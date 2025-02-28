@@ -1,4 +1,3 @@
-import Link from 'next/link';
 
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
@@ -13,9 +12,6 @@ import { UpdateAccountOrganizationName } from './personal-account-settings/updat
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './personal-account-settings/update-account-organization-sender-email-and-sender-domain';
 import { UpdateAccountOrganizationSenderName } from './personal-account-settings/update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './personal-account-settings/update-account-organization-sidebar';
-import { ThemedButton } from './ui/button-themed-with-settings';
-import { useTranslation } from 'react-i18next';
-import { TreliDialog } from './personal-account-settings/treli/treli-dialog';
 
 
 interface SiteSettingsProps {
@@ -34,10 +30,8 @@ function SiteSettings({
   role,
   handleChangeLanguage,
   user,
-  accountStripe,
 }: SiteSettingsProps) {
-  const { t } = useTranslation('account');
-  const { logo_url, logo_dark_url, updateOrganizationSetting, favicon_url } =
+  const { logo_url, logo_dark_url, updateOrganizationSetting, favicon_url, language } =
     useOrganizationSettings();
 
   const bucketStorage = {
@@ -64,7 +58,7 @@ function SiteSettings({
             <p className="mr-7 w-[45%] whitespace-nowrap font-bold text-gray-700">
               <Trans i18nKey={'accounts:language'} />
             </p>
-            <LanguageSelector onChange={handleChangeLanguage} />
+            <LanguageSelector onChange={handleChangeLanguage} defaultLanguage={language}/>
           </div>
           <Separator />
           <div className="flex justify-between">

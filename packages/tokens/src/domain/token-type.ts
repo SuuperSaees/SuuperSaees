@@ -19,6 +19,7 @@ service: Service.Type;
 expires_at: Date;
 organization_id: string;
 payment_methods: BillingAccounts.PaymentMethod[];
+primary_owner_id: string;
 }
 export interface TokenRecoveryType {
   id?: string;

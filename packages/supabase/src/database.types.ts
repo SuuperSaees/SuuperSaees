@@ -2311,6 +2311,7 @@ export type Database = {
       services: {
         Row: {
           allowed_orders: number | null
+          checkout_url: string | null
           created_at: string
           credit_based: boolean | null
           credits: number | null
@@ -2342,6 +2343,7 @@ export type Database = {
         }
         Insert: {
           allowed_orders?: number | null
+          checkout_url?: string | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
@@ -2373,6 +2375,7 @@ export type Database = {
         }
         Update: {
           allowed_orders?: number | null
+          checkout_url?: string | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
@@ -2998,6 +3001,7 @@ export type Database = {
           name: string | null
           phone_number: string | null
           picture_url: string | null
+          preferences: Json | null
           user_id: string
         }
         Insert: {
@@ -3006,6 +3010,7 @@ export type Database = {
           name?: string | null
           phone_number?: string | null
           picture_url?: string | null
+          preferences?: Json | null
           user_id: string
         }
         Update: {
@@ -3014,6 +3019,7 @@ export type Database = {
           name?: string | null
           phone_number?: string | null
           picture_url?: string | null
+          preferences?: Json | null
           user_id?: string
         }
         Relationships: [
@@ -3571,6 +3577,9 @@ export type Database = {
         | "auth_card_background_color"
         | "auth_section_background_color"
         | "dashboard_url"
+        | "catalog_provider_url"
+        | "catalog_product_url"
+        | "tool_copy_list_url"
       payment_status: "pending" | "succeeded" | "failed"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
       plugin_type: "tool" | "internal" | "external" | "integration"

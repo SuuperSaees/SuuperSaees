@@ -145,8 +145,8 @@ export const useBrief = (
     },
 
     onSuccess: async () => {
-      setBrief(defaultBrief);
-      setFormFields([]);
+      // setBrief(defaultBrief);
+      // setFormFields([]);
       await queryClient.invalidateQueries({
         queryKey: ['briefs'],
       });

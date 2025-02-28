@@ -32,6 +32,7 @@ import { RoleBadge } from './role-badge';
 import { useQuery } from '@tanstack/react-query';
 import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
 import { Spinner } from '@kit/ui/spinner';
+import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
@@ -108,7 +109,7 @@ export function AccountMembersTable({
       return 1;
     }),
   [members, search]);
-
+  const {config} = useTableConfigs('table-config');
   return (
     <div className={'flex flex-col space-y-2'}>
       {/* <Input
@@ -117,7 +118,7 @@ export function AccountMembersTable({
         placeholder={t(`searchMembersPlaceholder`)}
       /> */}
       <div className="rounded-lg bg-white">
-        <DataTable columns={columns} data={filteredMembers} />
+        <DataTable columns={columns} data={filteredMembers} configs={config}/>
       </div>
     </div>
   );

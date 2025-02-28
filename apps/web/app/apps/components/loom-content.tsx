@@ -13,7 +13,7 @@ import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 
 import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
 import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
-
+import { isValidUUID } from '~/utils/generate-uuid';
 interface LoomPublicIdContainerProps {
   pluginId: string;
   userId: string;
@@ -88,6 +88,7 @@ function LoomPublicIdContainer({
       return await updateAccountPluginAction(pluginId, updates);
     },
     onSuccess: () => {
+      if (!loomAppId) return;
       toast.success(t('successMessage'), {
         description: t('pluginUpdatedSuccessfully'),
       });
@@ -99,6 +100,16 @@ function LoomPublicIdContainer({
       });
     },
   });
+
+  const handleUpdateCredentials = () => {
+    if (!isValidUUID(loomAppId) && loomAppId) {
+      toast.error(t('errorMessage'), {
+        description: t('invalidLoomAppIdFormat')
+      });
+      return;
+    }
+    updateCredentialsMutation.mutate();
+  };
 
   return (
     <div className="space-y-8">
@@ -130,7 +141,7 @@ function LoomPublicIdContainer({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setLoomAppId(e.target.value)
                 }
-                onBlur={() => updateCredentialsMutation.mutate()}
+                onBlur={handleUpdateCredentials}
                 className="w-full"
               />
               <button

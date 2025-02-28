@@ -23,6 +23,7 @@
   "draft": "Draft",
   "title": "Services",
   "checkoutURL": "Checkout URL",
+  "checkoutURLCopied": "Checkout URL copied to clipboard",
   "edit": "Edit service",
   "eliminate": "Eliminate service",
   "searchServices": "Search service...",

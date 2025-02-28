@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, useCallback } from 'react';
 import { Flag, SquareKanban, Tag, Users2 } from 'lucide-react';
 
 import useFilters from '~/hooks/use-filters';
@@ -23,6 +24,7 @@ interface Priority {
 interface FilterHandler {
   key: string;
   filterFn: (order: Order.Response, selectedValues: string[]) => boolean;
+  persistent?: boolean;
 }
 
 interface UseOrdersFilterConfigsProps {
@@ -33,6 +35,7 @@ interface UseOrdersFilterConfigsProps {
   clientMembers: User.Response[];
   clientOrganizations: Account.Response[];
   priorities: Priority[];
+  storageKey: string;
 }
 
 // Constants
@@ -51,6 +54,49 @@ const normalizeString = (str: string | undefined | null) => {
     .replace(/[^a-z0-9\s]/g, '');
 };
 
+const getDateFormats = (date: Date) => [
+  date.toLocaleDateString(),
+  date.toLocaleDateString('es-ES'),
+  date.toLocaleString('default', { month: 'short' }),
+  date.toLocaleString('en-US', { month: 'short' }), 
+  date.toLocaleString('default', { month: 'long' }),
+  date.toLocaleString('en-US', { month: 'long' }), 
+  date.getFullYear().toString()
+].map(d => normalizeString(d));
+
+const getSearchableFields = (order: Order.Response) => {
+  const fields = [
+    order.id?.toString().replace('#', ''),
+    order.title,
+    order.description,
+    order.brief?.name,
+    order.client_organization?.name,
+    order.customer?.name,
+    order.customer?.email,
+    order.status?.toLowerCase(),
+    order.priority?.toLowerCase(),
+    ...order.assigned_to?.flatMap(assignee => [
+      assignee.agency_member?.name,
+      assignee.agency_member?.email
+    ]) ?? []
+  ];
+
+  // Add date formats
+  const dates = [
+    order.created_at,
+    order.updated_at,
+    order.due_date
+  ].filter(Boolean);
+
+  const dateFormats = dates.flatMap(date => 
+    date ? getDateFormats(new Date(date)) : []
+  );
+
+  return [...fields, ...dateFormats]
+    .filter(Boolean)
+    .map(normalizeString);
+};
+
 const useOrdersFilterConfigs = ({
   orders,
   tags,
@@ -59,7 +105,31 @@ const useOrdersFilterConfigs = ({
   priorities,
   clientMembers,
   clientOrganizations,
+  storageKey = 'orders-filters',
 }: UseOrdersFilterConfigsProps) => {
+  // Create a more efficient search index using a Map for faster lookups
+  const ordersSearchIndex = useMemo(() => {
+    // Skip rebuilding the index if orders haven't changed
+    if (orders.length === 0) {
+      return new Map<string, string[]>();
+    }
+    
+    console.time('Building search index');
+    const searchIndex = new Map<string, string[]>();
+    
+    orders.forEach(order => {
+      // Only compute searchable fields if not already in the index or if order has changed
+      const orderId = order.id?.toString() ?? '';
+      if (!searchIndex.has(orderId)) {
+        const searchableFields = getSearchableFields(order);
+        searchIndex.set(orderId, searchableFields);
+      }
+    });
+    
+    console.timeEnd('Building search index');
+    return searchIndex;
+  }, [orders]);
+
   const initialFiltersHandlers: FilterHandler[] = [
     {
       key: 'status',
@@ -104,54 +174,13 @@ const useOrdersFilterConfigs = ({
       key: 'search',
       filterFn: (order, selectedValues) =>
         selectedValues.some((searchTerm) => {
+          if (!searchTerm) return true;
           const searchTermNormalized = normalizeString(searchTerm);
-          
-          const orderId = order.id?.toString().replace('#', '');
-          if (normalizeString(orderId)?.includes(searchTermNormalized)) return true;
-          
-          if (normalizeString(order.title)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.description)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.brief?.name)?.includes(searchTermNormalized)) return true;
-          
-          const getDateFormats = (date: Date) => [
-            date.toLocaleDateString(),
-            date.toLocaleDateString('es-ES'),
-            date.toLocaleString('default', { month: 'short' }),
-            date.toLocaleString('en-US', { month: 'short' }), 
-            date.toLocaleString('default', { month: 'long' }),
-            date.toLocaleString('en-US', { month: 'long' }), 
-            date.getFullYear().toString()
-          ].map(d => normalizeString(d)?.toLowerCase() ?? '');
-
-          if (order.created_at) {
-            const date = new Date(order.created_at);
-            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
-          }
-          
-          if (order.updated_at) {
-            const date = new Date(order.updated_at);
-            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
-          }
-          
-          if (order.due_date) {
-            const date = new Date(order.due_date);
-            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
-          }
-          
-          if (normalizeString(order.client_organization?.name)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.customer?.name)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.customer?.email)?.includes(searchTermNormalized)) return true;
-          
-          if (order.assigned_to?.some(assignee => 
-            normalizeString(assignee.agency_member?.name)?.includes(searchTermNormalized) ??
-            normalizeString(assignee.agency_member?.email)?.includes(searchTermNormalized)
-          )) return true;
-          
-          if (normalizeString(order.status?.toLowerCase())?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.priority?.toLowerCase())?.includes(searchTermNormalized)) return true;
-          
-          return false;
+          // Use the search index for faster lookups
+          const orderFields = ordersSearchIndex.get(order.id?.toString() ?? '') ?? [];
+          return orderFields.some(field => field.includes(searchTermNormalized));
         }),
+      persistent: false,
     },
   ];
 
@@ -162,7 +191,7 @@ const useOrdersFilterConfigs = ({
     removeFilter,
     resetFilters,
     getFilterValues,
-  } = useFilters(orders, initialFiltersHandlers, 'orders-filters');
+  } = useFilters(orders, initialFiltersHandlers, storageKey);
 
   // Utility functions
 
@@ -338,61 +367,39 @@ const useOrdersFilterConfigs = ({
   const searchConfig = {
     key: 'search',
     label: 'search',
-    filter: (searchTerm: string) =>
+    filter: useCallback((searchTerm: string) => {
+      // Normalize the search term once outside the filter function
+      const normalizedSearchTerm = normalizeString(searchTerm.trim());
+      
+      // Get current search filter value
+      const currentSearchValue = getFilterValues('search')?.[0] ?? '';
+      
+      // Only update if the search term has actually changed
+      if (normalizedSearchTerm === normalizeString(currentSearchValue.trim())) {
+        return; // Skip update if the normalized search terms are the same
+      }
+      
+      if (!normalizedSearchTerm) {
+        // If search is empty, remove the filter entirely
+        removeFilter('search');
+        return;
+      }
+      
+      // Create a stable filter function that doesn't recreate on each render
+      const searchFilterFn = (order: Order.Response) => {
+        // Use the search index for faster lookups
+        const orderFields = ordersSearchIndex.get(order.id?.toString() ?? '') ?? [];
+        return orderFields.some(field => field.includes(normalizedSearchTerm));
+      };
+      
       updateFilter(
         'search',
         'replace',
-        (order: Order.Response) => {
-          const searchTermNormalized = normalizeString(searchTerm);
-          
-          const orderId = order.id?.toString().replace('#', '');
-          if (normalizeString(orderId)?.includes(searchTermNormalized)) return true;
-          
-          if (normalizeString(order.title)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.description)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.brief?.name)?.includes(searchTermNormalized)) return true;
-          
-          const getDateFormats = (date: Date) => [
-            date.toLocaleDateString(),
-            date.toLocaleDateString('es-ES'),
-            date.toLocaleString('default', { month: 'short' }),
-            date.toLocaleString('en-US', { month: 'short' }), 
-            date.toLocaleString('default', { month: 'long' }),
-            date.toLocaleString('en-US', { month: 'long' }), 
-            date.getFullYear().toString()
-          ].map(d => normalizeString(d)?.toLowerCase() ?? '');
-
-          if (order.created_at) {
-            const date = new Date(order.created_at);
-            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
-          }
-          
-          if (order.updated_at) {
-            const date = new Date(order.updated_at);
-            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
-          }
-          
-          if (order.due_date) {
-            const date = new Date(order.due_date);
-            if (getDateFormats(date).some(d => normalizeString(d)?.includes(searchTermNormalized))) return true;
-          }
-          
-          if (normalizeString(order.client_organization?.name)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.customer?.name)?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.customer?.email)?.includes(searchTermNormalized)) return true;
-          
-          if (order.assigned_to?.some(assignee => 
-            normalizeString(assignee.agency_member?.name)?.includes(searchTermNormalized) ??
-            normalizeString(assignee.agency_member?.email)?.includes(searchTermNormalized)
-          )) return true;
-          
-          if (normalizeString(order.status?.toLowerCase())?.includes(searchTermNormalized)) return true;
-          if (normalizeString(order.priority?.toLowerCase())?.includes(searchTermNormalized)) return true;
-          
-          return false;
-        },
-        searchTerm
-      ),
+        searchFilterFn,
+        searchTerm,
+        false
+      );
+    }, [ordersSearchIndex, getFilterValues, removeFilter, updateFilter]),
   };
 
   return {

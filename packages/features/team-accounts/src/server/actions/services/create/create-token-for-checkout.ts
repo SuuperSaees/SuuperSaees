@@ -12,13 +12,15 @@ export const createUrlForCheckout = async ({
   organizationId,
   paymentMethods,
   baseUrl,
+  primaryOwnerId,
 }: {
   stripeId?: string;
-  priceId: string;
-  service: Service.Relationships.Billing.BillingService;
+  priceId?: string;
+  service: Service.Relationships.Billing.BillingService | Service.Type;
   organizationId: string;
-  paymentMethods: BillingAccounts.PaymentMethod[];
+  paymentMethods?: BillingAccounts.PaymentMethod[];
   baseUrl: string;
+  primaryOwnerId: string;
 }) => {
   try {
     // Validate input parameters
@@ -37,16 +39,12 @@ export const createUrlForCheckout = async ({
     try {
       token = await createToken({
         account_id: stripeId ?? '',
-        price_id: priceId,
+        price_id: priceId ?? '',
         service: service,
         expires_at: new Date(),
         organization_id: organizationId,
-        payment_methods: paymentMethods ?? {
-          id: '',
-          name: '',
-          icon: '',
-          description: '',
-        },
+        payment_methods: paymentMethods ?? [],
+        primary_owner_id: primaryOwnerId,
       });
     } catch (tokenError: unknown) {
       console.error('Token creation failed:', {
