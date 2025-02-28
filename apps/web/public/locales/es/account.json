@@ -231,6 +231,6 @@
   "clipboardError": "Error al copiar al portapapeles",
   "connect": "Conectar",
   "guest": "Invitado",
-  "updateLanguageSuccess": "Idioma actualizado con éxito"
+  "updateLanguageSuccess": "Idioma actualizado con éxito",
   "invalidLoomAppIdFormat": "Formato de ID de aplicación de Loom inválido"
 }
