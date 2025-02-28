@@ -1,5 +1,5 @@
 import { // Briefcase,
-CreditCard, Layers, Settings, Users, Home, MessagesSquare // Wallet,
+CreditCard, Layers, Settings, Users, Home, MessagesSquare, Package, Bot // Wallet,
 } from 'lucide-react';
 
 
@@ -37,6 +37,7 @@ const routes = [
   {
     label: 'common:usersName',
     Icon: <Users className={iconClasses} />,
+    collapsed: true,
     children: [
       {
         label: 'common:clientsName',
@@ -46,6 +47,35 @@ const routes = [
         label: 'common:teamName',
         path: pathsConfig.app.team,
       },
+    ],
+    
+  },
+  {
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
+    ],
+  },
+
+  {
+    label: 'common:catalogName',
+    Icon: <Package className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:catalogProviderName',
+        path: pathsConfig.app.catalogProvider,
+      },
+      {
+        label: 'common:catalogProductName',
+        path: pathsConfig.app.catalogProduct,
+      }
     ],
   },
 

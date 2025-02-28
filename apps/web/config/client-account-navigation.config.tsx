@@ -4,7 +4,9 @@ import { // Briefcase,
   Users, // Wallet,
   FolderClosed,
   MessagesSquare,
-  Home
+  Home,
+  Package,
+  Bot
 } from 'lucide-react';
 
 
@@ -68,6 +70,7 @@ const routes = [
     path: pathsConfig.app.organization,
     Icon: <Users className={iconClasses} />,
   },
+  
   {
     label: 'common:storage',
     path: pathsConfig.app.storage,
@@ -80,6 +83,34 @@ const routes = [
       <FolderClosed className={iconClasses} />
     ),
   },
+  {
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
+    ],
+  },
+  {
+    label: 'common:catalogName',
+    Icon: <Package className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:catalogProviderName',
+        path: pathsConfig.app.catalogProvider,
+      },
+      {
+        label: 'common:catalogProductName',
+        path: pathsConfig.app.catalogProduct,
+      }
+    ],
+  },
+
   {
 
     label: 'common:settingsName',

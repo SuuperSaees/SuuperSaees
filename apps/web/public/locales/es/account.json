@@ -232,4 +232,5 @@
   "connect": "Conectar",
   "guest": "Invitado",
   "updateLanguageSuccess": "Idioma actualizado con éxito"
+  "invalidLoomAppIdFormat": "Formato de ID de aplicación de Loom inválido"
 }

@@ -57,6 +57,33 @@ type HandlePaymentStripeProps = {
   baseUrl: string;
 };
 
+const calculateTrialDays = (service: Service.Relationships.Billing.BillingService): number => {
+  if (!service.test_period || !service.test_period_duration) {
+    return 0;
+  }
+
+  const duration = service.test_period_duration;
+  const unit = service.test_period_duration_unit_of_measurement?.toLowerCase() || '';
+
+  if (!unit) return 0;
+
+  // Verificar la unidad de medida usando includes() para mayor flexibilidad
+  if (unit.includes('day')) {
+    return duration;
+  }
+  if (unit.includes('week')) {
+    return duration * 7;
+  }
+  if (unit.includes('month')) {
+    return duration * 30;
+  }
+  if (unit.includes('year')) {
+    return duration * 365;
+  }
+
+  return 0;
+};
+
 export const handleRecurringPayment = async ({
   service,
   values,
@@ -84,6 +111,7 @@ export const handleRecurringPayment = async ({
         paymentMethodId,
         couponId: coupon,
         sessionId: sessionId,
+        trialPeriodDays: calculateTrialDays(service),
       }),
     });
 
@@ -244,6 +272,7 @@ export const handleOneTimePayment = async ({
         serviceId: service.id,
         sessionId: sessionId,
         quantity: quantity,
+        trialPeriodDays: calculateTrialDays(service),
       }),
     });
 

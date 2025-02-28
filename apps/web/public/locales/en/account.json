@@ -232,4 +232,5 @@
   "connect": "Connect",
   "guest": "Guest",
   "updateLanguageSuccess": "Language updated successfully"
+  "invalidLoomAppIdFormat": "Invalid Loom App ID format"
 }

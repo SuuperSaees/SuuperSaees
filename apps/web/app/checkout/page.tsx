@@ -11,6 +11,7 @@ import DetailsSide from './components/details';
 import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/actions/services/get/get-services';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import EmptyPaymentMethods from './components/empty-payment-methods';
+import ErrorDecodedToken from './components/error-decoded-token';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -26,12 +27,21 @@ async function ServiceCheckoutPage({
 }) {
   const suuperLogo = process.env.NEXT_PUBLIC_SUUPER_LOGO_IMAGE;
 
-  const tokendecoded = await decodeTokenData<PayToken>(tokenId);
+  const tokendecoded = await decodeTokenData<PayToken>(tokenId).catch((error) => {
+    console.error('Error decoding token:', error);
+    return null
+  });
+  
+
+  if(!tokendecoded) {
+    return <ErrorDecodedToken />
+  }
 
   const organizationSettings = await getOrganizationSettingsByOrganizationId(
     tokendecoded?.organization_id ?? '',
     true,
   );
+
   const logoUrl = organizationSettings.find(
     (setting) => setting.key === 'logo_url',
   )?.value;

@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       paymentMethodId,
       couponId,
       sessionId,
+      trialPeriodDays,
     } = await request.clone().json();
     
     const supabase = getSupabaseServerComponentClient(
@@ -133,9 +134,6 @@ export async function POST(request: NextRequest) {
             { status: 400 },
           );
         }
-
-
-        
       } catch (error) {
         console.error('Error retrieving coupon:', error);
         return NextResponse.json(
@@ -145,13 +143,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     subscription = await stripe.subscriptions.create(
       {
         customer: customer.id,
         items: [{ price: priceId }],
         expand: ['latest_invoice.payment_intent'],
         metadata: { sessionId: sessionId },
+        ...(trialPeriodDays ? { trial_period_days: trialPeriodDays } : {}),
       },
       { stripeAccount: accountId },
     );
@@ -187,7 +185,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      clientSecret: subscription.latest_invoice.payment_intent.client_secret,
+      clientSecret: subscription.latest_invoice.payment_intent?.client_secret ?? '',
     });
   } catch (error) {
     console.error('Internal Server Error: ', error);
