@@ -143,5 +143,30 @@
   "goToPage": "Ir a la página",
   "of": "de",
   "showing": "Mostrando",
-  "go": "Ir"
+  "go": "Ir",
+  "export": {
+    "exportCSV": "Exportar CSV",
+    "exportOptions": "Opciones de exportación",
+    "configureAndPreview": "Configura tus opciones de exportación y ve la vista previa de los resultados",
+    "settings": "Configuraciones",
+    "preview": "Vista previa",
+    "filename": "Nombre del archivo",
+    "delimiter": "Delimitador",
+    "selectDelimiter": "Seleccionar delimitador",
+    "comma": "Coma",
+    "semicolon": "Punto y coma",
+    "tab": "Tabulador",
+    "delimiterHelp": "Elige el delimitador que mejor funcione con tu aplicación de hojas de cálculo. La coma es estándar para CSV, pero el punto y coma puede funcionar mejor en algunas regiones.",
+    "usePagination": "Usar paginación",
+    "pageSize": "Tamaño de la página",
+    "currentPage": "Página actual",
+    "selectColumns": "Seleccionar columnas para exportar",
+    "selectAll": "Seleccionar todas",
+    "clearAll": "Limpiar todas",
+    "previewTitle": "Vista previa de datos",
+    "previewDescription": "Vista previa de las primeras 5 filas de datos con las columnas seleccionadas",
+    "noColumnsSelected": "No hay columnas seleccionadas para exportar",
+    "export": "Exportar",
+    "selectAtLeastOneColumn": "Por favor, selecciona al menos una columna para exportar"
+  }
 }

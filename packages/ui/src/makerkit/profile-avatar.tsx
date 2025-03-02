@@ -34,7 +34,7 @@ export function ProfileAvatar(props: ProfileAvatarProps) {
 
   return (
     <Avatar className={avatarClassName + ` ${className}`} {...rest}>
-      <AvatarImage src={props.pictureUrl ?? undefined} />
+      <AvatarImage src={props.pictureUrl ?? undefined} className='object-contain' />
 
       <AvatarFallback className={'animate-in fade-in text-gray-700'}>
         <span suppressHydrationWarning className={'uppercase'}>

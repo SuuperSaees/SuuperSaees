@@ -15,6 +15,7 @@ import { UpdateFunction, ViewItem, ViewTypeEnum } from '~/(views)/views.types';
 import { Tags } from '~/lib/tags.types';
 import { User } from '~/lib/user.types';
 
+import useCSVExportFormatters from '../hooks/use-csv-export-formatters';
 import useOrdersActionHandler from '../hooks/use-orders-action-handler';
 import useOrdersAuthManagement from '../hooks/use-orders-auth-management';
 import useOrdersFilterConfigs from '../hooks/use-orders-filter-configs';
@@ -23,10 +24,12 @@ import useOrdersViewConfigs from '../hooks/use-orders-view-configs';
 import { useAgencyStatuses } from './context/agency-statuses-context';
 import { useOrdersContext } from './context/orders-context';
 import CreateOrderButton from './create-order-button';
+
 import Filters from './filters';
 import Search from './search';
 import StatusFilters from './status-filters';
 import ViewSelect from './view-select';
+import SettingsDropdown from './settings-dropdown';
 
 // Types
 interface ProjectsBoardProps {
@@ -109,6 +112,19 @@ const ProjectsBoard = ({
     queryKey,
   });
 
+  // Get CSV export formatters
+  const { getValueFormatters } = useCSVExportFormatters(statuses, PRIORITIES);
+
+  // You can add custom formatters if needed in the future:
+  // const { getValueFormatters, createCustomFormatter } = useCSVExportFormatters(
+  //   statuses,
+  //   PRIORITIES,
+  //   {
+  //     // Example of a custom formatter:
+  //     // title: (value) => `Project: ${String(value ?? '')}`
+  //   }
+  // );
+
   // Compute initial active tab
   const statusFilterValues = getFilterValues('status');
   const getInitialActiveTab = () => {
@@ -145,7 +161,7 @@ const ProjectsBoard = ({
     }
     return filteredOrders;
   }, [filteredOrders, currentView, statuses]);
-  
+
   // Handle search with a stable reference to prevent re-renders
   const handleSearch = useCallback((searchTerm: string) => {
     // Only update if the search term has actually changed
@@ -171,7 +187,7 @@ const ProjectsBoard = ({
       initialPreferences={preferences}
       customComponents={customComponents}
     >
-      <div className="flex w-full flex-col gap-4 max-h-full min-h-0 h-full">
+      <div className="flex h-full max-h-full min-h-0 w-full flex-col gap-4">
         <div className="flex flex-wrap items-center justify-end gap-4">
           <StatusFilters
             activeTab={activeTab}
@@ -190,6 +206,52 @@ const ProjectsBoard = ({
             onReset={resetFilters}
           />
           <ViewSelect options={viewOptions} defaultValue={currentView} />
+          
+          <SettingsDropdown
+            disabled={ordersAreLoading}
+            data={orders}
+            t={t}
+            allowedColumns={[
+              'id',
+              'title',
+              'status',
+              'priority',
+              'created_at',
+              'updated_at',
+              'due_date',
+              'customer',
+              'assigned_to',
+              'agency',
+              'client_organization',
+            ]}
+            defaultFilename="projects.csv"
+            defaultSelectedColumns={[
+              'id',
+              'title',
+              'status',
+              'priority',
+              'created_at',
+              'updated_at',
+              'due_date',
+              'customer',
+              'client_organization',
+            ]}
+            columnHeaders={{
+              id: t('columns.id'),
+              title: t('columns.title'),
+              status: t('columns.status'),
+              priority: t('columns.priority'),
+              created_at: t('columns.createdAt'),
+              updated_at: t('columns.updatedAt'),
+              due_date: t('columns.dueDate'),
+              customer: t('columns.customer'),
+              assigned_to: t('columns.assignedTo'),
+              agency: t('columns.agency'),
+              client_organization: t('columns.clientOrganization'),
+            }}
+            valueFormatters={getValueFormatters()}
+          />
+          
           <CreateOrderButton
             t={t}
             hasOrders={orders.length > 0 || ordersAreLoading}

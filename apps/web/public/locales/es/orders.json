@@ -202,6 +202,21 @@
   "shareProject": "Compartir proyecto",
   "publishProject": "Copiar enlace",
   "shareProjectDescription": "Al compartir este proyecto públicamente, cualquier persona con el enlace podrá acceder a toda la información de este proyecto, incluyendo la interacción a través del chat y la visualización de archivos, detalles y tareas.",
-  "link": "Enlace"
+  "link": "Enlace",
+  "columns": {
+    "id": "ID",
+    "title": "Título",
+    "description": "Descripción",
+    "status": "Estado",
+    "statusId": "Estado ID",
+    "dueDate": "Fecha de vencimiento",
+    "priority": "Prioridad",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "clientOrganization": "Organización del cliente",
+    "agency": "Agencia",
+    "assignedTo": "Asignado a",
+    "customer": "Cliente"
+  }
 }
 
