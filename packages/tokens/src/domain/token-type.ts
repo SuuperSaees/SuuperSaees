@@ -23,8 +23,8 @@ primary_owner_id: string;
 }
 export interface TokenRecoveryType {
   id?: string;
-email: string;
-redirectTo: string;
+  email: string;
+  redirectTo: string;
 }
 
 export interface DefaultToken {

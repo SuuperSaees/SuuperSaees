@@ -3,34 +3,20 @@
 import {
   useMemo, //  useState
 } from 'react';
-
-// import { TransferOwnershipDialog } from './transfer-ownership-dialog';
-// import { UpdateMemberRoleDialog } from './update-member-role-dialog';
 import Link from 'next/link';
 
 import { ColumnDef } from '@tanstack/react-table';
-// import { Ellipsis } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Database } from '@kit/supabase/database';
 import { Badge } from '@kit/ui/badge';
-// import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from '@kit/ui/dropdown-menu';
 import { If } from '@kit/ui/if';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 import AgencyClientCrudMenu from '../clients/agency-client-crud-menu';
-// import { Trans } from '@kit/ui/trans';
-// import { RemoveMemberDialog } from './remove-member-dialog';
+
 import { RoleBadge } from './role-badge';
-import { useQuery } from '@tanstack/react-query';
-import { getUserRoleById } from '../../server/actions/members/get/get-member-account';
 import { Spinner } from '@kit/ui/spinner';
 import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';
 
@@ -48,17 +34,13 @@ type AccountMembersTableProps = {
   currentUserId: string;
   currentAccountId: string;
   userRoleHierarchy: number;
-  isPrimaryOwner: boolean;
-  canManageRoles: boolean;
 };
 
 export function AccountMembersTable({
   members,
   currentUserId,
   currentAccountId,
-  // isPrimaryOwner,
   userRoleHierarchy,
-  // canManageRoles,
 }: AccountMembersTableProps) {
   const search = '';
 
@@ -112,11 +94,6 @@ export function AccountMembersTable({
   const {config} = useTableConfigs('table-config');
   return (
     <div className={'flex flex-col space-y-2'}>
-      {/* <Input
-        value={search}
-        onInput={(e) => setSearch((e.target as HTMLInputElement).value)}
-        placeholder={t(`searchMembersPlaceholder`)}
-      /> */}
       <div className="rounded-lg bg-white">
         <DataTable columns={columns} data={filteredMembers} configs={config}/>
       </div>
@@ -228,8 +205,6 @@ function ActionsDropdown({
   member,
   currentUserId,
   currentUserRole,
-  // currentTeamAccountId,
-  // currentRoleHierarchy,
 }: {
   permissions: Permissions;
   member: Members[0];
@@ -238,11 +213,7 @@ function ActionsDropdown({
   currentRoleHierarchy: number;
   currentUserRole: string
 }) {
-  // const [isRemoving, setIsRemoving] = useState(false);
-  // const [isTransferring, setIsTransferring] = useState(false);
-  // const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
-  // const memberRoleHierarchy = member.role_hierarchy_level;
   const canUpdateRole = permissions.canUpdateRole();
 
   const canRemoveFromAccount =
@@ -271,63 +242,6 @@ function ActionsDropdown({
         inTeamMembers={true}
         targetRole={member.role}
       />
-      {/* <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant={'ghost'} size={'icon'}>
-            <Ellipsis className={'h-5 w-5'} />
-          </Button>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent>
-          <If condition={canUpdateRole}>
-            <DropdownMenuItem onClick={() => setIsUpdatingRole(true)}>
-              <Trans i18nKey={'team:updateRole'} />
-            </DropdownMenuItem>
-          </If> */}
-
-      {/* <If condition={permissions.canTransferOwnership}>
-            <DropdownMenuItem onClick={() => setIsTransferring(true)}>
-              <Trans i18nKey={'team:transferOwnership'} />
-            </DropdownMenuItem>
-          </If> */}
-      {/* 
-          <If condition={canRemoveFromAccount}>
-            <DropdownMenuItem onClick={() => setIsRemoving(true)}>
-              <Trans i18nKey={'team:removeMember'} />
-            </DropdownMenuItem>
-          </If>
-        </DropdownMenuContent>
-      </DropdownMenu> */}
-
-      {/* <If condition={isRemoving}>
-        <RemoveMemberDialog
-          isOpen
-          setIsOpen={setIsRemoving}
-          teamAccountId={currentTeamAccountId}
-          userId={member.user_id}
-        />
-      </If>
-
-      <If condition={isUpdatingRole}>
-        <UpdateMemberRoleDialog
-          isOpen
-          setIsOpen={setIsUpdatingRole}
-          userId={member.user_id}
-          userRole={member.role}
-          teamAccountId={currentTeamAccountId}
-          userRoleHierarchy={currentRoleHierarchy}
-        />
-      </If>
-
-      <If condition={isTransferring}>
-        <TransferOwnershipDialog
-          isOpen
-          setIsOpen={setIsTransferring}
-          targetDisplayName={member.name ?? member.email}
-          accountId={member.account_id}
-          userId={member.user_id}
-        />
-      </If> */}
     </>
   );
 }

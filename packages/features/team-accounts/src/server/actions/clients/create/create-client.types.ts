@@ -27,3 +27,4 @@ export type CreateClient = {
     OrganizationSettings.EXTRA_KEYS.default_sender_domain;
   export const defaultSenderLogo = OrganizationSettings.EXTRA_KEYS.default_sender_logo;
   export const defaultSenderColor = OrganizationSettings.EXTRA_KEYS.default_sender_color;
+  export const portalNameKey = OrganizationSettings.KEYS.portal_name;

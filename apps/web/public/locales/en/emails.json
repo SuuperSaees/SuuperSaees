@@ -84,6 +84,17 @@
     "greeting": "Hi ${toEmail}",
     "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
   },
+  "clientInvitationEmail": {
+    "subject": "Invitation to join ${agencyName}",
+    "body": "You have been invited to join ${agencyName}",
+    "yourUsername": "Your username:",
+    "thanks": "Thanks,",
+    "team": "The team",
+    "activateAccount": "Accept invitation",
+    "at": "at",
+    "greeting": "Hi ${toEmail}",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
     "chatMessage": {
       "subject": "New message from ${senderName} in ${chatTitle}",
       "body": "${senderName} has sent you a new message in the chat ${chatTitle}",
