@@ -38,6 +38,25 @@ export class SubdomainsRepository {
 
             domainId = subdomainData.subdomain_id;
         }
+
+        // Validar si el subdominio ya está en uso
+        if (payload.domain) {
+            const { data: existingDomain, error: existingError } = await this.client
+                .from('subdomains')
+                .select('id')
+                .eq('domain', payload.domain)
+                .is('deleted_on', null)
+                .neq('id', domainId)
+                .single();
+
+            if (existingError && existingError.code !== 'PGRST116') {
+                throw existingError;
+            }
+
+            if (existingDomain) {
+                throw new Error('Subdomain already in use');
+            }
+        }
         
         const { data: subdomainData, error: subdomainError } = await this.client
         .from('subdomains')

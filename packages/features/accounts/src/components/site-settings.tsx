@@ -166,7 +166,7 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandDomain'} />
+                <Trans i18nKey={'account:brandDomain'} />
               </p>
             </div>
             <UpdateAccountOrganizationDomain organizationId={user?.organization_id ?? ''} />

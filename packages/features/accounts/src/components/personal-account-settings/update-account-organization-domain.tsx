@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { useEffect } from 'react';
 
 import {
   Form,
@@ -14,12 +15,18 @@ import { ThemedInput } from '../ui/input-themed-with-settings';
 import { useUpdateDomain } from '../../hooks/use-update-domain';
 
 const AccountOrganizationDomainSchema = z.object({
-    domain: z.string().min(2).max(100),
-  });
+  domain: z
+    .string()
+    .min(2, 'Domain is too short')
+    .max(100, 'Domain is too long')
+    .regex(
+      /^(localhost(:\d{1,5})?|(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,})$/,
+      'Please enter a valid domain format (e.g., domain.com, app.domain.co, localhost:3000)'
+    ),
+});
 
 export function UpdateAccountOrganizationDomain({ organizationId }: { organizationId: string }) {
   const { domain, updateDomain, isLoading } = useUpdateDomain(organizationId);
-
   const form = useForm({
     resolver: zodResolver(AccountOrganizationDomainSchema),
     defaultValues: {
@@ -27,13 +34,15 @@ export function UpdateAccountOrganizationDomain({ organizationId }: { organizati
     },
   });
 
-  const onSubmit = ({ domain }: { domain: string }) => {
-    updateDomain({ domain });
-  };
+  useEffect(() => {
+    if (domain) {
+      form.setValue('domain', domain);
+    }
+  }, [domain, form]);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const onSubmit = ({ domain }: { domain: string }) => {
+  updateDomain({ domain });
+  };
 
   return (
     <div className={'flex flex-col w-full'}>
@@ -52,6 +61,7 @@ export function UpdateAccountOrganizationDomain({ organizationId }: { organizati
                   <ThemedInput
                     data-test={'account-domain'}
                     minLength={2}
+                    disabled={isLoading}
                     placeholder={''}
                     maxLength={100}
                     {...field}

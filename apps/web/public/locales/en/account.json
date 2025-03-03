@@ -233,5 +233,7 @@
   "connect": "Connect",
   "guest": "Guest",
   "updateLanguageSuccess": "Language updated successfully",
-  "invalidLoomAppIdFormat": "Invalid Loom App ID format"
+  "invalidLoomAppIdFormat": "Invalid Loom App ID format",
+  "domainUpdatedSuccessfully": "Domain updated successfully",
+  "domainUpdateError": "Error updating domain"
 }
