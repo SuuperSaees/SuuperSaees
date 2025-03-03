@@ -1,4 +1,4 @@
-import { EllipsisVertical, LockKeyhole, ArrowLeftRight, Users, Pen } from 'lucide-react';
+import { EllipsisVertical, LockKeyhole, Users, Pen } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +7,6 @@ import {
 } from '@kit/ui/dropdown-menu';
 import DeleteUserDialog from '../../server/actions/clients/delete/delete-client';
 import EditUserDialog from './edit-user-dialog';
-import SwitchOrganizationDialog from './SwitchOrganizationDialog';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import {AdminImpersonateUserDialog} from '../../../../../features/admin/src/components/admin-impersonate-user-dialog';
@@ -31,7 +30,6 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, currentUserRole, c
   const {t} = useTranslation('clients');
   const [openEditUserDialog, setOpenEditUserDialog] = useState(false);
   const [openImpersonateUserDialog, setOpenImpersonateUserDialog] = useState(false);
-  // const [openSwitchOrganizationDialog, setOpenSwitchOrganizationDialog] = useState(false);
   const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false)
 
   let {

@@ -2,16 +2,9 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-
-
-
 import { z } from 'zod';
-
-
-
 import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
-
 import { AcceptInvitationSchema } from '../../schema/accept-invitation.schema';
 import { DeleteInvitationSchema } from '../../schema/delete-invitation.schema';
 import { InviteMembersSchema } from '../../schema/invite-members.schema';
@@ -19,55 +12,227 @@ import { RenewInvitationSchema } from '../../schema/renew-invitation.schema';
 import { UpdateInvitationSchema } from '../../schema/update-invitation.schema';
 import { createAccountInvitationsService } from '../services/account-invitations.service';
 import { createAccountPerSeatBillingService } from '../services/account-per-seat-billing.service';
+import { generateMagicLinkRecoveryPassword } from '../actions/members/update/update-account';
+import { createToken } from '../../../../../tokens/src/create-token';
+import { TokenRecoveryType } from '../../../../../tokens/src/domain/token-type';
+import { getClientConfirmEmailTemplate } from '../actions/clients/send-email/utils/client-confirm-email-template';
+import { getTextColorBasedOnBackground } from '../utils/generate-colors';
+import { getDomainByOrganizationId } from '../../../../../multitenancy/utils/get/get-domain';
+import { getOrganizationSettingsByOrganizationId } from './organizations/get/get-organizations';
+import {
+  langKey,
+  logoUrlKey,
+  themeColorKey,
+  senderNameKey,
+  senderDomainKey,
+  senderEmailKey,
+  defaultSenderEmail,
+  defaultSenderDomain,
+  defaultSenderLogo,
+  defaultSenderColor,
+  defaultAgencyName,
+  defaultAgencySenderName,
+  portalNameKey,
+} from '../actions/clients/create/create-client.types';
+import { v4 as uuidv4 } from 'uuid';
+const SUUPER_CLIENT_ID = process.env.SUUPER_CLIENT_ID;
+const SUUPER_CLIENT_SECRET = process.env.SUUPER_CLIENT_SECRET;
+
+
 
 export const createInvitationsAction = enhanceAction(
   async (params) => {
-    const client = getSupabaseServerActionClient();
-
-    // Check if the user is authenticated
-    const { error: userError } = await client.auth.getUser();
-
-    if (userError) throw new Error(userError.message);
+    const client = getSupabaseServerActionClient({
+      admin: true,
+    });
 
     // Fetch users who already belong to an organization (using their email)
-    const { data: invitedUsers, error: invitedUsersError } = await client
+    const { data: existingUsers, error: existingUsersError } = await client
       .from('accounts')
-      .select('email, organization_id')
+      .select('id, email, deleted_on, organization_id')
       .in(
         'email',
         params.invitations.map((invitation) => invitation.email),
       );
 
-    if (invitedUsersError) {
-      console.error('Failed to retrieve invited users');
-      throw new Error(invitedUsersError.message);
+    if (existingUsersError) {
+      console.error('Failed to retrieve existing users');
+      throw new Error(existingUsersError.message);
     }
 
-    // Filter out invitations where the user already belongs to any organization
-    const filteredInvitations = params.invitations.filter((invitation) => {
-      const user = invitedUsers.find((u) => u.email === invitation.email);
-      return !user ?? !user?.organization_id; // Only invite if the user is not part of any organization
+    // Fetch existing memberships for all users
+    const { data: existingMemberships } = await client
+      .from('accounts_memberships')
+      .select('user_id')
+      .in(
+        'user_id',
+        existingUsers?.map(user => user.id) || []
+      );
+
+    // Separate invitations into new users and users to reactivate
+    const newInvitations = [];
+    const usersToReactivate = [];
+
+    for (const invitation of params.invitations) {
+      const existingUser = existingUsers?.find(u => u.email === invitation.email);
+      const hasMembership = existingMemberships?.some(m => m.user_id === existingUser?.id);
+      
+      if (existingUser && (existingUser.deleted_on ?? !hasMembership)) {
+        usersToReactivate.push({
+          ...invitation,
+          userId: existingUser.id
+        });
+      } else if (!existingUser) {
+        newInvitations.push(invitation);
+      }
+    }
+
+    if (!usersToReactivate.length && !newInvitations.length) {
+      throw new Error('No invitations to process');
+    }
+
+    const { data: organizationAccount, error: organizationAccountError } = await client
+      .from('accounts')
+      .select('id, name, primary_owner_user_id')
+      .eq('slug', params.accountSlug)
+      .single();
+      
+    if (organizationAccountError) {
+      console.error('Failed to retrieve organization account');
+      throw new Error(organizationAccountError.message);
+    }
+
+    // Get organization settings and send reactivation email
+    const domain = await getDomainByOrganizationId(organizationAccount.id, true, true);
+    const settings = await getOrganizationSettingsByOrganizationId(
+      organizationAccount.id,
+      true,
+      [logoUrlKey, themeColorKey, senderNameKey, senderDomainKey, senderEmailKey, langKey, portalNameKey],
+      client
+    );
+
+    let logoUrl = defaultSenderLogo,
+    agencyName = organizationAccount.name ?? defaultAgencyName,
+    themeColor = defaultSenderColor,
+    senderName = '',
+    senderEmail = defaultSenderEmail,
+    senderDomain = defaultSenderDomain,
+    lang: 'en' | 'es' = 'en';
+
+    // ... Configure email settings from organization settings ...
+
+    settings.forEach((setting) => {
+      if (setting.key === logoUrlKey) {
+        logoUrl = setting.value;
+      } else if (setting.key === themeColorKey) {
+        themeColor = setting.value;
+      } else if (setting.key === senderNameKey) {
+        senderName = setting.value;
+      } else if (setting.key === senderEmailKey) {
+        senderEmail = setting.value;
+      } else if (setting.key === senderDomainKey) {
+        senderDomain = setting.value;
+      } else if (setting.key === langKey) {
+        lang = setting.value as 'en' | 'es';
+      } else if (setting.key === portalNameKey) {
+        agencyName = setting.value;
+      }
+    });
+    const baseUrl = domain;
+   
+
+    // Handle reactivations asynchronously
+    const reactivationPromises = usersToReactivate.map(async (user) => {
+      try {
+        await client.from('accounts')
+          .update({ deleted_on: null, organization_id: null })
+          .eq('id', user.userId);
+
+        const hasMembership = existingMemberships?.some(m => m.user_id === user.userId);
+        
+        if (hasMembership) {
+          await client.from('accounts_memberships')
+            .delete()
+            .eq('user_id', user.userId);
+        }
+
+        const generatedMagicLink = await generateMagicLinkRecoveryPassword(
+          user.email,
+          undefined,
+          true
+        );
+
+        const tokenRecoveryType: TokenRecoveryType = {
+          email: user.email,
+          redirectTo: generatedMagicLink,
+        };
+
+        const { tokenId } = await createToken(tokenRecoveryType);
+        const invitationId = uuidv4();
+
+        const { error: invitationError } = await client
+          .from('invitations')
+          .insert({
+            account_id: organizationAccount.id,
+            invited_by: organizationAccount.primary_owner_user_id,
+            email: user.email,
+            invite_token: invitationId,
+            role: user.role,
+            expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
+          }).select('*').single();
+
+        if (invitationError) throw new Error(invitationError.message);
+
+        const acceptInvitationUrl = `${domain}/auth/confirm?token_hash_recovery=${tokenId}&email=${user.email}&type=recovery&next=${domain}/join?invite_token=${invitationId}&email=${user.email}`;
+
+        const { template, t } = getClientConfirmEmailTemplate(
+          user.email,
+          baseUrl,
+          tokenId,
+          acceptInvitationUrl,
+          lang,
+          agencyName,
+          logoUrl,
+          themeColor,
+          getTextColorBasedOnBackground(themeColor),
+          'invitation'
+        );
+
+        const fromSenderIdentity = senderName
+          ? `${senderName} <${senderEmail}@${senderDomain}>`
+          : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${senderEmail}@${senderDomain}>`;
+
+        return fetch(`${domain}/api/v1/mailer`, {
+          method: 'POST',
+          headers: new Headers({
+            Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+          }),
+          body: JSON.stringify({
+            from: fromSenderIdentity,
+            to: [user.email],
+            subject: t('subject', { agencyName }),
+            html: template,
+          }),
+        });
+      } catch (error) {
+        console.error('Failed to process reactivation for user:', user.email, error);
+        // No lanzamos el error para que no detenga el proceso completo
+        return null;
+      }
     });
 
-    // If there are no new invitations to send, return early
-    if (filteredInvitations.length === 0) {
-      console.error('Failed to send the invitation');
-      throw new Error('No users available to send the invitation');
+    // Process reactivations in parallel
+    await Promise.allSettled(reactivationPromises);
+
+    // Handle new invitations
+    if (newInvitations.length > 0) {
+      const service = createAccountInvitationsService(client);
+      await service.sendInvitations({
+        ...params,
+        invitations: newInvitations,
+      });
     }
 
-    // Update params with the filtered invitations
-    const updatedParams = {
-      ...params,
-      invitations: filteredInvitations,
-    };
-
-    // Create the service
-    const service = createAccountInvitationsService(client);
-
-    // Send the filtered invitations
-    await service.sendInvitations(updatedParams);
-
-    // Revalidate the member page
     revalidateMemberPage();
 
     return {
@@ -142,7 +307,7 @@ export const acceptInvitationAction = enhanceAction(
 
     // Create the services
     const perSeatBillingService = createAccountPerSeatBillingService(client);
-    const service = createAccountInvitationsService(client);
+    const service = createAccountInvitationsService(client); 
 
     // Check if the user already belongs to any organization
     const { data: existingUser, error: existingUserError } = await client
