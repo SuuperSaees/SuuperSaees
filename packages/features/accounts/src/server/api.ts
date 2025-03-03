@@ -68,7 +68,6 @@ class AccountsApi {
     const logoUrl =
       accounts[0]?.settings?.find((setting) => setting.key === 'logo_url')
         ?.value ?? accounts[0]?.picture_url ?? '';
-    console.log('load accounts', accounts);
     return {
       id: accounts[0]?.id,
       name: accounts[0]?.name,
