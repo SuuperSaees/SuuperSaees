@@ -41,7 +41,7 @@ export const  getOrderById = async (orderId: Order.Type['id']) => {
         activities(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
           reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
           files(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
-         assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
+         assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
         `,
       )
@@ -118,7 +118,8 @@ export const  getOrderById = async (orderId: Order.Type['id']) => {
         };
       }),
       assigned_to: orderData.assigned_to.filter(assignment => 
-        !assignment.agency_member?.deleted_on
+        !assignment.agency_member?.deleted_on && 
+        assignment.agency_member?.organization_id === orderData.agency_id
       ),
       client_organization: clientOrganizationData,
       brief_responses: briefResponses,
@@ -256,7 +257,7 @@ export const getOrders = async (
       .select(
         `*, client_organization:accounts!client_organization_id(id, name, settings:organization_settings!account_id(key, value)),
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
-        assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
+        assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
         tags:order_tags(tag:tags(*))
         `,
         { count: 'exact' },
@@ -288,7 +289,9 @@ export const getOrders = async (
       const ordersIdsAgencyMemberBelongsTo = ordersAssignedToAgencyMember.map(
         (order) => order.order_id,
       );
-      query = query.in('id', ordersIdsAgencyMemberBelongsTo);
+      query = query
+        .in('id', ordersIdsAgencyMemberBelongsTo)
+        .eq('agency_id', userAccount.organization_id);
     } else if (isAgencyOwnerOrProjectManager) {
       query = query.eq('agency_id', userAccount.organization_id);
     } else {
@@ -306,7 +309,8 @@ export const getOrders = async (
     orders = ordersData.map(order => ({
       ...order,
       assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on
+        !assignment.agency_member?.deleted_on && 
+        assignment.agency_member?.organization_id === order.agency_id
       ) ?? [],
     }));
 
@@ -538,7 +542,7 @@ export async function getOrdersByUserId(
       .select(
         `*, client_organization:accounts!client_organization_id(id, name),
       customer:accounts!customer_id(id, name),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, organization_id, settings:user_settings(name, picture_url))),
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       `,
       )
@@ -562,7 +566,13 @@ export async function getOrdersByUserId(
     // Step 4: Fetch the order where the currentUserAccount is the client_organization_id or the agency_id
     const { error: orderError, data: orderData } = await query;
 
-    orders = orderData;
+    orders = orderData?.map(order => ({
+      ...order,
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on && 
+        assignment.agency_member?.organization_id === order.agency_id
+      ) ?? [],
+    }));
 
     const orderIds = orderData?.map((order) => order.uuid) ?? [];
 
@@ -685,7 +695,7 @@ export async function getOrdersByOrganizationId(
       .select(
         `*, client_organization:accounts!client_organization_id(id, name),
       customer:accounts!customer_id(id, name),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, deleted_on, settings:user_settings(name, picture_url))), 
+      assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, deleted_on, organization_id, settings:user_settings(name, picture_url))), 
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       `,
       )
@@ -719,7 +729,8 @@ export async function getOrdersByOrganizationId(
     let orders = orderData.map(order => ({
       ...order,
       assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on
+        !assignment.agency_member?.deleted_on && 
+        assignment.agency_member?.organization_id === order.agency_id
       ) ?? [],
     }));
 
