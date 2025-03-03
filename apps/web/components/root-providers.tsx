@@ -20,9 +20,6 @@ import { AppEventsProvider } from '@kit/shared/events';
 import { If } from '@kit/ui/if';
 import { VersionUpdater } from '@kit/ui/version-updater';
 
-
-
-import { AnalyticsProvider } from '~/components/analytics-provider';
 import { AuthProvider } from '~/components/auth-provider';
 import appConfig from '~/config/app.config';
 import authConfig from '~/config/auth.config';
@@ -72,7 +69,6 @@ export function RootProviders({
   return (
     <MonitoringProvider>
       <AppEventsProvider>
-        <AnalyticsProvider>
           <ReactQueryProvider>
             <ReactQueryStreamedHydration>
               <I18nProvider settings={i18nSettings} resolver={i18nResolver}>
@@ -102,7 +98,6 @@ export function RootProviders({
               </I18nProvider>
             </ReactQueryStreamedHydration>
           </ReactQueryProvider>
-        </AnalyticsProvider>
       </AppEventsProvider>
     </MonitoringProvider>
   );
