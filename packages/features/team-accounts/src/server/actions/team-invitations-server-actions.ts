@@ -91,7 +91,7 @@ export const createInvitationsAction = enhanceAction(
 
     const { data: organizationAccount, error: organizationAccountError } = await client
       .from('accounts')
-      .select('id, name')
+      .select('id, name, primary_owner_user_id')
       .eq('slug', params.accountSlug)
       .single();
       
@@ -172,7 +172,7 @@ export const createInvitationsAction = enhanceAction(
           .from('invitations')
           .insert({
             account_id: organizationAccount.id,
-            invited_by: user.userId,
+            invited_by: organizationAccount.primary_owner_user_id,
             email: user.email,
             invite_token: invitationId,
             role: user.role,
@@ -368,7 +368,7 @@ export const acceptInvitationAction = enhanceAction(
     // Associate the new member with the sender's organization
     const { error: associateMemberError } = await client
       .from('accounts')
-      .update({ organization_id: senderOrganization?.organization_id ?? senderAccount.invited_by })
+      .update({ organization_id: senderOrganization?.organization_id })
       .eq('id', user.id);
       
     if (associateMemberError) {
