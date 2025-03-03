@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { getFileTypeIcon } from '../../components/files/file-types';
+import { FileIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Spinner } from '@kit/ui/spinner';
-import { File } from '~/lib/file.types';
-import { canPreviewFile, getFileType } from '../../../../lib/file-types';
-import { getFileExtension, FileIcon } from '../../../../components/shared/file-icons';
 
 interface FilePreviewProps {
   src: string;
@@ -17,7 +15,6 @@ interface FilePreviewProps {
   actualPage?: number;
   onLoadPDF?: (total: number) => void;
   zoomLevel?: number;
-  files?: File.Response[];
 }
 
 export const FilePreview: React.FC<FilePreviewProps> = ({
@@ -29,8 +26,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   isDialog,
   actualPage = 1,
   onLoadPDF,
-  zoomLevel = 1,
-  files
+  zoomLevel = 1
 }) => {
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [pageImage, setPageImage] = useState<string | null>(null);
@@ -98,7 +94,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   };
 
   const renderPreview = () => {
-    if ((fileType.startsWith('image/') && canPreviewFile(getFileType(fileType, getFileExtension(fileName)))) || (fileType.startsWith('application/pdf') && pageImage)) {
+    if (fileType.startsWith('image/') || (fileType.startsWith('application/pdf') && pageImage)) {
       return isDialog ? (
         <img
           src={fileType.startsWith('application/pdf') ? pageImage! : src}
@@ -110,7 +106,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
          {
           fileType.startsWith('application/pdf') ? (
             <div className="w-full h-full flex items-center justify-center">
-              <FileIcon extension={getFileExtension(fileName)} size="lg" />
+              {getFileTypeIcon(fileName)}
             </div>
           ) : (
             <Image 
@@ -164,7 +160,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
 
     return (
       <div className={`w-full h-[60vh] flex flex-col items-center justify-center ${className}`}>
-        <FileIcon extension={getFileExtension(fileName)} size="lg" />
+        <FileIcon className="w-12 h-12 text-gray-400" />
         {isDialog ? (
           <>
             <p className="text-gray-400">{fileName}</p>

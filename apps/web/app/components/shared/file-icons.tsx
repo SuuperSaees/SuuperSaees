@@ -27,7 +27,6 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   psd: '#155EEF',
   indd: '#BA24D5',
   aep: '#6938EF',
-  eps: '#E04F16',
   
   // Development
   html: '#444CE7',
@@ -38,18 +37,12 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   tsx: '#444CE7',
   json: '#444CE7',
   xml: '#444CE7',
-  java: '#444CE7',
-  sql: '#444CE7',
-  rss: '#444CE7',
-  exe: '#535862',
-  py: '#444CE7',
   
   // Media - Video
   mp4: '#155EEF',
   mov: '#155EEF',
   avi: '#155EEF',
   mkv: '#155EEF',
-  mpeg: '#155EEF',
   
   // Archives
   zip: '#535862',
@@ -57,18 +50,10 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   '7z': '#535862',
 
   // Images
-  img: '#7F56D9',
-  jpg: '#7F56D9',
-  jpeg: '#7F56D9',
-  png: '#7F56D9',
-  webp: '#7F56D9',
-  tiff: '#7F56D9',
-  gif: '#7F56D9',
-  svg: '#7F56D9',
-  heic: '#7F56D9',
-  heif: '#7F56D9',
-  hevc: '#7F56D9',
-  hev: '#7F56D9',
+  heic: '#039855',
+  heif: '#039855',
+  hevc: '#039855',
+  hev: '#039855',
 
   // Audio
   mp3: '#53B1FD',
@@ -79,6 +64,8 @@ export const FILE_EXTENSION_COLORS: Record<string, string> = {
   m4v: '#53B1FD',
   ogg: '#53B1FD',
   wma: '#53B1FD',
+
+  
 };
 
 interface FileIconProps {
@@ -96,31 +83,18 @@ export const FileIcon: React.FC<FileIconProps> = ({
   const color = FILE_EXTENSION_COLORS[ext] ?? '#535862';
   
   const sizeClasses = {
-    sm: 'w-9 h-9',
+    sm: 'w-8 h-8',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
     xs: 'w-5 h-5'
-  };
-
-  // Font size mapping based on icon size
-  const fontSizes = {
-    sm: 8,
-    md: 9,
-    lg: 10
   };
 
   if (!ext) {
     return <StickyNote className={cn(`text-gray-500 ${sizeClasses[size]} ${className}`)} />;
   }
 
-  // Format the extension text
-  let displayExt = ext.toUpperCase();
-  if (displayExt.length > 4) {
-    displayExt = displayExt.substring(0, 4);
-  }
-
   return (
-    <div className={`relative font-inherit ${sizeClasses[size]} ${className}`}>
+    <div className={`relative ${sizeClasses[size]} ${className}`}>
       <svg width="100%" height="100%" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M7.75 4C7.75 2.20508 9.20508 0.75 11 0.75H27C27.1212 0.75 27.2375 0.798159 27.3232 0.883885L38.1161 11.6768C38.2018 11.7625 38.25 11.8788 38.25 12V36C38.25 37.7949 36.7949 39.25 35 39.25H11C9.20507 39.25 7.75 37.7949 7.75 36V4Z" 
@@ -132,19 +106,17 @@ export const FileIcon: React.FC<FileIconProps> = ({
           stroke="#D5D7DA" 
           strokeWidth="1.5"
         />
-        <rect x="3" y="18" width="30" height="16" rx="2" fill={color} />
+        <rect x="1" y="18" width="27" height="16" rx="2" fill={color} />
         <text
-          x="18"
-          y="28"
+          x="50%"
+          y="29"
           textAnchor="middle"
           fill="white"
-          fontSize={fontSizes[size]}
+          fontSize="8"
           fontFamily="system-ui"
-          fontWeight="700"
-          dominantBaseline="middle"
-          letterSpacing="-0.3"
+          fontWeight="500"
         >
-          {displayExt}
+          {ext.toUpperCase()}
         </text>
       </svg>
     </div>
@@ -165,9 +137,9 @@ export const getFileIconColor = (fileType: FileType, extension: string): string 
 
   // Fallback colors based on file type
   const typeColors: Record<FileType, string> = {
-    image: '#7F56D9',
+    image: '#039855',
     video: '#155EEF',
-    audio: '#53B1FD',
+    audio: '#155EEF',
     pdf: '#D92D20',
     document: '#155EEF',
     spreadsheet: '#079455',
