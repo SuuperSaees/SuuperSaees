@@ -42,7 +42,9 @@ const SUUPER_CLIENT_SECRET = process.env.SUUPER_CLIENT_SECRET;
 
 export const createInvitationsAction = enhanceAction(
   async (params) => {
-    const client = getSupabaseServerActionClient();
+    const client = getSupabaseServerActionClient({
+      admin: true,
+    });
 
     // Fetch users who already belong to an organization (using their email)
     const { data: existingUsers, error: existingUsersError } = await client
