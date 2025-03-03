@@ -44,7 +44,3 @@ export function useUpdateDomain(organizationId: string) {
     isUpdating: updateDomainMutation.isPending,
   };
 }
-
-  
-
-
