@@ -6,13 +6,12 @@ import { Trans } from '@kit/ui/trans';
 import UpdateImage from '../../../../../apps/web/app/components/ui/update-image';
 import { Account } from '../../../../../apps/web/lib/account.types';
 import { useOrganizationSettings } from '../context/organization-settings-context';
-import LoomPublicIdContainer from './personal-account-settings/loom-public-id-container';
 import UpdateAccountColorBrand from './personal-account-settings/update-account-color-brand';
 import { UpdateAccountOrganizationName } from './personal-account-settings/update-account-organization-name';
 import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './personal-account-settings/update-account-organization-sender-email-and-sender-domain';
 import { UpdateAccountOrganizationSenderName } from './personal-account-settings/update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './personal-account-settings/update-account-organization-sidebar';
-
+import { UpdateAccountOrganizationDomain } from './personal-account-settings/update-account-organization-domain';
 
 interface SiteSettingsProps {
   role: string;
@@ -167,18 +166,10 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                {' '}
-                <Trans i18nKey={'accounts:loomAppIdTitle'} />
-              </p>
-              <p className="text-wrap max-w-[300px]">
-                {' '}
-                <Trans i18nKey={'accounts:loomAppIdDescription'} />
+                <Trans i18nKey={'account:brandDomain'} />
               </p>
             </div>
-            <LoomPublicIdContainer
-              organizationId={user?.organization_id ?? ''}
-              userId={user?.id ?? ''}
-            />
+            <UpdateAccountOrganizationDomain organizationId={user?.organization_id ?? ''} />
           </div>
           <Separator />
           <div className="flex justify-between">
@@ -198,48 +189,7 @@ function SiteSettings({
             </div>
             <UpdateAccountOrganizationSenderEmailAndSenderDomain />
           </div>
-          {/* <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
-              <p className="font-bold">
-                {!accountStripe?.id ? (
-                  t('connectToStripe')
-                ) : accountStripe.charges_enabled ? (
-                  t('stripeConnected')
-                ) : (
-                  t('continueWithOnboardingStripe')
-                )}
-              </p>
-              <p className="text-wrap">
-                {!accountStripe?.id ? (
-                  t('connectToStripeDescription')
-                ) : accountStripe.charges_enabled ? (
-                  t('stripeConnectedDescription')
-                ) : (
-                  t('continueWithOnboardingStripeDescription')
-                )}
-              </p>
-            </div>
-            {(!accountStripe?.id || !accountStripe.charges_enabled) && (
-              <ThemedButton className="w-full">
-                <Link href={'/stripe'} className="h-full w-full">
-                  {accountStripe?.id ? <Trans i18nKey={'account:connect'} /> : <Trans i18nKey={'account:continue'} />}
-                </Link>
-              </ThemedButton>
-            )}
-          </div> 
-          <Separator />
-          <div className="flex justify-between items-center">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
-              <p className="font-bold">
-                {t('treli.connectTitle')}
-              </p>
-              <p className="text-wrap">
-              {t('treli.connectDescription')}
-              </p>
-            </div>
-            {user && <TreliDialog userId={user?.id} />}
-          </div>*/}
+         
         </div>
       )}
     </div>

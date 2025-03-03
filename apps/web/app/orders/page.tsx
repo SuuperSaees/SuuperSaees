@@ -7,7 +7,6 @@ import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getTags } from '~/server/actions/tags/tags.action';
-import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import {
   getAgencyForClient,
   getOrganization,
@@ -33,11 +32,7 @@ async function OrdersPage() {
   const client = getSupabaseServerComponentClient({
     admin: false,
   });
-  // const ordersData = ((await getOrders(true).catch((err) => {
-  //   console.error(err);
-  //   return [];
-  // })) ?? []) as OrderResponse[];
-  // const agencyId = ordersData?.[0]?.agency_id;
+
   const { workspace: userWorkspace } = await loadUserWorkspace();
   const userOrganization = await getOrganization();
   const agencyRoles = [
