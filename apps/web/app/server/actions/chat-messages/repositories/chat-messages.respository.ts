@@ -62,8 +62,7 @@ export class ChatMessagesRepository {
   }
 
   async listLastMessages(chatIds?: string[]): Promise<ChatMessages.TypeWithRelations[]> {
-    const client = this.adminClient ?? this.client;
-  
+    const client = this.client;
     const { data, error } = await client
       .from('chat_messages')
       .select(`

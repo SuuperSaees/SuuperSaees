@@ -12,5 +12,6 @@ export namespace User {
   > & {
     organization_id?: string | null;
     settings?: UserSettings.Type | null;
+    role?: string | null;
   } ;
 }

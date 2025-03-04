@@ -1,9 +1,9 @@
-import React, { useState, useRef, ComponentType, useEffect } from 'react';
+import React, { useState, useRef, ComponentType, useEffect, ReactNode } from 'react';
 import { Check, Copy, Download, Eye, MoreVertical, MessageCircle, ArrowDownToLine, X } from 'lucide-react';
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
 import { Separator } from '@kit/ui/separator';
 import Tooltip from '~/components/ui/tooltip';
-import { FilePreview } from '../components/files/file-preview';
+import FilePreview from '../../../components/file-preview/file-preview';
 import { handleCopyLink, handleFileDownload } from '../utils/file-utils';
 import { useFileHandlers } from '../hooks/files/use-file-handlres';
 import { useTranslation } from 'react-i18next';
@@ -16,25 +16,76 @@ import { FilePagination } from '../components/files/file-pagination';
 import { toast } from 'sonner';
 import FileViewer from '../components/files/file-viewer';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { File } from '~/lib/file.types';
+import { FileRendererProps } from '../../../components/file-preview/renderers';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from 'node_modules/@kit/ui/src/shadcn/hover-card';
+import { FileIcon, getFileExtension } from '../../../components/shared/file-icons';
+import { canPreviewFile, getFileType } from '../../../lib/file-types';
 
-interface FileProps {
-  src: string;
-  fileName: string;
-  fileType: string;
-  alt?: string;
-  className?: string;
-  isDialog?: boolean;
-  actualPage?: number;
-  onLoadPDF?: (total: number) => void;
-  zoomLevel?: number;
-  files?: File[];
-  triggerComponent?: React.ReactNode;
+
+interface FileProps extends FileRendererProps {
+  files?: File.Response[];
+  triggerComponent?: ReactNode;
   noPreview?: boolean;
+}
+
+interface Annotation {
+  id: string;
+  file_id: string;
+  position_x: number;
+  position_y: number;
+  content: string;
+  user_id: string;
+  page_number: number;
+  status: 'active' | 'completed' | 'draft';
+  number: number;
+  created_at: string;
+  updated_at: string;
+  message_id?: string;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  user_id: string;
+  parent_id: string;
+  created_at: string;
+}
+
+interface FileViewerProps {
+  currentFileType: string;
+  containerRef: React.RefObject<HTMLDivElement>;
+  handleMouseUp: () => void;
+  handleMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
+  handleWheel: (e: React.WheelEvent<HTMLDivElement>) => void;
+  imageRef: React.RefObject<HTMLDivElement>;
+  handleImageClick: (e: React.MouseEvent<HTMLDivElement>) => void;
+  handleMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
+  zoomLevel: number;
+  position: { x: number; y: number };
+  isDragging: boolean;
+  selectedFile: File.Response | null;
+  currentPage: number;
+  totalPages: number;
+  setTotalPages: (pages: number) => void;
+  isLoadingAnnotations: boolean;
+  annotations: Annotation[];
+  selectedAnnotation: Annotation | null;
+  isChatOpen: boolean;
+  setIsChatOpen: (open: boolean) => void;
+  setSelectedAnnotation: (annotation: Annotation | null) => void;
+  handleAnnotationClick: (annotation: Annotation | null) => void;
+  handleChatClose: () => void;
+  handleMessageSubmit: (content: string) => Promise<void>;
+  isLoadingMessages: boolean;
+  messages: Message[];
+  isSpacePressed: boolean;
+  isInitialMessageOpen: boolean;
+  setIsInitialMessageOpen: (open: boolean) => void;
 }
 
 export const withFileOptions = <P extends FileProps>(
@@ -64,7 +115,7 @@ export const withFileOptions = <P extends FileProps>(
     }
 
     return (
-      <div className="group relative inline-block h-full max-h-[150px] w-[150px] min-w-[150px] overflow-hidden justify-center items-center flex border bg-gray-100">
+      <div className="group relative inline-block h-full max-h-[150px] mt-auto min-w-[150px] overflow-hidden justify-center items-center flex">
         <FileDialogView
           triggerComponent={
             <>
@@ -128,13 +179,7 @@ export const withFileOptions = <P extends FileProps>(
               </div>
             </>
           }
-          imageContentComponent={<WrappedComponent {...props} />}
-          handleCopyLink={handleCopyLink}
-          handleDownload={handleFileDownload}
-          isLinkCopied={isLinkCopied}
-          fileName={props.fileName}
-          fileType={props.fileType}
-          files={props.files}
+          {...props}
         />
       </div>
     );
@@ -147,11 +192,10 @@ export const FileDialogView: React.FC<FileProps> = ({
   fileType,
   files,
 }) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File.Response | null>(null);
   const [currentFileType, setCurrentFileType] = useState(fileType);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
-  const [value, setValue] = React.useState("")
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState('active');
@@ -175,7 +219,6 @@ export const FileDialogView: React.FC<FileProps> = ({
     resetZoom,
   } = useFileHandlers(1, currentFileType);
 
-
   const { 
     annotations, 
     isLoadingAnnotations,
@@ -197,7 +240,6 @@ export const FileDialogView: React.FC<FileProps> = ({
       setSelectedFile(currentFile ?? null);
       setCurrentFileType(currentFile?.type ?? fileType);
       resetZoom();
-      setValue("1x");
     }
   }, [files, fileName, fileType]);
 
@@ -269,11 +311,11 @@ export const FileDialogView: React.FC<FileProps> = ({
         content: '',
         user_id: user.id,
         page_number: currentFileType.startsWith('application/pdf') ? currentPage : 0,
-        status: 'active' as 'active' | 'completed' | 'draft',
+        status: 'active' as const,
         number: annotations.length + 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
-      }
+      };
 
       setIsInitialMessageOpen(true);
       setSelectedAnnotation(annotation);
@@ -289,7 +331,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     if (!selectedAnnotation || !user) return;
     if (isInitialMessageOpen) {
       const annotation = await createAnnotation({
-        file_id: selectedFile?.id,
+        file_id: selectedFile?.id ?? '',
         position_x: selectedAnnotation.position_x,
         position_y: selectedAnnotation.position_y,
         content: content,
@@ -300,11 +342,11 @@ export const FileDialogView: React.FC<FileProps> = ({
       setSelectedAnnotation(annotation);
       setIsInitialMessageOpen(false);
     } else {
-      await addMessage({ parent_id: selectedAnnotation.message_id, content, user_id: user.id });
+      await addMessage({ parent_id: selectedAnnotation.message_id ?? '', content, user_id: user.id });
     }
   };
 
-  const handleAnnotationClick = (annotation: any) => {
+  const handleAnnotationClick = (annotation: typeof selectedAnnotation) => {
     setSelectedAnnotation(annotation);
     setIsChatOpen(true);
   };
@@ -329,7 +371,6 @@ export const FileDialogView: React.FC<FileProps> = ({
     if (fileToShow) {
       setSelectedFile(fileToShow);
       setCurrentFileType(fileToShow.type);
-      setValue("1x");
       resetZoom();
       if (pageNumber && fileToShow.type.startsWith('application/pdf')) {
         setCurrentPage(pageNumber);
@@ -339,7 +380,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     }
   };
 
-  const renderAnnotationsList = (filteredAnnotations: any[]) => {
+  const renderAnnotationsList = (filteredAnnotations: typeof annotations) => {
     if (filteredAnnotations.length === 0) {
       return (
         <div className="flex p-4 items-start gap-5">
@@ -356,25 +397,21 @@ export const FileDialogView: React.FC<FileProps> = ({
     return filteredAnnotations
       .sort((a, b) => a.created_at.localeCompare(b.created_at))
       .map((annotation) => (
-      <div key={annotation.id} className="">
+      <div key={annotation.id}>
         {activeTab === 'active' ? (
-          <>
-            <ActiveChats 
-              chat={annotation} 
-              onUpdate={handleUpdateAnnotation} 
-              onDelete={handleDeleteAnnotation}
-              onChatClick={handleChatClick}
-              t={t}
-            />
-          </>
+          <ActiveChats 
+            chat={annotation} 
+            onUpdate={handleUpdateAnnotation} 
+            onDelete={handleDeleteAnnotation}
+            onChatClick={handleChatClick}
+            t={t}
+          />
         ) : (
-          <>
-            <ResolvedChat 
-              chat={annotation} 
-              onDelete={handleDeleteAnnotation}
-              t={t}
-            />
-          </>
+          <ResolvedChat 
+            chat={annotation} 
+            onDelete={handleDeleteAnnotation}
+            t={t}
+          />
         )}
       </div>
     ));
@@ -429,7 +466,7 @@ export const FileDialogView: React.FC<FileProps> = ({
                 </HoverCard>
                 <ArrowDownToLine 
                   className="w-6 h-6 cursor-pointer text-[#A4A7AE] mr-[34px]" 
-                  onClick={() => handleFileDownload(selectedFile?.url, selectedFile?.name)} 
+                  onClick={() => selectedFile && handleFileDownload(selectedFile.url, selectedFile.name)} 
                 />
                 <DialogClose className="rounded-sm opacity-70 hover:opacity-100 focus:outline-none">
                   <X className="h-6 w-6 text-[#A4A7AE]" />
@@ -443,7 +480,7 @@ export const FileDialogView: React.FC<FileProps> = ({
         <div className="flex flex-1 min-h-0">
           <div 
             ref={filesContainerRef} 
-            className="w-52 overflow-y-auto flex flex-col gap-4 items-center py-4 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+            className="w-52 shrink-0 overflow-y-auto flex flex-col gap-4 items-center py-4 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
           >
             {files
               ?.filter((file, index, self) => 
@@ -452,27 +489,34 @@ export const FileDialogView: React.FC<FileProps> = ({
               .map((file, index) => (
               <div 
                 data-file-name={file.name}
-                className='flex flex-col cursor-pointer hover:opacity-80' 
+                className='flex flex-col cursor-pointer hover:opacity-80 w-full' 
                 key={index}
                 onClick={() => {
                   setSelectedFile(file);
                   setCurrentFileType(file.type);
-                  setValue("1x");
                   resetZoom();
                   setCurrentPage(1);
                 }}
               >
-                <div className={`h-[150px] w-[150px] flex item-center justify-center rounded-lg border ${
-                  selectedFile?.name === file.name ? 'border-blue-500 border-2' : 'bg-gray-100'
+                <div className={`h-[150px] w-full flex item-center justify-center rounded-lg border overflow-hidden ${
+                  selectedFile?.name === file.name ? 'border-blue-500 border-2' : 'bg-gray-100 border-2 border-transparent'
                 }`}>
-                  <FilePreview
-                    src={file.url}
-                    fileName={file.name}
-                    fileType={file.type}
-                    className="max-w-full max-h-full"
-                  />
+                  {file.type.startsWith('image/') && canPreviewFile(getFileType(file.type, getFileExtension(file.name))) ? (
+                    <FilePreview
+                      src={file.url}
+                      fileName={file.name}
+                      fileType={file.type}
+                      className="w-full h-full object-contain"
+                      renderAs="inline"
+                    />
+                  ) : (
+                    <div className='mx-auto my-auto w-20 h-20 rounded-lg flex items-center justify-center' style={{
+                    }}>
+                      <FileIcon extension={getFileExtension(file.name)} size="md" />
+                    </div>
+                  )}
                 </div>
-                <p className="text-sm font-medium text-gray-400 truncate w-[150px]">{file.name ?? 'fileName'}</p>
+                <p className="text-sm font-medium text-gray-400 truncate ">{file.name ?? 'fileName'}</p>
               </div>
             ))}
           </div>
@@ -556,5 +600,4 @@ export const FileDialogView: React.FC<FileProps> = ({
   );
 };
 
-const FileWithOptions = withFileOptions(FilePreview);
-export default FileWithOptions;
+export default withFileOptions(FilePreview);
