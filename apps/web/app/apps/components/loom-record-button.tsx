@@ -84,6 +84,10 @@ function LoomRecordButton({
     return <Spinner className="h-5 text-gray-400" />;
   }
 
+  if (!loomAppId || !isSupported()) {
+    return null;
+  }
+
   return (
     <button
       ref={buttonRef}
