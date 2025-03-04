@@ -26,6 +26,7 @@ const RichTextEditor = ({
   showToolbar = true,
   isEditable = true,
   className = '',
+  customActionButtons,
   ...rest
 }: RichTextEditorProps) => {
   const [uploads, setUploads] = useState<FileUpload[]>([]);
@@ -134,7 +135,7 @@ const RichTextEditor = ({
           {showToolbar && (
             <Toolbar
               editor={editor}
-     
+              customActionButtons={customActionButtons}
               onFileSelect={handleFileSelect}
             />
           )}

@@ -20,6 +20,7 @@ export interface RichTextEditorProps {
   isEditable?: boolean;
   className?: string;
   onFileUpload?: (file: File, fileId: string, setUploads: Dispatch<SetStateAction<FileUpload[]>>,) => Promise<string>;
+  customActionButtons?: ((editor: Editor) => JSX.Element)[];
 }
 
 export interface ToolbarProps {

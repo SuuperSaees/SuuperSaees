@@ -1,14 +1,16 @@
 import type { Editor } from '@tiptap/react';
 import { Upload } from 'lucide-react';
 import { useRef } from 'react';
+import React from 'react';
 
 interface ToolbarProps {
   editor: Editor | null;
   disabled?: boolean;
   onFileSelect?: (files: FileList) => void;
+  customActionButtons?: ((editor: Editor) => React.ReactNode)[];
 }
 
-export const Toolbar = ({ editor, disabled, onFileSelect }: ToolbarProps) => {
+export const Toolbar = ({ editor, disabled, onFileSelect, customActionButtons }: ToolbarProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!editor) {
@@ -44,6 +46,11 @@ export const Toolbar = ({ editor, disabled, onFileSelect }: ToolbarProps) => {
       >
         <Upload className="h-5 w-5 flex-shrink-0 text-gray-400" />
       </button>
+      {customActionButtons?.map((button, index) => (
+        <React.Fragment key={index}>
+          {button(editor)}
+        </React.Fragment>
+      ))}
     </div>
   );
 };
