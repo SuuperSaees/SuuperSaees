@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+'use client';
+import React, { useState } from 'react';
 
-import { useMutation } from '@tanstack/react-query';
-import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
 
 import { Spinner } from '@kit/ui/spinner';
 
@@ -23,65 +24,68 @@ function LoomPublicIdContainer({
   userId,
 }: LoomPublicIdContainerProps) {
   const [loomAppId, setLoomAppId] = useState<string>('');
-  const [domain, setDomain] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showLoomAppId, setShowLoomAppId] = useState<boolean>(false);
 
   const { t } = useTranslation('account');
 
-  useEffect(() => {
-    if (!pluginId) return;
-
-    const fetchPluginData = async () => {
+  // Fetch plugin data using React Query
+  const { isLoading } = useQuery({
+    queryKey: ['plugin', pluginId],
+    queryFn: async () => {
+      if (!pluginId) {
+        return null;
+      }
+      
       try {
-        setIsLoading(true);
         const response = await getAccountPluginByIdAction(pluginId);
-
+        
         if (response?.success) {
-          const credentials = response.success.data?.credentials as Record<
-            string,
-            unknown
-          >;
-          if (typeof credentials.loom_app_id === 'string') {
+          const credentials = response.success.data?.credentials as Record<string, unknown>;
+          if (typeof credentials?.loom_app_id === 'string') {
             setLoomAppId(credentials.loom_app_id);
           }
-        } else {
-          throw new Error(
-            response?.error?.message ?? 'Failed to fetch plugin data',
-          );
-        }
+          return response.success.data;
+        } 
+        
+        throw new Error(response?.error?.message ?? 'Failed to fetch plugin data');
       } catch (error) {
         console.error('Error fetching plugin data:', error);
         toast.error(t('errorFetchingPlugin'), {
           description: t('errorFetchingPluginDescription'),
         });
-      } finally {
-        setIsLoading(false);
+        throw error;
       }
-    };
+    },
+    enabled: !!pluginId,
+    retry: 1
+  });
 
-    void fetchPluginData();
-  }, [pluginId, t]);
-
-  useEffect(() => {
-    if (!userId) return;
-
-    const fetchDomain = async () => {
+  // Fetch domain data using React Query
+  const { data: domainData } = useQuery({
+    queryKey: ['domain', userId],
+    queryFn: async () => {
+      if (!userId) {
+        return { domain: '' };
+      }
+      
       try {
-        const domainData = await getDomainByUserId(userId);
-        if (domainData?.domain) {
-          setDomain(domainData.domain);
-        }
+        const domain = await getDomainByUserId(userId);
+        return domain;
       } catch (error) {
         console.error('Error fetching domain:', error);
+        return { domain: '' };
       }
-    };
-
-    void fetchDomain();
-  }, [userId]);
+    },
+    enabled: !!userId,
+    retry: 1
+  });
 
   const updateCredentialsMutation = useMutation({
     mutationFn: async () => {
+      if (!pluginId) {
+        throw new Error('Plugin ID is required');
+      }
+      
       const updates = {
         credentials: { loom_app_id: loomAppId },
         provider: 'loom',
@@ -94,10 +98,15 @@ function LoomPublicIdContainer({
         description: t('pluginUpdatedSuccessfully'),
       });
     },
-    onError: (error) => {
-      console.error('Error en cliente:', error);
+    onError: (error: unknown) => {
+      console.error('Error updating plugin:', error);
+      toast.error(t('errorMessage'), {
+        description: t('errorUpdatingPlugin'),
+      });
     },
   });
+
+  const domain = domainData?.domain ?? '';
 
   return (
     <>

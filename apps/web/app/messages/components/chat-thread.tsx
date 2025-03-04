@@ -1,7 +1,8 @@
 'use client';
 
-import {  Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
+import { Editor } from '@tiptap/react';
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
@@ -10,12 +11,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { File } from '~/lib/file.types';
 import { Members } from '~/lib/members.types';
 
+import LoomRecordButton from '../../apps/components/loom-record-button';
 import RichTextEditor from '../../components/messages/rich-text-editor';
 import { FileUpload } from '../../components/messages/types';
 import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';
 import MessageList from './message-list';
+import { useQuery } from '@tanstack/react-query';
+import { getAgencyForClientByUserId, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { InternalMessagesToggle, useInternalMessaging } from '../../components/messages';
 
 export default function ChatThread({
   agencyTeam,
@@ -23,6 +28,7 @@ export default function ChatThread({
   agencyTeam: Members.Organization;
 }) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const { getInternalMessagingEnabled } = useInternalMessaging();
   const {
     user,
     activeChat,
@@ -39,12 +45,11 @@ export default function ChatThread({
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
-
   const handleMembersUpdate = async (members: string[]) => {
     await membersUpdateMutation.mutateAsync(members);
   };
 
-  const handleDelete =  () => {
+  const handleDelete = () => {
     deleteChatMutation.mutate(activeChat?.id ?? '');
   };
 
@@ -80,10 +85,15 @@ export default function ChatThread({
         content: message,
         user_id: userId,
         temp_id: messageId,
+        visibility: getInternalMessagingEnabled()
+          ? 'internal_agency' as const
+          : 'public' as const,
       };
       if (setUploads) {
         // Since we're going to add the files to the bd, we need to update the current upload to be pending
-        setUploads((prev) => prev.map((upload) => ({ ...upload, status: 'uploading' })));
+        setUploads((prev) =>
+          prev.map((upload) => ({ ...upload, status: 'uploading' })),
+        );
       }
       await addMessageMutation.mutateAsync({
         message: newMessage,
@@ -91,10 +101,21 @@ export default function ChatThread({
       });
       if (setUploads) {
         // Since we're going to add the files to the bd, we need to update the current upload to be pending
-        setUploads((prev) => prev.map((upload) => ({ ...upload, status: 'success' })));
+        setUploads((prev) =>
+          prev.map((upload) => ({ ...upload, status: 'success' })),
+        );
       }
     }
   };
+
+  const organizationData  = useQuery({
+    queryKey: ['account-plugins', user.id],
+    queryFn: user.role === 'client_member' || user.role === 'client_owner' ? 
+      async () => await getAgencyForClientByUserId(user.id) : 
+      async () => await getOrganization(),
+    enabled: !!user.id,
+    retry: 1,
+  });
   // Set
   // members
   useEffect(() => {
@@ -111,30 +132,31 @@ export default function ChatThread({
 
   const activeChatDataName = { ...activeChat }.name;
   const isOwner = chatById?.user_id === user.id;
-  const canEditName = isOwner || chatById?.members?.some((member) => member.id === user.id);
+  const canEditName =
+    isOwner || chatById?.members?.some((member) => member.id === user.id);
   return (
-    <div className="flex h-full flex-col min-w-0">
+    <div className="flex h-full min-w-0 flex-col">
       {/* Header */}
 
-      <div className="flex items-center justify-between border-b p-4 min-h-20">
-        <div className="flex-1 min-w-0 ">
+      <div className="flex min-h-20 items-center justify-between border-b p-4">
+        <div className="min-w-0 flex-1">
           {canEditName ? (
             <input
               type="text"
               value={activeChatDataName}
-            onChange={(e) => {
-              const newChat = { ...activeChat, name: e.target.value };
-              setActiveChat(newChat);
-            }}
-            onBlur={async (e) => {
-              if (e.target.value !== chatById?.name) {
-                await handleUpdate(e.target.value);
-              }
-            }}
-              className="w-full text-xl font-semibold bg-transparent border-none outline-none focus:ring-0 text-primary-900 overflow-hidden text-ellipsis"
+              onChange={(e) => {
+                const newChat = { ...activeChat, name: e.target.value };
+                setActiveChat(newChat);
+              }}
+              onBlur={async (e) => {
+                if (e.target.value !== chatById?.name) {
+                  await handleUpdate(e.target.value);
+                }
+              }}
+              className="w-full overflow-hidden text-ellipsis border-none bg-transparent text-xl font-semibold text-primary-900 outline-none focus:ring-0"
             />
           ) : (
-            <span className="block w-full text-xl font-semibold text-primary-900 overflow-hidden text-ellipsis">
+            <span className="block w-full overflow-hidden text-ellipsis text-xl font-semibold text-primary-900">
               {activeChatDataName}
             </span>
           )}
@@ -158,7 +180,7 @@ export default function ChatThread({
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-2 text-red-600"
-                onClick={ () => {
+                onClick={() => {
                   setIsPopupOpen(false);
                   handleDelete();
                 }}
@@ -183,6 +205,22 @@ export default function ChatThread({
           showToolbar={true}
           isEditable={true}
           onFileUpload={handleFileUpload}
+          customActionButtons={[
+            (editor: Editor) => (
+              <LoomRecordButton
+                onAction={(text: string) => editor.commands.setContent(text)}
+                loomAppId={organizationData.data?.loom_app_id ?? ''}
+                isLoading={organizationData.isLoading}
+              />
+            ),
+            () => (
+              <InternalMessagesToggle 
+                userRole={user.role} 
+                allowedRoles={['agency_member', 'agency_project_manager', 'agency_owner']}
+                className="ml-2"
+              />
+            ),
+          ]}
         />
       </div>
     </div>

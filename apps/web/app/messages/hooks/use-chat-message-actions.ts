@@ -77,6 +77,7 @@ export const useChatMessageActions = ({
         temp_id: message.temp_id,
         id: message.id,
         chat_id: chatId,
+        visibility: message.visibility,
       };
       const response = await createMessage({
         id: message.id,
@@ -103,7 +104,7 @@ export const useChatMessageActions = ({
         user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        visibility: Message.Visibility.PUBLIC,
+        visibility: message.visibility as Message.Visibility,
         id: 'temp-' + tempId,
         deleted_on: null,
         order_id: null,

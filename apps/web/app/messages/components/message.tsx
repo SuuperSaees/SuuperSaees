@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { format } from 'date-fns';
-import { ClockIcon, Trash2, X } from 'lucide-react';
+import { ClockIcon, KeyIcon, Trash2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -30,8 +30,8 @@ interface MessageProps {
 }
 
 export default function Message({ message, canDelete = false }: MessageProps) {
-  const { deleteMessageMutation } = useChat();
-  
+  const { deleteMessageMutation, user } = useChat();
+  const userRole = user.role;
   const { t } = useTranslation('orders');
   const [isOpen, setIsOpen] = useState(false);
 
@@ -39,6 +39,9 @@ export default function Message({ message, canDelete = false }: MessageProps) {
   const content = message.content ?? '';
 
   const displayName = message.user?.name;
+
+  const isInternalMessage = ["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) && 
+  message.visibility === "internal_agency";
 
   const handleDeleteMessage = async () => {
     await deleteMessageMutation.mutateAsync({ messageId: message.id, chatId: '' });
@@ -50,6 +53,11 @@ export default function Message({ message, canDelete = false }: MessageProps) {
           <span className="font-semibold">{displayName}</span>
           {message?.pending && (
             <ClockIcon className="h-3 w-3 self-center text-muted-foreground" />
+          )}
+          {isInternalMessage && (
+            <span className="text-gray-400 text-sm flex items-center gap-1">
+              <KeyIcon className="w-4 h-4" /> {t('internalMessage')}
+            </span>
           )}
         </div>
         <div className="flex gap-2 items-center">
@@ -68,7 +76,9 @@ export default function Message({ message, canDelete = false }: MessageProps) {
 
       <div className="bg-slate-0 flex w-full flex-col gap-2 overflow-hidden rounded-lg rounded-ss-none leading-relaxed">
         <div
-          className={`flex flex-col gap-2 whitespace-normal break-words rounded-lg text-sm`}
+          className={`flex flex-col gap-2 whitespace-normal break-words rounded-lg text-sm ${
+            isInternalMessage ? "p-3 bg-yellow-50" : "bg-transparent"
+          }`}
         >
           <div 
             dangerouslySetInnerHTML={{ __html: content }} 
