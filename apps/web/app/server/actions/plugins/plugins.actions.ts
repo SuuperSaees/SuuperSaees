@@ -2,24 +2,27 @@
 
 import { createPluginsAction } from "./plugins";
 import { PluginInsert } from "~/lib/plugins.types";
-export const pluginsActions = createPluginsAction('/api/plugins');
+
+function getPluginsActions() {
+    return createPluginsAction(process.env.NEXT_PUBLIC_SITE_URL as string);
+}
 
 export const createPlugin = async (pluginData: PluginInsert, image: File | null) => {
-    return await pluginsActions.create(pluginData, image);
+    return await getPluginsActions().create(pluginData, image);
 }
 
 export const updatePlugin = async (id: string, payload: Partial<PluginInsert>, image: File | null) => {
-    return await pluginsActions.update(id, payload, image);
+    return await getPluginsActions().update(id, payload, image);
 }
 
 export const deletePlugin = async (id: string) => {
-    return await pluginsActions.delete(id);
+    return await getPluginsActions().delete(id);
 }
 
 export const getPlugin = async (id: string) => {
-    return await pluginsActions.get(id);
+    return await getPluginsActions().get(id);
 }
 
 export const listPlugins = async () => {
-    return await pluginsActions.list();
+    return await getPluginsActions().list();
 }
