@@ -54,16 +54,20 @@ class AccountsApi {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
       .select(
-        `id, name, slug, picture_url, settings:organization_settings!inner(*)`,
-      );
+        `id, name, slug, picture_url, settings:organization_settings!left(*)`,
+      )
 
     if (error) {
       throw error;
     }
+
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No user accounts found');
+    }
+
     const logoUrl =
       accounts[0]?.settings?.find((setting) => setting.key === 'logo_url')
         ?.value ?? accounts[0]?.picture_url ?? '';
-
     return {
       id: accounts[0]?.id,
       name: accounts[0]?.name,
