@@ -96,101 +96,106 @@ export class AccountPluginRepository {
   }
 
   /**
-   * @name get
-   * @description Fetches account_plugins by ID or account ID.
-   * When fetching by ID, returns a single account_plugin.
-   * When fetching by account ID, supports pagination and returns an array.
-   * Ensures account_plugins are not marked as deleted.
-   * @param {Object} params - The query parameters
-   * @param {string} [params.id] - The unique ID of the account_plugin to fetch
-   * @param {string} [params.accountId] - The account ID to fetch account_plugins for
-   * @param {number} [params.limit=10] - The maximum number of account_plugins to fetch (only for accountId)
-   * @param {number} [params.offset=0] - The number of account_plugins to skip (only for accountId)
-   * @returns {Promise<AccountPlugin | AccountPlugin[]>} Single account plugin or array depending on query type
-   * @throws {Error} If the fetch operation fails or invalid parameters are provided
+   * @name getById
+   * @description Fetches an account_plugin by its unique ID from the 'account_plugins' table.
+   * Ensures the account_plugin has not been marked as deleted.
+   * @param {string} id - The unique ID of the account_plugin to fetch.
+   * @returns {Promise<AccountPlugin | null>} The account plugin data or null if not found.
+   * @throws {Error} If the fetch operation fails.
    */
-  async get({
-    id,
-    accountId,
-    limit = 10,
-    offset = 0,
-  }: {
-    id?: string;
-    accountId?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<AccountPlugin | AccountPlugin[]> {
-    try {
-      const query = this.client
-        .from(this.tableName)
-        .select(`
-          id,
-          plugin_id,
-          account_id,
-          provider_id,
-          status,
-          credentials,
-          created_at,
-          updated_at,
-          deleted_on
-        `)
-        .is('deleted_on', null);
+  async getById(id: string): Promise<AccountPlugin | null> {
+    const { data, error } = await this.client
+      .from(this.tableName)
+      .select(
+        `
+        id,
+        plugin_id,
+        account_id,
+        provider_id,
+        status,
+        credentials,
+        created_at,
+        updated_at,
+        deleted_on
+      `,
+      )
+      .eq('id', id)
+      .is('deleted_on', null)
+      .single();
 
-      if (id) {
-        const { data, error } = await query.eq('id', id).single();
-        
-        if (error) {
-          throw new Error(
-            `[REPOSITORY] Error fetching account plugin by ID: ${error.message}`,
-          );
-        }
-
-        return data as AccountPlugin;
-      }
-
-      if (accountId) {
-        const { data, error } = await query
-          .eq('account_id', accountId)
-          .range(offset, offset + limit - 1);
-
-        if (error) {
-          throw new Error(
-            `[REPOSITORY] Error fetching account plugins for account: ${error.message}`,
-          );
-        }
-
-        return data as AccountPlugin[];
-      }
-
-      throw new Error('[REPOSITORY] Either id or accountId must be provided');
-    } catch (error) {
+    if (error) {
       throw new Error(
-        `[REPOSITORY] Error in get method: ${(error as Error).message}`,
+        `[REPOSITORY] Error fetching account plugin by ID: ${error.message}`,
       );
     }
+
+    return data as AccountPlugin;
+  }
+
+  /**
+   * @name getByAccount
+   * @description Fetches account_plugins associated with a specific account ID.
+   * Supports pagination using limit and offset.
+   * Ensures account_plugins are not marked as deleted.
+   * @param {string} accountId - The account ID to fetch account_plugins for.
+   * @param {number} [limit=10] - The maximum number of account_plugins to fetch (default is 10).
+   * @param {number} [offset=0] - The number of account_plugins to skip for pagination (default is 0).
+   * @returns {Promise<AccountPlugin[]>} A list of account_plugins associated with the account.
+   * @throws {Error} If the fetch operation fails.
+   */
+  async getByAccount(
+    accountId: string,
+    limit = 10,
+    offset = 0,
+  ): Promise<AccountPlugin[]> {
+    const { data, error } = await this.client
+      .from(this.tableName)
+      .select(
+        `
+        id,
+        plugin_id,
+        account_id,
+        provider_id,
+        status,
+        credentials,
+        created_at,
+        updated_at,
+        deleted_on
+      `,
+      )
+      .eq('account_id', accountId)
+      .is('deleted_on', null)
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      throw new Error(
+        `[REPOSITORY] Error fetching account plugins for account: ${error.message}`,
+      );
+    }
+
+    return data as AccountPlugin[];
   }
 
   /**
    * @name update
-   * @description Updates an account_plugin and optionally its billing_account (excluding `loom`).
-   * Can also update just the status of the account_plugin.
+   * @description Updates an account_plugin and its billing_account (excluding `loom`).
    * @param {string} id - The unique ID of the account_plugin to update.
-   * @param {Partial<AccountPluginInsert> | { status: 'installed' | 'uninstalled' | 'failed' | 'in progress' | null }} updates - The fields to update
-   * @param {Partial<BillingAccountInsert>} [billingUpdates] - Optional fields to update in the billing_account.
+   * @param {Partial<AccountPluginInsert>} updates - The fields to update in the account_plugin.
+   * @param {Partial<BillingAccountInsert>} billingUpdates - The fields to update in the billing_account.
    * @returns {Promise<AccountPlugin>} The updated account_plugin data.
    * @throws {Error} If the update operation fails.
    */
   async update(
     id: string,
-    updates: Partial<AccountPluginInsert> | { status: 'installed' | 'uninstalled' | 'failed' | 'in progress' | null },
-    billingUpdates?: Partial<BillingAccountInsert>,
+    updates: Partial<AccountPluginInsert>,
+    billingUpdates: Partial<BillingAccountInsert>,
   ): Promise<AccountPlugin> {
     try {
       const { data: pluginData, error: pluginError } = await this.client
         .from(this.tableName)
         .update({
           ...updates,
-          provider_id: 'provider_id' in updates ? updates.provider_id ?? undefined : undefined,
+          provider_id: updates.provider_id ?? undefined,
         })
         .eq('id', id)
         .is('deleted_on', null)
@@ -215,33 +220,118 @@ export class AccountPluginRepository {
         );
       }
 
-      if (billingUpdates?.account_id && billingUpdates?.provider) {
-        const { error: billingError } = await this.client
-          .from('billing_accounts')
-          .upsert(
-            {
-              account_id: billingUpdates.account_id,
-              provider: billingUpdates.provider,
-              credentials: billingUpdates.credentials ?? null,
-              updated_at: billingUpdates.updated_at ?? new Date().toISOString(),
-              provider_id: billingUpdates.provider_id ?? undefined,
-            },
-            {
-              onConflict: 'account_id,provider',
-            },
-          );
+      if (!billingUpdates.account_id || !billingUpdates.provider) {
+        throw new Error(
+          `[REPOSITORY] Account ID and Provider are required for updating billing account.`,
+        );
+      }
 
-        if (billingError) {
-          throw new Error(
-            `[REPOSITORY] Error upserting billing account: ${billingError.message}`,
-          );
-        }
+      const { error: billingError } = await this.client
+        .from('billing_accounts')
+        .upsert(
+          {
+            account_id: billingUpdates.account_id,
+            provider: billingUpdates.provider,
+            credentials: billingUpdates.credentials ?? null,
+            updated_at: billingUpdates.updated_at ?? new Date().toISOString(),
+            provider_id: billingUpdates.provider_id ?? undefined,
+          },
+          {
+            onConflict: 'account_id,provider',
+          },
+        );
+
+      if (billingError) {
+        throw new Error(
+          `[REPOSITORY] Error upserting billing account: ${billingError.message}`,
+        );
       }
 
       return pluginData as AccountPlugin;
     } catch (error) {
       throw new Error(
         `[REPOSITORY] Error in update method: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * @name updateLoom
+   * @description Updates only the account_plugin table for `loom`.
+   * @param {string} id - The unique ID of the account_plugin to update.
+   * @param {Partial<AccountPluginInsert>} updates - The fields to update in the account_plugin.
+   * @returns {Promise<AccountPlugin>} The updated account_plugin data.
+   * @throws {Error} If the update operation fails.
+   */
+  async updateLoom(
+    id: string,
+    updates: Partial<AccountPluginInsert>,
+  ): Promise<AccountPlugin> {
+    try {
+      const { data: pluginData, error: pluginError } = await this.client
+        .from(this.tableName)
+        .update({
+          ...updates,
+          provider_id: updates.provider_id ?? undefined,
+        })
+        .eq('id', id)
+        .is('deleted_on', null)
+        .select(
+          `
+          id,
+          plugin_id,
+          account_id,
+          provider_id,
+          status,
+          credentials,
+          created_at,
+          updated_at,
+          deleted_on
+        `,
+        )
+        .single();
+
+      if (pluginError) {
+        throw new Error(
+          `[REPOSITORY] Error updating loom account plugin: ${pluginError.message}`,
+        );
+      }
+
+      return pluginData as AccountPlugin;
+    } catch (error) {
+      throw new Error(
+        `[REPOSITORY] Error in updateLoom method: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * @name updateStatus
+   * @description Updates the status of an account_plugin in the 'account_plugins' table.
+   * @param {string} id - The unique ID of the account_plugin to update.
+   * @param {"installed" | "uninstalled" | "failed" | "in progress" | null} status - The new status to set for the account_plugin.
+   * @returns {Promise<void>} Resolves when the status is successfully updated.
+   * @throws {Error} If the update operation fails.
+   */
+  async updateStatus(
+    id: string,
+    status: 'installed' | 'uninstalled' | 'failed' | 'in progress' | null,
+  ): Promise<void> {
+    try {
+      const { error } = await this.client
+        .from(this.tableName)
+        .update({ status })
+        .eq('id', id)
+        .is('deleted_on', null);
+
+      if (error) {
+        throw new Error(
+          `[REPOSITORY] Error updating account plugin status: ${error.message}`,
+        );
+      }
+    } catch (error) {
+      throw new Error(
+        `[REPOSITORY] Error in updateStatus method: ${(error as Error).message}`,
       );
     }
   }
