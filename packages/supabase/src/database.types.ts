@@ -70,6 +70,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "account_plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "account_plugins_plugin_id_fkey"
             columns: ["plugin_id"]
             isOneToOne: false

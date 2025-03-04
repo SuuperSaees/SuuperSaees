@@ -78,7 +78,7 @@ export class ChatRepository {
  
 
   async get(chatId: string, fields?: string[]): Promise<Chats.TypeWithRelations> {
-    const client = this.adminClient ?? this.client;
+    const client = this.client;
     
     if (fields){
       const { data: chat, error } = await client
@@ -152,7 +152,6 @@ export class ChatRepository {
       // is deleted_on null but for messages
       .is('messages.deleted_on', null)
       .single();
-      console.log('chat', chat?.messages.filter((message) => message.files.length > 0))
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);

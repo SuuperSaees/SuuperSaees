@@ -71,10 +71,27 @@ export class ChatMessagesService {
     payload: ChatMessages.TypeWithRelations,
   ): Promise<void> {
     const userId = payload.messages?.[0]?.user_id;
-
-    const chatMembers = await this.chatMembersRepository?.list(payload.chat_id);
-
-    const chatMembersEmails = chatMembers?.filter(member => member.user_id !== userId).map(member => member.user.email);
+    const messageVisibility = payload.messages?.[0]?.visibility;
+    const chatMembers = await this.chatMembersRepository?.list(payload.chat_id, undefined, false, true);
+    
+    const chatMembersEmails = chatMembers
+      ?.filter(member => {
+        // Always exclude the sender
+        if (member.user_id === userId) return false;
+        
+        // If message is public, include all members
+        if (messageVisibility === 'public') return true;
+        
+        // If message is internal_agency, only include agency roles
+        if (messageVisibility === 'internal_agency') {
+          const agencyRoles = ['agency_owner', 'agency_project_manager', 'agency_member'];
+          return agencyRoles.includes(member.user.role);
+        }
+        
+        // Default case (should not happen, but include for safety)
+        return true;
+      })
+      .map(member => member.user.email);
 
 
     const senderName = chatMembers?.find(member => member.user_id === userId)?.user.name;

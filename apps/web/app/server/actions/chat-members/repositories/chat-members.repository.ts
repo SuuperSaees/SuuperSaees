@@ -18,7 +18,7 @@ export class ChatMembersRepository {
   // * CREATE REPOSITORIES
   async upsert(
     chat_id: string,
-    members: { user_id: string; type: string, visibility: boolean }[],
+    members: { user_id: string; type: string, visibility: boolean, role: string | undefined }[],
   ): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
@@ -100,7 +100,7 @@ export class ChatMembersRepository {
   }
 
   // * GET REPOSITORIES
-  async list(chatId?: string, userId?: string, getAllMembers= false): Promise<ChatMembers.TypeWithRelations[]> {
+  async list(chatId?: string, userId?: string, getAllMembers= false, includeRoles = false): Promise<ChatMembers.TypeWithRelations[]> {
     const client = this.adminClient ?? this.client;
 
     if(userId && !chatId	) {
@@ -147,7 +147,23 @@ export class ChatMembersRepository {
         `Error fetching members for chat ${chatId}: ${error.message}`,
       );
     }
+    let roles: { user_id: string, role: string }[] | undefined = undefined
+    if(includeRoles) {
+      const { data: rolesData, error: rolesError } = await client
+        .from('accounts_memberships')
+        .select('role:account_role, user_id')
+        .in('user_id', data.map((member) => member.user_id ?? ''));
 
+      if(rolesError) {
+        throw new Error(`Error fetching roles: ${rolesError.message}`);
+      }
+
+      roles = rolesData.map((role) => ({
+        user_id: role.user_id ?? '',
+        role: role.role ?? '',
+      }));
+
+    }
     const members = data.map((member) => ({
       ...member,
       user: {
@@ -155,6 +171,7 @@ export class ChatMembersRepository {
         email: member.user?.email ?? '',
         name: member.user?.settings?.name ?? '',
         picture_url: member.user?.settings?.picture_url ?? '',
+        role: roles?.find((role) => role.user_id === member.user_id)?.role ?? undefined,
       },
     }));
 
