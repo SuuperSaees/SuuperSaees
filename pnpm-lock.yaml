@@ -108,9 +108,6 @@ importers:
       '@kit/billing-gateway':
         specifier: workspace:^
         version: link:../../packages/billing/gateway
-      '@kit/cms':
-        specifier: workspace:^
-        version: link:../../packages/cms/core
       '@kit/database-webhooks':
         specifier: workspace:^
         version: link:../../packages/database-webhooks
@@ -561,85 +558,6 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.24.1
-
-  packages/cms/core:
-    devDependencies:
-      '@kit/eslint-config':
-        specifier: workspace:*
-        version: link:../../../tooling/eslint
-      '@kit/prettier-config':
-        specifier: workspace:*
-        version: link:../../../tooling/prettier
-      '@kit/tsconfig':
-        specifier: workspace:*
-        version: link:../../../tooling/typescript
-      '@types/node':
-        specifier: ^20.14.11
-        version: 20.14.11
-
-  packages/cms/keystatic:
-    dependencies:
-      '@keystatic/core':
-        specifier: 0.5.27
-        version: 0.5.27(next@15.0.3(@opentelemetry/api@1.9.0)(@playwright/test@1.45.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@keystatic/next':
-        specifier: ^5.0.1
-        version: 5.0.1(@keystatic/core@0.5.27(next@15.0.3(@opentelemetry/api@1.9.0)(@playwright/test@1.45.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(next@15.0.3(@opentelemetry/api@1.9.0)(@playwright/test@1.45.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@markdoc/markdoc':
-        specifier: ^0.4.0
-        version: 0.4.0(@types/react@18.3.3)(react@18.3.1)
-    devDependencies:
-      '@kit/cms':
-        specifier: workspace:^
-        version: link:../core
-      '@kit/eslint-config':
-        specifier: workspace:*
-        version: link:../../../tooling/eslint
-      '@kit/prettier-config':
-        specifier: workspace:*
-        version: link:../../../tooling/prettier
-      '@kit/tsconfig':
-        specifier: workspace:*
-        version: link:../../../tooling/typescript
-      '@kit/ui':
-        specifier: workspace:^
-        version: link:../../ui
-      '@types/node':
-        specifier: ^20.14.11
-        version: 20.14.11
-      '@types/react':
-        specifier: ^18.3.3
-        version: 18.3.3
-      react:
-        specifier: 18.3.1
-        version: 18.3.1
-      zod:
-        specifier: ^3.23.8
-        version: 3.23.8
-
-  packages/cms/wordpress:
-    devDependencies:
-      '@kit/cms':
-        specifier: workspace:^
-        version: link:../core
-      '@kit/eslint-config':
-        specifier: workspace:*
-        version: link:../../../tooling/eslint
-      '@kit/prettier-config':
-        specifier: workspace:*
-        version: link:../../../tooling/prettier
-      '@kit/tsconfig':
-        specifier: workspace:*
-        version: link:../../../tooling/typescript
-      '@kit/ui':
-        specifier: workspace:^
-        version: link:../../ui
-      '@types/node':
-        specifier: ^20.14.11
-        version: 20.14.11
-      wp-types:
-        specifier: ^3.66.0
-        version: 3.66.0
 
   packages/database-webhooks:
     devDependencies:

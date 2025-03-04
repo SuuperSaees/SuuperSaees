@@ -42,7 +42,6 @@
     "@kit/auth": "workspace:^",
     "@kit/billing": "workspace:^",
     "@kit/billing-gateway": "workspace:^",
-    "@kit/cms": "workspace:^",
     "@kit/database-webhooks": "workspace:^",
     "@kit/email-templates": "workspace:^",
     "@kit/i18n": "workspace:^",
