@@ -4,6 +4,8 @@ alter table "public"."account_plugins" add constraint "account_plugins_account_i
 
 alter table "public"."account_plugins" validate constraint "account_plugins_account_id_fkey";
 
+drop policy "Read for all authenticated users" on "public"."messages";
+
 create policy "Read for all authenticated users"
 on "public"."messages"
 as permissive
