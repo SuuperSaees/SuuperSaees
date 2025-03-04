@@ -42,12 +42,14 @@ const SUUPER_CLIENT_SECRET = process.env.SUUPER_CLIENT_SECRET;
 
 export const createInvitationsAction = enhanceAction(
   async (params) => {
-    const client = getSupabaseServerActionClient({
+    const client = getSupabaseServerActionClient();
+
+    const adminClient = getSupabaseServerActionClient({
       admin: true,
     });
 
     // Fetch users who already belong to an organization (using their email)
-    const { data: existingUsers, error: existingUsersError } = await client
+    const { data: existingUsers, error: existingUsersError } = await adminClient
       .from('accounts')
       .select('id, email, deleted_on, organization_id')
       .in(
@@ -61,7 +63,7 @@ export const createInvitationsAction = enhanceAction(
     }
 
     // Fetch existing memberships for all users
-    const { data: existingMemberships } = await client
+    const { data: existingMemberships } = await adminClient
       .from('accounts_memberships')
       .select('user_id')
       .in(
@@ -91,7 +93,7 @@ export const createInvitationsAction = enhanceAction(
       throw new Error('No invitations to process');
     }
 
-    const { data: organizationAccount, error: organizationAccountError } = await client
+    const { data: organizationAccount, error: organizationAccountError } = await adminClient
       .from('accounts')
       .select('id, name, primary_owner_user_id')
       .eq('slug', params.accountSlug)
@@ -108,7 +110,7 @@ export const createInvitationsAction = enhanceAction(
       organizationAccount.id,
       true,
       [logoUrlKey, themeColorKey, senderNameKey, senderDomainKey, senderEmailKey, langKey, portalNameKey],
-      client
+      adminClient
     );
 
     let logoUrl = defaultSenderLogo,
@@ -144,14 +146,14 @@ export const createInvitationsAction = enhanceAction(
     // Handle reactivations asynchronously
     const reactivationPromises = usersToReactivate.map(async (user) => {
       try {
-        await client.from('accounts')
+        await adminClient.from('accounts')
           .update({ deleted_on: null, organization_id: null })
           .eq('id', user.userId);
 
         const hasMembership = existingMemberships?.some(m => m.user_id === user.userId);
         
         if (hasMembership) {
-          await client.from('accounts_memberships')
+          await adminClient.from('accounts_memberships')
             .delete()
             .eq('user_id', user.userId);
         }
@@ -170,7 +172,7 @@ export const createInvitationsAction = enhanceAction(
         const { tokenId } = await createToken(tokenRecoveryType);
         const invitationId = uuidv4();
 
-        const { error: invitationError } = await client
+        const { error: invitationError } = await adminClient
           .from('invitations')
           .insert({
             account_id: organizationAccount.id,
