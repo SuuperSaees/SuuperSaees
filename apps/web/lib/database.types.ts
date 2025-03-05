@@ -1213,6 +1213,144 @@ export type Database = {
           },
         ]
       }
+      embed_accounts: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          embed_id: string | null
+          id: number
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          embed_id?: string | null
+          id?: number
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          embed_id?: string | null
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "embed_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_embed_id_fkey"
+            columns: ["embed_id"]
+            isOneToOne: false
+            referencedRelation: "embeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      embeds: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          icon: string | null
+          id: string
+          location: Database["public"]["Enums"]["embed_location"]
+          organization_id: string | null
+          title: string | null
+          type: Database["public"]["Enums"]["embed_types"]
+          updated_at: string | null
+          user_id: string | null
+          value: string
+          visibility: Database["public"]["Enums"]["visibility"] | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          icon?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["embed_location"]
+          organization_id?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["embed_types"]
+          updated_at?: string | null
+          user_id?: string | null
+          value: string
+          visibility?: Database["public"]["Enums"]["visibility"] | null
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          icon?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["embed_location"]
+          organization_id?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["embed_types"]
+          updated_at?: string | null
+          user_id?: string | null
+          value?: string
+          visibility?: Database["public"]["Enums"]["visibility"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "embeds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       files: {
         Row: {
           created_at: string
@@ -1249,7 +1387,7 @@ export type Database = {
           type?: string
           url?: string
           user_id?: string
-        };
+        }
         Relationships: [
           {
             foreignKeyName: "files_message_id_fkey"
@@ -3553,6 +3691,8 @@ export type Database = {
         | "suuper"
       chat_role: "user" | "assistant"
       chat_role_type: "project_manager" | "assistant" | "owner" | "guest"
+      embed_location: "tab" | "sidebar" | "main" | "footer"
+      embed_types: "url" | "iframe"
       field_types:
         | "date"
         | "multiple_choice"
