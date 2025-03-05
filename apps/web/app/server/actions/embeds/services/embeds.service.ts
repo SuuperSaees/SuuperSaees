@@ -34,12 +34,12 @@ export class EmbedsService implements IEmbedsService {
         return await this.embedsRepository.delete(embedId);
     }
 
-    async get(embedId?: string): Promise<Embeds.Type> {
+    async get(embedId?: string): Promise<Embeds.TypeWithRelations> {
         const embed = await this.embedsRepository.get(embedId);
-        
+
         return embed;
     }
-    async list(organizationId: string): Promise<Embeds.Type[]> {
-        return await this.embedsRepository.list(organizationId);
+    async list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]> {
+        return await this.embedsRepository.list(organizationId, role, agencyId);
     }
 }

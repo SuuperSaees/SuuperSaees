@@ -27,7 +27,7 @@ export async function deleteEmbed(embedId: string) {
     return await embedAction.delete(embedId);
 }
 
-export async function getEmbeds(organizationId: string) {
+export async function getEmbeds(organizationId?: string, role?: string, agencyId?: string) {
     const embedAction = getEmbedAction();
-    return await embedAction.list(organizationId);
+    return await embedAction.list(organizationId, role, agencyId);
 }

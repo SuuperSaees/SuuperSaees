@@ -21,12 +21,12 @@ export class EmbedsAction extends BaseAction implements IEmbedsAction {
         return this.controller.delete(embedId);
     }
 
-    async get(embedId?: string): Promise<Embeds.Type> {
+    async get(embedId?: string): Promise<Embeds.TypeWithRelations> {
         return this.controller.get(embedId);
     }
 
-    async list(organizationId: string): Promise<Embeds.Type[]> {
-        return this.controller.list(organizationId);
+    async list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]> {
+        return this.controller.list(organizationId, role, agencyId);
     }
 }
 
