@@ -1,4 +1,4 @@
-create type "public"."embed_location" as enum ('tab', 'sidebar', 'main', 'footer');
+create type "public"."embed_location" as enum ('tab', 'sidebar');
 
 create type "public"."embed_types" as enum ('url', 'iframe');
 
