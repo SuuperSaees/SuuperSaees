@@ -9,7 +9,7 @@ export namespace Embeds {
   export type Update = Database["public"]["Tables"]["embeds"]["Update"];
 
   export type TypeWithRelations = Type & {
-    organizations: {
+    organizations?: {
       id: string;
       name: string;
       picture_url: string;
