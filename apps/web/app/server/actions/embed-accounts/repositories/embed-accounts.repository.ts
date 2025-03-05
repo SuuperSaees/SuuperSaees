@@ -10,7 +10,7 @@ export class EmbedAccountsRepository {
         this.adminClient = adminClient;
     }
 
-    async create(payload: EmbedAccounts.Insert): Promise<EmbedAccounts.Type> {
+    async create(payload: EmbedAccounts.Insert[]): Promise<EmbedAccounts.Type> {
         const { data, error } = await this.client
             .from('embed_accounts')
             .insert(payload)

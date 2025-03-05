@@ -45,17 +45,25 @@ export class EmbedsRepository {
         if (embedError) throw embedError;
     }
 
-    async get(embedId?: string): Promise<Embeds.Type> {
+    async get(embedId?: string): Promise<Embeds.TypeWithRelations> {
         const { data: embedData, error: embedError } = await this.client
         .from('embeds')
-        .select('*')
+        .select('*, embed_accounts(*, accounts(id, picture_url, name, organizations_settings(*)))')
         .eq('id', embedId ?? '')
         .is('deleted_on', null)
         .single();
 
         if (embedError) throw embedError;
 
-        return embedData;
+        return {
+            ...embedData,
+            organizations: []
+            // organizations: embedData?.embed_accounts?.map((embedAccount) => ({
+            //     id: embedAccount?.account_id,
+            //     name: embedAccount?.accounts?.organizations_settings?.find((setting: { key: string, value: string }) => setting.key === 'name')?.value,
+            //     picture_url: embedAccount?.accounts?.organizations_settings?.find((setting: { key: string, value: string }) => setting.key === 'picture_url')?.value,
+            // })),
+        };
     }
 
     async list(organizationId: string): Promise<Embeds.Type[]> {

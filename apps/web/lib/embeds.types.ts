@@ -7,4 +7,12 @@ export namespace Embeds {
   export type Type = Database["public"]["Tables"]["embeds"]["Row"];
   export type Insert = Database["public"]["Tables"]["embeds"]["Insert"];
   export type Update = Database["public"]["Tables"]["embeds"]["Update"];
+
+  export type TypeWithRelations = Type & {
+    organizations: {
+      id: string;
+      name: string;
+      picture_url: string;
+    }[];
+  };
 }

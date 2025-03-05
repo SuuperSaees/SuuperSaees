@@ -15,11 +15,11 @@ export class EmbedsController {
         this.adminClient = adminClient;
     }
 
-    async create(payload: Embeds.Insert): Promise<Embeds.Type> {
+    async create(payload: Embeds.Insert, accountIds?: string[]): Promise<Embeds.Type> {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
             const embedsService = new EmbedsService(embedsRepository);
-            return await embedsService.create(payload);
+            return await embedsService.create(payload, accountIds);
         } catch (error) {
             console.log(error);
             throw error;

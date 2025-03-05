@@ -9,8 +9,8 @@ export class EmbedsAction extends BaseAction implements IEmbedsAction {
         super(baseUrl);
         this.controller = new EmbedsController(this.baseUrl, this.client, this.adminClient);
     }
-    async create(embed: Embeds.Insert): Promise<Embeds.Type> {
-        return await this.controller.create(embed);
+    async create(embed: Embeds.Insert, accountIds?: string[]): Promise<Embeds.Type> {
+        return await this.controller.create(embed, accountIds);
     }
 
     async update(embedId: string, embed: Embeds.Update): Promise<Embeds.Type> {
