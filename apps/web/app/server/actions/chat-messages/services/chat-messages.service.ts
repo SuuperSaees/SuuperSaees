@@ -13,8 +13,6 @@ export class ChatMessagesService {
     private readonly chatRepository?: ChatRepository
   ) {}
 
-
-
   // * CREATE SERVICES
   async create(
     payload: ChatMessages.InsertWithRelations,
@@ -37,8 +35,6 @@ export class ChatMessagesService {
       chatMessage = await this.chatMessagesRepository.create(payload);
     }
 
-
-  
     return chatMessage;
   }
 
