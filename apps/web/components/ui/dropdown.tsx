@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 import { Separator } from '@kit/ui/separator';
+import { cn } from '@kit/ui/utils';
 
 export type DropdownOption = {
   value: string | JSX.Element;
@@ -15,8 +16,9 @@ export type DropdownOption = {
 interface DropdownProps {
   children: React.ReactNode;
   options: DropdownOption[];
+  className?: string
 }
-export default function Dropdown({ children, options }: DropdownProps) {
+export default function Dropdown({ children, options, className }: DropdownProps) {
   const [isPending, startTransition] = useTransition();
   const [disabledIndices, setDisabledIndices] = useState<number[]>([]);
 
@@ -32,7 +34,7 @@ export default function Dropdown({ children, options }: DropdownProps) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild className="w-fit">
+      <DropdownMenuTrigger asChild className={cn('w-fit', className)}>
         {children}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
