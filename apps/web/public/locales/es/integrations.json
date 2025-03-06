@@ -1,0 +1,65 @@
+{
+  "title": "Integraciones",
+  "form": {
+    "title": "Incrustar otras apps",
+    "description": "Incrusta tus apps favoritas en tu proyecto. Guía de video.",
+    "inputs": {
+      "title": {
+        "type": "text",
+        "label": "Título",
+        "placeholder": "Título corto"
+      },
+      "icon": {
+        "type": "text",
+        "label": "Icono",
+        "placeholder": "URL del icono"
+      },
+      "location": {
+        "type": "select",
+        "label": "Ubicación",
+        "options": [
+          {
+            "label": "Tab",
+            "value": "tab"
+          },
+          {
+            "label": "Sidebar",
+            "value": "sidebar"
+          }
+        ]
+      },
+      "type": {
+        "type": "select",
+        "label": "Tipo",
+        "options": [
+          {
+            "label": "Enlace",
+            "value": "url"
+          },
+          {
+            "label": "Iframe",
+            "value": "iframe"
+          }
+        ]
+      },
+      "url": {
+        "type": "text",
+        "label": "Fuente incrustada",
+        "placeholder": "Ingresa el {{tipo}}"
+      },
+      "visibility": {
+        "type": "select",
+        "label": "Visibilidad",
+        "options": [
+          { "label": "Para todos", "value": "public", "icon": "Globe" },
+          { "label": "Privado", "value": "private", "icon": "Lock" }
+        ]
+      },
+      "organizations": {
+        "type": "select",
+        "label": "Organizaciones",
+        "placeholder": "Selecciona organizaciones"
+      }
+    }
+  }
+}

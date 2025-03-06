@@ -34,12 +34,16 @@ export class EmbedsService implements IEmbedsService {
         return embedCreated;
     }
 
-    async update(embedId: string, payload: Embeds.Update): Promise<Embeds.Type> {
-        // Validate the data before updating
+    async update(embedId: string, payload: Embeds.Update, accountIds?: string[]): Promise<Embeds.Type> {
+        // Validar los datos antes de actualizar
         this.securityService.validateEmbedData(payload);
+
         
         const embedUpdated = await this.embedsRepository.update(embedId, payload);
 
+        if (accountIds && embedUpdated.visibility === 'private') {
+            await this.embedAccountsRepository?.update(embedId, accountIds);
+        }
         return embedUpdated;
     }
 

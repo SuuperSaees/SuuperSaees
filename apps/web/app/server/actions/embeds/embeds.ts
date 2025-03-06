@@ -13,8 +13,8 @@ export class EmbedsAction extends BaseAction implements IEmbedsAction {
         return await this.controller.create(embed, accountIds);
     }
 
-    async update(embedId: string, embed: Embeds.Update): Promise<Embeds.Type> {
-        return this.controller.update(embedId, embed);
+    async update(embedId: string, embed: Embeds.Update, accountIds?: string[]): Promise<Embeds.Type> {
+        return this.controller.update(embedId, embed, accountIds);
     }
 
     async delete(embedId: string): Promise<void> {
