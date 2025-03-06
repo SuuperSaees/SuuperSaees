@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 
 import { Form } from '@kit/ui/form';
 
-import { Embed } from '../embed-section';
 import { FormValues, formSchema } from '../schema';
 import { LocationField } from './fields/location-field';
 import { TitleField } from './fields/title-field';
@@ -17,10 +16,13 @@ import { TypeField } from './fields/type-field';
 import { ValueField } from './fields/value-field';
 import { VisibilityField } from './fields/visibility-field';
 import { OrganizationsField } from './fields/organizations-field';
+import { Embeds } from '~/lib/embeds.types';
 
 interface EmbedEditorProps {
   onAction: (values: FormValues) => void | Promise<void>;
-  defaultValue: Embed | null;
+  defaultValue: Embeds.Type & {
+    embed_accounts: string[];
+  } | null;
 }
 
 export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
@@ -32,7 +34,7 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
       title: defaultValue?.title ?? '',
       icon: defaultValue?.icon ?? '',
       location: defaultValue?.location ?? 'tab',
-      type: defaultValue?.type ?? 'link',
+      type: defaultValue?.type ?? 'url',
       visibility: defaultValue?.visibility ?? 'public',
       value: defaultValue?.value ?? '',
       embed_accounts: defaultValue?.embed_accounts ?? [],
@@ -45,9 +47,9 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
 
     form.reset({
       title: defaultValue.title ?? '',
-      icon: defaultValue.icon,
+      icon: defaultValue.icon ?? '',
       location: defaultValue.location ?? 'tab',
-      type: defaultValue.type ?? 'link',
+      type: defaultValue.type ?? 'url',
       visibility: defaultValue.visibility ?? 'public',
       value: defaultValue.value ?? '',
       embed_accounts: defaultValue.embed_accounts ?? [],
@@ -62,7 +64,7 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="flex min-w-80 flex-col gap-4 px-4 py-8 text-gray-500"
+        className="flex min-w-80 flex-col gap-4 px-4 py-8 text-gray-500 ml-auto"
       >
         <h2 className="font-bold text-gray-600">{t('form.title')}</h2>
         <p className="text-sm text-gray-500">{t('form.description')}</p>
