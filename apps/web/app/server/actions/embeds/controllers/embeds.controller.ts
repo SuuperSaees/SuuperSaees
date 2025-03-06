@@ -26,11 +26,11 @@ export class EmbedsController {
         }
     }
 
-    async update(embedId: string, payload: Embeds.Update): Promise<Embeds.Type> {
+    async update(embedId: string, payload: Embeds.Update, accountIds?: string[]): Promise<Embeds.Type> {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
             const embedsService = new EmbedsService(embedsRepository);
-            return await embedsService.update(embedId, payload);
+            return await embedsService.update(embedId, payload, accountIds);
         } catch (error) {
             console.log(error);
             throw error;

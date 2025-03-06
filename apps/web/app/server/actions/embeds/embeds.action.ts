@@ -17,9 +17,9 @@ export async function createEmbed(embed: Embeds.Insert, accountIds?: string[]) {
     return await embedAction.create(embed, accountIds);
 }
 
-export async function updateEmbed(embedId: string, embed: Embeds.Update) {
+export async function updateEmbed(embedId: string, embed: Embeds.Update, accountIds?: string[]) {
     const embedAction = getEmbedAction();
-    return await embedAction.update(embedId, embed);
+    return await embedAction.update(embedId, embed, accountIds);
 }
 
 export async function deleteEmbed(embedId: string) {
