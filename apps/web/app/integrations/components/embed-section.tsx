@@ -53,10 +53,10 @@ export function EmbedSection({ embeds, agencyId, userId }: EmbedSectionProps) {
   );
 
   // Filter embeds to only show iframe types in the tab content
-  const iframeEmbeds = useMemo(
-    () => formattedEmbeds.filter((embed) => embed.type === 'iframe'),
-    [formattedEmbeds],
-  );
+  // const iframeEmbeds = useMemo(
+  //   () => formattedEmbeds.filter((embed) => embed.type === 'iframe'),
+  //   [formattedEmbeds],
+  // );
 
   // Create mutation
   const createMutation = useMutation<Embeds.Type, Error, FormValues>({
@@ -146,7 +146,6 @@ export function EmbedSection({ embeds, agencyId, userId }: EmbedSectionProps) {
     [activeEmbedId, updateMutation],
   );
 
-
   // No embeds to display - still show the "Add Integration" tab
   if (embeds.length === 0) {
     return (
@@ -156,7 +155,7 @@ export function EmbedSection({ embeds, agencyId, userId }: EmbedSectionProps) {
         className="h-full w-full text-gray-500"
       >
         <TabsList className="bg-transparent">
-          <TabsTrigger value="new" className="flex items-center gap-2">
+          <TabsTrigger value="new" className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500">
             <Plus className="h-4 w-4" />
             Add Integration
           </TabsTrigger>
@@ -178,7 +177,7 @@ export function EmbedSection({ embeds, agencyId, userId }: EmbedSectionProps) {
       className="h-full w-full text-gray-500"
     >
       <TabsList className="bg-transparent">
-        <TabsTrigger value="new" className="flex items-center gap-2">
+        <TabsTrigger value="new"   className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500">
           <Plus className="h-4 w-4" />
           Add Integration
         </TabsTrigger>

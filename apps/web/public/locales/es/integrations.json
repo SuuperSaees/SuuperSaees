@@ -34,7 +34,7 @@
         "options": [
           {
             "label": "Enlace",
-            "value": "link"
+            "value": "url"
           },
           {
             "label": "Iframe",

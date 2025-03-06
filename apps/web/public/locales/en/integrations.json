@@ -33,8 +33,8 @@
         "label": "Type",
         "options": [
           {
-            "label": "Link",
-            "value": "link"
+            "label": "URL",
+            "value": "url"
           },
           {
             "label": "Iframe",

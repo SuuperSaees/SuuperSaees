@@ -1,19 +1,19 @@
 'use client';
 
-import Link from 'next/link';
 
-import { Box, EllipsisVertical, SquareArrowOutUpRight } from 'lucide-react';
+
+import { Box, EllipsisVertical, } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
 import { Trans } from 'react-i18next';
 
 import { TabsTrigger } from '@kit/ui/tabs';
 
 import Dropdown from '~/components/ui/dropdown';
+import { Embeds } from '~/lib/embeds.types';
 
-import { Embed } from './embed-section';
 
 interface EmbedTabProps {
-  embed: Embed;
+  embed: Embeds.Type;
   isActive: boolean;
   onDelete?: (embedId: string) => Promise<void> | void;
 }
@@ -34,20 +34,20 @@ export function EmbedTab({ embed, isActive, onDelete }: EmbedTabProps) {
   };
 
   // Render external link for 'link' type embeds
-  if (embed.type === 'link') {
-    return (
-      <Link
-        href={embed.value}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100"
-      >
-        <EmbedIcon icon={embed.icon} title={embed.title} />
-        <span>{embed.title}</span>
-        <SquareArrowOutUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-      </Link>
-    );
-  }
+  // if (embed.type === 'link') {
+  //   return (
+  //     <Link
+  //       href={embed.value}
+  //       target="_blank"
+  //       rel="noopener noreferrer"
+  //       className="group flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100"
+  //     >
+  //       <EmbedIcon icon={embed.icon} title={embed.title} />
+  //       <span>{embed.title}</span>
+  //       <SquareArrowOutUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
+  //     </Link>
+  //   );
+  // }
 
   // Render tab trigger for 'iframe' type embeds
   return (
@@ -55,7 +55,7 @@ export function EmbedTab({ embed, isActive, onDelete }: EmbedTabProps) {
       value={embed.id}
       className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500"
     >
-      <EmbedIcon icon={embed.icon} title={embed.title} />
+      <EmbedIcon icon={embed.icon ?? ''} title={embed.title ?? ''} />
       <span>{embed.title}</span>
       {onDelete && (
         <Dropdown

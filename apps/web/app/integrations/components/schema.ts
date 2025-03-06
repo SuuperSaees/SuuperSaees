@@ -6,7 +6,7 @@ export const formSchema = z.object({
   location: z.enum(["tab", "sidebar", "main", "footer"]),
   type: z.enum(["url", "iframe"]),
   visibility: z.enum(["public", "private"]),
-  value: z.string().url("Please enter a valid URL"),
+  value: z.string(),
   embed_accounts: z.array(z.string()).optional(),
 })
 

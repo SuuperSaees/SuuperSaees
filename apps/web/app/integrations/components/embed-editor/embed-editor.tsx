@@ -7,7 +7,7 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 
-import { Form } from '@kit/ui/form';
+import { Form, FormMessage } from '@kit/ui/form';
 
 import { FormValues, formSchema } from '../schema';
 import { LocationField } from './fields/location-field';
@@ -60,6 +60,7 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
     await onAction(values);
   };
 
+  console.log('error', form.formState.errors);
   return (
     <Form {...form}>
       <form
@@ -74,11 +75,11 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
         <TypeField control={form.control} />
         <ValueField control={form.control} watch={form.watch} />
         <VisibilityField control={form.control} />
-
+    
         {form.watch('visibility') === 'private' && (
           <OrganizationsField control={form.control} setValue={form.setValue} />
         )}
-
+        <FormMessage />
         <ThemedButton type="submit" className="mt-auto w-full">
           {t('form.title')}
         </ThemedButton>
