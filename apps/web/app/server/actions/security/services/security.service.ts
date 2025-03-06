@@ -46,7 +46,7 @@ export class SecurityService {
         }
     }
 
-    private async validateIframe(value: string): Promise<void> {
+    async validateIframe(value: string): Promise<void> {
         // Sanitize the iframe with DOMPurify
         const cleanIframe = this.purify.sanitize(value, {
             ALLOWED_TAGS: ['iframe'],
@@ -81,7 +81,7 @@ export class SecurityService {
         this.validateXssAttack(value);
     }
 
-    private async validateUrl(value: string): Promise<void> {
+    async validateUrl(value: string): Promise<void> {
         try {
             this.validateXssAttack(value);
 
@@ -102,7 +102,7 @@ export class SecurityService {
         }
     }
 
-    private validateXssAttack(value: string): void {
+    validateXssAttack(value: string): void {
         // Improved validation to prevent XSS attacks
         // Search for common XSS patterns
         const xssPatterns = [
@@ -142,7 +142,7 @@ export class SecurityService {
         }
     }
 
-    private async checkEmbeddable(url: string): Promise<void> {
+    async checkEmbeddable(url: string): Promise<void> {
         try {
             // Make a HEAD request to verify the headers
             const response = await fetch(url, { 
