@@ -7,12 +7,12 @@ export class EmbedAccountsService implements IEmbedAccountsService {
         this.embedAccountsRepository = embedAccountsRepository;
     }
 
-    async create(payload: EmbedAccounts.Insert): Promise<EmbedAccounts.Type> {
+    async create(payload: EmbedAccounts.Insert[]): Promise<EmbedAccounts.Type[]> {
         return await this.embedAccountsRepository.create(payload);
     }
 
-    async update(embedAccountId: string, payload: EmbedAccounts.Update): Promise<EmbedAccounts.Type> {
-        return await this.embedAccountsRepository.update(embedAccountId, payload);
+    async update(embedId: string, accountIds: string[]): Promise<EmbedAccounts.Type[]> {
+        return await this.embedAccountsRepository.update(embedId, accountIds);
     }
 
     async delete(embedAccountId: string): Promise<void> {

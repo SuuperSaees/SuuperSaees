@@ -15,7 +15,7 @@ export class EmbedAccountsController {
         this.adminClient = adminClient;
     }
 
-    async create(payload: EmbedAccounts.Insert): Promise<EmbedAccounts.Type> {
+    async create(payload: EmbedAccounts.Insert[]): Promise<EmbedAccounts.Type[]> {
         try {
             const repository = new EmbedAccountsRepository(this.client, this.adminClient);
             const service = new EmbedAccountsService(repository);
@@ -26,11 +26,11 @@ export class EmbedAccountsController {
         }
     }
 
-    async update(embedAccountId: string, payload: EmbedAccounts.Update): Promise<EmbedAccounts.Type> {
+    async update(embedId: string, accountIds: string[]): Promise<EmbedAccounts.Type[]> {
         try {
             const repository = new EmbedAccountsRepository(this.client, this.adminClient);
             const service = new EmbedAccountsService(repository);
-            return await service.update(embedAccountId, payload);
+            return await service.update(embedId, accountIds);
         } catch (error) {
             console.log(error);
             throw error;

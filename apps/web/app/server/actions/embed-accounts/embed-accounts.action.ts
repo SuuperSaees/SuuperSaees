@@ -12,14 +12,14 @@ export async function getEmbedAccount(embedAccountId: string) {
     return await embedAccountAction.get(embedAccountId);
 }
 
-export async function createEmbedAccount(embedAccount: EmbedAccounts.Insert) {
+export async function createEmbedAccounts(embedAccounts: EmbedAccounts.Insert[]) {
     const embedAccountAction = getEmbedAccountAction();
-    return await embedAccountAction.create(embedAccount);
+    return await embedAccountAction.create(embedAccounts);
 }
 
-export async function updateEmbedAccount(embedAccountId: string, embedAccount: EmbedAccounts.Update) {
+export async function updateEmbedAccounts(embedId: string, accountIds: string[]) {
     const embedAccountAction = getEmbedAccountAction();
-    return await embedAccountAction.update(embedAccountId, embedAccount);
+    return await embedAccountAction.update(embedId, accountIds);
 }
 
 export async function deleteEmbedAccount(embedAccountId: string) {

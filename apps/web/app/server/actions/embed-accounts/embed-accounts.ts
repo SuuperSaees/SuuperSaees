@@ -10,12 +10,12 @@ export class EmbedAccountsAction extends BaseAction implements IEmbedAccountsAct
         this.controller = new EmbedAccountsController(this.baseUrl, this.client, this.adminClient);
     }
 
-    async create(embedAccount: EmbedAccounts.Insert): Promise<EmbedAccounts.Type> {
-        return await this.controller.create(embedAccount);
+    async create(embedAccounts: EmbedAccounts.Insert[]): Promise<EmbedAccounts.Type[]> {
+        return await this.controller.create(embedAccounts);
     }
 
-    async update(embedAccountId: string, embedAccount: EmbedAccounts.Update): Promise<EmbedAccounts.Type> {
-        return this.controller.update(embedAccountId, embedAccount);
+    async update(embedId: string, accountIds: string[]): Promise<EmbedAccounts.Type[]> {
+        return this.controller.update(embedId, accountIds);
     }
 
     async delete(embedAccountId: string): Promise<void> {

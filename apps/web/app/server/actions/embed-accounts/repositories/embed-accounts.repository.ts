@@ -10,27 +10,60 @@ export class EmbedAccountsRepository {
         this.adminClient = adminClient;
     }
 
-    async create(payload: EmbedAccounts.Insert[]): Promise<EmbedAccounts.Type> {
+    async create(payload: EmbedAccounts.Insert[]): Promise<EmbedAccounts.Type[]> {
         const { data, error } = await this.client
             .from('embed_accounts')
             .insert(payload)
             .select()
-            .single();
 
         if (error) throw error;
         return data;
     }
 
-    async update(embedAccountId: string, payload: EmbedAccounts.Update): Promise<EmbedAccounts.Type> {
-        const { data, error } = await this.client
+    async update(embedId: string, accountIds: string[]): Promise<EmbedAccounts.Type[]> {
+        const { data: existingRelations, error: fetchError } = await this.client
             .from('embed_accounts')
-            .update(payload)
-            .eq('id', embedAccountId)
-            .select()
-            .single();
-
-        if (error) throw error;
-        return data;
+            .select('*')
+            .eq('embed_id', embedId)
+            .is('deleted_on', null);
+        
+        if (fetchError) throw fetchError;
+        
+        const existingAccountIds = existingRelations.map(relation => relation.account_id as string);
+        const accountIdsToDelete = existingAccountIds.filter(id => !accountIds.includes(id));
+        const accountIdsToCreate = accountIds.filter(id => !existingAccountIds.includes(id));
+        
+        if (accountIdsToDelete.length > 0) {
+            const { error: deleteError } = await this.client
+                .from('embed_accounts')
+                .delete()
+                .eq('embed_id', embedId)
+                .in('account_id', accountIdsToDelete);
+            
+            if (deleteError) throw deleteError;
+        }
+        
+        if (accountIdsToCreate.length > 0) {
+            const newRelations = accountIdsToCreate.map(accountId => ({
+                embed_id: embedId,
+                account_id: accountId
+            }));
+            
+            const { error: createError } = await this.client
+                .from('embed_accounts')
+                .insert(newRelations);
+            
+            if (createError) throw createError;
+        }
+        
+        const { data: updatedRelations, error: finalFetchError } = await this.client
+            .from('embed_accounts')
+            .select('*')
+            .eq('embed_id', embedId)
+            .is('deleted_on', null);
+        
+        if (finalFetchError) throw finalFetchError;
+        return updatedRelations;
     }
 
     async delete(embedAccountId: string): Promise<void> {
