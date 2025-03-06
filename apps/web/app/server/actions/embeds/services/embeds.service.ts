@@ -80,13 +80,13 @@ export class EmbedsService implements IEmbedsService {
     /**
      * Validate that the value is a valid and secure iframe
      */
-    private validateIframe(value: string): void {
+    private validateIframe(value: string): void { // aceptar cualquier tipo de embebidos. Modiofcar este validateIframe para aceptar cualquier tipo de embebidos. 
         // Validate the basic iframe format
         const iframeRegex = /^<iframe\s+.*<\/iframe>$/;
         if (!iframeRegex.test(value)) {
             throw new CustomError(HttpStatus.Error.BadRequest, "The value must be a valid iframe HTML");
         }
-        // Extract the src attribute
+        // Extract the src attribute PRE FETCH Con los headers. 
         const srcMatch = value.match(/src=["'](.*?)["']/);
         if (!srcMatch) {
             throw new CustomError(HttpStatus.Error.BadRequest, "The iframe must contain a valid src attribute");
@@ -122,7 +122,7 @@ export class EmbedsService implements IEmbedsService {
                 throw new CustomError(HttpStatus.Error.BadRequest, "Only HTTPS URLs are allowed");
             }
             
-            // // White list of domains (example)
+            // // White list of domains (example) PRE FETCH Con los headers. 
             // const allowedDomains = [
             //     'youtube.com', 'www.youtube.com',
             //     'vimeo.com', 'player.vimeo.com',
