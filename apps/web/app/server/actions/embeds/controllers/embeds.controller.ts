@@ -3,6 +3,7 @@ import { EmbedsRepository } from '../repositories/embeds.repository';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { EmbedsService } from '../services/embeds.service';
+import { EmbedAccountsRepository } from '../../embed-accounts/repositories/embed-accounts.repository';
 
 export class EmbedsController {
     private baseUrl: string
@@ -18,7 +19,8 @@ export class EmbedsController {
     async create(payload: Embeds.Insert, accountIds?: string[]): Promise<Embeds.Type> {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
-            const embedsService = new EmbedsService(embedsRepository);
+            const embedAccountsRepository = new EmbedAccountsRepository(this.client, this.adminClient);
+            const embedsService = new EmbedsService(embedsRepository, embedAccountsRepository);
             return await embedsService.create(payload, accountIds);
         } catch (error) {
             console.log(error);
@@ -29,7 +31,8 @@ export class EmbedsController {
     async update(embedId: string, payload: Embeds.Update, accountIds?: string[]): Promise<Embeds.Type> {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
-            const embedsService = new EmbedsService(embedsRepository);
+            const embedAccountsRepository = new EmbedAccountsRepository(this.client, this.adminClient);
+            const embedsService = new EmbedsService(embedsRepository, embedAccountsRepository);
             return await embedsService.update(embedId, payload, accountIds);
         } catch (error) {
             console.log(error);
