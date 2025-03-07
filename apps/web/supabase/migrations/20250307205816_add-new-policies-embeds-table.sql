@@ -32,6 +32,7 @@ BEGIN
         ALTER TYPE public.app_permissions ADD VALUE 'embeds.delete';
     END IF;
 END $$;
+COMMIT;
 
 alter table "public"."embeds" alter column "organization_id" drop not null;
 
