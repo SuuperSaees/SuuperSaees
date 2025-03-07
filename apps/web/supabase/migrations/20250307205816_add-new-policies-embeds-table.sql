@@ -1,16 +1,37 @@
-alter table "public"."account_plugins" drop constraint "account_plugins_account_id_fkey";
-
 alter table "public"."embed_accounts" drop constraint "embed_accounts_pkey";
 
 drop index if exists "public"."embed_accounts_pkey";
 
-alter type "public"."app_permissions" rename to "app_permissions__old_version_to_be_dropped";
+-- alter type "public"."app_permissions" rename to "app_permissions__old_version_to_be_dropped";
 
-create type "public"."app_permissions" as enum ('roles.manage', 'billing.manage', 'settings.manage', 'members.manage', 'invites.manage', 'tasks.write', 'tasks.delete', 'messages.write', 'messages.read', 'orders.write', 'orders.read', 'orders.manage', 'orders.delete', 'services.write', 'services.read', 'services.manage', 'services.delete', 'billing.write', 'billing.read', 'billing.delete', 'timers.write', 'timers.read', 'timers.manage', 'timers.delete', 'embeds.write', 'embeds.read', 'embeds.manage', 'embeds.delete');
+-- create type "public"."app_permissions" as enum ('roles.manage', 'billing.manage', 'settings.manage', 'members.manage', 'invites.manage', 'tasks.write', 'tasks.delete', 'messages.write', 'messages.read', 'orders.write', 'orders.read', 'orders.manage', 'orders.delete', 'services.write', 'services.read', 'services.manage', 'services.delete', 'billing.write', 'billing.read', 'billing.delete', 'timers.write', 'timers.read', 'timers.manage', 'timers.delete', 'embeds.write', 'embeds.read', 'embeds.manage', 'embeds.delete');
 
-alter table "public"."role_permissions" alter column permission type "public"."app_permissions" using permission::text::"public"."app_permissions";
+-- alter table "public"."role_permissions" alter column permission type "public"."app_permissions" using permission::text::"public"."app_permissions";
 
-drop type "public"."app_permissions__old_version_to_be_dropped" cascade;
+-- drop type "public"."app_permissions__old_version_to_be_dropped" cascade;
+
+DO $$
+BEGIN
+    -- Add 'embeds.write' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'embeds.write' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'embeds.write';
+    END IF;
+
+    -- Add 'embeds.read' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'embeds.read' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'embeds.read';
+    END IF;
+
+    -- Add 'embeds.manage' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'embeds.manage' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'embeds.manage';
+    END IF;
+
+    -- Add 'embeds.delete' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'embeds.delete' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'embeds.delete';
+    END IF;
+END $$;
 
 alter table "public"."embeds" alter column "organization_id" drop not null;
 
@@ -85,14 +106,6 @@ to authenticated
 using ((is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'embeds.manage'::app_permissions) AND (organization_id = get_user_organization_id(auth.uid()))))
 with check ((is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'embeds.manage'::app_permissions) AND (organization_id = get_user_organization_id(auth.uid()))));
 
-
-create policy "Read for all authenticated users"
-on "public"."messages"
-as permissive
-for select
-to authenticated
-using (true);
-
 INSERT INTO public.role_permissions (role, permission) VALUES ('agency_owner', 'embeds.write');
 INSERT INTO public.role_permissions (role, permission) VALUES ('agency_owner', 'embeds.read');
 INSERT INTO public.role_permissions (role, permission) VALUES ('agency_owner', 'embeds.delete');
@@ -111,3 +124,4 @@ INSERT INTO public.role_permissions (role, permission) VALUES ('super_admin', 'e
 INSERT INTO public.role_permissions (role, permission) VALUES ('super_admin', 'embeds.write');
 INSERT INTO public.role_permissions (role, permission) VALUES ('client_owner', 'embeds.read');
 INSERT INTO public.role_permissions (role, permission) VALUES ('client_member', 'embeds.read');
+
