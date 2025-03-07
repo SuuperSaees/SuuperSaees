@@ -10,11 +10,11 @@ import { EmbedSection } from './components/embed-section';
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
-    title: i18n.t('integrations:title'),
+    title: i18n.t('embeds:title'),
   };
 };
 
-async function IntegrationsPage() {
+async function EmbedsPage() {
   const {
     agency,
     organization,
@@ -29,7 +29,7 @@ async function IntegrationsPage() {
   
   return (
     <PageBody className="flex h-full flex-col gap-8 p-8 py-8 lg:px-8">
-      <h1 className="text-2xl font-bold">Integrations</h1>
+      <h1 className="text-2xl font-bold">Embeds</h1>
 
       <div className="flex h-full w-full gap-8">
         {/* Embeds Content */}
@@ -44,4 +44,4 @@ async function IntegrationsPage() {
   );
 }
 
-export default withI18n(IntegrationsPage);
+export default withI18n(EmbedsPage);

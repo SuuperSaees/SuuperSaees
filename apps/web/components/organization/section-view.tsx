@@ -17,7 +17,7 @@ import OrdersSection from './orders';
 import { ServiceButtonTriggers } from './service-button-triggers';
 // import ReviewSection from './reviews';
 import ServiceSection from './services';
-import { EmbedSection } from '~/integrations/components/embed-section';
+import { EmbedSection } from '~/embeds/components/embed-section';
 import { getEmbeds } from '~/server/actions/embeds/embeds.action';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { BoxIcon } from 'lucide-react';

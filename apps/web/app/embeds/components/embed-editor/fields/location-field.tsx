@@ -4,7 +4,7 @@ import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormField, FormItem, FormLabel } from "@kit/ui/form"
 import SelectAction from "~/components/ui/select"
-import { FormValues } from "../../schema"
+import { FormValues } from "../../../schema"
 
 
 interface LocationFieldProps {
@@ -12,7 +12,7 @@ interface LocationFieldProps {
 }
 
 export function LocationField({ control }: LocationFieldProps) {
-  const { t } = useTranslation("integrations")
+  const { t } = useTranslation("embeds")
 
   return (
     <FormField

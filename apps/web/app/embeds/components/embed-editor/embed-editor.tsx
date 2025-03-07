@@ -11,7 +11,7 @@ import { Form, FormMessage } from '@kit/ui/form';
 
 import { Embeds } from '~/lib/embeds.types';
 
-import { FormValues, formSchema } from '../schema';
+import { FormValues, formSchema } from '../../schema';
 import { LocationField } from './fields/location-field';
 import { OrganizationsField } from './fields/organizations-field';
 import { TitleField } from './fields/title-field';
@@ -29,7 +29,7 @@ interface EmbedEditorProps {
 }
 
 export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
-  const { t } = useTranslation('integrations');
+  const { t } = useTranslation('embeds');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

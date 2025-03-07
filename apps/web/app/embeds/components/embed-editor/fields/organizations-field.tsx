@@ -16,7 +16,7 @@ import CheckboxCombobox, {
 } from '~/components/ui/checkbox-combobox';
 import { getClientsOrganizations } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
-import type { FormValues, Organization, SelectOption } from '../../schema';
+import type { FormValues, Organization, SelectOption } from '../../../schema';
 
 interface OrganizationsFieldProps {
   control: Control<FormValues>;
@@ -33,7 +33,7 @@ export function OrganizationsField({
   setValue,
   defaultValues,
 }: OrganizationsFieldProps) {
-  const { t } = useTranslation('integrations');
+  const { t } = useTranslation('embeds');
   const [selectedOrganizations, setSelectedOrganizations] = useState<
     Organization[]
   >([]);

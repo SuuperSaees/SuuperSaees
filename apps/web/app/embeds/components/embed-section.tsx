@@ -16,10 +16,10 @@ import {
   updateEmbed,
 } from '~/server/actions/embeds/embeds.action';
 
-import { EmbedEditor } from './embed-editor/embed-editor';
 import { EmbedPreview } from './embed-preview';
 import { EmbedTab } from './embed-tab';
-import { FormValues } from './schema';
+import { FormValues } from '../schema';
+import { EmbedEditor } from './embed-editor/embed-editor';
 
 interface EmbedSectionProps {
   embeds: Embeds.TypeWithRelations[];

@@ -5,14 +5,14 @@ import { useTranslation } from "react-i18next"
 import { Globe, Lock } from "lucide-react"
 import { FormField, FormItem, FormLabel } from "@kit/ui/form"
 import SelectAction from "~/components/ui/select"
-import type { FormValues } from "../../schema"
+import type { FormValues } from "../../../schema"
 
 interface VisibilityFieldProps {
   control: Control<FormValues>
 }
 
 export function VisibilityField({ control }: VisibilityFieldProps) {
-  const { t } = useTranslation("integrations")
+  const { t } = useTranslation("embeds")
 
   const visibilityOptions = [
     {

@@ -2,7 +2,7 @@ import type { Control, UseFormWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormControl, FormField, FormItem, FormLabel } from "@kit/ui/form"
 import { Textarea } from "@kit/ui/textarea"
-import type { FormValues } from "../../schema"
+import type { FormValues } from "../../../schema"
 
 interface ValueFieldProps {
   control: Control<FormValues>
@@ -10,7 +10,7 @@ interface ValueFieldProps {
 }
 
 export function ValueField({ control, watch }: ValueFieldProps) {
-  const { t } = useTranslation("integrations")
+  const { t } = useTranslation("embeds")
   const type = watch("type")
 
   return (

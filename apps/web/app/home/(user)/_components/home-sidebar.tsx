@@ -70,7 +70,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   // new tabs in the sidebar with embeds
   const embeds = organization?.embeds;
   const sidebarEmbeds = embeds?.filter(embed => embed.location === 'sidebar' && !embed.deleted_on) ?? [];
-
+  
   // Add embeds to the navigation config if there are sidebar embeds
   const navigationConfigWithEmbeds = sidebarEmbeds.length 
     ? NavigationConfigSchema.parse({

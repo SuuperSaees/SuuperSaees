@@ -3,14 +3,14 @@ import { useTranslation } from "react-i18next"
 import { Text } from "lucide-react"
 import { FormControl, FormField, FormItem, FormLabel } from "@kit/ui/form"
 import { Input } from "@kit/ui/input"
-import type { FormValues } from "../../schema"
+import type { FormValues } from "../../../schema"
 
 interface TitleFieldProps {
   control: Control<FormValues>
 }
 
 export function TitleField({ control }: TitleFieldProps) {
-  const { t } = useTranslation("integrations")
+  const { t } = useTranslation("embeds")
 
   return (
     <FormField

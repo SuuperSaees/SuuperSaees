@@ -4,14 +4,14 @@ import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { FormControl, FormField, FormItem, FormLabel } from "@kit/ui/form"
 import { RadioGroup, RadioGroupItem } from "@kit/ui/radio-group"
-import type { FormValues, SelectOption } from "../../schema"
+import type { FormValues, SelectOption } from "../../../schema"
 
 interface TypeFieldProps {
   control: Control<FormValues>
 }
 
 export function TypeField({ control }: TypeFieldProps) {
-  const { t } = useTranslation("integrations")
+  const { t } = useTranslation("embeds")
 
   return (
     <FormField

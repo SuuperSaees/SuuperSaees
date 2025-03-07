@@ -12,7 +12,7 @@ interface EmbedPreviewProps {
 }
 
 export function EmbedPreview({ embedSrc }: EmbedPreviewProps) {
-  const { t } = useTranslation('integrations');
+  const { t } = useTranslation('embeds');
   const embedContent = useMemo(() => {
     if (!embedSrc?.trim()) {
       return (
