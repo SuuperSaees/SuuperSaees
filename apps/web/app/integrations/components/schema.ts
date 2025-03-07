@@ -3,7 +3,7 @@ import { z } from "zod"
 export const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   icon: z.string().optional().nullable(),
-  location: z.enum(["tab", "sidebar", "main", "footer"]),
+  location: z.enum(["tab", "sidebar"]),
   type: z.enum(["url", "iframe"]),
   visibility: z.enum(["public", "private"]),
   value: z.string(),
