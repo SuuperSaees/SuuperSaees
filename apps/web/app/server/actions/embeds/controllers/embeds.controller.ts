@@ -62,11 +62,11 @@ export class EmbedsController {
         }
     }
 
-    async list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]> {
+    async list(organizationId?: string): Promise<Embeds.TypeWithRelations[]> {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
             const embedsService = new EmbedsService(embedsRepository);
-            return await embedsService.list(organizationId, role, agencyId);
+            return await embedsService.list(organizationId);
         } catch (error) {
             console.log(error);
             throw error;
