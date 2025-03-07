@@ -54,7 +54,7 @@ class AccountsApi {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
       .select(
-        `id, name, slug, picture_url, settings:organization_settings!left(*)`,
+        `id, name, slug, picture_url, settings:organization_settings!left(*), embeds!organization_id(*)`,
       )
 
     if (error) {
@@ -73,6 +73,7 @@ class AccountsApi {
       name: accounts[0]?.name,
       slug: accounts[0]?.slug,
       picture_url: logoUrl,
+      embeds: accounts[0]?.embeds,
     };
   }
 

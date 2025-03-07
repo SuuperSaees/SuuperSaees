@@ -48,6 +48,7 @@ async function workspaceLoader() {
     name: '',
     slug: '',
     picture_url: '',
+    embeds: [],
   } : accounts;
 
   return {
