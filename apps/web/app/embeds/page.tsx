@@ -24,8 +24,9 @@ async function EmbedsPage() {
   const userId = userWorkspace.id ?? '';
   const agencyId = agency ? agency.id ?? '' : organization ? organization?.id ?? '' : '';
 
+  const embeds = await getEmbeds();
 
-  const embeds = await getEmbeds(agencyId);
+  console.log('embeds v1', JSON.stringify(embeds, null, 2));
   
   return (
     <PageBody className="flex h-full flex-col gap-8 p-8 py-8 lg:px-8">

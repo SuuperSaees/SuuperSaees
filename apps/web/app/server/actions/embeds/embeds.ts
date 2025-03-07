@@ -25,8 +25,8 @@ export class EmbedsAction extends BaseAction implements IEmbedsAction {
         return this.controller.get(embedId);
     }
 
-    async list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]> {
-        return this.controller.list(organizationId, role, agencyId);
+    async list(organizationId?: string): Promise<Embeds.TypeWithRelations[]> {
+        return this.controller.list(organizationId);
     }
 }
 

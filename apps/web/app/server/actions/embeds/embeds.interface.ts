@@ -4,6 +4,6 @@ export interface IEmbedsAction {
     update(embedId: string, embed: Embeds.Update, accountIds?: string[]): Promise<Embeds.Type>;
     delete(embedId: string): Promise<void>;
     get(embedId?: string): Promise<Embeds.TypeWithRelations>;
-    list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]>;
+    list(organizationId?: string): Promise<Embeds.TypeWithRelations[]>;
 }
 

@@ -65,56 +65,27 @@ export class EmbedsRepository {
         };
     }
 
-    async list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]> {
-        const agencyRoles = new Set(['agency_owner', 'agency_member', 'agency_project_manager']);
-        const clientRoles = new Set(['client_owner', 'client_member', 'client_guest']);
-
-        const isClient = clientRoles.has(role ?? '');
-        if(isClient && !agencyId) {
-            throw new Error('Agency ID is required for client role');
-        }
-
-        const isAgency = agencyRoles.has(role ?? '');
-
-        if(isAgency && !organizationId) {
-            throw new Error('Organization ID is required for agency role');
-        }
-
-        if(isClient){
-            const { data: embedData, error: embedError } = await this.client
-            .from('embeds')
-            .select(`
-                *,
-                embed_accounts!inner(*)
-            `)
-            .eq('organization_id', agencyId ?? '')
-            .is('deleted_on', null)
-            
-
-            if (embedError && embedError.code !== 'PGRST116') throw embedError;
-
-            const uniqueEmbeds = Array.from(
-                new Map(embedData?.map(embed => [embed.id, embed])).values()
-            );
-
-            return uniqueEmbeds ?? [];
-        }
-
-        const { data: embedData, error: embedError } = await this.client
+    async list(organizationId?: string): Promise<Embeds.TypeWithRelations[]> {
+        let query = this.client
         .from('embeds')
-        .select('*, embed_accounts!inner(*, accounts!inner(id, picture_url, name, organization_settings(key, value)))')
-        .eq('organization_id', organizationId ?? '')
+        .select('*, embed_accounts(*, accounts(id, picture_url, name, organization_settings(key, value)))')
         .is('deleted_on', null);
 
-        if (embedError && embedError.code !== 'PGRST116') throw embedError;
+        if(organizationId) {
+            query = query.eq('embed_accounts.account_id', organizationId);
+        }
+
+        const { data: embedData, error: embedError } = await query;
+
+        if (embedError) throw embedError;
 
         return embedData?.map((embed) => ({
             ...embed,
-            organizations: embed.embed_accounts.map((embedAccount) => ({
-                id: embedAccount.account_id ?? '',
-                name: embedAccount.accounts.organization_settings.find((setting: { key: string, value: string }) => setting.key === 'name')?.value ?? embedAccount.accounts.name ?? '',
-                picture_url: embedAccount.accounts.organization_settings.find((setting: { key: string, value: string }) => setting.key === 'picture_url')?.value ?? embedAccount.accounts.picture_url ?? '',
+            organizations: embed.embed_accounts?.map((embedAccount) => ({
+                id: embedAccount?.account_id ?? '',
+                name: embedAccount?.accounts?.organization_settings?.find((setting: { key: string, value: string }) => setting.key === 'name')?.value ?? embedAccount?.accounts?.name ?? '',
+                picture_url: embedAccount?.accounts?.organization_settings?.find((setting: { key: string, value: string }) => setting.key === 'picture_url')?.value ?? embedAccount?.accounts?.picture_url ?? '',
             })),
-        })) ?? [];
+        })) as Embeds.TypeWithRelations[];
     }
 }
