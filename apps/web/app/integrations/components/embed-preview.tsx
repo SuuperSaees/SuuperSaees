@@ -3,6 +3,8 @@
 import { useMemo } from 'react';
 
 import DOMPurify from 'dompurify';
+import EmptyState from '~/components/ui/empty-state';
+import { useTranslation } from 'react-i18next';
 
 interface EmbedPreviewProps {
   embedSrc: string;
@@ -10,19 +12,22 @@ interface EmbedPreviewProps {
 }
 
 export function EmbedPreview({ embedSrc }: EmbedPreviewProps) {
+  const { t } = useTranslation('integrations');
   const embedContent = useMemo(() => {
     if (!embedSrc?.trim()) {
       return (
-        <div className="flex h-full items-center justify-center text-muted-foreground">
-          No embed source provided
-        </div>
+        <EmptyState 
+          title={t('empty.title')}
+          description={t('empty.description')}
+          imageSrc='/images/illustrations/Illustration-box.svg'
+        />
       );
     }
 
     return isIframeCode(embedSrc)
       ? renderIframeFromCode(embedSrc)
       : renderIframeFromUrl(embedSrc);
-  }, [embedSrc]);
+  }, [embedSrc, t]);
 
   return (
     <div className="mt-4 aspect-video w-full overflow-hidden rounded-lg border bg-muted shadow-sm">

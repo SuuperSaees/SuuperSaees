@@ -17,6 +17,10 @@ import OrdersSection from './orders';
 import { ServiceButtonTriggers } from './service-button-triggers';
 // import ReviewSection from './reviews';
 import ServiceSection from './services';
+import { EmbedSection } from '~/integrations/components/embed-section';
+import { getEmbeds } from '~/server/actions/embeds/embeds.action';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { BoxIcon } from 'lucide-react';
 
 /**
  * @description This component is used to display the navigation tabs for the account settings page.
@@ -33,6 +37,8 @@ function SectionView({
   const { t } = useTranslation('clients');
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('orders');
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const userId = userWorkspace.id ?? '';
 
   const services =
     useQuery({
@@ -41,6 +47,14 @@ function SectionView({
       enabled: activeTab === 'services',
     }) ?? [];
 
+    console.log('agencyId', agencyId);
+  const embedsQuery = useQuery({
+    queryKey: ['organization-embeds', clientOrganizationId],
+    queryFn: async () => await getEmbeds(clientOrganizationId, agencyId),
+    enabled: activeTab === 'embeds',
+  })
+
+  const embeds = embedsQuery.data ?? [];
   const serviceOptions = services?.data?.map((service) => {
     return { value: service.id, label: service.name };
   });
@@ -73,6 +87,10 @@ function SectionView({
     ['files', null],
     ['reviews', null],
     ['invoices', null],
+    [
+      'embeds',
+      null
+    ],
   ]);
 
   const availableTabsBasedOnRole = new Set([
@@ -81,9 +99,10 @@ function SectionView({
     'agency_project_manager',
   ]);
   const availableTabs = availableTabsBasedOnRole.has(currentUserRole)
-    ? ['orders', 'members', 'services', 'files' ]
-    : ['members', 'services', 'orders'];
+    ? ['orders', 'members', 'services', 'files', 'embeds']
+    : ['members', 'services', 'orders', 'embeds'];
 
+    console.log('embeds', embeds);
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
       'orders',
@@ -116,6 +135,26 @@ function SectionView({
         currentUserRole={currentUserRole}
       />,
     ],
+    [
+      'embeds',
+      <EmbedSection
+        key={'embeds'}
+        embeds={embeds}
+        agencyId={agencyId}
+        userId={userId}
+        userRole={currentUserRole}
+        defaultCreationValue={
+          {
+            title:'',
+            value:'',
+            location: 'tab',
+            type: 'url',
+            visibility: 'private',
+            embed_accounts: [clientOrganizationId]
+          }
+        }
+      />,
+    ],
 
     // ['reviews', <ReviewSection key={'reviews'} />],
     // ['invoices', <InvoiceSection key={'invoices'} />],
@@ -139,12 +178,18 @@ function SectionView({
               option={option}
               value={option}
               key={option + 'tab'}
-              className="font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+              className="font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 flex items-center gap-2"
             >
+                {
+                  option === 'embeds' && (
+                    <BoxIcon className='w-4 h-4' />
+                  )
+                }
               {t(`organizations.${option}.title`)
                 .split('')
                 .map((char, index) => (index === 0 ? char.toUpperCase() : char))
                 .join('')}
+              
             </ThemedTabTrigger>
           ))}
         </TabsList>

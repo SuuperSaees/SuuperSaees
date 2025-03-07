@@ -69,5 +69,9 @@
         "placeholder": "Select organizations"
       }
     }
+  },
+  "empty": {
+    "title": "No embed source provided",
+    "description": "Please provide a valid embed source"
   }
 }

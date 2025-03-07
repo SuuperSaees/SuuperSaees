@@ -26,9 +26,12 @@ interface EmbedSectionProps {
   agencyId: string;
   userId: string;
   userRole: string;
+  defaultCreationValue?: Embeds.Type & {
+    embed_accounts: string[];
+  };
 }
 
-export function EmbedSection({ embeds, agencyId, userId }: EmbedSectionProps) {
+export function EmbedSection({ embeds, agencyId, userId, defaultCreationValue }: EmbedSectionProps) {
   const queryClient = useQueryClient();
 
   const formattedEmbeds = useMemo(() => {
@@ -164,7 +167,7 @@ export function EmbedSection({ embeds, agencyId, userId }: EmbedSectionProps) {
           <div className="flex-1">
             <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
           </div>
-          <EmbedEditor onAction={handleEmbedCreation} defaultValue={null} />
+          <EmbedEditor onAction={handleEmbedCreation} defaultValue={defaultCreationValue ?? null} />
         </div>
       </Tabs>
     );

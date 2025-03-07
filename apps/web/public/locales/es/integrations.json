@@ -61,5 +61,9 @@
         "placeholder": "Selecciona organizaciones"
       }
     }
+  },
+  "empty": {
+    "title": "No hay fuente incrustada",
+    "description": "Por favor, proporciona una fuente incrustada válida"
   }
 }

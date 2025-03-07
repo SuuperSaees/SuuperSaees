@@ -9,20 +9,23 @@ import { useTranslation } from 'react-i18next';
 
 import { Form, FormMessage } from '@kit/ui/form';
 
+import { Embeds } from '~/lib/embeds.types';
+
 import { FormValues, formSchema } from '../schema';
 import { LocationField } from './fields/location-field';
+import { OrganizationsField } from './fields/organizations-field';
 import { TitleField } from './fields/title-field';
 import { TypeField } from './fields/type-field';
 import { ValueField } from './fields/value-field';
 import { VisibilityField } from './fields/visibility-field';
-import { OrganizationsField } from './fields/organizations-field';
-import { Embeds } from '~/lib/embeds.types';
 
 interface EmbedEditorProps {
   onAction: (values: FormValues) => void | Promise<void>;
-  defaultValue: Embeds.Type & {
-    embed_accounts: string[];
-  } | null;
+  defaultValue:
+    | (Embeds.Type & {
+        embed_accounts: string[];
+      })
+    | null;
 }
 
 export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
@@ -60,12 +63,11 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
     await onAction(values);
   };
 
-  console.log('error', form.formState.errors);
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="flex min-w-80 flex-col gap-4 px-4 py-8 text-gray-500 ml-auto"
+        className="ml-auto flex min-w-80 flex-col gap-4 px-4 py-8 text-gray-500"
       >
         <h2 className="font-bold text-gray-600">{t('form.title')}</h2>
         <p className="text-sm text-gray-500">{t('form.description')}</p>
@@ -75,9 +77,15 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
         <TypeField control={form.control} />
         <ValueField control={form.control} watch={form.watch} />
         <VisibilityField control={form.control} />
-    
+
         {form.watch('visibility') === 'private' && (
-          <OrganizationsField control={form.control} setValue={form.setValue} />
+          <OrganizationsField
+            control={form.control}
+            setValue={form.setValue}
+            defaultValues={form.formState.defaultValues?.embed_accounts?.filter(
+              (account): account is string => account !== undefined,
+            )}
+          />
         )}
         <FormMessage />
         <ThemedButton type="submit" className="mt-auto w-full">
