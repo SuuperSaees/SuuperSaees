@@ -57,7 +57,7 @@ export class EmbedsService implements IEmbedsService {
         return embed;
     }
     
-    async list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]> {
-        return await this.embedsRepository.list(organizationId, role, agencyId);
+    async list(organizationId?: string): Promise<Embeds.TypeWithRelations[]> {
+        return await this.embedsRepository.list(organizationId);
     }
 }
