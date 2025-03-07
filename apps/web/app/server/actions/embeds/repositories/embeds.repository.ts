@@ -79,7 +79,7 @@ export class EmbedsRepository {
         
         if(organizationId) {
             embedsFiltered = embedData?.filter((embed) => {
-                return embed.embed_accounts?.some((embedAccount) => embedAccount.account_id === organizationId);
+                return embed.visibility === 'public' || embed.embed_accounts?.some((embedAccount) => embedAccount.account_id === organizationId);
             });
         }
 
