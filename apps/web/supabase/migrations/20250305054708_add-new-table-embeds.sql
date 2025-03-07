@@ -20,8 +20,8 @@ create table "public"."embeds" (
     "value" text not null,
     "icon" text,
     "location" embed_location not null default 'tab'::embed_location,
-    "user_id" uuid,
-    "organization_id" uuid,
+    "user_id" uuid not null,
+    "organization_id" uuid not null,
     "visibility" visibility default 'public'::visibility,
     "type" embed_types not null default 'url'::embed_types
 );

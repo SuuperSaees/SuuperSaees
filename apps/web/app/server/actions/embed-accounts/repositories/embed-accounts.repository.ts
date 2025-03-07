@@ -25,7 +25,6 @@ export class EmbedAccountsRepository {
             .from('embed_accounts')
             .select('*')
             .eq('embed_id', embedId)
-            .is('deleted_on', null);
         
         if (fetchError) throw fetchError;
         
@@ -60,7 +59,6 @@ export class EmbedAccountsRepository {
             .from('embed_accounts')
             .select('*')
             .eq('embed_id', embedId)
-            .is('deleted_on', null);
         
         if (finalFetchError) throw finalFetchError;
         return updatedRelations;
@@ -80,7 +78,6 @@ export class EmbedAccountsRepository {
             .from('embed_accounts')
             .select('*')
             .eq('id', embedAccountId)
-            .is('deleted_on', null)
             .single();
 
         if (error) throw error;
@@ -92,7 +89,6 @@ export class EmbedAccountsRepository {
             .from('embed_accounts')
             .select('*')
             .eq('embed_id', embedId)
-            .is('deleted_on', null);
 
         if (error) throw error;
         return data;

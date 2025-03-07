@@ -59,8 +59,8 @@ export class EmbedsRepository {
             ...embedData,
             organizations: embedData?.embed_accounts?.map((embedAccount) => ({
                 id: embedAccount?.account_id ?? '',
-                name: embedAccount?.accounts?.organization_settings?.find((setting: { key: string, value: string }) => setting.key === 'name')?.value ?? '',
-                picture_url: embedAccount?.accounts?.organization_settings?.find((setting: { key: string, value: string }) => setting.key === 'picture_url')?.value ?? '',
+                name: embedAccount?.accounts?.organization_settings?.find((setting: { key: string, value: string }) => setting.key === 'name')?.value ?? embedAccount?.accounts?.name ?? '',
+                picture_url: embedAccount?.accounts?.organization_settings?.find((setting: { key: string, value: string }) => setting.key === 'picture_url')?.value ?? embedAccount?.accounts?.picture_url ?? '',
             })),
         };
     }
@@ -89,7 +89,7 @@ export class EmbedsRepository {
             `)
             .eq('organization_id', agencyId ?? '')
             .is('deleted_on', null)
-            .or(`visibility.neq.private, and(visibility.eq.private, embed_accounts.account_id.eq.${organizationId})`)
+            
 
             if (embedError && embedError.code !== 'PGRST116') throw embedError;
 
@@ -102,12 +102,19 @@ export class EmbedsRepository {
 
         const { data: embedData, error: embedError } = await this.client
         .from('embeds')
-        .select('*')
+        .select('*, embed_accounts!inner(*, accounts!inner(id, picture_url, name, organization_settings(key, value)))')
         .eq('organization_id', organizationId ?? '')
         .is('deleted_on', null);
 
         if (embedError && embedError.code !== 'PGRST116') throw embedError;
 
-        return embedData ?? [];
+        return embedData?.map((embed) => ({
+            ...embed,
+            organizations: embed.embed_accounts.map((embedAccount) => ({
+                id: embedAccount.account_id ?? '',
+                name: embedAccount.accounts.organization_settings.find((setting: { key: string, value: string }) => setting.key === 'name')?.value ?? embedAccount.accounts.name ?? '',
+                picture_url: embedAccount.accounts.organization_settings.find((setting: { key: string, value: string }) => setting.key === 'picture_url')?.value ?? embedAccount.accounts.picture_url ?? '',
+            })),
+        })) ?? [];
     }
 }
