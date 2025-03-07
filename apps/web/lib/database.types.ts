@@ -1215,21 +1215,21 @@ export type Database = {
       }
       embed_accounts: {
         Row: {
-          account_id: string | null
+          account_id: string
           created_at: string
-          embed_id: string | null
+          embed_id: string
           id: number
         }
         Insert: {
-          account_id?: string | null
+          account_id: string
           created_at?: string
-          embed_id?: string | null
+          embed_id: string
           id?: number
         }
         Update: {
-          account_id?: string | null
+          account_id?: string
           created_at?: string
-          embed_id?: string | null
+          embed_id?: string
           id?: number
         }
         Relationships: [
@@ -3691,7 +3691,7 @@ export type Database = {
         | "suuper"
       chat_role: "user" | "assistant"
       chat_role_type: "project_manager" | "assistant" | "owner" | "guest"
-      embed_location: "tab" | "sidebar" | "main" | "footer"
+      embed_location: "tab" | "sidebar"
       embed_types: "url" | "iframe"
       field_types:
         | "date"
