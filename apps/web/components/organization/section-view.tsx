@@ -50,7 +50,7 @@ function SectionView({
     console.log('agencyId', agencyId);
   const embedsQuery = useQuery({
     queryKey: ['organization-embeds', clientOrganizationId],
-    queryFn: async () => await getEmbeds(clientOrganizationId, agencyId),
+    queryFn: async () => await getEmbeds(clientOrganizationId),
     enabled: activeTab === 'embeds',
   })
 

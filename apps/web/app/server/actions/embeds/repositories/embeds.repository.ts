@@ -66,20 +66,26 @@ export class EmbedsRepository {
     }
 
     async list(organizationId?: string): Promise<Embeds.TypeWithRelations[]> {
-        let query = this.client
+        const query = this.client
         .from('embeds')
         .select('*, embed_accounts(*, accounts(id, picture_url, name, organization_settings(key, value)))')
         .is('deleted_on', null);
-
-        if(organizationId) {
-            query = query.eq('embed_accounts.account_id', organizationId);
-        }
 
         const { data: embedData, error: embedError } = await query;
 
         if (embedError) throw embedError;
 
-        return embedData?.map((embed) => ({
+        let embedsFiltered = embedData;
+        
+        if(organizationId) {
+            embedsFiltered = embedData?.filter((embed) => {
+                return embed.embed_accounts?.some((embedAccount) => embedAccount.account_id === organizationId);
+            });
+        }
+
+        console.log('embedsFiltered from repository', embedsFiltered);
+
+        return embedsFiltered?.map((embed) => ({
             ...embed,
             organizations: embed.embed_accounts?.map((embedAccount) => ({
                 id: embedAccount?.account_id ?? '',
