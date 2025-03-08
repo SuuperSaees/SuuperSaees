@@ -43,8 +43,13 @@ async function workspaceLoader() {
 
   const agency = Object.values(teams)[0] ?? null;
 
-  const organization = accounts;
-
+  const organization = Array.isArray(accounts) ? {
+    id: '',
+    name: '',
+    slug: '',
+    picture_url: '',
+    embeds: [],
+  } : accounts;
 
   return {
     accounts,

@@ -68,6 +68,9 @@
   },
   "orders": {
     "title": "Projects"
+  },
+  "embeds": {
+    "title": "Embeds"
   }
 },
   "startWithFirstClientTitle": "Let's start with your first client",

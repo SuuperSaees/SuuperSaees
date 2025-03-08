@@ -17,7 +17,7 @@ import { useOrganizationSettings } from '../../../../../../packages/features/acc
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
-  const { workspace, user } = props.workspace;
+  const { workspace, user, organization } = props.workspace;
   const userRole = workspace.role;
 
   const {dashboard_url: dashboardUrl, catalog_provider_url: catalogProviderUrl, catalog_product_url: catalogProductUrl, tool_copy_list_url: toolCopyListUrl} = useOrganizationSettings();
@@ -67,6 +67,30 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const selectedNavigationConfig = navigationConfigMap[userRole as keyof typeof navigationConfigMap]?.() 
   ?? personalAccountNavigationConfig;
 
+  // new tabs in the sidebar with embeds
+  const embeds = organization?.embeds;
+  const sidebarEmbeds = embeds?.filter(embed => embed.location === 'sidebar' && !embed.deleted_on) ?? [];
+  
+  // Add embeds to the navigation config if there are sidebar embeds
+  const navigationConfigWithEmbeds = sidebarEmbeds.length 
+    ? NavigationConfigSchema.parse({
+        ...selectedNavigationConfig,
+        routes: [
+          ...selectedNavigationConfig.routes,
+          // Add a divider before embeds if there are any
+          ...(sidebarEmbeds.length > 0 ? [{ divider: true }] : []),
+          // Add each embed as a separate tab
+          ...sidebarEmbeds.map(embed => ({
+            label: embed.title ?? 'Embed',
+            path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
+            Icon: embed.icon ? <span className="w-4">{embed.icon}</span> : <span className="w-4">🔗</span>,
+            end: true,
+          })),
+        ],
+      })
+    : selectedNavigationConfig;
+
+  console.log('selectedNavigationConfig', navigationConfigWithEmbeds, 'workspace', workspace, 'organization', organization);
   return (
     <ThemedSidebar className='text-sm'>
       <div className="padding-24">
@@ -74,7 +98,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
       </div>
 
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
-        <SidebarNavigation config={selectedNavigationConfig} showDashboardUrl={showDashboardUrl} catalogProviderUrl={!!catalogProviderUrl} catalogProductUrl={!!catalogProductUrl} toolCopyListUrl={!!toolCopyListUrl} />
+        <SidebarNavigation config={navigationConfigWithEmbeds} showDashboardUrl={showDashboardUrl} catalogProviderUrl={!!catalogProviderUrl} catalogProductUrl={!!catalogProductUrl} toolCopyListUrl={!!toolCopyListUrl} />
         {userRole === 'client_guest' && (
           <SidebarContent>
             <GuestContent />

@@ -5,5 +5,5 @@ export interface IEmbedsService {
     update(embedId: string, payload: Embeds.Update): Promise<Embeds.Type>;
     delete(embedId: string): Promise<void>;
     get(embedId?: string): Promise<Embeds.TypeWithRelations>;
-    list(organizationId?: string, role?: string, agencyId?: string): Promise<Embeds.TypeWithRelations[]>;
-}
+    list(organizationId?: string): Promise<Embeds.TypeWithRelations[]>;
+    }

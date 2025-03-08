@@ -17,9 +17,9 @@ export async function createEmbed(embed: Embeds.Insert, accountIds?: string[]) {
     return await embedAction.create(embed, accountIds);
 }
 
-export async function updateEmbed(embedId: string, embed: Embeds.Update) {
+export async function updateEmbed(embedId: string, embed: Embeds.Update, accountIds?: string[]) {
     const embedAction = getEmbedAction();
-    return await embedAction.update(embedId, embed);
+    return await embedAction.update(embedId, embed, accountIds);
 }
 
 export async function deleteEmbed(embedId: string) {
@@ -27,7 +27,7 @@ export async function deleteEmbed(embedId: string) {
     return await embedAction.delete(embedId);
 }
 
-export async function getEmbeds(organizationId?: string, role?: string, agencyId?: string) {
+export async function getEmbeds(organizationId?: string) {
     const embedAction = getEmbedAction();
-    return await embedAction.list(organizationId, role, agencyId);
+    return await embedAction.list(organizationId);
 }
