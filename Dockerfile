@@ -8,11 +8,12 @@ COPY . .
 
 RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
-RUN pnpm install --frozen-lockfile
 
-# Reducir el límite de memoria a 6GB para dejar algo al sistema
-ENV NODE_OPTIONS="--max-old-space-size=6144"
-# Compilar directamente la app web para evitar Turborepo
+# Instalar solo las dependencias necesarias para la app web
+RUN cd apps/web && pnpm install --frozen-lockfile
+
+# Configurar opciones de memoria y compilar solo la app web
+ENV NODE_OPTIONS="--max-old-space-size=6144 --gc-global --optimize-for-size"
 RUN cd apps/web && NEXT_TELEMETRY_DISABLED=1 next build
 
 FROM node:20-alpine
