@@ -1,36 +1,58 @@
-FROM node:20 AS build
+FROM node:20-alpine AS base
 
-RUN apt-get update && apt-get install -y libc6-compat
+# Solo instalamos libc6-compat que es necesario para Next.js
+RUN apk add --no-cache libc6-compat
+
+# Configuramos pnpm
 RUN npm install -g pnpm@latest
-RUN pnpm store prune
+
+# Primera etapa: solo instalamos dependencias
+FROM base AS deps
 WORKDIR /app
+
+# Copiamos solo los archivos necesarios para instalar dependencias
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/ ./packages/
+
+# Instalamos solo las dependencias de la app web
+RUN cd apps/web && pnpm install --frozen-lockfile --ignore-scripts
+
+# Segunda etapa: construimos la aplicación
+FROM base AS builder
+WORKDIR /app
+
+# Configuramos memoria para Node.js
+ENV NODE_OPTIONS="--max-old-space-size=4096 --gc-global --optimize-for-size"
+ENV NEXT_TELEMETRY_DISABLED 1
+
+# Copiamos dependencias y archivos del proyecto
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY . .
 
-RUN rm -rf node_modules
-RUN pnpm add -w -D @sentry/utils
-
-# Instalar solo las dependencias necesarias para la app web
-RUN cd apps/web && pnpm install --frozen-lockfile
-
-# Configurar opciones de memoria y compilar solo la app web
-ENV NODE_OPTIONS="--max-old-space-size=6144 --gc-global --optimize-for-size"
+# Construimos directamente la app web sin usar Turborepo
 RUN cd apps/web && NEXT_TELEMETRY_DISABLED=1 next build
 
-FROM node:20-alpine
+# Etapa final: imagen de producción
+FROM node:20-alpine AS runner
+WORKDIR /app
 
 ENV NODE_ENV production
 ENV PORT 3000
+ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
-WORKDIR /app
+# Creamos un usuario no privilegiado
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
-COPY --from=build --chown=nextjs:nodejs /app/apps/web/styles ./apps/web/styles
+# Copiamos solo los archivos necesarios para la ejecución
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/styles ./apps/web/styles
 
 USER nextjs
-
 EXPOSE 3000
-ENV NEXT_TELEMETRY_DISABLED 1
+
 CMD ["node", "apps/web/server.js"]
