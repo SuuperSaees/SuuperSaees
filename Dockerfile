@@ -9,11 +9,11 @@ RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
 RUN pnpm i
 
-# Primera etapa: construye los paquetes
-RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm --filter="!web" build
+# Modifica esta línea para usar el comando correcto de turbo
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm --filter="!web" build
 
-# Segunda etapa: construye la aplicación web
-RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm --filter="web" build
+# Construye la aplicación web con opciones para reducir el uso de memoria
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm --filter="web" build --no-lint
 
 FROM node:20-alpine
 
