@@ -9,7 +9,11 @@ RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
 RUN pnpm i
 
-RUN NODE_OPTIONS="--max-old-space-size=6144" dotenv -- pnpm run build -- --workers=1
+# Primera etapa: construye los paquetes
+RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm --filter="!web" build
+
+# Segunda etapa: construye la aplicación web
+RUN NODE_OPTIONS="--max-old-space-size=2048" pnpm --filter="web" build
 
 FROM node:20-alpine
 

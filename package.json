@@ -11,7 +11,7 @@
   },
   "scripts": {
     "postinstall": "manypkg fix",
-    "build": "turbo build --cache-dir=.turbo",
+    "build": "turbo build --experimental-build --cache-dir=.turbo",
     "clean": "git clean -xdf node_modules dist .next",
     "clean:workspaces": "turbo clean",
     "set-credentials": "if exist set-credentials.ps1 (powershell -File set-credentials.ps1) else (echo File set-credentials.ps1 not found - continuing...)",
