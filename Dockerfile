@@ -1,15 +1,19 @@
-FROM node:20-alpine AS build
+FROM node:20 AS build
 
-RUN apk add --no-cache libc6-compat
-RUN npm install -g pnpm@9.5.0 dotenv-cli
+RUN apt-get update && apt-get install -y libc6-compat
+RUN npm install -g pnpm@latest
+RUN pnpm store prune
 WORKDIR /app
 COPY . .
 
 RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
-RUN pnpm i
+RUN pnpm install --frozen-lockfile
 
-RUN NODE_OPTIONS="--max-old-space-size=6144" dotenv -- pnpm run build -- --workers=2
+# Reducir el límite de memoria a 6GB para dejar algo al sistema
+ENV NODE_OPTIONS="--max-old-space-size=6144"
+# Compilar directamente la app web para evitar Turborepo
+RUN cd apps/web && NEXT_TELEMETRY_DISABLED=1 next build
 
 FROM node:20-alpine
 
