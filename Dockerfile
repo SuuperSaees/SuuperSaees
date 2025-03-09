@@ -1,5 +1,6 @@
-FROM node:20 AS build
+FROM node:20-alpine AS build
 
+RUN apk add --no-cache libc6-compat
 RUN npm install -g pnpm@9.5.0 dotenv-cli
 WORKDIR /app
 COPY . .
@@ -8,8 +9,7 @@ RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
 RUN pnpm i
 
-ENV NODE_OPTIONS="--max-old-space-size=8192"
-RUN dotenv -- pnpm run build -- --no-source-maps
+RUN NODE_OPTIONS="--max-old-space-size=6144" dotenv -- pnpm run build -- --workers=2
 
 FROM node:20-alpine
 
