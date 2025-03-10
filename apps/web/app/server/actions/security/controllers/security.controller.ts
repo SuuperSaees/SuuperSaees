@@ -16,8 +16,7 @@ export class SecurityController {
     }
 
     async validateEmbedData(data: Embeds.Insert | Embeds.Update): Promise<void> {
-        await Promise.resolve();
-        return this.securityService.validateEmbedData(data);
+        return await this.securityService.validateEmbedData(data);
     }
 
     async validateIframe(value: string): Promise<void> {

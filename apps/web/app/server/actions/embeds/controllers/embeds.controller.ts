@@ -4,6 +4,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { EmbedsService } from '../services/embeds.service';
 import { EmbedAccountsRepository } from '../../embed-accounts/repositories/embed-accounts.repository';
+import { SecurityService } from "../../security/services/security.service";
 
 export class EmbedsController {
     private baseUrl: string
@@ -20,6 +21,12 @@ export class EmbedsController {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
             const embedAccountsRepository = new EmbedAccountsRepository(this.client, this.adminClient);
+            const securityService = new SecurityService();
+            
+            // Sanitize and validate the payload
+            await securityService.validateEmbedData(payload);
+            
+            // Now payload has been sanitized, we can proceed with creation
             const embedsService = new EmbedsService(embedsRepository, embedAccountsRepository);
             return await embedsService.create(payload, accountIds);
         } catch (error) {
@@ -32,6 +39,12 @@ export class EmbedsController {
         try {
             const embedsRepository = new EmbedsRepository(this.client, this.adminClient);
             const embedAccountsRepository = new EmbedAccountsRepository(this.client, this.adminClient);
+            const securityService = new SecurityService();
+            
+            // Sanitize and validate the payload
+            await securityService.validateEmbedData(payload);
+            
+            // Now payload has been sanitized, we can proceed with update
             const embedsService = new EmbedsService(embedsRepository, embedAccountsRepository);
             return await embedsService.update(embedId, payload, accountIds);
         } catch (error) {

@@ -59,7 +59,12 @@
         "type": "select",
         "label": "Organizaciones",
         "placeholder": "Selecciona organizaciones"
-      }
+      },
+      "template": {
+        "type": "select",
+        "label": "Plantilla",
+        "placeholder": "Selecciona una plantilla"
+      } 
     }
   },
   "empty": {

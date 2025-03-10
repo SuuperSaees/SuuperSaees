@@ -3,11 +3,10 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
-import { TabsTrigger } from '@kit/ui/tabs';
+import { TabsContent } from '@kit/ui/tabs';
+import { Tabs } from '@kit/ui/tabs';
 
 import { Embeds } from '~/lib/embeds.types';
 import {
@@ -17,9 +16,9 @@ import {
 } from '~/server/actions/embeds/embeds.action';
 
 import { EmbedPreview } from './embed-preview';
-import { EmbedTab } from './embed-tab';
 import { FormValues } from '../schema';
 import { EmbedEditor } from './embed-editor/embed-editor';
+import { EmbedTabs } from './embed-tabs';
 
 interface EmbedSectionProps {
   embeds: Embeds.TypeWithRelations[];
@@ -29,9 +28,16 @@ interface EmbedSectionProps {
   defaultCreationValue?: Embeds.Type & {
     embed_accounts: string[];
   };
+  showEmbedSelector?: boolean;
 }
 
-export function EmbedSection({ embeds, agencyId, userId, defaultCreationValue }: EmbedSectionProps) {
+export function EmbedSection({ 
+  embeds, 
+  agencyId, 
+  userId, 
+  defaultCreationValue,
+  showEmbedSelector = false
+}: EmbedSectionProps) {
   const queryClient = useQueryClient();
 
   const formattedEmbeds = useMemo(() => {
@@ -157,17 +163,21 @@ export function EmbedSection({ embeds, agencyId, userId, defaultCreationValue }:
         onValueChange={handleTabChange}
         className="h-full w-full text-gray-500"
       >
-        <TabsList className="bg-transparent">
-          <TabsTrigger value="new" className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500">
-            <Plus className="h-4 w-4" />
-            Add Integration
-          </TabsTrigger>
-        </TabsList>
+        <EmbedTabs
+          embeds={[]}
+          activeEmbedId={activeEmbedId}
+          onDeleteEmbed={handleDeleteEmbed}
+        />
         <div className="flex h-full w-full gap-8">
           <div className="flex-1">
             <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
           </div>
-          <EmbedEditor onAction={handleEmbedCreation} defaultValue={defaultCreationValue ?? null} />
+          <EmbedEditor 
+            onAction={handleEmbedCreation} 
+            defaultValue={defaultCreationValue ?? null} 
+            availableEmbeds={formattedEmbeds}
+            showEmbedSelector={showEmbedSelector}
+          />
         </div>
       </Tabs>
     );
@@ -179,21 +189,11 @@ export function EmbedSection({ embeds, agencyId, userId, defaultCreationValue }:
       onValueChange={handleTabChange}
       className="h-full w-full text-gray-500"
     >
-      <TabsList className="bg-transparent">
-        <TabsTrigger value="new"   className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500">
-          <Plus className="h-4 w-4" />
-          Add Integration
-        </TabsTrigger>
-        {formattedEmbeds.map((embed) => (
-          <EmbedTab
-            key={embed.id}
-            embed={embed}
-            isActive={embed.id === activeEmbedId}
-            onDelete={handleDeleteEmbed}
-          />
-        ))}
-      </TabsList>
-
+      <EmbedTabs
+        embeds={formattedEmbeds}
+        activeEmbedId={activeEmbedId}
+        onDeleteEmbed={handleDeleteEmbed}
+      />
       <div className="flex h-full w-full gap-8">
         {/* New Integration Tab Content */}
         <TabsContent value="new" className="h-full w-full">
@@ -201,7 +201,12 @@ export function EmbedSection({ embeds, agencyId, userId, defaultCreationValue }:
             <div className="flex-1">
               <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
             </div>
-            <EmbedEditor onAction={handleEmbedCreation} defaultValue={null} />
+            <EmbedEditor 
+              onAction={handleEmbedCreation} 
+              defaultValue={defaultCreationValue ?? null} 
+              availableEmbeds={formattedEmbeds}
+              showEmbedSelector={showEmbedSelector}
+            />
           </div>
         </TabsContent>
 
@@ -220,6 +225,8 @@ export function EmbedSection({ embeds, agencyId, userId, defaultCreationValue }:
                 <EmbedEditor
                   onAction={handleEmbedUpdate}
                   defaultValue={embed}
+                  availableEmbeds={formattedEmbeds.filter(e => e.id !== embed.id)}
+                  showEmbedSelector={false}
                 />
               )}
             </div>

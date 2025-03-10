@@ -39,10 +39,6 @@ const config = {
     },
   },
   experimental: {
-    optimizeCss: true,
-    turbotrace: {
-      memoryLimit: 1024,
-    },
     mdxRs: true,
     instrumentationHook: true,
     turbo: {
@@ -61,10 +57,6 @@ const config = {
       'date-fns',
       ...INTERNAL_PACKAGES,
     ],
-  },
-  webpack: (config) => {
-    config.optimization.minimize = true;
-    return config;
   },
   modularizeImports: {
     lodash: {

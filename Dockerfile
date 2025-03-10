@@ -9,11 +9,7 @@ RUN rm -rf node_modules
 RUN pnpm add -w -D @sentry/utils
 RUN pnpm i
 
-# Modifica esta línea para usar el comando correcto de turbo
-RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm --filter="!web" build
-
-# Construye la aplicación web con opciones para reducir el uso de memoria
-RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm --filter="web" build --no-lint
+RUN NODE_OPTIONS="--max-old-space-size=6144" dotenv -- pnpm run build -- --workers=2
 
 FROM node:20-alpine
 

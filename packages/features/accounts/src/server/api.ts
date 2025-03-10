@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
+import { getEmbeds} from '../../../../../apps/web/app/server/actions/embeds/embeds.action'
 
 /**
  * Class representing an API for interacting with user accounts.
@@ -54,8 +55,8 @@ class AccountsApi {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
       .select(
-        `id, name, slug, picture_url, settings:organization_settings!left(*), embeds!organization_id(*)`,
-      )
+        `id, name, slug, picture_url, settings:organization_settings!left(*)`
+      );
 
     if (error) {
       throw error;
@@ -65,15 +66,23 @@ class AccountsApi {
       throw new Error('No user accounts found');
     }
 
+    const uniqueEmbeds = await getEmbeds().catch((error) => {
+      console.error('Error fetching unique embeds:', error);
+      return [];
+    });
+
     const logoUrl =
       accounts[0]?.settings?.find((setting) => setting.key === 'logo_url')
-        ?.value ?? accounts[0]?.picture_url ?? '';
+        ?.value ??
+      accounts[0]?.picture_url ??
+      '';
+
     return {
       id: accounts[0]?.id,
       name: accounts[0]?.name,
       slug: accounts[0]?.slug,
       picture_url: logoUrl,
-      embeds: accounts[0]?.embeds,
+      embeds: uniqueEmbeds,
     };
   }
 

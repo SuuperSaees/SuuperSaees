@@ -47,7 +47,6 @@ function SectionView({
       enabled: activeTab === 'services',
     }) ?? [];
 
-    console.log('agencyId', agencyId);
   const embedsQuery = useQuery({
     queryKey: ['organization-embeds', clientOrganizationId],
     queryFn: async () => await getEmbeds(clientOrganizationId),
@@ -102,7 +101,6 @@ function SectionView({
     ? ['orders', 'members', 'services', 'files', 'embeds']
     : ['members', 'services', 'orders', 'embeds'];
 
-    console.log('embeds', embeds);
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
       'orders',
@@ -143,6 +141,7 @@ function SectionView({
         agencyId={agencyId}
         userId={userId}
         userRole={currentUserRole}
+        showEmbedSelector={true}
         defaultCreationValue={
           {
             title:'',
