@@ -40,9 +40,6 @@ const config = {
   },
   experimental: {
     // optimizeCss: true,
-    turbotrace: {
-      memoryLimit: 1024,
-    },
     mdxRs: true,
     instrumentationHook: true,
     turbo: {
