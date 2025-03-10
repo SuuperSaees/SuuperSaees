@@ -18,6 +18,7 @@ import { TitleField } from './fields/title-field';
 import { TypeField } from './fields/type-field';
 import { ValueField } from './fields/value-field';
 import { VisibilityField } from './fields/visibility-field';
+import { EmbedSelector } from './fields/embed-selector';
 
 interface EmbedEditorProps {
   onAction: (values: FormValues) => void | Promise<void>;
@@ -26,9 +27,18 @@ interface EmbedEditorProps {
         embed_accounts: string[];
       })
     | null;
+  availableEmbeds?: (Embeds.Type & {
+    embed_accounts: string[];
+  })[];
+  showEmbedSelector?: boolean;
 }
 
-export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
+export function EmbedEditor({ 
+  onAction, 
+  defaultValue, 
+  availableEmbeds = [], 
+  showEmbedSelector = false 
+}: EmbedEditorProps) {
   const { t } = useTranslation('embeds');
 
   const form = useForm<FormValues>({
@@ -63,6 +73,19 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
     await onAction(values);
   };
 
+  // Handle selection from the embed selector
+  const handleEmbedSelect = (embed: Embeds.Type & { embed_accounts: string[] }) => {
+    form.reset({
+      title: embed.title ?? '',
+      icon: embed.icon ?? '',
+      location: embed.location ?? 'tab',
+      type: embed.type ?? 'url',
+      visibility: embed.visibility ?? 'public',
+      value: embed.value ?? '',
+      embed_accounts: embed.embed_accounts ?? [],
+    });
+  };
+
   return (
     <Form {...form}>
       <form
@@ -71,6 +94,13 @@ export function EmbedEditor({ onAction, defaultValue }: EmbedEditorProps) {
       >
         <h2 className="font-bold text-gray-600">{t('form.title')}</h2>
         <p className="text-sm text-gray-500">{t('form.description')}</p>
+
+        {/* Embed selector for pre-filling form values */}
+        <EmbedSelector 
+          embeds={availableEmbeds} 
+          onSelect={handleEmbedSelect} 
+          showSelector={showEmbedSelector} 
+        />
 
         <TitleField control={form.control} />
         <LocationField control={form.control} />

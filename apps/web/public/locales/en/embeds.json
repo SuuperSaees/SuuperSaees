@@ -67,6 +67,11 @@
         "type": "select",
         "label": "Organizations",
         "placeholder": "Select organizations"
+      },
+      "template": {
+        "type": "select",
+        "label": "Template",
+        "placeholder": "Select a template"
       }
     }
   },

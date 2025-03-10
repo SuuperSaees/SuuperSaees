@@ -1,0 +1,145 @@
+'use client';
+
+import type { Dispatch, SetStateAction } from 'react';
+
+import { Embeds } from '~/lib/embeds.types';
+import { Order } from '~/lib/order.types';
+
+import { ValueFormatters } from '../hooks/use-csv-export-formatters';
+import { ViewOption } from '../hooks/use-orders-view-configs';
+import CreateOrderButton from './create-order-button';
+import { EmbedTabs } from './embed-tabs';
+import Filters, { FilterGroup } from './filters';
+import Search from './search';
+import SettingsDropdown from './settings-dropdown';
+import StatusFilters, { TabConfig } from './status-filters';
+import ViewSelect from './view-select';
+
+interface BoardHeaderProps {
+  t: (key: string) => string;
+  activeTab: string;
+  handleTabChange: Dispatch<SetStateAction<string>>;
+  tabsConfig: TabConfig[];
+  embeds: Embeds.TypeWithRelations[];
+  theme_color?: string;
+  getFilterValues: (key: string) => string[] | null;
+  handleSearch: (searchTerm: string) => void;
+  filtersConfig: FilterGroup[];
+  filters: Record<string, string[]>;
+  resetFilters: () => void;
+  viewOptions: ViewOption[];
+  currentView: string;
+  ordersAreLoading: boolean;
+  orders: Order.Response[];
+  getValueFormatters: () => ValueFormatters;
+}
+
+export function BoardHeader({
+  t,
+  activeTab,
+  handleTabChange,
+  tabsConfig,
+  embeds,
+  theme_color,
+  getFilterValues,
+  handleSearch,
+  filtersConfig,
+  filters,
+  resetFilters,
+  viewOptions,
+  currentView,
+  ordersAreLoading,
+  orders,
+  getValueFormatters,
+}: BoardHeaderProps) {
+  return (
+    <div className="flex flex-wrap items-center justify-end gap-4">
+      <div className="mr-auto flex items-center gap-4">
+        {/* Status filters */}
+        <StatusFilters
+          activeTab={activeTab}
+          setActiveTab={handleTabChange}
+          t={t}
+          tabsConfig={tabsConfig}
+        />
+
+        {/* Embed tabs */}
+        <EmbedTabs
+          embeds={embeds}
+          activeTab={activeTab}
+          handleTabChange={handleTabChange}
+          theme_color={theme_color}
+        />
+      </div>
+
+      <Search
+        defaultSearch={getFilterValues('search')?.[0] ?? ''}
+        t={t}
+        handleSearch={handleSearch}
+      />
+
+      <Filters
+        filters={filtersConfig}
+        defaultFilters={filters}
+        onReset={resetFilters}
+      />
+
+      <ViewSelect options={viewOptions} defaultValue={currentView} />
+
+      <SettingsDropdown
+        disabled={ordersAreLoading}
+        data={orders}
+        t={t}
+        allowedColumns={[
+          'id',
+          'title',
+          'status',
+          'priority',
+          'created_at',
+          'updated_at',
+          'due_date',
+          'customer',
+          'assigned_to',
+          'agency',
+          'client_organization',
+        ]}
+        defaultFilename="projects.csv"
+        defaultSelectedColumns={[
+          'id',
+          'title',
+          'status',
+          'priority',
+          'created_at',
+          'updated_at',
+          'due_date',
+          'customer',
+          'client_organization',
+        ]}
+        columnHeaders={{
+          id: t('columns.id'),
+          title: t('columns.title'),
+          status: t('columns.status'),
+          priority: t('columns.priority'),
+          created_at: t('columns.createdAt'),
+          updated_at: t('columns.updatedAt'),
+          due_date: t('columns.dueDate'),
+          customer: t('columns.customer'),
+          assigned_to: t('columns.assignedTo'),
+          agency: t('columns.agency'),
+          client_organization: t('columns.clientOrganization'),
+        }}
+        valueFormatters={
+          getValueFormatters() as unknown as Record<
+            string,
+            (value: unknown) => string
+          >
+        }
+      />
+
+      <CreateOrderButton
+        t={t}
+        hasOrders={orders.length > 0 || ordersAreLoading}
+      />
+    </div>
+  );
+}
