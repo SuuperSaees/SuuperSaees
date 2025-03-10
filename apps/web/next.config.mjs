@@ -39,7 +39,7 @@ const config = {
     },
   },
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true,
     turbotrace: {
       memoryLimit: 1024,
     },
