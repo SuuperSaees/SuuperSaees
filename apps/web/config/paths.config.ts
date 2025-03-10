@@ -37,6 +37,7 @@ const PathsSchema = z.object({
     storage: z.string().min(1),
     setPassword: z.string().min(1),
     apps: z.string().min(1),
+    embeds: z.string().min(1),
   }),
 });
 
@@ -77,6 +78,7 @@ const pathsConfig = PathsSchema.parse({
     briefs: '/briefs',
     setPassword: '/set-password',
     apps: '/apps',
+    embeds: '/embeds',
   },
 } satisfies z.infer<typeof PathsSchema>);
 

@@ -54,8 +54,10 @@ class AccountsApi {
     const { data: accounts, error } = await this.client
       .from('user_accounts')
       .select(
-        `id, name, slug, picture_url, settings:organization_settings!left(*), embeds!organization_id(*)`,
-      )
+        `id, name, slug, picture_url, settings:organization_settings!left(*), 
+        embeds!organization_id(*),
+        embed_accounts!account_id(*, embed:embeds!embed_id(*))`,
+      );
 
     if (error) {
       throw error;
@@ -67,13 +69,45 @@ class AccountsApi {
 
     const logoUrl =
       accounts[0]?.settings?.find((setting) => setting.key === 'logo_url')
-        ?.value ?? accounts[0]?.picture_url ?? '';
+        ?.value ??
+      accounts[0]?.picture_url ??
+      '';
+
+    // Combine direct embeds with embeds from embed_accounts
+    const directEmbeds = accounts[0]?.embeds ?? [];
+    const embedAccountEmbeds =
+      accounts[0]?.embed_accounts?.map((ea) => ea.embed).filter(Boolean) ?? [];
+
+    // Flatten any potential array of arrays and ensure all items are objects
+    const flattenedDirectEmbeds = Array.isArray(directEmbeds[0])
+      ? directEmbeds.flat()
+      : directEmbeds;
+    const flattenedEmbedAccountEmbeds = Array.isArray(embedAccountEmbeds[0])
+      ? embedAccountEmbeds.flat()
+      : embedAccountEmbeds;
+
+    const allEmbeds = [
+      ...flattenedDirectEmbeds,
+      ...flattenedEmbedAccountEmbeds,
+    ];
+
+    // Remove duplicates based on embed id
+    const uniqueEmbeds = allEmbeds.filter((embed, index, self) => {
+      if (!embed) return false;
+      return (
+        index ===
+        self.findIndex(
+          (e) => e && 'id' in e && 'id' in embed && e.id === embed.id,
+        )
+      );
+    }) as Database['public']['Tables']['embeds']['Row'][];
+
     return {
       id: accounts[0]?.id,
       name: accounts[0]?.name,
       slug: accounts[0]?.slug,
       picture_url: logoUrl,
-      embeds: accounts[0]?.embeds,
+      embeds: uniqueEmbeds,
     };
   }
 

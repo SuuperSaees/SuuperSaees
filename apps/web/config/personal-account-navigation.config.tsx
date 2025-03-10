@@ -9,6 +9,7 @@ import {
   Home,
   Bot,
   Package,
+  Box,
   // Wallet,
 } from 'lucide-react';
 
@@ -112,6 +113,11 @@ const routes = [
   //   path: pathsConfig.app.personalAccountBilling,
   //   // Icon: </>
   // }
+  {
+    label: 'common:embedsName',
+    path: pathsConfig.app.embeds,
+    Icon: <Box className={iconClasses} />,
+  },
 ];
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {

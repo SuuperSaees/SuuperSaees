@@ -1,5 +1,6 @@
 import { // Briefcase,
-CreditCard, Layers, Settings, Users, Home, MessagesSquare, Package, Bot // Wallet,
+CreditCard, Layers, Settings, Users, Home, MessagesSquare, Package, Bot, // Wallet,
+Box
 } from 'lucide-react';
 
 
@@ -93,6 +94,11 @@ const routes = [
     label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
+  },
+  {
+    label: 'common:embedsName',
+    path: pathsConfig.app.embeds,
+    Icon: <Box className={iconClasses} />,
   },
   // {
   //   label: 'Facturación',
