@@ -1,6 +1,6 @@
 FROM node:20-alpine AS build
 
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat git
 RUN npm install -g pnpm@9.5.0 dotenv-cli
 WORKDIR /app
 COPY . .
