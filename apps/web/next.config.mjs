@@ -39,6 +39,7 @@ const config = {
     },
   },
   experimental: {
+    // optimizeCss: true,
     mdxRs: true,
     instrumentationHook: true,
     turbo: {
