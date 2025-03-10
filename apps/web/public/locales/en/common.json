@@ -171,5 +171,6 @@
     "noColumnsSelected": "No columns selected for export",
     "export": "Export",
     "selectAtLeastOneColumn": "Please select at least one column to export"
-  }
+  },
+  "embedsName": "Embeds"
 }

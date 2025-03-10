@@ -1,8 +1,6 @@
 'use client';
 
-
-
-import { Box, EllipsisVertical, } from 'lucide-react';
+import { EllipsisVertical } from 'lucide-react';
 import { Trash2 } from 'lucide-react';
 import { Trans } from 'react-i18next';
 
@@ -11,6 +9,7 @@ import { TabsTrigger } from '@kit/ui/tabs';
 import Dropdown from '~/components/ui/dropdown';
 import { Embeds } from '~/lib/embeds.types';
 
+import { DynamicIcon } from '../../components/shared/dynamic-icon';
 
 interface EmbedTabProps {
   embed: Embeds.Type;
@@ -55,7 +54,7 @@ export function EmbedTab({ embed, isActive, onDelete }: EmbedTabProps) {
       value={embed.id}
       className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500"
     >
-      <EmbedIcon icon={embed.icon ?? ''} title={embed.title ?? ''} />
+      <DynamicIcon name={embed.icon ?? ''} className="h-4 w-4" />
       <span>{embed.title}</span>
       {onDelete && (
         <Dropdown
@@ -67,20 +66,4 @@ export function EmbedTab({ embed, isActive, onDelete }: EmbedTabProps) {
       )}
     </TabsTrigger>
   );
-}
-
-function EmbedIcon({ icon, title }: { icon: string; title: string }) {
-  if (icon) {
-    return (
-      <div className="h-5 w-5 overflow-hidden rounded-md">
-        <img
-          src={icon || '/placeholder.svg'}
-          alt={title}
-          className="h-full w-full object-contain"
-        />
-      </div>
-    );
-  }
-
-  return <Box className="h-5 w-5" />;
 }

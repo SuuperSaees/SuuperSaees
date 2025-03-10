@@ -59,10 +59,6 @@ const config = {
       ...INTERNAL_PACKAGES,
     ],
   },
-  webpack: (config) => {
-    config.optimization.minimize = true;
-    return config;
-  },
   modularizeImports: {
     lodash: {
       transform: 'lodash/{{member}}',

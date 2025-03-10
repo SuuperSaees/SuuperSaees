@@ -9,7 +9,6 @@ export class SecurityService {
     private purify: typeof DOMPurify;
 
     constructor() {
-        // Inicializar DOMPurify con happy-dom para uso en el servidor
         this.window = new Window();
         this.purify = DOMPurify(this.window as Window & typeof globalThis);
     }
@@ -23,7 +22,7 @@ export class SecurityService {
             .replace(/'/g, '&#039;');
     }
 
-    validateEmbedData(data: Embeds.Insert | Embeds.Update): void {
+    async validateEmbedData(data: Embeds.Insert | Embeds.Update): Promise<void> {
         // Validate the title if it exists
         if (data.title) {
             if (data.title.length > 255) {
@@ -36,26 +35,46 @@ export class SecurityService {
             this.validateXssAttack(data.title);
         }
         
-        // Validate the value according to the type
+        // Validate and sanitize the value according to the type
         if (data.value && data.type) {
             if (data.type === 'iframe') {
-                void this.validateIframe(data.value);
+                // We'll sanitize the iframe value and update the data object
+                data.value = this.sanitizeIframeValue(data.value);
             } else if (data.type === 'url') {
-                void this.validateUrl(data.value);
+                // For URLs, we'll just validate but not modify the value
+                // as validateUrl will throw an error if the URL is invalid
+                await this.validateUrl(data.value);
             }
         }
     }
 
-    async validateIframe(value: string): Promise<void> {
-        // Sanitize the iframe with DOMPurify
+    // New method to sanitize iframe values
+    sanitizeIframeValue(value: string): string {
+        // If it's a URL, return it as is (validateIframe will validate it later)
+        if (value.trim().startsWith('http') && !value.includes('<iframe')) {
+            return value;
+        }
+        
+        // If it's an iframe HTML, sanitize it with DOMPurify
         const cleanIframe = this.purify.sanitize(value, {
             ALLOWED_TAGS: ['iframe'],
             ALLOWED_ATTR: ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'allow'],
             RETURN_DOM: false
         });
+        
+        return cleanIframe;
+    }
 
-        // If the iframe was completely removed, it is invalid
-        if (!cleanIframe?.includes('<iframe')) {
+    async validateIframe(value: string): Promise<void> {
+        // Check if the value is a URL instead of an iframe HTML
+        if (value.trim().startsWith('http') && !value.includes('<iframe')) {
+            // If it's a URL, validate it as a URL
+            await this.validateUrl(value);
+            return;
+        }
+        
+        // If the iframe was completely removed by sanitization, it is invalid
+        if (!value.includes('<iframe')) {
             throw new CustomError(HttpStatus.Error.BadRequest, "The value must be a valid iframe HTML");
         }
         
@@ -167,12 +186,12 @@ export class SecurityService {
                 // Verify if our URL is allowed in frame-ancestors
                 const frameAncestorsMatch = csp.match(/frame-ancestors\s+([^;]+)/i);
                 if (frameAncestorsMatch) {
-                    const allowedAncestors = frameAncestorsMatch[1].split(/\s+/);
+                    const allowedAncestors = frameAncestorsMatch[1]?.split(/\s+/);
                     // If it does not include 'self', '*' or our domain, it is not allowed to embed
-                    if (!allowedAncestors.some(ancestor => 
+                    if (!allowedAncestors?.some(ancestor => 
                         ancestor === '*' || 
                         ancestor === "'self'" || 
-                        ancestor.includes(new URL(process.env.APP_URL || 'https://example.com').hostname)
+                        ancestor.includes(new URL(process.env.APP_URL ?? 'https://example.com').hostname)
                     )) {
                         throw new CustomError(HttpStatus.Error.BadRequest, "This site restricts embedding through Content-Security-Policy");
                     }
