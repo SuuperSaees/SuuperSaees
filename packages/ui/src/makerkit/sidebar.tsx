@@ -172,7 +172,7 @@ export function SidebarItem({
             </Tooltip>
           </TooltipProvider>
         </If>
-        <span className={cn({ hidden: collapsed })}>{children}</span>
+        <span className={cn({ hidden: collapsed }, 'w-full flex items-center justify-between')}>{children}</span>
       </Link>
     </Button>
   );

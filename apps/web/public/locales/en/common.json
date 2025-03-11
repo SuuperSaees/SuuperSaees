@@ -171,5 +171,15 @@
     "noColumnsSelected": "No columns selected for export",
     "export": "Export",
     "selectAtLeastOneColumn": "Please select at least one column to export"
+  },
+  "embedsName": "Embeds",
+  "overdue": {
+    "title": "Overdue",
+    "singular": {
+      "description": "Overdue by {{days}} day"
+    },
+    "plural": {
+      "description": "Overdue by {{days}} days"
+    }
   }
 }

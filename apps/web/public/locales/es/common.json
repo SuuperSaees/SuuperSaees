@@ -168,5 +168,15 @@
     "noColumnsSelected": "No hay columnas seleccionadas para exportar",
     "export": "Exportar",
     "selectAtLeastOneColumn": "Por favor, selecciona al menos una columna para exportar"
+  },
+  "embedsName": "Embeds",
+  "overdue": {
+    "title": "Retrasado",
+    "singular": {
+      "description": "Retrasado por {{days}} día"
+    },
+    "plural": {
+      "description": "Retrasado por {{days}} días"
+    }
   }
 }
