@@ -6,11 +6,13 @@ import { Window } from 'happy-dom';
 
 export class SecurityService {
     private window: Window;
+    private baseUrl: string;
     private purify: typeof DOMPurify;
 
-    constructor() {
+    constructor(baseUrl?: string) {
         this.window = new Window();
         this.purify = DOMPurify(this.window as Window & typeof globalThis);
+        this.baseUrl = baseUrl ?? process.env.NEXT_PUBLIC_SITE_URL ?? '';
     }
 
     sanitizeText(text: string): string {
@@ -40,6 +42,8 @@ export class SecurityService {
             if (data.type === 'iframe') {
                 // We'll sanitize the iframe value and update the data object
                 data.value = this.sanitizeIframeValue(data.value);
+                // Add validation for iframe embeddability
+                await this.validateIframe(data.value);
             } else if (data.type === 'url') {
                 // For URLs, we'll just validate but not modify the value
                 // as validateUrl will throw an error if the URL is invalid
@@ -161,17 +165,41 @@ export class SecurityService {
         }
     }
 
+    isOriginAllowed(origin: string, allowedOrigins: string[]): boolean {
+        for (const allowedOrigin of allowedOrigins) {
+            if (allowedOrigin === '*' || allowedOrigin === "'self'") {
+                return true;
+            }
+            if (origin === allowedOrigin) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    getOrigin(url:string):string{
+        const urlObject = new URL(url);
+        return urlObject.origin;
+    }
+    
+    getHostname(url:string):string{
+        const urlObject = new URL(url);
+        return urlObject.hostname;
+    }
+    
+    getAppHostname():string{
+        return new URL(this.baseUrl).hostname;
+    }
+    
     async checkEmbeddable(url: string): Promise<void> {
         try {
-            // Make a HEAD request to verify the headers
-            const response = await fetch(url, { 
+            const response = await fetch(url, {
                 method: 'HEAD',
                 headers: {
                     'User-Agent': 'Mozilla/5.0 (compatible; EmbedValidator/1.0)'
                 }
             });
-
-            // Verify X-Frame-Options
+    
             const xFrameOptions = response.headers.get('X-Frame-Options');
             if (xFrameOptions) {
                 const option = xFrameOptions.toUpperCase();
@@ -179,29 +207,34 @@ export class SecurityService {
                     throw new CustomError(HttpStatus.Error.BadRequest, "This site does not allow embedding (X-Frame-Options restriction)");
                 }
             }
-
-            // Verify Content-Security-Policy for frame-ancestors
+    
             const csp = response.headers.get('Content-Security-Policy');
-            if (csp && csp.includes('frame-ancestors') && !csp.includes('frame-ancestors *')) {
-                // Verify if our URL is allowed in frame-ancestors
+            if (csp?.includes('frame-ancestors')) {
                 const frameAncestorsMatch = csp.match(/frame-ancestors\s+([^;]+)/i);
                 if (frameAncestorsMatch) {
                     const allowedAncestors = frameAncestorsMatch[1]?.split(/\s+/);
-                    // If it does not include 'self', '*' or our domain, it is not allowed to embed
-                    if (!allowedAncestors?.some(ancestor => 
-                        ancestor === '*' || 
-                        ancestor === "'self'" || 
-                        ancestor.includes(new URL(process.env.APP_URL ?? 'https://example.com').hostname)
-                    )) {
-                        throw new CustomError(HttpStatus.Error.BadRequest, "This site restricts embedding through Content-Security-Policy");
+                    const embedOrigin = this.getOrigin(url);
+                    const appHostname = this.getAppHostname();
+    
+                    if(!this.isOriginAllowed(embedOrigin,allowedAncestors ?? [])){
+                        if(!allowedAncestors?.some(ancestor => ancestor.includes(appHostname))){
+                            throw new CustomError(HttpStatus.Error.BadRequest, "This site restricts embedding through Content-Security-Policy");
+                        }
                     }
                 }
             }
+
+            if (csp?.includes("default-src 'self'")) {
+                const embedOrigin = new URL(url).origin;
+                if (!embedOrigin.includes(this.baseUrl)) {
+                    throw new CustomError(HttpStatus.Error.BadRequest, "This site does not allow embedding (CSP default-src 'self' restriction)");
+                }
+            }
+    
         } catch (error) {
             if (error instanceof CustomError) {
                 throw error;
             }
-            // If there is an error in the request, we assume that it cannot be embedded
             throw new CustomError(HttpStatus.Error.BadRequest, "Unable to verify if the site can be embedded");
         }
     }
