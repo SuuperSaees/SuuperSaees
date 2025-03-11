@@ -17,6 +17,7 @@ import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { ColumnConfigs, EntityData } from '../types';
 import Avatar from '../../../components/ui/avatar';
+import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
 
 const truncateText = (text: string, maxLength = 50) => {
   if (!text) return '';
@@ -43,9 +44,12 @@ export const ordersColumns = (
             className="flex w-full min-w-[100px] gap-2"
           >
             <div className="flex w-fit flex-col">
-              <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words font-semibold">
-                {truncateText(row.original.title)}
-              </span>
+              <div className="flex items-center">
+                <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words font-semibold">
+                  {truncateText(row.original.title)}
+                </span>
+                <UnreadMessageIndicator orderId={row.original.id} />
+              </div>
               <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
                 {truncateText(row.original?.brief?.name ?? '')}
               </span>

@@ -1,11 +1,12 @@
 'use client';
 
 import { format } from 'date-fns';
-import { es, enUS } from 'date-fns/locale';
+import { enUS, es } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
+import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 import { Chats } from '~/lib/chats.types';
 
 import { useChat } from './context/chat-context';
@@ -49,6 +50,8 @@ export default function ChatItem({
       })()
     : '';
 
+  const { getUnreadCountForChat } = useUnreadMessageCounts({ userId: chat.user_id });
+  const totalChatUnread = getUnreadCountForChat(chat.id);
   return (
     <button
       onClick={handleChatSelect}
@@ -83,8 +86,19 @@ export default function ChatItem({
           ) : null}
         </p>
       </div>
-      {/* Date in friendly format : if today show time, if same week show day of the week, if older than a week show date in short format*/}
-      <small className="text-xs text-gray-500">{date}</small>
+      <div className="flex flex-col items-end gap-1">
+        {/* Chat unread count bubble */}
+        {
+          totalChatUnread > 0 && (
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-400 text-white ml-auto">
+              <small className="text-xs text-white">{totalChatUnread}</small>
+            </div>
+          )
+        }
+
+        {/* Date in friendly format : if today show time, if same week show day of the week, if older than a week show date in short format*/}
+        <small className="text-xs text-gray-500">{date}</small>
+      </div>
     </button>
   );
 }
