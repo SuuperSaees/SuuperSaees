@@ -67,6 +67,8 @@ export function EmbedSection({
   //   [formattedEmbeds],
   // );
 
+  const host = typeof window !== 'undefined' ? window.location.hostname : '';
+
   // Create mutation
   const createMutation = useMutation<Embeds.Type, Error, FormValues>({
     mutationFn: (values: FormValues) => {
@@ -76,7 +78,7 @@ export function EmbedSection({
         organization_id: agencyId,
         user_id: userId,
       };
-      return createEmbed(embed, embed_accounts);
+      return createEmbed(embed, embed_accounts, host);
     },
     onSuccess: () => {
       toast.success('Integration created successfully');
@@ -99,7 +101,7 @@ export function EmbedSection({
       const embed = {
         ...embedData,
       };
-      return updateEmbed(id, embed, _embed_accounts);
+      return updateEmbed(id, embed, _embed_accounts, host);
     },
     onSuccess: () => {
       toast.success('Integration updated successfully');
