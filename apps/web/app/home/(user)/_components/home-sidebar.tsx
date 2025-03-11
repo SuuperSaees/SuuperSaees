@@ -10,12 +10,15 @@ import { clientAccountNavigationConfig, clientAccountGuestNavigationConfig } fro
 import pathsConfig from '~/config/paths.config';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
-import { GuestContent } from './guest-content';
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
+import { GuestContent } from './guest-content';
 import './styles/home-sidebar.css';
 import { useOrganizationSettings } from '../../../../../../packages/features/accounts/src/context/organization-settings-context';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
+
+// Custom SidebarNavigation component that adds the MessageBadge to the "/messages" navigation item
+
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user } = props.workspace;
   const userRole = workspace.role;
