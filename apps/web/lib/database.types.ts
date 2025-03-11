@@ -1610,6 +1610,56 @@ export type Database = {
           },
         ]
       }
+      message_reads: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           chat_id: string | null
@@ -3385,6 +3435,17 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_unread_message_counts: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          chat_id: string
+          chat_unread_count: number
+          order_id: number
+          order_unread_count: number
+        }[]
+      }
       get_upper_system_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -3531,6 +3592,20 @@ export type Database = {
           target_organization_id: string
         }
         Returns: boolean
+      }
+      mark_messages_as_read: {
+        Args: {
+          p_chat_id: string
+          p_user_id: string
+        }
+        Returns: number
+      }
+      mark_order_messages_as_read: {
+        Args: {
+          p_user_id: string
+          p_order_id: number
+        }
+        Returns: undefined
       }
       team_account_workspace: {
         Args: {

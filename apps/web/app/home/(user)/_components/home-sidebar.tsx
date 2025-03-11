@@ -5,7 +5,7 @@ import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/side
 import { z } from 'zod';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
-import { SidebarContent, SidebarNavigation } from '@kit/ui/sidebar';
+import { SidebarContent } from '@kit/ui/sidebar';
 
 import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
@@ -20,10 +20,14 @@ import { useOrganizationSettings } from '../../../../../../packages/features/acc
 import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
 import { DynamicIcon } from '../../../components/shared/dynamic-icon';
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
+import { CustomSidebarNavigation } from './custom-sidebar-navigation';
 import { GuestContent } from './guest-content';
 import './styles/home-sidebar.css';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
+
+// Custom SidebarNavigation component that adds the MessageBadge to the "/messages" navigation item
+
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user, organization } = props.workspace;
   const userRole = workspace.role;
@@ -131,12 +135,13 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
       <SidebarContent
         className={`b-["#f2f2f2"] mt-5 h-[calc(100%-160px)] overflow-y-auto`}
       >
-        <SidebarNavigation
+        <CustomSidebarNavigation
           config={navigationConfigWithEmbeds}
           showDashboardUrl={showDashboardUrl}
           catalogProviderUrl={!!catalogProviderUrl}
           catalogProductUrl={!!catalogProductUrl}
           toolCopyListUrl={!!toolCopyListUrl}
+          userId={user?.id ?? ''}
         />
         {userRole === 'client_guest' && (
           <SidebarContent>

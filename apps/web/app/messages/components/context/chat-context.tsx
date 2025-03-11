@@ -1,6 +1,6 @@
 'use client';
 
-import { Dispatch, SetStateAction, createContext, useContext } from 'react';
+import { Dispatch, SetStateAction, createContext, useContext, useEffect } from 'react';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
@@ -18,6 +18,7 @@ import {
   ChatProviderProps,
 } from '~/messages/types/chat-context.types';
 import { updateArrayData } from '~/utils/data-transform';
+import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 
 /**
  * Context for managing chat state and operations.
@@ -269,6 +270,7 @@ export function ChatProvider({
     handleSubscriptions,
   );
 
+  const { markChatAsRead } = useUnreadMessageCounts({userId: user.id});
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
     setMessages: setMessages,
@@ -299,6 +301,12 @@ export function ChatProvider({
     ...chatActions,
     ...messageActions,
   };
+
+  useEffect(() => {
+    if (activeChat?.id) {
+      void markChatAsRead(activeChat.id);
+    }
+  }, [activeChat?.id, markChatAsRead]);
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }
