@@ -8,9 +8,10 @@ function AdminPage() {
       <PageHeader
         title={'Super Admin'}
         description={`Your SaaS stats at a glance`}
+        className='mx-auto flex w-full lg:px-16 p-8'
       />
 
-      <PageBody>
+      <PageBody className='mx-auto flex w-full lg:px-16 p-8'>
         <AdminDashboard />
       </PageBody>
     </>
