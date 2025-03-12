@@ -3,7 +3,7 @@
 import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/sidebar-themed-with-settings';
 import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
-import { SidebarContent, SidebarNavigation } from '@kit/ui/sidebar';
+import { SidebarContent } from '@kit/ui/sidebar';
 import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
 import { clientAccountNavigationConfig, clientAccountGuestNavigationConfig } from '~/config/client-account-navigation.config';
@@ -14,6 +14,7 @@ import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 import { GuestContent } from './guest-content';
 import './styles/home-sidebar.css';
 import { useOrganizationSettings } from '../../../../../../packages/features/accounts/src/context/organization-settings-context';
+import { CustomSidebarNavigation } from './custom-sidebar-navigation';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 
@@ -77,7 +78,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
       </div>
 
       <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
-        <SidebarNavigation config={selectedNavigationConfig} showDashboardUrl={showDashboardUrl} catalogProviderUrl={!!catalogProviderUrl} catalogProductUrl={!!catalogProductUrl} toolCopyListUrl={!!toolCopyListUrl} />
+        <CustomSidebarNavigation config={selectedNavigationConfig} showDashboardUrl={showDashboardUrl} catalogProviderUrl={!!catalogProviderUrl} catalogProductUrl={!!catalogProductUrl} toolCopyListUrl={!!toolCopyListUrl} />
         {userRole === 'client_guest' && (
           <SidebarContent>
             <GuestContent />

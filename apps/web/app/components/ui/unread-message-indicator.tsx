@@ -4,16 +4,44 @@ import Tooltip from '~/components/ui/tooltip';
 import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { useRouter } from 'next/navigation';
+import { cn } from '@kit/ui/utils';
 
 interface UnreadMessageIndicatorProps {
-  orderId: number;
+  orderId?: number;
+  chatId?: string;
+  className?: string;
+  indicatorSize?: 'sm' | 'md' | 'lg';
+  showCount?: boolean;
+  customRoute?: string;
+  tooltipText?: string;
+  color?: 'red' | 'green' | 'blue' | 'yellow';
+  seeConversationFn?: () => void;
 }
 
-export function UnreadMessageIndicator({ orderId }: UnreadMessageIndicatorProps) {
+export function UnreadMessageIndicator({ 
+  orderId, 
+  chatId,
+  className,
+  indicatorSize = 'sm',
+  showCount = false,
+  customRoute,
+  tooltipText = 'Click to view conversation',
+  color = 'red',
+  seeConversationFn
+}: UnreadMessageIndicatorProps) {
   const { user } = useUserWorkspace();
-  const { getUnreadCountForOrder, markOrderAsRead } = useUnreadMessageCounts({ userId: user?.id ?? '' });
+  const { 
+    getUnreadCountForOrder, 
+    getUnreadCountForChat,
+  } = useUnreadMessageCounts({ userId: user?.id ?? '' });
   const router = useRouter();
-  const unreadCount = getUnreadCountForOrder(orderId);
+  
+  // Determine unread count based on whether we're dealing with an order or chat
+  const unreadCount = orderId 
+    ? getUnreadCountForOrder(orderId)
+    : chatId 
+      ? getUnreadCountForChat(chatId)
+      : 0;
   
   if (unreadCount <= 0) {
     return null;
@@ -23,12 +51,32 @@ export function UnreadMessageIndicator({ orderId }: UnreadMessageIndicatorProps)
     e.preventDefault();
     e.stopPropagation();
 
-    // Mark messages as read if the function exists
-    if (markOrderAsRead) {
-      void markOrderAsRead(orderId);
+
+
+    // Navigate to the appropriate route
+    if (customRoute) {
+      router.push(customRoute);
+    } else if (orderId) {
+      router.push(`/orders/${orderId}`);
+      seeConversationFn?.();
+    } else if (chatId) {
+      seeConversationFn?.();
     }
-    
-    router.push(`/orders/${orderId}`);
+  };
+  
+  // Size classes based on the indicatorSize prop
+  const sizeClasses = {
+    sm: 'h-2 w-2',
+    md: 'h-4 w-4',
+    lg: 'h-6 w-6'
+  };
+  
+  // Color classes based on the color prop
+  const colorClasses = {
+    red: 'bg-red-500',
+    green: 'bg-green-500',
+    blue: 'bg-blue-500',
+    yellow: 'bg-yellow-500'
   };
   
   const tooltipContent = (
@@ -36,17 +84,27 @@ export function UnreadMessageIndicator({ orderId }: UnreadMessageIndicatorProps)
       <p className="text-sm font-medium">
         {unreadCount} unread {unreadCount === 1 ? 'message' : 'messages'}
       </p>
-      <p className="text-xs text-blue-400">Click to view conversation</p>
+      <p className="text-xs text-blue-400">{tooltipText}</p>
     </div>
   );
   
   return (
     <Tooltip content={tooltipContent} delayDuration={200}>
       <div 
-        className="flex-shrink-0 ml-1 h-2 w-2 cursor-pointer rounded-full bg-red-500 animate-pulse"
+        className={cn(
+          "flex-shrink-0 ml-1 cursor-pointer rounded-full animate-pulse",
+          sizeClasses[indicatorSize],
+          colorClasses[color],
+          showCount ? "flex items-center justify-center" : "",
+          className
+        )}
         aria-label={`${unreadCount} unread messages`}
         onClick={handleClick}
-      />
+      >
+        {showCount && indicatorSize !== 'sm' && (
+          <small className="text-xs text-white">{unreadCount}</small>
+        )}
+      </div>
     </Tooltip>
   );
 } 

@@ -50,7 +50,14 @@ export const ordersColumns = (
                   {truncateText(row.original.title)}
                 </span>
                 <div className="flex items-start flex-shrink-0">
-                  <OverdueIndicator dueDate={row.original.due_date} />
+                  {
+                    withPermissionsActive && hasPermission() && (
+                      <OverdueIndicator 
+                        dueDate={row.original.due_date} 
+                        isCompleted={row.original.status === 'completed'} 
+                      />
+                    )
+                  }
                   <UnreadMessageIndicator orderId={row.original.id} />
                 </div>
               </div>
