@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
 import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 import { Chats } from '~/lib/chats.types';
+import { UnreadMessageIndicator } from '../../components/ui/unread-message-indicator';
 
 import { useChat } from './context/chat-context';
 
@@ -90,9 +91,12 @@ export default function ChatItem({
         {/* Chat unread count bubble */}
         {
           totalChatUnread > 0 && (
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-400 text-white ml-auto">
-              <small className="text-xs text-white">{totalChatUnread}</small>
-            </div>
+            <UnreadMessageIndicator 
+              chatId={chat.id}
+              color="green"
+              className="ml-auto"
+              seeConversationFn={handleChatSelect}
+            />
           )
         }
 

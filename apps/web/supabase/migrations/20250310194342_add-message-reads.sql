@@ -38,6 +38,7 @@ CREATE OR REPLACE FUNCTION public.get_unread_message_counts(p_user_id uuid)
 AS $function$
 DECLARE
   is_agency_role boolean;
+  cutoff_date timestamp with time zone := '2025-03-11 18:04:00-05'::timestamp with time zone; -- March 11, 2025, 6:04 PM Colombia time (UTC-5)
 BEGIN
   -- Check if the user has any agency role
   SELECT EXISTS (
@@ -59,6 +60,7 @@ BEGIN
   WHERE m.chat_id IS NOT NULL
   AND m.order_id IS NULL  -- Exclude order-related messages
   AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+  AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
   AND (
     is_agency_role = true  -- Agency roles can see all messages
     OR m.visibility = 'public'  -- Non-agency roles can only see public messages
@@ -79,6 +81,7 @@ BEGIN
   FROM messages m
   WHERE m.order_id IS NOT NULL
   AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+  AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
   AND (
     is_agency_role = true  -- Agency roles can see all messages
     OR m.visibility = 'public'  -- Non-agency roles can only see public messages

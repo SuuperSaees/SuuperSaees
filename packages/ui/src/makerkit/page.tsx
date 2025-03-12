@@ -117,7 +117,7 @@ export function PageDescription(props: React.PropsWithChildren) {
   return (
     <h2 className={'hidden lg:block'}>
       <span
-        className={'text-base font-medium leading-none text-muted-foreground'}
+        className={'text-sm font-medium leading-none text-muted-foreground'}
       >
         {props.children}
       </span>

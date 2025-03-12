@@ -7,7 +7,8 @@ const useOrdersTransformations = () => {
     const clientsLib = new Map<string, User.Response>();
 
     orders.forEach((order) => {
-      if (order.customer && clientsLib.has(order.customer.id)) return;
+      if (!order.customer || !order.customer.id) return;
+      if (clientsLib.has(order.customer.id)) return;
       clientsLib.set(order.customer.id, order.customer);
     });
 
