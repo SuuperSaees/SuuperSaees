@@ -3,7 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "~/lib/database.types";
 import { AccountPluginsRepository } from "../repositories/account-plugins.repository";
 import { AccountPluginsService } from "../services/account-plugins.service";
-
+import { PluginsRepository } from "../../plugins/repositories/plugins.repository";
 
 export class AccountPluginsController {
     private baseUrl: string;
@@ -30,7 +30,8 @@ export class AccountPluginsController {
     async create(payload: AccountPluginInsert): Promise<AccountPlugin> {
         try {
             const accountPluginRepository = new AccountPluginsRepository(this.client, this.adminClient);
-            const accountPluginService = new AccountPluginsService(accountPluginRepository);
+            const pluginsRepository = new PluginsRepository(this.client, this.adminClient);
+            const accountPluginService = new AccountPluginsService(accountPluginRepository, pluginsRepository);
             return await accountPluginService.create(payload);
         } catch (error) {
             console.log(error);
@@ -40,7 +41,6 @@ export class AccountPluginsController {
 
     async update(id: string, payload: Partial<AccountPluginInsert> & {
         provider?: string;
-        account_id?: string;
         provider_id?: string;
     }): Promise<AccountPlugin> {
         try {
@@ -62,7 +62,7 @@ export class AccountPluginsController {
             throw error;
         }
     }
-    async get(id: string): Promise<AccountPlugin | null> {
+    async get(id: string): Promise<AccountPlugin> {
         try {
             const accountPluginRepository = new AccountPluginsRepository(this.client, this.adminClient);
             const accountPluginService = new AccountPluginsService(accountPluginRepository);

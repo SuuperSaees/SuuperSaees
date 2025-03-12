@@ -60,8 +60,8 @@ export class AccountPluginsRepository {
 
       if (
         billingAccount &&
-        billingAccount.provider !== 'loom' &&
-        billingAccount.provider !== 'treli'
+        billingAccount.provider === 'stripe' ||
+        billingAccount.provider === 'treli'
       ) {
         const { error: billingError } = await this.client
           .from('billing_accounts')
@@ -69,7 +69,8 @@ export class AccountPluginsRepository {
             {
               ...billingAccount,
               provider_id: billingAccount.provider_id ?? null,
-            } as unknown as { provider_id: string },
+              account_id: billingAccount.account_id
+            },
             { onConflict: 'account_id,provider' },
           );
 
@@ -104,15 +105,9 @@ export class AccountPluginsRepository {
    */
   async get({
     id,
-    accountId,
-    limit = 10,
-    offset = 0,
   }: {
     id?: string;
-    accountId?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<AccountPlugin | AccountPlugin[]> {
+  }): Promise<AccountPlugin> {
     try {
       const query = this.client
         .from(this.tableName)
@@ -125,7 +120,8 @@ export class AccountPluginsRepository {
           credentials,
           created_at,
           updated_at,
-          deleted_on
+          deleted_on,
+          plugins(id, name)
         `)
         .is('deleted_on', null);
 
@@ -140,21 +136,7 @@ export class AccountPluginsRepository {
 
         return data as AccountPlugin;
       }
-
-      if (accountId) {
-        const { data, error } = await query
-          .eq('account_id', accountId)
-          .range(offset, offset + limit - 1);
-
-        if (error) {
-          throw new Error(
-            `[REPOSITORY] Error fetching account plugins for account: ${error.message}`,
-          );
-        }
-
-        return data as AccountPlugin[];
-      }
-
+      
       throw new Error('[REPOSITORY] Either id or accountId must be provided');
     } catch (error) {
       throw new Error(
@@ -162,6 +144,42 @@ export class AccountPluginsRepository {
       );
     }
   }
+
+    async list(accountId: string, limit= 10, offset= 0): Promise<AccountPlugin[]> {
+      try {
+        const query = this.client
+        .from(this.tableName)
+        .select(`
+          id,
+          plugin_id,
+          account_id,
+          provider_id,
+          status,
+          credentials,
+          created_at,
+          updated_at,
+          deleted_on
+        `)
+        .eq('account_id', accountId)
+        .is('deleted_on', null)
+        .range(offset, offset + limit - 1);
+
+        const { data, error } = await query;
+
+        if (error) {
+          throw new Error(
+            `[REPOSITORY] Error fetching account plugins: ${error.message}`,
+          );
+        }
+
+        return data as AccountPlugin[];
+      } catch (error) {
+        throw new Error(
+          `[REPOSITORY] Error in list method: ${(error as Error).message}`,
+        );
+      }
+    }
+
 
   /**
    * @name update
@@ -179,6 +197,7 @@ export class AccountPluginsRepository {
     billingUpdates?: Partial<BillingAccountInsert>,
   ): Promise<AccountPlugin> {
     try {
+
       const { data: pluginData, error: pluginError } = await this.client
         .from(this.tableName)
         .update({
@@ -263,7 +282,7 @@ export class AccountPluginsRepository {
         );
       }
 
-      if (provider !== 'loom') {
+      if (provider !== 'loom' && provider !== 'embeds') {
         const { error: billingError } = await this.client
           .from('billing_accounts')
           .update({
@@ -273,7 +292,7 @@ export class AccountPluginsRepository {
           .eq('account_id', accountId)
           .eq('provider', provider);
 
-        if (billingError) {
+        if (billingError && billingError.code !== 'PGRST116') {
           throw new Error(
             `[REPOSITORY] Error deleting billing account: ${billingError.message}`,
           );
@@ -349,6 +368,48 @@ export class AccountPluginsRepository {
     } catch (error) {
       throw new Error(
         `[REPOSITORY] Error in getProviderId method: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  async updateLoom(
+    id: string,
+    updates: Partial<AccountPluginInsert>,
+  ): Promise<AccountPlugin> {
+    try {
+      const { data: pluginData, error: pluginError } = await this.client
+        .from(this.tableName)
+        .update({
+          ...updates,
+          provider_id: updates.provider_id ?? undefined,
+        })
+        .eq('id', id)
+        .is('deleted_on', null)
+        .select(
+          `
+          id,
+          plugin_id,
+          account_id,
+          provider_id,
+          status,
+          credentials,
+          created_at,
+          updated_at,
+          deleted_on
+        `,
+        )
+        .single();
+
+      if (pluginError) {
+        throw new Error(
+          `[REPOSITORY] Error updating loom account plugin: ${pluginError.message}`,
+        );
+      }
+
+      return pluginData as AccountPlugin;
+    } catch (error) {
+      throw new Error(
+        `[REPOSITORY] Error in updateLoom method: ${(error as Error).message}`,
       );
     }
   }

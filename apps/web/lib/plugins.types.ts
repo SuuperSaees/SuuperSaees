@@ -33,6 +33,10 @@ export interface AccountPlugin {
   created_at: string;
   updated_at: string;
   deleted_on?: string | null;
+  plugins?: {
+    id: string;
+    name: string;
+  };
 }
 
 export interface AccountPluginInsert {

@@ -5,11 +5,13 @@ import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-import { getAccountPluginsByAccountAction } from '../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugins-by-account';
-import { getAllPluginsAction } from '../../../../packages/plugins/src/server/actions/plugins/get-all-plugins';
+import { getAccountPlugins } from '~/server/actions/account-plugins/account-plugins.action';
+import { getPlugins } from '~/server/actions/plugins/plugins.actions';
 import { PageHeader } from '../components/page-header';
 import PluginCard from './components/plugin-card';
 import PluginsHeaderCard from './components/plugins-header-card';
+import { AccountRoles } from '~/lib/account.types';
+import { redirect } from 'next/navigation';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -31,18 +33,27 @@ interface EnrichedPlugin {
 }
 
 async function PluginsPage() {
-  const { user } = await loadUserWorkspace();
-  const userId: string = user.id;
+  const { workspace } = await loadUserWorkspace();
+  const userId = workspace.id ?? '';
+  const role = workspace.role ?? '';
 
-  const allPluginsResponse = await getAllPluginsAction();
-  const allPlugins = allPluginsResponse.success?.data ?? [];
+  if (AccountRoles.clientRoles.has(role)) {
+    redirect('/orders');
+  }
 
-  const accountPluginsResponse = await getAccountPluginsByAccountAction(
+  const allPlugins = await getPlugins().catch((error) => {
+    console.error('Error fetching all plugins:', error);
+    return [];
+  });
+
+  const accountPlugins = await getAccountPlugins(
     userId,
     100,
     0,
-  );
-  const accountPlugins = accountPluginsResponse.success?.data ?? [];
+  ).catch((error) => {
+    console.error('Error fetching account plugins:', error);
+    return [];
+  });
 
   const enrichedPlugins: EnrichedPlugin[] = allPlugins.map((plugin) => {
     const accountPlugin = accountPlugins.find(
@@ -50,7 +61,7 @@ async function PluginsPage() {
     );
     return {
       id: plugin.id,
-      name: plugin.name || 'Unknown', 
+      name: plugin.name ?? 'Unknown', 
       description: plugin.description ?? '', 
       type: plugin.type,
       created_at: plugin.created_at,
@@ -68,7 +79,7 @@ async function PluginsPage() {
       if (plugin) {
         return {
           id: plugin.id,
-          name: plugin.name || 'Unknown',
+          name: plugin.name ?? 'Unknown',
           description: plugin.description ?? '',
           type: plugin.type,
           created_at: plugin.created_at,
