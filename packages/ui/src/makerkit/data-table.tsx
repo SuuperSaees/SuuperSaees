@@ -115,9 +115,9 @@ export function DataTable<T extends object>({
   });
 
   return (
-    <div className={'rounded-lg border'}>
-      <Table {...tableProps}>
-        <TableHeader>
+    <div className={'rounded-lg border shadow-none'}>
+      <Table {...tableProps} className='shadow-none'>
+        <TableHeader className='px-4'>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -127,6 +127,7 @@ export function DataTable<T extends object>({
                     width: header.column.getSize(),
                   }}
                   key={header.id}
+                  className='px-4'  
                 >
                   {header.isPlaceholder
                     ? null
@@ -148,7 +149,7 @@ export function DataTable<T extends object>({
                 data-state={row.getIsSelected() && 'selected'}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className='px-4'>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -156,7 +157,7 @@ export function DataTable<T extends object>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={columns.length} className="h-24 text-center px-4">
                 <Trans i18nKey={'common:noData'} />
               </TableCell>
             </TableRow>
