@@ -6,8 +6,8 @@ import { enhanceAction } from '@kit/next/actions';
 import { getLogger } from '@kit/shared/logger';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-import { createAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/create-account-plugin';
-import { updateAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { createAccountPlugin } from '../../../../../../apps/web/app/server/actions/account-plugins/account-plugins.action';
+import { updateAccountPlugin } from '../../../../../../apps/web/app/server/actions/account-plugins/account-plugins.action';
 import {
   UpdateTeamNameSchema,
   UpdateTeamStripeIdSchema,
@@ -100,7 +100,7 @@ export const updateTeamAccountStripeId = enhanceAction(
     }
 
     if (!existingPlugin) {
-      await createAccountPluginAction({
+      await createAccountPlugin({
         plugin_id: pluginId,
         account_id: accountId,
         credentials: { stripe_id },
@@ -113,14 +113,14 @@ export const updateTeamAccountStripeId = enhanceAction(
     } else {
       const updatedCredentials = { stripe_id };
 
-      await updateAccountPluginAction(
+      await updateAccountPlugin(
         existingPlugin.id,
         {
           credentials: updatedCredentials,
           provider: 'stripe',
           account_id: accountId,
+          provider_id: stripe_id,
         },
-        stripe_id, 
       );
 
       logger.info(

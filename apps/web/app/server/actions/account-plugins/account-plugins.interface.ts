@@ -1,4 +1,4 @@
-import { AccountPlugin, AccountPluginInsert } from "~/lib/plugins.types";
+import { AccountPlugin, AccountPluginInsert, BillingAccountInsert } from "~/lib/plugins.types";
 export interface IAccountPluginsAction {
     list(accountId: string, limit?: number, offset?: number): Promise<AccountPlugin[]>;
     create(payload: AccountPluginInsert): Promise<AccountPlugin>;
@@ -8,5 +8,5 @@ export interface IAccountPluginsAction {
         provider_id?: string;
     }): Promise<AccountPlugin>;
     delete(id: string, accountId: string, provider: string): Promise<void>;
-    get(id: string): Promise<AccountPlugin | null>;
+    get(id: string): Promise<AccountPlugin>;
 }

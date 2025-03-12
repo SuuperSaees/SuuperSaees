@@ -23,6 +23,6 @@ export const getPlugin = async (id: string) => {
     return await getPluginsActions().get(id);
 }
 
-export const listPlugins = async () => {
+export const getPlugins = async () => {
     return await getPluginsActions().list();
 }

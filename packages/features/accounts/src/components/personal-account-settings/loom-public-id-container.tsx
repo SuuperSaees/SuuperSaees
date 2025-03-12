@@ -8,8 +8,8 @@ import { Eye as EyeIcon, EyeOff as EyeOffIcon } from 'lucide-react';
 
 import { Spinner } from '@kit/ui/spinner';
 
-import { getAccountPluginByIdAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
-import { updateAccountPluginAction } from '../../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { getAccountPlugin } from '../../../../../../apps/web/app/server/actions/account-plugins/account-plugins.action';
+import { updateAccountPlugin } from '../../../../../../apps/web/app/server/actions/account-plugins/account-plugins.action';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { ThemedInput } from '../ui/input-themed-with-settings';
 import { CopyDomain } from './copy-domain';
@@ -37,17 +37,17 @@ function LoomPublicIdContainer({
       }
       
       try {
-        const response = await getAccountPluginByIdAction(pluginId);
+        const response = await getAccountPlugin(pluginId);
         
-        if (response?.success) {
-          const credentials = response.success.data?.credentials as Record<string, unknown>;
+        if (response) {
+          const credentials = response.credentials as Record<string, unknown>;
           if (typeof credentials?.loom_app_id === 'string') {
             setLoomAppId(credentials.loom_app_id);
           }
-          return response.success.data;
+          return response;
         } 
         
-        throw new Error(response?.error?.message ?? 'Failed to fetch plugin data');
+        throw new Error('Failed to fetch plugin data');
       } catch (error) {
         console.error('Error fetching plugin data:', error);
         toast.error(t('errorFetchingPlugin'), {
@@ -91,7 +91,7 @@ function LoomPublicIdContainer({
         provider: 'loom',
       };
 
-      return await updateAccountPluginAction(pluginId, updates);
+      return await updateAccountPlugin(pluginId, updates);
     },
     onSuccess: () => {
       toast.success(t('updateSuccess'), {

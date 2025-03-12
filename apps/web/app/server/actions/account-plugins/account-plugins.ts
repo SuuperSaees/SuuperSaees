@@ -24,19 +24,19 @@ class AccountPluginsAction extends BaseAction implements IAccountPluginsAction {
 
     async update(id: string, payload: Partial<AccountPluginInsert> & {
         provider?: string;
-        account_id?: string;
         provider_id?: string;
       }): Promise<AccountPlugin> {
         return await this.controller.update(id, payload);
     }
 
-    async delete(  id: string,
+    async delete(
+        id: string,
         accountId: string,
         provider: string,): Promise<void> {
         return await this.controller.delete(id, accountId, provider);
     }
 
-    async get(id: string): Promise<AccountPlugin | null> {
+    async get(id: string): Promise<AccountPlugin> {
         return await this.controller.get(id);
     }
 }
