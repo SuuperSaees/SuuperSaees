@@ -145,7 +145,9 @@ export const createClientUserAccount = async (
         callbackUrl,
         organizationName,
         organizationId ?? '',
-        );
+        ).catch((error) => {
+          console.error('Error occurred while sending the email', error);
+        });
       } else {
         return {
           ...clientOrganizationUser,

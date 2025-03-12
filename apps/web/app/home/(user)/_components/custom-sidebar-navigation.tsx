@@ -5,6 +5,7 @@ import { MessageBadge } from './message-badge';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 import { z } from 'zod';
 import pathsConfig from '~/config/paths.config';
+
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 export function CustomSidebarNavigation({
   config,
@@ -89,11 +90,10 @@ export function CustomSidebarNavigation({
               end={item.end}
               path={item.path}
               Icon={item.Icon}
+              className="flex w-full items-center"
             >
-              <div className="flex items-center">
-                <Trans i18nKey={item.label} defaults={item.label} />
-                <MessageBadge userId={userId ?? ''} />
-              </div>
+              <Trans i18nKey={item.label} defaults={item.label} />
+              <MessageBadge userId={userId ?? ''} />
             </SidebarItem>
           );
         }

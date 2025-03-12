@@ -9,7 +9,7 @@ export function MessageBadge({userId}: {userId: string}) {
   }
   
   return (
-    <span className="ml-2 w-6 h-6 inline-flex items-center justify-center rounded-full bg-white text-secondary-foreground text-xs font-semibold border border-gray-200">
+    <span className="ml-auto w-6 h-6 inline-flex items-center justify-center rounded-full bg-white/40 text-secondary-foreground text-xs font-semibold border border-white-200/[0.6]">
       {openChats.length}
     </span>
   );

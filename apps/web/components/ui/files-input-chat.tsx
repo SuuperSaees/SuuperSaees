@@ -1,49 +1,56 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
-
+import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } from 'react';
+import { StickyNote, X } from 'lucide-react';
+import { Spinner } from '@kit/ui/spinner';
+import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-chat-uploads';
+import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon, MPEGIcon, MKVIcon, AVIIcon, MP3Icon, MP4Icon, CLIPIcon, WAVIcon } from '~/orders/[id]/components/file-icons';
 import Image from 'next/image';
 
-import { X } from 'lucide-react';
-
-import { Spinner } from '@kit/ui/spinner';
-
-
-import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-chat-uploads';
-
-import FileUploadCard from '../../app/components/file-preview/file-upload-card';
-
-
+const fileTypeIcons: Record<string, JSX.Element> = {
+  pdf: <PDFIcon />,
+  doc: <DOCIcon />,
+  docx: <DOCXIcon />,
+  txt: <TXTIcon />,
+  csv: <CSVIcon />,
+  xls: <XLSIcon />,
+  xlsx: <XLSXIcon />,
+  ppt: <PPTIcon />,
+  pptx: <PPTXIcon />,
+  fig: <FIGIcon />,
+  ai: <AIIcon />,
+  psd: <PSDIcon />,
+  indd: <INDDIcon />,
+  aep: <AEPIcon />,
+  html: <HTMLIcon />,
+  css: <CSSIcon />,
+  rss: <RSSIcon />,
+  sql: <SQLIcon />,
+  js: <JSIcon />,
+  json: <JSONIcon />,
+  java: <JAVAIcon />,
+  xml: <XMLIcon />,
+  exe: <EXEIcon />,
+  dmg: <DMGIcon />,
+  zip: <ZIPIcon />,
+  rar: <RARIcon />,
+  mp3: <MP3Icon />,
+  mp4: <MP4Icon />,
+  wav: <WAVIcon />,
+  avi: <AVIIcon />,
+  mkv: <MKVIcon />,
+  mpeg: <MPEGIcon />,
+};
 
 interface FileUploaderProps {
   onFileSelect?: (fileIds: string[]) => void;
   onFileIdsChange?: (fileIds: string[]) => void;
   onMessageSend?: boolean;
-  onFileUploadStatusUpdate?: (
-    file: File,
-    status: 'uploading' | 'completed' | 'error',
-    serverId?: string,
-  ) => void;
+  onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
   thereAreFilesUploaded?: (value: boolean) => void;
   referenceId?: string;
 }
 
 const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
-  (
-    {
-      onFileSelect,
-      onFileIdsChange,
-      onMessageSend = false,
-      onFileUploadStatusUpdate,
-      thereAreFilesUploaded,
-      referenceId,
-    },
-    ref,
-  ) => {
+  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded, referenceId }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [hoveredFileId, setHoveredFileId] = useState<number | null>(null);
     const videoRefs = useRef<{ [key: number]: HTMLVideoElement }>({});
@@ -53,18 +60,21 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       globalFileList,
       handleFileChange,
       removeFile,
-      resetFiles,
+      resetFiles
     } = useFileUpload({
       onFileSelect,
       onFileIdsChange,
       onFileUploadStatusUpdate,
       thereAreFilesUploaded,
-      referenceId,
+      referenceId
     });
 
     useImperativeHandle(ref, () => inputRef.current!);
 
-
+    const getFileTypeIcon = (fileName: string) => {
+      const extension = fileName.split('.').pop()?.toLowerCase() ?? '';
+      return fileTypeIcons[extension] ?? <StickyNote className="text-gray-500 h-[56px] w-[40px]" />;
+    };
 
     useEffect(() => {
       if (onMessageSend) {
@@ -74,7 +84,7 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
 
     useEffect(() => {
       return () => {
-        Object.values(videoRefs.current).forEach((video) => {
+        Object.values(videoRefs.current).forEach(video => {
           if (video.src) {
             URL.revokeObjectURL(video.src);
           }
@@ -83,7 +93,7 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
     }, []);
 
     return (
-      <div className="flex max-h-[240px] w-full flex-wrap gap-2 overflow-y-auto overflow-x-hidden">
+      <div className="overflow-y-auto overflow-x-hidden flex flex-wrap gap-2 max-h-[240px] w-full">
         <input
           ref={inputRef}
           type="file"
@@ -94,75 +104,99 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
         {selectedFiles.map((file, id) => (
           <div
             key={id}
-            className="group relative m-2 mt-4 flex flex-col items-center justify-start"
+            className="relative flex flex-col items-center justify-start w-24 mt-4 m-2"
             onMouseEnter={() => setHoveredFileId(id)}
             onMouseLeave={() => setHoveredFileId(null)}
           >
-            <div className="flex items-center justify-center rounded-lg">
+            <div className="flex items-center justify-center w-24 h-16 bg-gray-200 rounded-lg overflow-hidden">
               {
                 <>
                   {file.type.startsWith('image/') ? (
-                    <div className="relative group/image h-full w-full">
-                      <Image
-                        src={
-                          globalFileList.find((item) => item.file === file)
-                            ?.url ?? URL.createObjectURL(file)
-                        }
-                        alt={file.name}
-                        className="h-20 w-20 rounded-lg object-cover"
-                        width={100}
-                        height={100}
-                        quality={60}
-                        priority
-                      />
-                      {globalFileList?.find((item) => item.file === file)
-                        ?.progress < 100 && (
-                        <button
-                          className="absolute -right-2 -top-2 z-[100] rounded-full border border-2 border-white bg-gray-800/100 p-0.5 hover:bg-gray-800/70"
-                        >
-                          <Spinner className="h-3 w-3 text-white" />
-                        </button>
+                    <div className="relative w-full h-full">
+                      {globalFileList.find((item) => item.file === file)?.progress === 100 ? (
+                        <Image 
+                          src={globalFileList.find((item) => item.file === file)?.url ?? URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="object-cover w-full h-full"
+                          width={100}
+                          height={100}
+                          quality={60}
+                          priority
+                        />
+                      ) : (
+                        <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                          <CLIPIcon />
+                          <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-300/50'>
+                            <Spinner className='w-5 h-5 text-black'/>
+                            <p className='text-black text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                          </div>
+                        </div>
                       )}
-                      {removeFile && (
-                        <button
-                          onClick={() => removeFile(file)}
-                          className="absolute -right-2 -top-2 z-[200] rounded-full border border-2 border-white bg-gray-800/100 p-0.5 hover:bg-gray-800/70 group-hover/image:block hidden"
-                        >
-                          <X className="h-3 w-3 text-white" />
-                        </button>
+                    </div>
+                  ) : file.type.startsWith('video/') ? (
+                    <div className="relative w-full h-full">
+                      {globalFileList.find((item) => item.file === file)?.progress === 100 ? (
+                        <video
+                          ref={el => {
+                            if (el) {
+                              videoRefs.current[id] = el;
+                              if (!el.src) {
+                                el.src = URL.createObjectURL(file);
+                              }
+                            }
+                          }}
+                          className="object-cover w-full h-full"
+                          muted
+                          controls={false}
+                          preload="metadata"
+                          disablePictureInPicture
+                          disableRemotePlayback
+                          controlsList="nodownload noplaybackrate"
+                          onLoadedMetadata={(e) => {
+                            e.currentTarget.currentTime = 0;
+                          }}
+                          style={{ pointerEvents: 'none' }}
+                        />
+                      ) : (
+                        <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                          {getFileTypeIcon(file.name)}
+                          <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-300/50'>
+                            <Spinner className='w-5 h-5 text-black'/>
+                            <p className='text-black text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                          </div>
+                        </div>
                       )}
                     </div>
                   ) : (
-                    <FileUploadCard
-                      fileName={file?.name ?? ''}
-                      fileType={file?.type ?? ''}
-                      extension={
-                        file?.name?.split('.').pop()?.toLowerCase() ?? ''
-                      }
-                      isLoading={
-                        globalFileList?.find((item) => item.file === file)
-                          ?.progress < 100
-                      }
-                      onRemove={() => removeFile(file)}
-                    />
+                    <div className='relative w-24 h-16 flex items-center justify-center flex-col border rounded-lg bg-white'>
+                      {getFileTypeIcon(file.name)}
+                      {globalFileList.find((item) => item.file === file)?.progress < 100 && (
+                        <div className='absolute inset-0 flex flex-col items-center justify-center bg-gray-300/50'>
+                          <Spinner className='w-5 h-5 text-black'/>
+                          <p className='text-black text-sm'>{globalFileList.find((item) => item.file === file)?.progress}%</p>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </>
               }
             </div>
-
-            {/* {hoveredFileId === id && globalFileList.find((item) => item.file === file)?.progress > 0 && (
+            <div>
+              <p className="text-sm text-gray-600 truncate w-24">{file.name}</p>
+            </div>
+            {hoveredFileId === id && globalFileList.find((item) => item.file === file)?.progress > 0 && (
               <div className="absolute top-[-8px] right-[-8px]">
                 <X
                   className="cursor-pointer w-4 h-4 bg-white rounded-full shadow"
                   onClick={() => removeFile(file)}
                 />
               </div>
-            )} */}
+            )}
           </div>
         ))}
       </div>
     );
-  },
+  }
 );
 
 FileUploader.displayName = 'FileUploader';

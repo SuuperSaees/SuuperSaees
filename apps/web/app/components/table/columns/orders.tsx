@@ -14,12 +14,13 @@ import StatusCombobox from '~/orders/[id]/components/status-combobox';
 import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick-date';
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
-import { ColumnConfigs, EntityData } from '../types';
 import Avatar from '../../../components/ui/avatar';
 import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
+import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
+import { OverdueIndicator } from '../../../components/ui/overdue-indicator';
+import { ColumnConfigs, EntityData } from '../types';
 
-const truncateText = (text: string, maxLength = 50) => {
+const truncateText = (text: string | undefined, maxLength = 50) => {
   if (!text) return '';
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
@@ -43,12 +44,22 @@ export const ordersColumns = (
             href={`/orders/${row.original.id}`}
             className="flex w-full min-w-[100px] gap-2"
           >
-            <div className="flex w-fit flex-col">
-              <div className="flex items-center">
-                <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words font-semibold">
+            <div className="flex flex-col">
+              <div className="flex items-center ">
+                <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words font-semibold mr-2">
                   {truncateText(row.original.title)}
                 </span>
-                <UnreadMessageIndicator orderId={row.original.id} />
+                <div className="flex items-start flex-shrink-0">
+                  {
+                    withPermissionsActive && hasPermission() && (
+                      <OverdueIndicator 
+                        dueDate={row.original.due_date} 
+                        isCompleted={row.original.status === 'completed'} 
+                      />
+                    )
+                  }
+                  <UnreadMessageIndicator orderId={row.original.id} />
+                </div>
               </div>
               <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
                 {truncateText(row.original?.brief?.name ?? '')}
