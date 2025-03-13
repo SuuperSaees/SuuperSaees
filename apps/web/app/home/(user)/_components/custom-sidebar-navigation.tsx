@@ -1,4 +1,4 @@
-import { SidebarDivider, SidebarGroup, SidebarItem } from '@kit/ui/sidebar';
+import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection } from '@kit/ui/sidebar';
 import { Trans } from '@kit/ui/trans';
 
 import { MessageBadge } from './message-badge';
@@ -27,6 +27,34 @@ export function CustomSidebarNavigation({
       {config.routes.map((item, index) => {
         if ('divider' in item) {
           return <SidebarDivider key={index} />;
+        }
+
+        if ('section' in item) {
+          return (
+            <SidebarSection
+              key={`section-${index}`}
+              className='mt-8'
+              label={
+                <Trans
+                  i18nKey={item.label}
+                  defaults={item.label}
+                  key={item.label + index}
+                />
+              }
+              path={item.path}
+            >
+              {item.items.map((child) => (
+                <SidebarItem
+                  key={child.path}
+                  end={child.end}
+                  path={child.path}
+                  Icon={child.Icon}
+                >
+                  <Trans i18nKey={child.label} defaults={child.label} />
+                </SidebarItem>
+              ))}
+            </SidebarSection>
+          );
         }
 
         if (

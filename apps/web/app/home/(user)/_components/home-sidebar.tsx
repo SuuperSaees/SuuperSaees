@@ -25,6 +25,18 @@ import './styles/home-sidebar.css';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 
+// Define the embed type to match what's expected
+type Embed = {
+  id: string;
+  title: string | null;
+  value: string;
+  type: string;
+  location: string;
+  deleted_on?: string | null;
+  visibility?: string;
+  icon?: string;
+};
+
 // Custom SidebarNavigation component that adds the MessageBadge to the "/messages" navigation item
 
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
@@ -88,7 +100,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
     personalAccountNavigationConfig;
 
   // new tabs in the sidebar with embeds
-  const embeds = organization?.embeds;
+  const embeds = organization?.embeds as Embed[] | undefined;
   const isClientRole = userRole?.startsWith('client_');
 
   const sidebarEmbeds =
@@ -103,24 +115,41 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
       );
     }) ?? [];
 
-  // Add embeds to the navigation config if there are sidebar embeds
+  // Add embeds to the navigation config
   const navigationConfigWithEmbeds = sidebarEmbeds.length
     ? NavigationConfigSchema.parse({
         ...selectedNavigationConfig,
         routes: [
           ...selectedNavigationConfig.routes,
           // Add a divider before embeds if there are any
-          ...(sidebarEmbeds.length > 0 ? [{ divider: true }] : []),
-          // Add each embed as a separate tab
-          ...sidebarEmbeds.map((embed) => ({
-            label: embed.title ?? 'Embed',
-            path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
-            Icon: embed.icon ? (
-              <DynamicIcon name={embed.icon} className="w-4" />
-            ) : (
-              <Box className="w-4" />
-            ),
-          })),
+  
+          // For client roles, use the section approach
+          ...(isClientRole
+            ? [
+                {
+                  section: true,
+                  label: 'common:workspaceName',
+                  items: sidebarEmbeds.map((embed) => ({
+                    label: embed.title ?? 'Embed',
+                    path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
+                    Icon: embed.icon ? (
+                      <DynamicIcon name={embed.icon} className="w-4" />
+                    ) : (
+                      <Box className="w-4" />
+                    ),
+                  })),
+                },
+              ]
+            : // For non-client roles, add each embed as a separate tab
+              sidebarEmbeds.map((embed) => ({
+                label: embed.title ?? 'Embed',
+                path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
+                Icon: embed.icon ? (
+                  <DynamicIcon name={embed.icon} className="w-4" />
+                ) : (
+                  <Box className="w-4" />
+                ),
+              }))),
         ],
       })
     : selectedNavigationConfig;

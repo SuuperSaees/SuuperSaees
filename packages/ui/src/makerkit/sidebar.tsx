@@ -130,8 +130,51 @@ export function SidebarGroup({
   );
 }
 export function SidebarDivider() {
+  return <div className="my-2 h-px bg-border" />;
+}
+export function SidebarSection({
+  label,
+  path,
+  children,
+  className,
+}: React.PropsWithChildren<{
+  label: string | React.ReactNode;
+  path?: string;
+  className?: string;
+}>) {
+  const { collapsed } = useContext(SidebarContext);
+  
+  const SectionHeader = () => {
+    if (path) {
+      return (
+        <Link href={path} className="block">
+          <div className="px-3 mb-2 hover:text-primary transition-colors">
+            <h3 className="text-xs font-medium text-muted-foreground">
+              <Trans i18nKey={label as string} defaults={label as string} />
+            </h3>
+          </div>
+        </Link>
+      );
+    }
+    
+    return (
+      <div className="px-3 mb-2 mt-4">
+        <h3 className="text-xs font-medium text-muted-foreground">
+          <Trans i18nKey={label as string} defaults={label as string} />
+        </h3>
+      </div>
+    );
+  };
+
+  if (collapsed) {
+    return <>{children}</>;
+  }
+
   return (
-    <div className={'dark:border-dark-800 my-2 border-t border-gray-100'} />
+    <div className={cn("mt-4", className)}>
+      <SectionHeader />
+      <div className="space-y-1">{children}</div>
+    </div>
   );
 }
 export function SidebarItem({
@@ -213,6 +256,33 @@ export function SidebarNavigation({
       {config.routes.map((item, index) => {
         if ('divider' in item) {
           return <SidebarDivider key={index} />;
+        }
+
+        if ('section' in item) {
+          return (
+            <SidebarSection
+              key={`section-${index}`}
+              label={
+                <Trans
+                  i18nKey={item.label}
+                  defaults={item.label}
+                  key={item.label + index}
+                />
+              }
+              path={item.path}
+            >
+              {item.items.map((child) => (
+                <SidebarItem
+                  key={child.path}
+                  end={child.end}
+                  path={child.path}
+                  Icon={child.Icon}
+                >
+                  <Trans i18nKey={child.label} defaults={child.label} />
+                </SidebarItem>
+              ))}
+            </SidebarSection>
+          );
         }
 
         if (item.label === 'common:catalogName' && !catalogProviderUrl && !catalogProductUrl) {

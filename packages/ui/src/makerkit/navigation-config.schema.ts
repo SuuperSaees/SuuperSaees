@@ -30,6 +30,19 @@ export const NavigationConfigSchema = z.object({
       z.object({
         divider: z.literal(true),
       }),
+      z.object({
+        section: z.literal(true),
+        label: z.string(),
+        path: z.string().optional(),
+        items: z.array(
+          z.object({
+            label: z.string(),
+            path: z.string(),
+            Icon: z.custom<React.ReactNode>(),
+            end: RouteMatchingEnd,
+          })
+        ),
+      }),
     ]),
   ),
 });
