@@ -47,6 +47,7 @@ export function MultipleChoice({
                     border-radius: 4px;
                     outline: none;
                     transition: all 0.3s;
+                    flex-shrink: 0;
                 }
                 .custom-checkbox:checked {
                     border-color: ${theme_color ?? '#000000'};
@@ -69,14 +70,16 @@ export function MultipleChoice({
                     key={item.value}
                     className="flex flex-row items-center space-x-3 space-y-0"
                 >
-                    <input
-                        type="checkbox"
-                        checked={selected.includes(item.value)}  
-                        onChange={(e) =>
-                            handleCheckboxChange(item.value, e.target.checked)
-                        }
-                        className="custom-checkbox h-5 w-5"
-                    />
+                    <div className="flex-shrink-0 h-5 w-5">
+                        <input
+                            type="checkbox"
+                            checked={selected.includes(item.value)}  
+                            onChange={(e) =>
+                                handleCheckboxChange(item.value, e.target.checked)
+                            }
+                            className="custom-checkbox h-5 w-5"
+                        />
+                    </div>
                     <p className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{item.label}</p>
                 </div>
             ))}
