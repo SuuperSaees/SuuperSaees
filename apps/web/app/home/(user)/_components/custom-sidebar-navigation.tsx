@@ -28,6 +28,7 @@ export function CustomSidebarNavigation({
   toolCopyListUrl?: boolean;
   userId?: string;
 }>) {
+  console.log('config', config)
   return (
     <>
       {config.routes.map((item, index) => {
@@ -87,6 +88,7 @@ export function CustomSidebarNavigation({
               collapsed={item.collapsed}
               Icon={item.Icon}
               className={item.className}
+              path={item.path}
             >
               {item.children.map((child) => {
                 if (
@@ -134,8 +136,8 @@ export function CustomSidebarNavigation({
             </SidebarItem>
           );
         }
-
         return (
+
           <SidebarItem
             key={item.path}
             end={item.end}

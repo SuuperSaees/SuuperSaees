@@ -126,6 +126,7 @@ export function createEmbedIcon(embed: Embed) {
  */
 export function createEmbedNavigationItem(embed: Embed) {
   return {
+    type: 'route',
     label: embed.title ?? 'Embed',
     path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
     Icon: createEmbedIcon(embed),
@@ -143,11 +144,9 @@ export function addClientEmbedsToNavigation(
 
   const routes = [...baseConfig.routes];
 
-  // Add a divider before the section
-  routes.push({ divider: true });
-
   // Add all embeds in a single section
   routes.push({
+    type: 'section',
     section: true,
     label: 'Workspace',
     items: embeds.map(createEmbedNavigationItem),
@@ -177,8 +176,6 @@ export function addAgencyEmbedsToNavigation(
 
   // Only add sections if we have embeds to show
   if (privateEmbeds.length > 0 || publicEmbeds.length > 0) {
-    // Add a divider before the sections
-    routes.push({ divider: true });
 
     // Process private embeds by client
     if (privateEmbeds.length > 0) {
@@ -204,14 +201,19 @@ export function addAgencyEmbedsToNavigation(
       // Add clients section if we have any client embeds
       if (clientEmbedsMap.size > 0) {
         routes.push({
+          type: 'section',
+          path: pathsConfig.app.clients,
           section: true,
           label: 'Clients',
+          className: 'text-xs font-medium text-muted-foreground',
           items: [], // Empty items array, we'll add client groups separately
         });
 
         // Add client groups
         Array.from(clientEmbedsMap.values()).forEach(({ client, embeds }) => {
           routes.push({
+            type: 'group',
+            path: `${pathsConfig.app.clients}/organizations/${client.id}`,
             label: client.name,
             Icon: (
               <AvatarComponent
@@ -232,6 +234,7 @@ export function addAgencyEmbedsToNavigation(
     // Add public workspace section
     if (publicEmbeds.length > 0) {
       routes.push({
+        type: 'group',
         label: 'Public Workspace',
         Icon: (
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-black text-white">
