@@ -6,8 +6,6 @@ import { Trans } from '@kit/ui/trans';
 import { Order } from '~/lib/order.types';
 import { updateOrder, logOrderActivities } from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import EditableHeader from '../../../../components/editable-header';
-import { useActivityContext } from '../context/activity-context';
-// import DeleteOrderDropdown from './delete-order-dropdown';
 import { ReviewDialog } from './review-dialog';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import type { User } from '@supabase/supabase-js';
@@ -18,13 +16,14 @@ export const OrderHeader = ({
   order,
   agencyStatuses,
   user,
+  userRole,
 }: {
   order: Order.Relational;
   agencyStatuses: AgencyStatus.Type[];
   user: User;
+  userRole: string;
 }) => {
   const { t } = useTranslation('responses');
-  const { userRole } = useActivityContext();
   const rolesThatCanEdit = new Set([
     'agency_member',
     'agency_project_manager',
@@ -46,7 +45,7 @@ export const OrderHeader = ({
       }
     };
 
-    fetchBriefName();
+    void fetchBriefName();
   }, [order?.brief_ids]);
 
   const handleUpdate = async (value: string) => {
@@ -87,11 +86,6 @@ export const OrderHeader = ({
         {(userRole === 'client_owner' || userRole === 'client_member') && (
           <ReviewDialog orderId={order.id} statusId={completedStatusId} className="w-fit" />
         )}
-        {/* {
-          userRole !== 'client_guest' && (
-            <DeleteOrderDropdown orderId={order?.id} />
-          )
-        } */}
       </div>
       <div className="flex items-center">
         <h3 className="relative mb-2 text-sm text-lg font-normal text-gray-600">

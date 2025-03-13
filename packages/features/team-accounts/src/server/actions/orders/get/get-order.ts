@@ -26,7 +26,7 @@ import {
 } from '../../members/get/get-member-account';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
-
+import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
 export const  getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -42,7 +42,8 @@ export const  getOrderById = async (orderId: Order.Type['id']) => {
           reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
           files(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
-         followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+         followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
+         order_tags(tag:tags(id, name, color, organization_id))
         `,
       )
       .eq('id', orderId)
@@ -82,7 +83,7 @@ export const  getOrderById = async (orderId: Order.Type['id']) => {
               }
             };
           })
-          .filter(Boolean); // Elimina los null del array final
+          .filter(Boolean); 
       }
 
 
@@ -111,6 +112,9 @@ export const  getOrderById = async (orderId: Order.Type['id']) => {
 
     const proccesedData = {
       ...orderData,
+      tags: Array.isArray(orderData.order_tags) 
+        ? orderData.order_tags.map(tagItem => tagItem.tag) 
+        : orderData.order_tags ? [orderData.order_tags?.tag as Tags.Type] : [],
       messages: orderData.messages.map((message) => {
         return {
           ...message,
