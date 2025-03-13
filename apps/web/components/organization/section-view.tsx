@@ -7,7 +7,7 @@ import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/t
 import { getServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
 import { useTranslation } from 'react-i18next';
 
-import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
 
 import FileSection from './files';
 import MemberButtonTriggers from './member-button-triggers';
@@ -21,7 +21,7 @@ import { EmbedSection } from '~/embeds/components/embed-section';
 import { getEmbeds } from '~/server/actions/embeds/embeds.action';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { BoxIcon } from 'lucide-react';
-
+import { EmbedPreview } from '~/embeds/components/embed-preview';
 /**
  * @description This component is used to display the navigation tabs for the account settings page.
  */
@@ -40,6 +40,13 @@ function SectionView({
   const { workspace: userWorkspace } = useUserWorkspace();
   const userId = userWorkspace.id ?? '';
 
+  // Define availableTabsBasedOnRole before it's used
+  const availableTabsBasedOnRole = new Set([
+    'agency_owner',
+    'agency_member',
+    'agency_project_manager',
+  ]);
+
   const services =
     useQuery({
       queryKey: ['organization-services', clientOrganizationId],
@@ -49,9 +56,12 @@ function SectionView({
 
   const embedsQuery = useQuery({
     queryKey: ['organization-embeds', clientOrganizationId],
-    queryFn: async () => await getEmbeds(clientOrganizationId),
-    enabled: activeTab === 'embeds',
-  })
+    queryFn: async () => {
+      // Return without type assertion to avoid linter errors
+      return await getEmbeds(clientOrganizationId);
+    },
+    enabled: activeTab === 'embeds' || !availableTabsBasedOnRole.has(currentUserRole),
+  });
 
   const embeds = embedsQuery.data ?? [];
   const serviceOptions = services?.data?.map((service) => {
@@ -92,14 +102,9 @@ function SectionView({
     ],
   ]);
 
-  const availableTabsBasedOnRole = new Set([
-    'agency_owner',
-    'agency_member',
-    'agency_project_manager',
-  ]);
   const availableTabs = availableTabsBasedOnRole.has(currentUserRole)
     ? ['orders', 'members', 'services', 'files', 'embeds']
-    : ['members', 'services', 'orders', 'embeds'];
+    : ['members', 'services', 'orders'];
 
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
@@ -141,19 +146,25 @@ function SectionView({
         agencyId={agencyId}
         userId={userId}
         userRole={currentUserRole}
-        showEmbedSelector={true}
-        defaultCreationValue={
-          {
-            title:'',
-            value:'',
-            location: 'tab',
-            type: 'url',
-            visibility: 'private',
-            embed_accounts: [clientOrganizationId]
-          }
-        }
+        showEmbedSelector={availableTabs.includes('embeds')}
+        defaultCreationValue={{
+          created_at: new Date().toISOString(),
+          deleted_on: null,
+          icon: null,
+          id: '',
+          location: 'tab',
+          organization_id: null,
+          title: '',
+          type: 'url',
+          updated_at: null,
+          user_id: null,
+          value: '',
+          visibility: 'private',
+          embed_accounts: [clientOrganizationId]
+        }}
       />,
-    ],
+    ], 
+
 
     // ['reviews', <ReviewSection key={'reviews'} />],
     // ['invoices', <InvoiceSection key={'invoices'} />],
@@ -163,10 +174,28 @@ function SectionView({
     (key) => availableTabs.includes(key),
   );
 
+  // For non-agency roles, add individual embed tabs
+  const isAgencyRole = availableTabsBasedOnRole.has(currentUserRole);
+  
+  // Create a list of all tabs to display
+  const allTabs = [...navigationOptionKeys];
+  
+  // If not an agency role and we have embeds, add them as individual tabs
+  if (!isAgencyRole && embeds.length > 0) {
+    embeds.forEach(embed => {
+      if (!allTabs.includes(embed.id)) {
+        allTabs.push(embed.id);
+      }
+    });
+  }
+
   return (
     <Tabs
-      defaultValue={navigationOptionKeys[0]}
-      onValueChange={(value) => setActiveTab(value)}
+      defaultValue={allTabs[0]}
+      onValueChange={(value) => {
+        console.log('Tab changed to:', value);
+        setActiveTab(value);
+      }}
       className="h-full"
     >
       <div className="flex justify-between">
@@ -191,17 +220,45 @@ function SectionView({
               
             </ThemedTabTrigger>
           ))}
+          
+          {/* Add individual embed tabs for non-agency roles */}
+          {!isAgencyRole && embeds.map((embed) => (
+            <TabsTrigger
+              key={`embed-${embed.id}-tab`}
+              value={embed.id}
+              className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500"
+            >
+              <BoxIcon className="h-4 w-4" />
+              <span>{embed.title}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
         <div className="flex gap-4">{buttonControllersMap.get(activeTab)}</div>
       </div>
 
-      {Array.from(navigationOptionsMap.values()).map((option) => (
+      {/* Standard tab contents */}
+      {Array.from(navigationOptionsMap.entries()).map(([key, option]) => (
         <TabsContent
-          value={option.key ?? ''}
+          value={key}
           className="h-full max-h-full min-h-0 w-full border-t py-8"
-          key={option.key + 'content'}
+          key={key + 'content'}
         >
           {option}
+        </TabsContent>
+      ))}
+
+      {/* Individual embed tab contents for non-agency roles */}
+      {!isAgencyRole && embeds.map((embed) => (
+        <TabsContent
+          value={embed.id}
+          className="h-full max-h-full min-h-0 w-full border-t py-8"
+          key={`embed-${embed.id}-content`}
+        >
+          <div className="flex h-full w-full">
+            <div className="flex-1">
+              <EmbedPreview embedSrc={embed.value} />
+            </div>
+          </div>
         </TabsContent>
       ))}
     </Tabs>

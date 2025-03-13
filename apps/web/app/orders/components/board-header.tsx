@@ -2,6 +2,8 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
 import { Embeds } from '~/lib/embeds.types';
 import { Order } from '~/lib/order.types';
 
@@ -52,24 +54,33 @@ export function BoardHeader({
   orders,
   getValueFormatters,
 }: BoardHeaderProps) {
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const agencyRoles = [
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ];
   return (
     <div className="flex flex-wrap items-center justify-end gap-4">
       <div className="mr-auto flex items-center gap-4">
         {/* Status filters */}
-        <StatusFilters
-          activeTab={activeTab}
-          setActiveTab={handleTabChange}
-          t={t}
-          tabsConfig={tabsConfig}
-        />
+        {agencyRoles.includes(userWorkspace.role ?? '') && (
+          <>
+            <StatusFilters
+              activeTab={activeTab}
+              setActiveTab={handleTabChange}
+              t={t}
+              tabsConfig={tabsConfig}
+            />
 
-        {/* Embed tabs */}
-        <EmbedTabs
-          embeds={embeds}
-          activeTab={activeTab}
-          handleTabChange={handleTabChange}
-          theme_color={theme_color}
-        />
+            <EmbedTabs
+              embeds={embeds}
+              activeTab={activeTab}
+              handleTabChange={handleTabChange}
+              theme_color={theme_color}
+            />
+          </>
+        )}
       </div>
 
       <Search

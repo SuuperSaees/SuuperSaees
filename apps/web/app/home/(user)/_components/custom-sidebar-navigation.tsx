@@ -7,6 +7,12 @@ import { z } from 'zod';
 import pathsConfig from '~/config/paths.config';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
+
+// Type guard to check if an item has the 'end' property
+function hasEndProperty(item: unknown): item is { end: boolean | ((path: string) => boolean) } {
+  return typeof item === 'object' && item !== null && 'end' in item;
+}
+
 export function CustomSidebarNavigation({
   config,
   showDashboardUrl,
@@ -43,12 +49,13 @@ export function CustomSidebarNavigation({
               }
               path={item.path}
             >
-              {item.items.map((child) => (
+              {item.items.map((child, childIndex) => (
                 <SidebarItem
-                  key={child.path}
-                  end={child.end}
+                  key={`${child.path}-${childIndex}`}
+                  end={hasEndProperty(child) ? child.end : undefined}
                   path={child.path}
                   Icon={child.Icon}
+                  className={child.className}
                 >
                   <Trans i18nKey={child.label} defaults={child.label} />
                 </SidebarItem>
@@ -79,6 +86,7 @@ export function CustomSidebarNavigation({
               collapsible={item.collapsible}
               collapsed={item.collapsed}
               Icon={item.Icon}
+              className={item.className}
             >
               {item.children.map((child) => {
                 if (
@@ -97,6 +105,7 @@ export function CustomSidebarNavigation({
                     end={child.end}
                     path={child.path}
                     Icon={child.Icon}
+                    className={child.className}
                   >
                     <Trans i18nKey={child.label} defaults={child.label} />
                   </SidebarItem>
@@ -132,6 +141,7 @@ export function CustomSidebarNavigation({
             end={item.end}
             path={item.path}
             Icon={item.Icon}
+            className={item.className}
           >
             <Trans i18nKey={item.label} defaults={item.label} />
           </SidebarItem>

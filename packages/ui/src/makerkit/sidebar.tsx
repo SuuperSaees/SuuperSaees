@@ -73,26 +73,28 @@ export function SidebarGroup({
   collapsible = true,
   Icon,
   children,
+  className,
 }: React.PropsWithChildren<{
   label: string | React.ReactNode;
   collapsible?: boolean;
   collapsed?: boolean;
   Icon?: React.ReactNode;
+  className?: string;
 }>) {
   const { collapsed: sidebarCollapsed } = useContext(SidebarContext);
   const [isGroupCollapsed, setIsGroupCollapsed] = useState(collapsed);
   const id = useId();
   const Wrapper = () => {
-    const className = cn('flex w-full text-md shadow-none', {
+    const wrapperClassName = cn('flex w-full text-md shadow-none', {
       'justify-between space-x-2.5': !sidebarCollapsed,
-    });
+    }, className);
     if (collapsible) {
       return (
         <Button
           aria-expanded={!isGroupCollapsed}
           aria-controls={id}
           onClick={() => setIsGroupCollapsed(!isGroupCollapsed)}
-          className={className}
+          className={wrapperClassName}
           variant="ghost"
           size="sm"
         >
@@ -113,13 +115,13 @@ export function SidebarGroup({
       );
     }
     return (
-      <div className={className}>
+      <div className={wrapperClassName}>
         <Trans i18nKey={label as string} defaults={label as string} />
       </div>
     );
   };
   return (
-    <div className={'flex flex-col space-y-1 py-1'}>
+    <div className={cn('flex flex-col space-y-1 py-1', className)}>
       <Wrapper />
       <If condition={collapsible ? !isGroupCollapsed : true}>
         <div id={id} className={'px-6.5 flex flex-col space-y-1'}>
@@ -197,9 +199,9 @@ export function SidebarItem({
   return (
     <Button
       asChild
-      className={cn(`text-md flex w-full shadow-none ${className}`, {
+      className={cn(`text-md flex w-full shadow-none`, {
         'justify-start space-x-2.5': !collapsed,
-      })}
+      }, className)}
       size={size}
       variant={variant}
       style={active && itemActiveStyle ? itemActiveStyle : undefined}
@@ -277,6 +279,7 @@ export function SidebarNavigation({
                   end={child.end}
                   path={child.path}
                   Icon={child.Icon}
+                  className={child.className}
                 >
                   <Trans i18nKey={child.label} defaults={child.label} />
                 </SidebarItem>
@@ -303,6 +306,7 @@ export function SidebarNavigation({
               collapsible={item.collapsible}
               collapsed={item.collapsed}
               Icon={item.Icon}
+              className={item.className}
             >
               {item.children.map((child) => {
                 if (
@@ -318,6 +322,7 @@ export function SidebarNavigation({
                     end={child.end}
                     path={child.path}
                     Icon={child.Icon}
+                    className={child.className}
                   >
                     <Trans i18nKey={child.label} defaults={child.label} />
                   </SidebarItem>
@@ -328,14 +333,16 @@ export function SidebarNavigation({
         }
 
         if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
-          return null
+          return null;
         }
+
         return (
           <SidebarItem
             key={item.path}
             end={item.end}
             path={item.path}
             Icon={item.Icon}
+            className={item.className}
           >
             <Trans i18nKey={item.label} defaults={item.label} />
           </SidebarItem>
