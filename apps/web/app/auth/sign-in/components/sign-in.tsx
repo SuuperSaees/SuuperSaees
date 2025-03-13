@@ -33,7 +33,9 @@ const SignIn = ({
       <div
         className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r`}
         style={{
-          background: `linear-gradient(to right, ${authDetails?.auth_section_background_color ? authDetails.auth_section_background_color : authDetails?.background_color}, ${authDetails?.auth_section_background_color ? authDetails.auth_section_background_color : authDetails?.background_color})`,
+          background: authDetails?.auth_section_background_color
+            ? authDetails.auth_section_background_color
+            : authDetails?.background_color,
         }}
       >
         <div className="absolute inset-0 flex items-center justify-center">
