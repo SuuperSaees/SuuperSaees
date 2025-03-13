@@ -276,28 +276,51 @@ const AsideOrderInformation = ({
           }
           </div>
           
-          <Link href={`/clients/organizations/${order.client_organization_id}`}>
-          <div className="flex gap-3">
-            <AvatarDisplayer
-              displayName={
-                order.client?.settings?.name ?? order.client?.name
-              }
-              pictureUrl={
-                order.client?.settings?.picture_url ?? order.client?.picture_url
-              }
-            />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium text-gray-600">
-                {order.client?.settings?.name ?? order.client?.name ?? ''}
-              </span>
-              <span className="text-sm text-gray-600">
-                {order.client_organization?.name
-                  ? order.client_organization?.name
-                  : ''}
-              </span>
+          {userRole === 'client_owner' || userRole === 'client_member' || userRole === 'agency_owner' || userRole === 'agency_project_manager' ? (
+            <Link href={`/clients/organizations/${order.client_organization_id}`}>
+              <div className="flex gap-3">
+                <AvatarDisplayer
+                  displayName={
+                    order.client?.settings?.name ?? order.client?.name
+                  }
+                  pictureUrl={
+                    order.client?.settings?.picture_url ?? order.client?.picture_url
+                  }
+                />
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-600">
+                    {order.client?.settings?.name ?? order.client?.name ?? ''}
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {order.client_organization?.name
+                      ? order.client_organization?.name
+                      : ''}
+                  </span>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex gap-3">
+              <AvatarDisplayer
+                displayName={
+                  order.client?.settings?.name ?? order.client?.name
+                }
+                pictureUrl={
+                  order.client?.settings?.picture_url ?? order.client?.picture_url
+                }
+              />
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-600">
+                  {order.client?.settings?.name ?? order.client?.name ?? ''}
+                </span>
+                <span className="text-sm text-gray-600">
+                  {order.client_organization?.name
+                    ? order.client_organization?.name
+                    : ''}
+                </span>
+              </div>
             </div>
-          </div>
-          </Link>
+          )}
         </div>
         {canAddAssignes ? (
           <>

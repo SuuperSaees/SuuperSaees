@@ -22,7 +22,6 @@ import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
 import { FormField as FormFieldType } from '~/lib/form-field.types';
 import { containsVideo } from '~/utils/contains-video';
-import { generateUUID } from '~/utils/generate-uuid';
 import { isYouTubeUrl } from '~/utils/upload-video';
 
 import { getYouTubeEmbedUrl } from '../utils/video-format';
