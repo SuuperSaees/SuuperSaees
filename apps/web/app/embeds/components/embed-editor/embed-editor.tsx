@@ -90,7 +90,7 @@ export function EmbedEditor({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="ml-auto flex min-w-80 flex-col gap-4 px-4 py-8 text-gray-500"
+        className="ml-auto flex w-full flex-col gap-4 px-4 py-8 text-gray-500 max-w-80"
       >
         <h2 className="font-bold text-gray-600">{t('form.title')}</h2>
         <p className="text-sm text-gray-500">{t('form.description')}</p>

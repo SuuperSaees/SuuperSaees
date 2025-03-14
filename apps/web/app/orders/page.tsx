@@ -18,6 +18,7 @@ import { AgencyStatusesProvider } from './components/context/agency-statuses-con
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
 import SectionView from '~/components/organization/section-view';
+import Header from '~/components/organization/header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -80,15 +81,32 @@ async function OrdersPage() {
       >
         <PageBody className="h-screen">
           <div className="flex h-full max-h-full min-h-0 flex-1 flex-col p-[35px]">
-            <PageHeader
+            {agencyRoles.includes(userWorkspace.role ?? '') ? <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
-            />
+            /> : <Header 
+              name={userOrganization.name ?? ''} 
+              logo={userOrganization.picture_url ?? ''} 
+              id={userOrganization.id ?? ''} 
+              currentUserRole={userWorkspace.role ?? ''} 
+              className="flex items-center gap-2 mb-6"
+              imageClassName="aspect-square h-8 w-8 flex-shrink-0"
+              contentClassName="flex flex-col justify-center"
+            />}
             {
               agencyRoles.includes(userWorkspace.role ?? '') ? (
-                <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
+                <ProjectsBoard agencyMembers={agencyMembers.map(member => ({
+                  organization_id: member.account_id,
+                  settings: member.user_settings,
+                  role: member.role
+                }))} tags={tags} />
               ) : (
-                <SectionView clientOrganizationId={userOrganization.id ?? ''} currentUserRole={userWorkspace.role ?? ''} agencyId={agencyId ?? ''} />
+                <SectionView 
+                  clientOrganizationId={userOrganization.id ?? ''} 
+                  currentUserRole={userWorkspace.role ?? ''} 
+                  agencyId={agencyId ?? ''} 
+                  sections={['orders']}
+                />
               )
             }
           </div>
