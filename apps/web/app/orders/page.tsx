@@ -19,9 +19,6 @@ import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
 import SectionView from '~/components/organization/section-view';
 
-// type OrderResponse = Omit<Order.Response, 'id'> & {
-//   id: string;
-// };
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
@@ -48,10 +45,6 @@ async function OrdersPage() {
   const agencyId = agency?.id ?? '';
   const agencyStatuses =
     (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
-
-  // const agency = await getOrganizationById(agencyId ?? '').catch((err) =>
-  //   console.error(`Error fetching agency: ${err}`),
-  // );
 
   const { data, error: membersError } = await client.rpc(
     'get_account_members',

@@ -45,7 +45,6 @@ import ActivityTags from './activity-tags';
 import { Tags } from '~/lib/tags.types';
 import { updateOrderTags } from '~/server/actions/orders/orders.action';
 interface AsideOrderInformationProps {
-  order: Order.Relational;
   className?: string;
   orderAgencyTags: Tags.Type[];
   [key: string]: unknown;
