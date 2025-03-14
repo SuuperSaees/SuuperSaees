@@ -7,20 +7,33 @@ import EditableHeader from '../editable-header';
 import { handleResponse } from '~/lib/response/handle-response';
 import { useTranslation } from 'react-i18next';
 import UpdateImage from '../../app/components/ui/update-image';
+import { cn } from '@kit/ui/utils';
 
 interface OrganizationHeaderProps {
   id: string;
   name: string;
   currentUserRole: string;
   logo?: string;
-  owner: {
+  owner?: {
     id: string;
     name: string;
     email?: string | null;
   };
+  className?: string;
+  imageClassName?: string;
+  contentClassName?: string;
 }
 
-function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderProps) {
+function Header({ 
+  name, 
+  logo, 
+  owner, 
+  id, 
+  currentUserRole, 
+  className, 
+  imageClassName = "aspect-square h-12 w-12 flex-shrink-0", 
+  contentClassName = "flex flex-col justify-center" 
+}: OrganizationHeaderProps) {
   const rolesThatCanEdit = new Set(['agency_member', 'agency_project_manager', 'agency_owner']);
   const { t } = useTranslation('responses');
 
@@ -37,16 +50,16 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
     identifier: '',
   };
   return (
-    <div className="flex w-full gap-4">
+    <div className={cn('flex w-full gap-4', className)}>
        <UpdateImage
         bucketStorage={bucketStorage}
         floatingButtons={{ update: true, delete: true }}
         defaultImageURL={logo ?? ''}
-        className="aspect-square h-16 w-16"
+        className={imageClassName}
         onUpdate={onUpdateAccountImage}
       />
 
-      <div className="flex flex-col gap-1 w-full">
+      <div className={contentClassName}>
         <EditableHeader
           initialName={name}
           id={id}
@@ -59,11 +72,11 @@ function Header({ name, logo, owner, id, currentUserRole }: OrganizationHeaderPr
           }}
           rolesThatCanEdit={rolesThatCanEdit}
         />
-        <p className="text-sm text-gray-600">
+        {owner ? <p className="text-sm text-gray-600">
           <Trans i18nKey={'clients:organizations.members.owner'} />
           {': '}
-          {owner.email}
-        </p>
+          {owner?.email}
+        </p> : null}
       </div>
     </div>
   );
