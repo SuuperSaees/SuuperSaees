@@ -2,6 +2,7 @@
 
 import { createTagsAction } from "./tags";
 import { Tags } from "~/lib/tags.types";
+import { cache } from "react";
 
 function getTagsAction() {
     return createTagsAction(process.env.NEXT_PUBLIC_SITE_URL as string);
@@ -27,7 +28,7 @@ export async function getTag(ids: string[]): Promise<Tags.Type[]> {
     return await tagsAction.get(ids);
 }
 
-export async function getTags(organizationId: string, orderId?: number): Promise<Tags.Type[]> {
+export const getTags = cache(async (organizationId: string, orderId?: number): Promise<Tags.Type[]> => {
     const tagsAction = getTagsAction();
     return await tagsAction.list(organizationId, orderId);
-}
+});

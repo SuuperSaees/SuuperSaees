@@ -1,4 +1,4 @@
-import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
+import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';

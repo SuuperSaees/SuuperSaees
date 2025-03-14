@@ -10,7 +10,7 @@ import { OrderHeader } from './components/order-header';
 import { OrderTabs } from './components/order-tabs';
 import { ActivityProvider } from './context/activity-context';
 import { Order } from '~/lib/order.types';
-import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
+import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { redirect } from 'next/navigation';
 import { getTags } from '~/server/actions/tags/tags.action';
@@ -22,20 +22,6 @@ const getOrderByIdCached = cache(async (id: string): Promise<Order.Relational> =
     console.error('Error fetching order:', err);
     return {} as Order.Relational;
   }
-});
-
-const getAgencyStatusesCached = cache(async (agencyId: string) => {
-  return getAgencyStatuses(agencyId).catch(err => {
-    console.error('Error fetching agency statuses:', err);
-    return [];
-  });
-});
-
-const getTagsCached = cache(async (agencyId: string) => {
-  return getTags(agencyId).catch(err => {
-    console.error('Error fetching agency tags:', err);
-    return [];
-  });
 });
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -67,8 +53,8 @@ async function OrderDetailsPage({
   }
 
   const [agencyStatuses, agencyTags] = await Promise.all([
-    getAgencyStatusesCached(order?.agency_id ?? ''),
-    getTagsCached(order?.agency_id ?? '')
+    getAgencyStatuses(order?.agency_id ?? ''),
+    getTags(order?.agency_id ?? '')
   ]);
 
   const organizationId = order?.client_organization_id;
