@@ -27,12 +27,16 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const userRole = workspace.role;
 
   // Get organization settings
-  const {
-    dashboard_url: dashboardUrl,
-    catalog_provider_url: catalogProviderUrl,
-    catalog_product_url: catalogProductUrl,
-    tool_copy_list_url: toolCopyListUrl,
-  } = useOrganizationSettings();
+  const settings = useOrganizationSettings();
+  
+  // Access settings safely
+  const dashboardUrl = settings.dashboard_url;
+  
+  // Parse pinned organizations from string to array
+  const pinnedOrganizationsString = settings.pinned_organizations;
+  const pinnedOrganizations = pinnedOrganizationsString 
+    ? JSON.parse(pinnedOrganizationsString) 
+    : [];
 
   // Determine if dashboard URL should be shown
   const showDashboardUrl = shouldShowDashboardUrl(
@@ -41,12 +45,18 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
     workspace.id
   );
 
-  // Build the navigation config with embeds
+  // Build the navigation config with embeds and pinned clients
   const navigationConfig = buildNavigationConfig(
     userRole,
     organization?.embeds as Embed[] | undefined,
-    Avatar
+    Avatar,
+    pinnedOrganizations
   );
+
+  // Get additional settings with type assertion for the UI
+  const catalogProviderUrl = Boolean(settings.catalog_provider_url);
+  const catalogProductUrl = Boolean(settings.catalog_product_url);
+  const toolCopyListUrl = Boolean(settings.tool_copy_list_url);
 
   return (
     <ThemedSidebar className="text-sm">
@@ -60,9 +70,9 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
         <CustomSidebarNavigation
           config={navigationConfig}
           showDashboardUrl={showDashboardUrl}
-          catalogProviderUrl={!!catalogProviderUrl}
-          catalogProductUrl={!!catalogProductUrl}
-          toolCopyListUrl={!!toolCopyListUrl}
+          catalogProviderUrl={catalogProviderUrl}
+          catalogProductUrl={catalogProductUrl}
+          toolCopyListUrl={toolCopyListUrl}
           userId={user?.id ?? ''}
         />
         {userRole === 'client_guest' && (

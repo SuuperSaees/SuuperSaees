@@ -10,7 +10,6 @@ import { Order } from '~/lib/order.types';
 import { ValueFormatters } from '../hooks/use-csv-export-formatters';
 import { ViewOption } from '../hooks/use-orders-view-configs';
 import CreateOrderButton from './create-order-button';
-import { EmbedTabs } from './embed-tabs';
 import Filters, { FilterGroup } from './filters';
 import Search from './search';
 import SettingsDropdown from './settings-dropdown';
@@ -41,8 +40,6 @@ export function BoardHeader({
   activeTab,
   handleTabChange,
   tabsConfig,
-  embeds,
-  theme_color,
   getFilterValues,
   handleSearch,
   filtersConfig,
@@ -71,13 +68,6 @@ export function BoardHeader({
               setActiveTab={handleTabChange}
               t={t}
               tabsConfig={tabsConfig}
-            />
-
-            <EmbedTabs
-              embeds={embeds}
-              activeTab={activeTab}
-              handleTabChange={handleTabChange}
-              theme_color={theme_color}
             />
           </>
         )}

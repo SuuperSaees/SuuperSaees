@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
 import { DynamicIcon } from '../app/components/shared/dynamic-icon';
+import { ClientSearchDropdown } from '../app/home/(user)/_components/client-search-dropdown';
 import {
   clientAccountGuestNavigationConfig,
   clientAccountNavigationConfig,
@@ -159,12 +160,13 @@ export function addClientEmbedsToNavigation(
 }
 
 /**
- * Adds agency embeds to the navigation config
+ * Adds agency embeds to the navigation config with support for pinned clients
  */
 export function addAgencyEmbedsToNavigation(
   baseConfig: NavigationConfig,
   embeds: Embed[],
   AvatarComponent: React.ComponentType<AvatarProps>,
+  pinnedClientIds?: string[],
 ): NavigationConfig {
   if (!embeds.length) return baseConfig;
 
@@ -198,19 +200,35 @@ export function addAgencyEmbedsToNavigation(
         }
       });
 
-      // Add clients section if we have any client embeds
+      // Add clients section with the search dropdown component
       if (clientEmbedsMap.size > 0) {
         routes.push({
           type: 'section',
           path: pathsConfig.app.clients,
           section: true,
-          label: 'Clients',
+          label: (
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-muted-foreground">Clients</span>
+              <ClientSearchDropdown />
+            </div>
+          ),
           className: 'text-xs font-medium text-muted-foreground',
           items: [], // Empty items array, we'll add client groups separately
         });
 
-        // Add client groups
-        Array.from(clientEmbedsMap.values()).forEach(({ client, embeds }) => {
+        // Filter client entries to only include pinned clients
+        const clientEntries = Array.from(clientEmbedsMap.values());
+        const pinnedClientEntries = clientEntries.filter(
+          ({ client }) => pinnedClientIds?.includes(client.id) ?? false
+        );
+        
+        // Sort pinned clients alphabetically
+        const sortedPinnedClientEntries = pinnedClientEntries.sort((a, b) => 
+          a.client.name.localeCompare(b.client.name)
+        );
+
+        // Add only pinned client groups
+        sortedPinnedClientEntries.forEach(({ client, embeds }) => {
           routes.push({
             type: 'group',
             path: `${pathsConfig.app.clients}/organizations/${client.id}`,
@@ -220,11 +238,11 @@ export function addAgencyEmbedsToNavigation(
                 src={client.picture_url ?? ''}
                 alt={client.name}
                 username={client.name}
-                className="h-5 w-5"
+                className="h-5 w-5 ring-2 ring-primary"
               />
             ),
             collapsible: true,
-            collapsed: false,
+            collapsed: false, // Pinned clients are expanded by default
             children: embeds.map(createEmbedNavigationItem),
           });
         });
@@ -255,12 +273,13 @@ export function addAgencyEmbedsToNavigation(
 }
 
 /**
- * Builds the complete navigation config with embeds
+ * Builds the complete navigation config with embeds and pinned clients
  */
 export function buildNavigationConfig(
   userRole: string | null | undefined,
   embeds: Embed[] | undefined,
   AvatarComponent: React.ComponentType<AvatarProps>,
+  pinnedClientIds?: string[],
 ): NavigationConfig {
   // Get base config
   const baseConfig = getBaseNavigationConfig(userRole);
@@ -270,7 +289,15 @@ export function buildNavigationConfig(
 
   // Filter embeds that should appear in the sidebar
   const sidebarEmbeds = embeds.filter(
-    (embed) => embed.location === 'sidebar' && !embed.deleted_on,
+    (embed) => {
+      if (embed.visibility === 'public') {
+        return !embed.deleted_on;
+      }
+      if (embed.visibility === 'private') {
+        return !embed.deleted_on && embed.location === 'sidebar';
+      }
+      return false;
+    }
   );
 
   if (!sidebarEmbeds.length) return baseConfig;
@@ -285,6 +312,7 @@ export function buildNavigationConfig(
       baseConfig,
       sidebarEmbeds,
       AvatarComponent,
+      pinnedClientIds,
     );
   }
 }

@@ -41,7 +41,7 @@ export const NavigationConfigSchema = z.object({
       z.object({
         type: z.literal('section').default('section'),
         section: z.literal(true),
-        label: z.string(),
+        label: z.custom<React.ReactNode>(),
         path: z.string().optional(),
         className: z.string().optional(),
         items: z.array(

@@ -131,7 +131,7 @@ export default function CheckboxCombobox<
                           placeholder="Search..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="h-9 pl-9 bg-gray-50/50 border-gray-100 placeholder:text-gray-400"
+                          className="h-9 pl-9 bg-gray-50/50 border-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
                         />
                       </div>
                     </div>
