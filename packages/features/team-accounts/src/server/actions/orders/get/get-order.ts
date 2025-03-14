@@ -27,11 +27,10 @@ import {
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
 import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
-export const  getOrderById = async (orderId: Order.Type['id']) => {
+
+export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userError } = await client.auth.getUser();
-    if (userError) throw userError.message;
 
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')

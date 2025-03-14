@@ -20,8 +20,22 @@ const getOrderByIdCached = cache(async (id: string): Promise<Order.Relational> =
     return await getOrderById(Number(id)) as unknown as Order.Relational;
   } catch (err) {
     console.error('Error fetching order:', err);
-    return undefined;
+    return {} as Order.Relational;
   }
+});
+
+const getAgencyStatusesCached = cache(async (agencyId: string) => {
+  return getAgencyStatuses(agencyId).catch(err => {
+    console.error('Error fetching agency statuses:', err);
+    return [];
+  });
+});
+
+const getTagsCached = cache(async (agencyId: string) => {
+  return getTags(agencyId).catch(err => {
+    console.error('Error fetching agency tags:', err);
+    return [];
+  });
 });
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
@@ -41,7 +55,7 @@ async function OrderDetailsPage({
 }: {
   params: { id: string };
 }) {
-  const [order, { user, workspace, organization, agency }, i18n] = await Promise.all([
+  const [order, { workspace, organization, agency, user }, i18n] = await Promise.all([
     getOrderByIdCached(id),
     loadUserWorkspace(),
     createI18nServerInstance()
@@ -53,14 +67,8 @@ async function OrderDetailsPage({
   }
 
   const [agencyStatuses, agencyTags] = await Promise.all([
-    getAgencyStatuses(order?.agency_id ?? '').catch(err => {
-      console.error('Error fetching agency statuses:', err);
-      return [];
-    }),
-    getTags(order?.agency_id ?? '').catch(err => {
-      console.error('Error fetching agency tags:', err);
-      return [];
-    })
+    getAgencyStatusesCached(order?.agency_id ?? ''),
+    getTagsCached(order?.agency_id ?? '')
   ]);
 
   const organizationId = order?.client_organization_id;
