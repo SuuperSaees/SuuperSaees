@@ -2,13 +2,14 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
 import { Embeds } from '~/lib/embeds.types';
 import { Order } from '~/lib/order.types';
 
 import { ValueFormatters } from '../hooks/use-csv-export-formatters';
 import { ViewOption } from '../hooks/use-orders-view-configs';
 import CreateOrderButton from './create-order-button';
-import { EmbedTabs } from './embed-tabs';
 import Filters, { FilterGroup } from './filters';
 import Search from './search';
 import SettingsDropdown from './settings-dropdown';
@@ -39,8 +40,6 @@ export function BoardHeader({
   activeTab,
   handleTabChange,
   tabsConfig,
-  embeds,
-  theme_color,
   getFilterValues,
   handleSearch,
   filtersConfig,
@@ -52,24 +51,26 @@ export function BoardHeader({
   orders,
   getValueFormatters,
 }: BoardHeaderProps) {
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const agencyRoles = [
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ];
   return (
     <div className="flex flex-wrap items-center justify-end gap-4">
       <div className="mr-auto flex items-center gap-4">
         {/* Status filters */}
-        <StatusFilters
-          activeTab={activeTab}
-          setActiveTab={handleTabChange}
-          t={t}
-          tabsConfig={tabsConfig}
-        />
-
-        {/* Embed tabs */}
-        <EmbedTabs
-          embeds={embeds}
-          activeTab={activeTab}
-          handleTabChange={handleTabChange}
-          theme_color={theme_color}
-        />
+        {agencyRoles.includes(userWorkspace.role ?? '') && (
+          <>
+            <StatusFilters
+              activeTab={activeTab}
+              setActiveTab={handleTabChange}
+              t={t}
+              tabsConfig={tabsConfig}
+            />
+          </>
+        )}
       </div>
 
       <Search

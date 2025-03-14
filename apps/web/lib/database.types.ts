@@ -3758,6 +3758,10 @@ export type Database = {
         | "timers.read"
         | "timers.manage"
         | "timers.delete"
+        | "embeds.write"
+        | "embeds.read"
+        | "embeds.manage"
+        | "embeds.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"
@@ -3813,6 +3817,7 @@ export type Database = {
         | "auth_card_background_color"
         | "auth_section_background_color"
         | "dashboard_url"
+        | "pinned_organizations"
         | "catalog_provider_url"
         | "catalog_product_url"
         | "tool_copy_list_url"

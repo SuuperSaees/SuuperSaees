@@ -1,0 +1,318 @@
+import React from 'react';
+
+import { Box, Link } from 'lucide-react';
+import { z } from 'zod';
+
+import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
+
+import { DynamicIcon } from '../app/components/shared/dynamic-icon';
+import { ClientSearchDropdown } from '../app/home/(user)/_components/client-search-dropdown';
+import {
+  clientAccountGuestNavigationConfig,
+  clientAccountNavigationConfig,
+} from './client-account-navigation.config';
+import { teamMemberAccountNavigationConfig } from './member-team-account-navigation.config';
+import pathsConfig from './paths.config';
+import { personalAccountNavigationConfig } from './personal-account-navigation.config';
+
+// Types
+export type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
+
+// Define Avatar component props interface
+export interface AvatarProps {
+  src: string;
+  alt: string;
+  username?: string;
+  className?: string;
+  [key: string]: unknown;
+}
+
+export type Organization = {
+  id: string;
+  name: string;
+  picture_url?: string;
+};
+
+export type Embed = {
+  id: string;
+  title: string | null;
+  value: string;
+  type: string;
+  location: string;
+  deleted_on?: string | null;
+  visibility?: string;
+  icon?: string;
+  organizations?: Organization[];
+};
+
+export type UserRole =
+  | 'agency_owner'
+  | 'agency_member'
+  | 'client_owner'
+  | 'client_member'
+  | 'client_guest';
+
+/**
+ * Determines if a dashboard URL should be shown based on user role and ID
+ */
+export function shouldShowDashboardUrl(
+  dashboardUrl: string | null | undefined,
+  userRole: string | null | undefined,
+  userId: string | null | undefined,
+): boolean {
+  if (!dashboardUrl) return false;
+
+  const clientRoles = new Set(['client_owner', 'client_member']);
+  const urlHasUserIds = dashboardUrl.includes('userIds=');
+
+  if (urlHasUserIds && clientRoles.has(userRole ?? '')) {
+    const userIds =
+      new URL(dashboardUrl).searchParams.get('userIds')?.split(',') ?? [];
+    return userIds.includes(userId ?? '');
+  }
+
+  return true;
+}
+
+/**
+ * Gets the base navigation config for a user role
+ */
+export function getBaseNavigationConfig(
+  userRole: string | null | undefined,
+): NavigationConfig {
+  const isAgencyOwner = userRole === 'agency_owner';
+
+  // For non-agency owners, filter out the clients path
+  const getFilteredConfig = (config: NavigationConfig) => {
+    if (isAgencyOwner) return config;
+
+    return {
+      ...config,
+      routes: config.routes.map((item) => {
+        if ('children' in item) {
+          return {
+            ...item,
+            children: item.children.filter(
+              (child) => child.path !== pathsConfig.app.clients,
+            ),
+          };
+        }
+        return item;
+      }),
+    };
+  };
+
+  // Select the appropriate config based on user role
+  if (userRole === 'agency_member')
+    return getFilteredConfig(teamMemberAccountNavigationConfig);
+  if (userRole === 'client_owner' || userRole === 'client_member')
+    return clientAccountNavigationConfig;
+  if (userRole === 'client_guest') return clientAccountGuestNavigationConfig;
+  return personalAccountNavigationConfig;
+}
+
+/**
+ * Creates an icon component from an embed's icon property
+ */
+export function createEmbedIcon(embed: Embed) {
+  return embed.icon ? (
+    <DynamicIcon name={embed.icon} className="w-4" />
+  ) : (
+    <Box className="w-4" />
+  );
+}
+
+/**
+ * Creates a navigation item for an embed
+ */
+export function createEmbedNavigationItem(embed: Embed) {
+  return {
+    type: 'route',
+    label: embed.title ?? 'Embed',
+    path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
+    Icon: createEmbedIcon(embed),
+  };
+}
+
+/**
+ * Adds client embeds to the navigation config
+ */
+export function addClientEmbedsToNavigation(
+  baseConfig: NavigationConfig,
+  embeds: Embed[],
+): NavigationConfig {
+  if (!embeds.length) return baseConfig;
+
+  const routes = [...baseConfig.routes];
+
+  // Add all embeds in a single section
+  routes.push({
+    type: 'section',
+    section: true,
+    label: 'Workspace',
+    items: embeds.map(createEmbedNavigationItem),
+  });
+
+  return NavigationConfigSchema.parse({
+    ...baseConfig,
+    routes,
+  });
+}
+
+/**
+ * Adds agency embeds to the navigation config with support for pinned clients
+ */
+export function addAgencyEmbedsToNavigation(
+  baseConfig: NavigationConfig,
+  embeds: Embed[],
+  AvatarComponent: React.ComponentType<AvatarProps>,
+  pinnedClientIds?: string[],
+): NavigationConfig {
+  if (!embeds.length) return baseConfig;
+
+  const routes = [...baseConfig.routes];
+
+  // Separate public and private embeds
+  const publicEmbeds = embeds.filter((embed) => embed.visibility === 'public');
+  const privateEmbeds = embeds.filter((embed) => embed.visibility !== 'public');
+
+  // Only add sections if we have embeds to show
+  if (privateEmbeds.length > 0 || publicEmbeds.length > 0) {
+
+    // Process private embeds by client
+    if (privateEmbeds.length > 0) {
+      // Group embeds by client
+      const clientEmbedsMap = new Map<
+        string,
+        { client: Organization; embeds: Embed[] }
+      >();
+
+      privateEmbeds.forEach((embed) => {
+        if (embed.organizations?.length) {
+          embed.organizations.forEach((org) => {
+            const entry = clientEmbedsMap.get(org.id);
+            if (entry) {
+              entry.embeds.push(embed);
+            } else {
+              clientEmbedsMap.set(org.id, { client: org, embeds: [embed] });
+            }
+          });
+        }
+      });
+
+      // Add clients section with the search dropdown component
+      if (clientEmbedsMap.size > 0) {
+        routes.push({
+          type: 'section',
+          path: pathsConfig.app.clients,
+          section: true,
+          label: (
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-medium text-muted-foreground">Clients</span>
+              <ClientSearchDropdown />
+            </div>
+          ),
+          className: 'text-xs font-medium text-muted-foreground',
+          items: [], // Empty items array, we'll add client groups separately
+        });
+
+        // Filter client entries to only include pinned clients
+        const clientEntries = Array.from(clientEmbedsMap.values());
+        const pinnedClientEntries = clientEntries.filter(
+          ({ client }) => pinnedClientIds?.includes(client.id) ?? false
+        );
+        
+        // Sort pinned clients alphabetically
+        const sortedPinnedClientEntries = pinnedClientEntries.sort((a, b) => 
+          a.client.name.localeCompare(b.client.name)
+        );
+
+        // Add only pinned client groups
+        sortedPinnedClientEntries.forEach(({ client, embeds }) => {
+          routes.push({
+            type: 'group',
+            path: `${pathsConfig.app.clients}/organizations/${client.id}`,
+            label: client.name,
+            Icon: (
+              <AvatarComponent
+                src={client.picture_url ?? ''}
+                alt={client.name}
+                username={client.name}
+                className="h-5 w-5 ring-2 ring-primary"
+              />
+            ),
+            collapsible: true,
+            collapsed: false, // Pinned clients are expanded by default
+            children: embeds.map(createEmbedNavigationItem),
+          });
+        });
+      }
+    }
+
+    // Add public workspace section
+    if (publicEmbeds.length > 0) {
+      routes.push({
+        type: 'group',
+        label: 'Public Workspace',
+        Icon: (
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-black text-white">
+            <Link className="h-3 w-3" />
+          </div>
+        ),
+        collapsible: true,
+        collapsed: false,
+        children: publicEmbeds.map(createEmbedNavigationItem),
+      });
+    }
+  }
+
+  return NavigationConfigSchema.parse({
+    ...baseConfig,
+    routes,
+  });
+}
+
+/**
+ * Builds the complete navigation config with embeds and pinned clients
+ */
+export function buildNavigationConfig(
+  userRole: string | null | undefined,
+  embeds: Embed[] | undefined,
+  AvatarComponent: React.ComponentType<AvatarProps>,
+  pinnedClientIds?: string[],
+): NavigationConfig {
+  // Get base config
+  const baseConfig = getBaseNavigationConfig(userRole);
+
+  // If no embeds, return base config
+  if (!embeds?.length) return baseConfig;
+
+  // Filter embeds that should appear in the sidebar
+  const sidebarEmbeds = embeds.filter(
+    (embed) => {
+      if (embed.visibility === 'public') {
+        return !embed.deleted_on;
+      }
+      if (embed.visibility === 'private') {
+        return !embed.deleted_on && embed.location === 'sidebar';
+      }
+      return false;
+    }
+  );
+
+  if (!sidebarEmbeds.length) return baseConfig;
+
+  // Add embeds based on user role
+  const isClientRole = userRole?.startsWith('client_');
+
+  if (isClientRole) {
+    return addClientEmbedsToNavigation(baseConfig, sidebarEmbeds);
+  } else {
+    return addAgencyEmbedsToNavigation(
+      baseConfig,
+      sidebarEmbeds,
+      AvatarComponent,
+      pinnedClientIds,
+    );
+  }
+}

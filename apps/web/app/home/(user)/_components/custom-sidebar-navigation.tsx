@@ -1,4 +1,4 @@
-import { SidebarDivider, SidebarGroup, SidebarItem } from '@kit/ui/sidebar';
+import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection } from '@kit/ui/sidebar';
 import { Trans } from '@kit/ui/trans';
 
 import { MessageBadge } from './message-badge';
@@ -7,6 +7,12 @@ import { z } from 'zod';
 import pathsConfig from '~/config/paths.config';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
+
+// Type guard to check if an item has the 'end' property
+function hasEndProperty(item: unknown): item is { end: boolean | ((path: string) => boolean) } {
+  return typeof item === 'object' && item !== null && 'end' in item;
+}
+
 export function CustomSidebarNavigation({
   config,
   showDashboardUrl,
@@ -22,11 +28,41 @@ export function CustomSidebarNavigation({
   toolCopyListUrl?: boolean;
   userId?: string;
 }>) {
+  console.log('config', config)
   return (
     <>
       {config.routes.map((item, index) => {
         if ('divider' in item) {
           return <SidebarDivider key={index} />;
+        }
+
+        if ('section' in item) {
+          return (
+            <SidebarSection
+              key={`section-${index}`}
+              className='mt-8'
+              label={
+                <Trans
+                  i18nKey={item.label}
+                  defaults={item.label}
+                  key={item.label + index}
+                />
+              }
+              path={item.path}
+            >
+              {item.items.map((child, childIndex) => (
+                <SidebarItem
+                  key={`${child.path}-${childIndex}`}
+                  end={hasEndProperty(child) ? child.end : undefined}
+                  path={child.path}
+                  Icon={child.Icon}
+                  className={child.className}
+                >
+                  <Trans i18nKey={child.label} defaults={child.label} />
+                </SidebarItem>
+              ))}
+            </SidebarSection>
+          );
         }
 
         if (
@@ -51,6 +87,8 @@ export function CustomSidebarNavigation({
               collapsible={item.collapsible}
               collapsed={item.collapsed}
               Icon={item.Icon}
+              className={item.className}
+              path={item.path}
             >
               {item.children.map((child) => {
                 if (
@@ -69,6 +107,7 @@ export function CustomSidebarNavigation({
                     end={child.end}
                     path={child.path}
                     Icon={child.Icon}
+                    className={child.className}
                   >
                     <Trans i18nKey={child.label} defaults={child.label} />
                   </SidebarItem>
@@ -97,13 +136,14 @@ export function CustomSidebarNavigation({
             </SidebarItem>
           );
         }
-
         return (
+
           <SidebarItem
             key={item.path}
             end={item.end}
             path={item.path}
             Icon={item.Icon}
+            className={item.className}
           >
             <Trans i18nKey={item.label} defaults={item.label} />
           </SidebarItem>

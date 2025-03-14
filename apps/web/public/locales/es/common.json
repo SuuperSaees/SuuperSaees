@@ -178,5 +178,6 @@
     "plural": {
       "description": "Retrasado por {{days}} días"
     }
-  }
+  },
+  "workspaceName": "Espacio de trabajo"
 }

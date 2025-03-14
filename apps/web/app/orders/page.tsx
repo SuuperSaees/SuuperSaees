@@ -17,6 +17,7 @@ import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
+import SectionView from '~/components/organization/section-view';
 
 // type OrderResponse = Omit<Order.Response, 'id'> & {
 //   id: string;
@@ -90,8 +91,13 @@ async function OrdersPage() {
               title="orders:title"
               rightContent={<TimerContainer />}
             />
-
-            <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
+            {
+              agencyRoles.includes(userWorkspace.role ?? '') ? (
+                <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
+              ) : (
+                <SectionView clientOrganizationId={userOrganization.id ?? ''} currentUserRole={userWorkspace.role ?? ''} agencyId={agencyId ?? ''} />
+              )
+            }
           </div>
         </PageBody>
       </AgencyStatusesProvider>
