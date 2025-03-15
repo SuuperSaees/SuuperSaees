@@ -52,7 +52,7 @@ export function EmbedTab({ embed, isActive, onDelete }: EmbedTabProps) {
   return (
     <TabsTrigger
       value={embed.id}
-      className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500"
+      className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-black data-[state=inactive]:text-gray-500"
     >
       <DynamicIcon name={embed.icon ?? ''} className="h-4 w-4" />
       <span>{embed.title}</span>

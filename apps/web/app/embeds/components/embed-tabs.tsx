@@ -20,7 +20,7 @@ export function EmbedTabs({
     <TabsList className="bg-transparent">
       <TabsTrigger 
         value="new" 
-        className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500"
+        className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-black data-[state=inactive]:text-gray-500"
       >
         <Plus className="h-4 w-4" />
         Add Integration

@@ -171,7 +171,7 @@ export function EmbedSection({
           onDeleteEmbed={handleDeleteEmbed}
         />
         <div className="flex h-full w-full gap-8">
-          <div className="flex-1">
+          <div className="flex-1 p-8 bg-gray-200">
             <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
           </div>
           <EmbedEditor 
@@ -200,7 +200,7 @@ export function EmbedSection({
         {/* New Integration Tab Content */}
         <TabsContent value="new" className="h-full w-full">
           <div className="flex h-full w-full gap-8">
-            <div className="flex-1">
+            <div className="flex-1 p-8 bg-gray-200">
               <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
             </div>
             <EmbedEditor 
@@ -220,7 +220,7 @@ export function EmbedSection({
             className="h-full w-full"
           >
             <div className="flex h-full w-full gap-8">
-              <div className="flex-1">
+              <div className="flex-1 p-8 bg-gray-200">
                 <EmbedPreview embedSrc={embed.value} />
               </div>
               {activeEmbedId === embed.id && (
