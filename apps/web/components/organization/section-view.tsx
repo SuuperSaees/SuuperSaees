@@ -30,12 +30,14 @@ function SectionView({
   clientOrganizationId,
   currentUserRole,
   agencyId,
-  sections
+  sections,
+  showCardStats = true,
 }: {
   clientOrganizationId: string;
   currentUserRole: string;
   agencyId: string;
   sections?: string[];
+  showCardStats?: boolean;
 }) {
   const { t } = useTranslation('clients');
   const [search, setSearch] = useState('');
@@ -115,7 +117,7 @@ function SectionView({
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
       'orders',
-      <OrdersSection key={'orders'} organizationId={clientOrganizationId} agencyId={agencyId}/>,
+      <OrdersSection key={'orders'} organizationId={clientOrganizationId} agencyId={agencyId} showCardStats={showCardStats}/>,
     ],
     [
       'members',
