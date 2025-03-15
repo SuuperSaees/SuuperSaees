@@ -1,4 +1,4 @@
-import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
+import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
@@ -18,10 +18,8 @@ import { AgencyStatusesProvider } from './components/context/agency-statuses-con
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
 import SectionView from '~/components/organization/section-view';
+import Header from '~/components/organization/header';
 
-// type OrderResponse = Omit<Order.Response, 'id'> & {
-//   id: string;
-// };
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
   return {
@@ -48,10 +46,6 @@ async function OrdersPage() {
   const agencyId = agency?.id ?? '';
   const agencyStatuses =
     (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
-
-  // const agency = await getOrganizationById(agencyId ?? '').catch((err) =>
-  //   console.error(`Error fetching agency: ${err}`),
-  // );
 
   const { data, error: membersError } = await client.rpc(
     'get_account_members',
@@ -87,15 +81,32 @@ async function OrdersPage() {
       >
         <PageBody className="h-screen">
           <div className="flex h-full max-h-full min-h-0 flex-1 flex-col p-[35px]">
-            <PageHeader
+            {agencyRoles.includes(userWorkspace.role ?? '') ? <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
-            />
+            /> : <Header 
+              name={userOrganization.name ?? ''} 
+              logo={userOrganization.picture_url ?? ''} 
+              id={userOrganization.id ?? ''} 
+              currentUserRole={userWorkspace.role ?? ''} 
+              className="flex items-center gap-2 mb-6"
+              imageClassName="aspect-square h-8 w-8 flex-shrink-0"
+              contentClassName="flex flex-col justify-center"
+            />}
             {
               agencyRoles.includes(userWorkspace.role ?? '') ? (
-                <ProjectsBoard agencyMembers={agencyMembers} tags={tags} />
+                <ProjectsBoard agencyMembers={agencyMembers.map(member => ({
+                  organization_id: member.account_id,
+                  settings: member.user_settings,
+                  role: member.role
+                }))} tags={tags} />
               ) : (
-                <SectionView clientOrganizationId={userOrganization.id ?? ''} currentUserRole={userWorkspace.role ?? ''} agencyId={agencyId ?? ''} />
+                <SectionView 
+                  clientOrganizationId={userOrganization.id ?? ''} 
+                  currentUserRole={userWorkspace.role ?? ''} 
+                  agencyId={agencyId ?? ''} 
+                  sections={['orders']}
+                />
               )
             }
           </div>
