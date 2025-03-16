@@ -106,6 +106,7 @@ async function OrdersPage() {
                   currentUserRole={userWorkspace.role ?? ''} 
                   agencyId={agencyId ?? ''} 
                   sections={['orders']}
+                  showCardStats={false}
                 />
               )
             }
