@@ -23,6 +23,7 @@ import { getEmbeds } from '~/server/actions/embeds/embeds.action';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { BoxIcon } from 'lucide-react';
 import { EmbedPreview } from '~/embeds/components/embed-preview';
+import ButtonPinOrganization from './button-pin-organization';
 /**
  * @description This component is used to display the navigation tabs for the account settings page.
  */
@@ -30,10 +31,12 @@ function SectionView({
   clientOrganizationId,
   currentUserRole,
   agencyId,
+  sections
 }: {
   clientOrganizationId: string;
   currentUserRole: string;
   agencyId: string;
+  sections?: string[];
 }) {
   const { t } = useTranslation('clients');
   const [search, setSearch] = useState('');
@@ -104,9 +107,12 @@ function SectionView({
     ],
   ]);
 
-  const availableTabs = availableTabsBasedOnRole.has(currentUserRole)
-    ? ['orders', 'members', 'services', 'files', 'embeds']
-    : ['members', 'services', 'orders'];
+  // Modificar la lógica para priorizar las secciones pasadas como prop
+  const availableTabs = sections 
+    ? sections 
+    : availableTabsBasedOnRole.has(currentUserRole)
+      ? ['orders', 'members', 'services', 'files', 'embeds']
+      : ['members', 'services', 'orders'];
 
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
@@ -172,6 +178,7 @@ function SectionView({
     // ['invoices', <InvoiceSection key={'invoices'} />],
   ]);
 
+  // Filtrar navigationOptionKeys para incluir solo las secciones disponibles
   const navigationOptionKeys = Array.from(navigationOptionsMap.keys()).filter(
     (key) => availableTabs.includes(key),
   );
@@ -255,6 +262,13 @@ function SectionView({
           ))}
         </TabsList>
         <div className="flex gap-4">{buttonControllersMap.get(activeTab)}</div>
+
+
+        {availableTabsBasedOnRole.has(currentUserRole) && (
+          <div>
+            <ButtonPinOrganization organizationId={clientOrganizationId} />
+          </div>
+        )}
       </div>
 
       {/* Standard tab contents */}

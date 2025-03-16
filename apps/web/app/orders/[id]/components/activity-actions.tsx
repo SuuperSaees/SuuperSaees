@@ -15,7 +15,7 @@ import { ActivityType, DataResult } from '../context/activity.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import FileWithOptions from '../hoc/with-file-options';
 import { useActivityContext } from '../context/activity-context';
-
+4
 const translateActivity = (
   activity: DataResult.Activity,
   t: TFunction<'logs', undefined>,

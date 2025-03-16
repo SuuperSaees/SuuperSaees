@@ -12,8 +12,6 @@ import DatePicker from 'node_modules/@kit/team-accounts/src/server/actions/order
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { Trans } from '@kit/ui/trans';
-
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
 import { parseISO } from 'date-fns';
@@ -45,7 +43,6 @@ import ActivityTags from './activity-tags';
 import { Tags } from '~/lib/tags.types';
 import { updateOrderTags } from '~/server/actions/orders/orders.action';
 interface AsideOrderInformationProps {
-  order: Order.Relational;
   className?: string;
   orderAgencyTags: Tags.Type[];
   [key: string]: unknown;
@@ -252,7 +249,7 @@ const AsideOrderInformation = ({
         <div className="border-b border-gray-200 pb-7">
           <div className="flex items-center justify-between">
           <h3 className="pb-4 font-bold">
-            <Trans i18nKey="details.createdBy" />
+            {t('details.createdBy')}
           </h3>
 
           {
