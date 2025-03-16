@@ -1,3 +1,5 @@
+'use client';
+
 import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection } from '@kit/ui/sidebar';
 import { Trans } from '@kit/ui/trans';
 
@@ -43,12 +45,13 @@ export function CustomSidebarNavigation({
               className='mt-8'
               label={
                 <Trans
-                  i18nKey={item.label}
-                  defaults={item.label}
-                  key={item.label + index}
+                  i18nKey={typeof item.label === 'string' ? item.label : ''}
+                  defaults={typeof item.label === 'string' ? item.label : ''}
+                  key={typeof item.label === 'string' ? item.label + index : index + ''}
                 />
               }
               path={item.path}
+              menu={item.menu}
             >
               {item.items.map((child, childIndex) => (
                 <SidebarItem
@@ -57,6 +60,7 @@ export function CustomSidebarNavigation({
                   path={child.path}
                   Icon={child.Icon}
                   className={child.className}
+                  menu={child.menu}
                 >
                   <Trans i18nKey={child.label} defaults={child.label} />
                 </SidebarItem>
@@ -76,12 +80,12 @@ export function CustomSidebarNavigation({
         } else if ('children' in item) {
           return (
             <SidebarGroup
-              key={item.label}
+              key={typeof item.label === 'string' ? item.label : ''}
               label={
                 <Trans
-                  i18nKey={item.label}
-                  defaults={item.label}
-                  key={item.label + index}
+                  i18nKey={typeof item.label === 'string' ? item.label : ''}
+                  defaults={typeof item.label === 'string' ? item.label : ''}
+                  key={typeof item.label === 'string' ? item.label + index : index + ''}
                 />
               }
               collapsible={item.collapsible}
@@ -89,6 +93,7 @@ export function CustomSidebarNavigation({
               Icon={item.Icon}
               className={item.className}
               path={item.path}
+              menu={item.menu}
             >
               {item.children.map((child) => {
                 if (
@@ -108,6 +113,7 @@ export function CustomSidebarNavigation({
                     path={child.path}
                     Icon={child.Icon}
                     className={child.className}
+                    menu={child.menu}
                   >
                     <Trans i18nKey={child.label} defaults={child.label} />
                   </SidebarItem>
@@ -129,7 +135,8 @@ export function CustomSidebarNavigation({
               end={item.end}
               path={item.path}
               Icon={item.Icon}
-              className="flex w-full items-center"
+              className="flex w-full items-center justify-between"
+              menu={item.menu}
             >
               <Trans i18nKey={item.label} defaults={item.label} />
               <MessageBadge userId={userId ?? ''} />
@@ -144,6 +151,7 @@ export function CustomSidebarNavigation({
             path={item.path}
             Icon={item.Icon}
             className={item.className}
+            menu={item.menu}
           >
             <Trans i18nKey={item.label} defaults={item.label} />
           </SidebarItem>

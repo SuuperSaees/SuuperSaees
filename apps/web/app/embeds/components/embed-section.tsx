@@ -1,22 +1,15 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { useMemo, useState } from 'react';
 
 import { TabsContent } from '@kit/ui/tabs';
 import { Tabs } from '@kit/ui/tabs';
 
 import { Embeds } from '~/lib/embeds.types';
-import {
-  createEmbed,
-  deleteEmbed,
-  updateEmbed,
-} from '~/server/actions/embeds/embeds.action';
+import { useEmbedApiActions, useEmbedUrlParams } from '../hooks';
+import { FormValues } from '../schema';
 
 import { EmbedPreview } from './embed-preview';
-import { FormValues } from '../schema';
 import { EmbedEditor } from './embed-editor/embed-editor';
 import { EmbedTabs } from './embed-tabs';
 
@@ -31,6 +24,22 @@ interface EmbedSectionProps {
   showEmbedSelector?: boolean;
 }
 
+// Helper function to convert FormValues to the expected EmbedEditor defaultValue type
+const formValuesToEmbedType = (values: FormValues): (Embeds.Type & { embed_accounts: string[] }) => {
+  return {
+    id: '',
+    created_at: new Date().toISOString(),
+    updated_at: null,
+    deleted_on: null,
+    organization_id: null,
+    user_id: null,
+    ...values,
+    title: values.title ?? '',
+    icon: values.icon ?? null,
+    embed_accounts: values.embed_accounts ?? [],
+  } as Embeds.Type & { embed_accounts: string[] };
+};
+
 export function EmbedSection({ 
   embeds, 
   agencyId, 
@@ -38,8 +47,6 @@ export function EmbedSection({
   defaultCreationValue,
   showEmbedSelector = false
 }: EmbedSectionProps) {
-  const queryClient = useQueryClient();
-
   const formattedEmbeds = useMemo(() => {
     return embeds.map((embed) => ({
       ...embed,
@@ -60,102 +67,54 @@ export function EmbedSection({
   const [activeEmbedId, setActiveEmbedId] = useState<string>(
     defaultEmbed?.id ?? 'new',
   );
+  
+  // Store default creation values from URL parameters
+  const [urlDefaultValues, setUrlDefaultValues] = useState<FormValues | null>(null);
 
-  // Filter embeds to only show iframe types in the tab content
-  // const iframeEmbeds = useMemo(
-  //   () => formattedEmbeds.filter((embed) => embed.type === 'iframe'),
-  //   [formattedEmbeds],
-  // );
+  // Setup mutations with callbacks
+  const {
+    createMutation,
+    handleEmbedCreation,
+    handleEmbedUpdate,
+    handleEmbedDelete,
+  } = useEmbedApiActions({
+    agencyId,
+    userId,
+    activeEmbedId,
+    onCreateSuccess: (newEmbed) => setActiveEmbedId(newEmbed.id),
+    onDeleteSuccess: () => setActiveEmbedId('new'),
+  });
 
-  const host = typeof window !== 'undefined' ? window.location.hostname : '';
-
-  // Create mutation
-  const createMutation = useMutation<Embeds.Type, Error, FormValues>({
-    mutationFn: (values: FormValues) => {
-      const { embed_accounts, ...embedData } = values;
-      const embed = {
-        ...embedData,
-        organization_id: agencyId,
-        user_id: userId,
-      };
-      return createEmbed(embed, embed_accounts, host);
+  // Handle URL parameters
+  useEmbedUrlParams({
+    formattedEmbeds,
+    setActiveEmbedId,
+    updateEmbed: (id, values, isAccountRemoval) => {
+      // First set active tab to show what's being modified
+      setActiveEmbedId(id);
+      // Then update the embed
+      void handleEmbedUpdate(values, { isAccountRemoval });
     },
-    onSuccess: () => {
-      toast.success('Integration created successfully');
-      void queryClient.invalidateQueries({ queryKey: ['embeds'] });
-      setActiveEmbedId(defaultEmbed?.id ?? 'new');
-    },
-    onError: (error: Error) => {
-      toast.error('Failed to create integration: ' + error.message);
+    deleteEmbed: handleEmbedDelete,
+    setDefaultCreationValues: (values) => {
+      // Just set the default values, don't trigger creation
+      setUrlDefaultValues(values);
     },
   });
 
-  // Update mutation
-  const updateMutation = useMutation<
-    Embeds.Type,
-    Error,
-    { id: string; values: FormValues }
-  >({
-    mutationFn: ({ id, values }) => {
-      const { embed_accounts: _embed_accounts, ...embedData } = values;
-      const embed = {
-        ...embedData,
-      };
-      return updateEmbed(id, embed, _embed_accounts, host);
-    },
-    onSuccess: () => {
-      toast.success('Integration updated successfully');
-      void queryClient.invalidateQueries({ queryKey: ['embeds'] });
-    },
-    onError: (error: Error) => {
-      toast.error('Failed to update integration: ' + error.message);
-    },
-  });
-
-  // Delete mutation
-  const deleteMutation = useMutation<void, Error, string>({
-    mutationFn: (id: string) => deleteEmbed(id),
-  });
-
-  const handleDeleteEmbed = useCallback(
-    (id: string) => {
-      deleteMutation.mutate(id, {
-        onSuccess: () => {
-          toast.success('Integration deleted successfully');
-        },
-      });
-    },
-    [deleteMutation],
-  );
-
-  const handleTabChange = useCallback((tabId: string) => {
+  const handleTabChange = (tabId: string) => {
     setActiveEmbedId(tabId);
-  }, []);
+  };
 
-  const handleEmbedCreation = useCallback(
-    async (values: FormValues) => {
-      try {
-        await createMutation.mutateAsync(values);
-      } catch (error) {
-        // Error is handled by the mutation's onError
-        console.error('Failed to create embed:', error);
-      }
-    },
-    [createMutation],
-  );
-
-  const handleEmbedUpdate = useCallback(
-    async (values: FormValues) => {
-      if (activeEmbedId === 'new') return;
-      try {
-        await updateMutation.mutateAsync({ id: activeEmbedId, values });
-      } catch (error) {
-        // Error is handled by the mutation's onError
-        console.error('Failed to update embed:', error);
-      }
-    },
-    [activeEmbedId, updateMutation],
-  );
+  // Determine which default values to use - prioritize URL values over props
+  const effectiveDefaultValue = urlDefaultValues ?? defaultCreationValue ?? null;
+  
+  // Convert FormValues to Embeds.Type if needed
+  const processedDefaultValue = effectiveDefaultValue && 'id' in effectiveDefaultValue 
+    ? effectiveDefaultValue 
+    : effectiveDefaultValue 
+      ? formValuesToEmbedType(effectiveDefaultValue)
+      : null;
 
   // No embeds to display - still show the "Add Integration" tab
   if (embeds.length === 0) {
@@ -168,7 +127,7 @@ export function EmbedSection({
         <EmbedTabs
           embeds={[]}
           activeEmbedId={activeEmbedId}
-          onDeleteEmbed={handleDeleteEmbed}
+          onDeleteEmbed={handleEmbedDelete}
         />
         <div className="flex h-full w-full gap-8">
           <div className="flex-1 p-8 bg-gray-200">
@@ -176,7 +135,7 @@ export function EmbedSection({
           </div>
           <EmbedEditor 
             onAction={handleEmbedCreation} 
-            defaultValue={defaultCreationValue ?? null} 
+            defaultValue={processedDefaultValue} 
             availableEmbeds={formattedEmbeds}
             showEmbedSelector={showEmbedSelector}
           />
@@ -194,7 +153,7 @@ export function EmbedSection({
       <EmbedTabs
         embeds={formattedEmbeds}
         activeEmbedId={activeEmbedId}
-        onDeleteEmbed={handleDeleteEmbed}
+        onDeleteEmbed={handleEmbedDelete}
       />
       <div className="flex h-full w-full gap-8">
         {/* New Integration Tab Content */}
@@ -205,7 +164,7 @@ export function EmbedSection({
             </div>
             <EmbedEditor 
               onAction={handleEmbedCreation} 
-              defaultValue={defaultCreationValue ?? null} 
+              defaultValue={processedDefaultValue} 
               availableEmbeds={formattedEmbeds}
               showEmbedSelector={showEmbedSelector}
             />

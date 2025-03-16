@@ -1,7 +1,7 @@
 import { EmbedAccounts } from '~/lib/embed-accounts.types';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
-
+import { revalidatePath } from 'next/cache';
 export class EmbedAccountsRepository {
     private client: SupabaseClient<Database>
     private adminClient?: SupabaseClient<Database>
@@ -16,6 +16,7 @@ export class EmbedAccountsRepository {
             .insert(payload)
             .select()
 
+        revalidatePath('/embeds');
         if (error) throw error;
         return data;
     }
@@ -61,6 +62,8 @@ export class EmbedAccountsRepository {
             .eq('embed_id', embedId)
         
         if (finalFetchError) throw finalFetchError;
+
+        revalidatePath('/embeds');
         return updatedRelations;
     }
 
@@ -70,6 +73,7 @@ export class EmbedAccountsRepository {
             .delete()
             .eq('id', embedAccountId);
 
+        revalidatePath('/embeds');
         if (error) throw error;
     }
 

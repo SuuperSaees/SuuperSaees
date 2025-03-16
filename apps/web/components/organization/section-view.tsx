@@ -1,6 +1,7 @@
 'use client';
 
-import { type JSX, useState } from 'react';
+import { type JSX, useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 import { useQuery } from '@tanstack/react-query';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
@@ -39,6 +40,7 @@ function SectionView({
   const [activeTab, setActiveTab] = useState('orders');
   const { workspace: userWorkspace } = useUserWorkspace();
   const userId = userWorkspace.id ?? '';
+  const searchParams = useSearchParams();
 
   // Define availableTabsBasedOnRole before it's used
   const availableTabsBasedOnRole = new Set([
@@ -177,21 +179,40 @@ function SectionView({
   // For non-agency roles, add individual embed tabs
   const isAgencyRole = availableTabsBasedOnRole.has(currentUserRole);
   
-  // Create a list of all tabs to display
-  const allTabs = [...navigationOptionKeys];
-  
-  // If not an agency role and we have embeds, add them as individual tabs
-  if (!isAgencyRole && embeds.length > 0) {
-    embeds.forEach(embed => {
-      if (!allTabs.includes(embed.id)) {
-        allTabs.push(embed.id);
-      }
-    });
-  }
+  // Create a list of all tabs to display - memoized to prevent unnecessary re-renders
+  const allTabs = useMemo(() => {
+    const tabs = [...navigationOptionKeys];
+    
+    // If not an agency role and we have embeds, add them as individual tabs
+    if (!isAgencyRole && embeds.length > 0) {
+      embeds.forEach(embed => {
+        if (!tabs.includes(embed.id)) {
+          tabs.push(embed.id);
+        }
+      });
+    }
+    
+    return tabs;
+  }, [navigationOptionKeys, isAgencyRole, embeds]);
+
+  // Handle section query parameter to activate the appropriate tab
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (section && allTabs.includes(section)) {
+      setActiveTab(section);
+    }
+    
+    // Clear the section parameter from the URL
+    if (section) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('section');
+      window.history.replaceState({}, '', url);
+    }
+  }, [searchParams, allTabs]);
 
   return (
     <Tabs
-      defaultValue={allTabs[0]}
+      value={activeTab}
       onValueChange={(value) => {
         console.log('Tab changed to:', value);
         setActiveTab(value);
