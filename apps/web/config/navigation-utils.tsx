@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 
 import { Box, Link } from 'lucide-react';
@@ -6,7 +7,8 @@ import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
 import { DynamicIcon } from '../app/components/shared/dynamic-icon';
-import { ClientSearchDropdown } from '../app/home/(user)/_components/client-search-dropdown';
+import { ClientsOptionsDropdown } from '../app/home/(user)/_components/clients-options-dropdown';
+import { ClientOptionsDropdown } from '../app/home/(user)/_components/client-options-dropdown';
 import {
   clientAccountGuestNavigationConfig,
   clientAccountNavigationConfig,
@@ -14,6 +16,7 @@ import {
 import { teamMemberAccountNavigationConfig } from './member-team-account-navigation.config';
 import pathsConfig from './paths.config';
 import { personalAccountNavigationConfig } from './personal-account-navigation.config';
+import { EmbedOptionsDropdown } from '~/home/(user)/_components/embed-options-dropdown';
 
 // Types
 export type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
@@ -125,12 +128,13 @@ export function createEmbedIcon(embed: Embed) {
 /**
  * Creates a navigation item for an embed
  */
-export function createEmbedNavigationItem(embed: Embed) {
+export function createEmbedNavigationItem(embed: Embed, clientId: string) {
   return {
     type: 'route',
     label: embed.title ?? 'Embed',
     path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
     Icon: createEmbedIcon(embed),
+    menu: <EmbedOptionsDropdown embedId={embed.id} accountId={clientId} />,
   };
 }
 
@@ -150,7 +154,7 @@ export function addClientEmbedsToNavigation(
     type: 'section',
     section: true,
     label: 'Workspace',
-    items: embeds.map(createEmbedNavigationItem),
+    items: embeds.map((embed) => createEmbedNavigationItem(embed, '')),
   });
 
   return NavigationConfigSchema.parse({
@@ -206,13 +210,9 @@ export function addAgencyEmbedsToNavigation(
           type: 'section',
           path: pathsConfig.app.clients,
           section: true,
-          label: (
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-medium text-muted-foreground">Clients</span>
-              <ClientSearchDropdown />
-            </div>
-          ),
-          className: 'text-xs font-medium text-muted-foreground',
+          label: 'Clients',
+          menu: <ClientsOptionsDropdown />,
+          className: "text-xs font-medium text-muted-foreground",
           items: [], // Empty items array, we'll add client groups separately
         });
 
@@ -233,17 +233,18 @@ export function addAgencyEmbedsToNavigation(
             type: 'group',
             path: `${pathsConfig.app.clients}/organizations/${client.id}`,
             label: client.name,
+            menu: <ClientOptionsDropdown clientId={client.id} />,
             Icon: (
               <AvatarComponent
                 src={client.picture_url ?? ''}
                 alt={client.name}
                 username={client.name}
-                className="h-5 w-5 ring-2 ring-primary"
+                className="h-5 w-5 border-none"
               />
             ),
             collapsible: true,
             collapsed: false, // Pinned clients are expanded by default
-            children: embeds.map(createEmbedNavigationItem),
+            children: embeds.map((embed) => createEmbedNavigationItem(embed, client.id)),
           });
         });
       }
@@ -261,7 +262,7 @@ export function addAgencyEmbedsToNavigation(
         ),
         collapsible: true,
         collapsed: false,
-        children: publicEmbeds.map(createEmbedNavigationItem),
+        children: publicEmbeds.map((embed) => createEmbedNavigationItem(embed, '')),
       });
     }
   }

@@ -1,6 +1,7 @@
 import { Embeds } from '~/lib/embeds.types';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
+import { revalidatePath } from 'next/cache';
 
 export class EmbedsRepository {
     private client: SupabaseClient<Database>
@@ -17,6 +18,7 @@ export class EmbedsRepository {
         .select()
         .single();
 
+        revalidatePath('/embeds');
         if (embedError) throw embedError;
         return embedData;
     }
@@ -31,6 +33,7 @@ export class EmbedsRepository {
 
         if (embedError) throw embedError;
 
+        revalidatePath('/embeds');
         return embedData;
     }
 
@@ -41,7 +44,7 @@ export class EmbedsRepository {
             deleted_on: new Date().toISOString(),
         })
         .eq('id', embedId);
-
+        revalidatePath('/embeds');
         if (embedError) throw embedError;
     }
 

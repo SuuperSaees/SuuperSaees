@@ -1,4 +1,6 @@
-import React, { useState, useTransition, type JSX } from 'react';
+'use client';
+
+import React, { useState, type JSX } from 'react';
 
 import {
   DropdownMenu,
@@ -11,51 +13,78 @@ import { cn } from '@kit/ui/utils';
 
 export type DropdownOption = {
   value: string | JSX.Element;
-  actionFn: () => Promise<void>;
+  actionFn: () => void | Promise<void>;
+  closeOnClick?: boolean;
 };
+
 interface DropdownProps {
   children: React.ReactNode;
   options: DropdownOption[];
   className?: string
+  contentClassName?: string
+  showSeparators?: boolean;
 }
-export default function Dropdown({ children, options, className }: DropdownProps) {
-  const [isPending, startTransition] = useTransition();
-  const [disabledIndices, setDisabledIndices] = useState<number[]>([]);
 
-  const handleClick = (option: DropdownOption, index: number) => {
-    setDisabledIndices((prev) => [...prev, index]);
+export default function Dropdown({ children, options, className, contentClassName, showSeparators = true }: DropdownProps) {
+  const [open, setOpen] = useState(false);
 
-    startTransition(async () => {
-      await option.actionFn().finally(() => {
-        setDisabledIndices((prev) => prev.filter((i) => i !== index));
-      });
-    });
+  const isLinkElement = (value: string | JSX.Element): boolean => {
+    if (typeof value !== 'object' || !React.isValidElement(value)) {
+      return false;
+    }
+    
+    const props = value.props as Record<string, unknown>;
+    return props && typeof props === 'object' && 'href' in props;
+  };
+
+  const handleClick = async (option: DropdownOption) => {
+
+
+
+     await option.actionFn();
+
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild className={cn('w-fit', className)}>
         {children}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {options.map((option, index) => (
-          <React.Fragment
-            key={
-              typeof option.value === 'string'
-                ? option.value + index
-                : 'opt' + index
-            }
-          >
-            <DropdownMenuItem
-              className={`min-w-32 cursor-pointer ${disabledIndices.includes(index) ? 'cursor-not-allowed opacity-50' : ''}`}
-              onClick={() => handleClick(option, index)}
-              disabled={isPending || disabledIndices.includes(index)}
+      <DropdownMenuContent align="start" className={contentClassName}>
+        {options.map((option, index) => {
+          const isLink = isLinkElement(option.value);
+          
+          return (
+            <React.Fragment
+              key={
+                typeof option.value === 'string'
+                  ? option.value + index
+                  : 'opt' + index
+              }
             >
-              {option.value}
-            </DropdownMenuItem>
-            {index < options.length - 1 && <Separator />}
-          </React.Fragment>
-        ))}
+              <DropdownMenuItem
+                className={cn(
+                  "min-w-32 cursor-pointer",
+
+                )}
+                onClick={async (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  await handleClick(option);
+                }}
+                onSelect={(e) => {
+                  e.stopPropagation();
+                  if (isLink) {
+                    e.preventDefault();
+                  }
+                }}
+              >
+                {option.value}
+              </DropdownMenuItem>
+              {showSeparators && index < options.length - 1 && <Separator />}
+            </React.Fragment>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

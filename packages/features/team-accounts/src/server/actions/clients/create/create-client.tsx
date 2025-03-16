@@ -40,7 +40,13 @@ const formSchema = z.object({
   role: z.string().min(2).max(50),
 });
 
-const CreateClientDialog = () => {
+interface CreateClientDialogProps {
+  customTrigger?: React.ReactNode;
+  onOpenChange?: (open: boolean) => void;
+  open?: boolean;
+}
+
+const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientDialogProps) => {
   const { t } = useTranslation('responses');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,11 +75,11 @@ const CreateClientDialog = () => {
 
   return (
     <>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <ThemedButton>{t('createClient')}</ThemedButton>
+      <AlertDialog open={open} onOpenChange={onOpenChange}>
+        <AlertDialogTrigger asChild >
+          {customTrigger ?? <ThemedButton>{t('createClient')}</ThemedButton>}
         </AlertDialogTrigger>
-        <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+        <AlertDialogContent >
           <div className="flex w-full items-center justify-between">
             <AlertDialogHeader>
               <AlertDialogTitle>{t('createClient')}</AlertDialogTitle>

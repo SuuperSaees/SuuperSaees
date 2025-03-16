@@ -1,6 +1,6 @@
 'use client';
 
-import { useContext, useId, useState, useEffect } from 'react';
+import { useContext, useEffect, useId, useState } from 'react';
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -38,11 +38,11 @@ export function Sidebar(props: {
 }) {
   const [collapsed, setCollapsed] = useState(props.collapsed ?? false);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
-  
+
   const className = getClassNameBuilder(props.className ?? '')({
     collapsed,
   });
-  
+
   const ctx = {
     collapsed,
     setCollapsed,
@@ -50,7 +50,7 @@ export function Sidebar(props: {
     openGroupId,
     setOpenGroupId,
   };
-  
+
   return (
     <SidebarContext.Provider value={ctx}>
       <div className={className} style={props.style}>
@@ -81,6 +81,7 @@ export function SidebarGroup({
   children,
   className,
   path,
+  menu,
 }: React.PropsWithChildren<{
   label: string | React.ReactNode;
   collapsible?: boolean;
@@ -88,136 +89,109 @@ export function SidebarGroup({
   Icon?: React.ReactNode;
   className?: string;
   path?: string;
+  menu?: React.ReactNode;
 }>) {
-  const { collapsed: sidebarCollapsed, openGroupId, setOpenGroupId } = useContext(SidebarContext);
+  const {
+    collapsed: sidebarCollapsed,
+    openGroupId,
+    setOpenGroupId,
+  } = useContext(SidebarContext);
   const id = useId();
   const pathname = usePathname();
-  
-  // Initialize the openGroupId based on the collapsed prop
-  // This effect runs once on mount to set the initial state
+  const isGroupOpen = openGroupId === id;
+
+  // Initialize group state on mount
   useEffect(() => {
     if (!collapsed && collapsible) {
       setOpenGroupId(id);
     }
   }, [collapsed, collapsible, id, setOpenGroupId]);
-  
-  // Determine if this group is open based on the shared openGroupId state
-  const isGroupOpen = openGroupId === id;
-  
-  // Handle toggling this group
+
+  // Toggle group open/closed
   const toggleGroup = () => {
-    if (isGroupOpen) {
-      // If this group is already open, close it
-      setOpenGroupId(null);
-    } else {
-      // Otherwise, open this group and close any other open group
-      setOpenGroupId(id);
-    }
+    setOpenGroupId(isGroupOpen ? null : id);
   };
 
-  const labelContent = (
-    <div className="flex gap-2">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>{Icon}</TooltipTrigger>
-        </Tooltip>
-      </TooltipProvider>
-      <Trans i18nKey={label as string} defaults={label as string} />
+  // Prepare the label content
+  const labelContent =
+    typeof label === 'string' ? (
+      <Trans i18nKey={label} defaults={label} />
+    ) : (
+      label
+    );
+
+  // Common wrapper class names
+  const wrapperClassName = cn(
+    'flex w-full text-md shadow-none group/sidebar-group relative gap-2',
+    {
+      'w-full px-3': !sidebarCollapsed,
+    },
+    className,
+  );
+
+  // Render the icon if provided
+  const iconElement = Icon && (
+    <div className="block flex h-5 w-5 items-center justify-center group-hover/sidebar-group:hidden">
+      {Icon}
     </div>
   );
 
-  const Wrapper = () => {
-    const wrapperClassName = cn(
-      'flex w-full text-md shadow-none',
-      {
-        'justify-between space-x-2.5': !sidebarCollapsed,
-      },
-      className,
-    );
+  // Render the menu if provided
+  const menuElement = menu && (
+    <div className="ml-auto flex items-center justify-center">{menu}</div>
+  );
 
-    if (collapsible) {
-      // Collapsible group
-      if (path) {
-        // Collapsible with path - render a button with a link inside for the label
-        return (
-          <div className={wrapperClassName}>
-            <Link
-              href={path}
-              className={cn(
-                'flex items-center decoration-transparent transition-colors hover:underline hover:decoration-gray-400 px-2',
-                {
-                  'font-medium': isRouteActive(pathname, path, true),
-                },
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {labelContent}
-            </Link>
-            <Button
-              aria-expanded={isGroupOpen}
-              aria-controls={id}
-              onClick={toggleGroup}
-              className="px-3"
-              variant="ghost"
-              size="sm"
-            >
-              <ChevronDown
-                className={cn(`h-3 transition duration-300`, {
-                  'rotate-180': isGroupOpen,
-                })}
-              />
-            </Button>
-          </div>
-        );
-      } else {
-        // Collapsible without path - standard button behavior
-        return (
-          <Button
-            aria-expanded={isGroupOpen}
-            aria-controls={id}
-            onClick={toggleGroup}
-            className={wrapperClassName}
-            variant="ghost"
-            size="sm"
-          >
-            {labelContent}
-            <ChevronDown
-              className={cn(`h-3 transition duration-300`, {
-                'rotate-180': isGroupOpen,
-              })}
-            />
-          </Button>
-        );
-      }
-    } else {
-      // Not collapsible
-      if (path) {
-        // Not collapsible with path - render as a link
-        return (
-          <Link
-            href={path}
-            className={cn(wrapperClassName, 'hover:underline', {
-              'font-medium': isRouteActive(pathname, path, true),
-            })}
-          >
-            {labelContent}
-          </Link>
-        );
-      } else {
-        // Not collapsible without path - render as a div (current behavior)
-        return <div className={wrapperClassName}>{labelContent}</div>;
-      }
-    }
-  };
+  // Render the chevron for collapsible groups
+  const chevronElement = collapsible && (
+    <Button
+      aria-expanded={isGroupOpen}
+      aria-controls={id}
+      onClick={toggleGroup}
+      className="hidden h-5 w-5 items-center justify-center p-0 group-hover/sidebar-group:flex"
+      variant="ghost"
+      size="sm"
+    >
+      <ChevronDown
+        className={cn('block h-3 w-3 transition duration-300', {
+          'rotate-180': isGroupOpen,
+        })}
+      />
+    </Button>
+  );
+
+  // Render the label content, either as a link or plain text
+  const labelElement = path ? (
+    <Link
+      href={path}
+      className={cn('flex items-center transition-colors', {
+        'font-medium': isRouteActive(pathname, path, true),
+      })}
+      onClick={collapsible ? (e) => e.stopPropagation() : undefined}
+    >
+      {labelContent}
+    </Link>
+  ) : (
+    <span>{labelContent}</span>
+  );
 
   return (
     <div className={cn('flex flex-col space-y-1 py-1', className)}>
-      <Wrapper />
-      <If condition={collapsible ? isGroupOpen : true}>
-        <div id={id} className={'px-6.5 flex flex-col space-y-1'}>
+      <div
+        className={wrapperClassName}
+        onClick={collapsible && !path ? toggleGroup : undefined}
+      >
+        {chevronElement}
+        {iconElement}
+        {labelElement}
+        {menuElement}
+      </div>
+
+      {/* Render children if not collapsible or if group is open */}
+      {(!collapsible || isGroupOpen) && (
+        <div id={id} className="pl-7 flex flex-col space-y-1">
           {children}
         </div>
-      </If>
+      )}
     </div>
   );
 }
@@ -229,31 +203,35 @@ export function SidebarSection({
   path,
   children,
   className,
+  menu,
 }: React.PropsWithChildren<{
   label: string | React.ReactNode;
   path?: string;
   className?: string;
+  menu?: React.ReactNode;
 }>) {
   const { collapsed } = useContext(SidebarContext);
 
   const SectionHeader = () => {
     if (path) {
       return (
-        <Link href={path} className="block">
-          <div className="mb-2 mt-4 px-3 transition-colors hover:text-primary">
+        <div className="mt-4 flex items-center justify-between px-3">
+          <Link href={path} className="h-fit w-fit">
             <h3 className="text-xs font-medium text-muted-foreground">
               <Trans i18nKey={label as string} defaults={label as string} />
             </h3>
-          </div>
-        </Link>
+          </Link>
+          {menu}
+        </div>
       );
     }
 
     return (
-      <div className="mb-2 mt-4 px-3">
+      <div className="mt-4 flex justify-between px-3">
         <h3 className="text-xs font-medium text-muted-foreground">
           <Trans i18nKey={label as string} defaults={label as string} />
         </h3>
+        {menu}
       </div>
     );
   };
@@ -265,7 +243,7 @@ export function SidebarSection({
   return (
     <div className={cn('mt-4', className)}>
       <SectionHeader />
-      <div className="space-y-1">{children}</div>
+      <div className="flex space-y-1">{children}</div>
     </div>
   );
 }
@@ -275,24 +253,27 @@ export function SidebarItem({
   children,
   Icon,
   className,
+  menu,
 }: React.PropsWithChildren<{
   path: string;
   Icon: React.ReactNode;
   end?: boolean | ((path: string) => boolean);
   className?: string;
+  menu?: React.ReactNode;
 }>) {
   const { collapsed, itemActiveStyle } = useContext(SidebarContext);
   const currentPath = usePathname() ?? '';
   const active = isRouteActive(path, currentPath, end ?? false);
   const variant = active ? 'secondary' : 'ghost';
   const size = collapsed ? 'icon' : 'sm';
+
   return (
     <Button
       asChild
       className={cn(
         `text-md flex w-full shadow-none`,
         {
-          'justify-start space-x-2.5': !collapsed,
+          'justify-start gap-3 px-3': !collapsed,
         },
         className,
       )}
@@ -318,6 +299,11 @@ export function SidebarItem({
           )}
         >
           {children}
+          {!collapsed && menu && (
+            <span className="ml-auto flex items-center justify-center">
+              {menu}
+            </span>
+          )}
         </span>
       </Link>
     </Button>
@@ -367,9 +353,13 @@ export function SidebarNavigation({
               key={`section-${index}`}
               label={
                 <Trans
-                  i18nKey={item.label}
-                  defaults={item.label}
-                  key={item.label + index}
+                  i18nKey={typeof item.label === 'string' ? item.label : ''}
+                  defaults={typeof item.label === 'string' ? item.label : ''}
+                  key={
+                    typeof item.label === 'string'
+                      ? item.label + index
+                      : index + ''
+                  }
                 />
               }
               path={item.path}
@@ -400,12 +390,16 @@ export function SidebarNavigation({
         } else if ('children' in item) {
           return (
             <SidebarGroup
-              key={item.label}
+              key={typeof item.label === 'string' ? item.label : ''}
               label={
                 <Trans
-                  i18nKey={item.label}
-                  defaults={item.label}
-                  key={item.label + index}
+                  i18nKey={typeof item.label === 'string' ? item.label : ''}
+                  defaults={typeof item.label === 'string' ? item.label : ''}
+                  key={
+                    typeof item.label === 'string'
+                      ? item.label + index
+                      : index + ''
+                  }
                 />
               }
               collapsible={item.collapsible}

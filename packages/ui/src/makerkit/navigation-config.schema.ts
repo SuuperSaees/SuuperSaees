@@ -15,15 +15,17 @@ export const NavigationConfigSchema = z.object({
         Icon: z.custom<React.ReactNode>(),
         end: RouteMatchingEnd,
         className: z.string().optional(),
+        menu: z.custom<React.ReactNode>().optional(),
       }),
       z.object({
         type: z.literal('group').default('group'),
         path: z.string().optional(),
-        label: z.string(),
+        label: z.custom<React.ReactNode>(),
         collapsible: z.boolean().optional(),
         collapsed: z.boolean().optional(),
         Icon: z.custom<React.ReactNode>(),
         className: z.string().optional(),
+        menu: z.custom<React.ReactNode>().optional(),
         children: z.array(
           z.object({
             label: z.string(),
@@ -31,6 +33,7 @@ export const NavigationConfigSchema = z.object({
             Icon: z.custom<React.ReactNode>(),
             end: RouteMatchingEnd,
             className: z.string().optional(),
+            menu: z.custom<React.ReactNode>().optional(),
           }),
         ),
       }),
@@ -44,6 +47,7 @@ export const NavigationConfigSchema = z.object({
         label: z.custom<React.ReactNode>(),
         path: z.string().optional(),
         className: z.string().optional(),
+        menu: z.custom<React.ReactNode>().optional(),
         items: z.array(
           z.object({
             label: z.string(),
@@ -51,6 +55,7 @@ export const NavigationConfigSchema = z.object({
             Icon: z.custom<React.ReactNode>(),
             end: RouteMatchingEnd,
             className: z.string().optional(),
+            menu: z.custom<React.ReactNode>().optional(),
           })
         ),
       }),
