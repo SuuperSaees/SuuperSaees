@@ -10,11 +10,6 @@ import pathsConfig from '~/config/paths.config';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 
-// Type guard to check if an item has the 'end' property
-function hasEndProperty(item: unknown): item is { end: boolean | ((path: string) => boolean) } {
-  return typeof item === 'object' && item !== null && 'end' in item;
-}
-
 export function CustomSidebarNavigation({
   config,
   showDashboardUrl,
@@ -42,7 +37,7 @@ export function CustomSidebarNavigation({
           return (
             <SidebarSection
               key={`section-${index}`}
-              className='mt-8'
+  
               label={
                 <Trans
                   i18nKey={typeof item.label === 'string' ? item.label : ''}
@@ -52,20 +47,8 @@ export function CustomSidebarNavigation({
               }
               path={item.path}
               menu={item.menu}
-            >
-              {item.items.map((child, childIndex) => (
-                <SidebarItem
-                  key={`${child.path}-${childIndex}`}
-                  end={hasEndProperty(child) ? child.end : undefined}
-                  path={child.path}
-                  Icon={child.Icon}
-                  className={child.className}
-                  menu={child.menu}
-                >
-                  <Trans i18nKey={child.label} defaults={child.label} />
-                </SidebarItem>
-              ))}
-            </SidebarSection>
+              groups={item.groups}
+            />
           );
         }
 
@@ -144,7 +127,6 @@ export function CustomSidebarNavigation({
           );
         }
         return (
-
           <SidebarItem
             key={item.path}
             end={item.end}

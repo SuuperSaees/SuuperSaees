@@ -30,7 +30,7 @@ async function EmbedsPage() {
     <PageBody className="flex h-full flex-col gap-8 p-8 py-8 lg:px-8">
       <h1 className="text-2xl font-bold">Embeds</h1>
 
-      <div className="flex h-full w-full gap-8">
+      <div className="flex-1 min-h-0 overflow-hidden">
         {/* Embeds Content */}
         <EmbedSection
           embeds={embeds}

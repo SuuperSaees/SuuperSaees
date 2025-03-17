@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Text, Image, Link, FileText, ExternalLink, BarChart, PieChart, Calendar, Mail, MessageSquare, Settings, User, Users, Home, Box, LayoutDashboard, Globe, Database, Table, Kanban, Trello, ClipboardList, FileSpreadsheet, FileCode, Map, LineChart, Activity, Bell, Bookmark, Briefcase, CreditCard, ShoppingCart, Truck, Video, Phone } from "lucide-react"
@@ -55,6 +55,7 @@ interface TitleFieldProps {
 
 export function TitleField({ control }: TitleFieldProps) {
   const { t } = useTranslation("embeds")
+  const [isIconPopoverOpen, setIsIconPopoverOpen] = useState(false)
 
   // Function to get the icon component by name
   const getIconByName = (iconName: string | null | undefined) => {
@@ -80,9 +81,9 @@ export function TitleField({ control }: TitleFieldProps) {
                   control={control}
                   name="icon"
                   render={({ field: iconField }) => (
-                    <Popover>
+                    <Popover open={isIconPopoverOpen} onOpenChange={setIsIconPopoverOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg bg-gray-100 p-0">
+                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg bg-transparent p-0">
                           {(() => {
                             const IconComponent = getIconByName(iconField.value);
                             return <IconComponent className="h-4 w-4" />;
@@ -98,7 +99,10 @@ export function TitleField({ control }: TitleFieldProps) {
                                 variant="ghost"
                                 size="icon"
                                 className={`h-9 w-9 rounded-md ${iconField.value === item.name ? "bg-gray-100" : ""}`}
-                                onClick={() => iconField.onChange(item.name)}
+                                onClick={() => {
+                                  iconField.onChange(item.name);
+                                  setIsIconPopoverOpen(false);
+                                }}
                               >
                                 {(() => {
                                   const IconComponent = item.icon;

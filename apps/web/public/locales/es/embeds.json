@@ -1,6 +1,8 @@
 {
   "title": "Embeds",
   "form": {
+    "updateButton": "Actualizar embed",
+    "createButton": "Crear embed",
     "title": "Incrustar otras apps",
     "description": "Incrusta tus apps favoritas en tu proyecto. Guía de video.",
     "inputs": {

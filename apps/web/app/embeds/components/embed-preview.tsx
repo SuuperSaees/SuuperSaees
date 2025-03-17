@@ -20,6 +20,7 @@ export function EmbedPreview({ embedSrc }: EmbedPreviewProps) {
           title={t('empty.title')}
           description={t('empty.description')}
           imageSrc='/images/illustrations/Illustration-box.svg'
+          className='bg-transparent'
         />
       );
     }
@@ -30,7 +31,7 @@ export function EmbedPreview({ embedSrc }: EmbedPreviewProps) {
   }, [embedSrc, t]);
 
   return (
-    <div className="mt-4 aspect-video w-full overflow-hidden rounded-lg border bg-muted shadow-sm">
+    <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-lg border shadow-sm">
       {embedContent}
     </div>
   );
@@ -74,6 +75,7 @@ function renderIframeFromUrl(url: string, allowedDomains?: string[]) {
     <iframe
       src={url}
       className="h-full w-full"
+      style={{ height: '100%' }}
       title="Embedded content"
       sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -136,6 +138,7 @@ function renderIframeFromCode(code: string, allowedDomains?: string[]) {
       <iframe
         src={src}
         className="h-full w-full"
+        style={{ height: '100%' }}
         title={title}
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         allow={

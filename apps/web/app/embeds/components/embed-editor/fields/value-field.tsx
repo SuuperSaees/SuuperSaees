@@ -28,7 +28,6 @@ export function ValueField({ control, watch }: ValueFieldProps) {
               placeholder={t("form.inputs.url.placeholder", {
                 type: type === "link" ? "URL" : "embed URL",
               })}
-              className="bg-white"
               {...field}
             />
           </FormControl>

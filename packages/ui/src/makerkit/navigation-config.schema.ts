@@ -48,14 +48,26 @@ export const NavigationConfigSchema = z.object({
         path: z.string().optional(),
         className: z.string().optional(),
         menu: z.custom<React.ReactNode>().optional(),
-        items: z.array(
+        groups: z.array(
           z.object({
-            label: z.string(),
-            path: z.string(),
+            type: z.literal('group').default('group'),
+            path: z.string().optional(),
+            label: z.custom<React.ReactNode>(),
+            collapsible: z.boolean().optional(),
+            collapsed: z.boolean().optional(),
             Icon: z.custom<React.ReactNode>(),
-            end: RouteMatchingEnd,
             className: z.string().optional(),
             menu: z.custom<React.ReactNode>().optional(),
+            children: z.array(
+              z.object({
+                label: z.string(),
+                path: z.string(),
+                Icon: z.custom<React.ReactNode>(),
+                end: RouteMatchingEnd,
+                className: z.string().optional(),
+                menu: z.custom<React.ReactNode>().optional(),
+              }),
+            ),
           })
         ),
       }),

@@ -59,7 +59,7 @@ export function EmbedTab({ embed, isActive, onDelete }: EmbedTabProps) {
       {onDelete && (
         <Dropdown
           options={[deleteOption]}
-          className={isActive ? 'block' : 'hidden group-hover:block'}
+          className={isActive ? 'visible' : 'invisible group-hover:visible'}
         >
           <EllipsisVertical className="h-4 w-4" />
         </Dropdown>
