@@ -1,5 +1,6 @@
 import { // Briefcase,
-CreditCard, Layers, Settings, Users, Home, MessagesSquare, Package, Bot, // Wallet,
+CreditCard, Layers, Settings, Users, Home, Package, Bot,
+Inbox, // Wallet,
 } from 'lucide-react';
 
 
@@ -26,7 +27,7 @@ const routes = [
     type: 'route',
     label: 'common:messagesName',
     path: pathsConfig.app.messages,
-    Icon: <MessagesSquare className={iconClasses} />,
+    Icon: <Inbox className={iconClasses} />,
     end: true,
     children: [],
     divider: true,
@@ -37,22 +38,28 @@ const routes = [
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
-  {
-    type: 'group',
-    label: 'common:usersName',
-    Icon: <Users className={iconClasses} />,
-    collapsed: true,
-    children: [
-      {
-        label: 'common:clientsName',
-        path: pathsConfig.app.clients,
-      },
-      {
-        label: 'common:teamName',
-        path: pathsConfig.app.team,
-      },
-    ],
+  // {
+  //   type: 'group',
+  //   label: 'common:usersName',
+  //   Icon: <Users className={iconClasses} />,
+  //   collapsed: true,
+  //   children: [
+  //     {
+  //       label: 'common:clientsName',
+  //       path: pathsConfig.app.clients,
+  //     },
+  //     {
+  //       label: 'common:teamName',
+  //       path: pathsConfig.app.team,
+  //     },
+  //   ],
     
+  // },
+  {
+    type: 'route',
+    label: 'common:teamName',
+    path: pathsConfig.app.team,
+    Icon: <Users className={iconClasses} />,
   },
   {
     type: 'group',
