@@ -25,7 +25,6 @@ export function CustomSidebarNavigation({
   toolCopyListUrl?: boolean;
   userId?: string;
 }>) {
-  console.log('config', config)
   return (
     <>
       {config.routes.map((item, index) => {

@@ -1,8 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
-import { getEmbeds} from '../../../../../apps/web/app/server/actions/embeds/embeds.action'
-
+import { getEmbeds } from '../../../../../apps/web/app/server/actions/embeds/embeds.action'
+import { fetchClientOrganizations } from '../../../team-accounts/src/server/actions/clients/get/get-clients'
 /**
  * Class representing an API for interacting with user accounts.
  * @constructor
@@ -77,12 +77,31 @@ class AccountsApi {
       accounts[0]?.picture_url ??
       '';
 
+    // Get pinned organizations from settings
+    const pinnedOrganizationsString = accounts[0]?.settings?.find(
+      (setting) => setting.key === 'pinned_organizations'
+    )?.value;
+
+    const clientOrganizations = await (async () => {
+      if (pinnedOrganizationsString) {
+        try {
+          const pinnedOrganizations = JSON.parse(pinnedOrganizationsString);
+          return await fetchClientOrganizations(this.client, pinnedOrganizations);
+        } catch (e) {
+          console.error('Error parsing pinned organizations:', e);
+          return [];
+        }
+      }
+      return [];
+    })();
+
     return {
       id: accounts[0]?.id,
       name: accounts[0]?.name,
       slug: accounts[0]?.slug,
       picture_url: logoUrl,
       embeds: uniqueEmbeds,
+      clientOrganizations,
     };
   }
 

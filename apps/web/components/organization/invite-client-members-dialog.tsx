@@ -99,10 +99,10 @@ export function InviteClientMembersDialogContainer({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} modal>
+    <Dialog open={open} onOpenChange={onOpenChange} >
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             <Trans i18nKey={'clients:organizations.members.invite.title'} />

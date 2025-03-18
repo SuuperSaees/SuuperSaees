@@ -45,6 +45,48 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
   // Ref for tracking if component is mounted
   const isMounted = useRef(true);
 
+  // Add ref for the scrollable container
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Add wheel event handler
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      // Get container bounds
+      const rect = container.getBoundingClientRect();
+      
+      // Check if mouse is over the container
+      const isMouseOver = 
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+
+      if (isMouseOver) {
+        e.preventDefault();
+        
+        // Adjust the scroll speed
+        const scrollSpeed = 1.5;
+        const delta = e.deltaY * scrollSpeed;
+        
+        // Smooth scroll
+        container.scrollBy({
+          left: delta,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    // Add the event listener to the window to catch all wheel events
+    window.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, []);
+
   // Fetch clients - only when the dialog is open to avoid unnecessary loading
   const { data: clients = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['clientOrganizations'],
@@ -84,8 +126,11 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
     setSaveError(null);
   }, [open]);
 
-  // Filter clients based on search query
+  // Filter clients based on search query and exclude guests
   const filteredClients = clients.filter(client => 
+    // First exclude guests (case insensitive)
+    !client.name.toLowerCase().startsWith('guest') &&
+    // Then apply search filter
     client.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -171,8 +216,11 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
         
         {/* Selected clients pills - horizontal scrolling */}
         {selectedClients.length > 0 && (
-          <div className="px-5 pt-3 pb-2 border-b border-gray-100">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+          <div className="px-5 pt-3 pb-2 border-b border-gray-100 min-w-0">
+            <div 
+              ref={scrollContainerRef}
+              className="flex gap-2 overflow-x-auto pb-2 no-scrollbar"
+            >
               {selectedClients.map(client => (
                 <div 
                   key={client.id}

@@ -3,7 +3,7 @@
 import React from 'react';
 import { EllipsisVertical, Plus, Trash2 } from 'lucide-react';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
-import { Trans } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { DynamicIcon } from '../../../app/components/shared/dynamic-icon';
 import Dropdown from '~/components/ui/dropdown';
 
@@ -54,6 +54,7 @@ export function EmbedTab({ id, title, icon, activeTab, onDelete }: EmbedTabProps
 }
 
 export function AddIntegrationTab({ activeTab }: { activeTab: string }) {
+  const { t } = useTranslation('embeds');
   return (
     <ThemedTabTrigger
       activeTab={activeTab}
@@ -62,7 +63,7 @@ export function AddIntegrationTab({ activeTab }: { activeTab: string }) {
       className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
     >
       <Plus className="h-4 w-4" />
-      <span>Add Integration</span>
+      <span>{t('form.addButton')}</span>
     </ThemedTabTrigger>
   );
 }

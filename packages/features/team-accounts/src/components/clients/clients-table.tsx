@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import * as React from 'react';
 
-import Link from 'next/link';
-
+import { useTranslation } from 'react-i18next';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -17,24 +16,24 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table';
 import { Search } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
 import { Separator } from '@kit/ui/separator';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
-import DeleteUserDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/delete/delete-client';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 import { Account } from '../../../../../../apps/web/lib/account.types';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';  
-// import UpdateClientDialog from '../../server/actions/clients/update/update-client';
+import { OrganizationOptionsDropdown } from './organization-options-dropdown';
+import Link from 'next/link';
 
 const getUniqueOrganizations = (clients: ClientsWithOrganization[]): Organization[] => {
   return clients.map((client) => ({
@@ -450,8 +449,7 @@ const useOrganizationColumns = (
         cell: ({row}) => {
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              {/* <Pen className="h-4 w-4 text-gray-600" /> */}
-              <DeleteUserDialog userId={''}  organizationId={row.original.id} />
+              <OrganizationOptionsDropdown organizationId={row.original.id} />
             </div>
           );
         },

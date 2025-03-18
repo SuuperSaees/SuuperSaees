@@ -71,7 +71,10 @@
   },
   "embeds": {
     "title": "Embeds"
-  }
+  },
+  "pinOrganization": "Pin organization",
+  "unpinOrganization": "Unpin organization",
+  "deleteOrganization": "Delete organization"
 },
   "startWithFirstClientTitle": "Let's start with your first client",
   "noClientsDescription": "You haven't created any clients yet, add one by clicking below.",
