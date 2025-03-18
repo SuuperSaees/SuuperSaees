@@ -11,20 +11,17 @@ import { getServices } from 'node_modules/@kit/team-accounts/src/server/actions/
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@kit/ui/tabs';
+import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-import { EmbedPreview } from '~/embeds/components/embed-preview';
 import { EmbedSection } from '~/embeds/components/embed-section';
 import { getEmbeds } from '~/server/actions/embeds/embeds.action';
 
 import ButtonPinOrganization from './button-pin-organization';
 import FileSection from './files';
 import MemberButtonTriggers from './member-button-triggers';
-// import InvoiceSection from './invoices';
 import MemberSection from './members';
 import OrdersSection from './orders';
 import { ServiceButtonTriggers } from './service-button-triggers';
-// import ReviewSection from './reviews';
 import ServiceSection from './services';
 
 /**
@@ -70,8 +67,8 @@ function SectionView({
       // Return without type assertion to avoid linter errors
       return await getEmbeds(clientOrganizationId);
     },
-    enabled:
-      activeTab === 'embeds' || !availableTabsBasedOnRole.has(currentUserRole),
+    // Always fetch embeds to check if we need to show embed tabs
+    enabled: true,
   });
 
   const embeds = useMemo(() => embedsQuery.data ?? [], [embedsQuery.data]);
@@ -107,16 +104,68 @@ function SectionView({
     ['files', null],
     ['reviews', null],
     ['invoices', null],
-    ['embeds', null],
+    ['new', null], // Add controller for the "new embed" tab
   ]);
 
-  // Modificar la lógica para priorizar las secciones pasadas como prop
-  const availableTabs = sections
-    ? sections
-    : availableTabsBasedOnRole.has(currentUserRole)
-      ? ['orders', 'members', 'services', 'files', 'embeds']
-      : ['members', 'services', 'orders'];
+  // Add embed IDs to button controllers map
+  embeds.forEach(embed => {
+    buttonControllersMap.set(embed.id, null);
+  });
 
+  // Define base tabs that are always available
+  const baseTabs = availableTabsBasedOnRole.has(currentUserRole)
+    ? ['orders', 'members', 'services', 'files']
+    : ['members', 'services', 'orders'];
+
+  // Determine if we should include embed tabs
+  const shouldIncludeEmbedTabs = sections 
+    ? Boolean(sections.includes('embeds'))
+    : availableTabsBasedOnRole.has(currentUserRole);
+    
+  // Add "new" tab for creating embeds if embeds functionality is enabled
+  const embedTabs = shouldIncludeEmbedTabs
+    ? ['new'].concat(embeds.map(embed => embed.id))
+    : [];
+  
+  // Combine all available tabs
+  const availableTabs = sections 
+    ? sections.filter(section => section !== 'embeds').concat(embedTabs)
+    : baseTabs.concat(embedTabs);
+
+  // Create the default embed creation values once
+  const defaultEmbedCreationValue = useMemo(() => ({
+    created_at: new Date().toISOString(),
+    deleted_on: null,
+    icon: null,
+    id: '',
+    location: 'tab' as const,
+    organization_id: null,
+    title: '',
+    type: 'url' as const,
+    updated_at: null,
+    user_id: null,
+    value: '',
+    visibility: 'private' as const,
+    embed_accounts: [clientOrganizationId],
+  }), [clientOrganizationId]);
+
+  // Prepare the embed section component for reuse
+  const embedSectionComponent = useMemo(() => (
+    <EmbedSection
+      key={'embed-section'}
+      embeds={embeds}
+      agencyId={agencyId}
+      userId={userId}
+      userRole={currentUserRole}
+      showEmbedSelector={true}
+      queryKey={['organization-embeds', clientOrganizationId]}
+      defaultCreationValue={defaultEmbedCreationValue}
+      externalTabControl={true}
+      activeEmbedId={activeTab}
+    />
+  ), [embeds, agencyId, userId, currentUserRole, clientOrganizationId, activeTab, defaultEmbedCreationValue]);
+
+  // Add embed section component to navigation options
   const navigationOptionsMap = new Map<string, JSX.Element>([
     [
       'orders',
@@ -154,61 +203,24 @@ function SectionView({
         currentUserRole={currentUserRole}
       />,
     ],
-    [
-      'embeds',
-      <EmbedSection
-        key={'embeds'}
-        embeds={embeds}
-        agencyId={agencyId}
-        userId={userId}
-        userRole={currentUserRole}
-        showEmbedSelector={availableTabs.includes('embeds')}
-        queryKey={['organization-embeds', clientOrganizationId]}
-        defaultCreationValue={{
-          created_at: new Date().toISOString(),
-          deleted_on: null,
-          icon: null,
-          id: '',
-          location: 'tab',
-          organization_id: null,
-          title: '',
-          type: 'url',
-          updated_at: null,
-          user_id: null,
-          value: '',
-          visibility: 'private',
-          embed_accounts: [clientOrganizationId],
-        }}
-      />,
-    ],
-
-    // ['reviews', <ReviewSection key={'reviews'} />],
-    // ['invoices', <InvoiceSection key={'invoices'} />],
+    // Add new embed creation as its own tab
+    ['new', embedSectionComponent],
   ]);
+
+  // Add each embed as its own tab
+  embeds.forEach(embed => {
+    navigationOptionsMap.set(embed.id, embedSectionComponent);
+  });
 
   // Filtrar navigationOptionKeys para incluir solo las secciones disponibles
   const navigationOptionKeys = Array.from(navigationOptionsMap.keys()).filter(
     (key) => availableTabs.includes(key),
   );
 
-  // For non-agency roles, add individual embed tabs
-  const isAgencyRole = availableTabsBasedOnRole.has(currentUserRole);
-
   // Create a list of all tabs to display - memoized to prevent unnecessary re-renders
   const allTabs = useMemo(() => {
-    const tabs = [...navigationOptionKeys];
-
-    // If not an agency role and we have embeds, add them as individual tabs
-    if (!isAgencyRole && embeds.length > 0) {
-      embeds.forEach((embed) => {
-        if (!tabs.includes(embed.id)) {
-          tabs.push(embed.id);
-        }
-      });
-    }
-
-    return tabs;
-  }, [navigationOptionKeys, isAgencyRole, embeds]);
+    return [...navigationOptionKeys];
+  }, [navigationOptionKeys]);
 
   // Handle section query parameter to activate the appropriate tab
   useEffect(() => {
@@ -225,6 +237,26 @@ function SectionView({
     }
   }, [searchParams, allTabs]);
 
+  // Function to get appropriate label for embed tabs
+  const getTabLabel = (option: string) => {
+    // For standard tabs, use translation
+    if (['orders', 'members', 'services', 'files'].includes(option)) {
+      return t(`organizations.${option}.title`)
+        .split('')
+        .map((char, index) => (index === 0 ? char.toUpperCase() : char))
+        .join('');
+    }
+    
+    // For "new" tab, show "Add Integration"
+    if (option === 'new') {
+      return 'Add Integration';
+    }
+    
+    // For embed tabs, show the embed title
+    const embed = embeds.find(e => e.id === option);
+    return embed?.title ?? option;
+  };
+
   return (
     <Tabs
       value={activeTab}
@@ -232,7 +264,7 @@ function SectionView({
         console.log('Tab changed to:', value);
         setActiveTab(value);
       }}
-      className={`h-full min-h-0 ${activeTab === 'embeds' ? 'flex flex-col' : ''}`}
+      className={`h-full min-h-0 ${['new', ...embeds.map(e => e.id)].includes(activeTab) ? 'flex flex-col' : ''}`}
     >
       <div className="flex justify-between">
         <TabsList className="gap-2 bg-transparent">
@@ -244,26 +276,10 @@ function SectionView({
               key={option + 'tab'}
               className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
             >
-              {option === 'embeds' && <BoxIcon className="h-4 w-4" />}
-              {t(`organizations.${option}.title`)
-                .split('')
-                .map((char, index) => (index === 0 ? char.toUpperCase() : char))
-                .join('')}
+              {(['new', ...embeds.map(e => e.id)].includes(option)) && <BoxIcon className="h-4 w-4" />}
+              {getTabLabel(option)}
             </ThemedTabTrigger>
           ))}
-
-          {/* Add individual embed tabs for non-agency roles */}
-          {!isAgencyRole &&
-            embeds.map((embed) => (
-              <TabsTrigger
-                key={`embed-${embed.id}-tab`}
-                value={embed.id}
-                className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-gray-600 data-[state=inactive]:text-gray-500"
-              >
-                <BoxIcon className="h-4 w-4" />
-                <span>{embed.title}</span>
-              </TabsTrigger>
-            ))}
         </TabsList>
         <div className="flex gap-4 items-center">
           {availableTabsBasedOnRole.has(currentUserRole) && (
@@ -273,32 +289,18 @@ function SectionView({
         </div>
       </div>
 
-      {/* Standard tab contents */}
+      {/* Tab contents */}
       {Array.from(navigationOptionsMap.entries()).map(([key, option]) => (
         <TabsContent
           value={key}
-          className={`max-h-full min-h-0 w-full border-t py-8 ${key === 'embeds' ? 'overflow-hidden flex-1' : ''}`}
+          className={`max-h-full min-h-0 w-full border-t py-8 ${
+            ['new', ...embeds.map(e => e.id)].includes(key) ? 'overflow-hidden flex-1' : ''
+          }`}
           key={key + 'content'}
         >
           {option}
         </TabsContent>
       ))}
-
-      {/* Individual embed tab contents for non-agency roles */}
-      {!isAgencyRole &&
-        embeds.map((embed) => (
-          <TabsContent
-            value={embed.id}
-            className="max-h-full min-h-0 w-full border-t py-8 overflow-hidden flex-1"
-            key={`embed-${embed.id}-content`}
-          >
-            <div className="flex h-full w-full overflow-hidden">
-              <div className="flex-1 h-full overflow-hidden">
-                <EmbedPreview embedSrc={embed.value} />
-              </div>
-            </div>
-          </TabsContent>
-        ))}
     </Tabs>
   );
 }

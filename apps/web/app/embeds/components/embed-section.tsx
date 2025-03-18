@@ -23,6 +23,8 @@ interface EmbedSectionProps {
   };
   showEmbedSelector?: boolean;
   queryKey?: string[];
+  externalTabControl?: boolean;
+  activeEmbedId?: string;
 }
 
 // Helper function to convert FormValues to the expected EmbedEditor defaultValue type
@@ -47,7 +49,9 @@ export function EmbedSection({
   userId, 
   defaultCreationValue,
   showEmbedSelector = false,
-  queryKey = ['embeds']
+  queryKey = ['embeds'],
+  externalTabControl = false,
+  activeEmbedId: externalActiveEmbedId
 }: EmbedSectionProps) {
   const formattedEmbeds = useMemo(() => {
     return embeds.map((embed) => ({
@@ -66,9 +70,15 @@ export function EmbedSection({
     [formattedEmbeds],
   );
 
-  const [activeEmbedId, setActiveEmbedId] = useState<string>(
+  // Use internal state for tab control only when not using external tab control
+  const [internalActiveEmbedId, setInternalActiveEmbedId] = useState<string>(
     defaultEmbed?.id ?? 'new',
   );
+  
+  // Use the appropriate active embed ID based on control mode
+  const activeEmbedId = externalTabControl 
+    ? externalActiveEmbedId ?? 'new'
+    : internalActiveEmbedId;
   
   // Store default creation values from URL parameters
   const [urlDefaultValues, setUrlDefaultValues] = useState<FormValues | null>(null);
@@ -83,18 +93,28 @@ export function EmbedSection({
     agencyId,
     userId,
     activeEmbedId,
-    onCreateSuccess: (newEmbed) => setActiveEmbedId(newEmbed.id),
-    onDeleteSuccess: () => setActiveEmbedId('new'),
+    onCreateSuccess: (newEmbed) => {
+      if (!externalTabControl) {
+        setInternalActiveEmbedId(newEmbed.id);
+      }
+    },
+    onDeleteSuccess: () => {
+      if (!externalTabControl) {
+        setInternalActiveEmbedId('new');
+      }
+    },
     queryKey,
   });
 
   // Handle URL parameters
   useEmbedUrlParams({
     formattedEmbeds,
-    setActiveEmbedId,
+    setActiveEmbedId: externalTabControl ? (() => {/* no-op */}) : setInternalActiveEmbedId,
     updateEmbed: (id, values, isAccountRemoval) => {
       // First set active tab to show what's being modified
-      setActiveEmbedId(id);
+      if (!externalTabControl) {
+        setInternalActiveEmbedId(id);
+      }
       // Then update the embed
       void handleEmbedUpdate(values, { isAccountRemoval });
     },
@@ -106,7 +126,9 @@ export function EmbedSection({
   });
 
   const handleTabChange = (tabId: string) => {
-    setActiveEmbedId(tabId);
+    if (!externalTabControl) {
+      setInternalActiveEmbedId(tabId);
+    }
   };
 
   // Determine which default values to use - prioritize URL values over props
@@ -118,6 +140,55 @@ export function EmbedSection({
     : effectiveDefaultValue 
       ? formValuesToEmbedType(effectiveDefaultValue)
       : null;
+
+  // Render content for the currently active embed
+  const renderActiveEmbedContent = () => {
+    // The "new" tab to create a new integration
+    if (activeEmbedId === 'new') {
+      return (
+        <div className="flex h-full gap-8">
+          <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
+            <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
+          </div>
+          <EmbedEditor 
+            onAction={handleEmbedCreation} 
+            type="create"
+            defaultValue={processedDefaultValue} 
+            availableEmbeds={formattedEmbeds}
+            showEmbedSelector={showEmbedSelector}
+          />
+        </div>
+      );
+    }
+
+    // Existing embed tab
+    const activeEmbed = formattedEmbeds.find(embed => embed.id === activeEmbedId);
+    if (!activeEmbed) return null;
+
+    return (
+      <div className="flex h-full gap-8">
+        <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
+          <EmbedPreview embedSrc={activeEmbed.value} />
+        </div>
+        <EmbedEditor
+          type="update"
+          onAction={handleEmbedUpdate}
+          defaultValue={activeEmbed}
+          availableEmbeds={formattedEmbeds.filter(e => e.id !== activeEmbed.id)}
+          showEmbedSelector={false}
+        />
+      </div>
+    );
+  };
+
+  // When using external tab control, just render the content for the active tab
+  if (externalTabControl) {
+    return (
+      <div className="h-full min-h-0 flex-1 overflow-hidden">
+        {renderActiveEmbedContent()}
+      </div>
+    );
+  }
 
   // No embeds to display - still show the "Add Integration" tab
   if (embeds.length === 0) {
@@ -150,6 +221,7 @@ export function EmbedSection({
     );
   }
 
+  // Original internal tabs version
   return (
     <Tabs
       value={activeEmbedId}
