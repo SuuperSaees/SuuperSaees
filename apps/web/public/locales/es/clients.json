@@ -71,7 +71,10 @@
     },
     "embeds": {
       "title": "Embeds"
-    }
+    },
+    "pinOrganization": "Fijar organización",
+    "unpinOrganization": "Quitar fijado",
+    "deleteOrganization": "Eliminar organización"
   },
   "startWithFirstClientTitle": "Comencemos con tu primer cliente",
   "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
