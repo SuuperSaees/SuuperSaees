@@ -171,12 +171,10 @@ class AuthCallbackService {
       }
       
       const newUrlPayload = new URL(payload?.redirectTo ?? '');
-      
-      console.log('email callback', emailToInvite);
 
       let newCallbackNextPath = callbackNextPath;
 
-      if (emailToInvite) {
+      if (emailToInvite && !newCallbackNextPath?.includes('set-password')) {
         newCallbackNextPath = `${newCallbackNextPath}&email=${emailToInvite}`;
       }
       
