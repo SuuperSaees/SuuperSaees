@@ -18,7 +18,8 @@ import { TitleField } from './fields/title-field';
 import { TypeField } from './fields/type-field';
 import { ValueField } from './fields/value-field';
 import { VisibilityField } from './fields/visibility-field';
-import { EmbedSelector } from './fields/embed-selector';
+
+// import { EmbedSelector } from './fields/embed-selector';
 
 interface EmbedEditorProps {
   onAction: (values: FormValues) => void | Promise<void>;
@@ -31,13 +32,15 @@ interface EmbedEditorProps {
     embed_accounts: string[];
   })[];
   showEmbedSelector?: boolean;
+  type: 'create' | 'update';
 }
 
-export function EmbedEditor({ 
-  onAction, 
-  defaultValue, 
-  availableEmbeds = [], 
-  showEmbedSelector = false 
+export function EmbedEditor({
+  onAction,
+  defaultValue,
+  type,
+  // availableEmbeds = [],
+  // showEmbedSelector = false
 }: EmbedEditorProps) {
   const { t } = useTranslation('embeds');
 
@@ -74,52 +77,54 @@ export function EmbedEditor({
   };
 
   // Handle selection from the embed selector
-  const handleEmbedSelect = (embed: Embeds.Type & { embed_accounts: string[] }) => {
-    form.reset({
-      title: embed.title ?? '',
-      icon: embed.icon ?? '',
-      location: embed.location ?? 'tab',
-      type: embed.type ?? 'url',
-      visibility: embed.visibility ?? 'public',
-      value: embed.value ?? '',
-      embed_accounts: embed.embed_accounts ?? [],
-    });
-  };
+  // const handleEmbedSelect = (embed: Embeds.Type & { embed_accounts: string[] }) => {
+  //   form.reset({
+  //     title: embed.title ?? '',
+  //     icon: embed.icon ?? '',
+  //     location: embed.location ?? 'tab',
+  //     type: embed.type ?? 'url',
+  //     visibility: embed.visibility ?? 'public',
+  //     value: embed.value ?? '',
+  //     embed_accounts: embed.embed_accounts ?? [],
+  //   });
+  // };
 
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className="ml-auto flex w-full flex-col gap-4 px-4 py-8 text-gray-500 max-w-80"
+        className="ml-auto flex h-full max-w-80 flex-col gap-4 text-gray-500 py-2"
       >
         <h2 className="font-bold text-gray-600">{t('form.title')}</h2>
         <p className="text-sm text-gray-500">{t('form.description')}</p>
 
         {/* Embed selector for pre-filling form values */}
-        <EmbedSelector 
+        {/* <EmbedSelector 
           embeds={availableEmbeds} 
           onSelect={handleEmbedSelect} 
           showSelector={showEmbedSelector} 
-        />
+        /> */}
+        <div className="scrollbar-on-hover flex flex-col gap-4 overflow-y-auto shrink">
+          <TitleField control={form.control} />
+          <LocationField control={form.control} />
+          <TypeField control={form.control} />
+          <ValueField control={form.control} watch={form.watch} />
+          <VisibilityField control={form.control} />
 
-        <TitleField control={form.control} />
-        <LocationField control={form.control} />
-        <TypeField control={form.control} />
-        <ValueField control={form.control} watch={form.watch} />
-        <VisibilityField control={form.control} />
+          {form.watch('visibility') === 'private' && (
+            <OrganizationsField
+              control={form.control}
+              setValue={form.setValue}
+              defaultValues={form.formState.defaultValues?.embed_accounts?.filter(
+                (account): account is string => account !== undefined,
+              )}
+            />
+          )}
+          <FormMessage />
+        </div>
 
-        {form.watch('visibility') === 'private' && (
-          <OrganizationsField
-            control={form.control}
-            setValue={form.setValue}
-            defaultValues={form.formState.defaultValues?.embed_accounts?.filter(
-              (account): account is string => account !== undefined,
-            )}
-          />
-        )}
-        <FormMessage />
-        <ThemedButton type="submit" className="mt-auto w-full">
-          {t('form.title')}
+        <ThemedButton type="submit" className="mt-auto w-full shrink-0">
+          {type === 'create' ? t('form.createButton') : t('form.updateButton')}
         </ThemedButton>
       </form>
     </Form>

@@ -17,7 +17,7 @@ export function EmbedTabs({
   onDeleteEmbed
 }: EmbedTabsProps) {
   return (
-    <TabsList className="bg-transparent">
+    <TabsList className="bg-transparent justify-start">
       <TabsTrigger 
         value="new" 
         className="group flex items-center gap-2 text-sm transition-colors data-[state=active]:bg-[#F0F0F0] data-[state=inactive]:bg-transparent data-[state=active]:text-black data-[state=inactive]:text-gray-500"

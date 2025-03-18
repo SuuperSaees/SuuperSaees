@@ -1,6 +1,8 @@
 {
   "title": "Embeds",
   "form": {
+    "updateButton": "Update embed",
+    "createButton": "Create embed",
     "title": "Embed other apps",
     "description": "Embed your favorite apps in your project. Video gide.",
     "inputs": {

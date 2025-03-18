@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 
-import { Box, Link } from 'lucide-react';
+import { Box } from 'lucide-react';
 import { z } from 'zod';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
@@ -150,12 +150,23 @@ export function addClientEmbedsToNavigation(
   const routes = [...baseConfig.routes];
 
   // Add all embeds in a single section
-  routes.push({
-    type: 'section',
-    section: true,
-    label: 'Workspace',
-    items: embeds.map((embed) => createEmbedNavigationItem(embed, '')),
-  });
+  if (embeds.length > 0) {
+    routes.push({
+      type: 'section',
+      section: true,
+      label: 'Workspace',
+      groups: [
+        {
+          type: 'group',
+          label: 'Embeds',
+          Icon: <Box className="w-4" />,
+          collapsible: true,
+          collapsed: false,
+          children: embeds.map((embed) => createEmbedNavigationItem(embed, '')),
+        }
+      ],
+    });
+  }
 
   return NavigationConfigSchema.parse({
     ...baseConfig,
@@ -206,16 +217,6 @@ export function addAgencyEmbedsToNavigation(
 
       // Add clients section with the search dropdown component
       if (clientEmbedsMap.size > 0) {
-        routes.push({
-          type: 'section',
-          path: pathsConfig.app.clients,
-          section: true,
-          label: 'Clients',
-          menu: <ClientsOptionsDropdown />,
-          className: "text-xs font-medium text-muted-foreground",
-          items: [], // Empty items array, we'll add client groups separately
-        });
-
         // Filter client entries to only include pinned clients
         const clientEntries = Array.from(clientEmbedsMap.values());
         const pinnedClientEntries = clientEntries.filter(
@@ -227,29 +228,49 @@ export function addAgencyEmbedsToNavigation(
           a.client.name.localeCompare(b.client.name)
         );
 
-        // Add only pinned client groups
-        sortedPinnedClientEntries.forEach(({ client, embeds }) => {
-          routes.push({
-            type: 'group',
-            path: `${pathsConfig.app.clients}/organizations/${client.id}`,
-            label: client.name,
-            menu: <ClientOptionsDropdown clientId={client.id} />,
-            Icon: (
-              <AvatarComponent
-                src={client.picture_url ?? ''}
-                alt={client.name}
-                username={client.name}
-                className="h-5 w-5 border-none"
-              />
-            ),
-            collapsible: true,
-            collapsed: false, // Pinned clients are expanded by default
-            children: embeds.map((embed) => createEmbedNavigationItem(embed, client.id)),
+        // Create client groups for the section
+        if (sortedPinnedClientEntries.length > 0) {
+          const clientGroups = sortedPinnedClientEntries.map(({ client, embeds }) => {
+            // Add both private embeds and public embeds to each client
+            const clientEmbeds = [
+              ...embeds,
+              ...publicEmbeds // Include public embeds for each client
+            ];
+            
+            return {
+              type: 'group' as const,
+              path: `${pathsConfig.app.clients}/organizations/${client.id}`,
+              label: client.name,
+              menu: <ClientOptionsDropdown clientId={client.id} />,
+              Icon: (
+                <AvatarComponent
+                  src={client.picture_url ?? ''}
+                  alt={client.name}
+                  username={client.name}
+                  className="h-5 w-5 border-none"
+                />
+              ),
+              collapsible: true,
+              collapsed: false, // Pinned clients are expanded by default
+              children: clientEmbeds.map((embed) => createEmbedNavigationItem(embed, client.id)),
+            };
           });
-        });
+
+          routes.push({
+            type: 'section',
+            path: pathsConfig.app.clients,
+            section: true,
+            label: 'Clients',
+            menu: <ClientsOptionsDropdown />,
+            className: "text-xs font-medium text-muted-foreground",
+            groups: clientGroups,
+          });
+        }
       }
     }
 
+    // Comment out the Public Workspace section
+    /*
     // Add public workspace section
     if (publicEmbeds.length > 0) {
       routes.push({
@@ -265,6 +286,7 @@ export function addAgencyEmbedsToNavigation(
         children: publicEmbeds.map((embed) => createEmbedNavigationItem(embed, '')),
       });
     }
+    */
   }
 
   return NavigationConfigSchema.parse({
@@ -305,15 +327,21 @@ export function buildNavigationConfig(
 
   // Add embeds based on user role
   const isClientRole = userRole?.startsWith('client_');
-
-  if (isClientRole) {
-    return addClientEmbedsToNavigation(baseConfig, sidebarEmbeds);
-  } else {
-    return addAgencyEmbedsToNavigation(
-      baseConfig,
-      sidebarEmbeds,
-      AvatarComponent,
-      pinnedClientIds,
-    );
+  
+  try {
+    if (isClientRole) {
+      return addClientEmbedsToNavigation(baseConfig, sidebarEmbeds);
+    } else {
+      return addAgencyEmbedsToNavigation(
+        baseConfig,
+        sidebarEmbeds,
+        AvatarComponent,
+        pinnedClientIds,
+      );
+    }
+  } catch (error) {
+    console.error('Error building navigation config:', error);
+    // Return the base config if there was an error
+    return baseConfig;
   }
 }

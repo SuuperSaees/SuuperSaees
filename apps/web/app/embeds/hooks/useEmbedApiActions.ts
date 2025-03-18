@@ -16,6 +16,7 @@ interface UseEmbedApiActionsProps {
   activeEmbedId: string;
   onCreateSuccess?: (newEmbed: Embeds.Type) => void;
   onDeleteSuccess?: () => void;
+  queryKey?: string[];
 }
 
 export function useEmbedApiActions({
@@ -24,6 +25,7 @@ export function useEmbedApiActions({
   activeEmbedId,
   onCreateSuccess,
   onDeleteSuccess,
+  queryKey = ['embeds'],
 }: UseEmbedApiActionsProps) {
   const queryClient = useQueryClient();
   const host = typeof window !== 'undefined' ? window.location.hostname : '';
@@ -41,7 +43,7 @@ export function useEmbedApiActions({
     },
     onSuccess: async (newEmbed) => {
       toast.success('Integration created successfully');
-      await queryClient.invalidateQueries({ queryKey: ['embeds'] });
+      await queryClient.invalidateQueries({ queryKey });
       onCreateSuccess?.(newEmbed);
     },
     onError: (error: Error) => {
@@ -79,7 +81,7 @@ export function useEmbedApiActions({
         toast.success('Integration updated successfully');
       }
       
-      void queryClient.invalidateQueries({ queryKey: ['embeds'] });
+      void queryClient.invalidateQueries({ queryKey });
     },
     onError: (error, { isAccountRemoval }, toastId) => {
       // Dismiss loading toast and show error
@@ -106,7 +108,7 @@ export function useEmbedApiActions({
       toast.success('Integration deleted successfully');
       
       // Invalidate queries to refresh the data
-      void queryClient.invalidateQueries({ queryKey: ['embeds'] }).then(() => {
+      void queryClient.invalidateQueries({ queryKey }).then(() => {
         // After data is refreshed, call the success callback
         onDeleteSuccess?.();
       });
