@@ -227,8 +227,8 @@ function SectionView({
       }}
       className={`h-full min-h-0 ${['new', ...embeds.map(e => e.id)].includes(activeTab) ? 'flex flex-col' : ''}`}
     >
-      <div className="flex justify-between">
-        <TabsList className="gap-2 bg-transparent">
+      <div className="flex justify-between flex-wrap shrink gap-4">
+        <TabsList className="gap-2 bg-transparent max-w-full">
           {/* Standard tabs */}
           {renderStandardTabs(baseTabs)}
           

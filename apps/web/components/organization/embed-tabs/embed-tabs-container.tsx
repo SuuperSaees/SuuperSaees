@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { EmbedTab, AddIntegrationTab, StandardTab } from './embed-tab';
 import { EmbedSection } from '~/embeds/components/embed-section';
 import { useEmbedTabs } from './use-embed-tabs';
 import { FormValues } from '~/embeds/schema';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Embeds } from '~/lib/embeds.types';
 
 type EmbedTabsContainerProps = {
   clientOrganizationId: string;
@@ -94,9 +96,52 @@ export function EmbedTabsContainer({
     />
   ), [embeds, agencyId, userId, currentUserRole, clientOrganizationId, activeTab, defaultEmbedCreationValue, embedSectionRef]);
 
-  // Return components for rendering in TabsList
-  const renderTabs = () => {
-    return embedTabs.map(id => {
+  const ScrollableTabList: React.FC<{
+    embedTabs: string[];
+    embeds: Embeds.TypeWithRelations[];
+    activeTab: string;
+    handleDelete: (id: string) => void;
+  }> = ({ embedTabs, embeds, activeTab, handleDelete }) => {
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [showLeftButton, setShowLeftButton] = useState(false);
+    const [showRightButton, setShowRightButton] = useState(false);
+
+    const checkScroll = () => {
+      if (!scrollContainerRef.current) return;
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftButton(scrollLeft > 0);
+      setShowRightButton(scrollLeft < scrollWidth - clientWidth);
+    };
+
+    useEffect(() => {
+      const scrollContainer = scrollContainerRef.current;
+      if (scrollContainer) {
+        checkScroll();
+        scrollContainer.addEventListener('scroll', checkScroll);
+        window.addEventListener('resize', checkScroll);
+
+        return () => {
+          scrollContainer.removeEventListener('scroll', checkScroll);
+          window.removeEventListener('resize', checkScroll);
+        };
+      }
+    }, []);
+
+    const scroll = (direction: 'left' | 'right') => {
+      if (!scrollContainerRef.current) return;
+      const scrollAmount = 200;
+      const container = scrollContainerRef.current;
+      const newScrollLeft = direction === 'left' 
+        ? container.scrollLeft - scrollAmount 
+        : container.scrollLeft + scrollAmount;
+      
+      container.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    };
+
+    const tabElements = embedTabs.map(id => {
       if (id === 'new') {
         return <AddIntegrationTab key="new-tab" activeTab={activeTab} />;
       }
@@ -117,6 +162,53 @@ export function EmbedTabsContainer({
       
       return null;
     }).filter(Boolean);
+
+    return (
+      <div 
+        ref={scrollContainerRef}
+        className="relative flex overflow-x-auto min-w-[250px] max-w-full no-scrollbar h-full border-l border-gray-300"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}
+      >
+        {showLeftButton && (
+          <div className="sticky left-0 z-10 h-full flex items-stretch">
+            <button
+              onClick={() => scroll('left')}
+              className="flex items-center justify-center w-8 bg-[#FAFAFA] hover:bg-[#FAFAFA] backdrop-blur-[1px] shadow-lg"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+        <div className="flex items-center px-2">
+          {tabElements}
+        </div>
+        {showRightButton && (
+          <div className="sticky right-0 z-10 h-full flex items-stretch">
+            <button
+              onClick={() => scroll('right')}
+              className="flex items-center justify-center w-8 bg-[#FAFAFA] hover:bg-[#FAFAFA] backdrop-blur-[1px] shadow-lg"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Return components for rendering in TabsList
+  const renderTabs = () => {
+    return (
+      <ScrollableTabList
+        embedTabs={embedTabs}
+        embeds={embeds}
+        activeTab={activeTab}
+        handleDelete={handleDelete}
+      />
+    );
   };
 
   // Return components for standard tabs
