@@ -8,14 +8,11 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@kit/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from '@kit/ui/dialog';
 import {
   Form,
   FormControl,
@@ -75,20 +72,15 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
 
   return (
     <>
-      <AlertDialog open={open} onOpenChange={onOpenChange}>
-        <AlertDialogTrigger asChild >
+      <Dialog open={open} onOpenChange={(newOpen) => onOpenChange?.(newOpen)}>
+        <DialogTrigger asChild>
           {customTrigger ?? <ThemedButton>{t('createClient')}</ThemedButton>}
-        </AlertDialogTrigger>
-        <AlertDialogContent >
+        </DialogTrigger>
+        <DialogContent>
           <div className="flex w-full items-center justify-between">
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('createClient')}</AlertDialogTitle>
-            </AlertDialogHeader>
-            <AlertDialogCancel className="font-bold text-red-500 hover:text-red-700">
-              X
-            </AlertDialogCancel>
+            <DialogTitle>{t('createClient')}</DialogTitle>
           </div>
-          <AlertDialogDescription>
+          <div className="mt-4">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -186,9 +178,9 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
                 </ThemedButton>
               </form>
             </Form>
-          </AlertDialogDescription>
-        </AlertDialogContent>
-      </AlertDialog>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
