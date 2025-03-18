@@ -3,10 +3,18 @@
 import Link from 'next/link';
 
 import { MoreHorizontal, Pen, Trash } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import Dropdown, { DropdownOption } from '~/components/ui/dropdown';
 
-export function EmbedOptionsDropdown({ embedId, accountId }: { embedId: string, accountId?: string }) {
+export function EmbedOptionsDropdown({
+  embedId,
+  accountId,
+}: {
+  embedId: string;
+  accountId?: string;
+}) {
+  const { t } = useTranslation('common');
   const dropdownOptions: DropdownOption[] = [
     {
       value: (
@@ -15,7 +23,9 @@ export function EmbedOptionsDropdown({ embedId, accountId }: { embedId: string, 
           className="flex w-full items-center gap-2"
         >
           <Pen className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Edit</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.edit')}
+          </span>
         </Link>
       ),
       actionFn: () => {
@@ -25,11 +35,17 @@ export function EmbedOptionsDropdown({ embedId, accountId }: { embedId: string, 
     {
       value: (
         <Link
-          href={ accountId ? `/embeds?id=${embedId}&action=delete&accountId=${accountId}` : `/embeds?id=${embedId}&action=delete`}
+          href={
+            accountId
+              ? `/embeds?id=${embedId}&action=delete&accountId=${accountId}`
+              : `/embeds?id=${embedId}&action=delete`
+          }
           className="flex w-full items-center gap-2"
         >
           <Trash className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Delete</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.delete')}
+          </span>
         </Link>
       ),
       actionFn: () => {

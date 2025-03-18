@@ -8,11 +8,14 @@ import Dropdown, { DropdownOption } from '~/components/ui/dropdown';
 import CreateClientDialog from '~/team-accounts/src/server/actions/clients/create/create-client';
 
 import { PinClientsDialog } from './pin-clients-dialog';
+import { useTranslation } from 'react-i18next';
 
 export function ClientsOptionsDropdown() {
   const [isPinDialogOpen, setIsPinDialogOpen] = useState(false);
   const [isCreateClientDialogOpen, setIsCreateClientDialogOpen] =
     useState(false);
+
+  const { t } = useTranslation('common');
   // Create a ref to the hidden CreateClientDialog trigger
 
   // Dropdown options
@@ -21,7 +24,9 @@ export function ClientsOptionsDropdown() {
       value: (
         <div className="flex items-center gap-2">
           <Plus className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Add Client</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.addClient')}
+          </span>
         </div>
       ),
       actionFn: () => {
@@ -33,7 +38,9 @@ export function ClientsOptionsDropdown() {
       value: (
         <div className="flex items-center gap-2">
           <Pin className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Pin Client</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.pinClient')}
+          </span>
         </div>
       ),
       actionFn: () => {

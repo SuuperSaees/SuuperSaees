@@ -1,19 +1,24 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 
+import Link from 'next/link';
+
+import { useMutation } from '@tanstack/react-query';
 import {
   Archive,
+  Briefcase,
   Layers,
-  LayoutGrid,
   MoreHorizontal,
+  PinOff,
   Plus,
   UserPlus,
   Users,
 } from 'lucide-react';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+import { useTranslation } from 'react-i18next';
 
-import { Separator } from '@kit/ui/separator';
+import { Spinner } from '@kit/ui/spinner';
 
 import { InviteClientMembersDialogContainer } from '~/components/organization/invite-client-members-dialog';
 import Dropdown, { DropdownOption } from '~/components/ui/dropdown';
@@ -29,6 +34,25 @@ export function ClientOptionsDropdown({
 }: ClientItemOptionsDropdownProps) {
   const [isInviteMembersDialogOpen, setIsInviteMembersDialogOpen] =
     useState(false);
+  const { t } = useTranslation('common');
+
+  const { updateOrganizationSetting, pinned_organizations } =
+    useOrganizationSettings();
+  // Unpin function
+  const unpinMutation = useMutation({
+    mutationFn: async () => {
+      const pinnedOrganizations: string[] = pinned_organizations
+        ? JSON.parse(pinned_organizations)
+        : [];
+      const selectedClientIds = pinnedOrganizations.filter(
+        (id: string) => id !== clientId,
+      );
+      await updateOrganizationSetting.mutateAsync({
+        key: 'pinned_organizations',
+        value: JSON.stringify(selectedClientIds),
+      });
+    },
+  });
   // Dropdown options
   const dropdownOptions: DropdownOption[] = [
     // First section - Add space
@@ -39,8 +63,32 @@ export function ClientOptionsDropdown({
           className="flex w-full items-center gap-2"
         >
           <Plus className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Add space</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.addSpace')}
+          </span>
         </Link>
+      ),
+      actionFn: () => {
+        // Link handles the navigation
+        null;
+      },
+    },
+    // Unpin client
+    {
+      value: (
+        <button
+          onClick={() => unpinMutation.mutate()}
+          className="flex w-full items-center gap-2"
+        >
+          {unpinMutation.isPending ? (
+            <Spinner className="h-4 w-4 text-gray-500" />
+          ) : (
+            <PinOff className="h-4 w-4 text-gray-500" />
+          )}
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.unpinClient')}
+          </span>
+        </button>
       ),
       actionFn: () => {
         // Link handles the navigation
@@ -53,7 +101,7 @@ export function ClientOptionsDropdown({
         <div className="flex items-center gap-2">
           <UserPlus className="h-4 w-4 text-gray-500" />
           <span className="text-sm font-medium text-gray-700">
-            Invite member
+            {t('sidebar.inviteMembers')}
           </span>
         </div>
       ),
@@ -61,15 +109,9 @@ export function ClientOptionsDropdown({
         // Open the dialog directly instead of clicking the hidden button
         setIsInviteMembersDialogOpen(true);
       },
+      includeSeparator: true,
     },
-    // Custom separator as a dropdown option
-    {
-      value: <Separator className="my-1" />,
-      actionFn: () => {
-        // Link handles the navigation
-        null;
-      },
-    },
+
     // Projects
     {
       value: (
@@ -78,7 +120,9 @@ export function ClientOptionsDropdown({
           className="flex w-full items-center gap-2"
         >
           <Layers className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Projects</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.projects')}
+          </span>
         </Link>
       ),
       actionFn: () => {
@@ -94,7 +138,9 @@ export function ClientOptionsDropdown({
           className="flex w-full items-center gap-2"
         >
           <Users className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Members</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.members')}
+          </span>
         </Link>
       ),
       actionFn: () => {
@@ -109,8 +155,10 @@ export function ClientOptionsDropdown({
           href={`/clients/organizations/${clientId}?section=services`}
           className="flex w-full items-center gap-2"
         >
-          <LayoutGrid className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Services</span>
+          <Briefcase className="h-4 w-4 text-gray-500" />
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.services')}
+          </span>
         </Link>
       ),
       actionFn: () => {
@@ -126,7 +174,9 @@ export function ClientOptionsDropdown({
           className="flex w-full items-center gap-2"
         >
           <Archive className="h-4 w-4 text-gray-500" />
-          <span className="text-sm font-medium text-gray-700">Files</span>
+          <span className="text-sm font-medium text-gray-700">
+            {t('sidebar.files')}
+          </span>
         </Link>
       ),
       actionFn: () => {
@@ -159,9 +209,7 @@ export function ClientOptionsDropdown({
         userRoleHierarchy={userRoleHierarchy}
         open={isInviteMembersDialogOpen}
         onOpenChange={setIsInviteMembersDialogOpen}
-      >
-
-      </InviteClientMembersDialogContainer>
+      ></InviteClientMembersDialogContainer>
     </>
   );
 }

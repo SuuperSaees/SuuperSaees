@@ -15,6 +15,7 @@ export type DropdownOption = {
   value: string | JSX.Element;
   actionFn: () => void | Promise<void>;
   closeOnClick?: boolean;
+  includeSeparator?: boolean;
 };
 
 interface DropdownProps {
@@ -81,6 +82,7 @@ export default function Dropdown({ children, options, className, contentClassNam
               >
                 {option.value}
               </DropdownMenuItem>
+              {option.includeSeparator  &&  !showSeparators && <Separator className='my-2'/>}
               {showSeparators && index < options.length - 1 && <Separator />}
             </React.Fragment>
           );
