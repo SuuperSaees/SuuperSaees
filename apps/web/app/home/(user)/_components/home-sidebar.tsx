@@ -23,7 +23,7 @@ import {
  * Home sidebar component that displays navigation based on user role and embeds
  */
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
-  const { workspace, user, organization } = props.workspace;
+  const { workspace, user, pinnedOrganizations, organization } = props.workspace;
   const userRole = workspace.role;
 
   // Get organization settings
@@ -31,12 +31,6 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   
   // Access settings safely
   const dashboardUrl = settings.dashboard_url;
-  
-  // Parse pinned organizations from string to array
-  const pinnedOrganizationsString = settings.pinned_organizations;
-  const pinnedOrganizations = pinnedOrganizationsString 
-    ? JSON.parse(pinnedOrganizationsString) 
-    : [];
 
   // Determine if dashboard URL should be shown
   const showDashboardUrl = shouldShowDashboardUrl(
@@ -45,7 +39,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
     workspace.id
   );
 
-  // Build the navigation config with embeds and pinned clients
+  // Build the navigation config with embeds and client organizations
   const navigationConfig = buildNavigationConfig(
     userRole,
     organization?.embeds as Embed[] | undefined,
