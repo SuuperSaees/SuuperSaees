@@ -1,20 +1,17 @@
 'use client';
 
-import { type JSX, useEffect, useMemo, useState } from 'react';
-
+import React, { type JSX, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-
 import { useQuery } from '@tanstack/react-query';
-import { BoxIcon } from 'lucide-react';
-import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { getServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
 import { useTranslation } from 'react-i18next';
 
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
-import { EmbedSection } from '~/embeds/components/embed-section';
 import { getEmbeds } from '~/server/actions/embeds/embeds.action';
+
+// Import our new modular components
+import { EmbedTabsContainer } from './embed-tabs';
 
 import ButtonPinOrganization from './button-pin-organization';
 import FileSection from './files';
@@ -43,8 +40,6 @@ function SectionView({
   const { t } = useTranslation('clients');
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('orders');
-  const { workspace: userWorkspace } = useUserWorkspace();
-  const userId = userWorkspace.id ?? '';
   const searchParams = useSearchParams();
 
   // Define availableTabsBasedOnRole before it's used
@@ -117,56 +112,43 @@ function SectionView({
     ? ['orders', 'members', 'services', 'files']
     : ['members', 'services', 'orders'];
 
-  // Determine if we should include embed tabs
-  const shouldIncludeEmbedTabs = sections 
-    ? Boolean(sections.includes('embeds'))
-    : availableTabsBasedOnRole.has(currentUserRole);
-    
-  // Add "new" tab for creating embeds if embeds functionality is enabled
-  const embedTabs = shouldIncludeEmbedTabs
-    ? ['new'].concat(embeds.map(embed => embed.id))
-    : [];
-  
+  // Use our new EmbedTabsContainer to manage embed tabs
+  const {
+    renderTabs: renderEmbedTabs,
+    renderStandardTabs,
+    getTabContents,
+    embedTabs
+  } = EmbedTabsContainer({
+    clientOrganizationId,
+    currentUserRole,
+    agencyId,
+    sections,
+    activeTab,
+    onTabDelete: (id) => {
+      // If the deleted tab was active, switch to 'new'
+      if (activeTab === id) {
+        setActiveTab('new');
+      }
+    },
+    getTabLabel: (option) => {
+      // For standard tabs, use translation
+      if (['orders', 'members', 'services', 'files'].includes(option)) {
+        return t(`organizations.${option}.title`)
+          .split('')
+          .map((char, index) => (index === 0 ? char.toUpperCase() : char))
+          .join('');
+      }
+      return '';
+    }
+  });
+
   // Combine all available tabs
   const availableTabs = sections 
     ? sections.filter(section => section !== 'embeds').concat(embedTabs)
     : baseTabs.concat(embedTabs);
 
-  // Create the default embed creation values once
-  const defaultEmbedCreationValue = useMemo(() => ({
-    created_at: new Date().toISOString(),
-    deleted_on: null,
-    icon: null,
-    id: '',
-    location: 'tab' as const,
-    organization_id: null,
-    title: '',
-    type: 'url' as const,
-    updated_at: null,
-    user_id: null,
-    value: '',
-    visibility: 'private' as const,
-    embed_accounts: [clientOrganizationId],
-  }), [clientOrganizationId]);
-
-  // Prepare the embed section component for reuse
-  const embedSectionComponent = useMemo(() => (
-    <EmbedSection
-      key={'embed-section'}
-      embeds={embeds}
-      agencyId={agencyId}
-      userId={userId}
-      userRole={currentUserRole}
-      showEmbedSelector={true}
-      queryKey={['organization-embeds', clientOrganizationId]}
-      defaultCreationValue={defaultEmbedCreationValue}
-      externalTabControl={true}
-      activeEmbedId={activeTab}
-    />
-  ), [embeds, agencyId, userId, currentUserRole, clientOrganizationId, activeTab, defaultEmbedCreationValue]);
-
-  // Add embed section component to navigation options
-  const navigationOptionsMap = new Map<string, JSX.Element>([
+  // Add standard sections to the navigation options map
+  const navigationOptionsMap = new Map<string, React.ReactNode>([
     [
       'orders',
       <OrdersSection
@@ -203,16 +185,15 @@ function SectionView({
         currentUserRole={currentUserRole}
       />,
     ],
-    // Add new embed creation as its own tab
-    ['new', embedSectionComponent],
   ]);
 
-  // Add each embed as its own tab
-  embeds.forEach(embed => {
-    navigationOptionsMap.set(embed.id, embedSectionComponent);
+  // Add embed tab contents
+  const embedContents = getTabContents();
+  embedContents.forEach((content, key) => {
+    navigationOptionsMap.set(key, content);
   });
 
-  // Filtrar navigationOptionKeys para incluir solo las secciones disponibles
+  // Filter navigation option keys to include only the available tabs
   const navigationOptionKeys = Array.from(navigationOptionsMap.keys()).filter(
     (key) => availableTabs.includes(key),
   );
@@ -237,26 +218,6 @@ function SectionView({
     }
   }, [searchParams, allTabs]);
 
-  // Function to get appropriate label for embed tabs
-  const getTabLabel = (option: string) => {
-    // For standard tabs, use translation
-    if (['orders', 'members', 'services', 'files'].includes(option)) {
-      return t(`organizations.${option}.title`)
-        .split('')
-        .map((char, index) => (index === 0 ? char.toUpperCase() : char))
-        .join('');
-    }
-    
-    // For "new" tab, show "Add Integration"
-    if (option === 'new') {
-      return 'Add Integration';
-    }
-    
-    // For embed tabs, show the embed title
-    const embed = embeds.find(e => e.id === option);
-    return embed?.title ?? option;
-  };
-
   return (
     <Tabs
       value={activeTab}
@@ -268,18 +229,11 @@ function SectionView({
     >
       <div className="flex justify-between">
         <TabsList className="gap-2 bg-transparent">
-          {navigationOptionKeys.map((option) => (
-            <ThemedTabTrigger
-              activeTab={activeTab}
-              option={option}
-              value={option}
-              key={option + 'tab'}
-              className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
-            >
-              {(['new', ...embeds.map(e => e.id)].includes(option)) && <BoxIcon className="h-4 w-4" />}
-              {getTabLabel(option)}
-            </ThemedTabTrigger>
-          ))}
+          {/* Standard tabs */}
+          {renderStandardTabs(baseTabs)}
+          
+          {/* Embed tabs */}
+          {renderEmbedTabs()}
         </TabsList>
         <div className="flex gap-4 items-center">
           {availableTabsBasedOnRole.has(currentUserRole) && (

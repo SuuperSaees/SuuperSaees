@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, forwardRef, useImperativeHandle } from 'react';
 
 import { TabsContent } from '@kit/ui/tabs';
 import { Tabs } from '@kit/ui/tabs';
@@ -27,6 +27,15 @@ interface EmbedSectionProps {
   activeEmbedId?: string;
 }
 
+// Expose the handleEmbedDelete function via ref
+export interface EmbedSectionRef {
+  handleEmbedDelete: (id: string) => Promise<void> | void;
+  handleEmbedUpdate: (
+    values: unknown,
+    options?: { isAccountRemoval?: boolean }
+  ) => Promise<void> | void;
+}
+
 // Helper function to convert FormValues to the expected EmbedEditor defaultValue type
 const formValuesToEmbedType = (values: FormValues): (Embeds.Type & { embed_accounts: string[] }) => {
   return {
@@ -43,7 +52,7 @@ const formValuesToEmbedType = (values: FormValues): (Embeds.Type & { embed_accou
   } as Embeds.Type & { embed_accounts: string[] };
 };
 
-export function EmbedSection({ 
+export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({ 
   embeds, 
   agencyId, 
   userId, 
@@ -52,7 +61,7 @@ export function EmbedSection({
   queryKey = ['embeds'],
   externalTabControl = false,
   activeEmbedId: externalActiveEmbedId
-}: EmbedSectionProps) {
+}, ref) => {
   const formattedEmbeds = useMemo(() => {
     return embeds.map((embed) => ({
       ...embed,
@@ -105,6 +114,23 @@ export function EmbedSection({
     },
     queryKey,
   });
+
+  // Expose handleEmbedDelete function via ref
+  useImperativeHandle(ref, () => ({
+    handleEmbedDelete: async (id: string) => {
+      // Ensure it always returns a Promise
+      return Promise.resolve(handleEmbedDelete(id));
+    },
+    handleEmbedUpdate: async (
+      values: unknown,
+      options?: { isAccountRemoval?: boolean }
+    ) => {
+      // Type assertion to match the expected type
+      const typedValues = values as Parameters<typeof handleEmbedUpdate>[0];
+      // Ensure it always returns a Promise
+      return Promise.resolve(handleEmbedUpdate(typedValues, options));
+    },
+  }));
 
   // Handle URL parameters
   useEmbedUrlParams({
@@ -276,4 +302,7 @@ export function EmbedSection({
       </div>
     </Tabs>
   );
-}
+});
+
+// Fix the displayName
+EmbedSection.displayName = 'EmbedSection';
