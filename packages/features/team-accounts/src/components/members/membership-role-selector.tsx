@@ -27,7 +27,7 @@ export function MembershipRoleSelector({
       </SelectTrigger>
 
       <SelectContent>
-        {roles.map((role) => {
+        {roles.filter((role) => role !== 'agency_owner').map((role) => {
           return (
             <SelectItem
               key={role}
