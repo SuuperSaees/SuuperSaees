@@ -19,7 +19,7 @@ export function EmbedOptionsDropdown({
     {
       value: (
         <Link
-          href={`/clients/organizations/${accountId}?section=spaces&action=edit&embedId=${embedId}`}
+          href={`/embeds?accountId=${accountId}&action=edit&id=${embedId}`}
           className="flex w-full items-center gap-2"
         >
           <Pen className="h-4 w-4 text-gray-500" />
@@ -35,7 +35,7 @@ export function EmbedOptionsDropdown({
     {
       value: (
         <Link
-          href={`/clients/organizations/${accountId}?section=spaces&action=delete&embedId=${embedId}`}
+          href={`/embeds?accountId=${accountId}&action=delete&id=${embedId}`}
           className="flex w-full items-center gap-2"
         >
           <Trash className="h-4 w-4 text-gray-500" />
