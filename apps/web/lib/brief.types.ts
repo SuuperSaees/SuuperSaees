@@ -59,9 +59,6 @@ export namespace Brief {
       export type Response = {
         field: FormFieldType;
         response: Database['public']['Tables']['brief_responses']['Row']['response'];
-        brief: {
-          name: Database['public']['Tables']['briefs']['Row']['name'];
-        };
       };
     }
 

@@ -23,12 +23,10 @@ import { SkeletonOrdersSection } from './skeleton-orders-section';
 interface OrdersSectionProps {
   organizationId: string;
   agencyId: string;
-  showCardStats?: boolean;
 }
 export default function OrdersSection({
   organizationId,
   agencyId,
-  showCardStats = true,
 }: OrdersSectionProps) {
   const client = useSupabase();
   const { t } = useTranslation('statistics');
@@ -111,15 +109,14 @@ export default function OrdersSection({
 
   return (
     <div className="flex h-full flex-col gap-8">
-      {showCardStats && (
-        <div className="flex flex-wrap gap-2.5">
-          <CardStats
-            title={t('projects.active')}
-            value={{
-              current: currentStats.active,
-              previous: previousStats.active,
-              unit: 'months',
-            }}
+      <div className="flex flex-wrap gap-2.5">
+        <CardStats
+          title={t('projects.active')}
+          value={{
+            current: currentStats.active,
+            previous: previousStats.active,
+            unit: 'months',
+          }}
           type="active"
         />
         <CardStats
@@ -148,9 +145,8 @@ export default function OrdersSection({
             unit: 'months',
           }}
           type="completed"
-          />
-        </div>
-      )}
+        />
+      </div>
       <OrdersProvider
         agencyMembers={transformedAgencyMembers}
         agencyId={organizationOrders[0]?.agency_id ?? ''}

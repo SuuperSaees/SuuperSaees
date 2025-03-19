@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
+import { Spinner } from '@kit/ui/spinner';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
 import { UserWithSettings } from '~/lib/account.types';
@@ -9,10 +10,12 @@ import { useTranslation } from 'react-i18next';
 
 interface CalendarSectionProps {
   orderAgencyMembers: UserWithSettings[];
+  loading: boolean;
 }
 
 function CalendarSection({
   orderAgencyMembers,
+  loading,
 }: CalendarSectionProps) {
   const {t} = useTranslation('orders');
   const [activeTab, setActiveTab] = useState<string>(
@@ -26,7 +29,9 @@ function CalendarSection({
   return (
     <div>
       <p className="mb-2 font-bold">{t('calendarTitle')}</p>
-      {orderAgencyMembers.every((member) => !member.user_settings?.calendar) ? (
+      {loading ? (
+        <Spinner className="h-7 w-7" />
+      ) : orderAgencyMembers.every((member) => !member.user_settings?.calendar) ? (
         <p>{t('calendarEmpty')}</p>
       ) : (
         <Tabs

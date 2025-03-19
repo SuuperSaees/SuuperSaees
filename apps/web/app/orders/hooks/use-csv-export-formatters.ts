@@ -42,12 +42,12 @@ import { useTranslation } from 'react-i18next';
  * Type for a value formatter function
  * Takes any value and returns a formatted string
  */
-export type ValueFormatter = (value: unknown) => string;
+type ValueFormatter = (value: unknown) => string;
 
 /**
  * Type for the object containing all value formatters
  */
-export type ValueFormatters = Record<string, ValueFormatter>;
+type ValueFormatters = Record<string, ValueFormatter>;
 
 /**
  * Type for status objects

@@ -28,9 +28,3 @@ export type UserWithSettings = {
     calendar: string | null;
   };
 };
-
-export const AccountRoles = {
-  clientRoles: new Set(['client_member', 'client_owner', 'client_guest']),
-  agencyRoles: new Set(['agency_member', 'agency_owner', 'agency_project_manager']),
-  allRoles: new Set(['client_member', 'client_owner', 'agency_member', 'agency_owner', 'agency_project_manager', 'client_guest']),
-}
