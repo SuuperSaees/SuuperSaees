@@ -67,12 +67,17 @@ function SectionView({
     enabled: true,
   });
 
-  const embeds = useMemo(() => embedsQuery.data ?? [], [embedsQuery.data]);
+  const embeds = useMemo(() => {
+    // Filter embeds to only show those with location === 'tab'
+    return (embedsQuery.data ?? []).filter(embed => embed.location === 'tab');
+  }, [embedsQuery.data]);
   const isEmbedsLoading = embedsQuery.isLoading;
+
   const serviceOptions = services?.data?.map((service) => {
     return { value: service.id, label: service.name };
   });
 
+  console.log('embeds', embeds);
   // This is the actual path of the current folder
   // const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]); It's not used in the code for now
 
@@ -120,7 +125,6 @@ function SectionView({
     renderStandardTabs,
     getTabContents,
     embedTabs,
-
     handleDelete,
   } = EmbedTabsContainer({
     clientOrganizationId,
@@ -146,7 +150,7 @@ function SectionView({
     }
   });
 
-  // Combine all available tabs
+  // Combine all available tabs - now embeds are always included regardless of role
   const availableTabs = sections 
     ? sections.filter(section => section !== 'embeds').concat(embedTabs)
     : baseTabs.concat(embedTabs);

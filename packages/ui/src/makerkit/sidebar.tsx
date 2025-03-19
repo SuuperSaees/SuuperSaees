@@ -152,7 +152,9 @@ export function SidebarGroup({
 
   // Render the icon if provided
   const iconElement = Icon && (
-    <div className="block flex h-5 w-5 items-center justify-center group-hover/sidebar-group:hidden shrink-0">
+    <div className={cn("block flex h-5 w-5 items-center justify-center shrink-0", {
+      "group-hover/sidebar-group:hidden": collapsible
+    })}>
       {Icon}
     </div>
   );
