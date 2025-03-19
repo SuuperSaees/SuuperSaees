@@ -13,8 +13,8 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { getDomainByUserId } from '~/multitenancy/utils/get/get-domain';
 
-import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
-import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import { updateAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 import { isValidUUID } from '~/utils/generate-uuid';
 
 interface LoomPublicIdContainerProps {
@@ -40,17 +40,17 @@ function LoomPublicIdContainer({
       }
       
       try {
-        const response = await getAccountPluginByIdAction(pluginId);
+        const accountPlugin = await getAccountPlugin(pluginId)
         
-        if (response?.success) {
-          const credentials = response.success.data?.credentials as Record<string, unknown>;
+        if (accountPlugin) {
+          const credentials = accountPlugin.credentials as Record<string, unknown>;
           if (typeof credentials?.loom_app_id === 'string') {
             setLoomAppId(credentials.loom_app_id);
           }
-          return response.success.data;
+          return accountPlugin;
         } 
         
-        throw new Error(response?.error?.message ?? 'Failed to fetch plugin data');
+        throw new Error('Failed to fetch plugin data');
       } catch (error) {
         console.error('Error fetching plugin data:', error);
         toast.error(t('errorMessage'), {
@@ -98,8 +98,7 @@ function LoomPublicIdContainer({
         provider: 'loom',
       };
 
-
-      return await updateAccountPluginAction(pluginId, updates);
+      return await updateAccountPlugin(pluginId, updates);
     },
     onSuccess: () => {
       if (!loomAppId) return;

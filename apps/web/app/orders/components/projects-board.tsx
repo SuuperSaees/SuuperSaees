@@ -1,19 +1,26 @@
 'use client';
 
-import { Dispatch, SetStateAction, useMemo, useState, useCallback } from 'react';
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useMemo,
+} from 'react';
 
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
-import Board from '~/(views)/components/board';
-import KanbanSkeleton from '~/(views)/components/kanban/kanban-skeleton';
-import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { ViewProvider } from '~/(views)/contexts/view-context';
-import { ViewInitialConfigurations } from '~/(views)/view-config.types';
-import { UpdateFunction, ViewItem, ViewTypeEnum } from '~/(views)/views.types';
-import { Tags } from '~/lib/tags.types';
-import { User } from '~/lib/user.types';
+import type { ViewInitialConfigurations } from '~/(views)/view-config.types';
+import type {
+  UpdateFunction,
+  ViewItem,
+  ViewTypeEnum,
+} from '~/(views)/views.types';
+import type { Tags } from '~/lib/tags.types';
+import type { User } from '~/lib/user.types';
 
 import useCSVExportFormatters from '../hooks/use-csv-export-formatters';
 import useOrdersActionHandler from '../hooks/use-orders-action-handler';
@@ -21,15 +28,13 @@ import useOrdersAuthManagement from '../hooks/use-orders-auth-management';
 import useOrdersFilterConfigs from '../hooks/use-orders-filter-configs';
 import useOrdersTransformations from '../hooks/use-orders-transformations';
 import useOrdersViewConfigs from '../hooks/use-orders-view-configs';
+import { useOrdersTabs } from '../hooks/user-orders-tabs';
+import { PRIORITIES } from '../utils/constants';
+import { AGENCY_ROLES } from '../utils/constants';
+import { BoardContent } from './board-content';
+import { BoardHeader } from './board-header';
 import { useAgencyStatuses } from './context/agency-statuses-context';
 import { useOrdersContext } from './context/orders-context';
-import CreateOrderButton from './create-order-button';
-
-import Filters from './filters';
-import Search from './search';
-import StatusFilters from './status-filters';
-import ViewSelect from './view-select';
-import SettingsDropdown from './settings-dropdown';
 
 // Types
 interface ProjectsBoardProps {
@@ -38,19 +43,6 @@ interface ProjectsBoardProps {
   className?: string;
   storageKey?: string;
 }
-
-// Constants
-const PRIORITIES = [
-  { id: '1', name: 'low', color: '#DCFAE6' },
-  { id: '2', name: 'medium', color: '#fef7c3' },
-  { id: '3', name: 'high', color: '#FEE4E2' },
-];
-
-const AGENCY_ROLES = new Set([
-  'agency_owner',
-  'agency_project_manager',
-  'agency_member',
-]);
 
 const ProjectsBoard = ({
   agencyMembers,
@@ -63,13 +55,13 @@ const ProjectsBoard = ({
     useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
-  const { workspace } = useUserWorkspace();
+  const { workspace, organization } = useUserWorkspace();
+  const { theme_color } = useOrganizationSettings();
   const role = workspace.role ?? '';
 
-  // State
+  // Custom hooks
   const { getClientUsers, getClientOrganizations } = useOrdersTransformations();
 
-  // Custom hooks
   const {
     getFilterValues,
     resetFilters,
@@ -115,35 +107,11 @@ const ProjectsBoard = ({
   // Get CSV export formatters
   const { getValueFormatters } = useCSVExportFormatters(statuses, PRIORITIES);
 
-  // You can add custom formatters if needed in the future:
-  // const { getValueFormatters, createCustomFormatter } = useCSVExportFormatters(
-  //   statuses,
-  //   PRIORITIES,
-  //   {
-  //     // Example of a custom formatter:
-  //     // title: (value) => `Project: ${String(value ?? '')}`
-  //   }
-  // );
-
-  // Compute initial active tab
-  const statusFilterValues = getFilterValues('status');
-  const getInitialActiveTab = () => {
-    if (
-      statusFilterValues?.length === 1 &&
-      statusFilterValues.includes('completed')
-    ) {
-      return 'completed';
-    }
-    if (
-      statusFilterValues &&
-      !['annulled', 'completed'].includes(statusFilterValues.join(','))
-    ) {
-      return 'open';
-    }
-    return 'all';
-  };
-
-  const [activeTab, setActiveTab] = useState(getInitialActiveTab());
+  // Tab management
+  const { activeTab, handleTabChange, isEmbedTab, embeds } = useOrdersTabs({
+    organization,
+    getFilterValues,
+  });
 
   // Auth management
   useOrdersAuthManagement({
@@ -163,14 +131,17 @@ const ProjectsBoard = ({
   }, [filteredOrders, currentView, statuses]);
 
   // Handle search with a stable reference to prevent re-renders
-  const handleSearch = useCallback((searchTerm: string) => {
-    // Only update if the search term has actually changed
-    const currentSearchValue = getFilterValues('search')?.[0] ?? '';
-    if (searchTerm !== currentSearchValue) {
-      searchConfig.filter(searchTerm);
-    }
-  }, [searchConfig, getFilterValues]);
-  
+  const handleSearch = useCallback(
+    (searchTerm: string) => {
+      // Only update if the search term has actually changed
+      const currentSearchValue = getFilterValues('search')?.[0] ?? '';
+      if (searchTerm !== currentSearchValue) {
+        searchConfig.filter(searchTerm);
+      }
+    },
+    [searchConfig, getFilterValues],
+  );
+
   return (
     <ViewProvider
       initialData={mutedOrders as ViewItem[]}
@@ -188,84 +159,33 @@ const ProjectsBoard = ({
       customComponents={customComponents}
     >
       <div className="flex h-full max-h-full min-h-0 w-full flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-end gap-4">
-          <StatusFilters
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            t={t}
-            tabsConfig={tabsConfig}
-          />
-          <Search
-            defaultSearch={getFilterValues('search')?.[0] ?? ''}
-            t={t}
-            handleSearch={handleSearch}
-          />
-          <Filters
-            filters={filtersConfig}
-            defaultFilters={filters}
-            onReset={resetFilters}
-          />
-          <ViewSelect options={viewOptions} defaultValue={currentView} />
-          
-          <SettingsDropdown
-            disabled={ordersAreLoading}
-            data={orders}
-            t={t}
-            allowedColumns={[
-              'id',
-              'title',
-              'status',
-              'priority',
-              'created_at',
-              'updated_at',
-              'due_date',
-              'customer',
-              'assigned_to',
-              'agency',
-              'client_organization',
-            ]}
-            defaultFilename="projects.csv"
-            defaultSelectedColumns={[
-              'id',
-              'title',
-              'status',
-              'priority',
-              'created_at',
-              'updated_at',
-              'due_date',
-              'customer',
-              'client_organization',
-            ]}
-            columnHeaders={{
-              id: t('columns.id'),
-              title: t('columns.title'),
-              status: t('columns.status'),
-              priority: t('columns.priority'),
-              created_at: t('columns.createdAt'),
-              updated_at: t('columns.updatedAt'),
-              due_date: t('columns.dueDate'),
-              customer: t('columns.customer'),
-              assigned_to: t('columns.assignedTo'),
-              agency: t('columns.agency'),
-              client_organization: t('columns.clientOrganization'),
-            }}
-            valueFormatters={getValueFormatters()}
-          />
-          
-          <CreateOrderButton
-            t={t}
-            hasOrders={orders.length > 0 || ordersAreLoading}
-          />
-        </div>
-        {ordersAreLoading ? (
-          currentView === 'kanban' ? (
-            <KanbanSkeleton columns={5} />
-          ) : (
-            <TableSkeleton columns={9} rows={7} />
-          )
-        ) : (
-          <Board className={className} />
-        )}
+        <BoardHeader
+          t={t}
+          activeTab={activeTab}
+          handleTabChange={handleTabChange}
+          tabsConfig={tabsConfig}
+          embeds={embeds}
+          theme_color={theme_color}
+          getFilterValues={getFilterValues}
+          handleSearch={handleSearch}
+          filtersConfig={filtersConfig}
+          filters={filters}
+          resetFilters={resetFilters}
+          viewOptions={viewOptions}
+          currentView={currentView}
+          ordersAreLoading={ordersAreLoading}
+          orders={orders}
+          getValueFormatters={getValueFormatters}
+        />
+
+        <BoardContent
+          ordersAreLoading={ordersAreLoading}
+          currentView={currentView}
+          activeTab={activeTab}
+          isEmbedTab={isEmbedTab}
+          embeds={embeds}
+          className={className}
+        />
       </div>
     </ViewProvider>
   );
