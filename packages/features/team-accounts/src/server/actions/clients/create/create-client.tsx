@@ -8,11 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from '@kit/ui/dialog';
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@kit/ui/alert-dialog';
 import {
   Form,
   FormControl,
@@ -37,13 +40,7 @@ const formSchema = z.object({
   role: z.string().min(2).max(50),
 });
 
-interface CreateClientDialogProps {
-  customTrigger?: React.ReactNode;
-  onOpenChange?: (open: boolean) => void;
-  open?: boolean;
-}
-
-const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientDialogProps) => {
+const CreateClientDialog = () => {
   const { t } = useTranslation('responses');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -72,15 +69,20 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(newOpen) => onOpenChange?.(newOpen)}>
-        <DialogTrigger asChild>
-          {customTrigger ?? <ThemedButton>{t('createClient')}</ThemedButton>}
-        </DialogTrigger>
-        <DialogContent>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <ThemedButton>{t('createClient')}</ThemedButton>
+        </AlertDialogTrigger>
+        <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
           <div className="flex w-full items-center justify-between">
-            <DialogTitle>{t('createClient')}</DialogTitle>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('createClient')}</AlertDialogTitle>
+            </AlertDialogHeader>
+            <AlertDialogCancel className="font-bold text-red-500 hover:text-red-700">
+              X
+            </AlertDialogCancel>
           </div>
-          <div className="mt-4">
+          <AlertDialogDescription>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -178,9 +180,9 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
                 </ThemedButton>
               </form>
             </Form>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </AlertDialogDescription>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

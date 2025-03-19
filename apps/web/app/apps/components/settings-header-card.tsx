@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 
-import { updateAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import { updatePluginStatusAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin-status';
 
 interface SettingsHeaderCardProps {
   name: string;
@@ -39,7 +39,7 @@ function SettingsHeaderCard({
     }
 
     try {
-      await updateAccountPlugin(pluginId, { status: 'uninstalled' });
+      await updatePluginStatusAction(pluginId, 'uninstalled');
       toast.success(t('successMessage'), {
         description: t('pluginDeletedSuccessfully'),
       });

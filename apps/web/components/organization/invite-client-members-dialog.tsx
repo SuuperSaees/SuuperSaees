@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -51,15 +51,12 @@ const MAX_INVITES = 5;
 export function InviteClientMembersDialogContainer({
   clientOrganizationId,
   children,
-  open,
-  onOpenChange,
 }: React.PropsWithChildren<{
   clientOrganizationId: string;
   userRoleHierarchy: number;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
 }>) {
   const [pending, startTransition] = useTransition();
+  const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation('responses');
   const queryClient = useQueryClient();
 
@@ -96,13 +93,14 @@ export function InviteClientMembersDialogContainer({
         }).catch(() => null);
     });
 
+    setIsOpen(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} >
+    <Dialog open={isOpen} onOpenChange={setIsOpen} modal>
       <DialogTrigger asChild>{children}</DialogTrigger>
 
-      <DialogContent>
+      <DialogContent onInteractOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>
             <Trans i18nKey={'clients:organizations.members.invite.title'} />

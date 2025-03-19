@@ -23,14 +23,12 @@ const iconClasses = 'w-4';
 
 const routes = [
   {
-    type: 'route',
     label: 'common:dashboardName',
     path: pathsConfig.app.dashboard,
     Icon: <Home className={iconClasses} />,
     end: true,
   },
   {
-    type: 'route',
     label: 'common:messagesName',
     path: pathsConfig.app.messages,
     Icon: <MessagesSquare className={iconClasses} />,
@@ -47,7 +45,6 @@ const routes = [
   //   divider: true,
   // },
   {
-    type: 'route',
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
@@ -69,14 +66,12 @@ const routes = [
   //   Icon: <Wallet className={iconClasses} />,
   // },
   {
-    type: 'route',
     label: 'common:organizationName',
     path: pathsConfig.app.organization,
     Icon: <Users className={iconClasses} />,
   },
   
   {
-    type: 'route',
     label: 'common:storage',
     path: pathsConfig.app.storage,
     Icon: (
@@ -89,7 +84,6 @@ const routes = [
     ),
   },
   {
-    type: 'group',
     label: 'common:aiToolsName',
     Icon: <Bot className={iconClasses} />,
     collapsed: true,
@@ -102,7 +96,6 @@ const routes = [
     ],
   },
   {
-    type: 'group',
     label: 'common:catalogName',
     Icon: <Package className={iconClasses} />,
     collapsed: true,
@@ -119,7 +112,7 @@ const routes = [
   },
 
   {
-    type: 'route',
+
     label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
@@ -134,7 +127,6 @@ const routes = [
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {
   routes.push({
-    type: 'route',
     label: 'common:billingTabLabel',
     path: pathsConfig.app.personalAccountBilling,
     Icon: <CreditCard className={iconClasses} />,

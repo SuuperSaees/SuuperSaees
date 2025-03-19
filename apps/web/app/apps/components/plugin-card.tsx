@@ -14,9 +14,9 @@ import { Button } from '@kit/ui/button';
 import { Card } from '@kit/ui/card';
 import { Switch } from '@kit/ui/switch';
 
-import { createAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
-import { deleteAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
-import { updateAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import { createAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/create-account-plugin';
+import { deleteAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/delete-account-plugin';
+import { updatePluginStatusAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin-status';
 
 interface AppCardProps {
   pluginId?: string;
@@ -47,9 +47,7 @@ export default function PluginCard({
 
   const updatePluginMutation = useMutation({
     mutationFn: async (newStatus: 'installed' | 'uninstalled') => {
-      await updateAccountPlugin(pluginId ?? '', {
-        status: newStatus,
-      });
+      await updatePluginStatusAction(pluginId ?? '', newStatus);
     },
     onMutate: (newStatus: 'installed' | 'uninstalled') => {
       setIsInstalled(newStatus === 'installed');
@@ -70,7 +68,7 @@ export default function PluginCard({
 
   const createPluginMutation = useMutation({
     mutationFn: async () => {
-      await createAccountPlugin({
+      await createAccountPluginAction({
         plugin_id: id,
         account_id: userId,
         status: 'installed',
@@ -96,11 +94,19 @@ export default function PluginCard({
 
   const deletePluginMutation = useMutation({
     mutationFn: async () => {
-      await deleteAccountPlugin(
+      const response = await deleteAccountPluginAction(
         pluginId ?? '',
         userId,
         name.toLowerCase(),
       );
+
+      if (!response || response.error) {
+        throw new Error(
+          response?.error?.message ?? 'Unexpected error occurred',
+        );
+      }
+
+      return response;
     },
     onError: () => {
       toast.error(t('errorMessage'), {

@@ -10,7 +10,6 @@ import LoomContent from './loom-content';
 import SettingsHeaderCard from './settings-header-card';
 import StripeContent from './stripe-content';
 import TreliContent from './treli-content';
-import EmbedsContent from './embed-content';
 
 function SettingsContent({ userId }: { userId: string }) {
   const searchParams = useSearchParams();
@@ -25,7 +24,6 @@ function SettingsContent({ userId }: { userId: string }) {
     treli: TreliContent,
     loom: LoomContent,
     stripe: StripeContent,
-    embeds: EmbedsContent,
   };
 
   const PluginComponent =

@@ -1,6 +1,4 @@
-'use client';
-
-import React, { useState, type JSX } from 'react';
+import React, { useState, useTransition, type JSX } from 'react';
 
 import {
   DropdownMenu,
@@ -9,84 +7,53 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 import { Separator } from '@kit/ui/separator';
-import { cn } from '@kit/ui/utils';
 
 export type DropdownOption = {
   value: string | JSX.Element;
-  actionFn: () => void | Promise<void>;
-  closeOnClick?: boolean;
-  includeSeparator?: boolean;
+  actionFn: () => Promise<void>;
 };
-
 interface DropdownProps {
   children: React.ReactNode;
   options: DropdownOption[];
-  className?: string
-  contentClassName?: string
-  showSeparators?: boolean;
 }
+export default function Dropdown({ children, options }: DropdownProps) {
+  const [isPending, startTransition] = useTransition();
+  const [disabledIndices, setDisabledIndices] = useState<number[]>([]);
 
-export default function Dropdown({ children, options, className, contentClassName, showSeparators = true }: DropdownProps) {
-  const [open, setOpen] = useState(false);
+  const handleClick = (option: DropdownOption, index: number) => {
+    setDisabledIndices((prev) => [...prev, index]);
 
-  const isLinkElement = (value: string | JSX.Element): boolean => {
-    if (typeof value !== 'object' || !React.isValidElement(value)) {
-      return false;
-    }
-    
-    const props = value.props as Record<string, unknown>;
-    return props && typeof props === 'object' && 'href' in props;
-  };
-
-  const handleClick = async (option: DropdownOption) => {
-
-
-
-     await option.actionFn();
-
+    startTransition(async () => {
+      await option.actionFn().finally(() => {
+        setDisabledIndices((prev) => prev.filter((i) => i !== index));
+      });
+    });
   };
 
   return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild className={cn('w-fit', className)}>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild className="w-fit">
         {children}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className={contentClassName}>
-        {options.map((option, index) => {
-          const isLink = isLinkElement(option.value);
-          
-          return (
-            <React.Fragment
-              key={
-                typeof option.value === 'string'
-                  ? option.value + index
-                  : 'opt' + index
-              }
+      <DropdownMenuContent align="start">
+        {options.map((option, index) => (
+          <React.Fragment
+            key={
+              typeof option.value === 'string'
+                ? option.value + index
+                : 'opt' + index
+            }
+          >
+            <DropdownMenuItem
+              className={`min-w-32 cursor-pointer ${disabledIndices.includes(index) ? 'cursor-not-allowed opacity-50' : ''}`}
+              onClick={() => handleClick(option, index)}
+              disabled={isPending || disabledIndices.includes(index)}
             >
-              <DropdownMenuItem
-                className={cn(
-                  "min-w-32 cursor-pointer",
-
-                )}
-                onClick={async (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  await handleClick(option);
-                }}
-                onSelect={(e) => {
-                  e.stopPropagation();
-                  if (isLink) {
-                    e.preventDefault();
-                  }
-                }}
-              >
-                {option.value}
-              </DropdownMenuItem>
-              {option.includeSeparator  &&  !showSeparators && <Separator className='my-2'/>}
-              {showSeparators && index < options.length - 1 && <Separator />}
-            </React.Fragment>
-          );
-        })}
+              {option.value}
+            </DropdownMenuItem>
+            {index < options.length - 1 && <Separator />}
+          </React.Fragment>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

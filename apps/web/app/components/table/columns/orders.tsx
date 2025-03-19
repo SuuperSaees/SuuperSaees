@@ -15,9 +15,9 @@ import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import Avatar from '../../../components/ui/avatar';
-import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { OverdueIndicator } from '../../../components/ui/overdue-indicator';
+import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
 import { ColumnConfigs, EntityData } from '../types';
 
 const truncateText = (text: string | undefined, maxLength = 50) => {

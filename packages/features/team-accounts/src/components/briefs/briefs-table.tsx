@@ -39,7 +39,10 @@ import {
   createBrief,
   duplicateBrief,
 } from '../../server/actions/briefs/create/create-briefs';
+// import CreateBriefDialog from '../../server/actions/briefs/create/create-brief-ui';
 import DeleteBriefDialog from '../../server/actions/briefs/delete/delete-brief-ui';
+
+// import UpdateBriefDialog from '../../server/actions/briefs/update/update-brief-ui';
 
 type BriefTableProps = {
   briefs: Brief.Relationships.Services.Response[];
@@ -49,7 +52,7 @@ type BriefTableProps = {
 };
 
 // SERVICES TABLE
-export const BriefsTable = React.memo(function BriefsTable({
+export function BriefsTable({
   activeTab,
   briefs,
   accountRole,
@@ -69,14 +72,12 @@ export const BriefsTable = React.memo(function BriefsTable({
   const [rowSelection, setRowSelection] = React.useState({});
 
   const columns = useGetColumns(t);
-  const filteredBriefs = useMemo(() => {
+  const filteredBriefs = briefs.filter((brief) => {
     const searchString = search?.toLowerCase();
-    return briefs.filter((brief) => {
-      const displayName = brief?.name.toLowerCase();
-      return displayName.includes(searchString);
-    });
-  }, [briefs, search]);
-  const options = useMemo(() => ({
+    const displayName = brief?.name.toLowerCase();
+    return displayName.includes(searchString);
+  });
+  const options = {
     data: filteredBriefs,
     columns,
     onSortingChange: setSorting,
@@ -93,15 +94,9 @@ export const BriefsTable = React.memo(function BriefsTable({
       columnVisibility,
       rowSelection,
     },
-  }), [
-    filteredBriefs, 
-    columns, 
-    sorting, 
-    columnFilters, 
-    columnVisibility, 
-    rowSelection
-  ]);
+  };
 
+  // const importantPropietaryOrganizationId = accountIds[0];
   const briefMutation = useMutation({
     mutationFn: async () => {
       const res = await createBrief({});
@@ -150,6 +145,9 @@ export const BriefsTable = React.memo(function BriefsTable({
               className="bg-background w-full rounded-lg pr-8 md:w-[200px] lg:w-[320px]"
             />
           </div>
+          {/* <CreateBriefDialog
+            propietary_organization_id={importantPropietaryOrganizationId ?? ''}
+          /> */}
           {briefs.length > 0 && (
             <ThemedButton
               onClick={async () => await briefMutation.mutateAsync()}
@@ -173,9 +171,9 @@ export const BriefsTable = React.memo(function BriefsTable({
       {isLoading ? (
         <SkeletonTable columns={4} rows={7} className="mt-4" />
       ) : !briefs.length ? (
+        // <div className="mt-6 flex h-full flex-col rounded-md border bg-white p-2">
         <EmptyState
           imageSrc="/images/illustrations/Illustration-cloud.svg"
-          loading="lazy"
           title={t('briefs:empty.agency.title')}
           description={t('briefs:empty.agency.description')}
           button={
@@ -199,17 +197,17 @@ export const BriefsTable = React.memo(function BriefsTable({
           }
         />
       ) : (
+        // </div>
         <DataTable
           data={filteredBriefs}
           columns={columns}
           options={options}
           className="mt-4 bg-white"
-          virtualization={briefs.length > 50}
         />
       )}
     </div>
   );
-});
+}
 
 // TFunction<'briefs', undefined>
 const useGetColumns = (
@@ -227,34 +225,6 @@ const useGetColumns = (
     },
   });
 
-  const getTagColors = useMemo(() => [
-    {
-      bgColor: 'bg-blue-100',
-      textColor: 'text-blue-800',
-      borderColor: 'border-blue-300',
-    },
-    {
-      bgColor: 'bg-violet-100',
-      textColor: 'text-violet-800',
-      borderColor: 'border-violet-300',
-    },
-    {
-      bgColor: 'bg-fuchsia-100',
-      textColor: 'text-fuchsia-800',
-      borderColor: 'border-fuchsia-300',
-    },
-    {
-      bgColor: 'bg-cyan-100',
-      textColor: 'text-cyan-800',
-      borderColor: 'border-cyan-300',
-    },
-    {
-      bgColor: 'bg-teal-100',
-      textColor: 'text-teal-800',
-      borderColor: 'border-teal-300',
-    },
-  ], []);
-
   return useMemo(
     () => [
       {
@@ -269,27 +239,61 @@ const useGetColumns = (
         header: t('services'),
         cell: ({ row }) => {
           const services = row.original.services;
+          const tagColors = [
+            {
+              bgColor: 'bg-blue-100',
+              textColor: 'text-blue-800',
+              borderColor: 'border-blue-300',
+            },
+            {
+              bgColor: 'bg-violet-100',
+              textColor: 'text-violet-800',
+              borderColor: 'border-violet-300',
+            },
+            {
+              bgColor: 'bg-fuchsia-100',
+              textColor: 'text-fuchsia-800',
+              borderColor: 'border-fuchsia-300',
+            },
+            {
+              bgColor: 'bg-cyan-100',
+              textColor: 'text-cyan-800',
+              borderColor: 'border-cyan-300',
+            },
+            {
+              bgColor: 'bg-teal-100',
+              textColor: 'text-teal-800',
+              borderColor: 'border-teal-300',
+            },
+          ];
           const maxTags = 4;
-          
+          //   console.log('s', services);
           return (
             <div className="flex gap-2">
-              {services?.slice(0, maxTags).map((service, index) => {
-                const tagColor = getTagColors[index % getTagColors.length];
-                
-                return (
-                  <div
-                    key={service.id || index}
-                    className={`boder-neutral-400 rounded-full border px-2 ${tagColor?.bgColor} ${tagColor?.textColor} ${tagColor?.borderColor} truncate font-semibold`}
-                  >
-                    {service.name}
-                  </div>
-                );
+              {services?.map((service, index) => {
+                // random tagColor to each service
+                const tagColor =
+                  tagColors[Math.floor(Math.random() * tagColors.length)];
+                if (index + 1 === services.length && index + 1 > maxTags) {
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-center gap-1 truncate rounded-full border border-neutral-200 bg-gray-100 px-2 text-sm font-medium text-gray-500"
+                    >
+                      +{services.length - index}
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div
+                      key={index}
+                      className={`boder-neutral-400 rounded-full border px-2 ${tagColor?.bgColor} ${tagColor?.textColor} ${tagColor?.borderColor} truncate font-semibold`}
+                    >
+                      {service.name}
+                    </div>
+                  );
+                }
               })}
-              {services?.length > maxTags && (
-                <div className="flex items-center gap-1 truncate rounded-full border border-neutral-200 bg-gray-100 px-2 text-sm font-medium text-gray-500">
-                  +{services.length - maxTags}
-                </div>
-              )}
             </div>
           );
         },
@@ -355,6 +359,6 @@ const useGetColumns = (
         },
       },
     ],
-    [t, duplicateBriefMutation, getTagColors],
+    [t, duplicateBriefMutation],
   );
 };
