@@ -59,7 +59,7 @@ export function ClientOptionsDropdown({
     {
       value: (
         <Link
-          href={`/embeds?accountId=${clientId}&action=create`}
+          href={`/clients/organizations/${clientId}?section=spaces&action=create`}
           className="flex w-full items-center gap-2"
         >
           <Plus className="h-4 w-4 text-gray-500" />

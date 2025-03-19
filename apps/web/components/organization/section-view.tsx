@@ -20,6 +20,7 @@ import MemberSection from './members';
 import OrdersSection from './orders';
 import { ServiceButtonTriggers } from './service-button-triggers';
 import ServiceSection from './services';
+import { Spinner } from '@kit/ui/spinner';
 
 /**
  * @description This component is used to display the navigation tabs for the account settings page.
@@ -67,6 +68,7 @@ function SectionView({
   });
 
   const embeds = useMemo(() => embedsQuery.data ?? [], [embedsQuery.data]);
+  const isEmbedsLoading = embedsQuery.isLoading;
   const serviceOptions = services?.data?.map((service) => {
     return { value: service.id, label: service.name };
   });
@@ -117,14 +119,16 @@ function SectionView({
     renderTabs: renderEmbedTabs,
     renderStandardTabs,
     getTabContents,
-    embedTabs
+    embedTabs,
+
+    handleDelete,
   } = EmbedTabsContainer({
     clientOrganizationId,
     currentUserRole,
     agencyId,
     sections,
     activeTab,
-    onTabDelete: (id) => {
+    onTabDelete: (id: string) => {
       // If the deleted tab was active, switch to 'new'
       if (activeTab === id) {
         setActiveTab('new');
@@ -187,10 +191,14 @@ function SectionView({
     ],
   ]);
 
-  // Add embed tab contents
+  // Add embed tab contents with loading state
   const embedContents = getTabContents();
   embedContents.forEach((content, key) => {
-    navigationOptionsMap.set(key, content);
+    navigationOptionsMap.set(key, isEmbedsLoading ? (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      </div>
+    ) : content);
   });
 
   // Filter navigation option keys to include only the available tabs
@@ -206,17 +214,49 @@ function SectionView({
   // Handle section query parameter to activate the appropriate tab
   useEffect(() => {
     const section = searchParams.get('section');
-    if (section && allTabs.includes(section)) {
+    const action = searchParams.get('action');
+    const embedId = searchParams.get('embedId');
+
+    // Don't process embed actions if embeds are still loading
+    if (isEmbedsLoading) {
+      return;
+    }
+
+    // Handle spaces section with actions
+    if (section === 'spaces') {
+      if (action === 'create') {
+        setActiveTab('new');
+      } else if (action === 'edit' && embedId) {
+        // Only set active tab if embed exists
+        const embedExists = embedTabs.includes(embedId);
+        if (embedExists) {
+          setActiveTab(embedId);
+        }
+      } else if (action === 'delete' && embedId) {
+        // Only process delete if embed exists
+        const deleteTab = embedTabs.find(tab => tab === embedId);
+        if (deleteTab) {
+          setActiveTab(embedId);
+          setTimeout(() => {
+            void handleDelete(deleteTab);
+          }, 100);
+        }
+      }
+    }
+    // Handle other sections as before
+    else if (section && allTabs.includes(section)) {
       setActiveTab(section);
     }
 
-    // Clear the section parameter from the URL
-    if (section) {
+    // Clear the URL parameters
+    if (section ?? action ?? embedId) {
       const url = new URL(window.location.href);
       url.searchParams.delete('section');
+      url.searchParams.delete('action');
+      url.searchParams.delete('embedId');
       window.history.replaceState({}, '', url);
     }
-  }, [searchParams, allTabs]);
+  }, [searchParams, allTabs, embedTabs, handleDelete, isEmbedsLoading]);
 
   return (
     <Tabs
@@ -232,14 +272,16 @@ function SectionView({
           {/* Standard tabs */}
           {renderStandardTabs(baseTabs)}
           
-          {/* Embed tabs */}
-          {renderEmbedTabs()}
+          {/* Embed tabs with loading state */}
+          {isEmbedsLoading ? (
+            <Spinner className="w-4 h-4 text-gray-500" />
+          ) : renderEmbedTabs()}
         </TabsList>
         <div className="flex gap-4 items-center">
           {availableTabsBasedOnRole.has(currentUserRole) && (
             <ButtonPinOrganization organizationId={clientOrganizationId} />
           )}
-          {buttonControllersMap.get(activeTab)}
+          {!isEmbedsLoading && buttonControllersMap.get(activeTab)}
         </div>
       </div>
 
