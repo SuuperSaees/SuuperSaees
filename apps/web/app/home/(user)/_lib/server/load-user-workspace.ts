@@ -43,12 +43,28 @@ async function workspaceLoader() {
 
   const agency = Object.values(teams)[0] ?? null;
 
-  const organization = accounts;
+  const organization = Array.isArray(accounts) ? {
+    id: '',
+    name: '',
+    slug: '',
+    picture_url: '',
+    embeds: [],
+    clientOrganizations: [],
+  } : accounts;
 
+  // Get pinned organizations with only necessary fields
+  const pinnedOrganizations = !Array.isArray(accounts) 
+    ? (accounts.clientOrganizations ?? []).map(org => ({
+        id: org.id,
+        name: org.name,
+        picture_url: org.picture_url ?? undefined
+      }))
+    : [];
 
   return {
     accounts,
     organization,
+    pinnedOrganizations,
     workspace,
     user,
     agency,

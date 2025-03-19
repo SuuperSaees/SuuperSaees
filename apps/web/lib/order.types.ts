@@ -53,6 +53,7 @@ export namespace Order {
       name: string;
       slug: string;
     };
+    tags: Tags.Type[] | null;
   };
   export type Insert = Database['public']['Tables']['orders_v2']['Insert'];
   export type Update = Database['public']['Tables']['orders_v2']['Update'];

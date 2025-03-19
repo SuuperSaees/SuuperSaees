@@ -10,8 +10,8 @@ import { Spinner } from '@kit/ui/spinner';
 
 import Tooltip from '~/components/ui/tooltip';
 
-import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
-import { updateAccountPluginAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/update-account-plugin';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import { updateAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 function TreliContentStatic({
   pluginId,
@@ -45,11 +45,10 @@ function TreliContentStatic({
     const fetchPluginData = async () => {
       try {
         setIsLoading(true);
-        const response = await getAccountPluginByIdAction(pluginId);
+        const response = await getAccountPlugin(pluginId);
 
-        if (response?.success) {
-          const fetchedCredentials = response.success.data
-            ?.credentials as Record<string, unknown>;
+        if (response) {
+          const fetchedCredentials = response.credentials as Record<string, unknown>;
 
           setCredentials({
             treli_user: (fetchedCredentials?.treli_user as string) || '',
@@ -58,9 +57,7 @@ function TreliContentStatic({
             webhook_url: (fetchedCredentials?.webhook_url as string) || '',
           });
         } else {
-          throw new Error(
-            response?.error?.message ?? t('errorFetchingTreliCredentials'),
-          );
+          throw new Error(t('errorFetchingTreliCredentials'));
         }
       } catch (error) {
         console.error(t('errorFetchingTreliCredentials'), error);
@@ -92,14 +89,14 @@ function TreliContentStatic({
 
       const providerId = crypto.randomUUID();
 
-      await updateAccountPluginAction(
+      await updateAccountPlugin(
         pluginId,
         {
           credentials: updatedCredentials,
           provider: 'treli',
           account_id: userId,
+          provider_id: providerId,
         },
-        providerId,
       );
 
       setCredentials(updatedCredentials);

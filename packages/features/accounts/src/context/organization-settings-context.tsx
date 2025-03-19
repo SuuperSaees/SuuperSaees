@@ -17,7 +17,21 @@ import { useTranslation } from 'react-i18next';
 import { handleResponse } from '../../../../../apps/web/lib/response/handle-response';
 
 export type OrganizationSettingKeys =
-  Database['public']['Enums']['organization_setting_key'];
+  | 'theme_color'
+  | 'background_color'
+  | 'logo_url'
+  | 'timezone'
+  | 'language'
+  | 'date_format'
+  | 'sidebar_background_color'
+  | 'portal_name'
+  | 'favicon_url'
+  | 'dashboard_url'
+  | 'catalog_provider_url'
+  | 'catalog_product_url'
+  | 'tool_copy_list_url'
+  | 'pinned_organizations'
+  | Database['public']['Enums']['organization_setting_key'];
 
 export type OrganizationSettingValue =
   Database['public']['Tables']['organization_settings']['Row']['value'];
