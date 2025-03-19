@@ -152,5 +152,5 @@ export interface ActivityContextType {
     subscription_status: Tables<'subscriptions'>['status'] | null;
   };
   loadingMessages: boolean;
-  deleteMessage: (messageId: string) => Promise<void>;
+  deleteMessage: (messageId: string, adminActived?: boolean) => Promise<void>;
 }

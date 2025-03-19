@@ -187,8 +187,9 @@ export const ActivityProvider = ({
   });
 
   const deleteMessageMutation = useMutation({
-    mutationFn: (messageId: string) => deleteMessage(messageId),
-    onMutate: async (messageId) => {
+    mutationFn: ({ messageId, adminActived }: { messageId: string; adminActived?: boolean }) => 
+      deleteMessage(messageId, adminActived),
+    onMutate: async ({messageId}) => {
       await queryClient.cancelQueries({ queryKey: ['messages'] });
 
       // Store the previous messages state
@@ -445,8 +446,8 @@ export const ActivityProvider = ({
           }),
         userWorkspace: currentUser,
         loadingMessages,
-        deleteMessage: async (messageId: string) => {
-          await deleteMessageMutation.mutateAsync(messageId);
+        deleteMessage: async (messageId: string, adminActived?: boolean) => {
+          await deleteMessageMutation.mutateAsync({ messageId, adminActived });
         },
       }}
     >
