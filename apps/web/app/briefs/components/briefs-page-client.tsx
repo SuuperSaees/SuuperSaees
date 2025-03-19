@@ -1,0 +1,132 @@
+'use client';
+
+import { useState } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+import { useMutation, useQuery } from '@tanstack/react-query';
+import type { ColumnDefBase } from '@tanstack/react-table';
+import { Search } from 'lucide-react';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { useTranslation } from 'react-i18next';
+
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
+import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
+import EmptyState from '~/components/ui/empty-state';
+import { SkeletonTable } from '~/components/ui/skeleton';
+import { useColumns } from '~/hooks/use-columns';
+import type { Brief } from '~/lib/brief.types';
+import { handleResponse } from '~/lib/response/handle-response';
+import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
+import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
+
+import { PageHeader } from '../../components/page-header';
+import Table from '../../components/table/table';
+import { TimerContainer } from '../../components/timer-container';
+
+interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
+  accessorKey: keyof T;
+  header: string;
+}
+
+export function BriefsPageClient() {
+  const router = useRouter();
+  const { workspace } = useUserWorkspace();
+  const accountRole = workspace?.role ?? '';
+  const { t } = useTranslation(['briefs', 'services']);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const { data: briefs = [], isLoading: briefsAreLoading } = useQuery({
+    queryKey: ['briefs'],
+    queryFn: () => getBriefs({ includes: ['services'] }),
+  });
+
+  const hasPermissionToActionBriefs = () => {
+    return ['agency_owner', 'agency_project_manager'].includes(accountRole);
+  };
+
+  const briefColumns = useColumns('briefs', {
+    hasPermission: hasPermissionToActionBriefs,
+  }) as ColumnDef<Brief.Relationships.Services.Response>[];
+
+  const briefMutation = useMutation({
+    mutationFn: async () => {
+      const res = await createBrief({});
+      await handleResponse(res, 'briefs', t);
+      if (res.ok && res?.success?.data) {
+        router.push(`briefs/${res.success.data.id}`);
+      }
+    },
+  });
+
+  // Helper function to normalize strings
+  const normalizeString = (str: string | undefined | null) => {
+    if (!str) return '';
+    return str
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, '');
+  };
+
+  const filteredBriefs = briefs.filter((brief) => {
+    const searchTermNormalized = normalizeString(searchTerm);
+    return normalizeString(brief.name)?.includes(searchTermNormalized);
+  });
+
+  const createButton = (
+    <ThemedButton
+      onClick={() => briefMutation.mutate()}
+      disabled={briefMutation.isPending}
+    >
+      {t('briefs:create')}
+    </ThemedButton>
+  );
+  const { config } = useTableConfigs('table-config');
+
+  return (
+    <div className="p-[35px] flex flex-col">
+      <PageHeader title="briefs:briefs" rightContent={<TimerContainer />} />
+      <div className="ml-auto flex items-center gap-4">
+        <div className="relative">
+          <ThemedInput
+            type="text"
+            placeholder={t('briefs:search')}
+            value={searchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
+            className="h-10 w-[280px] pl-10"
+          />
+          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+        </div>
+        {hasPermissionToActionBriefs() && createButton}
+      </div>
+
+      <div className="mt-8">
+        {briefsAreLoading ? (
+          <SkeletonTable columns={4} rows={7} className="mt-4" />
+        ) : filteredBriefs.length === 0 ? (
+          <EmptyState
+            imageSrc="/images/illustrations/Illustration-cloud.svg"
+            title={t('briefs:empty.title')}
+            description={t('briefs:empty.description')}
+            button={hasPermissionToActionBriefs() ? createButton : undefined}
+          />
+        ) : (
+          <Table
+            data={filteredBriefs}
+            columns={briefColumns}
+            filterKey="name"
+            controllers={{
+              search: { value: searchTerm, setValue: setSearchTerm },
+            }}
+            configs={config}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
