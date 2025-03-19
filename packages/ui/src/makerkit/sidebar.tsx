@@ -22,6 +22,21 @@ import { SidebarContext } from './context/sidebar.context';
 import { NavigationConfigSchema } from './navigation-config.schema';
 import { Trans } from './trans';
 
+export const getColorLuminance = (hexColor: string): { luminance: number, theme: 'light' | 'dark' } => {
+  const color = hexColor.replace('#', '');
+  const r = parseInt(color.substring(0, 2), 16);
+  const g = parseInt(color.substring(2, 4), 16);
+  const b = parseInt(color.substring(4, 6), 16);
+
+  // Calculate the luminance value
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+  // Determine the theme based on the luminance value
+  const theme = luminance > 186 ? 'light' : 'dark';
+
+  // Return an object with luminance and theme properties
+  return { luminance, theme };
+}
 // Define a better type for the group children to avoid any
 export type SidebarGroupChild = {
   label: string;
@@ -56,6 +71,7 @@ export function Sidebar(props: {
       }) => React.ReactNode);
   style?: React.CSSProperties; // Adding style prop explicitly
   itemActiveStyle?: React.CSSProperties;
+  sidebarColor?: string;
 }) {
   const [collapsed, setCollapsed] = useState(props.collapsed ?? false);
   const [openGroupId, setOpenGroupId] = useState<string | null>(null);
@@ -70,6 +86,7 @@ export function Sidebar(props: {
     itemActiveStyle: props.itemActiveStyle,
     openGroupId,
     setOpenGroupId,
+    sidebarColor: props.sidebarColor ?? '#ffffff',
   };
 
   return (
@@ -255,8 +272,8 @@ export function SidebarSection({
   menu?: React.ReactNode;
   groups?: FlexibleGroup[];
 }>) {
-  const { collapsed } = useContext(SidebarContext);
-
+  const { collapsed, sidebarColor } = useContext(SidebarContext);
+  
   // Add additional error handling for debugging
   const safeGroups = Array.isArray(groups) ? groups : [];
   
@@ -265,7 +282,11 @@ export function SidebarSection({
       return (
         <div className="mt-4 flex items-center justify-between px-3">
           <Link href={path} className="h-fit w-fit">
-            <h3 className={cn("text-xs font-medium text-muted-foreground", className)}>
+            <h3 className={cn("text-xs font-medium text-muted-foreground", className)}
+         style={{
+          color: getColorLuminance(sidebarColor).theme === 'light' ? '#747476' : '#e8e8e8'
+        }}
+            >
               <Trans i18nKey={label as string} defaults={label as string} />
             </h3>
           </Link>
@@ -278,7 +299,11 @@ export function SidebarSection({
 
     return (
       <div className="mt-4 flex justify-between px-3">
-        <h3 className={cn("text-xs font-medium text-muted-foreground", className)}>
+        <h3 className={cn("text-xs font-medium text-muted-foreground", className)}
+        style={{
+          color: getColorLuminance(sidebarColor).theme === 'light' ? '#747476' : '#e8e8e8'
+        }}
+        >
           <Trans i18nKey={label as string} defaults={label as string} />
         </h3>
         <div className="flex items-center justify-center shrink-0 group-hover/sidebar-section:visible invisible">
