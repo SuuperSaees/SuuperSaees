@@ -99,6 +99,7 @@ export const fetchFormfieldsWithResponses = async (
       .select(
         `field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required),
         response,
+        brief:briefs(name),
         order_data:orders_v2(id, customer_id)
         `,
       )

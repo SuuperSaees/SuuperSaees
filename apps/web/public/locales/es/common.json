@@ -178,5 +178,20 @@
     "plural": {
       "description": "Retrasado por {{days}} días"
     }
+  },
+  "workspaceName": "Espacio de trabajo",
+  "sidebar": {
+    "addSpace": "Agregar espacio",
+    "projects": "Proyectos",
+    "services": "Servicios",
+    "members": "Miembros",
+    "files": "Archivos",
+    "inviteMembers": "Invitar miembros",
+    "clients": "Clientes",
+    "pinClient": "Fijar cliente",
+    "unpinClient": "Desfijar cliente",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "addClient": "Agregar cliente"
   }
 }

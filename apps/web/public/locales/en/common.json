@@ -181,5 +181,20 @@
     "plural": {
       "description": "Overdue by {{days}} days"
     }
+  },
+  "workspaceName": "Workspace",
+  "sidebar": {
+    "addSpace": "Add space",
+    "projects": "Projects",
+    "services": "Services",
+    "members": "Members",
+    "files": "Files",
+    "inviteMembers": "Invite members",
+    "clients": "Clients",
+    "pinClient": "Pin client",
+    "unpinClient": "Unpin client",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addClient": "Add client"
   }
 }

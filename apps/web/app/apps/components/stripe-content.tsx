@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 
 import { useTranslation } from 'react-i18next';
 
-import { getAccountPluginByIdAction } from '../../../../../packages/plugins/src/server/actions/account-plugins/get-account-plugin-by-Id';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 function StripeContent({ pluginId }: { pluginId: string; userId: string }) {
   const router = useRouter();
@@ -23,14 +23,14 @@ function StripeContent({ pluginId }: { pluginId: string; userId: string }) {
       try {
         setIsLoading(true);
 
-        const response = await getAccountPluginByIdAction(pluginId);
+        const response = await getAccountPlugin(pluginId);
 
-        if (response?.success) {
-          const providerId = response.success.data?.provider_id;
+        if (response) {
+          const providerId = response.provider_id;
 
           setIsConnected(!!providerId);
         } else {
-          console.error('Error fetching plugin:', response?.error?.message);
+          console.error('Error fetching plugin');
         }
       } catch (error) {
         console.error('Error fetching plugin data:', error);
