@@ -19,7 +19,7 @@ export function EmbedOptionsDropdown({
     {
       value: (
         <Link
-          href={`/embeds?id=${embedId}&action=edit`}
+          href={`/embeds?accountId=${accountId}&action=edit&id=${embedId}`}
           className="flex w-full items-center gap-2"
         >
           <Pen className="h-4 w-4 text-gray-500" />
@@ -35,11 +35,7 @@ export function EmbedOptionsDropdown({
     {
       value: (
         <Link
-          href={
-            accountId
-              ? `/embeds?id=${embedId}&action=delete&accountId=${accountId}`
-              : `/embeds?id=${embedId}&action=delete`
-          }
+          href={`/embeds?accountId=${accountId}&action=delete&id=${embedId}`}
           className="flex w-full items-center gap-2"
         >
           <Trash className="h-4 w-4 text-gray-500" />
@@ -62,7 +58,7 @@ export function EmbedOptionsDropdown({
     >
       <button
         className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent text-gray-400 transition-all duration-200 hover:bg-gray-100 hover:text-gray-600"
-        aria-label="Client options"
+        aria-label="Embed options"
         type="button"
       >
         <MoreHorizontal className="h-4 w-4" />

@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { EmbedTab, AddIntegrationTab, StandardTab } from './embed-tab';
-import { EmbedSection } from '~/embeds/components/embed-section';
-import { useEmbedTabs } from './use-embed-tabs';
-import { FormValues } from '~/embeds/schema';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+import { EmbedSection } from '~/embeds/components/embed-section';
+import { FormValues } from '~/embeds/schema';
 import { Embeds } from '~/lib/embeds.types';
+
+import { AddIntegrationTab, EmbedTab, StandardTab } from './embed-tab';
+import { useEmbedTabs } from './use-embed-tabs';
 
 type EmbedTabsContainerProps = {
   clientOrganizationId: string;
@@ -43,15 +46,15 @@ export function EmbedTabsContainer({
   const handleDelete = async (id: string) => {
     if (embedSectionRef.current?.handleEmbedDelete) {
       // Instead of full deletion, update the embed to remove this organization
-      const embed = embeds.find(e => e.id === id);
+      const embed = embeds.find((e) => e.id === id);
       if (embed) {
         // Get embed_accounts from the organizations
-        const currentAccounts = embed.organizations?.map(org => org.id) ?? [];
-        
+        const currentAccounts = embed.organizations?.map((org) => org.id) ?? [];
+
         const embedAccounts = currentAccounts.filter(
-          (accountId: string) => accountId !== clientOrganizationId
+          (accountId: string) => accountId !== clientOrganizationId,
         );
-        
+
         // If this is the last organization, then delete the embed
         // Otherwise just update the embed_accounts
         if (embedAccounts.length === 0) {
@@ -65,36 +68,47 @@ export function EmbedTabsContainer({
             type: embed.type ?? 'url',
             visibility: embed.visibility ?? 'private',
             value: embed.value ?? '',
-            embed_accounts: embedAccounts
+            embed_accounts: embedAccounts,
           } as unknown as FormValues;
-          
-          await embedSectionRef.current.handleEmbedUpdate(
-            updateData,
-            { isAccountRemoval: true }
-          );
+
+          await embedSectionRef.current.handleEmbedUpdate(updateData, {
+            isAccountRemoval: true,
+          });
         }
-        
+
         onTabDelete(id);
       }
     }
   };
 
   // Prepare the embed section component for reuse
-  const embedSectionComponent = useMemo(() => (
-    <EmbedSection
-      key={'embed-section'}
-      embeds={embeds}
-      agencyId={agencyId}
-      userId={userId}
-      userRole={currentUserRole}
-      showEmbedSelector={true}
-      queryKey={['organization-embeds', clientOrganizationId]}
-      defaultCreationValue={defaultEmbedCreationValue}
-      externalTabControl={true}
-      activeEmbedId={activeTab}
-      ref={embedSectionRef}
-    />
-  ), [embeds, agencyId, userId, currentUserRole, clientOrganizationId, activeTab, defaultEmbedCreationValue, embedSectionRef]);
+  const embedSectionComponent = useMemo(
+    () => (
+      <EmbedSection
+        key={'embed-section'}
+        embeds={embeds}
+        agencyId={agencyId}
+        userId={userId}
+        userRole={currentUserRole}
+        showEmbedSelector={true}
+        queryKey={['organization-embeds', clientOrganizationId]}
+        defaultCreationValue={defaultEmbedCreationValue}
+        externalTabControl={true}
+        activeEmbedId={activeTab}
+        ref={embedSectionRef}
+      />
+    ),
+    [
+      embeds,
+      agencyId,
+      userId,
+      currentUserRole,
+      clientOrganizationId,
+      activeTab,
+      defaultEmbedCreationValue,
+      embedSectionRef,
+    ],
+  );
 
   const ScrollableTabList: React.FC<{
     embedTabs: string[];
@@ -108,7 +122,8 @@ export function EmbedTabsContainer({
 
     const checkScroll = () => {
       if (!scrollContainerRef.current) return;
-      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      const { scrollLeft, scrollWidth, clientWidth } =
+        scrollContainerRef.current;
       setShowLeftButton(scrollLeft > 0);
       setShowRightButton(scrollLeft < scrollWidth - clientWidth);
     };
@@ -131,67 +146,68 @@ export function EmbedTabsContainer({
       if (!scrollContainerRef.current) return;
       const scrollAmount = 200;
       const container = scrollContainerRef.current;
-      const newScrollLeft = direction === 'left' 
-        ? container.scrollLeft - scrollAmount 
-        : container.scrollLeft + scrollAmount;
-      
+      const newScrollLeft =
+        direction === 'left'
+          ? container.scrollLeft - scrollAmount
+          : container.scrollLeft + scrollAmount;
+
       container.scrollTo({
         left: newScrollLeft,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
     };
 
-    const tabElements = embedTabs.map(id => {
-      if (id === 'new') {
-        return <AddIntegrationTab key="new-tab" activeTab={activeTab} />;
-      }
-      
-      const embed = embeds.find(e => e.id === id);
-      if (embed) {
-        return (
-          <EmbedTab
-            key={`embed-${id}`}
-            id={id}
-            title={embed.title ?? ''}
-            icon={embed.icon}
-            activeTab={activeTab}
-            onDelete={handleDelete}
-          />
-        );
-      }
-      
-      return null;
-    }).filter(Boolean);
+    const tabElements = embedTabs
+      .map((id) => {
+        if (id === 'new') {
+          return <AddIntegrationTab key="new-tab" activeTab={activeTab} />;
+        }
+
+        const embed = embeds.find((e) => e.id === id);
+        if (embed) {
+          return (
+            <EmbedTab
+              key={`embed-${id}`}
+              id={id}
+              title={embed.title ?? ''}
+              icon={embed.icon}
+              activeTab={activeTab}
+              onDelete={handleDelete}
+            />
+          );
+        }
+
+        return null;
+      })
+      .filter(Boolean);
 
     return (
-      <div 
+      <div
         ref={scrollContainerRef}
-        className="relative flex overflow-x-auto min-w-[250px] max-w-full no-scrollbar h-full border-l border-gray-300"
+        className="no-scrollbar relative flex h-full min-w-[250px] max-w-full overflow-x-auto border-l border-gray-300"
         style={{
           scrollbarWidth: 'none',
-          msOverflowStyle: 'none'
+          msOverflowStyle: 'none',
         }}
       >
         {showLeftButton && (
-          <div className="sticky left-0 z-10 h-full flex items-stretch">
+          <div className="sticky left-0 z-10 flex h-full items-stretch">
             <button
               onClick={() => scroll('left')}
-              className="flex items-center justify-center w-8 bg-[#FAFAFA] hover:bg-[#FAFAFA] backdrop-blur-[1px] shadow-lg"
+              className="flex w-8 items-center justify-center bg-[#FAFAFA] shadow-lg backdrop-blur-[1px] hover:bg-[#FAFAFA]"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="h-5 w-5" />
             </button>
           </div>
         )}
-        <div className="flex items-center px-2">
-          {tabElements}
-        </div>
+        <div className="flex items-center px-2">{tabElements}</div>
         {showRightButton && (
-          <div className="sticky right-0 z-10 h-full flex items-stretch">
+          <div className="sticky right-0 z-10 flex h-full items-stretch">
             <button
               onClick={() => scroll('right')}
-              className="flex items-center justify-center w-8 bg-[#FAFAFA] hover:bg-[#FAFAFA] backdrop-blur-[1px] shadow-lg"
+              className="flex w-8 items-center justify-center bg-[#FAFAFA] shadow-lg backdrop-blur-[1px] hover:bg-[#FAFAFA]"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="h-5 w-5" />
             </button>
           </div>
         )}
@@ -213,7 +229,7 @@ export function EmbedTabsContainer({
 
   // Return components for standard tabs
   const renderStandardTabs = (standardTabs: string[]) => {
-    return standardTabs.map(option => (
+    return standardTabs.map((option) => (
       <StandardTab
         key={`tab-${option}`}
         option={option}
@@ -226,15 +242,15 @@ export function EmbedTabsContainer({
   // Creates a map of tab IDs to their content components
   const getTabContents = () => {
     const contentMap = new Map<string, React.ReactNode>();
-    
+
     // Add the embed section component for 'new' and all existing embeds
     if (shouldIncludeEmbedTabs) {
       contentMap.set('new', embedSectionComponent);
-      embeds.forEach(embed => {
+      embeds.forEach((embed) => {
         contentMap.set(embed.id, embedSectionComponent);
       });
     }
-    
+
     return contentMap;
   };
 
@@ -243,6 +259,8 @@ export function EmbedTabsContainer({
     renderStandardTabs,
     getTabContents,
     embeds,
-    embedTabs
+    embedTabs,
+    onTabDelete,
+    handleDelete,
   };
-} 
+}

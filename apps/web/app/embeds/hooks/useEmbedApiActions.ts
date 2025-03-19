@@ -58,11 +58,11 @@ export function useEmbedApiActions({
     { id: string; values: FormValues; isAccountRemoval?: boolean }
   >({
     mutationFn: ({ id, values }) => {
-      const { embed_accounts: _embed_accounts, ...embedData } = values;
+      const { embed_accounts, ...embedData } = values;
       const embed = {
         ...embedData,
       };
-      return updateEmbed(id, embed, _embed_accounts, host);
+      return updateEmbed(id, embed, embed_accounts, host);
     },
     onMutate: ({ isAccountRemoval }) => {
       // Show loading toast when mutation starts

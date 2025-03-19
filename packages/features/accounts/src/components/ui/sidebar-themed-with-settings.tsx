@@ -47,6 +47,8 @@ export const ThemedSidebar: React.FC<{
         backgroundColor: theme_color ?? '#e0e0e0', // Color de fondo activo por defecto
         color: theme_color ? getTextColorBasedOnBackground(theme_color) : '#000', // Color negro por defecto
       }}
+      sidebarColor={effectiveBackgroundColor}
+
       {...rest}
     >
       {children}

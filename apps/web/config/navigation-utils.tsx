@@ -128,13 +128,16 @@ export function createEmbedIcon(embed: Embed) {
 /**
  * Creates a navigation item for an embed
  */
-export function createEmbedNavigationItem(embed: Embed, clientId: string) {
+export function createEmbedNavigationItem(embed: Embed, clientId: string, isClientView = false) {
   return {
-    type: 'route',
+    type: 'group' as const,
     label: embed.title ?? 'Embed',
     path: embed.type === 'url' ? embed.value : `/embeds/${embed.id}`,
     Icon: createEmbedIcon(embed),
-    menu: <EmbedOptionsDropdown embedId={embed.id} accountId={clientId} />,
+    menu: !isClientView ? <EmbedOptionsDropdown embedId={embed.id} accountId={clientId} /> : undefined,
+    collapsible: false,
+    collapsed: false,
+    children: [],
   };
 }
 
@@ -145,26 +148,21 @@ export function addClientEmbedsToNavigation(
   baseConfig: NavigationConfig,
   embeds: Embed[],
 ): NavigationConfig {
-  if (!embeds.length) return baseConfig;
+  // Filter embeds by location === 'sidebar'
+  const sidebarEmbeds = embeds.filter(embed => embed.location === 'sidebar');
+  
+  if (!sidebarEmbeds.length) return baseConfig;
 
   const routes = [...baseConfig.routes];
 
   // Add all embeds in a single section
-  if (embeds.length > 0) {
+  if (sidebarEmbeds.length > 0) {
     routes.push({
       type: 'section',
       section: true,
       label: 'Workspace',
-      groups: [
-        {
-          type: 'group',
-          label: 'Embeds',
-          Icon: <Box className="w-4" />,
-          collapsible: true,
-          collapsed: false,
-          children: embeds.map((embed) => createEmbedNavigationItem(embed, '')),
-        }
-      ],
+      groups: sidebarEmbeds.map((embed) => createEmbedNavigationItem(embed, '', true)),
+      menu: undefined,
     });
   }
 

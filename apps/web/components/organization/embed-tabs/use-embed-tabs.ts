@@ -32,7 +32,8 @@ export function useEmbedTabs({
     enabled: true,
   });
 
-  const embeds = useMemo(() => embedsQuery.data ?? [], [embedsQuery.data]);
+  const embeds = useMemo(() => embedsQuery.data ?? [], [embedsQuery.data])
+  .filter(embed => embed.location === 'tab');
 
   // Determine if we should include embed tabs based on roles and sections
   const availableTabsBasedOnRole = new Set([
@@ -41,14 +42,16 @@ export function useEmbedTabs({
     'agency_project_manager',
   ]);
 
-  // Determine if we should include embed tabs
+  // Determine if we should include embed tabs - now always true if not explicitly excluded in sections
   const shouldIncludeEmbedTabs = sections 
     ? Boolean(sections.includes('embeds'))
-    : availableTabsBasedOnRole.has(currentUserRole);
+    : true; // Show embed tabs for all roles
     
-  // Add "new" tab for creating embeds if embeds functionality is enabled
+  // Add "new" tab for creating embeds only for agency roles
   const embedTabs = shouldIncludeEmbedTabs
-    ? embeds.map(embed => embed.id).concat(['new'])
+    ? embeds.map(embed => embed.id).concat(
+        availableTabsBasedOnRole.has(currentUserRole) ? ['new'] : []
+      )
     : [];
 
   // Create the default embed creation values once
