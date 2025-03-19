@@ -103,6 +103,12 @@ const routes = [
     path: pathsConfig.app.briefs,
     Icon: <CopyCheck className={iconClasses} />,
   },
+  {
+    type: 'route',
+    label: 'common:teamName',
+    path: pathsConfig.app.team,
+    Icon: <Users className={iconClasses} />,
+  },
   // {
   //   label: 'Facturas',
   //   path: pathsConfig.app.invoices,
@@ -121,12 +127,7 @@ const routes = [
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
   },
-  {
-    type: 'route',
-    label: 'common:teamName',
-    path: pathsConfig.app.team,
-    Icon: <Users className={iconClasses} />,
-  },
+
 
   // {
   //   label: 'Facturación',

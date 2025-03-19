@@ -152,7 +152,7 @@ export const useBrief = (
       });
       // reset
 
-      router.push('/services?briefs=true'); // Redirect to briefs page
+      router.push('/briefs'); // Redirect to briefs page
     },
   });
 

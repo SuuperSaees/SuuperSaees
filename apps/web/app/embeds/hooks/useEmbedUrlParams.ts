@@ -100,6 +100,12 @@ export function useEmbedUrlParams({
             accId => accId !== accountId
           );
           
+          // If this was the last account, delete the entire embed
+          if (updatedEmbedAccounts.length === 0) {
+            deleteEmbed(id);
+            return;
+          }
+          
           // Create updated embed data with only the required properties and default values
           const updatedValues: FormValues = {
             title: embed.title ?? '',
