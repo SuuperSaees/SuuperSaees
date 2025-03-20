@@ -212,6 +212,7 @@ $function$
 ;
 
 -- Create the mark_order_messages_as_read function
+DROP FUNCTION IF EXISTS "public"."mark_order_messages_as_read"(p_user_id uuid, p_order_id integer);
 CREATE OR REPLACE FUNCTION public.mark_order_messages_as_read(p_user_id uuid, p_order_id integer)
  RETURNS integer
  LANGUAGE plpgsql
