@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, forwardRef, useImperativeHandle } from 'react';
+import { useMemo, useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 
 import { TabsContent } from '@kit/ui/tabs';
 import { Tabs } from '@kit/ui/tabs';
@@ -92,9 +92,17 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
   // Store default creation values from URL parameters
   const [urlDefaultValues, setUrlDefaultValues] = useState<FormValues | null>(null);
 
+  // Add state for preview value
+  const [previewValue, setPreviewValue] = useState<string>('');
+
+  // Update preview value when active embed changes
+  useEffect(() => {
+    const activeEmbed = formattedEmbeds.find(embed => embed.id === activeEmbedId);
+    setPreviewValue(activeEmbed?.value ?? '');
+  }, [activeEmbedId, formattedEmbeds]);
+
   // Setup mutations with callbacks
   const {
-    createMutation,
     handleEmbedCreation,
     handleEmbedUpdate,
     handleEmbedDelete,
@@ -174,10 +182,11 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
       return (
         <div className="flex h-full gap-8">
           <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
-            <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
+            <EmbedPreview embedSrc={previewValue} />
           </div>
           <EmbedEditor 
             onAction={handleEmbedCreation} 
+            onValueChange={setPreviewValue}
             type="create"
             defaultValue={processedDefaultValue} 
             availableEmbeds={formattedEmbeds}
@@ -194,11 +203,12 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
     return (
       <div className="flex h-full gap-8">
         <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
-          <EmbedPreview embedSrc={activeEmbed.value} />
+          <EmbedPreview embedSrc={previewValue} />
         </div>
         <EmbedEditor
           type="update"
           onAction={handleEmbedUpdate}
+          onValueChange={setPreviewValue}
           defaultValue={activeEmbed}
           availableEmbeds={formattedEmbeds.filter(e => e.id !== activeEmbed.id)}
           showEmbedSelector={false}
@@ -232,10 +242,11 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
         <div className="flex-1 min-h-0 overflow-hidden mt-2">
           <div className="flex h-full gap-8">
             <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
-              <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
+              <EmbedPreview embedSrc={previewValue} />
             </div>
             <EmbedEditor 
               onAction={handleEmbedCreation} 
+              onValueChange={setPreviewValue}
               type="create"
               defaultValue={processedDefaultValue} 
               availableEmbeds={formattedEmbeds}
@@ -264,11 +275,12 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
         <TabsContent value="new" className="h-full min-h-0 flex-1 overflow-hidden mt-0">
           <div className="flex h-full gap-8">
             <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
-              <EmbedPreview embedSrc={createMutation.data?.value ?? ''} />
+              <EmbedPreview embedSrc={previewValue} />
             </div>
             <EmbedEditor 
               type="create"
               onAction={handleEmbedCreation} 
+              onValueChange={setPreviewValue}
               defaultValue={processedDefaultValue} 
               availableEmbeds={formattedEmbeds}
               showEmbedSelector={showEmbedSelector}
@@ -285,12 +297,13 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
           >
             <div className="flex h-full gap-8">
               <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">
-                <EmbedPreview embedSrc={embed.value} />
+                <EmbedPreview embedSrc={previewValue} />
               </div>
               {activeEmbedId === embed.id && (
                 <EmbedEditor
                   type="update"
                   onAction={handleEmbedUpdate}
+                  onValueChange={setPreviewValue}
                   defaultValue={embed}
                   availableEmbeds={formattedEmbeds.filter(e => e.id !== embed.id)}
                   showEmbedSelector={false}

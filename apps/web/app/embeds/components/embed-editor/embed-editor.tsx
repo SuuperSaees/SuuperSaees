@@ -23,6 +23,7 @@ import { VisibilityField } from './fields/visibility-field';
 
 interface EmbedEditorProps {
   onAction: (values: FormValues) => void | Promise<void>;
+  onValueChange?: (value: string) => void;
   defaultValue:
     | (Embeds.Type & {
         embed_accounts: string[];
@@ -37,6 +38,7 @@ interface EmbedEditorProps {
 
 export function EmbedEditor({
   onAction,
+  onValueChange,
   defaultValue,
   type,
   // availableEmbeds = [],
@@ -71,6 +73,12 @@ export function EmbedEditor({
       embed_accounts: defaultValue.embed_accounts ?? [],
     });
   }, [defaultValue, form]);
+
+  // Watch value field for real-time preview
+  const value = form.watch('value');
+  useEffect(() => {
+    onValueChange?.(value);
+  }, [value, onValueChange]);
 
   const handleSubmit = async (values: FormValues) => {
     await onAction(values);
