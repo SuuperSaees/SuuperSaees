@@ -193,8 +193,6 @@ class AuthCallbackService {
       const query = new URLSearchParams(hash);
       const accessToken = query.get('access_token');
       const refreshToken = query.get('refresh_token');
-
-      console.log('callbackNextPath', newCallbackNextPath);
       
       if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
@@ -202,6 +200,7 @@ class AuthCallbackService {
       } else {
         console.log('error setting session', accessToken, refreshToken);
         console.log('url', url.href);
+        url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
         return url;
       }
     }
