@@ -198,8 +198,7 @@ class AuthCallbackService {
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
         return url;
       } else {
-        console.log('error setting session', accessToken, refreshToken);
-        console.log('url', url.href);
+        console.error('error setting session');
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
         return url;
       }
