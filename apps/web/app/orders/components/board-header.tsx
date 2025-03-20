@@ -51,26 +51,26 @@ export function BoardHeader({
   orders,
   getValueFormatters,
 }: BoardHeaderProps) {
-  const { workspace: userWorkspace } = useUserWorkspace();
-  const agencyRoles = [
-    'agency_owner',
-    'agency_project_manager',
-    'agency_member',
-  ];
+  // const { workspace: userWorkspace } = useUserWorkspace();
+  // const agencyRoles = [
+  //   'agency_owner',
+  //   'agency_project_manager',
+  //   'agency_member',
+  // ];
   return (
     <div className="flex flex-wrap items-center justify-end gap-4">
       <div className="mr-auto flex items-center gap-4">
         {/* Status filters */}
-        {agencyRoles.includes(userWorkspace.role ?? '') && (
-          <>
+        {/* {agencyRoles.includes(userWorkspace.role ?? '') && (
+          <> */}
             <StatusFilters
               activeTab={activeTab}
               setActiveTab={handleTabChange}
               t={t}
               tabsConfig={tabsConfig}
             />
-          </>
-        )}
+          {/* </>
+        )} */}
       </div>
 
       <Search
