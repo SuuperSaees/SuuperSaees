@@ -76,7 +76,8 @@ export default function BriefCompletionForm({
           <div className="flex w-full max-w-full shrink-0 flex-col gap-16 lg:max-w-xs lg:sticky lg:top-0 lg:h-fit justify-between items-start">
             <BriefCard brief={brief} />
             {(userRole === 'agency_owner' ||
-              userRole === 'agency_project_manager') && <ClientAssignation />}
+              userRole === 'agency_project_manager' ||
+              userRole === 'agency_member') && <ClientAssignation />}
           </div>
 
           <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">

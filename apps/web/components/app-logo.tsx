@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { getColorLuminance } from '~/utils/generate-colors';
 
-function LogoImage({ className }: { className?: string }) {
+export function LogoImage({ className }: { className?: string }) {
   return (
     <svg 
       width="142" 
@@ -27,7 +27,7 @@ function LogoImage({ className }: { className?: string }) {
   );
 }
 
-function CustomLogoImage({
+export function CustomLogoImage({
   className = '',
   url,
 }: {

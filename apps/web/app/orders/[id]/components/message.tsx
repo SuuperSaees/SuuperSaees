@@ -39,11 +39,13 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     ? `${t('guest')} ${message.user?.settings?.name?.split(' ')[1] ?? message.user?.name?.split(' ')[1]}`
     : message.user?.settings?.name ?? message.user?.name;
 
-  const isInternalMessage = ["agency_owner", "agency_member", "agency_project_manager"].includes(userRole) && 
+  const agencyRoles = new Set(["agency_owner", "agency_member", "agency_project_manager"]);
+
+  const isInternalMessage = agencyRoles.has(userRole) && 
     message.visibility === "internal_agency";
 
   const handleDeleteMessage = async () => {
-    await deleteMessage(message.id);
+    await deleteMessage(message.id, userRole === 'agency_owner');
     setIsOpen(false);
   };
 
@@ -64,7 +66,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
         <div className="flex gap-2">
           <small>{date}</small>
           <div className="w-4 h-4">
-            {isHovered && currentUser?.id === message.user_id && (
+            {(isHovered && (currentUser?.id === message.user_id || userRole === 'agency_owner')) && (
               <Trash2 
                 className="w-4 h-4 hover:text-red-500 transition duration-300 cursor-pointer text-gray-600" 
                 onClick={() => setIsOpen(true)} 

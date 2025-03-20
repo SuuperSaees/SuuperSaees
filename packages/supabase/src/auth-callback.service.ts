@@ -171,12 +171,10 @@ class AuthCallbackService {
       }
       
       const newUrlPayload = new URL(payload?.redirectTo ?? '');
-      
-      console.log('email callback', emailToInvite);
 
       let newCallbackNextPath = callbackNextPath;
 
-      if (emailToInvite) {
+      if (emailToInvite && !newCallbackNextPath?.includes('set-password')) {
         newCallbackNextPath = `${newCallbackNextPath}&email=${emailToInvite}`;
       }
       
@@ -195,10 +193,12 @@ class AuthCallbackService {
       const query = new URLSearchParams(hash);
       const accessToken = query.get('access_token');
       const refreshToken = query.get('refresh_token');
-
-      console.log('callbackNextPath', newCallbackNextPath);
       
       if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
+        url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+        return url;
+      } else {
+        console.error('error setting session');
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
         return url;
       }

@@ -528,7 +528,7 @@ function DetailsStep() {
           <FormItem>
             <FormLabel>{t('service_description')}</FormLabel>
             <FormControl>
-              <Textarea {...field} className="flex w-full" />
+              <Textarea {...field} className="flex w-full" rows={10} />
             </FormControl>
             <FormMessage />
           </FormItem>

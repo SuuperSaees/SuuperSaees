@@ -382,6 +382,7 @@ function getPatterns() {
         if (isOrdersPath) {
           const publicTokenId = req.nextUrl.searchParams.get('public_token_id');
           const originalPath = req.nextUrl.href;
+          console.log('originalPath', originalPath, publicTokenId, req.nextUrl);
           const confirmPath = `/auth/confirm?next=${originalPath}&public_token_id=${publicTokenId}`;
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }

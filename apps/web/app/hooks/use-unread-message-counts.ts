@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { useRealtime } from './use-realtime';
@@ -25,15 +25,70 @@ interface MarkOrderAsReadParams {
   orderId: number;
 }
 
+// Create a singleton for sound management
+// This ensures only one sound plays regardless of how many hook instances exist
+const SoundManager = (() => {
+  let instance: {
+    audio: HTMLAudioElement | null;
+    lastPlayedAt: number;
+    prevTotalUnread: number;
+    play: (totalUnread: number) => void;
+  } | null = null;
+  
+  return {
+    getInstance: () => {
+      if (!instance) {
+        // Create audio element
+        const audio = typeof window !== 'undefined' 
+          ? new Audio(NOTIFICATION_SOUND_PATH) 
+          : null;
+          
+        // Set volume to 10%
+        if (audio) {
+          audio.volume = 0.1;
+        }
+        
+        instance = {
+          audio,
+          lastPlayedAt: 0,
+          prevTotalUnread: 0,
+          play: (totalUnread: number) => {
+            if (!instance?.audio) return;
+            
+            const now = Date.now();
+            
+            // Only play sound if:
+            // 1. Count increased (not on initial load)
+            // 2. At least 1 second has passed since the last sound
+            if (
+              instance.prevTotalUnread > 0 && 
+              totalUnread > instance.prevTotalUnread &&
+              now - instance.lastPlayedAt > 1000
+            ) {
+              instance.audio.play().catch(err => {
+                console.warn('Audio play prevented:', err);
+              });
+              
+              instance.lastPlayedAt = now;
+            }
+            
+            // Update the previous total
+            instance.prevTotalUnread = totalUnread;
+          }
+        };
+      }
+      
+      return instance;
+    }
+  };
+})();
+
 export function useUnreadMessageCounts({userId}: {userId: string}) {
   const supabase = useSupabase();
   const queryClient = useQueryClient();
   
-  // Add a ref to track previous total count
-  const prevTotalUnreadRef = useRef(0);
-  
-  // Add a ref for the audio element
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Get the singleton sound manager
+  const soundManager = SoundManager.getInstance();
   
   // Function to fetch unread counts
   const fetchUnreadCounts = useCallback(async (): Promise<UnreadMessageCount[]> => {
@@ -163,30 +218,11 @@ export function useUnreadMessageCounts({userId}: {userId: string}) {
     [markOrderAsReadMutation]
   );
 
-  // Initialize audio element with reduced volume
+  // Play sound when unread count changes
   useEffect(() => {
-    audioRef.current = new Audio(NOTIFICATION_SOUND_PATH);
-    // Set volume to 30% (value between 0.0 and 1.0)
-    audioRef.current.volume = 0.1;
-    
-    return () => {
-      audioRef.current = null;
-    };
-  }, []);
-  
-  // Play sound when unread count increases
-  useEffect(() => {
-    // Only play sound if count increased (not on initial load)
-    if (prevTotalUnreadRef.current > 0 && totalUnread > prevTotalUnreadRef.current) {
-      audioRef.current?.play().catch(err => {
-        // Ignore autoplay errors (browsers may block without user interaction)
-        console.warn('Audio play prevented:', err);
-      });
-    }
-    
-    // Update the ref with current value
-    prevTotalUnreadRef.current = totalUnread;
-  }, [totalUnread]);
+    // Use the singleton sound manager to play the sound
+    soundManager.play(totalUnread);
+  }, [totalUnread, soundManager]);
 
   return {
     openOrders: unreadCounts.filter(count => count.order_unread_count > 0),
