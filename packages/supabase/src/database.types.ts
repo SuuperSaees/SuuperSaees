@@ -1612,20 +1612,26 @@ export type Database = {
       }
       message_reads: {
         Row: {
+          chat_id: string | null
           id: string
           message_id: string
+          order_id: number | null
           read_at: string | null
           user_id: string
         }
         Insert: {
+          chat_id?: string | null
           id?: string
           message_id: string
+          order_id?: number | null
           read_at?: string | null
           user_id: string
         }
         Update: {
+          chat_id?: string | null
           id?: string
           message_id?: string
+          order_id?: number | null
           read_at?: string | null
           user_id?: string
         }
@@ -2073,6 +2079,7 @@ export type Database = {
       orders_v2: {
         Row: {
           agency_id: string
+          brief_id: string | null
           brief_ids: string[] | null
           client_organization_id: string
           created_at: string
@@ -2094,6 +2101,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
+          brief_id?: string | null
           brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
@@ -2115,6 +2123,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
+          brief_id?: string | null
           brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
@@ -2135,6 +2144,13 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["visibility"]
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_v2_brief_id_fkey"
+            columns: ["brief_id"]
+            isOneToOne: false
+            referencedRelation: "briefs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_v2_client_organization_id_fkey"
             columns: ["client_organization_id"]
@@ -3346,6 +3362,7 @@ export type Database = {
         }
         Returns: {
           agency_id: string
+          brief_id: string | null
           brief_ids: string[] | null
           client_organization_id: string
           created_at: string
@@ -3639,6 +3656,7 @@ export type Database = {
         }
         Returns: {
           agency_id: string
+          brief_id: string | null
           brief_ids: string[] | null
           client_organization_id: string
           created_at: string

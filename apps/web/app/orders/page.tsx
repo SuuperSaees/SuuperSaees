@@ -1,11 +1,12 @@
-import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
+import Header from '~/components/organization/header';
+import SectionView from '~/components/organization/section-view';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
 import { getTags } from '~/server/actions/tags/tags.action';
 import {
   getAgencyForClient,
@@ -17,8 +18,6 @@ import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
-import SectionView from '~/components/organization/section-view';
-import Header from '~/components/organization/header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -81,19 +80,35 @@ async function OrdersPage() {
       >
         <PageBody className="h-screen">
           <div className="flex h-full max-h-full min-h-0 flex-1 flex-col p-[35px]">
-            {agencyRoles.includes(userWorkspace.role ?? '') ? <PageHeader
+            <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
-            /> : <Header 
-              name={userOrganization.name ?? ''} 
-              logo={userOrganization.picture_url ?? ''} 
-              id={userOrganization.id ?? ''} 
-              currentUserRole={userWorkspace.role ?? ''} 
-              className="flex items-center gap-2 mb-6"
-              imageClassName="aspect-square h-8 w-8 flex-shrink-0"
-              contentClassName="flex flex-col justify-center"
-            />}
-            {
+            />
+            {/* {agencyRoles.includes(userWorkspace.role ?? '') ? (
+              <PageHeader
+                title="orders:title"
+                rightContent={<TimerContainer />}
+              />
+            ) : (
+              <Header
+                name={userOrganization.name ?? ''}
+                logo={userOrganization.picture_url ?? ''}
+                id={userOrganization.id ?? ''}
+                currentUserRole={userWorkspace.role ?? ''}
+                className="mb-6 flex items-center gap-2"
+                imageClassName="aspect-square h-8 w-8 flex-shrink-0"
+                contentClassName="flex flex-col justify-center"
+              />
+            )} */}
+            <ProjectsBoard
+              agencyMembers={agencyMembers.map((member) => ({
+                organization_id: member.account_id,
+                settings: member.user_settings,
+                role: member.role,
+              }))}
+              tags={tags}
+            />
+            {/* {
               agencyRoles.includes(userWorkspace.role ?? '') ? (
                 <ProjectsBoard agencyMembers={agencyMembers.map(member => ({
                   organization_id: member.account_id,
@@ -109,7 +124,7 @@ async function OrdersPage() {
                   showCardStats={false}
                 />
               )
-            }
+            } */}
           </div>
         </PageBody>
       </AgencyStatusesProvider>

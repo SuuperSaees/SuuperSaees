@@ -265,20 +265,22 @@ export function buildNavigationConfig(
 ): NavigationConfig {
   // Get base config
   const baseConfig = getBaseNavigationConfig(userRole);
-
+  const allowedAgencyRoles = ['agency_owner', 'agency_project_manager'];
   // Add embeds based on user role
   const isClientRole = userRole?.startsWith('client_');
   
   try {
     if (isClientRole) {
       return addClientEmbedsToNavigation(baseConfig, embeds ?? []);
-    } else {
+    } else if (allowedAgencyRoles.includes(userRole ?? '')) {
       return addAgencyEmbedsToNavigation(
         baseConfig,
         embeds ?? [],
         AvatarComponent,
         clientOrganizations,
       );
+    } else {
+      return baseConfig;
     }
   } catch (error) {
     console.error('Error building navigation config:', error);

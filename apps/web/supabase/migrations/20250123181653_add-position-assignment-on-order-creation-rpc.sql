@@ -104,7 +104,8 @@ BEGIN
     title,
     uuid,
     status_id,
-    position  -- Include the position in the INSERT statement
+    position,  -- Include the position in the INSERT statement
+    brief_id
   )
   VALUES (
     COALESCE(NULLIF(_order->>'agency_id', '')::uuid, NULL),
@@ -126,7 +127,11 @@ BEGIN
     _order->>'title',
     _order->>'uuid',
     default_status_id,
-    new_position  -- Use the calculated position
+    new_position,  -- Use the calculated position
+    CASE 
+      WHEN array_length(brief_ids, 1) > 0 THEN brief_ids[1]  -- Tomar el primer elemento de brief_ids
+      ELSE NULL
+    END  -- Use the first brief_id if it exists, otherwise NULL
   )
   RETURNING * INTO new_order;
 
