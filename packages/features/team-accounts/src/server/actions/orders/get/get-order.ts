@@ -15,8 +15,6 @@ import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import {
-  fetchBriefs,
-  fetchBriefsResponsesforOrders,
   fetchFormfieldsWithResponses,
 } from '../../briefs/get/get-brief';
 import {
@@ -262,14 +260,13 @@ export const getOrders = async (
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
         assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
         tags:order_tags(tag:tags(*))
+        ${includeBrief ? ', brief:briefs(name)' : ''}
         `,
         { count: 'exact' },
       )
       .is('deleted_on', null)
       .order('created_at', { ascending: false })
-      .limit(300);
    
-
     let orders: Order.Response[] = [];
 
     if (isClient) {
@@ -350,37 +347,7 @@ export const getOrders = async (
       order.client_organization = { id: order.client_organization?.id, name: order.client_organization?.name, picture_url: clientOrganizationPictureURL };
       if (!order.status_id) return;
       order.statusData = statusMap.get(order.status_id) ?? null;
-
-      
     });
-
-    // Step 7: Assign optional data
-    if (includeBrief) {
-      const orderIds = orders.map((order) => order.uuid) ?? [];
-      const briefResponseData = await fetchBriefsResponsesforOrders(
-        client,
-        orderIds,
-      );
-
-      const briefIds =
-        briefResponseData?.map((response) => response?.brief_id) ?? [];
-
-      const briefData = await fetchBriefs(client, briefIds, ['name', 'id']);
-
-      // Insert the brief names into the orders
-      // Map briefs to orders => each order has a brief_ids => take the first brief
-      orders = orders?.map((order) => {
-        const brief = briefData?.find(
-          (brief) => brief.id === order.brief_ids?.[0],
-        );
-        return {
-          ...order,
-          brief: {
-            name: brief?.name,
-          },
-        };
-      });
-    }
 
     return orders;
   } catch (error) {
@@ -548,6 +515,7 @@ export async function getOrdersByUserId(
       customer:accounts!customer_id(id, name),
       assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, organization_id, settings:user_settings(name, picture_url))),
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+      ${includeBrief ? ', brief:briefs(name)' : ''}
       `,
       )
       .order('created_at', { ascending: false })
@@ -578,35 +546,7 @@ export async function getOrdersByUserId(
       ) ?? [],
     }));
 
-    const orderIds = orderData?.map((order) => order.uuid) ?? [];
-
-    // Step 5: Fetch the briefs for the orders and add them to the orders (if needed)
-    if (includeBrief) {
-      const briefResponseData = await fetchBriefsResponsesforOrders(
-        client,
-        orderIds,
-      );
-
-      const briefIds =
-        briefResponseData?.map((response) => response?.brief_id) ?? [];
-
-      const briefData = await fetchBriefs(client, briefIds, ['name', 'id']);
-
-      // Insert the brief names into the orders
-      // Map briefs to orders => each order has a brief_ids => take the first brief
-      orders = orders?.map((order) => {
-        const brief = briefData?.find(
-          (brief) => brief.id === order.brief_ids?.[0],
-        );
-        return {
-          ...order,
-          brief: {
-            name: brief?.name,
-          },
-        };
-      });
-    }
-
+    
     if (includeReviews) {
       const reviews = await getOrdersReviewsForUser(userId);
       orders = orders?.map((order) => {
@@ -701,6 +641,7 @@ export async function getOrdersByOrganizationId(
       customer:accounts!customer_id(id, name),
       assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, deleted_on, organization_id, settings:user_settings(name, picture_url))), 
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+      ${includeBrief ? ', brief:briefs(name)' : ''}
       `,
       )
       .order('created_at', { ascending: false })
@@ -737,33 +678,6 @@ export async function getOrdersByOrganizationId(
         assignment.agency_member?.organization_id === order.agency_id
       ) ?? [],
     }));
-
-    // Step 3: Fetch the briefs for the orders and add them to the orders (if needed)
-    if (includeBrief) {
-      const orderIds = orders.map((order) => order.uuid) ?? [];
-      const briefResponseData = await fetchBriefsResponsesforOrders(
-        client,
-        orderIds,
-      );
-
-      const briefIds =
-        briefResponseData?.map((response) => response?.brief_id) ?? [];
-
-      const briefData = await fetchBriefs(client, briefIds, ['name', 'id']);
-
-      // Insert the brief names into the orders
-      orders = orders?.map((order) => {
-        const brief = briefData?.find(
-          (brief) => brief.id === order.brief_ids?.[0],
-        );
-        return {
-          ...order,
-          brief: {
-            name: brief?.name,
-          },
-        };
-      });
-    }
 
     // Step 4: Fetch the reviews for the orders and add them to the orders (if needed)
     if (includeReviews) {
