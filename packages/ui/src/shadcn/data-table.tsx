@@ -11,7 +11,6 @@ import {
 } from '@tanstack/react-table';
 
 import { Trans } from '../makerkit/trans';
-
 import {
   Pagination,
   PaginationContent,
@@ -21,7 +20,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from './pagination';
-
 import {
   Select,
   SelectContent,
@@ -45,6 +43,14 @@ interface DataTableProps<TData, TValue> {
   className?: string;
   emptyStateComponent?: React.ReactNode;
   disableInteractions?: boolean;
+  configs?: CustomConfigs;
+}
+
+export interface CustomConfigs {
+  rowsPerPage: {
+    onUpdate: (value: string) => void;
+    value: number;
+  };
 }
 
 export function DataTable<TData, TValue>({
@@ -54,8 +60,11 @@ export function DataTable<TData, TValue>({
   className,
   emptyStateComponent,
   disableInteractions,
+  configs,
 }: DataTableProps<TData, TValue>) {
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(
+    configs?.rowsPerPage.value ?? 10,
+  );
 
   const table = useReactTable({
     ...options,
@@ -68,9 +77,9 @@ export function DataTable<TData, TValue>({
 
   const { pageIndex } = table.getState().pagination;
   const pageCount = table.getPageCount();
-  const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   const handleRowsPerPageChange = (value: string) => {
+    configs?.rowsPerPage.onUpdate(value);
     const newValue = Number(value);
     if (!isNaN(newValue) && newValue > 0 && newValue <= 100) {
       setRowsPerPage(newValue);
@@ -78,156 +87,215 @@ export function DataTable<TData, TValue>({
     }
   };
 
+  const renderPageNumbers = () => {
+    const pages = [];
+    const showPages = 4;
+    const currentPage = pageIndex + 1;
+
+    pages.push(1);
+
+    if (currentPage > showPages) {
+      pages.push('ellipsis');
+    }
+
+    let rangeStart = Math.max(2, currentPage - 2);
+    let rangeEnd = Math.min(pageCount - 1, currentPage + 2);
+
+    if (currentPage <= showPages) {
+      rangeEnd = Math.min(pageCount - 1, showPages + 2);
+    }
+    if (currentPage > pageCount - showPages) {
+      rangeStart = Math.max(2, pageCount - showPages - 1);
+    }
+
+    for (let i = rangeStart; i <= rangeEnd; i++) {
+      pages.push(i);
+    }
+
+    if (currentPage < pageCount - showPages) {
+      pages.push('ellipsis');
+    }
+
+    if (pageCount > 1) {
+      pages.push(pageCount);
+    }
+
+    return pages;
+  };
+
   return (
-
-
-      <div className={'rounded-lg border border-gray-100 ' + className}>
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className="text-nowrap px-6 py-3 align-top text-black"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-
-          <TableBody
-            className={disableInteractions ? 'pointer-events-none' : ''}
-          >
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-row-id={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className="odd:bg-gray-50 even:bg-transparent"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-6 py-3">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  {emptyStateComponent ? (
-                    emptyStateComponent
-                  ) : (
-                    <Trans i18nKey={'common:noData'} />
-                  )}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-        
-        {table.getRowModel().rows?.length > 0 && (
-          <Pagination className="border-t p-4">
-            <PaginationContent className="flex w-full items-center justify-between gap-4">
-              {pageIndex > 0 && (
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (table.getCanPreviousPage()) {
-                        table.previousPage();
-                      }
-                    }}
+    <div className={'rounded-lg border border-gray-100 ' + className}>
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead
+                    key={header.id}
+                    className="text-nowrap px-6 py-3 align-top text-black"
                   >
-                    <Trans i18nKey={'common:pagination.previous'} />
-                  </PaginationPrevious>
-                </PaginationItem>
-              )}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
 
-              <div className="flex flex-1 justify-center">
-                {pages.map((page) => (
+        <TableBody className={disableInteractions ? 'pointer-events-none' : ''}>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-row-id={row.id}
+                data-state={row.getIsSelected() && 'selected'}
+                className="odd:bg-gray-50 even:bg-transparent"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className="px-6 py-3">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                {emptyStateComponent ? (
+                  emptyStateComponent
+                ) : (
+                  <Trans i18nKey={'common:noData'} />
+                )}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      {table.getRowModel().rows?.length > 0 && (
+        <Pagination className="border-t p-4">
+          <PaginationContent className="flex w-full items-center flex-wrap">
+            <div className="flex-none">
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 ${
+                    pageIndex === 0
+                      ? 'pointer-events-none opacity-50'
+                      : 'hover:bg-gray-100'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (table.getCanPreviousPage()) {
+                      table.previousPage();
+                    }
+                  }}
+                >
+                  <span className="hidden sm:inline">
+                    <Trans i18nKey={'common:pagination.previous'} />
+                  </span>
+                </PaginationPrevious>
+              </PaginationItem>
+            </div>
+
+            <div className="flex flex-1 justify-center gap-2">
+              {renderPageNumbers().map((page, index) =>
+                page === 'ellipsis' ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis className="text-gray-400" />
+                  </PaginationItem>
+                ) : (
                   <PaginationItem key={page}>
                     <PaginationLink
-                      className={`${
-                        pageIndex === page - 1 ? 'bg-gray-100' : ''
-                      } border-none hover:bg-gray-50`}
+                      className={`h-9 min-w-[2.25rem] rounded-md text-sm font-medium ${
+                        typeof page === 'number' && pageIndex === page - 1
+                          ? 'bg-gray-100 text-gray-900 border-none'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      } transition-all duration-200`}
                       href="#"
-                      isActive={pageIndex === page - 1}
+                      isActive={typeof page === 'number' && pageIndex === page - 1}
                       onClick={(e) => {
                         e.preventDefault();
-                        table.setPageIndex(page - 1);
+                        if (typeof page === 'number') {
+                          table.setPageIndex(page - 1);
+                        }
                       }}
                     >
                       {page}
                     </PaginationLink>
                   </PaginationItem>
-                ))}
-                {pageCount > 3 && pageIndex < pageCount - 2 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
-              </div>
-              <SelectRowsPerPage handleRowsPerPageChange={handleRowsPerPageChange} />
-              {pageIndex < pageCount - 1 && (
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (table.getCanNextPage()) {
-                        table.nextPage();
-                      }
-                    }}
-                  >
-                    <Trans i18nKey={'common:pagination.next'} />
-                  </PaginationNext>
-                </PaginationItem>
+                ),
               )}
-            </PaginationContent>
-          </Pagination>
-        )}
-      </div>
+            </div>
+
+            <div className="flex flex-none items-center gap-4 mx-auto">
+              <div className="flex items-center gap-2">
+                <SelectRowsPerPage
+                  defaultValue={rowsPerPage}
+                  handleRowsPerPageChange={handleRowsPerPageChange}
+                />
+                <span className="text-sm text-gray-500">
+                  <Trans i18nKey={'common:of'} />{' '}
+                  {table.getFilteredRowModel().rows.length}
+                </span>
+              </div>
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 ${
+                    pageIndex >= pageCount - 1
+                      ? 'pointer-events-none opacity-50'
+                      : 'hover:bg-gray-100'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (table.getCanNextPage()) {
+                      table.nextPage();
+                    }
+                  }}
+                >
+                  <span className="hidden sm:inline">
+                    <Trans i18nKey={'common:pagination.next'} />
+                  </span>
+                </PaginationNext>
+              </PaginationItem>
+            </div>
+          </PaginationContent>
+        </Pagination>
+      )}
+    </div>
   );
 }
 
-
-
 interface SelectRowsPerPageProps {
   handleRowsPerPageChange: (value: string) => void;
+  defaultValue: number;
 }
 
 export function SelectRowsPerPage({
   handleRowsPerPageChange,
+  defaultValue,
 }: SelectRowsPerPageProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-gray-600">
+      <span className="text-sm text-gray-500">
         <Trans i18nKey={'common:rowsPerPage'} />
       </span>
-      <Select defaultValue="10" onValueChange={handleRowsPerPageChange}>
-        <SelectTrigger className="w-[100px] rounded-md bg-white font-medium">
+      <Select
+        defaultValue={String(defaultValue)}
+        onValueChange={handleRowsPerPageChange}
+      >
+        <SelectTrigger className="w-[100px] rounded-md bg-white font-medium text-gray-500">
           <SelectValue placeholder="Rows" />
         </SelectTrigger>
-        <SelectContent className="rounded-md text-gray-600">
+        <SelectContent className="rounded-md text-gray-500">
           <SelectItem value="5">
             <Trans i18nKey={'common:rowNumber'} values={{ number: 5 }} />
           </SelectItem>
@@ -254,4 +322,3 @@ export function SelectRowsPerPage({
     </div>
   );
 }
-

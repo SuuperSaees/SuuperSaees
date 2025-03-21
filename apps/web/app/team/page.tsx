@@ -7,6 +7,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import ClientsMembersPagePresentation from './components/clients-members-page-presentation';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -18,38 +19,19 @@ export const generateMetadata = async () => {
 async function ClientsMembersPage() {
   const client = getSupabaseServerComponentClient();
 
-  const { data: authenticatedUser, error: authenticatedUserError } =
-    await client.auth.getUser();
-  if (authenticatedUserError) {
-    console.error(
-      'Error fetching authenticated user:',
-      authenticatedUserError.message,
-    );
-  }
+  const { organization, user: authenticatedUser } = await loadUserWorkspace();
 
   const { data: accountData, error: accountError } = await client
     .from('accounts')
     .select()
-    .eq('id', authenticatedUser.user?.id ?? '')
+    .eq('id', authenticatedUser.id ?? '')
     .single();
 
   if (accountError) {
     console.error('Error fetching account:', accountError.message);
   }
 
-  const { data: organizationAccount, error: organizationAccountError } =
-    await client
-      .from('accounts')
-      .select()
-      .eq('id', accountData?.organization_id ?? '')
-      .single();
-
-  if (organizationAccountError) {
-    console.error(
-      'Error fetching organization account:',
-      organizationAccountError.message,
-    );
-  }
+  
   const { data: accountMembership, error: accountMembershipError } =
     await client
       .from('accounts_memberships')
@@ -91,9 +73,9 @@ async function ClientsMembersPage() {
     role_hierarchy_level: accountRole?.hierarchy_level,
   };
 
-  const slug = organizationAccount?.slug ?? '';
+  const slug = organization?.slug ?? '';
 
-  const [members, invitations, canAddMember, { user }] =
+  const [members, invitations, _, { user }] =
     await loadMembersPageData(client, slug).catch((error) => {
       console.error('Error loading members page data:', error);
       return [];
@@ -101,8 +83,6 @@ async function ClientsMembersPage() {
 
   const canManageRoles =
     account?.permissions?.includes('roles.manage') ?? false;
-  const canManageInvitations =
-    account?.permissions?.includes('invites.manage') ?? false;
 
   const isPrimaryOwner = account.primary_owner_user_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
@@ -117,15 +97,8 @@ async function ClientsMembersPage() {
       slug={slug}
       members={members}
       invitations={invitations}
-      canAddMember={await canAddMember()
-        .then((result) => result ?? false)
-        .catch((err) => {
-          console.error('Error from members page, canAddMember:', err);
-          return false;
-        })}
       user={user}
       canManageRoles={canManageRoles}
-      canManageInvitations={canManageInvitations}
       isPrimaryOwner={isPrimaryOwner}
     />
   );

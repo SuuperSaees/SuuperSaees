@@ -24,7 +24,6 @@ export default function Member({
   id,
   userRole,
   user,
-  orders,
   agencyStatuses,
   agencyMembers,
 }: {
@@ -93,7 +92,6 @@ export default function Member({
       t('team:member.tabs.home'),
       <HomeSection
         key={t('team:member.tabs.home')}
-        memberOrders={orders}
         agencyMembers={agencyMembers}
       />,
     ],
@@ -114,13 +112,14 @@ export default function Member({
   ]);
 
   return (
-    <AgencyStatusesProvider initialStatuses={agencyStatuses}>
+    <AgencyStatusesProvider initialStatuses={agencyStatuses} agencyMembers={agencyMembers}>
       <Section views={views} state={null}>
         <Section.Header
           id={id}
           currentUserRole={userRole}
           account={account}
           bucketStorage={bucketStorage}
+
           emailLabel="Email"
           controllers={{
             onUpdateAccountImage: updateMemberImage,

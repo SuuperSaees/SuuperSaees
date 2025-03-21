@@ -18,7 +18,7 @@ import {
 import { If } from '@kit/ui/if';
 import { Trans } from '@kit/ui/trans';
 
-import { ThemedInput } from '../../../accounts/src/components/ui/input-themed-with-settings';
+// import { ThemedInput } from '../../../accounts/src/components/ui/input-themed-with-settings';
 import { PasswordSignUpSchema } from '../schemas/password-sign-up.schema';
 import { useAuthDetails } from '../sign-in';
 import { TermsAndConditionsFormField } from './terms-and-conditions-form-field';
@@ -27,6 +27,7 @@ import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils
 import { EyeOff, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { Spinner } from '@kit/ui/spinner';
+import { Input } from '@kit/ui/input';
 
 
 export function PasswordSignUpForm({
@@ -89,13 +90,13 @@ export function PasswordSignUpForm({
             control={form.control}
             name={'organizationName'}
             render={({ field }) => (
-              <FormItem className="text-start w-full">
+              <FormItem className="text-start w-full text-black">
                 <FormLabel>
                   <Trans i18nKey={'common:organizationNamelabel'} />
                 </FormLabel>
 
                 <FormControl>
-                  <ThemedInput
+                  <Input
                     className='w-full'
                     data-test={'email-input'}
                     required
@@ -119,13 +120,13 @@ export function PasswordSignUpForm({
           control={form.control}
           name={'email'}
           render={({ field }) => (
-            <FormItem className="text-start w-full">
+            <FormItem className="text-start w-full text-black">
               <FormLabel>
                 <Trans i18nKey={'common:emailAddress'} />
               </FormLabel>
 
               <FormControl>
-                <ThemedInput
+                <Input
                   className='w-full'
                   data-test={'email-input'}
                   required
@@ -143,14 +144,14 @@ export function PasswordSignUpForm({
           control={form.control}
           name={'password'}
           render={({ field }) => (
-            <FormItem className="text-start">
+            <FormItem className="text-start text-black">
               <FormLabel>
                 <Trans i18nKey={'common:password'} />
               </FormLabel>
 
               <FormControl>
                 <div className="relative">
-                  <ThemedInput
+                  <Input
                     required
                     data-test={'password-input'}
                     type={showPassword ? "text" : "password"}

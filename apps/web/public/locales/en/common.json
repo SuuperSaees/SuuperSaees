@@ -12,6 +12,7 @@
   "settingsTabLabel": "Settings",
   "profileSettingsTabLabel": "Profile",
   "subscriptionSettingsTabLabel": "Subscription",
+  "messagesName": "Messages",
   "dashboardTabDescription": "An overview of your organization's activity and performance across all your projects.",
   "settingsTabDescription": "Manage your settings and preferences.",
   "emailAddress": "Email",
@@ -58,8 +59,14 @@
   "settingsName": "Settings",
   "usersName": "Users",
   "ordersName": "Projects",
+  "dashboardName": "Dashboard",
   "clientsName": "Clients",
   "teamName": "Team",
+  "aiToolsName": "AI Tools",
+  "catalogProviderName": "Providers",
+  "catalogProductName": "Products",
+  "toolCopyListName": "Copy Listing",
+  "catalogName": "Catalog",
   "orders": "Projects",
   "profile": "My profile",
   "billing": "Billing",
@@ -85,7 +92,8 @@
   "clear": "Clear",
   "pagination": {
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "search": "Search..."
   },
   "timer": {
     "pauseTimer": "Pause timer",
@@ -106,6 +114,87 @@
   "stopImpersonatingDescription": "You will go back to your session shortly",
   "rowsPerPage": "Show",
   "rowNumber": "{{number}} rows",
-  "filters": "Filters",
-  "resetFilters": "Reset filters"
+  "filters": {
+    "title": "Filters",
+    "appliedFilters": {
+      "singular": "({{number}})",
+      "plural": "({{number}})"
+    },
+    "resetFilters": "Clear filters",
+    "groups": {
+      "status": {
+        "title": "Status"
+      },
+      "client_organization": {
+        "title": "Client Organization"
+      },
+      "assigned_to": {
+        "title": "Assigned to"
+      },
+      "tags": {
+        "title": "Tags"
+      },
+      "customer": {
+        "title": "Customer"
+      },
+      "priority": {
+        "title": "Priority"
+      }
+    }
+  },
+  "pluginsName": "Apps",
+  "goToPage": "Go to page",
+  "of": "of",
+  "showing": "Showing",
+  "go": "Go",
+  "export": {
+    "exportCSV": "Export CSV",
+    "exportOptions": "Export Options",
+    "configureAndPreview": "Configure your export options and preview the data",
+    "settings": "Settings",
+    "preview": "Preview",
+    "filename": "Filename",
+    "delimiter": "Delimiter",
+    "selectDelimiter": "Select delimiter",
+    "comma": "Comma",
+    "semicolon": "Semicolon",
+    "tab": "Tab",
+    "delimiterHelp": "Choose the delimiter that works best with your spreadsheet application. Semicolon is recommended for European locales.",
+    "usePagination": "Use pagination",
+    "pageSize": "Page size",
+    "currentPage": "Current page",
+    "selectColumns": "Select columns to export",
+    "selectAll": "Select all",
+    "clearAll": "Clear all",
+    "previewTitle": "Data Preview",
+    "previewDescription": "Preview of the first 5 rows of data with selected columns",
+    "noColumnsSelected": "No columns selected for export",
+    "export": "Export",
+    "selectAtLeastOneColumn": "Please select at least one column to export"
+  },
+  "embedsName": "Embeds",
+  "overdue": {
+    "title": "Overdue",
+    "singular": {
+      "description": "Overdue by {{days}} day"
+    },
+    "plural": {
+      "description": "Overdue by {{days}} days"
+    }
+  },
+  "workspaceName": "Workspace",
+  "sidebar": {
+    "addSpace": "Add space",
+    "projects": "Projects",
+    "services": "Services",
+    "members": "Members",
+    "files": "Files",
+    "inviteMembers": "Invite members",
+    "clients": "Clients",
+    "pinClient": "Pin client",
+    "unpinClient": "Unpin client",
+    "edit": "Edit",
+    "delete": "Delete",
+    "addClient": "Add client"
+  }
 }

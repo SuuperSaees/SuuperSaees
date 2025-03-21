@@ -24,7 +24,7 @@ async function AccountPage({ params }: Params) {
   const account = await loadAccount(params.id);
 
   return (
-    <PageBody className={'py-4'}>
+    <PageBody className={'mx-auto flex w-full lg:px-16 p-8'}>
       <AdminAccountPage account={account} />
     </PageBody>
   );

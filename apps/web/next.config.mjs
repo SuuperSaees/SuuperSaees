@@ -19,7 +19,6 @@ const INTERNAL_PACKAGES = [
   '@kit/email-templates',
   '@kit/database-webhooks',
   '@kit/webhooks',
-  '@kit/cms',
   '@kit/monitoring',
   '@kit/next',
   '@kit/notifications',
@@ -40,6 +39,7 @@ const config = {
     },
   },
   experimental: {
+    // optimizeCss: true,
     mdxRs: true,
     instrumentationHook: true,
     turbo: {

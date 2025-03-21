@@ -37,7 +37,7 @@ function PageWithSidebar(props: PageProps) {
       <div
         className={
           props.contentContainerClassName ??
-          'mx-auto flex h-screen w-full flex-col overflow-y-auto px-4 lg:px-0'
+          'mx-auto flex h-screen w-full flex-col overflow-y-auto px-4 lg:px-0 bg-[#FAFAFA]'
         }
       >
         {MobileNavigation}
@@ -117,7 +117,7 @@ export function PageDescription(props: React.PropsWithChildren) {
   return (
     <h2 className={'hidden lg:block'}>
       <span
-        className={'text-base font-medium leading-none text-muted-foreground'}
+        className={'text-sm font-medium leading-none text-muted-foreground'}
       >
         {props.children}
       </span>

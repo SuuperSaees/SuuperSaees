@@ -1,19 +1,11 @@
-/**
- * Displays multiple avatars in a row.
- *
- * @param {MultiAvatarDisplayerProps} props - The props for the component.
- * @returns {JSX.Element} The rendered component.
- */
-// if avatars length is greater than maxAvatars props, show a circle with bg gray with the remaining avatars (eg. +5)
 import { withDropdown } from '~/hocs/with-dropdown';
-import { z } from 'zod';
-
 import type { JSX } from "react";
 import Avatar from './avatar';
+import { z } from 'zod';
 
 export type AvatarType = {
   name: string;
-  email: string;
+  email?: string;
   picture_url?: string | null;
 };
 
@@ -34,45 +26,70 @@ export default function MultiAvatarDisplayer({
   avatarClassName,
   customItemTrigger,
   blocked,
+  overlap = 8, // Made overlap configurable with a default value
   ...rest
 }: MultiAvatarDisplayerProps & {
   customItemTrigger?: JSX.Element;
 }) {
-  const overlap = 16; // Amount of overlap between avatars in pixels
+  // Calculate base avatar size from className or use default
+  const getAvatarSize = () => {
+    if (avatarClassName) {
+      const widthMatch = avatarClassName.match(/w-(\d+)/);
+      return widthMatch ? parseInt(widthMatch[1] ?? '32') : 32;
+    }
+    return 32;
+
+  };
+
+  // Calculate negative margin based on avatar size
+  const calculateMargin = (index: number) => {
+    if (index === 0) return 0;
+    const size = getAvatarSize();
+    return -(size * (overlap / 32)); // Adjusted calculation for more natural spacing
+  };
 
   return (
     <div className={`relative flex items-center ${className}`} {...rest}>
       {avatars.slice(0, maxAvatars).map((avatar, index) => (
-        <Avatar
-          src={avatar?.picture_url ?? ''}
-          username={avatar?.name}
+        <div
           key={index + avatar?.name}
-          alt={avatar?.name}
-          className={`h-8 w-8 border-2 border-white ${avatarClassName}`}
           style={{
-            marginLeft: index === 0 ? 0 : `${-overlap}px`,
+            marginLeft: `${calculateMargin(index)}px`,
             zIndex: maxAvatars + index,
           }}
-        />
+          className="relative"
+        >
+          <Avatar
+            src={avatar?.picture_url ?? ''}
+            username={avatar?.name}
+            alt={avatar?.name}
+            className={`border-2 border-white ${avatarClassName}`}
+          />
+        </div>
       ))}
-      
 
-      { (customItemTrigger && !blocked) ? (
+      {(customItemTrigger && !blocked) ? (
         <div
           className="relative flex items-center justify-center"
-          style={{ marginLeft: `${overlap / 8}px`, zIndex: 1 }}
+          style={{
+            marginLeft: `0px`,
+            zIndex: 1
+          }}
         >
           {customItemTrigger}
         </div>
       ) : (
         avatars.length > maxAvatars && (
           <div
-            className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold text-sm text-gray-600"
+            className={`flex items-center justify-center rounded-full border-2 border-white bg-gray-200 font-bold text-sm text-gray-600 ${
+              avatarClassName?.includes('w-') ? avatarClassName : 'w-8 h-8'
+            }`}
             style={{
-              marginLeft: `${overlap / 2}px`,
+              marginLeft: `0px`,
               zIndex: 1,
             }}
           >
+
             +{avatars.length - maxAvatars}
           </div>
         )
@@ -80,6 +97,7 @@ export default function MultiAvatarDisplayer({
     </div>
   );
 }
+
 
 // Define the schema type
 const schema = z.object({

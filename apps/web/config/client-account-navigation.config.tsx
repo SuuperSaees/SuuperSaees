@@ -3,6 +3,10 @@ import { // Briefcase,
   Layers, Settings, // SquareCheck,
   Users, // Wallet,
   FolderClosed,
+  MessagesSquare,
+  Home,
+  Package,
+  Bot
 } from 'lucide-react';
 
 
@@ -18,13 +22,32 @@ import pathsConfig from '~/config/paths.config';
 const iconClasses = 'w-4';
 
 const routes = [
+  {
+    type: 'route',
+    label: 'common:dashboardName',
+    path: pathsConfig.app.dashboard,
+    Icon: <Home className={iconClasses} />,
+    end: true,
+  },
+  {
+    type: 'route',
+    label: 'common:messagesName',
+    path: pathsConfig.app.messages,
+    Icon: <MessagesSquare className={iconClasses} />,
+    end: true,
+    children: [],
+    divider: true,
+  },
   // {
-  //   label: 'Inicio',
-  //   path: pathsConfig.app.home,
-  //   Icon: <Home className={iconClasses} />,
+  //   label: 'common:messagesName',
+  //   path: pathsConfig.app.messages,
+  //   Icon: <MessagesSquare className={iconClasses} />,
   //   end: true,
+  //   children: [],
+  //   divider: true,
   // },
   {
+    type: 'route',
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
@@ -46,11 +69,14 @@ const routes = [
   //   Icon: <Wallet className={iconClasses} />,
   // },
   {
+    type: 'route',
     label: 'common:organizationName',
     path: pathsConfig.app.organization,
     Icon: <Users className={iconClasses} />,
   },
+  
   {
+    type: 'route',
     label: 'common:storage',
     path: pathsConfig.app.storage,
     Icon: (
@@ -63,7 +89,37 @@ const routes = [
     ),
   },
   {
+    type: 'group',
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
+    ],
+  },
+  {
+    type: 'group',
+    label: 'common:catalogName',
+    Icon: <Package className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:catalogProviderName',
+        path: pathsConfig.app.catalogProvider,
+      },
+      {
+        label: 'common:catalogProductName',
+        path: pathsConfig.app.catalogProduct,
+      }
+    ],
+  },
 
+  {
+    type: 'route',
     label: 'common:settingsName',
     path: pathsConfig.app.personalAccountSettings,
     Icon: <Settings className={iconClasses} />,
@@ -78,6 +134,7 @@ const routes = [
 
 if (featureFlagsConfig.enablePersonalAccountBilling) {
   routes.push({
+    type: 'route',
     label: 'common:billingTabLabel',
     path: pathsConfig.app.personalAccountBilling,
     Icon: <CreditCard className={iconClasses} />,

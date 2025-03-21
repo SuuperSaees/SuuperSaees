@@ -18,7 +18,7 @@ import {
 import { Input } from '@kit/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Spinner } from '@kit/ui/spinner';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 
 export type Option = {
   value: string;
@@ -68,23 +68,23 @@ export default function CheckboxCombobox<
   onChange, 
 }: ComboboxProps<TSchema>) {
   const [searchTerm, setSearchTerm] = useState('');
-
   const form = useForm<z.infer<TSchema>>({
     defaultValues,
     resolver: zodResolver(schema),
   });
 
   const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase()),
+    option.label?.toLowerCase().includes(searchTerm?.toLowerCase() ?? ''),
   );
 
   const handlePopoverClose = async (open: boolean) => {
     if (!open) {
       const currentValues = form.getValues();
+      const formDefaultValues = form.formState.defaultValues;
       const hasChanges = Object.keys(currentValues).some(
         (key) =>
           JSON.stringify(currentValues[key]) !==
-          JSON.stringify(defaultValues[key]),
+          JSON.stringify(formDefaultValues?.[key]),
       );
 
       if (hasChanges) {
@@ -119,59 +119,78 @@ export default function CheckboxCombobox<
                       </button>
                     )}
                   </PopoverTrigger>
-                  <PopoverContent className="flex w-[300px] flex-col p-2">
-                    <Input
-                      placeholder="Search..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="mb-2"
-                    />
-                    <div className="no-scrollbar max-h-[250px] overflow-y-auto">
-                      { isLoading ? <Spinner className='w-5 h-5 mx-auto' /> :filteredOptions.length ? (
-                        filteredOptions.map((option) => (
-                          <FormItem
-                            key={option.value}
-                            className="flex flex-row items-center space-x-3 space-y-0 rounded-md p-2 hover:bg-gray-100"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={
-                                  values
-                                    ? values.includes(option.value)
-                                    : field.value.includes(option.value)
-                                }
-                                onCheckedChange={(checked) => {
-                                  const newValue = checked
-                                    ? [...(values ?? field.value), option.value]
-                                    : (values ?? field.value).filter(
-                                        (value) => value !== option.value,
-                                      );
-                                  if (onChange) {
-                                    onChange(newValue);
-                                  } else {
-                                    field.onChange(newValue);
-                                  }
-                                  if (onSelect) {
-                                    onSelect(option.value);
-                                  }
-                                  option.actionFn &&
-                                    option.actionFn(option.value);
-                                }}
-                              />
-                            </FormControl>
-                            {CustomItemComponent ? (
-                              <FormLabel className="h-full w-full font-normal text-gray">
-                                <CustomItemComponent option={option} />
-                              </FormLabel>
-                            ) : (
-                              <FormLabel>{option.label}</FormLabel>
-                            )}
-                          </FormItem>
-                        ))
+                  <PopoverContent 
+                    className="w-[var(--radix-popover-trigger-width)] p-0 overflow-hidden m-0 min-w-80"
+                    align="start"
+                    sideOffset={4}
+                  >
+                    <div className="p-4 border-b border-gray-100">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Input
+                          placeholder="Search..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="h-9 pl-9 bg-gray-50/50 border-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      {isLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <Spinner className='w-5 h-5' />
+                        </div>
                       ) : (
-                        <p className="p-2 text-sm text-gray-500">
-                          No results found.
-                        </p>
+                        <div className="max-h-[250px] overflow-y-auto">
+                          {filteredOptions.length ? (
+                            filteredOptions.map((option) => (
+                              <FormItem
+                                key={option.value}
+                                className="flex flex-row items-center space-x-3 rounded-md px-2 py-1.5 hover:bg-gray-50 text-gray-500"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={
+                                      values
+                                        ? values.includes(option.value)
+                                        : field.value.includes(option.value)
+                                    }
+                                    onCheckedChange={(checked) => {
+                                      const newValue = checked
+                                        ? [...(values ?? field.value), option.value]
+                                        : (values ?? field.value).filter(
+                                            (value) => value !== option.value,
+                                          );
+                                      if (onChange) {
+                                        field.onChange(newValue);
+                                        onChange(newValue);
+                                      } else {
+                                        field.onChange(newValue);
+                                      }
+                                      if (onSelect) {
+                                        onSelect(option.value);
+                                      }
+                                      option.actionFn &&
+                                        option.actionFn(option.value);
+                                    }}
+                                className="mt-0.5"
+                                  />
+                                </FormControl>
+                                {CustomItemComponent ? (
+                                  <FormLabel className="w-full cursor-pointer font-normal">
+                                    <CustomItemComponent option={option} />
+                                  </FormLabel>
+                                ) : (
+                                  <FormLabel className="cursor-pointer">{option.label}</FormLabel>
+                                )}
+                              </FormItem>
+                            ))
+                          ) : (
+                            <p className="py-8 text-center text-sm text-gray-400">
+                              No results found
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </PopoverContent>

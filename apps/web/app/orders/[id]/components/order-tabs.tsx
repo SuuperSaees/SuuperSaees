@@ -2,20 +2,34 @@
 
 import { UseQueryResult, useQuery } from '@tanstack/react-query';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
-
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
-
 import { UserWithSettings } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { getOrderAgencyMembers } from '~/team-accounts/src/server/actions/orders/get/get-order';
-
-import ActivityPage from './activity';
-import CalendarSection from './calendar-section';
-import DetailsPage from './details';
-import TasksSection from './tasks';
-import FileSection from '~/components/organization/files';
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import ActivityPage from './activity';
+
+const DetailsPage = dynamic(() => import('./details'), {
+  loading: () => <div className="flex h-full items-center justify-center"></div>,
+  ssr: false
+});
+
+const TasksSection = dynamic(() => import('./tasks'), {
+  loading: () => <div className="flex h-full items-center justify-center"></div>,
+  ssr: false
+});
+
+const FileSection = dynamic(() => import('~/components/organization/files'), {
+  loading: () => <div className="flex h-full items-center justify-center"></div>,
+  ssr: false
+});
+
+const CalendarSection = dynamic(() => import('./calendar-section'), {
+  loading: () => <div className="flex h-full items-center justify-center"></div>,
+  ssr: false
+});
 
 type OrderTabsProps = {
   organizationId:
@@ -46,9 +60,8 @@ export const OrderTabs = ({
   agencyName,
 }: OrderTabsProps) => {
 
-  const [activeTab, setActiveTab] = useState<TabType>(
-    'activity',
-  );
+  const [activeTab, setActiveTab] = useState<TabType>('activity');
+  
   const { data: orderAgencyMembers, isLoading } = useQuery<UserWithSettings[]>({
     queryKey: ['order-agency-members', orderId],
     queryFn: async () => {
@@ -99,9 +112,6 @@ export const OrderTabs = ({
           className="flex items-center gap-1"
         >
           <Trans i18nKey={'orders:details.navigation.tasks'} />
-          {/* <TaskCounter
-            taskCount={countIncompleteTasks(tasks)}
-          /> */}
         </ThemedTabTrigger>
         <ThemedTabTrigger value="files" activeTab={activeTab} option={'files'}>
           <Trans i18nKey={'orders:details.navigation.files'} />

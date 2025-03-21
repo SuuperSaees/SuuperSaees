@@ -22,7 +22,7 @@ const UserFile = ({ file, files }: UserFileProps) => {
   };
 
   return (
-    <div className="flex mb-10">
+    <div className="flex">
       {renderFilePreview(file)}
     </div>
   );

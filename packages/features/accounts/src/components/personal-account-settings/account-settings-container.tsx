@@ -162,7 +162,7 @@ export function PersonalAccountSettingsContainer(
   }
 
   return (
-    <div className="w-full h-full">
+    <div className="">
       <Tabs defaultValue={"site"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
           <div className="flex items-center justify-between pb-[24px]">
@@ -207,7 +207,7 @@ export function PersonalAccountSettingsContainer(
         }
         
         <TabsContent value="profile">
-          <ProfileSettings user={user} userSettings={userSettings} callback={props.paths.callback} handleChangeLanguage={handleChangeLanguage} userRole={role} />
+          <ProfileSettings user={user} userSettings={userSettings} callback={props.paths.callback} userRole={role} />
         </TabsContent>
         <TabsContent value="subscription">
           <BillingContainerConfig tab={tab ?? ''} />

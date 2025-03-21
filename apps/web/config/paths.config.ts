@@ -12,6 +12,11 @@ const PathsSchema = z.object({
   }),
   app: z.object({
     home: z.string().min(1),
+    dashboard: z.string().min(1),
+    toolCopyList: z.string().min(1),
+    catalogProvider: z.string().min(1),
+    catalogProduct: z.string().min(1),
+    messages: z.string().min(1),
     orders: z.string().min(1),
     users: z.string().min(1),
     services: z.string().min(1),
@@ -31,6 +36,8 @@ const PathsSchema = z.object({
     organization: z.string().min(1),
     storage: z.string().min(1),
     setPassword: z.string().min(1),
+    apps: z.string().min(1),
+    embeds: z.string().min(1),
   }),
 });
 
@@ -45,10 +52,15 @@ const pathsConfig = PathsSchema.parse({
   },
   app: {
     home: '/home',
+    dashboard: '/dashboard',
     team: '/team',
     clients: '/clients',
     orders: '/orders',
+    messages: '/messages',
     users: '/users',
+    toolCopyList: '/tools/copy-listing',
+    catalogProvider: '/catalog/providers',
+    catalogProduct: '/catalog/products',
     services: '/services',
     invoices: '/invoices',
     personalAccountSettings: '/home/settings',
@@ -65,6 +77,8 @@ const pathsConfig = PathsSchema.parse({
     storage: '/storage',
     briefs: '/briefs',
     setPassword: '/set-password',
+    apps: '/apps',
+    embeds: '/embeds',
   },
 } satisfies z.infer<typeof PathsSchema>);
 

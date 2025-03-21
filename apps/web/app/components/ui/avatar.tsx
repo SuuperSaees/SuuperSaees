@@ -15,7 +15,7 @@ export default function Avatar({
   const fallback = username ? username.charAt(0).toUpperCase() : 'N/A';
 
   return (
-    <div className={`rounded-full w-8 h-8 border-2 border-white overflow-hidden ${className}`}>
+    <div className={`rounded-full border-2 border-white overflow-hidden shrink-0 ${!className?.includes('w-') ? 'w-8 h-8': ''} ${className}`}>
       {src ? (
         <img src={src} alt={alt} className="h-full w-full object-cover" />
       ) : (

@@ -15,6 +15,7 @@
   "dashboardTabDescription": "Un resumen de la actividad y rendimiento de tu organización en todos tus proyectos.",
   "settingsTabDescription": "Administra tus configuraciones y preferencias.",
   "emailAddress": "Correo electrónico",
+  "messagesName": "Mensajes",
   "password": "Contraseña",
   "confirmClose": "¿Estás seguro de que quieres continuar?",
   "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
@@ -57,8 +58,14 @@
   "settingsName": "Configuraciones",
   "usersName": "Usuarios",
   "ordersName": "Proyectos",
+  "dashboardName": "Tablero",
   "clientsName": "Clientes",
   "teamName": "Equipo",
+  "aiToolsName": "Herramientas AI",
+  "catalogProviderName": "Proveedores",
+  "catalogProductName": "Productos",
+  "toolCopyListName": "Copiar listado",
+  "catalogName": "Catálogo",
   "nameInput": "Nombre",
   "storage": "Almacenamiento",
   "namePortalInput": "Nombre del portal",
@@ -82,7 +89,8 @@
   "clear": "Eliminar",
   "pagination": {
     "next": "Siguiente",
-    "previous": "Anterior"
+    "previous": "Anterior",
+    "search": "Buscar..."
   },
   "timer": {
     "pauseTimer": "Pausar temporizador",
@@ -103,6 +111,87 @@
   "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos",
   "rowsPerPage": "Mostrar",
   "rowNumber": "{{number}} filas",
-  "filters": "Filtros",
-  "resetFilters": "Restablecer filtros"
+  "filters": {
+    "title": "Filtros",
+    "appliedFilters": {
+      "singular": "({{number}})",
+      "plural": "({{number}})"
+    },
+    "resetFilters": "Limpiar filtros",
+    "groups": {
+      "status": {
+        "title": "Estado"
+      },
+      "client_organization": {
+        "title": "Organización del cliente"
+      },
+      "assigned_to": {
+        "title": "Asignado a"
+      },
+      "tags": {
+        "title": "Etiquetas"
+      },
+      "customer": {
+        "title": "Cliente"
+      },
+      "priority": {
+        "title": "Prioridad"
+      }
+    }
+  },
+  "pluginsName": "Aplicaciones",
+  "goToPage": "Ir a la página",
+  "of": "de",
+  "showing": "Mostrando",
+  "go": "Ir",
+  "export": {
+    "exportCSV": "Exportar CSV",
+    "exportOptions": "Opciones de exportación",
+    "configureAndPreview": "Configura tus opciones de exportación y ve la vista previa de los resultados",
+    "settings": "Configuraciones",
+    "preview": "Vista previa",
+    "filename": "Nombre del archivo",
+    "delimiter": "Delimitador",
+    "selectDelimiter": "Seleccionar delimitador",
+    "comma": "Coma",
+    "semicolon": "Punto y coma",
+    "tab": "Tabulador",
+    "delimiterHelp": "Elige el delimitador que mejor funcione con tu aplicación de hojas de cálculo. La coma es estándar para CSV, pero el punto y coma puede funcionar mejor en algunas regiones.",
+    "usePagination": "Usar paginación",
+    "pageSize": "Tamaño de la página",
+    "currentPage": "Página actual",
+    "selectColumns": "Seleccionar columnas para exportar",
+    "selectAll": "Seleccionar todas",
+    "clearAll": "Limpiar todas",
+    "previewTitle": "Vista previa de datos",
+    "previewDescription": "Vista previa de las primeras 5 filas de datos con las columnas seleccionadas",
+    "noColumnsSelected": "No hay columnas seleccionadas para exportar",
+    "export": "Exportar",
+    "selectAtLeastOneColumn": "Por favor, selecciona al menos una columna para exportar"
+  },
+  "embedsName": "Embeds",
+  "overdue": {
+    "title": "Retrasado",
+    "singular": {
+      "description": "Retrasado por {{days}} día"
+    },
+    "plural": {
+      "description": "Retrasado por {{days}} días"
+    }
+  },
+  "workspaceName": "Espacio de trabajo",
+  "sidebar": {
+    "addSpace": "Agregar espacio",
+    "projects": "Proyectos",
+    "services": "Servicios",
+    "members": "Miembros",
+    "files": "Archivos",
+    "inviteMembers": "Invitar miembros",
+    "clients": "Clientes",
+    "pinClient": "Fijar cliente",
+    "unpinClient": "Desfijar cliente",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "addClient": "Agregar cliente"
+  }
 }

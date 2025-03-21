@@ -262,3 +262,10 @@ SELECT pg_catalog.setval('"public"."role_permissions_id_seq"', 7, true);
 --
 
 SELECT pg_catalog.setval('"supabase_functions"."hooks_id_seq"', 19, true);
+
+INSERT INTO "public"."plugins" ("id", "deleted_on", "created_at", "updated_at", "type", "description", "metadata", "name", "icon_url") VALUES ('a346f4d2-8501-4f28-810a-26b487a05b65', null, '2025-01-10 22:28:38.765124+00', '2025-01-10 22:28:38.765124+00', 'external', 'Stripe plugin for managing payment gateways.', '{"version": "1.0.0", "documentation_url": "https://stripe.com/docs"}', 'stripe', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins/stripe.png?t=2025-01-10T22%3A21%3A06.994Z'), ('c9a95821-6d63-4588-98b1-47d4aaaa46be', null, '2025-01-10 22:28:38.765124+00', '2025-01-10 22:28:38.765124+00', 'external', 'Loom plugin for recording and sharing videos.', '{"version": "1.0.0", "documentation_url": "https://loom.com/docs"}', 'loom', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins/loom.png?t=2025-01-10T22%3A18%3A46.373Z'), ('f7dba2ae-6183-4742-b03c-cda819fb10a9', null, '2025-01-10 22:28:38.765124+00', '2025-01-10 22:28:38.765124+00', 'external', 'Treli plugin for LATAM subscription management.', '{"version": "1.0.0", "documentation_url": "https://treli.com/docs"}', 'treli', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins/treli.png?t=2025-01-10T22%3A22%3A02.727Z');
+
+INSERT INTO "public"."plugins" 
+("id", "deleted_on", "created_at", "updated_at", "type", "description", "metadata", "name", "icon_url") 
+VALUES 
+('e8f72b59-3a41-4c8d-9e67-d5b8f1d2c0a3', null, '2025-01-10 22:28:38.765124+00', '2025-01-10 22:28:38.765124+00', 'internal', 'Integrate any custom iframe as an application within the platform.', '{"version": "1.0.0", "documentation_url": "https://suuper.co/docs"}', 'embeds', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//embeds.jpg');

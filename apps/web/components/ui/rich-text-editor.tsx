@@ -144,6 +144,7 @@ interface RichTextEditorProps {
   className?: string;
   handleFileIdsChange?: (fileIds: string[]) => void;
   isDragging?: boolean;
+  referenceId?: string;
   setIsDragging?: (value: boolean) => void;
   agencyId?: string;
   clientOrganizationId?: string;
@@ -171,6 +172,7 @@ const RichTextEditor = ({
   handleFileIdsChange,
   className,
   isDragging,
+  referenceId,
   setIsDragging,
   agencyId,
   clientOrganizationId,
@@ -234,9 +236,9 @@ const RichTextEditor = ({
         //   sendContent();
         //   return true;
         // },
-        // Insert new paragraph on Ctrl + Enter or Cmd + Enter
+        // Insert line break on Ctrl + Enter or Cmd + Enter
         'Mod-Enter': () => {
-          this.editor.commands.splitBlock();
+          this.editor.commands.setHardBreak();
           return true;
         },
       };
@@ -313,7 +315,7 @@ const RichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none',
+          'prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl focus:outline-none [&>p]:mb-4',
       },
     },
     onUpdate({ editor }) {
@@ -502,6 +504,7 @@ const RichTextEditor = ({
             agencyId={agencyId ?? ''}
             clientOrganizationId={clientOrganizationId ?? ''}
             folderId={folderId ?? ''}
+            referenceId={referenceId}
           />
           <div className='flex justify-between'>
             {showToolbar && (

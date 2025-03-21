@@ -2,13 +2,9 @@
 
 import { useMemo, useState } from 'react';
 
-
-
 import { ColumnDef } from '@tanstack/react-table';
 import { Ellipsis, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
-
 
 import { Database } from '@kit/supabase/database';
 import { Badge } from '@kit/ui/badge';
@@ -57,6 +53,12 @@ export function AccountInvitationsTable({
     );
   }), [invitations, search]);
 
+  const sortedInvitations = useMemo(() => {
+    return [...filteredInvitations].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [filteredInvitations]);
+
   return (
     <div className={'flex flex-col space-y-4'}>
       <div className="flex items-center justify-between">
@@ -79,7 +81,7 @@ export function AccountInvitationsTable({
       <DataTable
         data-cy={'invitations-table'}
         columns={columns}
-        data={filteredInvitations}
+        data={sortedInvitations}
       />
       </div>
     </div>
@@ -126,6 +128,9 @@ function useGetColumns(permissions: {
       },
       {
         header: t('invitedAtLabel'),
+        id: 'created_at',
+        sortingFn: 'datetime',
+        sortDescFirst: true,
         cell: ({ row }) => {
           return new Date(row.original.created_at).toLocaleDateString();
         },

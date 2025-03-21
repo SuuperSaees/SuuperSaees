@@ -53,7 +53,7 @@ async function fetchClientMembers(
   client: SupabaseClient<Database>,
   currentUserOrganizationId: string,
   currentUserRole: string,
-  clientOrganizacionId: string,
+  clientOrganizationId: string,
   agencyRoles: string[],
   clientRoles: string[],
 ) {
@@ -64,7 +64,7 @@ async function fetchClientMembers(
       .from('clients')
       .select('user_client_id')
       .eq('agency_id', currentUserOrganizationId)
-      .eq('organization_client_id', clientOrganizacionId)
+      .eq('organization_client_id', clientOrganizationId)
       .is('deleted_on', null);
   } else if (clientRoles.includes(currentUserRole)) {
     clientsQuery = client
@@ -76,6 +76,7 @@ async function fetchClientMembers(
     throw new Error('User role is neither agency nor client.');
   }
 
+  
   const { data: clientsData, error: clientsDataError } = await clientsQuery;
   if (clientsDataError) {
     throw new Error(`Error fetching client data: ${clientsDataError.message}`);
@@ -88,6 +89,7 @@ async function fetchClientMembers(
     .select(
       'id, email, picture_url, name, organization_id, primary_owner_user_id, created_at, is_personal_account, settings:user_settings!user_id(name, picture_url)',
     )
+    .eq('is_personal_account', true)
     .in('id', clientsIds);
 
     // Get the roles
@@ -108,6 +110,7 @@ async function fetchClientMembers(
     const transformedClientAccounts = clientAccounts?.map((client) => ({
       ...client,
       role: clientUsersRoles?.find((role) => role.user_id === client.id)?.account_role ?? null,
+      picture_url: client.settings?.picture_url ?? client.picture_url,
     }));
 
   if (clientAccountsError) {
@@ -265,7 +268,7 @@ export async function fetchClientOrganizations(
     await client
       .from('accounts')
       .select(
-        'id, name, slug, picture_url, primary_owner_user_id, created_at, is_personal_account',
+        'id, name, slug, picture_url, primary_owner_user_id, created_at, is_personal_account, settings:organization_settings(key, value)',
       )
       .in('id', clientOrganizationIds)
       .eq('is_personal_account', false);
@@ -279,14 +282,16 @@ export async function fetchClientOrganizations(
 }
 
 // Helper function to combine client owner data with organization data
-// Helper function to combine client owner data with organization data
 function combineClientData(
   clientOwners: UserAccount[],
   clientOrganizations: Organization[],
   clientUsers: UserAccount[],
 ) {
-  // Map over each organization to attach its primary owner and associated users
-  return clientOrganizations.map((organization) => {
+  const sortedOrganizations = [...clientOrganizations].sort((a, b) => 
+    new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
+  );
+
+  return sortedOrganizations.map((organization) => {
     // Find the primary owner based on `primary_owner_user_id`
     const primaryOwner = clientOwners.find(
       (owner) => owner.id === organization.primary_owner_user_id
@@ -423,11 +428,20 @@ export async function getClientsOrganizations() {
       client,
       clientOrganizationIds,
     );
-    return clientOrganizations;
+
+    // Return only the logo_url
+    const clientOrganizationsWithLogoUrl = clientOrganizations.map((organization) => ({
+      ...organization,
+      picture_url: organization.settings?.find((setting) => setting.key === 'logo_url')?.value ?? organization.picture_url ?? '',
+    }));
+
+
+    return clientOrganizationsWithLogoUrl;
   } catch (error) {
     console.error('Error fetching client organizations:', error);
     throw error;
   }
+
 }
 
 export async function fetchDeletedClients(client: SupabaseClient<Database>, agencyId: Client.Type['agency_id'], userId?: Client.Type['user_client_id']) {

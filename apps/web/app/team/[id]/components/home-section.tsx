@@ -1,44 +1,65 @@
 'use client';
 
+import { useCallback } from 'react';
+
+import { useParams } from 'next/navigation';
+
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
-import EmptyState from '~/components/ui/empty-state';
-import { useColumns } from '~/hooks/use-columns';
+import { SkeletonOrdersSection } from '~/components/organization/skeleton-orders-section';
 import { UserWithSettings } from '~/lib/account.types';
-import { Order } from '~/lib/order.types';
-import { useUserOrderActions } from '~/orders/hooks/user-order-actions';
-
-import Table from '../../../components/table/table';
-import CardStats from '../../../components/ui/card-stats';
+import { OrdersProvider } from '~/orders/components/context/orders-context';
+import ProjectsBoard from '~/orders/components/projects-board';
 import { useOrderStats } from '~/orders/hooks/use-order-stats';
+import { getTags } from '~/server/actions/tags/tags.action';
+import { getOrdersByUserId } from '~/team-accounts/src/server/actions/orders/get/get-order';
+
+import CardStats from '../../../components/ui/card-stats';
 
 interface HomeSectionProps {
-  memberOrders: Order.Response[];
   agencyMembers: UserWithSettings[];
 }
-export default function HomeSection({
-  memberOrders,
-  agencyMembers,
-}: HomeSectionProps) {
-  // console.log('memberOrders', memberOrders);
-  const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
-  const actions = {
-    orderDateMutation: orderDateMutation,
-    updateOrderAssigns: orderAssignsMutation,
-  };
-  const additionalData = {
-    orderAgencyMembers: agencyMembers,
-  };
-  const columns = useColumns('orders', {
-    data: additionalData,
-    actions: actions,
-  });
+
+export default function HomeSection({ agencyMembers }: HomeSectionProps) {
   const { t } = useTranslation('statistics');
-  // Current Date
+
+  const { id } = useParams();
+  // Transform agencyMembers to match the expected User.Response type
+
+  const queryKey = ['orders', id as string];
+  const queryFn = useCallback(async () => {
+    const orders = await getOrdersByUserId(
+      (id as string) ?? '',
+      true,
+      60,
+      true,
+    );
+    return orders.success?.data ?? [];
+  }, [id]);
+
+  const memberOrdersQuery = useQuery({
+    queryKey,
+    queryFn,
+  });
+
+  const memberOrders = memberOrdersQuery?.data ?? [];
+
+  const tagsQuery = useQuery({
+    queryKey: ['tags'],
+    queryFn: async () => await getTags(memberOrders?.[0]?.agency_id ?? ''),
+    enabled: !!memberOrders?.length,
+  });
+
+  const tags = tagsQuery?.data ?? [];
+
   const { currentStats, previousStats } = useOrderStats(memberOrders);
+  if (tagsQuery.isLoading || memberOrdersQuery.isLoading) {
+    return <SkeletonOrdersSection />;
+  }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex h-full flex-col gap-8">
       <div className="flex flex-wrap gap-2.5">
         <CardStats
           title={t('projects.active')}
@@ -47,6 +68,7 @@ export default function HomeSection({
             previous: previousStats.active,
             unit: 'months',
           }}
+          type="active"
         />
         <CardStats
           title={t('projects.rating.average')}
@@ -54,7 +76,8 @@ export default function HomeSection({
             current: currentStats.averageRating,
             previous: previousStats.averageRating,
             unit: 'months',
-          }} // Placeholder for rating
+          }}
+          type="rating"
         />
         <CardStats
           title={t('projects.month.last')}
@@ -63,6 +86,7 @@ export default function HomeSection({
             previous: previousStats.total,
             unit: 'months',
           }}
+          type="totalInTheLastMonth"
         />
         <CardStats
           title={t('projects.completed')}
@@ -71,20 +95,22 @@ export default function HomeSection({
             previous: previousStats.completed,
             unit: 'months',
           }}
+          type="completed"
         />
       </div>
-      <Table
-        data={memberOrders}
-        columns={columns}
-        filterKey={'title'}
-        emptyStateComponent={
-          <EmptyState
-            title={t('orders:empty.member.title')}
-            description={t('orders:empty.member.description')}
-            imageSrc="/images/illustrations/Illustration-box.svg"
-          />
-        }
-      />
+      <OrdersProvider
+        agencyMembers={agencyMembers}
+        agencyId={memberOrders[0]?.agency_id ?? ''}
+        queryKey={queryKey}
+        queryFn={queryFn}
+        initialOrders={memberOrders}
+      >
+        <ProjectsBoard
+          agencyMembers={agencyMembers}
+          tags={tags}
+          className="min-h-[800px]"
+        />
+      </OrdersProvider>
     </div>
   );
 }

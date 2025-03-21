@@ -200,6 +200,7 @@
   "brandSidebarReset": "Restablecer",
   "brandSenderNameSubmit": "Actualizar remitente",
   "brandSenderName": "Nombre del remitente",
+  "brandDomain": "Dominio",
   "brandSenderNameDescription": "Actualiza el nombre que se mostrará como el remitente de los correos electrónicos",
   "brandSenderEmailAndDomain": "Correo electrónico y dominio del remitente",
   "brandSenderEmailAndDomainDescription": "Actualiza el correo electrónico y el dominio que se mostrará como el remitente de los correos electrónicos",
@@ -230,5 +231,9 @@
   "clipboardCopied": "Contenido copiado al portapapeles",
   "clipboardError": "Error al copiar al portapapeles",
   "connect": "Conectar",
-  "guest": "Invitado"
+  "guest": "Invitado",
+  "updateLanguageSuccess": "Idioma actualizado con éxito",
+  "invalidLoomAppIdFormat": "Formato de ID de aplicación de Loom inválido",
+  "domainUpdatedSuccessfully": "Dominio actualizado con éxito",
+  "domainUpdateError": "Error al actualizar el dominio"
 }

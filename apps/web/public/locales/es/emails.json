@@ -84,5 +84,25 @@
     "activateAccount": "Recuperar contraseña",
     "greeting": "Hola ${toEmail}",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+  },
+  "clientInvitationEmail": {
+    "subject": "Invitación a unirse a ${agencyName}",
+    "body": "Has sido invitado a unirte a ${agencyName}",
+    "yourUsername": "Tu nombre de usuario:",
+    "thanks": "Gracias,",
+    "team": "El equipo",
+    "activateAccount": "Aceptar invitación",
+    "at": "de",
+    "greeting": "Hola ${toEmail}",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+  },
+    "chatMessage": {
+      "subject": "Nuevo mensaje de ${senderName} en ${chatTitle}",
+      "body": "${senderName} te ha enviado un nuevo mensaje en el chat ${chatTitle}",
+      "greeting": "Hola ${toName},",
+      "viewMessage": "Ver Mensaje",
+      "farewell": "Saludos cordiales,",
+      "footer": "Estás recibiendo este correo porque eres participante de este chat. Si no deseas recibir estas notificaciones, puedes ajustar tu configuración de notificaciones.",
+      "at": "en"
   }
 }

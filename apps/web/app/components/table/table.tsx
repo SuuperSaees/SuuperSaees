@@ -8,9 +8,10 @@ import { ListFilter, Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+import { convertToTitleCase } from '~/orders/[id]/utils/format-agency-names';
 
 import { Button } from '@kit/ui/button';
-import { DataTable } from '@kit/ui/data-table';
+import { CustomConfigs, DataTable } from '@kit/ui/data-table';
 import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 import { Separator } from '@kit/ui/separator';
 
@@ -85,6 +86,7 @@ interface TableProps<T> {
     filterableColumns: (keyof T)[];
   };
   controllerBarComponents?: ControllerBarComponentsProps;
+  configs?: CustomConfigs
 }
 
 export default function Table<T>({
@@ -98,6 +100,7 @@ export default function Table<T>({
   className,
   presetFilters,
   controllerBarComponents,
+  configs
 }: TableProps<T>) {
   const [search, setSearch] = useState(controllers?.search?.value ?? '');
   const [filteredData, setFilteredData] = useState(data);
@@ -126,8 +129,14 @@ export default function Table<T>({
 
       // Check if the object matches all active filters
       const matchesFilters = Object.entries(activeFilters).every(
-        ([key, value]) =>
-          String(obj[key as keyof T] ?? '').includes(String(value)),
+        ([key, value]) => {
+          if (key === 'tags') {
+            return obj.tags?.some(tagObj => 
+              String(tagObj.tag?.name ?? '').includes(String(value))
+            );
+          }
+          return String(obj[key as keyof T] ?? '').includes(String(value));
+        }
       );
 
       return displayValue.includes(searchString) && matchesFilters;
@@ -187,6 +196,7 @@ export default function Table<T>({
         className="rounded-xl bg-white"
         emptyStateComponent={emptyStateComponent}
         disableInteractions={disableInteractions}
+        configs={configs}
       />
     </div>
   );
@@ -253,9 +263,9 @@ export function ControllerBar<T>({
 interface PresetFiltersProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
-  filterableColumns: (keyof T)[];
-  onFilter: (columnKey: keyof T, value: string) => void;
-  activeFilters: Record<keyof T, string>;
+  filterableColumns: (keyof T | 'tags')[];
+  onFilter: (columnKey: keyof T | 'tags', value: string) => void;
+  activeFilters: Record<string, string>;
   className?: string;
 }
 
@@ -271,25 +281,47 @@ const PresetFilters = <T,>({
 
   // Helper function to check if a value is primitive
   const isPrimitive = (val: unknown) => val !== Object(val);
-  const dataByColumn = columns.reduce(
-    (acc, column) => {
-      if (filterableColumns.includes(column.accessorKey)) {
-        acc[column.accessorKey] = Array.from(
+
+
+  const dataByColumn = filterableColumns.reduce(
+    (acc, fieldKey) => {
+      if (fieldKey === 'tags') {
+        const allTags = data.reduce((tags: any[], item: any) => {
+          if (item.tags && Array.isArray(item.tags)) {
+            tags.push(...item.tags);
+          }
+          return tags;
+        }, []);
+
+        acc[fieldKey] = allTags
+          .filter((tag: any) => tag.tag?.id && tag.tag?.name)
+          .reduce((unique: any[], current: any) => {
+            const exists = unique.some((item) => item.id === current.tag.id);
+            if (!exists) {
+              unique.push({
+                id: current.tag.id,
+                name: current.tag.name
+              });
+            }
+            return unique;
+          }, []);
+      } else {
+        acc[fieldKey] = Array.from(
           new Set(
             data
-              .map((item) => item[column.accessorKey])
-              .filter(
-                (value) =>
-                  isPrimitive(value) && value !== null && value !== undefined,
-              ), // Ensure value is primitive
-          ),
+              .map((item) => item[fieldKey as keyof T])
+              .filter((value) => 
+                value !== null && 
+                value !== undefined &&
+                (isPrimitive(value) || typeof value === 'object')
+              )
+          )
         );
       }
       return acc;
     },
-    {} as Record<keyof T, string[]>,
+    {} as Record<keyof T, any[]>
   );
-
   // Function to reset all filters
   const resetFilters = () => {
     filterableColumns.forEach((columnKey) => onFilter(columnKey, ''));
@@ -303,7 +335,7 @@ const PresetFilters = <T,>({
           className="flex w-fit items-center gap-2 text-sm font-semibold text-gray-600"
         >
           <ListFilter className="h-4 w-4" />
-          <span>{t('common:filters')}</span>
+          <span>{t('common:filters.title')}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="relative flex flex-col gap-4 py-6">
@@ -312,7 +344,7 @@ const PresetFilters = <T,>({
           className="absolute right-4 top-2 h-6 w-6 rounded-full p-0"
           onClick={resetFilters}
         >
-          <Tooltip content={t('common:resetFilters')}>
+          <Tooltip content={t('common:filters.resetFilters')}>
             <ResetIcon className="h-4 w-4" />
           </Tooltip>
         </Button>
@@ -341,6 +373,23 @@ const PresetFilters = <T,>({
               />
             </div>
           ))}
+        {/* Add a new column for tags */}
+        {
+          filterableColumns.includes('tags') && (
+            <div className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-gray-600">Tags</span>
+              <Combobox 
+                options={dataByColumn['tags']?.map((item: { id: string, name: string }) => ({
+                  value: item.id,
+                  label: convertToTitleCase(item.name),
+                  actionFn: () => onFilter('tags', item.name),
+                }))} 
+                className="w-full text-sm"
+                defaultValue={activeFilters.tags} 
+              />
+            </div>
+          )
+        }
       </PopoverContent>
     </Popover>
   );

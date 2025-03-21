@@ -33,15 +33,23 @@ export function useSignInWithEmailPassword() {
       .from('clients')
       .select('user_client_id')
       .eq('user_client_id', userId)
-      .eq('agency_id', organizationId)
+      .eq('agency_id', organizationId ?? '')
       .not('deleted_on', 'is', null)
       .maybeSingle();
 
     if (clientError) {
       throw new Error(`Error fetching client data: ${clientError.message}`);
     }
+
+    const { data: notAllowedMember } = await client
+    .from('accounts')
+    .select('id')
+    .eq('id', userId)
+    .not('deleted_on', 'is', null)
+    .maybeSingle();
+    
     // Step 6: If the user is not allowed bcz is deleted from the agency's clients, don't allow the user to sign in
-    if (notAllowedClient) {
+    if (notAllowedClient ?? notAllowedMember) {
       // Log the user out
       await client.auth.signOut();
       throw new Error('User cannot sign in with this account');

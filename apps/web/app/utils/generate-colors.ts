@@ -16,10 +16,10 @@ export function darkenColor(hex: string, amount = 0.1): string {
   let g = parseInt(hex.slice(2, 4), 16);
   let b = parseInt(hex.slice(4, 6), 16);
 
-  const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b);
-  if (luminance < 80) { 
-    return '#FFFFFF';
-  }
+  // const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b);
+  // if (luminance < 80) { 
+  //   return '#FFFFFF';
+  // }
 
   // Convert RGB to HSL
   r /= 255;
@@ -117,4 +117,18 @@ export const hexToRgb = (hex: string) => {
   const b = parseInt(hex.substring(4, 6), 16);
   
   return `${r}, ${g}, ${b}`;
+};
+
+export const getContrastColor = (color: string) => {
+  const { theme: baseTextColor, luminance } = getColorLuminance(color);
+
+  let contrasColor = baseTextColor === 'dark' ? 'white' : 'black';
+
+  if (luminance < 50) {
+    contrasColor = 'white';
+  } else if (luminance > 200) {
+    contrasColor = 'black';
+  }
+
+  return contrasColor;
 };

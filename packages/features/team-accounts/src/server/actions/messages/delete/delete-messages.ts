@@ -22,9 +22,11 @@ function parseStorageUrl(url: string): StoragePathInfo {
   };
 }
 
-export const deleteMessage = async (messageId: string) => {
+export const deleteMessage = async (messageId: string, adminActived = false) => {
   try {
-    const client = getSupabaseServerComponentClient();
+    const client = getSupabaseServerComponentClient({
+      admin: adminActived,
+    });
 
     const { data: files, error: filesError } = await client
       .from('files')

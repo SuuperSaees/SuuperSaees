@@ -1,30 +1,24 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
-
-
 import { SupabaseClient } from '@supabase/supabase-js';
-
-
 
 // import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
-
-
 import pathsConfig from '~/config/paths.config';
-import { getDomainByUserId, getFullDomainBySubdomain } from '~/multitenancy/utils/get/get-domain';
+import {
+  getDomainByUserId,
+  getFullDomainBySubdomain,
+} from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
-
-
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
 // import { handleCsrf } from './handlers/csrf-handler';
 import { Database } from './lib/database.types';
-
 
 // import { handleDomainCheck } from './handlers/domain-check-handler';
 
@@ -52,17 +46,19 @@ function setCachedDomain(
     secure: isProd,
   });
 }
+
 function getCachedLanguage(request: NextRequest): string | null {
-  const langCookie = request.cookies.get('i18next');
+  const langCookie = request.cookies.get('lang');
   return langCookie ? langCookie.value : null;
 }
 
 function setCachedLanguage(
   response: NextResponse,
-  language: string,
+  language: string
 ) {
-  response.cookies.set('i18next', language, {
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+  // Set the language cookie for i18next to use
+  response.cookies.set('lang', language, {
+    maxAge: 60 * 60 * 24, // 1 day - shorter expiry to ensure updates are picked up
   });
 }
 
@@ -156,7 +152,6 @@ export async function middleware(request: NextRequest) {
   response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);
 
-  
   const csrfResponse = response;
 
   const handlePattern = matchUrlPattern(request.url);
@@ -168,29 +163,60 @@ export async function middleware(request: NextRequest) {
   if (request.headers.has('next-action')) {
     csrfResponse.headers.set('x-action-path', request.nextUrl.pathname);
   }
-  
+
   setCORSHeaders(csrfResponse);
 
   try {
     const supabase = createMiddlewareClient(request, response);
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const host = new URL(request.nextUrl.origin).host;
     if (user) {
-      const cachedLang = getCachedLanguage(request);
-      if (!cachedLang) {
-        const values = ['language'];
-        const domainData = await getFullDomainBySubdomain(host, true, values);
-        const language = domainData?.settings?.find(
+      // Always check for the latest language preferences on each request
+      // This ensures changes to organization settings are immediately reflected
+      
+      // Check if the user has a language preference
+      const { data: userSettings } = await supabase
+        .from('user_settings')
+        .select('preferences')
+        .eq('user_id', user.id)
+        .single();
+      
+      // Extract user language preference if it exists
+      let language = 'en';
+      
+      if (userSettings?.preferences && 
+          typeof userSettings.preferences === 'object' && 
+          userSettings.preferences !== null && 
+          'user' in userSettings.preferences && 
+          typeof userSettings.preferences.user === 'object' && 
+          userSettings.preferences.user !== null && 
+          'language' in userSettings.preferences.user) {
+        // User has a language preference, use it
+        language = String(userSettings.preferences.user.language);
+      } else {
+        // If no user preference, fall back to organization setting
+        const domainData = await getFullDomainBySubdomain(host, true, ['language']);
+        language = domainData?.settings?.find(
           (setting) => setting.key === 'language'
         )?.value ?? 'en';
- 
+      }
+
+      // Get current language from cookie
+      const currentLang = getCachedLanguage(request);
+      
+      // Only update cookie if the language has changed or cookie is missing
+      if (!currentLang || currentLang !== language) {
         setCachedLanguage(csrfResponse, language);
       }
+    } else {
+      // Clear all localStorage when no session is present
+      csrfResponse.headers.set('Clear-Site-Data', '"storage"');
     }
   } catch (error) {
     console.error('Error setting language in middleware:', error);
   }
-  
 
   return csrfResponse;
 }
@@ -250,7 +276,7 @@ function getPatterns() {
           return;
         }
 
-        const {id: organizationId} = await getOrganizationByUserId(
+        const { id: organizationId } = await getOrganizationByUserId(
           user.id,
           true,
         ).catch((error) => {
@@ -307,7 +333,8 @@ function getPatterns() {
         // Check if this request is for the activation link (e.g., /auth/confirm)
         const isActivationLink =
           req.nextUrl.pathname.startsWith('/auth/confirm');
-        const isOnboarding = req.nextUrl.pathname.startsWith('/auth/onboarding');
+        const isOnboarding =
+          req.nextUrl.pathname.startsWith('/auth/onboarding');
 
         // Check if we need to verify MFA (user is authenticated but needs to verify MFA)
         const isVerifyMfa = req.nextUrl.pathname === pathsConfig.auth.verifyMfa;
@@ -334,51 +361,64 @@ function getPatterns() {
 
         const origin = req.nextUrl.origin;
         const next = req.nextUrl.pathname;
-       
-        const isOrdersPath = req.nextUrl.pathname.includes('orders') && req.nextUrl.searchParams.has('public_token_id');
+
+        const isOrdersPath =
+          req.nextUrl.pathname.includes('orders') &&
+          req.nextUrl.searchParams.has('public_token_id');
 
         // Check if this is an invitation URL
-        const isInvitationUrl = req.nextUrl.pathname === '/join' && 
-        req.nextUrl.searchParams.has('invite_token');
+        const isInvitationUrl =
+          req.nextUrl.pathname === '/join' &&
+          req.nextUrl.searchParams.has('invite_token');
 
         // Check if this is a checkout URL
-        const isCheckoutUrl = req.nextUrl.pathname === '/checkout' && (req.nextUrl.searchParams.has('tokenId') || req.nextUrl.searchParams.has('token_id'));
+        const isCheckoutUrl =
+          req.nextUrl.pathname === '/checkout' &&
+          (req.nextUrl.searchParams.has('tokenId') ||
+            req.nextUrl.searchParams.has('token_id'));
 
         // Skip authentication check for invitation URLs
 
         if (isOrdersPath) {
           const publicTokenId = req.nextUrl.searchParams.get('public_token_id');
-          const originalPath = req.nextUrl.pathname;
+          const originalPath = req.nextUrl.href;
+          console.log('originalPath', originalPath, publicTokenId, req.nextUrl);
           const confirmPath = `/auth/confirm?next=${originalPath}&public_token_id=${publicTokenId}`;
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }
-        
+
         if (isInvitationUrl || isCheckoutUrl) {
           return;
         }
-        
         // If user is not logged in, redirect to sign in page.
         if (!user) {
           const signIn = pathsConfig.auth.signIn;
           const redirectPath = `${signIn}?next=${next}`;
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
-        
+
         // Obtain the user role
         const userRole = await getUserRoleById(user.id);
         if (userRole === 'client_guest') {
           const allowedPaths = ['/orders', '/auth'];
           const currentPath = req.nextUrl.pathname;
-          if (!currentPath.startsWith('/orders') && 
-              !allowedPaths.some(path => currentPath.startsWith(path))) {
-            return NextResponse.redirect(new URL(pathsConfig.app.orders, origin).href);
+          if (
+            !currentPath.startsWith('/orders') &&
+            !allowedPaths.some((path) => currentPath.startsWith(path))
+          ) {
+            return NextResponse.redirect(
+              new URL(pathsConfig.app.orders, origin).href,
+            );
           }
         }
         const supabase = createMiddlewareClient(req, res);
 
         if (userRole === 'agency_owner') {
           const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
-          if (!hasPhoneNumber && !req.nextUrl.pathname.includes('auth/onboarding')) {
+          if (
+            !hasPhoneNumber &&
+            !req.nextUrl.pathname.includes('auth/onboarding')
+          ) {
             return NextResponse.redirect(
               new URL('/auth/onboarding', origin).href,
             );
@@ -476,7 +516,10 @@ function setCORSHeaders(response: NextResponse) {
 }
 
 // This function is to verify the phone number
-async function checkPhoneNumber(supabase: SupabaseClient<Database>, userId: string) {
+async function checkPhoneNumber(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+) {
   const { data, error } = await supabase
     .from('user_settings')
     .select('phone_number')

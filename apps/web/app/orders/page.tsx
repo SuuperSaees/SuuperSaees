@@ -1,17 +1,24 @@
-import { getOrders } from 'node_modules/@kit/team-accounts/src/server/actions/orders/get/get-order';
-import { getAgencyStatuses } from 'node_modules/@kit/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
+import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { getOrganizationById } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getTags } from '~/server/actions/tags/tags.action';
+import {
+  getAgencyForClient,
+  getOrganization,
+} from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
-import { OrderList } from './components/orders-list';
+import { OrdersProvider } from './components/context/orders-context';
+import ProjectsBoard from './components/projects-board';
+import SectionView from '~/components/organization/section-view';
+import Header from '~/components/organization/header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -21,55 +28,92 @@ export const generateMetadata = async () => {
 };
 
 async function OrdersPage() {
-  const client = getSupabaseServerComponentClient({ 
+  const client = getSupabaseServerComponentClient({
     admin: false,
   });
-  const ordersData = await getOrders(true).catch((err) => console.error(err));
-  const agencyId = ordersData?.[0]?.agency_id;
 
-  const agencyStatuses = await getAgencyStatuses(agencyId ?? '')
-    .catch((err) => console.error(err))
-    .catch(() => []);
+  const { workspace: userWorkspace } = await loadUserWorkspace();
+  const userOrganization = await getOrganization();
+  const agencyRoles = [
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ];
 
-  const agency = await getOrganizationById(agencyId ?? '').catch((err) => console.error(`Error fetching agency: ${err}`));  
+  const agency = agencyRoles.includes(userWorkspace.role ?? '')
+    ? userOrganization
+    : await getAgencyForClient(userOrganization.id ?? '');
+  const agencyId = agency?.id ?? '';
+  const agencyStatuses =
+    (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
 
-  const { data, error: membersError } = await client.rpc('get_account_members', {
-    account_slug: agency?.slug ?? '',
-  })
+  const { data, error: membersError } = await client.rpc(
+    'get_account_members',
+    {
+      account_slug: agency?.slug ?? '',
+    },
+  );
   let agencyMembers = [];
   if (membersError) {
     console.error('Error fetching agency members:', membersError);
     agencyMembers = [];
   }
-  agencyMembers = data?.map((member) => ({
-    ...member,
-    role: member.role.toLowerCase(),
-    user_settings:  {
-      picture_url: member.picture_url,
-      name: member.name,
-    }
-  })) ?? [];
+  agencyMembers =
+    data?.map((member) => ({
+      ...member,
+      role: member.role.toLowerCase(),
+      user_settings: {
+        picture_url: member.picture_url,
+        name: member.name,
+      },
+    })) ?? [];
 
-  
+  const tags = await getTags(agencyId ?? '');
+
   return (
-    <>
-      <AgencyStatusesProvider initialStatuses={agencyStatuses ?? []}>
-        <PageBody>
-          <div className="p-[35px]">
-            <PageHeader
+    <OrdersProvider
+      agencyMembers={agencyMembers ?? []}
+      agencyId={agencyId ?? ''}
+    >
+      <AgencyStatusesProvider
+        initialStatuses={agencyStatuses ?? []}
+        agencyMembers={agencyMembers ?? []}
+      >
+        <PageBody className="h-screen">
+          <div className="flex h-full max-h-full min-h-0 flex-1 flex-col p-[35px]">
+            {agencyRoles.includes(userWorkspace.role ?? '') ? <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
-            />
-
-            <OrderList
-              orders={ordersData ?? []}
-              agencyMembers={agencyMembers ?? []}
-              agencyStatuses={agencyStatuses ?? []}
-            ></OrderList>
+            /> : <Header 
+              name={userOrganization.name ?? ''} 
+              logo={userOrganization.picture_url ?? ''} 
+              id={userOrganization.id ?? ''} 
+              currentUserRole={userWorkspace.role ?? ''} 
+              className="flex items-center gap-2 mb-6"
+              imageClassName="aspect-square h-8 w-8 flex-shrink-0"
+              contentClassName="flex flex-col justify-center"
+            />}
+            {
+              agencyRoles.includes(userWorkspace.role ?? '') ? (
+                <ProjectsBoard agencyMembers={agencyMembers.map(member => ({
+                  organization_id: member.account_id,
+                  settings: member.user_settings,
+                  role: member.role
+                }))} tags={tags} />
+              ) : (
+                <SectionView 
+                  clientOrganizationId={userOrganization.id ?? ''} 
+                  currentUserRole={userWorkspace.role ?? ''} 
+                  agencyId={agencyId ?? ''} 
+                  sections={['orders']}
+                  showCardStats={false}
+                />
+              )
+            }
           </div>
         </PageBody>
       </AgencyStatusesProvider>
-    </>
+    </OrdersProvider>
   );
 }
 

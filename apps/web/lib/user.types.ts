@@ -8,8 +8,10 @@ export namespace User {
   export type Update = Database['public']['Tables']['accounts']['Update'];
   export type Response = Pick<
     Type,
-    'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
+    'email' | 'id' | 'name' | 'picture_url'
   > & {
-    settings: UserSettings.Type;
+    organization_id?: string | null;
+    settings?: UserSettings.Type | null;
+    role?: string | null;
   } ;
 }

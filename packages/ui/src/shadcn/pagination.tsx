@@ -71,7 +71,7 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn('gap-1 border border-gray-300 pl-2.5', className)}
+    className={cn('gap-1 pl-2.5 text-gray-600', className)}
     {...props}
   >
     <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -91,7 +91,7 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn('ml-3 gap-1 border border-gray-300 pr-2.5', className)}
+    className={cn('ml-3 gap-1 pr-2.5 text-gray-600', className)}
     {...props}
   >
     {props.children ?? (
@@ -114,7 +114,7 @@ const PaginationEllipsis = ({
     {...props}
   >
     <DotsHorizontalIcon className="h-4 w-4" />
-    <span className="sr-only">Más paginas</span>
+    {/* <span className="sr-only">Más paginas</span> */}
   </span>
 );
 PaginationEllipsis.displayName = 'PaginationEllipsis';

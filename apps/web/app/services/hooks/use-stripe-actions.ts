@@ -110,7 +110,7 @@ export function useStripeActions() {
       }
     const effectiveStripeId = stripeId;
     const effectiveOrgId = organizationId;
-     if (!effectiveStripeId || !effectiveOrgId) {
+     if (!effectiveOrgId) {
       throw new Error('Missing required IDs');
     }
 
@@ -127,6 +127,7 @@ export function useStripeActions() {
       organizationId: effectiveOrgId,
       paymentMethods,
       baseUrl: window.location.origin,
+      primaryOwnerId: ''
     });
   } catch (error) {
     console.error('Checkout error:', error);

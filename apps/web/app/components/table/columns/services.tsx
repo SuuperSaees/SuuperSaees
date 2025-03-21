@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-
+import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Link2, Pen } from 'lucide-react';
+import { Link2, Pen, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '@kit/ui/button';
@@ -11,17 +11,13 @@ import { Button } from '@kit/ui/button';
 import Tooltip from '~/components/ui/tooltip';
 import { Service } from '~/lib/services.types';
 import DeleteServiceDialog from '~/services/delete/delete-component';
-import { useStripeActions } from '~/services/hooks/use-stripe-actions';
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { ColumnConfigs } from '../types';
 
 export const servicesColumns = (
   t: TFunction,
-  paymentsMethods: ColumnConfigs['services']['paymentsMethods'],
   hasPermission?: ColumnConfigs['services']['hasPermission'],
-  stripeId?: string,
-  organizationId?: string,
 ): ColumnDef<Service.Relationships.Billing.BillingService>[] => {
   return [
     {
@@ -29,10 +25,10 @@ export const servicesColumns = (
       header: t('services:name'),
       cell: ({ row }) => (
         <Link
-          href={`/services/${row.original.id}`}
+          href={`/services/update?id=${row.original.id}`}
           className="flex w-full gap-2 font-semibold"
         >
-          <div className="capitalize">{row.getValue('name')}</div>
+          <div className="">{row.getValue('name')}</div>
         </Link>
       ),
     },
@@ -74,9 +70,6 @@ export const servicesColumns = (
           <ServiceActions
             service={row.original}
             hasPermission={hasPermission}
-            paymentsMethods={paymentsMethods}
-            stripeId={stripeId}
-            organizationId={organizationId}
           />
         );
       },
@@ -143,37 +136,33 @@ const DateDisplay = ({ date }: { date: string }) => {
 
 interface ServiceActionsProps {
   service: Service.Relationships.Billing.BillingService;
-  paymentsMethods: ColumnConfigs['services']['paymentsMethods'];
   hasPermission?: ColumnConfigs['services']['hasPermission'];
-  stripeId?: string;
-  organizationId?: string;
 }
 
 function ServiceActions({
   service,
-  paymentsMethods,
   hasPermission,
-  stripeId,
-  organizationId,
 }: ServiceActionsProps) {
   const { t } = useTranslation();
+const [copied, setCopied] = useState(false);
 
-  const { handleCheckout } = useStripeActions();
+const handleCopyCheckoutUrl = () => {
+  void navigator.clipboard.writeText(service.checkout_url ?? '');
+  setCopied(true);
+  setTimeout(() => setCopied(false), 2000);
+}
 
   return (
     <div className="flex items-center gap-4 self-stretch">
       {
         hasPermission && hasPermission('checkout') && (
-          <Tooltip content={t('services:checkoutURL')}>
+          <Tooltip content={copied ? t('services:checkoutURLCopied') : t('services:checkoutURL')}>
             <Button
               variant="ghost"
-              disabled={service.billing_services.length === 0}
-              className={`${service.billing_services.length === 0 ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-              onClick={() => {
-                handleCheckout(service, paymentsMethods, stripeId ?? '', organizationId ?? '');
-              }}
+              className="cursor-pointer"
+              onClick={handleCopyCheckoutUrl}
             >
-              <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />
+              {copied ? <Check className="h-5 w-5 cursor-pointer text-gray-600" /> : <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />}
             </Button>
           </Tooltip>
         )

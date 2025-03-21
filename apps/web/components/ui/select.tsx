@@ -11,10 +11,12 @@ import {
   SelectValue,
 } from '@kit/ui/select';
 import { Spinner } from '@kit/ui/spinner';
+import { cn } from '@kit/ui/utils';
 
-type Option = {
+export type Option = {
   label: string;
   value: string | number;
+  action?: (option: string | number) => void;
 };
 
 interface SelectActionProps {
@@ -26,7 +28,9 @@ interface SelectActionProps {
   customItem?: (option: string) => React.ReactNode; // JSX or string for both selected and dropdown items
   children?: React.ReactNode;
   isLoading?: boolean;
+  showLabel?: boolean;
   [key: string]: unknown;
+  containerClassname?: string;
 }
 
 const SelectAction = ({
@@ -38,6 +42,8 @@ const SelectAction = ({
   customItem,
   children,
   isLoading,
+  showLabel,
+  containerClassname,
   ...rest
 }: SelectActionProps) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
@@ -49,14 +55,20 @@ const SelectAction = ({
       (option) => option.value === defaultValue,
     );
     setSelectedLabel(defaultOption ? defaultOption.label : null);
+    setSelectedValue(defaultValue);
   }, [defaultValue, options]);
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="font-semibold">
-        {children ? children : groupName ? groupName : 'Select an option'}
-      </span>
+    <div className={cn('flex flex-col gap-2 ', containerClassname)}>
+      {
+        (children ?? groupName ?? showLabel) && (
+          <span className="font-semibold">
+            {children ? children : groupName ? groupName :showLabel ?  'Select an option' : null}
+          </span>
+        )
+      }
       <Select
+
         value={selectedValue ?? undefined}
         onValueChange={(value) => {
           const selectedOption = options.find(
@@ -65,16 +77,17 @@ const SelectAction = ({
           if (selectedOption) {
             setSelectedValue(String(selectedOption.value));
             setSelectedLabel(selectedOption.label);
+            selectedOption.action && selectedOption.action(selectedOption.value);
           }
           onSelectHandler && onSelectHandler(value);
         }}
         {...rest}
       >
-        <SelectTrigger className={'w-full border-none bg-black ' + className}>
+        <SelectTrigger className={'w-full ' + className}>
           <SelectValue placeholder={t('common:selectOption')}>
             {/* Use customItem for the selected value if provided, otherwise show the label */}
             {customItem && selectedValue
-              ? customItem(options.find((opt) => opt.value === selectedValue)!.label)
+              ? customItem(options.find((opt) => opt.value === selectedValue)?.label ?? '')
               : selectedLabel ?? t('common:selectOption')}
           </SelectValue>
         </SelectTrigger>
@@ -89,6 +102,7 @@ const SelectAction = ({
                 className="pointer-events-auto cursor-pointer"
               >
                 {/* Use customItem for dropdown items if provided, otherwise show the label */}
+                
                 {customItem ? customItem(option.label) : option.label}
               </SelectItem>
             ))}

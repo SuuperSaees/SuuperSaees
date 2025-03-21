@@ -20,6 +20,7 @@ interface UseFileUploadProps {
   agencyId: string;
   clientOrganizationId: string;
   folderId: string;
+  referenceId?: string;
 }
 
 export const useFileUpload = ({
@@ -30,6 +31,7 @@ export const useFileUpload = ({
   agencyId,
   clientOrganizationId,
   folderId,
+  referenceId
 }: UseFileUploadProps) => {
   const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -128,6 +130,7 @@ export const useFileUpload = ({
         type: file.type,
         url: fileUrl,
         user_id: userWorkspace.id ?? '',
+        reference_id: referenceId,
       };
 
       const createdFiles = await insertFilesInFolder(folderId, [newFileData], clientOrganizationId, agencyId);

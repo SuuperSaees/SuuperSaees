@@ -1,17 +1,13 @@
 import 'server-only';
 
-
-
 import { type EmailOtpType, SupabaseClient } from '@supabase/supabase-js';
-
-
 
 import { TokenRecoveryType, DefaultToken } from '../../tokens/src/domain/token-type';
 import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
+import { getDomainByUserId } from '../../multitenancy/utils/get/get-domain';
 import { createClient } from '../../features/team-accounts/src/server/actions/clients/create/create-clients';
-import { v4 as uuidv4 } from 'uuid';
 
 /**
  * @name createAuthCallbackService
@@ -51,6 +47,7 @@ class AuthCallbackService {
     const publicTokenId = searchParams.get('public_token_id');
     const callbackNextPath = searchParams.get('next');
     const host = request.headers.get('host');
+    const emailToInvite = searchParams.get('email');
 
     // set the host to the request host since outside of Vercel it gets set as "localhost"
     if (url.host.includes('localhost:') && !host?.includes('localhost')) {
@@ -97,7 +94,11 @@ class AuthCallbackService {
       const { data: session } = await this.client.auth.getSession();
       if (session?.session) {
         // redirect to the next path
-        url.pathname = callbackNextPath ?? url.pathname;
+        url.href = callbackNextPath?.split('?')[0] ?? url.href;
+        const { domain } = await getDomainByUserId(session.session.user.id, true);
+        if (domain) {
+          url.href = `${domain}${url.pathname}`
+        }
         return url;
       }
 
@@ -108,24 +109,37 @@ class AuthCallbackService {
       ) as { isValidToken: boolean; payload?: DefaultToken };
 
       if (payload) {
-        
-        url.pathname = callbackNextPath ?? url.pathname;
+        const adminClient = getSupabaseServerComponentClient({
+          admin: true,
+        });
+        const { data, error } = await adminClient
+        .from('accounts')
+        .select('count')
+        .like('email', 'guest%@suuper.co')
+        .single();
+
+      if (error) {
+        console.error('Error getting guest count', error);
+        throw new Error('Error getting guest count');
+      }
+        url.href = callbackNextPath?.split('?')[0] ?? url.href;
+
+        const count = (data?.count ?? 0) + 1;
         // here we need to set the session with the user data
-        const newUuid = uuidv4();
         const response = await createClient({
           agencyId: payload.agency_id ?? '',
           adminActivated: true,
           client: {
-            email: `guest+${newUuid}@suuper.co`,
-            name: 'guest ' + newUuid,
-            slug: `guest ${newUuid}'s organization`,
+            email: `guest+${count}@suuper.co`,
+            name: 'guest ' + count,
+            slug: `guest ${count}'s organization`,
           },
           role: 'client_guest',
           sendEmail: false,
         });
 
         if (response.ok) {
-          const orderId = Number(callbackNextPath?.split('/')[2]);
+          const orderId = Number(callbackNextPath?.split('/')[4]?.split('?')[0]);
           const { access_token, refresh_token } = response.success?.data?.session;
           await this.client.auth.setSession({ access_token, refresh_token });
             const { error } = await this.client.from('order_followers')
@@ -133,6 +147,10 @@ class AuthCallbackService {
               order_id: orderId,
               client_member_id: response.success?.data?.user_client_id,
             });
+          const { domain } = await getDomainByUserId(response.success?.data?.user_client_id ?? '', true);
+          if (domain) {
+            url.href = `${domain}${url.pathname}`
+          }
           if (error) {
             console.error('Error adding follower to order', error);
             throw new Error('Error adding follower to order');
@@ -143,15 +161,23 @@ class AuthCallbackService {
     }
 
     if (tokenHashRecovery && type) {
-      // search in the database for the token_hash_session
       const { isValidToken, payload } = await verifyToken(
         '',
         tokenHashRecovery,
       ) as { isValidToken: boolean; payload?: TokenRecoveryType };
+      
       if (!isValidToken) {
         console.error('Error verifying token hash session');
       }
+      
       const newUrlPayload = new URL(payload?.redirectTo ?? '');
+
+      let newCallbackNextPath = callbackNextPath;
+
+      if (emailToInvite && !newCallbackNextPath?.includes('set-password')) {
+        newCallbackNextPath = `${newCallbackNextPath}&email=${emailToInvite}`;
+      }
+      
       const response = await fetch(payload?.redirectTo ?? '', {
         method: 'GET',
         redirect: 'manual',
@@ -169,12 +195,14 @@ class AuthCallbackService {
       const refreshToken = query.get('refresh_token');
       
       if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
-        url.href = callbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+        url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+        return url;
+      } else {
+        console.error('error setting session');
+        url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
         return url;
       }
-      };
-    
-
+    }
 
     // if we have an invite token, we append it to the redirect url
     if (inviteToken) {

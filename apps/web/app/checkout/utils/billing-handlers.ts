@@ -11,7 +11,7 @@ import { createSession } from '~/team-accounts/src/server/actions/sessions/creat
 
 
 
-import { Credentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
+import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
 
 
 type ValuesProps = {
@@ -57,6 +57,33 @@ type HandlePaymentStripeProps = {
   baseUrl: string;
 };
 
+const calculateTrialDays = (service: Service.Relationships.Billing.BillingService): number => {
+  if (!service.test_period || !service.test_period_duration) {
+    return 0;
+  }
+
+  const duration = service.test_period_duration;
+  const unit = service.test_period_duration_unit_of_measurement?.toLowerCase() || '';
+
+  if (!unit) return 0;
+
+  // Verificar la unidad de medida usando includes() para mayor flexibilidad
+  if (unit.includes('day')) {
+    return duration;
+  }
+  if (unit.includes('week')) {
+    return duration * 7;
+  }
+  if (unit.includes('month')) {
+    return duration * 30;
+  }
+  if (unit.includes('year')) {
+    return duration * 365;
+  }
+
+  return 0;
+};
+
 export const handleRecurringPayment = async ({
   service,
   values,
@@ -84,6 +111,7 @@ export const handleRecurringPayment = async ({
         paymentMethodId,
         couponId: coupon,
         sessionId: sessionId,
+        trialPeriodDays: calculateTrialDays(service),
       }),
     });
 
@@ -129,11 +157,11 @@ export const handleRecurringPayment = async ({
       return { success: false };
     }
     const credentials =
-      credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+      credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
 
     // Create Basic Auth token
     const authToken = Buffer.from(
-      `${credentials.username}:${credentials.password}`,
+      `${credentials.treli_user}:${credentials.treli_password}`,
     ).toString('base64');
 
     const subscriptionPlan = {
@@ -244,6 +272,7 @@ export const handleOneTimePayment = async ({
         serviceId: service.id,
         sessionId: sessionId,
         quantity: quantity,
+        trialPeriodDays: calculateTrialDays(service),
       }),
     });
 
@@ -288,11 +317,11 @@ export const handleOneTimePayment = async ({
       return { success: false };
     }
     const credentials =
-      credentialsCrypto.decrypt<Credentials>(parsedCredentials);
+      credentialsCrypto.decrypt<TreliCredentials>(parsedCredentials);
 
     // Create Basic Auth token
     const authToken = Buffer.from(
-      `${credentials.username}:${credentials.password}`,
+      `${credentials.treli_user}:${credentials.treli_password}`,
     ).toString('base64');
 
     const subscriptionPlan = {

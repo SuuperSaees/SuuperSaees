@@ -9,27 +9,29 @@ import { Review } from './review.types';
 import { Task } from './tasks.types';
 import { UserSettings } from './user-settings.types';
 import { User } from './user.types';
+import { Tags } from './tags.types';
 
 type UserResponse = Pick<
   User.Type,
   'email' | 'id' | 'name' | 'picture_url' > & {
-    settings: Pick<UserSettings.Type, 'name' | 'picture_url'> | null;
+    settings:UserSettings.Type;
   }
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'];
 
   export type Response = Order.Type & {
-    customer: UserResponse[];
+    tags: {tag:  Tags.Type}[] | null;
+    customer: User.Response
     assigned_to: {
       agency_member: UserResponse | null;
     }[] | null;
-    client_organization: Pick<Account.Type, 'name' | 'id'>[] | null;
+    client_organization: Account.Response | null;
     followers?: {
       client_follower: User.Response;
     }[] | null;
     brief?: Partial<Pick<Brief.Response, 'name'>>;
-    review?: Review.Response;
     statusData?: AgencyStatus.Type | null;
+    reviews?: Review.Response[];
   };
   export type Relational = Order.Relationships.All & {
     brief_responses: Brief.Relationships.FormFieldResponse.Response[]
@@ -51,6 +53,7 @@ export namespace Order {
       name: string;
       slug: string;
     };
+    tags: Tags.Type[] | null;
   };
   export type Insert = Database['public']['Tables']['orders_v2']['Insert'];
   export type Update = Database['public']['Tables']['orders_v2']['Update'];
@@ -86,6 +89,8 @@ export namespace Order {
       activities: Activity.Type[];
     };
   }
+
+  export type Assignee = Database['public']['Tables']['order_assignations']['Row'];
   export namespace Enums {
     export enum Status {
       PENDING = 'pending',

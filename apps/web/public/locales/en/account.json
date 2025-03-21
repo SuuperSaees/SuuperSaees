@@ -200,6 +200,7 @@
   "brandSidebarReset": "Reset",
   "brandSenderNameSubmit": "Update Sender",
   "brandSenderName": "Sender Name",
+  "brandDomain": "Domain",
   "brandSenderNameDescription": "Update the name that will be displayed as the sender of the emails",
   "brandSenderEmailAndDomain": "Sender Email and Domain",
   "brandSenderEmailAndDomainDescription": "Update the email and domain that will be displayed as the sender of the emails",
@@ -230,5 +231,9 @@
   "clipboardCopied": "Content copied to clipboard",
   "clipboardError": "Error copying content to clipboard",
   "connect": "Connect",
-  "guest": "Guest"
+  "guest": "Guest",
+  "updateLanguageSuccess": "Language updated successfully",
+  "invalidLoomAppIdFormat": "Invalid Loom App ID format",
+  "domainUpdatedSuccessfully": "Domain updated successfully",
+  "domainUpdateError": "Error updating domain"
 }

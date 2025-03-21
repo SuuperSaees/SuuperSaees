@@ -5,6 +5,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
 } from 'react';
 
@@ -31,6 +32,7 @@ import {
   UserExtended,
 } from './activity.types';
 import { Brief } from '~/lib/brief.types';
+import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -185,8 +187,9 @@ export const ActivityProvider = ({
   });
 
   const deleteMessageMutation = useMutation({
-    mutationFn: (messageId: string) => deleteMessage(messageId),
-    onMutate: async (messageId) => {
+    mutationFn: ({ messageId, adminActived }: { messageId: string; adminActived?: boolean }) => 
+      deleteMessage(messageId, adminActived),
+    onMutate: async ({messageId}) => {
       await queryClient.cancelQueries({ queryKey: ['messages'] });
 
       // Store the previous messages state
@@ -381,7 +384,7 @@ export const ActivityProvider = ({
             return prevState;
           });
         } else {
-          stateSetter((prevState) => {
+            stateSetter((prevState) => {
             if (Array.isArray(prevState)) {
               return [...prevState, newData] as T[];
             } else {
@@ -411,6 +414,13 @@ export const ActivityProvider = ({
     setFiles,
   );
 
+  const { markOrderAsRead } = useUnreadMessageCounts({userId: currentUser.id ?? ''});
+  useEffect(() => {
+    if(order.id) {
+      markOrderAsRead(order.id);
+    }
+  }, [order.id, markOrderAsRead]);
+  
   return (
     <ActivityContext.Provider
       value={{
@@ -436,8 +446,8 @@ export const ActivityProvider = ({
           }),
         userWorkspace: currentUser,
         loadingMessages,
-        deleteMessage: async (messageId: string) => {
-          await deleteMessageMutation.mutateAsync(messageId);
+        deleteMessage: async (messageId: string, adminActived?: boolean) => {
+          await deleteMessageMutation.mutateAsync({ messageId, adminActived });
         },
       }}
     >

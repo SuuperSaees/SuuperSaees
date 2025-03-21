@@ -84,6 +84,20 @@ class AccountInvitationsWebhookService {
       'Handling invitation webhook event...',
     );
 
+    const { data: verifyExistingAccount } = await this.adminClient
+      .from('accounts')
+      .select('id')
+      .eq('email', invitation.email)
+      .single();
+
+    if (verifyExistingAccount?.id) {
+      logger.info(
+        { invitation, name: this.namespace },
+        'Account already exists. Skipping invitation email...',
+      );
+      return;
+    }
+
     const inviter = await this.adminClient
       .from('accounts')
       .select('email, name, organization_id')

@@ -326,6 +326,7 @@ const SubtaskItem = ({
                     hideSubmitButton={true}
                     showToolbar={true}
                     isEditable={isEditable}
+                    referenceId={subtask.id}
                   />
                 </div>
               </TabsContent>

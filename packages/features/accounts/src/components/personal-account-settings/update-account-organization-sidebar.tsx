@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 import { Input } from '@kit/ui/input';
-import { Spinner } from '@kit/ui/spinner';
 
 import { useOrganizationSettings } from '../../context/organization-settings-context';
 

@@ -4,6 +4,7 @@
   "confirmDateTitle": "Confirmar fecha",
   "confirmDateMessage": "¿Estás seguro de que deseas actualizar la fecha de vencimiento?",
   "accept": "Aceptar",
+  "save": "Guardar",
   "cancel": "Cancelar",
   "saveChanges": "Guardar cambios",
   "summary": "Resumen",
@@ -62,10 +63,12 @@
     "createdAt": "Creado",
     "assignedTo": "Asignado a",
     "followedBy": "Seguido por",
+    "tags": "Etiquetas",
     "status": "Estado",
     "priority": "Prioridad",
     "dueDate": "Fecha de vencimiento",
     "deadline": "Fecha límite",
+    "visibility": "Activa o desactiva para hacer este proyecto público o privado",
     "statuses": {
       "pending": "Esperando respuesta",
       "inProgress": "En Progreso",
@@ -195,6 +198,25 @@
   "files": {
     "noPreview": "No hay vista previa disponible",
     "download": "Por favor, descarga el archivo para verlo"
+  },
+  "shareProject": "Compartir proyecto",
+  "publishProject": "Copiar enlace",
+  "shareProjectDescription": "Al compartir este proyecto públicamente, cualquier persona con el enlace podrá acceder a toda la información de este proyecto, incluyendo la interacción a través del chat y la visualización de archivos, detalles y tareas.",
+  "link": "Enlace",
+  "columns": {
+    "id": "ID",
+    "title": "Título",
+    "description": "Descripción",
+    "status": "Estado",
+    "statusId": "Estado ID",
+    "dueDate": "Fecha de vencimiento",
+    "priority": "Prioridad",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "clientOrganization": "Organización del cliente",
+    "agency": "Agencia",
+    "assignedTo": "Asignado a",
+    "customer": "Cliente"
   }
 }
 

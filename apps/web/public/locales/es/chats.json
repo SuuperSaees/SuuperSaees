@@ -1,4 +1,9 @@
 {
+  "chats": "Chats",
+  "empty": {
+    "title": "No hay chats",
+    "description": "Comienza un chat con tus miembros de equipo"
+  },
   "chatTabLabel": "Chat de IA",
   "noCredits": "Lo sentimos, no tienes suficientes créditos",
   "genericError": "Perdón, algo salió mal",
@@ -25,5 +30,12 @@
   "modelDemoAlert": "Para esta demostración, solo admitimos GPT-3.5 Turbo. En producción, puede elegir cualquier modelo que desee utilizar.",
   "stopGenerating": "Detener generación",
   "continue": "Continuar",
-  "errorCreatingChat": "Error al crear chat"
+  "errorCreatingChat": "Error al crear chat",
+  "newChat": "Crear nuevo chat",
+  "search": "Buscar chats...",
+  "dateFormat": {
+    "today": "h:mm a",
+    "thisWeek": "EEEE",
+    "older": "dd/MM/yyyy"
+  }
 }

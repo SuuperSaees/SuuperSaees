@@ -115,6 +115,7 @@ export function PersonalAccountDropdown({
         refresh_token: token.refresh_token,
         access_token: token.access_token,
       });
+      localStorage.clear();
 
       //Push to /home page and then use refresh to reload the page with updated user data
       router.push('/home');

@@ -1,7 +1,7 @@
 import {
   CreditCard,
   LayoutDashboard,
-  MessageSquare,
+  MessagesSquare,
   Settings,
   Users,
 } from 'lucide-react';
@@ -15,18 +15,21 @@ const iconClasses = 'w-4';
 
 const getRoutes = (account: string) => [
   {
+    type: 'route',
     label: 'common:dashboardTabLabel',
     path: pathsConfig.app.accountHome.replace('[account]', account),
     Icon: <LayoutDashboard className={iconClasses} />,
     end: true,
   },
   {
+    type: 'route',
     label: 'chats:chatTabLabel',
     path: pathsConfig.app.accountHome.replace('[account]', account) + '/chat',
-    Icon: <MessageSquare className={iconClasses} />,
+    Icon: <MessagesSquare className={iconClasses} />,
     end: false,
   },
   {
+    type: 'group',
     label: 'common:settingsTabLabel',
     collapsible: false,
     children: [

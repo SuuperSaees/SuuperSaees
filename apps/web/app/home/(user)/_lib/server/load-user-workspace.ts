@@ -6,9 +6,10 @@ import { createAccountsApi } from '@kit/accounts/api';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 
-
+import { getTeams } from '~/server/actions/team/team.action';
 import featureFlagsConfig from '~/config/feature-flags.config';
 import { requireUserInServerComponent } from '~/lib/server/require-user-in-server-component';
+
 
 
 const shouldLoadAccounts = featureFlagsConfig.enableTeamAccounts;
@@ -33,18 +34,39 @@ async function workspaceLoader() {
 
   const workspacePromise = api.getAccountWorkspace();
 
-  const [accounts, workspace, user] = await Promise.all([
+  const [accounts, workspace, user, teams] = await Promise.all([
     accountsPromise(),
     workspacePromise,
     requireUserInServerComponent(),
+    getTeams({ organizationIds: [], includeMembers: false, includeAgency: true }),
   ]);
 
-  const organization = accounts;
+  const agency = Object.values(teams)[0] ?? null;
+
+  const organization = Array.isArray(accounts) ? {
+    id: '',
+    name: '',
+    slug: '',
+    picture_url: '',
+    embeds: [],
+    clientOrganizations: [],
+  } : accounts;
+
+  // Get pinned organizations with only necessary fields
+  const pinnedOrganizations = !Array.isArray(accounts) 
+    ? (accounts.clientOrganizations ?? []).map(org => ({
+        id: org.id,
+        name: org.name,
+        picture_url: org.picture_url ?? undefined
+      }))
+    : [];
 
   return {
     accounts,
     organization,
+    pinnedOrganizations,
     workspace,
     user,
+    agency,
   };
 }

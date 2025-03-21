@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
 import { Input } from '@kit/ui/input';
+import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
 
 import UpdateImage from '../../../../../apps/web/app/components/ui/update-image';
@@ -20,7 +21,6 @@ interface ProfileSettingsProps {
   user: Account.Type;
   userSettings: UserSettings.Type;
   callback: string;
-  handleChangeLanguage: (locale: string) => void;
   userRole: string;
 }
 
@@ -31,12 +31,10 @@ function ProfileSettings({
   userRole,
 }: ProfileSettingsProps) {
   const { t } = useTranslation('account');
-  const [calendarValue, setCalendarValue] = useState<
-    UserSettings.Type['calendar']
-  >(userSettings?.calendar ?? '');
+  const [calendarValue, setCalendarValue] = useState(userSettings?.calendar ?? '');
   const [isValidUrl, setIsValidUrl] = useState(true);
   const revalidateAccount = useRevalidatePersonalAccountDataQuery();
-
+  
   const validateUrl = useCallback((url: string) => {
     if (url === '') return true;
     try {
@@ -79,6 +77,33 @@ function ProfileSettings({
       });
     },
   });
+  
+  const handleLanguageChange = useCallback(async (locale: string) => {
+    if (user?.id) {
+      try {
+        // Update the user's language preference in the database
+        await updateUserSettings(user.id, { 
+          preferences: {
+            user: {
+              language: locale
+            }
+          }
+        });
+        
+        // Show success message
+        toast.success(t('updateSuccess'), {
+          description: t('updateLanguageSuccess'),
+        });
+        
+
+      } catch (error) {
+        toast.error('Error', {
+          description: t('updateLanguageError'),
+        });
+        console.error('Error updating language preference:', error);
+      }
+    }
+  }, [user?.id, t]);
 
   const handleCalendarChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,6 +113,7 @@ function ProfileSettings({
     },
     [validateUrl],
   );
+  
   const clientRoles = new Set(['client_owner', 'client_member']);
 
   const bucketStorage = {
@@ -115,17 +141,17 @@ function ProfileSettings({
     <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 text-sm lg:flex-nowrap'>
       <div className="flex w-full flex-col space-y-6">
         <div className="flex justify-between">
-          <div className="mr-24 flex flex-col whitespace-nowrap text-gray-700">
+          <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
             <p className="font-bold">{t('accountImage')}</p>
             <p>{t('accountImageDescription')}</p>
           </div>
-          <div className="w-full">
+          <div className="w-[100%]">
             <UpdateImage
               bucketStorage={bucketStorage}
               defaultImageURL={
                 userSettings?.picture_url ?? user?.picture_url ?? ''
               }
-              className="aspect-square h-20 w-20"
+              className="aspect-square h-20 w-20 [&>img]:object-cover"
               onUpdate={updateProfileImage}
             />
           </div>
@@ -142,6 +168,20 @@ function ProfileSettings({
         </div>
 
         <Separator />
+        
+        {/* Language Preference Section */}
+        <div className="flex justify-between">
+          <div className="mr-7 flex w-[45%] flex-col text-gray-700">
+            <p className="whitespace-nowrap font-bold">{t('language')}</p>
+            <p>{t('languageDescription')}</p>
+          </div>
+          <div className="flex w-full flex-col gap-4">
+            <LanguageSelector onChange={handleLanguageChange} />
+          </div>
+        </div>
+        
+        <Separator />
+        
         {!clientRoles.has(userRole) && (
           <>
             <div className="flex justify-between">
@@ -152,7 +192,6 @@ function ProfileSettings({
               <div className="flex w-full flex-col gap-4">
                 <Input
                   placeholder={t('pasteCalendar')}
-                  rows={8}
                   value={calendarValue}
                   onChange={handleCalendarChange}
                   className={

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { EllipsisVertical, Trash2 } from 'lucide-react';
+import { EllipsisVertical, Trash2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { deleteOrderById } from '~/team-accounts/src/server/actions/orders/delete/delete-order';
 
@@ -20,23 +20,34 @@ import {
 } from '@kit/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { handleResponse } from '~/lib/response/handle-response';
+import { copyToClipboard } from '~/utils/clipboard';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
-function DeleteOrderDropdown({orderId}: {orderId: number}) {
+function DeleteOrderDropdown({orderId, isPublic, tokenId}: {orderId: number, isPublic: boolean, tokenId?: string}) {
   const { t } = useTranslation(['orders', 'responses']);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const baseUrl = window.location.origin;
+  const handleCopy = async () => {
+    await copyToClipboard(`${baseUrl}/orders/${orderId}?public_token_id=${tokenId}`);
+    toast.success(t('success.copyToClipboard'));
+  };
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter()
 
+  const handleCloseDialog = () => setShowDeleteDialog(false);
+  const queryClient = useQueryClient();
   async function handleDelete() {
     try {
-
       const res = await deleteOrderById(orderId);
       await handleResponse(res, 'orders', t);
-      setIsDialogOpen(false);
+      handleCloseDialog();
       router.push('/orders');
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
       router.refresh();
     } catch (error) {
       console.error('Error deleting the order:', error);
-      setIsDialogOpen(false);
+      handleCloseDialog();
     }
   }
 
@@ -45,15 +56,29 @@ function DeleteOrderDropdown({orderId}: {orderId: number}) {
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Button variant="ghost" className='mr-2 h-10 m-0 text-slate-500 px-1'>
-          <EllipsisVertical className="w-[20px] h-[20px]" />
+            <EllipsisVertical className="w-[20px] h-[20px]" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem
-            onSelect={(event) => {
-              event.preventDefault();
-              setIsDialogOpen(true);
-            }}
+          {isPublic && (
+            <DropdownMenuItem
+              disabled={!tokenId}
+              onSelect={async (event) => {
+                event.preventDefault();
+                await handleCopy();
+              }}
+            >
+              <div className="flex items-center gap-2 text-gray-800">
+                <ExternalLink className="h-4 w-4" />
+                <p>{t('publishProject')}</p>
+              </div>
+            </DropdownMenuItem>
+          )}
+            <DropdownMenuItem
+              onSelect={(event) => {
+                event.preventDefault();
+                setShowDeleteDialog(true);
+              }}
           >
             <div className="flex items-center gap-2 text-gray-800">
               <Trash2 className="h-4 w-4" />
@@ -62,13 +87,13 @@ function DeleteOrderDropdown({orderId}: {orderId: number}) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={showDeleteDialog} onOpenChange={() => setShowDeleteDialog(false)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t('deleteConfirmation')}</DialogTitle>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+            <Button variant="outline" onClick={handleCloseDialog}>
               {t('cancel')}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>

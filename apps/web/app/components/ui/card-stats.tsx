@@ -20,34 +20,35 @@ interface CardStatsProps {
     previous: number | null;
     unit: MeasurementUnit;
   };
+  type: 'active' | 'rating' | 'totalInTheLastMonth' | 'completed';
 }
 
-export default function CardStats({ title, value }: CardStatsProps) {
+export default function CardStats({ title, value, type }: CardStatsProps) {
   const { current, previous } = value;
   const { t } = useTranslation('statistics');
-
-  const percentage = compareValues(current, previous);
+  // Only calculate percentage for totalInTheLastMonth type
+  const percentage = type === 'totalInTheLastMonth' ? compareValues(current, previous) : null;
   const formattedCurrent = formatNumber(current ? current : 0);
   const formattedPercentage =
     percentage !== null ? formatNumber(Math.abs(percentage)) : null;
 
   // Define percentage text based on the percentage change and edge cases
-  let percentageText;
-  if (percentage === null) {
-    // No previous data case
-    percentageText = current
-      ? current > 0
-        ? t('significantIncrease')
-        : t('noData')
-      : t('noData');
-  } else {
-    // Percentage change case
-    percentageText =
-      percentage > 0
-        ? t('increase')
-        : percentage < 0
-          ? t('decrease')
-          : t('notChanged'); // Handles the 0% case
+  let percentageText = null;
+  if (type === 'totalInTheLastMonth') {
+    if (percentage === null) {
+      percentageText = current
+        ? current > 0
+          ? t('significantIncrease')
+          : t('noData')
+        : t('noData');
+    } else {
+      percentageText =
+        percentage > 0
+          ? t('increase')
+          : percentage < 0
+            ? t('decrease')
+            : t('notChanged');
+    }
   }
 
   return (
@@ -58,31 +59,35 @@ export default function CardStats({ title, value }: CardStatsProps) {
           <span className="text-3xl font-bold text-gray-800">
             {formattedCurrent}
           </span>
-          <span className="flex flex-wrap items-center gap-2">
-            {percentage && percentage < 0 ? (
-              <TrendingDown className="h-4 w-4 text-red-500" />
-            ) : (
-              <TrendingUp className="h-4 w-4 text-green-500" />
-            )}
+          {type === 'totalInTheLastMonth' && (
+            <span className="flex flex-wrap items-center gap-2">
+              {percentage && percentage < 0 ? (
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              ) : (
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              )}
 
-            <span
-              className={`flex items-center gap-1 text-sm font-medium ${
-                percentage && percentage < 0 ? 'text-red-500' : 'text-green-500'
-              }`}
-            >
-              {formattedPercentage}%
+              <span
+                className={`flex items-center gap-1 text-sm font-medium ${
+                  percentage && percentage < 0 ? 'text-red-500' : 'text-green-500'
+                }`}
+              >
+                {formattedPercentage}%
+              </span>
+              <span className="text-xs font-medium text-gray-500">
+                {percentageText}
+              </span>
             </span>
-            <span className="text-xs font-medium text-gray-500">
-              {percentageText}
-            </span>
-          </span>
+          )}
         </span>
       </div>
-      {percentage && percentage < 0 ? (
-        <ChartNegative className="h-20 w-full" />
-      ) : (
-        <ChartPositive className="h-20 w-full" />
-      )}
+      {
+        percentage && percentage < 0 ? (
+          <ChartNegative className="h-20 w-full" />
+        ) : (
+          <ChartPositive className="h-20 w-full" />
+        )
+      }
     </div>
   );
 }

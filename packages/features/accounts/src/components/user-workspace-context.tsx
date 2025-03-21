@@ -24,6 +24,8 @@ export interface UserWorkspace {
     name: string | null;
     slug: string | null;
     picture_url: string | null;
+    embeds: Tables<'embeds'>[];
+    id: string | null;
   };
 
   user: User;

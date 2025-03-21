@@ -2744,3 +2744,274 @@ with
       'settings.manage'
     ))
   );
+
+  insert into storage.buckets
+(id, name, public)
+values
+('orders', 'orders', true);
+insert into storage.buckets
+(id, name, public)
+values
+('services', 'services', true);
+insert into storage.buckets
+(id, name, public)
+values
+('organization', 'organization', true); 
+insert into storage.buckets
+(id, name, public)                                                                  
+values
+('agency_files', 'agency_files', true);
+insert into storage.buckets
+(id, name, public)
+values
+('create_brief', 'create_brief', true);
+INSERT INTO storage.buckets
+(id, name, public)
+VALUES
+('plugins', 'plugins', true);
+
+-- ORDERS
+CREATE POLICY "authenticated user select access orders"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'orders'
+);
+CREATE POLICY "authenticated user update access orders"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'orders'
+);
+CREATE POLICY "authenticated user insert access orders"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+auth.uid() IS NOT NULL
+AND bucket_id = 'orders'
+);
+CREATE POLICY "authenticated user delete access orders"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'orders'
+);
+
+-- SERVICES
+CREATE POLICY "authenticated user select access services"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'services'
+);
+CREATE POLICY "authenticated user update access services"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'services'
+);
+CREATE POLICY "authenticated user insert access services"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+auth.uid() IS NOT NULL
+AND bucket_id = 'services'
+);
+CREATE POLICY "authenticated user delete access services"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'services'
+);
+
+-- ORGANIZATION
+CREATE POLICY "authenticated user select access organization"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'organization'
+);
+CREATE POLICY "authenticated user update access organization"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'organization'
+);
+CREATE POLICY "authenticated user insert access organization"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+auth.uid() IS NOT NULL
+AND bucket_id = 'organization'
+);
+CREATE POLICY "authenticated user delete access organization"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'organization'
+);
+
+-- AGENCY FILES
+CREATE POLICY "authenticated user select access agency_files"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'agency_files'
+);
+CREATE POLICY "authenticated user update access agency_files"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'agency_files'
+);
+CREATE POLICY "authenticated user insert access agency_files"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+auth.uid() IS NOT NULL
+AND bucket_id = 'agency_files'
+);
+CREATE POLICY "authenticated user delete access agency_files"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'agency_files'
+);
+
+-- CREATE BRIEF
+CREATE POLICY "authenticated user select access create_brief"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'create_brief'
+);
+CREATE POLICY "authenticated user update access create_brief"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'create_brief'
+);
+CREATE POLICY "authenticated user insert access create_brief"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+auth.uid() IS NOT NULL
+AND bucket_id = 'create_brief'
+);
+CREATE POLICY "authenticated user delete access create_brief"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'create_brief'
+);
+-- PLUGINS
+CREATE POLICY "authenticated user select access plugins"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'plugins'
+);
+CREATE POLICY "authenticated user update access plugins"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'plugins'
+);
+
+CREATE POLICY "authenticated user insert access plugins"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'plugins'
+);
+
+CREATE POLICY "authenticated user delete access plugins"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'plugins'
+);
+
+-- CHATS
+insert into storage.buckets
+(id, name, public)
+values
+('chats', 'chats', true);
+
+CREATE POLICY "authenticated user select access chats"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
+CREATE POLICY "authenticated user update access chats"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
+
+CREATE POLICY "authenticated user insert access chats"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);
+
+CREATE POLICY "authenticated user delete access chats"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+  auth.uid() IS NOT NULL
+  AND bucket_id = 'chats'
+);

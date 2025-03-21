@@ -4,13 +4,14 @@ import { useState } from 'react';
 
 import RichTextEditor from '~/components/ui/rich-text-editor';
 import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
-
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
 import { Separator } from '@kit/ui/separator';
 import { getUrlFile } from '~/team-accounts/src/server/actions/files/get/get-files';
 // import { insertOrderFiles } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
+import { getEmails } from '~/team-accounts/src/server/actions/orders/get/get-mail-info';
+import useInternalMessaging from '../hooks/use-messages';
 
 const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientOrganizationId }: { agencyName: string, agencyStatuses: AgencyStatus.Type[], activeTab: string, agencyId: string, clientOrganizationId: string }) => {
   const { order } = useActivityContext();
@@ -22,8 +23,15 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientO
 
   const { addMessage, userRole, userWorkspace } = useActivityContext();
 
+  const { getInternalMessagingEnabled } = useInternalMessaging()
+
   const handleOnCompleteMessageSend = async (messageContent: string, fileIdsList?: string[]) => {
     try {
+
+      const currentInternalMessagingState = getInternalMessagingEnabled();
+
+      const rolesAvailable = currentInternalMessagingState ? ['agency_member', 'agency_owner', 'agency_project_manager'] : ['agency_member', 'agency_owner', 'agency_project_manager', 'client_member', 'client_owner'];
+      const emailsData = await getEmails(order.id.toString(), rolesAvailable, userWorkspace.id ?? '');
       if (fileIdsList && fileIdsList?.length > 0) {
         const idsListFromServer = [];
         for (const fileId of fileIdsList) {
@@ -42,8 +50,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientO
             order.title,
             messageContent,
             userWorkspace.name ?? '',
-            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-              [],
+            emailsData,
             agencyName,
             new Date().toLocaleDateString(),
             userWorkspace.id ?? '',
@@ -55,8 +62,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientO
             order.title,
             messageContent,
             userWorkspace.name ?? '',
-            order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-              [],
+            emailsData,
             agencyName,
             new Date().toLocaleDateString(),
             userWorkspace.id ?? '',
@@ -70,8 +76,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientO
           order.title,
           messageContent,
           userWorkspace.name ?? '',
-          order?.assigned_to?.map((assignee) => assignee?.agency_member?.email) ??
-            [],
+          emailsData,
           agencyName,
           new Date().toLocaleDateString(),
           userWorkspace.id ?? '',
@@ -123,6 +128,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab, agencyId, clientO
           clientOrganizationId={clientOrganizationId}
           folderId={order.uuid}
           handleFileIdsChange={handleFileIdsChange}
+          referenceId={order.id.toString()}
         />
       </div>
   </div>

@@ -132,4 +132,19 @@ export enum ErrorPluginOperations {
   FAILED_TO_DELETE_PLUGIN = 'failedToDeletePlugin',
   PLUGIN_DELETED = 'pluginDeleted',
   PLUGIN_UPDATED = 'pluginUpdated',
+  FAILED_TO_FETCH_PLUGIN = 'failedToFetchPlugin',
+}
+
+export enum ErrorChatOperations {
+  CHAT_NOT_FOUND = 'chatNotFound',
+  CHAT_ALREADY_EXISTS = 'chatAlreadyExists',
+  FAILED_TO_CREATE_CHAT = 'failedToCreateChat',
+  FAILED_TO_UPDATE_CHAT = 'failedToUpdateChat',
+  FAILED_TO_DELETE_CHAT = 'failedToDeleteChat',
+  CHAT_DELETED = 'chatDeleted',
+  FAILED_TO_ADD_MEMBERS = 'failedToAddMembers',
+  FAILED_TO_REMOVE_MEMBERS = 'failedToRemoveMembers',
+  INSUFFICIENT_PERMISSIONS = 'insufficientPermissions',
+  FAILED_TO_GET_MESSAGES = 'failedToGetMessages',
+  FAILED_TO_GET_MEMBER_SETTINGS = 'failedToGetMemberSettings',
 }

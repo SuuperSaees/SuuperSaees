@@ -157,6 +157,7 @@ interface RichTextEditorProps {
   useInForm?: boolean;
   showToolbar?: boolean;
   isEditable?: boolean;
+  referenceId?: string;
 }
 
 // TODO: remove not related logic for this presentation component !IMPORTANT- TECHDEBT
@@ -169,6 +170,7 @@ const RichTextEditorV2 = ({
   hideSubmitButton = false,
   showToolbar = true,
   isEditable = true,
+  referenceId,
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
@@ -208,6 +210,7 @@ const RichTextEditorV2 = ({
         type: file.type,
         url: fileUrl,
         user_id: userWorkspace.id ?? '',
+        reference_id: referenceId,
       },
     ]);
 

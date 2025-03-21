@@ -1,68 +1,74 @@
+'use client';
+
 import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/sidebar-themed-with-settings';
-import { getUserRole } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-import { z } from 'zod';
-import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
-import { SidebarContent, SidebarNavigation } from '@kit/ui/sidebar';
+
+import { SidebarContent } from '@kit/ui/sidebar';
 import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
-import { clientAccountNavigationConfig, clientAccountGuestNavigationConfig } from '~/config/client-account-navigation.config';
-import pathsConfig from '~/config/paths.config';
-import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
-import { teamMemberAccountNavigationConfig } from '../../../../config/member-team-account-navigation.config';
-import { GuestContent } from './guest-content';
-// home imports
+import { useOrganizationSettings } from '../../../../../../packages/features/accounts/src/context/organization-settings-context';
+import Avatar from '../../../components/ui/avatar';
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
+import { CustomSidebarNavigation } from './custom-sidebar-navigation';
+import { GuestContent } from './guest-content';
 import './styles/home-sidebar.css';
 
-type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
-export async function HomeSidebar(props: { workspace: UserWorkspace }) {
-  const { workspace, user } = props.workspace;
-  const userRole = await getUserRole().catch((err) => {
-    console.error(`Error client, getting user role: ${err}`)
-    return ''
-  });
-  // const { t } = useTranslation('auth');
+// Import utility functions from our new module
+import { 
+  buildNavigationConfig, 
+  shouldShowDashboardUrl,
+  type Embed
+} from '~/config/navigation-utils';
 
-  // Filter the navigation config to remove the /clients path if userRole is 'agency_owner' or 'client_owner'
-  const filterNavigationConfig = (config: NavigationConfig) => {
-    if (userRole !== 'agency_owner') {
-      return {
-        ...config,
-        routes: config.routes.map((item) => {
-          // Check if the item has children
-          if ('children' in item) {
-            return {
-              ...item,
-              children: item.children.filter(
-                (child) => child.path !== pathsConfig.app.clients,
-              ),
-            };
-          }
-          return item; // Return item unchanged if it doesn't have children
-        }),
-      };
-    }
-    return config;
-  };
-  const navigationConfigMap = {
-    agency_member: () => filterNavigationConfig(teamMemberAccountNavigationConfig),
-    client_owner: () => clientAccountNavigationConfig,
-    client_member: () => clientAccountNavigationConfig,
-    client_guest: () => clientAccountGuestNavigationConfig,
-    agency_owner: () => personalAccountNavigationConfig,
-  } as const;
+/**
+ * Home sidebar component that displays navigation based on user role and embeds
+ */
+export function HomeSidebar(props: { workspace: UserWorkspace }) {
+  const { workspace, user, pinnedOrganizations, organization } = props.workspace;
+  const userRole = workspace.role;
 
-  const selectedNavigationConfig = navigationConfigMap[userRole as keyof typeof navigationConfigMap]?.() 
-  ?? personalAccountNavigationConfig;
+  // Get organization settings
+  const settings = useOrganizationSettings();
+  
+  // Access settings safely
+  const dashboardUrl = settings.dashboard_url;
+
+  // Determine if dashboard URL should be shown
+  const showDashboardUrl = shouldShowDashboardUrl(
+    dashboardUrl, 
+    userRole, 
+    workspace.id
+  );
+
+  // Build the navigation config with embeds and client organizations
+  const navigationConfig = buildNavigationConfig(
+    userRole,
+    organization?.embeds as Embed[] | undefined,
+    Avatar,
+    pinnedOrganizations
+  );
+
+  // Get additional settings with type assertion for the UI
+  const catalogProviderUrl = Boolean(settings.catalog_provider_url);
+  const catalogProductUrl = Boolean(settings.catalog_product_url);
+  const toolCopyListUrl = Boolean(settings.tool_copy_list_url);
 
   return (
-    <ThemedSidebar className='text-sm'>
+    <ThemedSidebar className="text-sm">
       <div className="padding-24">
         <AppLogo />
       </div>
 
-      <SidebarContent className={`mt-5 h-[calc(100%-160px)] b-["#f2f2f2"] overflow-y-auto`}>
-        <SidebarNavigation config={selectedNavigationConfig} />
+      <SidebarContent
+        className={`b-["#f2f2f2"] mt-5 h-[calc(100%-160px)] overflow-y-auto`}
+      >
+        <CustomSidebarNavigation
+          config={navigationConfig}
+          showDashboardUrl={showDashboardUrl}
+          catalogProviderUrl={catalogProviderUrl}
+          catalogProductUrl={catalogProductUrl}
+          toolCopyListUrl={toolCopyListUrl}
+          userId={user?.id ?? ''}
+        />
         {userRole === 'client_guest' && (
           <SidebarContent>
             <GuestContent />
@@ -71,13 +77,15 @@ export async function HomeSidebar(props: { workspace: UserWorkspace }) {
       </SidebarContent>
 
       <div className={'absolute bottom-4 left-0 w-full'}>
-        <SidebarContent>
-          <ProfileAccountDropdownContainer
-            collapsed={false}
-            user={user}
-            account={workspace}
-          />
-        </SidebarContent>
+        {userRole !== 'client_guest' && (
+          <SidebarContent>
+            <ProfileAccountDropdownContainer
+              collapsed={false}
+              user={user}
+              account={workspace}
+            />
+          </SidebarContent>
+        )}
       </div>
     </ThemedSidebar>
   );

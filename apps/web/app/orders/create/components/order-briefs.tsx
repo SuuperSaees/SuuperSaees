@@ -22,7 +22,6 @@ import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
 import { FormField as FormFieldType } from '~/lib/form-field.types';
 import { containsVideo } from '~/utils/contains-video';
-import { generateUUID } from '~/utils/generate-uuid';
 import { isYouTubeUrl } from '~/utils/upload-video';
 
 import { getYouTubeEmbedUrl } from '../utils/video-format';
@@ -144,7 +143,7 @@ export const OrderBriefs = ({
 
         return (
           <div key={brief?.id} className="flex flex-col gap-4">
-            <h3 className="text-lg font-bold">{brief?.name}</h3>
+            
             <div className="flex flex-col gap-8">
               {brief?.form_fields
                 ?.sort(
@@ -254,6 +253,7 @@ export const OrderBriefs = ({
                                     responseValue as never,
                                   );
                                 }}
+                                style={{whiteSpace: 'pre-wrap'}}
                               >
                                 {field.value}
                               </Textarea>

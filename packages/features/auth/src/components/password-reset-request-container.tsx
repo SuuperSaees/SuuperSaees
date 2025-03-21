@@ -19,9 +19,10 @@ import {
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { Trans } from '@kit/ui/trans';
-
+import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
 import { AuthErrorAlert } from './auth-error-alert';
 import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
+import { cn } from '@kit/ui/utils';
 
 const PasswordResetSchema = z.object({
   email: z.string().email(),
@@ -29,6 +30,8 @@ const PasswordResetSchema = z.object({
 
 export function PasswordResetRequestContainer(params: {
   redirectPath: string;
+  themeColor: string | undefined;
+  backgroundColor: string | undefined;
 }) {
   const { t } = useTranslation('auth');
   const resetPasswordMutation = useRequestResetPassword();
@@ -67,8 +70,14 @@ export function PasswordResetRequestContainer(params: {
             className={'w-full'}
           >
             <div className={'flex flex-col space-y-4'}>
-              <div>
-                <p className={'text-muted-foreground text-sm'}>
+              <div style={{
+                color: getTextColorBasedOnBackground(
+                  params.backgroundColor
+                    ? params.backgroundColor
+                    : '#ffffff',
+                ),
+              }}>
+                <p className={'text-sm'}>
                   <Trans i18nKey={'auth:passwordResetSubheading'} />
                 </p>
               </div>
@@ -79,7 +88,13 @@ export function PasswordResetRequestContainer(params: {
                 name={'email'}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
+                    <FormLabel style={{
+                      color: getTextColorBasedOnBackground(
+                        params.backgroundColor
+                          ? params.backgroundColor
+                          : '#ffffff',
+                      ),
+                    }}>
                       <Trans i18nKey={'common:emailAddress'} />
                     </FormLabel>
 
@@ -89,6 +104,13 @@ export function PasswordResetRequestContainer(params: {
                         type="email"
                         placeholder={t('emailPlaceholder')}
                         {...field}
+                        style={{
+                          color: getTextColorBasedOnBackground(
+                            params.backgroundColor
+                              ? params.backgroundColor
+                              : '#ffffff',
+                          ),
+                        }}
                       />
                     </FormControl>
 
@@ -98,6 +120,7 @@ export function PasswordResetRequestContainer(params: {
               />
               <ThemedButton
                 disabled={resetPasswordMutation.isPending}
+                themeColor={params.themeColor}
               >
                 <Trans i18nKey={'auth:passwordResetLabel'} />
               </ThemedButton>

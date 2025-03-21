@@ -34,6 +34,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_plugins: {
+        Row: {
+          account_id: string
+          created_at: string | null
+          credentials: Json | null
+          deleted_on: string | null
+          id: string
+          plugin_id: string
+          provider_id: string | null
+          status: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          created_at?: string | null
+          credentials?: Json | null
+          deleted_on?: string | null
+          id?: string
+          plugin_id?: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["plugin_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_plugins_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_plugins_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounts: {
         Row: {
           created_at: string | null
@@ -409,7 +474,7 @@ export type Database = {
           id: string
           namespace: string
           provider: Database["public"]["Enums"]["billing_provider"]
-          provider_id: string
+          provider_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -420,7 +485,7 @@ export type Database = {
           id?: string
           namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
-          provider_id: string
+          provider_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -431,7 +496,7 @@ export type Database = {
           id?: string
           namespace?: string
           provider?: Database["public"]["Enums"]["billing_provider"]
-          provider_id?: string
+          provider_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -688,53 +753,91 @@ export type Database = {
           },
         ]
       }
-      chat_messages: {
+      chat_members: {
         Row: {
-          account_id: string
-          chat_id: number
-          content: string
-          created_at: string | null
+          chat_id: string
+          created_at: string
+          deleted_on: string | null
           id: string
-          role: Database["public"]["Enums"]["chat_role"]
+          settings: Json | null
+          type: Database["public"]["Enums"]["chat_role_type"]
+          updated_at: string
+          user_id: string
+          visibility: boolean
         }
         Insert: {
-          account_id: string
-          chat_id?: number
-          content: string
-          created_at?: string | null
+          chat_id: string
+          created_at?: string
+          deleted_on?: string | null
           id?: string
-          role: Database["public"]["Enums"]["chat_role"]
+          settings?: Json | null
+          type?: Database["public"]["Enums"]["chat_role_type"]
+          updated_at?: string
+          user_id: string
+          visibility?: boolean
         }
         Update: {
-          account_id?: string
-          chat_id?: number
-          content?: string
-          created_at?: string | null
+          chat_id?: string
+          created_at?: string
+          deleted_on?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["chat_role"]
+          settings?: Json | null
+          type?: Database["public"]["Enums"]["chat_role_type"]
+          updated_at?: string
+          user_id?: string
+          visibility?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chat_members_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chat_messages_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chat_members_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      chat_messages: {
+        Row: {
+          chat_id: string
+          created_at: string | null
+          id: string
+          message_id: string
+        }
+        Insert: {
+          chat_id: string
+          created_at?: string | null
+          id?: string
+          message_id: string
+        }
+        Update: {
+          chat_id?: string
+          created_at?: string | null
+          id?: string
+          message_id?: string
+        }
+        Relationships: [
           {
             foreignKeyName: "chat_messages_chat_id_fkey"
             columns: ["chat_id"]
@@ -742,51 +845,118 @@ export type Database = {
             referencedRelation: "chats"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chat_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chats: {
         Row: {
-          account_id: string
+          agency_id: string | null
+          client_organization_id: string | null
           created_at: string | null
-          id: number
+          deleted_on: string | null
+          id: string
+          image: string | null
           name: string
-          reference_id: string
+          reference_id: string | null
           settings: Json
+          updated_at: string | null
+          user_id: string
+          visibility: boolean
         }
         Insert: {
-          account_id: string
+          agency_id?: string | null
+          client_organization_id?: string | null
           created_at?: string | null
-          id?: number
+          deleted_on?: string | null
+          id?: string
+          image?: string | null
           name: string
-          reference_id: string
+          reference_id?: string | null
           settings?: Json
+          updated_at?: string | null
+          user_id: string
+          visibility?: boolean
         }
         Update: {
-          account_id?: string
+          agency_id?: string | null
+          client_organization_id?: string | null
           created_at?: string | null
-          id?: number
+          deleted_on?: string | null
+          id?: string
+          image?: string | null
           name?: string
-          reference_id?: string
+          reference_id?: string | null
           settings?: Json
+          updated_at?: string | null
+          user_id?: string
+          visibility?: boolean
         }
         Relationships: [
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "chats_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "chats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "user_accounts"
             referencedColumns: ["id"]
@@ -1043,12 +1213,151 @@ export type Database = {
           },
         ]
       }
+      embed_accounts: {
+        Row: {
+          account_id: string
+          created_at: string
+          embed_id: string
+          id: number
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          embed_id: string
+          id?: number
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          embed_id?: string
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "embed_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_embed_id_fkey"
+            columns: ["embed_id"]
+            isOneToOne: false
+            referencedRelation: "embeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      embeds: {
+        Row: {
+          created_at: string
+          deleted_on: string | null
+          icon: string | null
+          id: string
+          location: Database["public"]["Enums"]["embed_location"]
+          organization_id: string | null
+          title: string | null
+          type: Database["public"]["Enums"]["embed_types"]
+          updated_at: string | null
+          user_id: string | null
+          value: string
+          visibility: Database["public"]["Enums"]["visibility"] | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_on?: string | null
+          icon?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["embed_location"]
+          organization_id?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["embed_types"]
+          updated_at?: string | null
+          user_id?: string | null
+          value: string
+          visibility?: Database["public"]["Enums"]["visibility"] | null
+        }
+        Update: {
+          created_at?: string
+          deleted_on?: string | null
+          icon?: string | null
+          id?: string
+          location?: Database["public"]["Enums"]["embed_location"]
+          organization_id?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["embed_types"]
+          updated_at?: string | null
+          user_id?: string | null
+          value?: string
+          visibility?: Database["public"]["Enums"]["visibility"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "embeds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeds_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       files: {
         Row: {
           created_at: string
           id: string
           message_id: string | null
           name: string
+          reference_id: string | null
           size: number
           temp_id: string | null
           type: string
@@ -1060,6 +1369,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           name: string
+          reference_id?: string | null
           size: number
           temp_id?: string | null
           type: string
@@ -1071,6 +1381,7 @@ export type Database = {
           id?: string
           message_id?: string | null
           name?: string
+          reference_id?: string | null
           size?: number
           temp_id?: string | null
           type?: string
@@ -1113,24 +1424,24 @@ export type Database = {
           agency_id: string | null
           client_organization_id: string | null
           created_at: string
-          file_id: string | null
-          folder_id: string | null
+          file_id: string
+          folder_id: string
           id: string
         }
         Insert: {
           agency_id?: string | null
           client_organization_id?: string | null
           created_at?: string
-          file_id?: string | null
-          folder_id?: string | null
+          file_id: string
+          folder_id: string
           id?: string
         }
         Update: {
           agency_id?: string | null
           client_organization_id?: string | null
           created_at?: string
-          file_id?: string | null
-          folder_id?: string | null
+          file_id?: string
+          folder_id?: string
           id?: string
         }
         Relationships: [
@@ -1299,8 +1610,59 @@ export type Database = {
           },
         ]
       }
+      message_reads: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
+          chat_id: string | null
           content: string | null
           created_at: string
           deleted_on: string | null
@@ -1314,6 +1676,7 @@ export type Database = {
           visibility: Database["public"]["Enums"]["messages_types"] | null
         }
         Insert: {
+          chat_id?: string | null
           content?: string | null
           created_at?: string
           deleted_on?: string | null
@@ -1327,6 +1690,7 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Update: {
+          chat_id?: string | null
           content?: string | null
           created_at?: string
           deleted_on?: string | null
@@ -1340,6 +1704,13 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["messages_types"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_order_id_fkey"
             columns: ["order_id"]
@@ -1526,6 +1897,7 @@ export type Database = {
         Update: {
           client_member_id?: string
           created_at?: string | null
+          id?: string
           order_id?: number
         }
         Relationships: [
@@ -1596,6 +1968,39 @@ export type Database = {
             columns: ["order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_tags: {
+        Row: {
+          created_at: string
+          order_id: number | null
+          tag_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          order_id?: number | null
+          tag_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          order_id?: number | null
+          tag_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_tags_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_v2"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
             referencedColumns: ["id"]
           },
         ]
@@ -1676,6 +2081,7 @@ export type Database = {
           description: string
           due_date: string | null
           id: number
+          position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
@@ -1696,6 +2102,7 @@ export type Database = {
           description: string
           due_date?: string | null
           id?: number
+          position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status?: string | null
@@ -1716,6 +2123,7 @@ export type Database = {
           description?: string
           due_date?: string | null
           id?: number
+          position?: number | null
           priority?: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id?: string
           status?: string | null
@@ -1894,64 +2302,39 @@ export type Database = {
       }
       plugins: {
         Row: {
-          account_id: string
           created_at: string
-          credentials: Json
           deleted_on: string | null
+          description: string | null
+          icon_url: string | null
           id: string
-          provider: string
-          provider_id: string
-          status: Database["public"]["Enums"]["plugin_status"]
+          metadata: Json | null
+          name: string
           type: Database["public"]["Enums"]["plugin_type"]
           updated_at: string
         }
         Insert: {
-          account_id: string
           created_at?: string
-          credentials: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider: string
-          provider_id: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
         Update: {
-          account_id?: string
           created_at?: string
-          credentials?: Json
           deleted_on?: string | null
+          description?: string | null
+          icon_url?: string | null
           id?: string
-          provider?: string
-          provider_id?: string
-          status?: Database["public"]["Enums"]["plugin_status"]
+          metadata?: Json | null
+          name?: string
           type?: Database["public"]["Enums"]["plugin_type"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "plugins_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       reactions: {
         Row: {
@@ -2138,6 +2521,7 @@ export type Database = {
       services: {
         Row: {
           allowed_orders: number | null
+          checkout_url: string | null
           created_at: string
           credit_based: boolean | null
           credits: number | null
@@ -2169,6 +2553,7 @@ export type Database = {
         }
         Insert: {
           allowed_orders?: number | null
+          checkout_url?: string | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
@@ -2200,6 +2585,7 @@ export type Database = {
         }
         Update: {
           allowed_orders?: number | null
+          checkout_url?: string | null
           created_at?: string
           credit_based?: boolean | null
           credits?: number | null
@@ -2631,6 +3017,58 @@ export type Database = {
           },
         ]
       }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          deleted_on: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tags_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           completed: boolean | null
@@ -2773,6 +3211,7 @@ export type Database = {
           name: string | null
           phone_number: string | null
           picture_url: string | null
+          preferences: Json | null
           user_id: string
         }
         Insert: {
@@ -2781,6 +3220,7 @@ export type Database = {
           name?: string | null
           phone_number?: string | null
           picture_url?: string | null
+          preferences?: Json | null
           user_id: string
         }
         Update: {
@@ -2789,6 +3229,7 @@ export type Database = {
           name?: string | null
           phone_number?: string | null
           picture_url?: string | null
+          preferences?: Json | null
           user_id?: string
         }
         Relationships: [
@@ -2835,20 +3276,6 @@ export type Database = {
             referencedRelation: "roles"
             referencedColumns: ["name"]
           },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
-          },
         ]
       }
       user_accounts: {
@@ -2866,20 +3293,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["name"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_user_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "user_accounts"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -2941,6 +3354,7 @@ export type Database = {
           description: string
           due_date: string | null
           id: number
+          position: number | null
           priority: Database["public"]["Enums"]["priority_types"] | null
           propietary_organization_id: string
           status: string | null
@@ -3021,6 +3435,17 @@ export type Database = {
       get_config: {
         Args: Record<PropertyKey, never>
         Returns: Json
+      }
+      get_unread_message_counts: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          chat_id: string
+          chat_unread_count: number
+          order_id: number
+          order_unread_count: number
+        }[]
       }
       get_upper_system_role: {
         Args: Record<PropertyKey, never>
@@ -3169,6 +3594,20 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_messages_as_read: {
+        Args: {
+          p_chat_id: string
+          p_user_id: string
+        }
+        Returns: number
+      }
+      mark_order_messages_as_read: {
+        Args: {
+          p_user_id: string
+          p_order_id: number
+        }
+        Returns: undefined
+      }
       team_account_workspace: {
         Args: {
           account_slug: string
@@ -3191,6 +3630,34 @@ export type Database = {
           new_owner_id: string
         }
         Returns: undefined
+      }
+      update_order_with_position: {
+        Args: {
+          p_order_id: number
+          p_order_updates: Json
+          p_position_updates: Json[]
+        }
+        Returns: {
+          agency_id: string
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          status_id: number | null
+          stripe_account_id: string | null
+          title: string
+          updated_at: string | null
+          uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
+        }
       }
       upsert_order: {
         Args: {
@@ -3265,6 +3732,7 @@ export type Database = {
         | "title"
         | "assigned_to"
         | "task"
+        | "annotation"
       annotations_status: "active" | "completed" | "draft"
       app_permissions:
         | "roles.manage"
@@ -3291,6 +3759,10 @@ export type Database = {
         | "timers.read"
         | "timers.manage"
         | "timers.delete"
+        | "embeds.write"
+        | "embeds.read"
+        | "embeds.manage"
+        | "embeds.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"
@@ -3298,6 +3770,9 @@ export type Database = {
         | "treli"
         | "suuper"
       chat_role: "user" | "assistant"
+      chat_role_type: "project_manager" | "assistant" | "owner" | "guest"
+      embed_location: "tab" | "sidebar"
+      embed_types: "url" | "iframe"
       field_types:
         | "date"
         | "multiple_choice"
@@ -3342,6 +3817,11 @@ export type Database = {
         | "logo_dark_url"
         | "auth_card_background_color"
         | "auth_section_background_color"
+        | "dashboard_url"
+        | "pinned_organizations"
+        | "catalog_provider_url"
+        | "catalog_product_url"
+        | "tool_copy_list_url"
       payment_status: "pending" | "succeeded" | "failed"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
       plugin_type: "tool" | "internal" | "external" | "integration"

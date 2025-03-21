@@ -118,7 +118,12 @@ class BillingWebhooksService {
     return true;
   }
 
-  async handleServiceUpdatedWebhook(service: Service.Type) {
+  async handleServiceUpdatedWebhook(service: Service.Type, oldService?: Service.Type) {
+
+    // stop bucle if oldService is not provided
+    if (!oldService?.price_id && service.price_id) return true;
+    const priceChanged = oldService?.price !== service.price;
+
     // verify if account has treli enabled
 
     const [accountsResult] = await Promise.all([
@@ -145,6 +150,7 @@ class BillingWebhooksService {
         service,
         account,
         billingServicesData?.provider_id,
+        priceChanged,
       );
     });
     if (promises.length > 0) {

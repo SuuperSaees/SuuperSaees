@@ -9,6 +9,7 @@ import { CustomResponse, ErrorOrganizationOperations } from '../../../../../../.
 import { CustomError } from '../../../../../../../../packages/shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
+import { revalidatePath } from 'next/cache';
 
 
 // Hex color validation regex
@@ -95,6 +96,8 @@ export const upsertOrganizationSettings = async (
         );
       }
 
+      revalidatePath('/home', 'layout');
+
       return CustomResponse.success(updatedSetting, 'organizationSettingUpdated').toJSON();
     } else {
       // If the setting does not exist, insert it
@@ -117,7 +120,8 @@ export const upsertOrganizationSettings = async (
           ErrorOrganizationOperations.FAILED_TO_CREATE_ORGANIZATION_SETTING,
         );
       }
-
+      
+      revalidatePath('/home', 'layout');
       return CustomResponse.success(insertedSetting, 'organizationSettingCreated').toJSON();
     }
   } catch (error) {

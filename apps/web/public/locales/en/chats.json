@@ -1,4 +1,9 @@
 {
+  "chats": "Chats",
+  "empty": {
+    "title": "No chats found",
+    "description": "Start a chat with your team members"
+  },
   "chatTabLabel": "AI Chat",
   "noCredits": "Sorry, you don't have enough credits",
   "genericError": "Sorry, something went wrong",
@@ -25,5 +30,12 @@
   "modelDemoAlert": "For this demo, we only support GPT-3.5 Turbo. In production, you can choose any model you wish to use.",
   "stopGenerating": "Stop Generating",
   "continue": "Continue",
-  "errorCreatingChat": "Error creating chat"
+  "errorCreatingChat": "Error creating chat",
+  "newChat": "Create new chat",
+  "search": "Search chats...",
+  "dateFormat": {
+    "today": "h:mm a",
+    "thisWeek": "EEEE",
+    "older": "MM/dd/yyyy"
+  }
 }
