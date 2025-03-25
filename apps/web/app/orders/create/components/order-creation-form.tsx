@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -15,21 +16,25 @@ import {
   MultiStepFormStep,
   createStepSchema,
 } from '@kit/ui/multi-step-form';
+import { Spinner } from '@kit/ui/spinner';
 
 import EmptyState from '~/components/ui/empty-state';
 import { Brief } from '~/lib/brief.types';
 import { FormField } from '~/lib/form-field.types';
 import { Order } from '~/lib/order.types';
 import { handleResponse } from '~/lib/response/handle-response';
+import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
+import {
+  createFolderFiles,
+} from '~/team-accounts/src/server/actions/files/create/create-file';
 import { createOrder } from '~/team-accounts/src/server/actions/orders/create/create-order';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import { generateOrderCreationSchema } from '../schemas/order-creation-schema';
 import BriefCompletionForm from './brief-completion-form';
 import BriefSelectionForm from './brief-selection-form';
-import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
-import { Spinner } from '@kit/ui/spinner';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { File } from '~/lib/file.types';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -57,7 +62,17 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     generateOrderCreationSchema(briefs.length > 0, t, formFields),
   );
 
-  const userRoleValidation = new Set(['agency_owner', 'agency_project_manager', 'agency_member'])
+  const { agency, organization } = useUserWorkspace();
+  const [clientOrganizationId, setClientOrganizationId] = useState<
+    string | undefined
+  >(organization?.id ?? undefined);
+  const agencyId = agency ? agency.id : organization?.id;
+
+  const userRoleValidation = new Set([
+    'agency_owner',
+    'agency_project_manager',
+    'agency_member',
+  ]);
 
   const formSchema = createStepSchema({
     briefSelection: z.object({
@@ -119,14 +134,37 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           );
       }
 
-      const titleFormFieldId = selectedBrief?.form_fields?.find((field) => field.field?.position === 0)?.field?.id;
-      const titleFormField = values.briefCompletion.brief_responses[titleFormFieldId ?? ''];
+      const titleFormFieldId = selectedBrief?.form_fields?.find(
+        (field) => field.field?.position === 0,
+      )?.field?.id;
+      const titleFormField =
+        values.briefCompletion.brief_responses[titleFormFieldId ?? ''];
 
       const res = await createOrder(
-        {...newOrder, title: titleFormField} as OrderInsert,
+        { ...newOrder, title: titleFormField } as OrderInsert,
         briefResponses,
         order_followers,
       );
+      // Since we're creating files for a order, the file need to be placed into the respective order folder
+      if (
+        values.briefCompletion.fileIds.length > 0 &&
+        clientOrganizationId &&
+        agencyId
+      ) {
+        const folderFilesToInsert: File.Relationships.FolderFiles.Insert[] = values.briefCompletion.fileIds.map(
+          (fileId) => ({
+            file_id: fileId,
+            client_organization_id: clientOrganizationId,
+            agency_id: agencyId,
+            folder_id: values.briefCompletion.uuid,
+          }),
+        );
+
+        await createFolderFiles(folderFilesToInsert).catch((error) => {
+          console.error('Error creating folder files:', error);
+          return
+        });
+      }
       await handleResponse(res, 'orders', t);
       if (res.ok) {
         router.push(`/orders/${res?.success?.data?.id}`);
@@ -184,24 +222,28 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     return (
       <div className="h-full [&>*]:h-full">
         <EmptyState
-            imageSrc="/images/illustrations/Illustration-cloud.svg"
-            title={t(
-              userRoleValidation.has(userRole) ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'
-            )}
-            description={t(
-              userRoleValidation.has(userRole) ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'
-            )}
-            button={
-              <ThemedButton
-                  onClick={async () => await briefMutation.mutateAsync()}
-                  disabled={briefMutation.isPending}
-                  className="flex items-center gap-2"
-                >
-                  <span>{t('briefs:createBrief')}</span>
-                  <Spinner className="h-4 w-4" />
-                </ThemedButton>
-            }
-          />
+          imageSrc="/images/illustrations/Illustration-cloud.svg"
+          title={t(
+            userRoleValidation.has(userRole)
+              ? 'briefs:empty.agency.title'
+              : 'briefs:empty.client.title',
+          )}
+          description={t(
+            userRoleValidation.has(userRole)
+              ? 'briefs:empty.agency.description'
+              : 'briefs:empty.client.description',
+          )}
+          button={
+            <ThemedButton
+              onClick={async () => await briefMutation.mutateAsync()}
+              disabled={briefMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              <span>{t('briefs:createBrief')}</span>
+              <Spinner className="h-4 w-4" />
+            </ThemedButton>
+          }
+        />
       </div>
     );
   }
@@ -218,10 +260,14 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           <EmptyState
             imageSrc="/images/illustrations/Illustration-cloud.svg"
             title={t(
-              userRoleValidation.has(userRole) ? 'briefs:empty.agency.title' : 'briefs:empty.client.title'
+              userRoleValidation.has(userRole)
+                ? 'briefs:empty.agency.title'
+                : 'briefs:empty.client.title',
             )}
             description={t(
-              userRoleValidation.has(userRole) ? 'briefs:empty.agency.description' : 'briefs:empty.client.description'
+              userRoleValidation.has(userRole)
+                ? 'briefs:empty.agency.description'
+                : 'briefs:empty.client.description',
             )}
             button={
               userRole === 'agency_owner' ||
@@ -254,6 +300,9 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
           uniqueId={uniqueId}
           orderMutation={orderMutation}
           userRole={userRole}
+          clientOrganizationId={clientOrganizationId}
+          agencyId={agencyId}
+          setClientOrganizationId={setClientOrganizationId}
         />
       </MultiStepFormStep>
     </MultiStepForm>

@@ -14,7 +14,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from '@kit/ui/form';
 import { useMultiStepFormContext } from '@kit/ui/multi-step-form';
@@ -52,6 +51,9 @@ interface BriefCompletionFormProps {
   >;
   uniqueId: string;
   userRole: string;
+  clientOrganizationId?: string | null;
+  agencyId?: string | null;
+  setClientOrganizationId: (clientOrganizationId: string) => void;
 }
 
 export default function BriefCompletionForm({
@@ -59,6 +61,9 @@ export default function BriefCompletionForm({
   uniqueId,
   orderMutation,
   userRole,
+  clientOrganizationId,
+  agencyId,
+  setClientOrganizationId,
 }: BriefCompletionFormProps) {
   const { t } = useTranslation('orders');
   const { form, prevStep } = useMultiStepFormContext();
@@ -73,11 +78,15 @@ export default function BriefCompletionForm({
     <Form {...form}>
       <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
         <div className="no-scrollbar flex h-full flex-wrap gap-16 overflow-y-auto lg:flex-nowrap">
-          <div className="flex w-full max-w-full shrink-0 flex-col gap-16 lg:max-w-xs lg:sticky lg:top-0 lg:h-fit justify-between items-start">
+          <div className="flex w-full max-w-full shrink-0 flex-col items-start justify-between gap-16 lg:sticky lg:top-0 lg:h-fit lg:max-w-xs">
             <BriefCard brief={brief} />
             {(userRole === 'agency_owner' ||
               userRole === 'agency_project_manager' ||
-              userRole === 'agency_member') && <ClientAssignation />}
+              userRole === 'agency_member') && (
+              <ClientAssignation
+                onSelectOrganization={setClientOrganizationId}
+              />
+            )}
           </div>
 
           <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
@@ -102,7 +111,6 @@ export default function BriefCompletionForm({
                   name="briefCompletion.description"
                   render={({ field }) => (
                     <FormItem>
-
                       <FormControl>
                         <ThemedTextarea
                           {...field}
@@ -117,19 +125,22 @@ export default function BriefCompletionForm({
                     </FormItem>
                   )}
                 />
-                <UploadFileComponent
-                  bucketName="orders"
-                  uuid={uniqueId}
-                  onFileIdsChange={handleFileIdsChange}
-                />
+                {clientOrganizationId && agencyId && (
+                  <UploadFileComponent
+                    bucketName="orders"
+                    uuid={uniqueId}
+                    onFileIdsChange={handleFileIdsChange}
+                  />
+                )}
               </>
             )}
-
-            <OrderBriefs
-              brief={brief}
-              form={form}
-              orderId={form.getValues('briefCompletion.uuid')}
-            />
+            {clientOrganizationId && agencyId && (
+              <OrderBriefs
+                brief={brief}
+                form={form}
+                orderId={form.getValues('briefCompletion.uuid')}
+              />
+            )}
           </div>
         </div>
         <div className="flex w-full justify-between py-4">
