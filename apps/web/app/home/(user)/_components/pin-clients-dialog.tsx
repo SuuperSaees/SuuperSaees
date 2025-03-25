@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Pin, X, Search, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Search, Check, AlertCircle, Loader2, Star } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
@@ -20,6 +20,7 @@ import { Input } from '@kit/ui/input';
 import { Button } from '@kit/ui/button';
 import { cn } from '@kit/ui/utils';
 import { Spinner } from '@kit/ui/spinner';
+import { useTranslation } from 'react-i18next';
 
 // Define the client type from the API response
 type ClientOrganization = {
@@ -39,13 +40,8 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
   const [originalSelectedIds, setOriginalSelectedIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const { pinned_organizations, updateOrganizationSetting } =
-    useOrganizationSettings();
-
-  // Ref for tracking if component is mounted
-  const isMounted = useRef(true);
-
-  // Add ref for the scrollable container
+  const { pinned_organizations, updateOrganizationSetting } = useOrganizationSettings();
+  const { t } = useTranslation('common');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Add wheel event handler
@@ -54,10 +50,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
       const container = scrollContainerRef.current;
       if (!container) return;
 
-      // Get container bounds
       const rect = container.getBoundingClientRect();
-      
-      // Check if mouse is over the container
       const isMouseOver = 
         e.clientX >= rect.left &&
         e.clientX <= rect.right &&
@@ -66,34 +59,22 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
 
       if (isMouseOver) {
         e.preventDefault();
-        
-        // Adjust the scroll speed
-        const scrollSpeed = 1.5;
-        const delta = e.deltaY * scrollSpeed;
-        
-        // Smooth scroll
         container.scrollBy({
-          left: delta,
+          left: e.deltaY * 1.5,
           behavior: 'smooth'
         });
       }
     };
 
-    // Add the event listener to the window to catch all wheel events
     window.addEventListener('wheel', handleWheel, { passive: false });
-
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-    };
+    return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // Fetch clients - only when the dialog is open to avoid unnecessary loading
+  // Fetch clients - only when the dialog is open
   const { data: clients = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['clientOrganizations'],
     queryFn: async () => await getClientsOrganizations(),
-    // Don't refetch on window focus to avoid unexpected changes
     refetchOnWindowFocus: false,
-    // Only fetch when the dialog is open
     enabled: open,
   }) as { 
     data: ClientOrganization[], 
@@ -108,29 +89,26 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
       try {
         const pinnedIds = JSON.parse(pinned_organizations) as string[];
         setSelectedClientIds(pinnedIds);
-        setOriginalSelectedIds(pinnedIds); // Store original selection for fallback
+        setOriginalSelectedIds(pinnedIds);
       } catch (e) {
         setSelectedClientIds([]);
         setOriginalSelectedIds([]);
       }
     }
-    
-    // Cleanup function to set isMounted to false when component unmounts
-    return () => {
-      isMounted.current = false;
-    };
   }, [open, pinned_organizations]);
 
-  // Reset error state when dialog opens/closes
+  // Reset states when dialog opens/closes
   useEffect(() => {
-    setSaveError(null);
+    if (!open) {
+      setSearchQuery('');
+      setSaveError(null);
+      setIsSaving(false);
+    }
   }, [open]);
 
   // Filter clients based on search query and exclude guests
   const filteredClients = clients.filter(client => 
-    // First exclude guests (case insensitive)
     !client.name.toLowerCase().startsWith('guest') &&
-    // Then apply search filter
     client.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -156,6 +134,8 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
 
   // Handle saving pinned clients
   const savePinnedClients = async () => {
+    if (isSaving) return;
+    
     setIsSaving(true);
     setSaveError(null);
     
@@ -165,32 +145,24 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
         value: JSON.stringify(selectedClientIds),
       });
       
-      // Only close if component is still mounted
-      if (isMounted.current) {
-        onOpenChange(false);
-      }
+      onOpenChange(false);
     } catch (error) {
       console.error('Failed to save pinned clients:', error);
       setSaveError('Failed to save changes. Please try again.');
-      
-      // Fallback to original selection on error
-      if (isMounted.current) {
-        setSelectedClientIds(originalSelectedIds);
-      }
+      setSelectedClientIds(originalSelectedIds);
     } finally {
-      if (isMounted.current) {
-        setIsSaving(false);
-      }
+      setIsSaving(false);
     }
   };
 
   // Reset state when dialog closes
   const handleDialogChange = (isOpen: boolean) => {
-    onOpenChange(isOpen);
     if (!isOpen) {
       setSearchQuery('');
       setSaveError(null);
+      setIsSaving(false);
     }
+    onOpenChange(isOpen);
   };
 
   // Check if there are unsaved changes
@@ -205,11 +177,11 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
         <div className="p-5 border-b border-gray-100">
           <DialogHeader className="mb-0 space-y-1">
             <div className="flex items-center gap-2">
-              <Pin className="h-4 w-4 text-gray-500" />
-              <DialogTitle className="text-lg font-medium">Pin Clients</DialogTitle>
+              <Star className="h-4 w-4 text-gray-500" />
+              <DialogTitle className="text-lg font-medium">{t('sidebar.pinClients')}</DialogTitle>
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              Select clients to pin to your sidebar for quick access
+              {t('sidebar.pinClientsDescription')}
             </p>
           </DialogHeader>
         </div>
@@ -251,7 +223,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
             <Input
-              placeholder="Search clients..."
+              placeholder={t('sidebar.searchClients')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 pr-3 py-1.5 w-full border-gray-200 rounded-md text-sm focus:ring-gray-300 focus:border-gray-300"
@@ -264,22 +236,22 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
               <Spinner className='text-gray-500 h-6 w-6' />
-              <p className="text-sm font-medium">Loading clients...</p>
+              <p className="text-sm font-medium">{t('sidebar.loadingClients')}</p>
             </div>
           ) : isError ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mb-3">
                 <AlertCircle className="h-6 w-6 text-red-500" />
               </div>
-              <p className="text-gray-700 text-sm font-medium mb-1">Failed to load clients</p>
-              <p className="text-gray-500 text-xs mb-4">There was an error loading the client list</p>
+                <p className="text-gray-700 text-sm font-medium mb-1">{t('sidebar.failedToLoadClients')}</p>
+                <p className="text-gray-500 text-xs mb-4">{t('sidebar.errorLoadingClients')}</p>
               <Button 
                 onClick={() => refetch()} 
                 variant="outline" 
                 size="sm"
                 className="text-xs px-3 py-1 h-7"
               >
-                Try Again
+                {t('sidebar.tryAgain')}
               </Button>
             </div>
           ) : filteredClients.length === 0 ? (
@@ -287,8 +259,8 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
               <div className="flex justify-center mb-2">
                 <Search className="h-8 w-8 text-gray-300" />
               </div>
-              <p className="text-gray-500 text-sm font-medium">No clients found</p>
-              <p className="text-gray-400 text-xs mt-1">Try a different search term</p>
+              <p className="text-gray-500 text-sm font-medium">{t('sidebar.noClientsFound')}</p>
+              <p className="text-gray-400 text-xs mt-1">{t('sidebar.differentSearchTerm')}</p>
             </div>
           ) : (
             <div className="space-y-1">
@@ -360,7 +332,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
                 className="h-8 px-3 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 disabled={isSaving}
               >
-                Cancel
+                {t('sidebar.cancel')}
               </Button>
             </DialogClose>
             <Button 
@@ -374,10 +346,10 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
               {isSaving ? (
                 <div className="flex items-center justify-center">
                   <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-                  <span>Saving</span>
+                  <span>{t('sidebar.saving')}</span>
                 </div>
               ) : (
-                'Save'
+                t('sidebar.save')
               )}
             </Button>
           </div>

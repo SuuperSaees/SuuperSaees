@@ -77,7 +77,7 @@ export function ClientsOptionsDropdown() {
         contentClassName="w-56 p-2 cursor-pointer"
       >
         <div
-          className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent text-gray-400 transition-all duration-200 hover:bg-gray-100 hover:text-gray-600"
+          className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent cursor-pointer"
           aria-label="Client options"
         >
           <MoreHorizontal className="h-4 w-4" />

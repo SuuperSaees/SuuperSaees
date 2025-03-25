@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Pin, PinOff } from 'lucide-react';
+import { Star, StarOff } from 'lucide-react';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 interface ButtonPinOrganizationProps {
@@ -49,9 +49,9 @@ export default function ButtonPinOrganization({
       title={isPinned ? 'Unpin organization' : 'Pin organization'}
     >
       {isPinned ? (
-       <PinOff className='w-4 h-4 text-slate-500' />
+       <StarOff className='w-4 h-4 text-slate-500' />
       ) : (
-        <Pin className='w-4 h-4 text-slate-500' />
+        <Star className='w-4 h-4 text-slate-500' />
       )}
     </button>
   );
