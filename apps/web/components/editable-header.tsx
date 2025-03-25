@@ -1,14 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Check, PenLine } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@kit/ui/button';
 import { TimerContainer } from '../app/components/timer-container';
 
 interface EditableHeaderProps {
   initialName: string;
-  id: string | number;
   userRole: string;
   updateFunction: (value: string) => Promise<void>;
   rolesThatCanEdit: Set<string>;
@@ -22,7 +19,6 @@ interface EditableHeaderProps {
 
 const EditableHeader = ({
   initialName,
-  id,
   userRole,
   updateFunction,
   rolesThatCanEdit,
@@ -33,7 +29,6 @@ const EditableHeader = ({
   inputClassName,
   textClassName,
 }: EditableHeaderProps) => {
-  const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(initialName);
   const inputRef = useRef<HTMLInputElement>(null);
   const spanRef = useRef<HTMLSpanElement>(null);
@@ -42,31 +37,20 @@ const EditableHeader = ({
     setName(initialName);
   }, [initialName]);
 
-  useEffect(() => {
-    setIsEditing(false);
-  }, [id]);
-
   const handleSave = async () => {
     if (name.trim() === '') {
       toast.error(`The given name cannot be empty`);
-      resetEditing();
+      setName(initialName);
       return;
     }
     if (name !== initialName) {
       try {
-        setIsEditing(false);
         await updateFunction(name);
       } catch (error) {
         console.error(`Error updating the name/title:`, error);
+        setName(initialName);
       }
-    } else {
-      resetEditing();
     }
-  };
-
-  const resetEditing = () => {
-    setIsEditing(false);
-    setName(initialName);
   };
 
   const updateInputWidth = () => {
@@ -81,7 +65,7 @@ const EditableHeader = ({
 
   useEffect(() => {
     updateInputWidth();
-  }, [name, isEditing]);
+  }, [name]);
 
   const canEdit = rolesThatCanEdit.has(userRole);
 
@@ -96,7 +80,6 @@ const EditableHeader = ({
     return variant === 'chat'
       ? `w-full h-15 ${baseClass} ${inputClassName ?? ''}`
       : `h-15 flex min-w-[80%] max-w-[80%] ${baseClass} ${inputClassName ?? ''}`;
-
   };
 
   const getTextClassName = () => {
@@ -104,68 +87,11 @@ const EditableHeader = ({
     return variant === 'chat'
       ? `block overflow-hidden text-ellipsis whitespace-nowrap ${baseClass} ${textClassName ?? ''}`
       : `max-w-[100%] overflow-hidden whitespace-nowrap pr-1 w-full ${baseClass} ${textClassName ?? ''}`;
-
   };
 
-  return (
-    <div className={layoutClassName}>
-      {canEdit && isEditing ? (
-        <div className={getContainerClassName()}>
-          {variant === 'chat' ? (
-            <>
-              <div className="relative flex-1 min-w-0 max-w-[600px] overflow-hidden">
-                <input
-                  type="text"
-                  ref={inputRef}
-                  className={getInputClassName()}
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                />
-                <span
-                  ref={spanRef}
-                  className="invisible absolute left-0 top-0 whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900"
-                >
-                  {name}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Button
-                  variant="ghost"
-                  className="h-10 px-1 text-slate-500"
-                  onClick={handleSave}
-                >
-                  <Check className="h-[20px] w-[20px]" />
-                </Button>
-                <TimerContainer />
-              </div>
-            </>
-          ) : (
-            <>
-              <input
-                type="text"
-                ref={inputRef}
-                className={getInputClassName()}
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-              <span
-                ref={spanRef}
-                className="invisible absolute min-w-[80%] max-w-[80%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900"
-              >
-                {name}
-              </span>
-              <Button
-                variant="ghost"
-                className="m-0 mr-2 h-10 px-1 text-slate-500"
-                onClick={handleSave}
-              >
-                <Check className="h-[20px] w-[20px]" />
-              </Button>
-              <TimerContainer />
-            </>
-          )}
-        </div>
-      ) : (
+  if (!canEdit) {
+    return (
+      <div className={layoutClassName}>
         <div className={getContainerClassName()}>
           {variant === 'chat' ? (
             <>
@@ -175,18 +101,6 @@ const EditableHeader = ({
                 </span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                {canEdit && (
-                  <Button
-                    variant="ghost"
-                    className="h-10 px-1 text-slate-500"
-                    onClick={() => {
-                      setIsEditing(true);
-                      updateInputWidth();
-                    }}
-                  >
-                    <PenLine className="h-[20px] w-[20px]" />
-                  </Button>
-                )}
                 <TimerContainer />
               </div>
             </>
@@ -196,23 +110,59 @@ const EditableHeader = ({
                 {name.slice(0, 70).trim()}
                 {name.length > 70 && '...'}
               </span>
-              {canEdit && (
-                <Button
-                  variant="ghost"
-                  className="m-0 h-10 px-1 text-slate-500"
-                  onClick={() => {
-                    setIsEditing(true);
-                    updateInputWidth();
-                  }}
-                >
-                  <PenLine className="h-[20px] w-[20px]" />
-                </Button>
-              )}
               <TimerContainer />
             </>
           )}
         </div>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={layoutClassName}>
+      <div className={getContainerClassName()}>
+        {variant === 'chat' ? (
+          <>
+            <div className="relative flex-1 min-w-0 max-w-[600px] overflow-hidden">
+              <input
+                type="text"
+                ref={inputRef}
+                className={getInputClassName()}
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                onBlur={handleSave}
+              />
+              <span
+                ref={spanRef}
+                className="invisible absolute left-0 top-0 whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900"
+              >
+                {name}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <TimerContainer />
+            </div>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              ref={inputRef}
+              className={getInputClassName()}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              onBlur={handleSave}
+            />
+            <span
+              ref={spanRef}
+              className="invisible absolute min-w-[80%] max-w-[80%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900"
+            >
+              {name}
+            </span>
+            <TimerContainer />
+          </>
+        )}
+      </div>
     </div>
   );
 };

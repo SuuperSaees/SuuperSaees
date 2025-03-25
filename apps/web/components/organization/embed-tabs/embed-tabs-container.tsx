@@ -173,6 +173,11 @@ export function EmbedTabsContainer({
               icon={embed.icon}
               activeTab={activeTab}
               onDelete={handleDelete}
+              onEdit={(id) => {
+                if (embedSectionRef.current?.handleEmbedEdit) {
+                  embedSectionRef.current.handleEmbedEdit(id);
+                }
+              }}
             />
           );
         }
@@ -200,7 +205,7 @@ export function EmbedTabsContainer({
             </button>
           </div>
         )}
-        <div className="flex items-center px-2">{tabElements}</div>
+        <div className="flex items-center px-2 gap-2">{tabElements}</div>
         {showRightButton && (
           <div className="sticky right-0 z-10 flex h-full items-stretch">
             <button

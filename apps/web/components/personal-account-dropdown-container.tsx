@@ -10,6 +10,7 @@ import featuresFlagConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
 import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/delete-token';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 const paths = {
   home: pathsConfig.app.home,
@@ -34,6 +35,8 @@ export function ProfileAccountDropdownContainer(props: {
   const user = useUser(props.user);
   const userData = user.data as User;
   const supabase = useSupabase();
+  const { sidebar_background_color } = useOrganizationSettings();
+  const sidebarBackgroundColor = sidebar_background_color ?? '#f2f2f2';
 
   const handleSignOut = async () => {
     const impersonatingTokenId = localStorage.getItem("impersonatingTokenId");
@@ -48,7 +51,7 @@ export function ProfileAccountDropdownContainer(props: {
   }
 
   return (
-    <div className={props.collapsed ? '' : 'w-full'}>
+    <div className={props.collapsed ? '' : 'w-full rounded-md'} style={{ backgroundColor: sidebarBackgroundColor }}>
       <PersonalAccountDropdown
         className={'w-full'}
         paths={paths}

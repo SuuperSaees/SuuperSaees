@@ -72,8 +72,8 @@
   "embeds": {
     "title": "Embeds"
   },
-  "pinOrganization": "Pin organization",
-  "unpinOrganization": "Unpin organization",
+  "pinOrganization": "Add to favorites",
+  "unpinOrganization": "Remove from favorites",
   "deleteOrganization": "Delete organization"
 },
   "startWithFirstClientTitle": "Let's start with your first client",

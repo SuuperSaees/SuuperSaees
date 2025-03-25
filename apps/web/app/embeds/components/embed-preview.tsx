@@ -31,7 +31,7 @@ export function EmbedPreview({ embedSrc }: EmbedPreviewProps) {
   }, [embedSrc, t]);
 
   return (
-    <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-lg border shadow-sm">
+    <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-lg ">
       {embedContent}
     </div>
   );
