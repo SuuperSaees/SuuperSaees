@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { Edit, EllipsisVertical, Plus, Trash2 } from 'lucide-react';
+import { Pen, EllipsisVertical, Plus, Trash} from 'lucide-react';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -33,7 +33,7 @@ export function EmbedTab({
     {
       value: (
         <span className="inline-flex w-full items-center gap-2 text-gray-600">
-          <Edit className="h-5 w-5" />
+          <Pen className="h-4 w-4" />
           <Trans i18nKey={'embeds:form.edit'} />
         </span>
       ),
@@ -46,7 +46,7 @@ export function EmbedTab({
     {
       value: (
         <span className="inline-flex w-full items-center gap-2 text-gray-600">
-          <Trash2 className="h-5 w-5" />
+          <Trash className="h-4 w-4" />
           <Trans i18nKey={'embeds:form.delete'} />
         </span>
       ),

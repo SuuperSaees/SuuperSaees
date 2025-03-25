@@ -10,7 +10,6 @@ import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 
 import pathsConfig from '../../../../apps/web/config/paths.config';
-import { Button } from '../shadcn/button';
 import {
   Tooltip,
   TooltipContent,
@@ -193,20 +192,18 @@ export function SidebarGroup({
 
   // Render the chevron for collapsible groups
   const chevronElement = collapsible && (
-    <Button
+    <button
       aria-expanded={isGroupOpen}
       aria-controls={id}
       onClick={toggleGroup}
-      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex"
-      variant="ghost"
-      size="sm"
+      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent yo"
     >
       <ChevronDown
         className={cn('block h-3 w-3', {
           'rotate-180': isGroupOpen,
         })}
       />
-    </Button>
+    </button>
   );
 
   // Render the label content, either as a link or plain text
@@ -307,7 +304,7 @@ export function SidebarSection({
   const { collapsed, itemActiveStyle, itemHoverStyle } =
     useContext(SidebarContext);
   const currentPath = usePathname() ?? '';
-  const active = isRouteActive(path ?? '', currentPath, false);
+  const active = isRouteActive(path ?? '', currentPath, true);
   // Add additional error handling for debugging
   const safeGroups = Array.isArray(groups) ? groups : [];
 
@@ -315,7 +312,7 @@ export function SidebarSection({
     if (path) {
       return (
         <div
-          className="group/sidebar-section mt-4 flex items-center justify-between rounded-md px-3 py-2 opacity-100 font-semibold"
+          className="group/sidebar-section mt-4 flex items-center justify-between rounded-md px-3 py-2 opacity-100 font-semibold opacity-70"
           style={active && itemActiveStyle ? itemActiveStyle : undefined}
           onMouseEnter={(e) => {
             if (itemHoverStyle) {
@@ -428,7 +425,7 @@ export function SidebarSection({
   return (
     <div
       className={cn(
-        'mt-4 flex flex-col gap-2',
+        'mt-4 flex flex-col gap-1',
         className,
       )}
     >

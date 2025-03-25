@@ -62,7 +62,6 @@ function Header({
       <div className={contentClassName}>
         <EditableHeader
           initialName={name}
-          id={id}
           userRole={currentUserRole}
           updateFunction={async (value: string) => {
             const res = await updateOrganization(id, {
