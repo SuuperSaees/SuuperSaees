@@ -34,6 +34,7 @@ export interface EmbedSectionRef {
     values: unknown,
     options?: { isAccountRemoval?: boolean }
   ) => Promise<void> | void;
+  handleEmbedEdit: (id: string) => void;
 }
 
 // Helper function to convert FormValues to the expected EmbedEditor defaultValue type
@@ -95,6 +96,9 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
   // Add state for preview value
   const [previewValue, setPreviewValue] = useState<string>('');
 
+  // Add state for tracking which embed is being edited
+  const [editingEmbedId, setEditingEmbedId] = useState<string | null>(null);
+
   // Update preview value when active embed changes
   useEffect(() => {
     const activeEmbed = formattedEmbeds.find(embed => embed.id === activeEmbedId);
@@ -138,6 +142,9 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
       // Ensure it always returns a Promise
       return Promise.resolve(handleEmbedUpdate(typedValues, options));
     },
+    handleEmbedEdit: (id: string) => {
+      setEditingEmbedId(id);
+    }
   }));
 
   // Handle URL parameters
@@ -200,6 +207,18 @@ export const EmbedSection = forwardRef<EmbedSectionRef, EmbedSectionProps>(({
     const activeEmbed = formattedEmbeds.find(embed => embed.id === activeEmbedId);
     if (!activeEmbed) return null;
 
+    // Show only preview by default
+    if (editingEmbedId !== activeEmbedId) {
+      return (
+        <div className="h-full">
+          <div className="h-full p-8 bg-gray-200 overflow-y-auto rounded-lg">
+            <EmbedPreview embedSrc={activeEmbed.value} />
+          </div>
+        </div>
+      );
+    }
+
+    // Show both preview and editor when in edit mode
     return (
       <div className="flex h-full gap-8">
         <div className="flex-1 p-8 bg-gray-200 overflow-y-auto rounded-lg">

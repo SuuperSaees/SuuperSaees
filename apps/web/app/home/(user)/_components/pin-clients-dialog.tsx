@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Pin, X, Search, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Search, Check, AlertCircle, Loader2, Star } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
@@ -20,6 +20,7 @@ import { Input } from '@kit/ui/input';
 import { Button } from '@kit/ui/button';
 import { cn } from '@kit/ui/utils';
 import { Spinner } from '@kit/ui/spinner';
+import { useTranslation } from 'react-i18next';
 
 // Define the client type from the API response
 type ClientOrganization = {
@@ -41,7 +42,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
   const [saveError, setSaveError] = useState<string | null>(null);
   const { pinned_organizations, updateOrganizationSetting } =
     useOrganizationSettings();
-
+  const { t } = useTranslation('common');
   // Ref for tracking if component is mounted
   const isMounted = useRef(true);
 
@@ -205,11 +206,11 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
         <div className="p-5 border-b border-gray-100">
           <DialogHeader className="mb-0 space-y-1">
             <div className="flex items-center gap-2">
-              <Pin className="h-4 w-4 text-gray-500" />
-              <DialogTitle className="text-lg font-medium">Pin Clients</DialogTitle>
+              <Star className="h-4 w-4 text-gray-500" />
+              <DialogTitle className="text-lg font-medium">{t('sidebar.pinClients')}</DialogTitle>
             </div>
             <p className="text-sm text-gray-500 mt-1">
-              Select clients to pin to your sidebar for quick access
+              {t('sidebar.pinClientsDescription')}
             </p>
           </DialogHeader>
         </div>
@@ -251,7 +252,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
             <Input
-              placeholder="Search clients..."
+              placeholder={t('sidebar.searchClients')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-8 pr-3 py-1.5 w-full border-gray-200 rounded-md text-sm focus:ring-gray-300 focus:border-gray-300"
@@ -264,22 +265,22 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
               <Spinner className='text-gray-500 h-6 w-6' />
-              <p className="text-sm font-medium">Loading clients...</p>
+              <p className="text-sm font-medium">{t('sidebar.loadingClients')}</p>
             </div>
           ) : isError ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mb-3">
                 <AlertCircle className="h-6 w-6 text-red-500" />
               </div>
-              <p className="text-gray-700 text-sm font-medium mb-1">Failed to load clients</p>
-              <p className="text-gray-500 text-xs mb-4">There was an error loading the client list</p>
+                <p className="text-gray-700 text-sm font-medium mb-1">{t('sidebar.failedToLoadClients')}</p>
+                <p className="text-gray-500 text-xs mb-4">{t('sidebar.errorLoadingClients')}</p>
               <Button 
                 onClick={() => refetch()} 
                 variant="outline" 
                 size="sm"
                 className="text-xs px-3 py-1 h-7"
               >
-                Try Again
+                {t('sidebar.tryAgain')}
               </Button>
             </div>
           ) : filteredClients.length === 0 ? (
@@ -287,8 +288,8 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
               <div className="flex justify-center mb-2">
                 <Search className="h-8 w-8 text-gray-300" />
               </div>
-              <p className="text-gray-500 text-sm font-medium">No clients found</p>
-              <p className="text-gray-400 text-xs mt-1">Try a different search term</p>
+              <p className="text-gray-500 text-sm font-medium">{t('sidebar.noClientsFound')}</p>
+              <p className="text-gray-400 text-xs mt-1">{t('sidebar.differentSearchTerm')}</p>
             </div>
           ) : (
             <div className="space-y-1">
@@ -360,7 +361,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
                 className="h-8 px-3 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 disabled={isSaving}
               >
-                Cancel
+                {t('sidebar.cancel')}
               </Button>
             </DialogClose>
             <Button 
@@ -374,10 +375,10 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
               {isSaving ? (
                 <div className="flex items-center justify-center">
                   <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
-                  <span>Saving</span>
+                  <span>{t('sidebar.saving')}</span>
                 </div>
               ) : (
-                'Save'
+                t('sidebar.save')
               )}
             </Button>
           </div>

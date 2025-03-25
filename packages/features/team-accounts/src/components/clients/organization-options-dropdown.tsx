@@ -1,6 +1,6 @@
 'use client';
 
-import { Plus, Pin, PinOff, MoreVertical } from 'lucide-react';
+import { Plus, MoreVertical, Star, StarOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
 
@@ -57,9 +57,9 @@ export function OrganizationOptionsDropdown({
           {togglePinMutation.isPending ? (
             <Spinner className="h-4 w-4 text-gray-500" />
           ) : isPinned() ? (
-            <PinOff className="h-4 w-4 text-gray-500" />
+            <StarOff className="h-4 w-4 text-gray-500" />
           ) : (
-            <Pin className="h-4 w-4 text-gray-500" />
+            <Star className="h-4 w-4 text-gray-500" />
           )}
           <span className="text-sm text-gray-700">
             {isPinned() ? t('organizations.unpinOrganization') : t('organizations.pinOrganization')}

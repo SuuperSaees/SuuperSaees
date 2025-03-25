@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useEffect, useMemo, useRef, useState,} from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useQuery } from '@tanstack/react-query';
 import { Search, X } from 'lucide-react';
@@ -43,13 +43,22 @@ export function OrganizationsField({
     queryFn: async () => await getClientsOrganizations(),
   });
 
+  const filteredOrganizations = useMemo(
+    () =>
+      clientsOrganizationsQuery.data?.filter(
+        (org) => !org.name.startsWith('guest'),
+      ),
+    [clientsOrganizationsQuery.data],
+  );
   const organizationOptions = useMemo(() => {
-    return clientsOrganizationsQuery.data?.map((org) => ({
-      value: org.id,
-      label: org.name,
-      picture_url: org.picture_url,
-    })) ?? [];
-  }, [clientsOrganizationsQuery.data]);
+    return (
+      filteredOrganizations?.map((org) => ({
+        value: org.id,
+        label: org.name,
+        picture_url: org.picture_url,
+      })) ?? []
+    );
+  }, [filteredOrganizations]);
 
   const handleOrganizationSelect = (value: string) => {
     const newOrg = clientsOrganizationsQuery.data?.find(
@@ -94,8 +103,6 @@ export function OrganizationsField({
 
   // If default values are provided, set the selected organizations based on the organization loaded in the query
   useEffect(() => {
-
-    
     if (organizationOptions?.length && defaultValues?.length) {
       const newSelectedOrganizations = organizationOptions
         .filter((org) => defaultValues.includes(org.value))

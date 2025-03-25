@@ -57,7 +57,7 @@ export function EmbedOptionsDropdown({
       showSeparators={false}
     >
       <button
-        className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent text-gray-400 transition-all duration-200 hover:bg-gray-100 hover:text-gray-600"
+        className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent transition-all duration-200"
         aria-label="Embed options"
         type="button"
       >

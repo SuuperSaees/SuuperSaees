@@ -4,8 +4,10 @@
     "updateButton": "Actualizar embed",
     "createButton": "Crear embed",
     "addButton": "Agregar embed",
-    "title": "Incrustar otras apps",
-    "description": "Incrusta tus apps favoritas en tu proyecto. Guía de video.",
+    "title": "Nuevo embed",
+    "description": "Añade un nuevo embed de tu aplicación favorita a tu portal.",
+    "delete": "Eliminar embed",
+    "edit": "Editar embed",
     "inputs": {
       "title": {
         "type": "text",
@@ -47,8 +49,8 @@
       },
       "url": {
         "type": "text",
-        "label": "Fuente incrustada",
-        "placeholder": "Ingresa el {{tipo}}"
+        "label": "Embed",
+        "placeholder": "Ingresa el URL o el código del Iframe"
       },
       "visibility": {
         "type": "select",
@@ -67,11 +69,11 @@
         "type": "select",
         "label": "Plantilla",
         "placeholder": "Selecciona una plantilla"
-      } 
+      }
     }
   },
   "empty": {
-    "title": "No hay fuente incrustada",
-    "description": "Por favor, proporciona una fuente incrustada válida"
+    "title": "No hay embed",
+    "description": "Por favor, proporciona un embed válido"
   }
 }

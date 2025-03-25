@@ -10,8 +10,8 @@ import {
   Briefcase,
   Layers,
   MoreHorizontal,
-  PinOff,
   Plus,
+  StarOff,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -78,12 +78,12 @@ export function ClientOptionsDropdown({
       value: (
         <button
           onClick={() => unpinMutation.mutate()}
-          className="flex w-full items-center gap-2"
+          className="flex w-full items-center gap-2 text-left"
         >
           {unpinMutation.isPending ? (
             <Spinner className="h-4 w-4 text-gray-500" />
           ) : (
-            <PinOff className="h-4 w-4 text-gray-500" />
+            <StarOff className="h-4 w-4 text-gray-500" />
           )}
           <span className="text-sm font-medium text-gray-700">
             {t('sidebar.unpinClient')}
@@ -195,7 +195,7 @@ export function ClientOptionsDropdown({
         contentClassName="w-56 p-2 cursor-pointer"
       >
         <button
-          className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent text-gray-400 transition-all duration-200 hover:bg-gray-100 hover:text-gray-600"
+          className="flex h-6 w-6 items-center justify-center rounded-full border-none bg-transparent"
           aria-label="Client options"
           type="button"
         >

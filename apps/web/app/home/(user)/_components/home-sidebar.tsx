@@ -53,7 +53,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const toolCopyListUrl = Boolean(settings.tool_copy_list_url);
 
   return (
-    <ThemedSidebar className="text-sm">
+    <ThemedSidebar className="text-sm scrollbar-on-hover">
       <div className="padding-24">
         <AppLogo />
       </div>
@@ -76,7 +76,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
         )}
       </SidebarContent>
 
-      <div className={'absolute bottom-4 left-0 w-full'}>
+      <div className={'w-full mb-4'}>
         {userRole !== 'client_guest' && (
           <SidebarContent>
             <ProfileAccountDropdownContainer

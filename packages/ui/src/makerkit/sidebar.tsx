@@ -10,7 +10,6 @@ import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 
 import pathsConfig from '../../../../apps/web/config/paths.config';
-import { Button } from '../shadcn/button';
 import {
   Tooltip,
   TooltipContent,
@@ -22,7 +21,9 @@ import { SidebarContext } from './context/sidebar.context';
 import { NavigationConfigSchema } from './navigation-config.schema';
 import { Trans } from './trans';
 
-export const getColorLuminance = (hexColor: string): { luminance: number, theme: 'light' | 'dark' } => {
+export const getColorLuminance = (
+  hexColor: string,
+): { luminance: number; theme: 'light' | 'dark' } => {
   const color = hexColor.replace('#', '');
   const r = parseInt(color.substring(0, 2), 16);
   const g = parseInt(color.substring(2, 4), 16);
@@ -36,7 +37,7 @@ export const getColorLuminance = (hexColor: string): { luminance: number, theme:
 
   // Return an object with luminance and theme properties
   return { luminance, theme };
-}
+};
 // Define a better type for the group children to avoid any
 export type SidebarGroupChild = {
   label: string;
@@ -69,8 +70,9 @@ export function Sidebar(props: {
         collapsed: boolean;
         setCollapsed: (collapsed: boolean) => void;
       }) => React.ReactNode);
-  style?: React.CSSProperties; // Adding style prop explicitly
+  style?: React.CSSProperties;
   itemActiveStyle?: React.CSSProperties;
+  itemHoverStyle?: React.CSSProperties;
   sidebarColor?: string;
 }) {
   const [collapsed, setCollapsed] = useState(props.collapsed ?? false);
@@ -84,6 +86,7 @@ export function Sidebar(props: {
     collapsed,
     setCollapsed,
     itemActiveStyle: props.itemActiveStyle,
+    itemHoverStyle: props.itemHoverStyle,
     openGroupId,
     setOpenGroupId,
     sidebarColor: props.sidebarColor ?? '#ffffff',
@@ -133,11 +136,13 @@ export function SidebarGroup({
     collapsed: sidebarCollapsed,
     openGroupId,
     setOpenGroupId,
+    itemActiveStyle,
+    itemHoverStyle,
   } = useContext(SidebarContext);
   const id = useId();
   const pathname = usePathname();
   const isGroupOpen = openGroupId === id;
-
+  const active = isRouteActive(pathname, path ?? '', true);
   // Initialize group state on mount
   useEffect(() => {
     if (!collapsed && collapsible) {
@@ -160,7 +165,7 @@ export function SidebarGroup({
 
   // Common wrapper class names
   const wrapperClassName = cn(
-    'flex w-full text-md shadow-none group/sidebar-group relative gap-2',
+    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1',
     {
       'w-full px-3': !sidebarCollapsed,
     },
@@ -169,42 +174,44 @@ export function SidebarGroup({
 
   // Render the icon if provided
   const iconElement = Icon && (
-    <div className={cn("block flex h-5 w-5 items-center justify-center shrink-0", {
-      "group-hover/sidebar-group:hidden": collapsible
-    })}>
+    <div
+      className={cn('block flex h-5 w-5 shrink-0 items-center justify-center', {
+        'group-hover/sidebar-group:hidden': collapsible,
+      })}
+    >
       {Icon}
     </div>
   );
 
   // Render the menu if provided
   const menuElement = menu && (
-    <div className="ml-auto flex items-center justify-center shrink-0 group-hover/sidebar-group:visible invisible">{menu}</div>
+    <div className="invisible ml-auto flex shrink-0 items-center justify-center group-hover/sidebar-group:visible">
+      {menu}
+    </div>
   );
 
   // Render the chevron for collapsible groups
   const chevronElement = collapsible && (
-    <Button
+    <button
       aria-expanded={isGroupOpen}
       aria-controls={id}
       onClick={toggleGroup}
-      className="hidden h-5 w-5 items-center justify-center p-0 group-hover/sidebar-group:flex"
-      variant="ghost"
-      size="sm"
+      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent yo"
     >
       <ChevronDown
-        className={cn('block h-3 w-3 transition duration-300', {
+        className={cn('block h-3 w-3', {
           'rotate-180': isGroupOpen,
         })}
       />
-    </Button>
+    </button>
   );
 
   // Render the label content, either as a link or plain text
   const labelElement = path ? (
     <Link
       href={path}
-      className={cn('flex items-center transition-colors line-clamp-1', {
-        'font-medium': isRouteActive(pathname, path, true),
+      className={cn('line-clamp-1 flex w-full items-center font-normal', {
+        'font-normal': isRouteActive(pathname, path, true),
       })}
       onClick={collapsible ? (e) => e.stopPropagation() : undefined}
     >
@@ -215,10 +222,32 @@ export function SidebarGroup({
   );
 
   return (
-    <div className={cn('flex flex-col space-y-1 py-1', className)}>
+    <div className={cn('flex flex-col space-y-2 rounded-md py-1', className)}>
       <div
         className={wrapperClassName}
         onClick={collapsible && !path ? toggleGroup : undefined}
+        style={active && itemActiveStyle ? itemActiveStyle : undefined}
+        onMouseEnter={(e) => {
+          if (itemHoverStyle) {
+            e.currentTarget.style.backgroundColor =
+              itemHoverStyle.backgroundColor as string;
+            e.currentTarget.style.color = itemHoverStyle.color as string;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (itemHoverStyle) {
+            // If the item is active, restore the active style
+            if (active && itemActiveStyle) {
+              e.currentTarget.style.backgroundColor =
+                itemActiveStyle.backgroundColor as string;
+              e.currentTarget.style.color = itemActiveStyle.color as string;
+            } else {
+              // Otherwise, clear the styles
+              e.currentTarget.style.backgroundColor = '';
+              e.currentTarget.style.color = '';
+            }
+          }
+        }}
       >
         {chevronElement}
         {iconElement}
@@ -228,7 +257,7 @@ export function SidebarGroup({
 
       {/* Render children if not collapsible or if group is open */}
       {(!collapsible || isGroupOpen) && (
-        <div id={id} className="pl-7 flex flex-col space-y-1 overflow-y-auto ">
+        <div id={id} className="flex flex-col space-y-1 overflow-y-auto pl-7">
           {children}
         </div>
       )}
@@ -272,25 +301,56 @@ export function SidebarSection({
   menu?: React.ReactNode;
   groups?: FlexibleGroup[];
 }>) {
-  const { collapsed, sidebarColor } = useContext(SidebarContext);
-  
+  const { collapsed, itemActiveStyle, itemHoverStyle } =
+    useContext(SidebarContext);
+  const currentPath = usePathname() ?? '';
+  const active = isRouteActive(path ?? '', currentPath, true);
   // Add additional error handling for debugging
   const safeGroups = Array.isArray(groups) ? groups : [];
-  
+
   const SectionHeader = () => {
     if (path) {
       return (
-        <div className="mt-4 flex items-center justify-between px-3">
-          <Link href={path} className="h-fit w-fit">
-            <h3 className={cn("text-xs font-medium text-muted-foreground", className)}
-         style={{
-          color: getColorLuminance(sidebarColor).theme === 'light' ? '#747476' : '#e8e8e8'
-        }}
+        <div
+          className="group/sidebar-section mt-4 flex items-center justify-between rounded-md px-3 py-2 opacity-100 font-semibold opacity-70"
+          style={active && itemActiveStyle ? itemActiveStyle : undefined}
+          onMouseEnter={(e) => {
+            if (itemHoverStyle) {
+              e.currentTarget.style.backgroundColor =
+                itemHoverStyle.backgroundColor as string;
+              e.currentTarget.style.color = itemHoverStyle.color as string;
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (itemHoverStyle) {
+              // If the item is active, restore the active style
+              if (active && itemActiveStyle) {
+                e.currentTarget.style.backgroundColor =
+                  itemActiveStyle.backgroundColor as string;
+                e.currentTarget.style.color = itemActiveStyle.color as string;
+              } else {
+                // Otherwise, clear the styles
+                e.currentTarget.style.backgroundColor = '';
+                e.currentTarget.style.color = '';
+              }
+            }
+          }}
+        >
+          <Link
+            href={path}
+            className="h-fit w-fit w-full rounded-md"
+          >
+            <h3
+              className={cn(
+                'text-xs',
+                className,
+              )}
+
             >
               <Trans i18nKey={label as string} defaults={label as string} />
             </h3>
           </Link>
-          <div className="flex items-center justify-center shrink-0 group-hover/sidebar-section:visible invisible">
+          <div className="invisible flex shrink-0 items-center justify-center group-hover/sidebar-section:visible">
             {menu}
           </div>
         </div>
@@ -299,14 +359,12 @@ export function SidebarSection({
 
     return (
       <div className="mt-4 flex justify-between px-3">
-        <h3 className={cn("text-xs font-medium text-muted-foreground", className)}
-        style={{
-          color: getColorLuminance(sidebarColor).theme === 'light' ? '#747476' : '#e8e8e8'
-        }}
+        <h3
+          className={cn('text-xs font-normal', className)}
         >
           <Trans i18nKey={label as string} defaults={label as string} />
         </h3>
-        <div className="flex items-center justify-center shrink-0 group-hover/sidebar-section:visible invisible">
+        <div className="invisible flex shrink-0 items-center justify-center group-hover/sidebar-section:visible">
           {menu}
         </div>
       </div>
@@ -317,7 +375,7 @@ export function SidebarSection({
     return groupsList.map((group, index) => {
       // Skip if group doesn't have required properties
       if (!group?.label) return null;
-      
+
       return (
         <SidebarGroup
           key={`group-${index}`}
@@ -329,24 +387,28 @@ export function SidebarSection({
           path={group.path}
           menu={group.menu}
         >
-          {Array.isArray(group.children) ? 
-            group.children.map((child, childIndex) => {
-              // Skip if child doesn't have required properties
-              if (!child?.path) return null;
-              
-              return (
-                <SidebarItem
-                  key={`${child.path}-${childIndex}`}
-                  end={child.end}
-                  path={child.path}
-                  Icon={child.Icon ?? <span />}
-                  className={child.className}
-                  menu={child.menu}
-                >
-                  <Trans i18nKey={child.label} defaults={child.label ?? 'Unnamed'} />
-                </SidebarItem>
-              );
-            }) : null}
+          {Array.isArray(group.children)
+            ? group.children.map((child, childIndex) => {
+                // Skip if child doesn't have required properties
+                if (!child?.path) return null;
+
+                return (
+                  <SidebarItem
+                    key={`${child.path}-${childIndex}`}
+                    end={child.end}
+                    path={child.path}
+                    Icon={child.Icon ?? <span />}
+                    className={child.className}
+                    menu={child.menu}
+                  >
+                    <Trans
+                      i18nKey={child.label}
+                      defaults={child.label ?? 'Unnamed'}
+                    />
+                  </SidebarItem>
+                );
+              })
+            : null}
         </SidebarGroup>
       );
     });
@@ -361,14 +423,18 @@ export function SidebarSection({
   }
 
   return (
-    <div className={cn('mt-4 group/sidebar-section flex flex-col gap-2', className)}>
+    <div
+      className={cn(
+        'mt-4 flex flex-col gap-1',
+        className,
+      )}
+    >
       <SectionHeader />
-      <div className="flex flex-col space-y-1 overflow-y-auto max-h-36 scrollbar-on-hover">
-        {safeGroups.length > 0 ? (
-          renderGroups(safeGroups)
-        ) : (
-          children
-        )}
+      <div className="scrollbar-on-hover flex-col space-y-1 overflow-y-auto">
+        {safeGroups.length > 0 ? renderGroups(safeGroups) : children}
+        <div className="py-2">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -387,11 +453,10 @@ export function SidebarItem({
   className?: string;
   menu?: React.ReactNode;
 }>) {
-  const { collapsed, itemActiveStyle } = useContext(SidebarContext);
+  const { collapsed, itemActiveStyle, itemHoverStyle } =
+    useContext(SidebarContext);
   const currentPath = usePathname() ?? '';
   const active = isRouteActive(path, currentPath, end ?? false);
-  const variant = active ? 'secondary' : 'ghost';
-  const size = collapsed ? 'icon' : 'sm';
 
   const buttonContent = (
     <>
@@ -408,34 +473,60 @@ export function SidebarItem({
         </TooltipProvider>
       ) : (
         <>
-          <span className="flex h-5 w-5 items-center justify-center shrink-0">{Icon}</span>
-          <span className="truncate w-full flex items-center">{children}</span>
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+            {Icon}
+          </span>
+          <span className="flex w-full items-center truncate">{children}</span>
         </>
       )}
     </>
   );
 
   return (
-    <div className="flex w-full items-center group/sidebar-item">
-      <Button
-        asChild
+    <div
+      className="group/sidebar-item flex w-full items-center rounded-md"
+      style={active && itemActiveStyle ? itemActiveStyle : undefined}
+      onMouseEnter={(e) => {
+        if (itemHoverStyle) {
+          e.currentTarget.style.backgroundColor =
+            itemHoverStyle.backgroundColor as string;
+          e.currentTarget.style.color = itemHoverStyle.color as string;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (itemHoverStyle) {
+          // If the item is active, restore the active style
+          if (active && itemActiveStyle) {
+            e.currentTarget.style.backgroundColor =
+              itemActiveStyle.backgroundColor as string;
+            e.currentTarget.style.color = itemActiveStyle.color as string;
+          } else {
+            // Otherwise, clear the styles
+            e.currentTarget.style.backgroundColor = '';
+            e.currentTarget.style.color = '';
+          }
+        }
+      }}
+    >
+      <button
         className={cn(
-          'text-md flex w-full shadow-none',
+          'text-md flex w-full bg-transparent shadow-none hover:bg-transparent',
           {
             'justify-start px-3': !collapsed,
           },
-          className
+          className,
         )}
-        size={size}
-        variant={variant}
-        style={active && itemActiveStyle ? itemActiveStyle : undefined}
       >
-        <Link key={path} href={path} className="flex items-center gap-2 min-w-0 py-1">
+        <Link
+          key={path}
+          href={path}
+          className="flex w-full min-w-0 items-center gap-2 py-1 font-normal"
+        >
           {buttonContent}
         </Link>
-      </Button>
+      </button>
       {!collapsed && menu && (
-        <div className="flex items-center justify-center px-3 shrink-0 group-hover/sidebar-item:visible invisible">
+        <div className="invisible flex shrink-0 items-center justify-center px-3 group-hover/sidebar-item:visible">
           {menu}
         </div>
       )}
