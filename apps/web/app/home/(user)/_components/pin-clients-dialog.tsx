@@ -40,13 +40,8 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
   const [originalSelectedIds, setOriginalSelectedIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const { pinned_organizations, updateOrganizationSetting } =
-    useOrganizationSettings();
+  const { pinned_organizations, updateOrganizationSetting } = useOrganizationSettings();
   const { t } = useTranslation('common');
-  // Ref for tracking if component is mounted
-  const isMounted = useRef(true);
-
-  // Add ref for the scrollable container
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Add wheel event handler
@@ -55,10 +50,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
       const container = scrollContainerRef.current;
       if (!container) return;
 
-      // Get container bounds
       const rect = container.getBoundingClientRect();
-      
-      // Check if mouse is over the container
       const isMouseOver = 
         e.clientX >= rect.left &&
         e.clientX <= rect.right &&
@@ -67,34 +59,22 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
 
       if (isMouseOver) {
         e.preventDefault();
-        
-        // Adjust the scroll speed
-        const scrollSpeed = 1.5;
-        const delta = e.deltaY * scrollSpeed;
-        
-        // Smooth scroll
         container.scrollBy({
-          left: delta,
+          left: e.deltaY * 1.5,
           behavior: 'smooth'
         });
       }
     };
 
-    // Add the event listener to the window to catch all wheel events
     window.addEventListener('wheel', handleWheel, { passive: false });
-
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-    };
+    return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // Fetch clients - only when the dialog is open to avoid unnecessary loading
+  // Fetch clients - only when the dialog is open
   const { data: clients = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['clientOrganizations'],
     queryFn: async () => await getClientsOrganizations(),
-    // Don't refetch on window focus to avoid unexpected changes
     refetchOnWindowFocus: false,
-    // Only fetch when the dialog is open
     enabled: open,
   }) as { 
     data: ClientOrganization[], 
@@ -109,29 +89,26 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
       try {
         const pinnedIds = JSON.parse(pinned_organizations) as string[];
         setSelectedClientIds(pinnedIds);
-        setOriginalSelectedIds(pinnedIds); // Store original selection for fallback
+        setOriginalSelectedIds(pinnedIds);
       } catch (e) {
         setSelectedClientIds([]);
         setOriginalSelectedIds([]);
       }
     }
-    
-    // Cleanup function to set isMounted to false when component unmounts
-    return () => {
-      isMounted.current = false;
-    };
   }, [open, pinned_organizations]);
 
-  // Reset error state when dialog opens/closes
+  // Reset states when dialog opens/closes
   useEffect(() => {
-    setSaveError(null);
+    if (!open) {
+      setSearchQuery('');
+      setSaveError(null);
+      setIsSaving(false);
+    }
   }, [open]);
 
   // Filter clients based on search query and exclude guests
   const filteredClients = clients.filter(client => 
-    // First exclude guests (case insensitive)
     !client.name.toLowerCase().startsWith('guest') &&
-    // Then apply search filter
     client.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -157,6 +134,8 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
 
   // Handle saving pinned clients
   const savePinnedClients = async () => {
+    if (isSaving) return;
+    
     setIsSaving(true);
     setSaveError(null);
     
@@ -166,32 +145,24 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
         value: JSON.stringify(selectedClientIds),
       });
       
-      // Only close if component is still mounted
-      if (isMounted.current) {
-        onOpenChange(false);
-      }
+      onOpenChange(false);
     } catch (error) {
       console.error('Failed to save pinned clients:', error);
       setSaveError('Failed to save changes. Please try again.');
-      
-      // Fallback to original selection on error
-      if (isMounted.current) {
-        setSelectedClientIds(originalSelectedIds);
-      }
+      setSelectedClientIds(originalSelectedIds);
     } finally {
-      if (isMounted.current) {
-        setIsSaving(false);
-      }
+      setIsSaving(false);
     }
   };
 
   // Reset state when dialog closes
   const handleDialogChange = (isOpen: boolean) => {
-    onOpenChange(isOpen);
     if (!isOpen) {
       setSearchQuery('');
       setSaveError(null);
+      setIsSaving(false);
     }
+    onOpenChange(isOpen);
   };
 
   // Check if there are unsaved changes
