@@ -210,7 +210,7 @@ export function SidebarGroup({
   const labelElement = path ? (
     <Link
       href={path}
-      className={cn('line-clamp-1 flex w-full items-center font-normal', {
+      className={cn('line-clamp-1 w-full font-normal ', {
         'font-normal': isRouteActive(pathname, path, true),
       })}
       onClick={collapsible ? (e) => e.stopPropagation() : undefined}
@@ -431,8 +431,8 @@ export function SidebarSection({
     >
       <SectionHeader />
       <div className="scrollbar-on-hover flex-col space-y-1 overflow-y-auto">
-        {safeGroups.length > 0 ? renderGroups(safeGroups) : children}
-        <div className="py-2">
+        {safeGroups.length > 0 ? renderGroups(safeGroups) : null}
+        <div className="py-1">
           {children}
         </div>
       </div>
