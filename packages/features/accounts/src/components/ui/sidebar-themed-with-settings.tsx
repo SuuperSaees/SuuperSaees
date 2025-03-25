@@ -31,21 +31,24 @@ export const ThemedSidebar: React.FC<{
   const defaultBackgroundColor = '#f2f2f2';
 
   // Provide a default value to prevent undefined
-  const effectiveBackgroundColor = sidebar_background_color ?? defaultBackgroundColor;
+  const effectiveBackgroundColor = sidebar_background_color ? sidebar_background_color : defaultBackgroundColor;
   const textColor = getTextColorBasedOnBackground(effectiveBackgroundColor);
-
   return (
     <Sidebar
       className={` ${className} border-none`}
       style={{
         backgroundColor: effectiveBackgroundColor, // Color de fondo por defecto
-        color: textColor || '#fff', // Color de texto por defecto
+        color: textColor, // Color de texto por defecto
         border: 'none', // Sin borde
         boxShadow: 'none', // Sin sombras
       }}
       itemActiveStyle={{
-        backgroundColor: theme_color ?? '#e0e0e0', // Color de fondo activo por defecto
-        color: theme_color ? getTextColorBasedOnBackground(theme_color) : '#000', // Color negro por defecto
+        backgroundColor: theme_color ?? 'rgba(255 255 255 / 0.6);', // Color de fondo activo por defecto
+        color: theme_color ? getTextColorBasedOnBackground(theme_color) : '#333333', // Color negro por defecto
+      }}
+      itemHoverStyle={{
+        backgroundColor: theme_color ? `${theme_color}66` : 'rgba(255 255 255 / 0.4)', // 66 is 40% opacity in hex
+        color: theme_color ? getTextColorBasedOnBackground(theme_color) : '#333333',
       }}
       sidebarColor={effectiveBackgroundColor}
 

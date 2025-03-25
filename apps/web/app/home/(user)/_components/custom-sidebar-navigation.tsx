@@ -47,7 +47,10 @@ export function CustomSidebarNavigation({
               path={item.path}
               menu={item.menu}
               groups={item.groups}
-            />
+              
+            >
+              {item.children}
+            </SidebarSection>
           );
         }
 

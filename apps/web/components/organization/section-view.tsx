@@ -77,7 +77,6 @@ function SectionView({
     return { value: service.id, label: service.name };
   });
 
-  console.log('embeds', embeds);
   // This is the actual path of the current folder
   // const [currentPath, setCurrentPath] = useState<{ title: string; uuid?: string }[]>([]); It's not used in the code for now
 
@@ -266,7 +265,6 @@ function SectionView({
     <Tabs
       value={activeTab}
       onValueChange={(value) => {
-        console.log('Tab changed to:', value);
         setActiveTab(value);
       }}
       className={`h-full min-h-0 ${['new', ...embeds.map(e => e.id)].includes(activeTab) ? 'flex flex-col' : ''}`}

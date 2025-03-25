@@ -72,8 +72,8 @@
     "embeds": {
       "title": "Embeds"
     },
-    "pinOrganization": "Fijar organización",
-    "unpinOrganization": "Quitar fijado",
+    "pinOrganization": "Añadir a favoritos",
+    "unpinOrganization": "Quitar de favoritos",
     "deleteOrganization": "Eliminar organización"
   },
   "startWithFirstClientTitle": "Comencemos con tu primer cliente",

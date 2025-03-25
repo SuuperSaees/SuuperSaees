@@ -1,11 +1,14 @@
 'use client';
 
 import React from 'react';
-import { EllipsisVertical, Plus, Trash2 } from 'lucide-react';
+
+import { Edit, EllipsisVertical, Plus, Trash2 } from 'lucide-react';
 import { ThemedTabTrigger } from 'node_modules/@kit/accounts/src/components/ui/tab-themed-with-settings';
 import { Trans, useTranslation } from 'react-i18next';
-import { DynamicIcon } from '../../../app/components/shared/dynamic-icon';
+
 import Dropdown from '~/components/ui/dropdown';
+
+import { DynamicIcon } from '../../../app/components/shared/dynamic-icon';
 
 type EmbedTabProps = {
   id: string;
@@ -13,24 +16,47 @@ type EmbedTabProps = {
   icon?: string | null;
   activeTab: string;
   onDelete?: (id: string) => Promise<void> | void;
+  onEdit?: (id: string) => Promise<void> | void;
 };
 
-export function EmbedTab({ id, title, icon, activeTab, onDelete }: EmbedTabProps) {
+export function EmbedTab({
+  id,
+  title,
+  icon,
+  activeTab,
+  onDelete,
+  onEdit,
+}: EmbedTabProps) {
   const isActive = activeTab === id;
-  
-  const deleteOption = {
-    value: (
-      <span className="inline-flex w-full items-center gap-2 text-gray-600">
-        <Trash2 className="h-5 w-5" />
-        <Trans i18nKey={'service:cancel'} />
-      </span>
-    ),
-    actionFn: async () => {
-      if (onDelete) {
-        await onDelete(id);
-      }
+
+  const options = [
+    {
+      value: (
+        <span className="inline-flex w-full items-center gap-2 text-gray-600">
+          <Edit className="h-5 w-5" />
+          <Trans i18nKey={'embeds:form.edit'} />
+        </span>
+      ),
+      actionFn: async () => {
+        if (onEdit) {
+          await onEdit(id);
+        }
+      },
     },
-  };
+    {
+      value: (
+        <span className="inline-flex w-full items-center gap-2 text-gray-600">
+          <Trash2 className="h-5 w-5" />
+          <Trans i18nKey={'embeds:form.delete'} />
+        </span>
+      ),
+      actionFn: async () => {
+        if (onDelete) {
+          await onDelete(id);
+        }
+      },
+    },
+  ];
 
   return (
     <ThemedTabTrigger
@@ -41,10 +67,11 @@ export function EmbedTab({ id, title, icon, activeTab, onDelete }: EmbedTabProps
     >
       <DynamicIcon name={icon ?? ''} className="h-4 w-4" />
       <span>{title}</span>
-      {onDelete && (
+      {(onDelete ?? onEdit) && (
         <Dropdown
-          options={[deleteOption]}
-          className={isActive ? "visible" : "invisible group-hover:visible"}
+          showSeparators={false}
+          options={options}
+          className={isActive ? 'visible' : 'invisible group-hover:visible'}
         >
           <EllipsisVertical className="h-4 w-4" />
         </Dropdown>
@@ -68,13 +95,13 @@ export function AddIntegrationTab({ activeTab }: { activeTab: string }) {
   );
 }
 
-export function StandardTab({ 
-  option, 
-  activeTab, 
-  label 
-}: { 
-  option: string; 
-  activeTab: string; 
+export function StandardTab({
+  option,
+  activeTab,
+  label,
+}: {
+  option: string;
+  activeTab: string;
   label: string;
 }) {
   return (
@@ -87,4 +114,4 @@ export function StandardTab({
       {label}
     </ThemedTabTrigger>
   );
-} 
+}

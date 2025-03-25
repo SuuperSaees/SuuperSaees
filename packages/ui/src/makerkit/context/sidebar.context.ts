@@ -5,6 +5,7 @@ const SidebarContext = createContext<{
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   itemActiveStyle?: React.CSSProperties;
+  itemHoverStyle?: React.CSSProperties;
   openGroupId: string | null;
   setOpenGroupId: (id: string | null) => void;
   sidebarColor: string;

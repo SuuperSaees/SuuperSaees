@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
 import { DynamicIcon } from '../app/components/shared/dynamic-icon';
-import { ClientsOptionsDropdown } from '../app/home/(user)/_components/clients-options-dropdown';
 import { ClientOptionsDropdown } from '../app/home/(user)/_components/client-options-dropdown';
 import {
   clientAccountGuestNavigationConfig,
@@ -17,6 +16,8 @@ import { teamMemberAccountNavigationConfig } from './member-team-account-navigat
 import pathsConfig from './paths.config';
 import { personalAccountNavigationConfig } from './personal-account-navigation.config';
 import { EmbedOptionsDropdown } from '~/home/(user)/_components/embed-options-dropdown';
+import { AddPinnedClientButton } from '~/home/(user)/_components/add-pinned-client-button';
+import { AddClientButton } from '~/home/(user)/_components/add-client-button';
 
 // Types
 export type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
@@ -243,9 +244,10 @@ export function addAgencyEmbedsToNavigation(
     path: pathsConfig.app.clients,
     section: true,
     label: 'Clients',
-    menu: <ClientsOptionsDropdown />,
-    className: "text-xs font-medium text-muted-foreground",
+    menu: <AddClientButton />,
+    className: "text-xs font-normal text-muted-foreground",
     groups: clientGroups,
+    children: <AddPinnedClientButton />
   });
 
   return NavigationConfigSchema.parse({

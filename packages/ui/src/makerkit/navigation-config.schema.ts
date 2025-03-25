@@ -48,6 +48,7 @@ export const NavigationConfigSchema = z.object({
         path: z.string().optional(),
         className: z.string().optional(),
         menu: z.custom<React.ReactNode>().optional(),
+        children: z.custom<React.ReactNode>().optional(),
         groups: z.array(
           z.object({
             type: z.literal('group').default('group'),
