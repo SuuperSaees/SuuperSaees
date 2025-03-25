@@ -165,7 +165,7 @@ export function SidebarGroup({
 
   // Common wrapper class names
   const wrapperClassName = cn(
-    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1',
+    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center  ',
     {
       'w-full px-3': !sidebarCollapsed,
     },
