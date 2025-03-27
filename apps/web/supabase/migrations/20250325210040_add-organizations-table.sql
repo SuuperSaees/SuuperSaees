@@ -329,20 +329,15 @@ BEGIN;
 
 -- 1. Add the organization_id column to accounts_memberships
 ALTER TABLE public.accounts_memberships 
-ADD COLUMN organization_id uuid;
+ADD COLUMN IF NOT EXISTS organization_id uuid;
 
 -- 2. Update the organization_id column with the current values of account_id
 -- This assumes that the account IDs that represent organizations are the same as those used in the organizations table
 UPDATE public.accounts_memberships
 SET organization_id = account_id;
 
--- 3. Create the foreign key constraint for organization_id that points to organizations
-ALTER TABLE public.accounts_memberships
-ADD CONSTRAINT accounts_memberships_organization_id_fkey
-FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE;
-
 -- 4. Create an index on organization_id for better performance
-CREATE INDEX idx_accounts_memberships_organization_id ON public.accounts_memberships(organization_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_memberships_organization_id ON public.accounts_memberships(organization_id);
 
 -- 5. Make organization_id NOT NULL after ensuring all records have a value
 ALTER TABLE public.accounts_memberships
