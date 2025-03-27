@@ -251,7 +251,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-    -- Insertar estados predeterminados para todas las organizaciones
+    -- Insert default states for all organizations
     INSERT INTO agency_statuses (status_name, status_color, agency_id, position)
     VALUES 
         ('pending', '#fef7c3', NEW.id, 0),
@@ -322,33 +322,33 @@ END $$;
 
 COMMIT;
 
--- Migración para agregar organization_id a accounts_memberships
--- Esta migración mantiene account_id y agrega organization_id como referencia a organizations
+-- Migration to add organization_id to accounts_memberships
+-- This migration keeps account_id and adds organization_id as a reference to organizations
 
 BEGIN;
 
--- 1. Agregar la columna organization_id a accounts_memberships
+-- 1. Add the organization_id column to accounts_memberships
 ALTER TABLE public.accounts_memberships 
 ADD COLUMN organization_id uuid;
 
--- 2. Actualizar la columna organization_id con los valores actuales de account_id
--- Esto asume que los IDs de accounts que representan organizaciones son los mismos que se usaron en la tabla organizations
+-- 2. Update the organization_id column with the current values of account_id
+-- This assumes that the account IDs that represent organizations are the same as those used in the organizations table
 UPDATE public.accounts_memberships
 SET organization_id = account_id;
 
--- 3. Crear la restricción de clave foránea para organization_id que apunte a organizations
+-- 3. Create the foreign key constraint for organization_id that points to organizations
 ALTER TABLE public.accounts_memberships
 ADD CONSTRAINT accounts_memberships_organization_id_fkey
 FOREIGN KEY (organization_id) REFERENCES public.organizations(id) ON DELETE CASCADE;
 
--- 4. Crear un índice en organization_id para mejorar el rendimiento
+-- 4. Create an index on organization_id for better performance
 CREATE INDEX idx_accounts_memberships_organization_id ON public.accounts_memberships(organization_id);
 
--- 5. Hacer que organization_id sea NOT NULL después de asegurarnos que todos los registros tienen un valor
+-- 5. Make organization_id NOT NULL after ensuring all records have a value
 ALTER TABLE public.accounts_memberships
 ALTER COLUMN organization_id SET NOT NULL;
 
--- Verificar que la migración se haya realizado correctamente
+-- Verify that the migration was completed correctly
 DO $$
 DECLARE
   count_memberships INTEGER;
