@@ -514,12 +514,138 @@ to authenticated
 using ((is_user_in_agency_organization(auth.uid(), organization_id) AND has_permission(auth.uid(), organization_id, 'embeds.manage'::app_permissions)));
     
 -- invitations
+
+drop policy "invitations_create_self" on "public"."invitations";
+
+create policy "invitations_create_self"
+on "public"."invitations"
+as permissive
+for insert
+to authenticated
+with check ((is_set('enable_team_accounts'::text) AND has_permission(( SELECT auth.uid() AS uid), account_id, 'invites.manage'::app_permissions) AND has_same_role_hierarchy_level_or_lower(( SELECT auth.uid() AS uid), account_id, ((role)::text)::character varying)));
+
+create policy invitations_delete on public.invitations for delete to authenticated using (
+  has_role_on_account (account_id)
+  and public.has_permission (
+    (
+      select
+        auth.uid ()
+    ),
+    account_id,
+    'invites.manage'::public.app_permissions
+  )
+);
+
+create policy invitations_update on public.invitations
+for update
+  to authenticated using (
+    public.has_permission (
+      (
+        select
+          auth.uid ()
+      ),
+      account_id,
+      'invites.manage'::public.app_permissions
+    )
+    and public.has_more_elevated_role (
+      (
+        select
+          auth.uid ()
+      ),
+      account_id,
+      role
+    )
+  )
+with
+  check (
+    public.has_permission (
+      (
+        select
+          auth.uid ()
+      ),
+      account_id,
+      'invites.manage'::public.app_permissions
+    )
+    and public.has_more_elevated_role (
+      (
+        select
+          auth.uid ()
+      ),
+      account_id,
+      role
+    )
+  );
     
 -- messages
+
+drop policy "Read for all authenticated users" on "public"."messages";
+
+create policy "Read for all authenticated users"
+on "public"."messages"
+as permissive
+for select
+to authenticated
+using ((has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'messages.read'::app_permissions) AND (((order_id IS NOT NULL) AND ((EXISTS ( SELECT 1
+   FROM order_assignations oa
+  WHERE (((oa.order_id)::text = (messages.order_id)::text) AND (oa.agency_member_id = auth.uid())))) OR (EXISTS ( SELECT 1
+   FROM order_followers ofollow
+  WHERE (((ofollow.order_id)::text = (messages.order_id)::text) AND (ofollow.client_member_id = auth.uid())))) OR has_role(auth.uid(), get_user_organization_id(auth.uid()), 'agency_owner'::text) OR has_role(auth.uid(), get_user_organization_id(auth.uid()), 'agency_project_manager'::text)) AND ((is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND (EXISTS ( SELECT 1
+   FROM orders_v2 o
+  WHERE (((o.id)::text = (messages.order_id)::text) AND (o.agency_id = get_user_organization_id(auth.uid())))))) OR ((NOT is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid()))) AND (EXISTS ( SELECT 1
+   FROM orders_v2 o
+  WHERE (((o.id)::text = (messages.order_id)::text) AND (o.client_organization_id = get_user_organization_id(auth.uid())))))))) OR ((chat_id IS NOT NULL) AND (EXISTS ( SELECT 1
+   FROM chat_members cm
+  WHERE ((cm.chat_id = messages.chat_id) AND (cm.user_id = auth.uid())))))) AND ((visibility = 'public'::messages_types) OR ((visibility = 'internal_agency'::messages_types) AND (EXISTS ( SELECT 1
+   FROM (accounts a
+     JOIN accounts_memberships am ON ((am.account_id = a.organization_id)))
+  WHERE ((a.id = messages.user_id) AND (a.is_personal_account = true) AND (am.user_id = auth.uid()) AND ((am.account_role)::text = ANY (ARRAY['agency_owner'::text, 'agency_project_manager'::text, 'agency_member'::text])))))))));
         
 -- orders_v2
+
+create policy "Allow authorized users to create orders"
+on "public"."orders_v2"
+as permissive
+for insert
+to authenticated
+with check (((auth.uid() IS NOT NULL) AND ((is_user_in_agency_organization(auth.uid(), agency_id) AND has_permission(auth.uid(), agency_id, 'orders.write'::app_permissions)) OR (is_user_in_client_organization(auth.uid(), client_organization_id) AND has_permission(auth.uid(), client_organization_id, 'orders.write'::app_permissions)))));
     
 -- subscriptions
     
+create policy "subscriptions_read_self"
+on "public"."subscriptions"
+as permissive
+for select
+to authenticated
+using (((has_role_on_account(propietary_organization_id) AND is_set('enable_team_account_billing'::text)) OR ((propietary_organization_id = ( SELECT auth.uid() AS uid)) AND is_set('enable_account_billing'::text))));
+
 -- timers
-    
+create policy "Allow users with specific permissions to create timers"
+on "public"."timers"
+as permissive
+for insert
+to authenticated
+with check (((auth.uid() IS NOT NULL) AND (is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.write'::app_permissions))));
+
+
+create policy "Allow users with specific permissions to delete timers"
+on "public"."timers"
+as permissive
+for delete
+to authenticated
+using (((auth.uid() IS NOT NULL) AND (is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.delete'::app_permissions) AND (auth.uid() = user_id))));
+
+
+create policy "Allow users with specific permissions to read orders"
+on "public"."timers"
+as permissive
+for select
+to authenticated
+using (((auth.uid() IS NOT NULL) AND ((is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.read'::app_permissions)) OR (is_user_in_client_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.read'::app_permissions)))));
+
+
+create policy "Allow users with specific permissions to update orders"
+on "public"."timers"
+as permissive
+for update
+to authenticated
+using (((auth.uid() IS NOT NULL) AND (is_user_in_agency_organization(auth.uid(), get_user_organization_id(auth.uid())) AND has_permission(auth.uid(), get_user_organization_id(auth.uid()), 'timers.manage'::app_permissions) AND (auth.uid() = user_id))));
