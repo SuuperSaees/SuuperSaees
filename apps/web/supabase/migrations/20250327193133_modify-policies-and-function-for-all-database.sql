@@ -738,3 +738,292 @@ as permissive
 for update
 to authenticated
 using (((user_belongs_to_agency_organizations(auth.uid()) AND has_permission_in_organizations(auth.uid(), 'timers.manage'::app_permissions) AND (auth.uid() = user_id))));
+
+-- functions and triggers 
+-- 1. insert_organization_subdomain
+
+drop function if exists public.insert_organization_subdomain();
+drop trigger if exists after_insert_subdomain on public.subdomains;
+
+CREATE OR REPLACE FUNCTION public.insert_organization_subdomain()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    v_organization_id uuid;
+BEGIN
+    SELECT organization_id INTO v_organization_id
+    FROM public.accounts_memberships
+    WHERE user_id = auth.uid();
+
+    INSERT INTO public.organization_subdomains (organization_id, subdomain_id)
+    VALUES (v_organization_id, NEW.id);
+
+    RETURN NEW;
+END;
+$function$
+;
+
+CREATE TRIGGER after_insert_subdomain AFTER INSERT ON public.subdomains FOR EACH ROW EXECUTE FUNCTION insert_organization_subdomain();
+
+GRANT EXECUTE ON FUNCTION public.insert_organization_subdomain() TO authenticated, service_role;
+
+-- 2. delete_checkout_if_deleted_on_not_null it's not related for this migration
+
+-- 3. handle_deleted_on it's not related for this migration
+
+-- 4. update_updated_at it's not related for this migration
+
+-- 5. handle_new_account_credits_usage
+
+drop function if exists kit.handle_new_account_credits_usage();
+drop trigger if exists on_account_created_fill_credits on public.accounts;
+
+drop function if exists kit.handle_new_organization_credits_usage();
+drop trigger if exists on_organization_created_fill_credits on public.organizations;
+
+create or replace function kit.handle_new_organization_credits_usage()
+returns trigger
+language plpgsql
+security definer set search_path = ''
+as $$
+declare
+  organizations_count integer;
+begin
+  -- collect the number of organizations the user owns
+  select count(*) 
+  from public.organizations
+  where owner_id = new.owner_id
+  into organizations_count;
+
+  -- we add credits only when this is the 1st organization
+  -- to avoid abuse of the free credits
+  if organizations_count > 1 then
+    insert into public.credits_usage (account_id, remaining_credits)
+      values (new.id, 0);
+
+    return new;
+  end if;
+
+  -- since this is the first organization, we add 20000 credits
+  insert into public.credits_usage (account_id, remaining_credits)
+  values (new.id, 20000);
+  return new;
+end;
+$$;
+
+create trigger on_organization_created_fill_credits
+  after insert on public.organizations
+  for each row
+  execute procedure kit.handle_new_organization_credits_usage();
+
+GRANT EXECUTE ON FUNCTION kit.handle_new_organization_credits_usage() TO authenticated, service_role;
+
+-- 6. decrement_service_client_count it's not related for this migration
+
+-- 7. increment_service_client_count it's not related for this migration
+
+-- 16. insert_default_agency_statuses it's not related for this migration
+
+-- 22. is_user_in_agency_organization it's not related for this migration
+
+-- 23. is_user_in_client_organization it's not related for this migration
+
+-- 12. update_notification_dismissed_status it's not related for this migration
+
+-- 21. get_user_organization_id it's not related for this migration
+
+-- 24. has_permission it's not related for this migration
+
+-- 8. check_team_account
+
+drop function if exists kit.check_team_account();
+drop trigger if exists only_team_accounts_check on public.invitations;
+
+create
+or replace function kit.check_team_account () returns trigger
+set
+  search_path = '' as $$
+begin
+    -- Verify if the organization exists
+    if not exists (
+        select 1
+        from
+            public.organizations
+        where
+            id = new.organization_id
+    ) then
+        raise exception 'Organization does not exist';
+    end if;
+
+    return NEW;
+end;
+
+$$ language plpgsql;
+
+create trigger only_team_accounts_check before insert
+or
+update on public.invitations for each row
+execute procedure kit.check_team_account ();
+
+GRANT EXECUTE ON FUNCTION kit.check_team_account() TO authenticated, service_role;
+
+-- 9. prevent_account_owner_membership_delete
+
+drop function if exists kit.prevent_account_owner_membership_delete();
+drop trigger if exists prevent_account_owner_membership_delete_check on public.accounts_memberships;
+
+create
+or replace function kit.prevent_account_owner_membership_delete () returns trigger
+set
+  search_path = '' as $$
+begin
+    if exists(
+        select
+            1
+        from
+            public.organizations
+        where
+            id = old.organization_id
+            and owner_id = old.user_id) then
+    raise exception 'The primary account owner cannot be removed from the account membership list';
+
+end if;
+
+    return old;
+
+end;
+
+$$ language plpgsql;
+
+create
+or replace trigger prevent_account_owner_membership_delete_check before delete on public.accounts_memberships for each row
+execute function kit.prevent_account_owner_membership_delete ();
+
+GRANT EXECUTE ON FUNCTION kit.prevent_account_owner_membership_delete() TO authenticated, service_role;
+
+-- 10. protect_account_fields
+
+drop function if exists kit.protect_account_fields();
+drop trigger if exists protect_account_fields on public.accounts;
+
+create
+or replace function kit.protect_account_fields () returns trigger as $$
+begin
+    if current_user in('authenticated', 'anon') then
+	if new.id <> old.id then
+            raise exception 'You do not have permission to update this field';
+        end if;
+    end if;
+
+    return NEW;
+
+end
+$$ language plpgsql
+set
+  search_path = '';
+
+-- trigger to protect account fields
+create trigger protect_account_fields before
+update on public.accounts for each row
+execute function kit.protect_account_fields ();
+
+GRANT EXECUTE ON FUNCTION kit.protect_account_fields() TO authenticated, service_role;
+
+-- 11. set_slug_from_account_name (usado en dos triggers)
+
+drop function if exists kit.set_slug_from_account_name();
+drop trigger if exists set_slug_from_account_name on public.accounts;
+drop trigger if exists update_slug_from_account_name on public.accounts;
+
+create
+or replace function kit.set_slug_from_account_name () returns trigger language plpgsql security definer
+set
+  search_path = '' as $$
+declare
+    sql_string varchar;
+    tmp_slug varchar;
+    increment integer;
+    tmp_row record;
+    tmp_row_count integer;
+begin
+    tmp_row_count = 1;
+
+    increment = 0;
+
+    while tmp_row_count > 0 loop
+        if increment > 0 then
+            tmp_slug = kit.slugify(new.name || ' ' || increment::varchar);
+
+        else
+            tmp_slug = kit.slugify(new.name);
+
+        end if;
+
+	sql_string = format('select count(1) cnt from public.organizations where slug = ''' || tmp_slug ||
+	    '''; ');
+
+        for tmp_row in execute (sql_string)
+            loop
+                raise notice 'tmp_row %', tmp_row;
+
+                tmp_row_count = tmp_row.cnt;
+
+            end loop;
+
+        increment = increment +1;
+
+    end loop;
+
+    new.slug := tmp_slug;
+
+    return NEW;
+
+end
+$$;
+
+
+create trigger "set_slug_from_account_name" before insert on public.organizations for each row when (
+  NEW.name is not null
+  and NEW.slug is null
+)
+execute procedure kit.set_slug_from_account_name ();
+
+-- Create a trigger when a name is updated to update the slug
+create trigger "update_slug_from_account_name" before
+update on public.organizations for each row when (
+  NEW.name is not null
+  and NEW.name <> OLD.name
+)
+execute procedure kit.set_slug_from_account_name ();
+
+
+-- 14. http_request (usado en accounts_update, billing_accounts_upsert, invitations_insert, services_upsert)
+
+-- 15. add_current_user_to_new_account
+
+-- 17. create_order_transaction
+
+-- 18. update_order_position
+
+-- 19. get_next_order_position
+
+-- 20. get_account_members
+
+-- 25. mark_order_messages_as_read
+
+-- 26. mark_chat_messages_as_read
+
+-- 27. deduct_credits
+
+-- 30. handle_organization_settings_portal_name_changes
+
+-- 33. handle_subscription_update
+
+-- 34. handle_subscription_delete
+
+-- 35. handle_billing_item_update
+
+-- 36. handle_billing_item_delete
+
