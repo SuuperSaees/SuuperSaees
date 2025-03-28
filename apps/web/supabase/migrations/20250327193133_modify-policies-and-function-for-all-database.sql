@@ -370,16 +370,19 @@ for select
 to public
 using (((auth.uid() IS NOT NULL) AND (user_belongs_to_agency_organizations(auth.uid()) AND has_permission_in_organizations(auth.uid(), 'billing.read'::app_permissions))));
     
--- billing_customers It's not needed to fix because it's not used in the app
+--  IMPORTANT: billing_customers It's not needed to fix because it's not used in the app
     
--- credits_usage It's not needed to fix because it's not used in the app
+-- IMPORTANT: credits_usage It's not needed to fix because it's not used in the app
 
--- notifications It's not needed to fix because it's not used in the app
+-- IMPORTANT: notifications It's not needed to fix because it's not used in the app
     
--- order_items It's not needed to fix because it's not used in the app
+-- IMPORTANT: order_items It's not needed to fix because it's not used in the app
 
--- subscription_items It's not needed to fix because it's not used in the app
+-- IMPORTANT: subscription_items It's not needed to fix because it's not used in the app
 
+-- IMPORTANT: orders It's not needed to fix because it's not used in the app
+
+-- IMPORTANT: chats It's not needed to fix because it's not orgaization related
 
 -- billing_services
 
@@ -466,18 +469,14 @@ as permissive
 for select
 to public
 using (EXISTS (SELECT 1
-  WHERE (auth.uid() IS NOT NULL) AND (has_permission_in_organizations(auth.uid(), 'services.read'::app_permissions)) AND (user_belongs_to_agency_organizations(auth.uid()) OR user_belongs_to_client_organizations(auth.uid()))));
-
--- chats
-    
+  WHERE (auth.uid() IS NOT NULL) AND (has_permission_in_organizations(auth.uid(), 'services.read'::app_permissions)) AND (user_belongs_to_agency_organizations(auth.uid()) OR user_belongs_to_client_organizations(auth.uid()))));    
+  
 -- embeds
     
 -- invitations
     
 -- messages
-    
--- orders
-    
+        
 -- orders_v2
     
 -- subscriptions
