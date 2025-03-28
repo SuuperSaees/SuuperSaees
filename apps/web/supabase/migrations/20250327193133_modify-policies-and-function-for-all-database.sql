@@ -472,6 +472,46 @@ using (EXISTS (SELECT 1
   WHERE (auth.uid() IS NOT NULL) AND (has_permission_in_organizations(auth.uid(), 'services.read'::app_permissions)) AND (user_belongs_to_agency_organizations(auth.uid()) OR user_belongs_to_client_organizations(auth.uid()))));    
   
 -- embeds
+
+alter table "public"."embeds" enable row level security;
+
+drop policy if exists "embeds_delete_agency" on "public"."embeds";
+drop policy if exists "embeds_insert_agency" on "public"."embeds";
+drop policy if exists "embeds_select_for_all_users" on "public"."embeds";
+drop policy if exists "embeds_update_agency" on "public"."embeds";
+
+create policy "embeds_delete_agency"
+on "public"."embeds"
+as permissive
+for delete
+to authenticated
+using ((is_user_in_agency_organization(auth.uid(), organization_id) AND has_permission(auth.uid(), organization_id, 'embeds.delete'::app_permissions)));
+
+
+create policy "embeds_insert_agency"
+on "public"."embeds"
+as permissive
+for insert
+to authenticated
+with check ((is_user_in_agency_organization(auth.uid(), organization_id) AND has_permission(auth.uid(), organization_id, 'embeds.write'::app_permissions)));
+
+create policy "embeds_select_for_all_users"
+on "public"."embeds"
+as permissive
+for select
+to authenticated
+using ((has_permission_in_organizations(auth.uid(), 'embeds.read'::app_permissions) AND ((EXISTS ( SELECT 1
+   FROM clients c
+  WHERE ((c.user_client_id = auth.uid()) AND ((organization_id = c.agency_id) OR (organization_id = c.organization_client_id)) AND ((visibility <> 'private'::visibility) OR (EXISTS ( SELECT 1
+           FROM embed_accounts ea
+          WHERE ((ea.embed_id = embeds.id) AND (ea.account_id = c.organization_client_id)))))))) OR (is_user_in_agency_organization(auth.uid(), organization_id)))));
+
+create policy "embeds_update_agency"
+on "public"."embeds"
+as permissive
+for update
+to authenticated
+using ((is_user_in_agency_organization(auth.uid(), organization_id) AND has_permission(auth.uid(), organization_id, 'embeds.manage'::app_permissions)));
     
 -- invitations
     
