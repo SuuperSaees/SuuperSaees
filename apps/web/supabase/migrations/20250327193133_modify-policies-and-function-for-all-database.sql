@@ -1298,3 +1298,80 @@ $function$
 ;
 
 grant execute on function public.get_account_members (text) to authenticated, service_role;
+
+-- setup_new_user 
+
+drop function if exists kit.setup_new_user();
+drop trigger if exists on_auth_user_created on auth.users;
+
+create
+or replace function kit.setup_new_user () returns trigger language plpgsql security definer
+set
+  search_path = '' as $$
+declare
+    user_name text;
+begin
+    if new.raw_user_meta_data ->> 'display_name' is not null then
+        user_name := new.raw_user_meta_data ->> 'display_name';
+
+    end if;
+
+    if user_name is null and new.email is not null then
+        user_name := split_part(new.email, '@', 1);
+
+    end if;
+
+    if user_name is null then
+        user_name := '';
+    end if;
+
+    insert into public.accounts(
+        id,
+        name,
+        email)
+    values (
+        new.id,
+        user_name,
+        new.email);
+
+    return new;
+
+end;
+
+$$;
+
+-- trigger the function every time a user is created
+create trigger on_auth_user_created
+after insert on auth.users for each row
+execute procedure kit.setup_new_user ();
+
+grant execute on function kit.setup_new_user() to authenticated, service_role;
+
+-- handle_update_user_email
+
+drop function if exists kit.handle_update_user_email();
+drop trigger if exists on_auth_user_updated on auth.users;
+
+create
+or replace function kit.handle_update_user_email () returns trigger language plpgsql security definer
+set
+  search_path = '' as $$
+begin
+    update
+        public.accounts
+    set
+        email = new.email
+    where
+        id = new.id
+    return new;
+
+end;
+
+$$;
+
+create trigger "on_auth_user_updated"
+after
+update of email on auth.users for each row
+execute procedure kit.handle_update_user_email ();
+
+grant execute on function kit.handle_update_user_email() to authenticated, service_role;
