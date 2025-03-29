@@ -25,7 +25,7 @@ import { Order } from '~/lib/order.types';
 import { handleResponse } from '~/lib/response/handle-response';
 import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
 import {
-  createFolderFiles,
+  insertFilesInFolder,
 } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { createOrder } from '~/team-accounts/src/server/actions/orders/create/create-order';
 import { generateUUID } from '~/utils/generate-uuid';
@@ -42,10 +42,7 @@ type OrderInsert = Omit<
   | 'client_organization_id'
   | 'agency_id'
   | 'propietary_organization_id'
-> & {
-  fileIds?: string[];
-  uniqueId: string;
-};
+> 
 
 interface OrderCreationFormProps {
   briefs: Brief.Relationships.Services.Response[];
@@ -62,7 +59,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
     generateOrderCreationSchema(briefs.length > 0, t, formFields),
   );
 
-  const { agency, organization } = useUserWorkspace();
+  const { agency, organization, workspace: userWorkspace } = useUserWorkspace();
   const [clientOrganizationId, setClientOrganizationId] = useState<
     string | undefined
   >(organization?.id ?? undefined);
@@ -91,7 +88,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
         uuid: uniqueId,
         title: '',
         description: '',
-        fileIds: [],
+        files: [],
         brief_responses: undefined,
         order_followers: undefined,
       },
@@ -102,10 +99,8 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   const orderMutation = useMutation({
     mutationFn: async ({
       values,
-      fileIds,
     }: {
       values: z.infer<typeof formSchema>;
-      fileIds: string[];
     }) => {
       const {
         brief_responses: _brief_responses,
@@ -113,7 +108,6 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
         ...newOrder
       } = {
         ...values.briefCompletion,
-        fileIds,
       };
       // Transform the data into the shape required by the server
       let briefResponses: Brief.Relationships.FormFieldResponses[] = [];
@@ -147,20 +141,21 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
       );
       // Since we're creating files for a order, the file need to be placed into the respective order folder
       if (
-        values.briefCompletion.fileIds.length > 0 &&
+        values.briefCompletion.files.length > 0 &&
         clientOrganizationId &&
         agencyId
       ) {
-        const folderFilesToInsert: File.Relationships.FolderFiles.Insert[] = values.briefCompletion.fileIds.map(
-          (fileId) => ({
-            file_id: fileId,
-            client_organization_id: clientOrganizationId,
-            agency_id: agencyId,
-            folder_id: values.briefCompletion.uuid,
+        const filesToInsert:File.Insert[] = values.briefCompletion.files.map(
+          (file) => ({
+            name: file.name ?? '',
+            size: file.size ?? 0,
+            type: file.type ?? '',
+            url: file.url ?? '',
+            user_id: userWorkspace?.id ?? '',
           }),
         );
 
-        await createFolderFiles(folderFilesToInsert).catch((error) => {
+        await insertFilesInFolder(values.briefCompletion.uuid, filesToInsert, clientOrganizationId, agencyId).catch((error) => {
           console.error('Error creating folder files:', error);
           return
         });
@@ -179,7 +174,6 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     orderMutation.mutate({
       values: values,
-      fileIds: values.briefCompletion.fileIds,
     });
   };
 

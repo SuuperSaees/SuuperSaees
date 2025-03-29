@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 import { UseMutationResult } from '@tanstack/react-query';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
@@ -19,12 +17,14 @@ import {
 import { useMultiStepFormContext } from '@kit/ui/multi-step-form';
 import { Spinner } from '@kit/ui/spinner';
 
-import UploadFileComponent from '~/components/ui/files-input';
 import { Brief } from '~/lib/brief.types';
+import { File } from '~/lib/file.types';
 
+import FilesUploader from '../../../components/file-preview/files-uploader';
 import BriefCard from './brief-card';
 import ClientAssignation from './client-assignation';
 import { OrderBriefs } from './order-briefs';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 interface BriefCompletionFormProps {
   brief: Brief.Relationships.Services.Response | null;
@@ -38,14 +38,13 @@ interface BriefCompletionFormProps {
         };
         briefCompletion: {
           uuid: string;
-          fileIds: string[];
+          files: File.Insert[];
           brief_responses: Record<string, string | undefined | Date>;
           description?: string | undefined;
           title?: string | undefined;
           order_followers?: string[] | undefined;
         };
       };
-      fileIds: string[];
     },
     unknown
   >;
@@ -67,11 +66,18 @@ export default function BriefCompletionForm({
 }: BriefCompletionFormProps) {
   const { t } = useTranslation('orders');
   const { form, prevStep } = useMultiStepFormContext();
-  const [_uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
 
-  const handleFileIdsChange = (fileIds: string[]) => {
-    setUploadedFileIds(fileIds);
-    form.setValue('briefCompletion.fileIds', fileIds);
+  const handleFilesChange = (uploads: FileUploadState[]) => {
+    const filesToInsert: File.Insert[] = uploads.map(
+      (upload) => ({
+        name: upload.file.name ?? '',
+        size: upload.file.size ?? 0,
+        type: upload.file.type ?? '',
+        url: upload.url ?? '',
+        user_id: '',
+      }),
+    );
+    form.setValue('briefCompletion.files', filesToInsert);
   };
 
   return (
@@ -126,10 +132,13 @@ export default function BriefCompletionForm({
                   )}
                 />
                 {clientOrganizationId && agencyId && (
-                  <UploadFileComponent
+                  <FilesUploader
                     bucketName="orders"
-                    uuid={uniqueId}
-                    onFileIdsChange={handleFileIdsChange}
+                    path={`/uploads/${uniqueId}`}
+                    // bucketName="orders"
+                    // uuid={uniqueId}
+                    // onFileIdsChange={handleFileIdsChange}
+                    onFilesSelected={handleFilesChange}
                   />
                 )}
               </>
