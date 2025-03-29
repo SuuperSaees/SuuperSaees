@@ -1054,7 +1054,7 @@ execute function kit.add_current_user_to_new_organization ();
 
 set check_function_bodies = off;
 
-CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[], domain text)
+CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[], _domain text)
  RETURNS orders_v2
  LANGUAGE plpgsql
 AS $function$DECLARE
@@ -1080,18 +1080,18 @@ BEGIN
   END IF;
   
   -- Step 0.1: Verify domain is not empty
-  IF domain IS NULL OR domain = '' THEN
+  IF _domain IS NULL OR _domain = '' THEN
     RAISE EXCEPTION 'Domain parameter is required';
   END IF;
   
   -- Step 0.2: Get subdomain ID from domain
   SELECT id INTO subdomain_id
   FROM public.subdomains
-  WHERE domain = domain
+  WHERE domain = _domain
   LIMIT 1;
   
   IF subdomain_id IS NULL THEN
-    RAISE EXCEPTION 'Subdomain not found for domain: %', domain;
+    RAISE EXCEPTION 'Subdomain not found for domain: %', _domain;
   END IF;
   
   -- Step 0.3: Get organization ID from subdomain

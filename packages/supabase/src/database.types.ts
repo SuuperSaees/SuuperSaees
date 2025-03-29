@@ -94,11 +94,8 @@ export type Database = {
           id: string
           loom_app_id: string | null
           name: string
-          organization_id: string | null
           picture_url: string | null
           public_data: Json
-          slug: string | null
-          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -110,11 +107,8 @@ export type Database = {
           id?: string
           loom_app_id?: string | null
           name: string
-          organization_id?: string | null
           picture_url?: string | null
           public_data?: Json
-          slug?: string | null
-          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -126,11 +120,8 @@ export type Database = {
           id?: string
           loom_app_id?: string | null
           name?: string
-          organization_id?: string | null
           picture_url?: string | null
           public_data?: Json
-          slug?: string | null
-          stripe_id?: string | null
           updated_at?: string | null
           updated_by?: string | null
         }
@@ -140,13 +131,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -2866,7 +2850,7 @@ export type Database = {
       }
       can_action_account_member: {
         Args: {
-          target_team_account_id: string
+          target_organization_id: string
           target_user_id: string
         }
         Returns: boolean
@@ -2889,36 +2873,68 @@ export type Database = {
           updated_at: string
         }
       }
-      create_order: {
-        Args: {
-          _order: Json
-          _brief_responses: Json[]
-          _order_followers: string[]
-          _order_file_ids: string[]
-        }
-        Returns: {
-          agency_id: string
-          brief_id: string | null
-          brief_ids: string[] | null
-          client_organization_id: string
-          created_at: string
-          customer_id: string
-          deleted_on: string | null
-          description: string
-          due_date: string | null
-          id: number
-          position: number | null
-          priority: Database["public"]["Enums"]["priority_types"] | null
-          propietary_organization_id: string
-          status: string | null
-          status_id: number | null
-          stripe_account_id: string | null
-          title: string
-          updated_at: string | null
-          uuid: string
-          visibility: Database["public"]["Enums"]["visibility"]
-        }
-      }
+      create_order:
+        | {
+            Args: {
+              _order: Json
+              _brief_responses: Json[]
+              _order_followers: string[]
+              _order_file_ids: string[]
+            }
+            Returns: {
+              agency_id: string
+              brief_id: string | null
+              brief_ids: string[] | null
+              client_organization_id: string
+              created_at: string
+              customer_id: string
+              deleted_on: string | null
+              description: string
+              due_date: string | null
+              id: number
+              position: number | null
+              priority: Database["public"]["Enums"]["priority_types"] | null
+              propietary_organization_id: string
+              status: string | null
+              status_id: number | null
+              stripe_account_id: string | null
+              title: string
+              updated_at: string | null
+              uuid: string
+              visibility: Database["public"]["Enums"]["visibility"]
+            }
+          }
+        | {
+            Args: {
+              _order: Json
+              _brief_responses: Json[]
+              _order_followers: string[]
+              _order_file_ids: string[]
+              _domain: string
+            }
+            Returns: {
+              agency_id: string
+              brief_id: string | null
+              brief_ids: string[] | null
+              client_organization_id: string
+              created_at: string
+              customer_id: string
+              deleted_on: string | null
+              description: string
+              due_date: string | null
+              id: number
+              position: number | null
+              priority: Database["public"]["Enums"]["priority_types"] | null
+              propietary_organization_id: string
+              status: string | null
+              status_id: number | null
+              stripe_account_id: string | null
+              title: string
+              updated_at: string | null
+              uuid: string
+              visibility: Database["public"]["Enums"]["visibility"]
+            }
+          }
       create_team_account: {
         Args: {
           account_name: string
@@ -2931,11 +2947,8 @@ export type Database = {
           id: string
           loom_app_id: string | null
           name: string
-          organization_id: string | null
           picture_url: string | null
           public_data: Json
-          slug: string | null
-          stripe_id: string | null
           updated_at: string | null
           updated_by: string | null
         }
@@ -2966,15 +2979,15 @@ export type Database = {
       }
       get_account_members: {
         Args: {
-          account_slug: string
+          organization_slug: string
         }
         Returns: {
           id: string
           user_id: string
-          account_id: string
+          organization_id: string
           role: string
           role_hierarchy_level: number
-          primary_owner_user_id: string
+          owner_user_id: string
           name: string
           email: string
           picture_url: string
@@ -2982,6 +2995,20 @@ export type Database = {
           updated_at: string
           settings: Json
         }[]
+      }
+      get_agency_id_from_orders_v2: {
+        Args: {
+          target_user_id: string
+          order_id: number
+        }
+        Returns: string
+      }
+      get_client_organization_id_from_orders_v2: {
+        Args: {
+          target_user_id: string
+          order_id: number
+        }
+        Returns: string
       }
       get_config: {
         Args: Record<PropertyKey, never>
@@ -3000,12 +3027,6 @@ export type Database = {
       }
       get_upper_system_role: {
         Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_user_organization_id: {
-        Args: {
-          user_id: string
-        }
         Returns: string
       }
       handle_account_name_changes: {
@@ -3040,7 +3061,14 @@ export type Database = {
       has_permission: {
         Args: {
           user_id: string
-          account_id: string
+          organization_id: string
+          permission_name: Database["public"]["Enums"]["app_permissions"]
+        }
+        Returns: boolean
+      }
+      has_permission_in_organizations: {
+        Args: {
+          target_user_id: string
           permission_name: Database["public"]["Enums"]["app_permissions"]
         }
         Returns: boolean
@@ -3055,7 +3083,7 @@ export type Database = {
       }
       has_role_on_account: {
         Args: {
-          account_id: string
+          organization_id: string
           account_role?: string
         }
         Returns: boolean
@@ -3093,7 +3121,7 @@ export type Database = {
           }
       is_account_owner: {
         Args: {
-          account_id: string
+          organization_id: string
         }
         Returns: boolean
       }
@@ -3117,7 +3145,7 @@ export type Database = {
       }
       is_team_member: {
         Args: {
-          account_id: string
+          organization_id: string
           user_id: string
         }
         Returns: boolean
@@ -3260,6 +3288,18 @@ export type Database = {
           trial_starts_at: string | null
           updated_at: string | null
         }
+      }
+      user_belongs_to_agency_organizations: {
+        Args: {
+          target_user_id: string
+        }
+        Returns: boolean
+      }
+      user_belongs_to_client_organizations: {
+        Args: {
+          target_user_id: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
