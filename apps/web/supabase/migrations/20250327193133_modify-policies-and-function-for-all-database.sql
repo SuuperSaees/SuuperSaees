@@ -743,7 +743,7 @@ using (((user_belongs_to_agency_organizations(auth.uid()) AND has_permission_in_
 -- functions and triggers 
 -- 1. insert_organization_subdomain
 
-drop function if exists public.insert_organization_subdomain();
+drop function if exists public.insert_organization_subdomain() cascade;
 drop trigger if exists after_insert_subdomain on public.subdomains;
 
 CREATE OR REPLACE FUNCTION public.insert_organization_subdomain()
@@ -782,10 +782,10 @@ GRANT EXECUTE ON FUNCTION public.insert_organization_subdomain() TO authenticate
 
 -- 5. handle_new_account_credits_usage
 
-drop function if exists kit.handle_new_account_credits_usage();
+drop function if exists kit.handle_new_account_credits_usage() cascade;
 drop trigger if exists on_account_created_fill_credits on public.accounts;
 
-drop function if exists kit.handle_new_organization_credits_usage();
+drop function if exists kit.handle_new_organization_credits_usage() cascade;
 drop trigger if exists on_organization_created_fill_credits on public.organizations;
 
 create or replace function kit.handle_new_organization_credits_usage()
@@ -857,7 +857,7 @@ GRANT EXECUTE ON FUNCTION kit.handle_new_organization_credits_usage() TO authent
 
 -- 8. check_team_account
 
-drop function if exists kit.check_team_account();
+drop function if exists kit.check_team_account() cascade;
 drop trigger if exists only_team_accounts_check on public.invitations;
 
 create
@@ -890,7 +890,7 @@ GRANT EXECUTE ON FUNCTION kit.check_team_account() TO authenticated, service_rol
 
 -- 9. prevent_account_owner_membership_delete
 
-drop function if exists kit.prevent_account_owner_membership_delete();
+drop function if exists kit.prevent_account_owner_membership_delete() cascade;
 drop trigger if exists prevent_account_owner_membership_delete_check on public.accounts_memberships;
 
 create
@@ -924,7 +924,7 @@ GRANT EXECUTE ON FUNCTION kit.prevent_account_owner_membership_delete() TO authe
 
 -- 10. protect_account_fields
 
-drop function if exists kit.protect_account_fields();
+drop function if exists kit.protect_account_fields() cascade;
 drop trigger if exists protect_account_fields on public.accounts;
 
 create
@@ -952,7 +952,7 @@ GRANT EXECUTE ON FUNCTION kit.protect_account_fields() TO authenticated, service
 
 -- 11. set_slug_from_account_name (usado en dos triggers)
 
-drop function if exists kit.set_slug_from_account_name();
+drop function if exists kit.set_slug_from_account_name() cascade;
 drop trigger if exists set_slug_from_account_name on public.accounts;
 drop trigger if exists update_slug_from_account_name on public.accounts;
 
@@ -1019,7 +1019,7 @@ execute procedure kit.set_slug_from_account_name ();
 
 
 -- 15. add_current_user_to_new_account
-drop function if exists kit.add_current_user_to_new_account();
+drop function if exists kit.add_current_user_to_new_account() cascade;
 drop trigger if exists add_current_user_to_new_account on public.accounts;
 
 create
@@ -1300,7 +1300,7 @@ END;$function$
 
 -- 20. get_account_members
 
-DROP FUNCTION IF EXISTS public.get_account_members(text);
+DROP FUNCTION IF EXISTS public.get_account_members(text) CASCADE;
 
 CREATE OR REPLACE FUNCTION public.get_account_members(organization_slug text)
  RETURNS TABLE(id uuid, user_id uuid, organization_id uuid, role character varying, role_hierarchy_level integer, owner_user_id uuid, name character varying, email character varying, picture_url character varying, created_at timestamp with time zone, updated_at timestamp with time zone, settings jsonb)
@@ -1343,7 +1343,7 @@ grant execute on function public.get_account_members (text) to authenticated, se
 
 -- setup_new_user 
 
-drop function if exists kit.setup_new_user();
+drop function if exists kit.setup_new_user() cascade;
 drop trigger if exists on_auth_user_created on auth.users;
 
 create
@@ -1391,7 +1391,7 @@ grant execute on function kit.setup_new_user() to authenticated, service_role;
 
 -- handle_update_user_email
 
-drop function if exists kit.handle_update_user_email();
+drop function if exists kit.handle_update_user_email() cascade;
 drop trigger if exists on_auth_user_updated on auth.users;
 
 create
