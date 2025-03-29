@@ -1054,14 +1054,15 @@ execute function kit.add_current_user_to_new_organization ();
 
 set check_function_bodies = off;
 
-CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[])
+CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[], domain text)
  RETURNS orders_v2
  LANGUAGE plpgsql
 AS $function$DECLARE
   new_order public.orders_v2;  -- Declare new_order as a record of type orders_v2
   current_user_id uuid := auth.uid();  -- Get the authenticated user's ID
   user_role text;  -- To store the current user's role
-  account_data record;  -- To hold account data
+  subdomain_id uuid;  -- To store the subdomain ID
+  organization_id uuid;  -- To store the organization ID from subdomain
   client_data record;  -- To hold client data
   agency_organization_data record;  -- To hold agency organization data
   agency_client_id uuid;  -- To hold the agency client ID
@@ -1077,71 +1078,112 @@ BEGIN
   IF current_user_id IS NULL THEN
     RAISE EXCEPTION 'User is not authenticated';
   END IF;
-
-  -- Step 0.1: Get the current user role
+  
+  -- Step 0.1: Verify domain is not empty
+  IF domain IS NULL OR domain = '' THEN
+    RAISE EXCEPTION 'Domain parameter is required';
+  END IF;
+  
+  -- Step 0.2: Get subdomain ID from domain
+  SELECT id INTO subdomain_id
+  FROM public.subdomains
+  WHERE domain = domain
+  LIMIT 1;
+  
+  IF subdomain_id IS NULL THEN
+    RAISE EXCEPTION 'Subdomain not found for domain: %', domain;
+  END IF;
+  
+  -- Step 0.3: Get organization ID from subdomain
+  SELECT organization_id INTO organization_id
+  FROM public.organization_subdomains
+  WHERE subdomain_id = subdomain_id
+  LIMIT 1;
+  
+  IF organization_id IS NULL THEN
+    RAISE EXCEPTION 'Organization not found for subdomain';
+  END IF;
+  
+  -- Step 0.4: Get user role for this organization
   SELECT am.account_role INTO user_role
-  FROM public.accounts_memberships AS am  -- Use an alias for clarity
+  FROM public.accounts_memberships am
   WHERE am.user_id = current_user_id
+  AND am.organization_id = organization_id
   LIMIT 1;
-
-  -- Step 0.2: Get account data
-  SELECT * INTO account_data
-  FROM public.accounts
-  WHERE id = current_user_id
-  LIMIT 1;
-
-  -- Step 0.3.1: Check _order_followers and use its first value if it exists
-  IF array_length(_order_followers, 1) IS NULL THEN
-    _order_followers := ARRAY[current_user_id];  -- Default to current_user_id if _order_followers is empty
+  
+  IF user_role IS NULL THEN
+    RAISE EXCEPTION 'User does not have a role in this organization';
   END IF;
 
- -- Step 0.3.2: Get client data using the first value of _order_followers if present
+  -- Step 0.5: Check _order_followers and use its first value if it exists
+  IF array_length(_order_followers, 1) IS NULL THEN
+    _order_followers := ARRAY[current_user_id::text];  -- Default to current_user_id if _order_followers is empty
+  END IF;
+
+  -- Step 0.6: Get client data using the first value of _order_followers if present
   SELECT * INTO client_data
   FROM public.clients
-  WHERE user_client_id = COALESCE(_order_followers[1]::uuid, current_user_id)  -- Use the first _order_followers value if it exists
+  WHERE user_client_id = COALESCE(_order_followers[1]::uuid, current_user_id)
   LIMIT 1;
 
-  -- Step 0.4: Determine agencyClientId and clientOrganizationId
-  agency_client_id := COALESCE(client_data.agency_id, account_data.organization_id);
-  client_organization_id := COALESCE(client_data.organization_client_id, account_data.organization_id);
+  -- Step 0.7: Determine agency_client_id and client_organization_id
+  IF user_role = ANY(agencyRoles) THEN
+    -- User is from agency
+    agency_client_id := organization_id;
+    client_organization_id := COALESCE(client_data.organization_client_id, organization_id);
+  ELSE
+    -- User is from client
+    client_organization_id := organization_id;
+    
+    -- Find the agency that this client belongs to
+    SELECT agency_id INTO agency_client_id
+    FROM public.clients
+    WHERE organization_client_id = organization_id
+    LIMIT 1;
+    
+    IF agency_client_id IS NULL THEN
+      -- If no agency found, use the client's organization
+      agency_client_id := organization_id;
+    END IF;
+  END IF;
 
-  -- Step 0.5: Get agency organization data
-  SELECT id, primary_owner_user_id, name INTO agency_organization_data
-  FROM public.accounts
-  WHERE id = agency_client_id
+  -- Step 0.8: Get agency organization data
+  SELECT o.id, o.owner_id, o.name INTO agency_organization_data
+  FROM public.organizations o
+  WHERE o.id = agency_client_id
   LIMIT 1;
 
-  -- Step 0.6: Get default status ID
+  -- Step 0.9: Get default status ID
   SELECT id INTO default_status_id
   FROM public.agency_statuses
   WHERE status_name = 'in_review'
   AND agency_id = agency_organization_data.id
   LIMIT 1;
 
-  -- Step 0.7: If no status found, set default status_id to 1
+  -- Step 0.10: If no status found, set default status_id to 1
   IF default_status_id IS NULL THEN
     default_status_id := 1;
   END IF;
 
-  -- Step 0.8: Calculate the new position
+  -- Step 0.11: Calculate the new position
   SELECT COALESCE(MAX(position), 0) + 1 INTO new_position
   FROM public.orders_v2
-  WHERE status_id = default_status_id  -- Use the default status_id determined earlier
-  AND agency_id = agency_organization_data.id;  -- Filter by agency_id to ensure positions are scoped to the agency
+  WHERE status_id = default_status_id
+  AND agency_id = agency_organization_data.id;
 
-  -- Step 0.9: Prepare the order for insertion (Include the calculated position)
+  -- Step 0.12: Prepare the order for insertion
   brief_ids := ARRAY(
     SELECT (response_item->>'brief_id')::uuid
     FROM unnest(_brief_responses) AS response_item
   );
   
- -- Construct the orderToInsert object
+  -- Construct the orderToInsert object
   _order := jsonb_set(_order, '{customer_id}', to_jsonb(COALESCE(_order_followers[1]::uuid, current_user_id::uuid)));
   _order := jsonb_set(_order, '{client_organization_id}', to_jsonb(client_organization_id::text));
-  _order := jsonb_set(_order, '{propietary_organization_id}', to_jsonb(agency_organization_data.primary_owner_user_id::text));
+  _order := jsonb_set(_order, '{propietary_organization_id}', to_jsonb(agency_organization_data.owner_id::text));
   _order := jsonb_set(_order, '{agency_id}', to_jsonb(agency_organization_data.id::text));
   _order := jsonb_set(_order, '{brief_ids}', to_jsonb(brief_ids));
-  _order := jsonb_set(_order, '{position}', to_jsonb(new_position::int));  -- Add the calculated position
+  _order := jsonb_set(_order, '{position}', to_jsonb(new_position::int));
 
   -- Step 1: Insert the order into orders_v2
   INSERT INTO public.orders_v2 (
@@ -1158,7 +1200,7 @@ BEGIN
     title,
     uuid,
     status_id,
-    position,  -- Include the position in the INSERT statement
+    position,
     brief_id
   )
   VALUES (
@@ -1181,11 +1223,11 @@ BEGIN
     _order->>'title',
     _order->>'uuid',
     default_status_id,
-    new_position,  -- Use the calculated position
+    new_position,
     CASE 
-      WHEN array_length(brief_ids, 1) > 0 THEN brief_ids[1]  -- Tomar el primer elemento de brief_ids
+      WHEN array_length(brief_ids, 1) > 0 THEN brief_ids[1]
       ELSE NULL
-    END  -- Use the first brief_id if it exists, otherwise NULL
+    END
   )
   RETURNING * INTO new_order;
 
@@ -1224,7 +1266,7 @@ BEGIN
       order_id
     )
     VALUES (
-      current_user_id,  -- Use the authenticated user's ID
+      current_user_id,
       new_order.id
     );
   END IF;
@@ -1236,7 +1278,7 @@ BEGIN
       SELECT DISTINCT unnest(array_append(_order_followers, COALESCE(_order_followers[1]::text, current_user_id::text)))
     );
   ELSE
-    all_followers := _order_followers;  -- Use provided followers if no client role
+    all_followers := _order_followers;
   END IF;
 
   -- Step 6: Insert all followers if present
@@ -1247,7 +1289,7 @@ BEGIN
     )
     SELECT
       new_order.id,
-      follower_id::uuid  -- Convert each follower to uuid
+      follower_id::uuid
     FROM unnest(all_followers) AS follower_id;
   END IF;
 
