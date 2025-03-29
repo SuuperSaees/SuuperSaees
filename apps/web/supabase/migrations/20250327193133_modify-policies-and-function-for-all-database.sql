@@ -386,6 +386,7 @@ using (((auth.uid() IS NOT NULL) AND (user_belongs_to_agency_organizations(auth.
 
 -- IMPORTANT: chats It's not needed to fix because it's not orgaization related
 
+
 -- billing_services
 
 alter table "public"."billing_services" enable row level security;
@@ -775,6 +776,8 @@ GRANT EXECUTE ON FUNCTION public.insert_organization_subdomain() TO authenticate
 
 -- 4. update_updated_at it's not related for this migration
 
+-- 30. handle_organization_settings_portal_name_changes it's not related for this migration
+
 -- 5. handle_new_account_credits_usage
 
 drop function if exists kit.handle_new_account_credits_usage();
@@ -999,15 +1002,283 @@ update on public.organizations for each row when (
 execute procedure kit.set_slug_from_account_name ();
 
 
--- 14. http_request (usado en accounts_update, billing_accounts_upsert, invitations_insert, services_upsert)
-
 -- 15. add_current_user_to_new_account
+drop function if exists kit.add_current_user_to_new_account();
+drop trigger if exists add_current_user_to_new_account on public.accounts;
 
--- 17. create_order_transaction
+create
+or replace function kit.add_current_user_to_new_organization () returns trigger language plpgsql security definer
+set
+  search_path = '' as $$
+begin
+    if new.owner_id = auth.uid() then
+        insert into public.accounts_memberships(
+            organization_id,
+            user_id,
+            account_role)
+        values(
+            new.id,
+            auth.uid(),
+            public.get_upper_system_role());
 
--- 18. update_order_position
+    end if;
 
--- 19. get_next_order_position
+    return NEW;
+
+end;
+
+$$;
+
+-- trigger the function whenever a new organization is created
+create trigger "add_current_user_to_new_organization"
+after insert on public.organizations for each row
+execute function kit.add_current_user_to_new_organization ();
+
+-- 17. create_order
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[])
+ RETURNS orders_v2
+ LANGUAGE plpgsql
+AS $function$DECLARE
+  new_order public.orders_v2;  -- Declare new_order as a record of type orders_v2
+  current_user_id uuid := auth.uid();  -- Get the authenticated user's ID
+  user_role text;  -- To store the current user's role
+  account_data record;  -- To hold account data
+  client_data record;  -- To hold client data
+  agency_organization_data record;  -- To hold agency organization data
+  agency_client_id uuid;  -- To hold the agency client ID
+  client_organization_id uuid;  -- To hold the client organization ID
+  brief_ids uuid[];  -- Array to hold brief IDs
+  agencyRoles text[] := ARRAY['agency_owner', 'agency_member', 'agency_project_manager'];  -- List of agency roles
+  clientRoles text[] := ARRAY['client_owner', 'client_member'];  -- List of client roles
+  all_followers text[];  -- Array to hold all followers
+  default_status_id integer;  -- To hold the default status ID
+  new_position integer;  -- To hold the new position
+BEGIN
+  -- Step 0: Verify the user is authenticated
+  IF current_user_id IS NULL THEN
+    RAISE EXCEPTION 'User is not authenticated';
+  END IF;
+
+  -- Step 0.1: Get the current user role
+  SELECT am.account_role INTO user_role
+  FROM public.accounts_memberships AS am  -- Use an alias for clarity
+  WHERE am.user_id = current_user_id
+  LIMIT 1;
+
+  -- Step 0.2: Get account data
+  SELECT * INTO account_data
+  FROM public.accounts
+  WHERE id = current_user_id
+  LIMIT 1;
+
+  -- Step 0.3.1: Check _order_followers and use its first value if it exists
+  IF array_length(_order_followers, 1) IS NULL THEN
+    _order_followers := ARRAY[current_user_id];  -- Default to current_user_id if _order_followers is empty
+  END IF;
+
+ -- Step 0.3.2: Get client data using the first value of _order_followers if present
+  SELECT * INTO client_data
+  FROM public.clients
+  WHERE user_client_id = COALESCE(_order_followers[1]::uuid, current_user_id)  -- Use the first _order_followers value if it exists
+  LIMIT 1;
+
+  -- Step 0.4: Determine agencyClientId and clientOrganizationId
+  agency_client_id := COALESCE(client_data.agency_id, account_data.organization_id);
+  client_organization_id := COALESCE(client_data.organization_client_id, account_data.organization_id);
+
+  -- Step 0.5: Get agency organization data
+  SELECT id, primary_owner_user_id, name INTO agency_organization_data
+  FROM public.accounts
+  WHERE id = agency_client_id
+  LIMIT 1;
+
+  -- Step 0.6: Get default status ID
+  SELECT id INTO default_status_id
+  FROM public.agency_statuses
+  WHERE status_name = 'in_review'
+  AND agency_id = agency_organization_data.id
+  LIMIT 1;
+
+  -- Step 0.7: If no status found, set default status_id to 1
+  IF default_status_id IS NULL THEN
+    default_status_id := 1;
+  END IF;
+
+  -- Step 0.8: Calculate the new position
+  SELECT COALESCE(MAX(position), 0) + 1 INTO new_position
+  FROM public.orders_v2
+  WHERE status_id = default_status_id  -- Use the default status_id determined earlier
+  AND agency_id = agency_organization_data.id;  -- Filter by agency_id to ensure positions are scoped to the agency
+
+  -- Step 0.9: Prepare the order for insertion (Include the calculated position)
+  brief_ids := ARRAY(
+    SELECT (response_item->>'brief_id')::uuid
+    FROM unnest(_brief_responses) AS response_item
+  );
+  
+ -- Construct the orderToInsert object
+  _order := jsonb_set(_order, '{customer_id}', to_jsonb(COALESCE(_order_followers[1]::uuid, current_user_id::uuid)));
+  _order := jsonb_set(_order, '{client_organization_id}', to_jsonb(client_organization_id::text));
+  _order := jsonb_set(_order, '{propietary_organization_id}', to_jsonb(agency_organization_data.primary_owner_user_id::text));
+  _order := jsonb_set(_order, '{agency_id}', to_jsonb(agency_organization_data.id::text));
+  _order := jsonb_set(_order, '{brief_ids}', to_jsonb(brief_ids));
+  _order := jsonb_set(_order, '{position}', to_jsonb(new_position::int));  -- Add the calculated position
+
+  -- Step 1: Insert the order into orders_v2
+  INSERT INTO public.orders_v2 (
+    agency_id,
+    brief_ids,
+    client_organization_id,
+    created_at,
+    customer_id,
+    description,
+    due_date,
+    priority,
+    propietary_organization_id,
+    status,
+    title,
+    uuid,
+    status_id,
+    position,  -- Include the position in the INSERT statement
+    brief_id
+  )
+  VALUES (
+    COALESCE(NULLIF(_order->>'agency_id', '')::uuid, NULL),
+    COALESCE(
+      ARRAY(
+        SELECT elem::uuid
+        FROM jsonb_array_elements_text(_order->'brief_ids') AS elem
+      ),
+      '{}'::uuid[]
+    ),
+    (_order->>'client_organization_id')::uuid,
+    NOW(),
+    (_order->>'customer_id')::uuid,
+    _order->>'description',
+    COALESCE(NULLIF(_order->>'due_date', ''), NULL)::timestamp with time zone,
+    COALESCE(_order->>'priority', 'low')::priority_types,
+    (_order->>'propietary_organization_id')::uuid,
+    COALESCE(_order->>'status', 'in_review'),
+    _order->>'title',
+    _order->>'uuid',
+    default_status_id,
+    new_position,  -- Use the calculated position
+    CASE 
+      WHEN array_length(brief_ids, 1) > 0 THEN brief_ids[1]  -- Tomar el primer elemento de brief_ids
+      ELSE NULL
+    END  -- Use the first brief_id if it exists, otherwise NULL
+  )
+  RETURNING * INTO new_order;
+
+  -- Step 2: Insert brief responses if present
+  IF _brief_responses IS NOT NULL AND array_length(_brief_responses, 1) > 0 THEN
+    INSERT INTO public.brief_responses (
+      order_id,
+      form_field_id,
+      brief_id,
+      response
+    )
+    SELECT
+      new_order.uuid,
+      (response_item->>'form_field_id')::uuid,
+      (response_item->>'brief_id')::uuid,
+      response_item->>'response'
+    FROM unnest(_brief_responses) AS response_item;
+  END IF;
+
+  -- Step 3: Insert order files if present
+  IF _order_file_ids IS NOT NULL AND array_length(_order_file_ids, 1) > 0 THEN
+    INSERT INTO public.order_files (
+      order_id,
+      file_id
+    )
+    SELECT
+      new_order.uuid,
+      file_id
+    FROM unnest(_order_file_ids) AS file_id;
+  END IF;
+
+  -- Step 4: Assign agency members to the order if role matches
+  IF user_role = ANY (agencyRoles) THEN
+    INSERT INTO public.order_assignations (
+      agency_member_id,
+      order_id
+    )
+    VALUES (
+      current_user_id,  -- Use the authenticated user's ID
+      new_order.id
+    );
+  END IF;
+
+  -- Step 5: Determine initial follower based on client role and insert order followers
+  IF user_role = ANY (clientRoles) THEN
+    -- Only append _order_followers[1] if it is not already in the array
+    all_followers := ARRAY(
+      SELECT DISTINCT unnest(array_append(_order_followers, COALESCE(_order_followers[1]::text, current_user_id::text)))
+    );
+  ELSE
+    all_followers := _order_followers;  -- Use provided followers if no client role
+  END IF;
+
+  -- Step 6: Insert all followers if present
+  IF array_length(all_followers, 1) > 0 THEN
+    INSERT INTO public.order_followers (
+      order_id,
+      client_member_id
+    )
+    SELECT
+      new_order.id,
+      follower_id::uuid  -- Convert each follower to uuid
+    FROM unnest(all_followers) AS follower_id;
+  END IF;
+
+  -- Return the newly created order record
+  RETURN new_order;
+END;$function$
+;
+
+-- 18. update_order
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.update_order_with_position(p_order_id bigint, p_order_updates jsonb, p_position_updates jsonb[])
+ RETURNS orders_v2
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$declare
+  updated_order orders_v2;
+begin
+  -- Start transaction
+  begin
+    -- Update main order
+    update orders_v2
+    set
+      status = coalesce((p_order_updates->>'status')::text, status),
+      status_id = coalesce((p_order_updates->>'status_id')::bigint, status_id),
+      position = coalesce((p_order_updates->>'position')::bigint, position),
+      updated_at = (p_order_updates->>'updated_at')::timestamp
+    where id = p_order_id
+    returning * into updated_order;
+
+    -- Update positions of other orders
+    if array_length(p_position_updates, 1) > 0 then
+      for i in 1..array_length(p_position_updates, 1) loop
+        update orders_v2
+        set position = (p_position_updates[i]->>'position')::bigint
+        where id = (p_position_updates[i]->>'id')::bigint;
+      end loop;
+    end if;
+
+    -- Return the updated order as a record of type orders_v2
+    return updated_order;
+  end;
+end;$function$
+;
+
+grant execute on function public.update_order_with_position to authenticated, service_role;
 
 -- 20. get_account_members
 
@@ -1016,8 +1287,6 @@ execute procedure kit.set_slug_from_account_name ();
 -- 26. mark_chat_messages_as_read
 
 -- 27. deduct_credits
-
--- 30. handle_organization_settings_portal_name_changes
 
 -- 33. handle_subscription_update
 
