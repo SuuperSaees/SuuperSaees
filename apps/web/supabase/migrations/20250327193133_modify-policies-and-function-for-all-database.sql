@@ -839,6 +839,12 @@ GRANT EXECUTE ON FUNCTION kit.handle_new_organization_credits_usage() TO authent
 
 -- 24. has_permission it's not related for this migration
 
+-- 18. update_order it's not related for this migration
+
+-- 25. mark_order_messages_as_read it's not related for this migration
+
+-- 26. mark_chat_messages_as_read it's not related for this migration
+
 -- 8. check_team_account
 
 drop function if exists kit.check_team_account();
@@ -1240,55 +1246,52 @@ BEGIN
 END;$function$
 ;
 
--- 18. update_order
-
-set check_function_bodies = off;
-
-CREATE OR REPLACE FUNCTION public.update_order_with_position(p_order_id bigint, p_order_updates jsonb, p_position_updates jsonb[])
- RETURNS orders_v2
- LANGUAGE plpgsql
- SECURITY DEFINER
-AS $function$declare
-  updated_order orders_v2;
-begin
-  -- Start transaction
-  begin
-    -- Update main order
-    update orders_v2
-    set
-      status = coalesce((p_order_updates->>'status')::text, status),
-      status_id = coalesce((p_order_updates->>'status_id')::bigint, status_id),
-      position = coalesce((p_order_updates->>'position')::bigint, position),
-      updated_at = (p_order_updates->>'updated_at')::timestamp
-    where id = p_order_id
-    returning * into updated_order;
-
-    -- Update positions of other orders
-    if array_length(p_position_updates, 1) > 0 then
-      for i in 1..array_length(p_position_updates, 1) loop
-        update orders_v2
-        set position = (p_position_updates[i]->>'position')::bigint
-        where id = (p_position_updates[i]->>'id')::bigint;
-      end loop;
-    end if;
-
-    -- Return the updated order as a record of type orders_v2
-    return updated_order;
-  end;
-end;$function$
-;
-
-grant execute on function public.update_order_with_position to authenticated, service_role;
-
 -- 20. get_account_members
 
--- 25. mark_order_messages_as_read
+DROP FUNCTION IF EXISTS public.get_account_members(text);
 
--- 26. mark_chat_messages_as_read
+CREATE OR REPLACE FUNCTION public.get_account_members(organization_slug text)
+ RETURNS TABLE(id uuid, user_id uuid, organization_id uuid, role character varying, role_hierarchy_level integer, owner_user_id uuid, name character varying, email character varying, picture_url character varying, created_at timestamp with time zone, updated_at timestamp with time zone, settings jsonb)
+ LANGUAGE plpgsql
+ SET search_path TO ''
+AS $function$
+begin
+    return QUERY
+    select
+        acc.id,
+        am.user_id,
+        am.organization_id,
+        am.account_role,
+        r.hierarchy_level,
+        o.owner_id as owner_user_id,
+        acc.name,
+        acc.email,
+        acc.picture_url,
+        am.created_at,
+        am.updated_at,
+        jsonb_build_object(
+        'name', us.name,
+        'picture_url', us.picture_url
+        ) AS settings
+    from
+        public.accounts_memberships am
+        join public.organizations o on o.id = am.organization_id
+        join public.accounts acc on acc.id = am.user_id
+        join public.roles r on r.name = am.account_role
+        left join public.user_settings us on us.user_id = am.user_id
+    where
+        o.slug = organization_slug
+        and o.deleted_on is null
+        and acc.deleted_on is null;
+end;
+$function$
+;
 
--- 27. deduct_credits
+grant execute on function public.get_account_members (text) to authenticated, service_role;
 
--- 33. handle_subscription_update
+-- 27. deduct_credits 
+
+-- 33. handle_subscription_update 
 
 -- 34. handle_subscription_delete
 
