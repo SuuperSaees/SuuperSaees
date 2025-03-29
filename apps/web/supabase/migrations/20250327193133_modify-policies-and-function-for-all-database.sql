@@ -778,6 +778,8 @@ GRANT EXECUTE ON FUNCTION public.insert_organization_subdomain() TO authenticate
 
 -- 30. handle_organization_settings_portal_name_changes it's not related for this migration
 
+-- 27. deduct_credits it's not related for this migration
+
 -- 5. handle_new_account_credits_usage
 
 drop function if exists kit.handle_new_account_credits_usage();
@@ -844,6 +846,14 @@ GRANT EXECUTE ON FUNCTION kit.handle_new_organization_credits_usage() TO authent
 -- 25. mark_order_messages_as_read it's not related for this migration
 
 -- 26. mark_chat_messages_as_read it's not related for this migration
+
+-- 33. handle_subscription_update it's not related for this migration
+
+-- 34. handle_subscription_delete it's not related for this migration
+
+-- 35. handle_billing_item_update it's not related for this migration
+
+-- 36. handle_billing_item_delete it's not related for this migration
 
 -- 8. check_team_account
 
@@ -1288,14 +1298,3 @@ $function$
 ;
 
 grant execute on function public.get_account_members (text) to authenticated, service_role;
-
--- 27. deduct_credits 
-
--- 33. handle_subscription_update 
-
--- 34. handle_subscription_delete
-
--- 35. handle_billing_item_update
-
--- 36. handle_billing_item_delete
-
