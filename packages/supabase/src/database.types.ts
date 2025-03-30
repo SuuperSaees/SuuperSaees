@@ -144,7 +144,6 @@ export type Database = {
       }
       accounts_memberships: {
         Row: {
-          account_id: string
           account_role: string
           created_at: string
           created_by: string | null
@@ -154,7 +153,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          account_id: string
           account_role?: string
           created_at?: string
           created_by?: string | null
@@ -164,7 +162,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          account_id?: string
           account_role?: string
           created_at?: string
           created_by?: string | null
@@ -174,13 +171,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "accounts_memberships_account_id_fkey1"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "accounts_memberships_account_role_fkey"
             columns: ["account_role"]

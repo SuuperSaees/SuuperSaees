@@ -805,14 +805,14 @@ begin
   -- we add credits only when this is the 1st organization
   -- to avoid abuse of the free credits
   if organizations_count > 1 then
-    insert into public.credits_usage (account_id, remaining_credits)
+    insert into public.credits_usage (organization_id, remaining_credits)
       values (new.id, 0);
 
     return new;
   end if;
 
   -- since this is the first organization, we add 20000 credits
-  insert into public.credits_usage (account_id, remaining_credits)
+  insert into public.credits_usage (organization_id, remaining_credits)
   values (new.id, 20000);
   return new;
 end;

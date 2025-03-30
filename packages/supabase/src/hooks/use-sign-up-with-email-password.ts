@@ -78,34 +78,34 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     const newUserData = response.data;
     const userId = newUserData.user?.id;
 
+    console.log('newUserData', newUserData);
+
     if (!inviteToken) {
       // New Step: Create organization account
-      const { data: accountData, error: accountError } = await client
-        .from('accounts')
+      const { data: organizationData, error: organizationError } = await client
+        .from('organizations')
         .insert({
-          primary_owner_user_id: userId,
+          owner_id: userId,
           name: credentials.organizationName,
-          email: null,
-          is_personal_account: false,
         })
         .select('id')
         .single();
 
-      if (accountError) {
-        console.error('Error creating account:', accountError);
+      if (organizationError) {
+        console.error('Error creating organization:', organizationError);
         throw new Error('Error occurred while creating the organization account');
       }
 
       // Update user with organization_id
-      const { error: userUpdateError } = await client
-        .from('accounts')
-        .update({ organization_id: accountData.id })
-        .eq('id', userId ?? '');
+      // const { error: userUpdateError } = await client
+      //   .from('accounts_memberships')
+      //   .update({ organization_id: organizationData.id })
+      //   .eq('user_id', userId ?? '');  
 
-      if (userUpdateError) {
-        console.error('Error updating user:', userUpdateError);
-        throw new Error('Error occurred while updating user organization');
-      }
+      // if (userUpdateError) {
+      //   console.error('Error updating user:', userUpdateError);
+      //   throw new Error('Error occurred while updating user organization');
+      // }
     }
 
     const { error: accountInsertDataError } = await client

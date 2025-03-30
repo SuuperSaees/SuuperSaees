@@ -362,6 +362,24 @@ END $$;
 
 COMMIT;
 
+BEGIN;
+
+ALTER TABLE public.credits_usage 
+ADD COLUMN IF NOT EXISTS organization_id uuid;
+
+UPDATE public.credits_usage
+SET organization_id = account_id;
+
+CREATE INDEX IF NOT EXISTS idx_credits_usage_organization_id ON public.credits_usage(organization_id);
+
+ALTER TABLE public.credits_usage
+ALTER COLUMN organization_id SET NOT NULL;
+
+alter table "public"."credits_usage" add constraint "credits_usage_organization_id_fkey" FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE CASCADE ON DELETE SET NULL not valid;
+
+alter table "public"."credits_usage" validate constraint "credits_usage_organization_id_fkey";
+COMMIT; 
+
 ALTER TABLE "public"."accounts" DROP COLUMN IF EXISTS "organization_id" CASCADE;
 ALTER TABLE "public"."accounts" DROP COLUMN IF EXISTS "stripe_id" CASCADE;
 ALTER TABLE "public"."accounts" DROP COLUMN IF EXISTS "slug" CASCADE;
