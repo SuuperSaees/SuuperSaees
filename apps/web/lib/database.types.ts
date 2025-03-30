@@ -965,26 +965,26 @@ export type Database = {
       }
       credits_usage: {
         Row: {
-          account_id: string
           id: number
+          organization_id: string
           remaining_credits: number
         }
         Insert: {
-          account_id: string
           id?: number
+          organization_id: string
           remaining_credits?: number
         }
         Update: {
-          account_id?: string
           id?: number
+          organization_id?: string
           remaining_credits?: number
         }
         Relationships: [
           {
-            foreignKeyName: "credits_usage_account_id_fkey"
-            columns: ["account_id"]
+            foreignKeyName: "credits_usage_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
