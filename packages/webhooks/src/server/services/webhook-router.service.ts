@@ -61,9 +61,9 @@ class WebhookRouterService {
               data: accountDataAgencyOwnerData,
               error: accountDataAgencyOwnerError,
             } = await this.adminClient
-              .from('accounts')
-              .select('id, organization_id')
-              .eq('stripe_id', stripeAccountId)
+              .from('billing_accounts')
+              .select('id, account:accounts(id, organization_id)')
+              .eq('provider_id', stripeAccountId)
               .single();
 
             if (accountDataAgencyOwnerError) {
@@ -79,8 +79,8 @@ class WebhookRouterService {
               slug: `${data?.customer_details?.name}'s Organization`,
               name: data?.customer_details?.name, // TODO: Check if this is the correct field
             };
-            const createdBy = accountDataAgencyOwnerData?.id;
-            const agencyId = accountDataAgencyOwnerData?.organization_id;
+            const createdBy = accountDataAgencyOwnerData?.account?.id;
+            const agencyId = accountDataAgencyOwnerData?.account?.organization_id;
 
             // Check if the client already exists
             const { data: clientData, error: clientError } =
@@ -145,7 +145,7 @@ class WebhookRouterService {
                 await this.adminClient
                   .from('clients')
                   .insert({
-                    agency_id: accountDataAgencyOwnerData.organization_id ?? '',
+                    agency_id: accountDataAgencyOwnerData.account?.organization_id ?? '',
                     organization_client_id: clientOrganizationId ?? '',
                     user_client_id: clientData.id,
                   })
@@ -202,7 +202,6 @@ class WebhookRouterService {
         return Promise.resolve();
       },
       onPaymentIntentSucceeded: async (data) => {
-        console.log('Payment subscription or unique payment succeeded:', data);
         try {
           if (stripeAccountId) {
             // Search organization by accountId
@@ -210,9 +209,9 @@ class WebhookRouterService {
               data: accountDataAgencyOwnerData,
               error: accountDataAgencyOwnerError,
             } = await this.adminClient
-              .from('accounts')
-              .select('id, organization_id')
-              .eq('stripe_id', stripeAccountId)
+              .from('billing_accounts')
+              .select('id, account:accounts(id, organization_id)')
+              .eq('provider_id', stripeAccountId)
               .single();
 
             if (accountDataAgencyOwnerError) {
@@ -225,14 +224,13 @@ class WebhookRouterService {
 
             const customer = await getSessionById(data.metadata.sessionId);
 
-
             const newClient = {
               email: customer?.client_email ?? '', // TODO: Check if this is the correct field
               slug: `${customer?.client_name}'s Organization`,
               name: customer?.client_name ?? '', // TODO: Check if this is the correct field
             };
-            const createdBy = accountDataAgencyOwnerData?.id;
-            const agencyId = accountDataAgencyOwnerData?.organization_id;
+            const createdBy = accountDataAgencyOwnerData?.account?.id;
+            const agencyId = accountDataAgencyOwnerData?.account?.organization_id;
 
             // Check if the client already exists
             const { data: clientData, error: clientError } =
@@ -298,7 +296,7 @@ class WebhookRouterService {
                 await this.adminClient
                   .from('clients')
                   .insert({
-                    agency_id: accountDataAgencyOwnerData.organization_id ?? '',
+                    agency_id: accountDataAgencyOwnerData.account?.organization_id ?? '',
                     organization_client_id: clientOrganizationId ?? '',
                     user_client_id: clientData.id,
                   })
