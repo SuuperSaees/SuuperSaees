@@ -102,6 +102,7 @@ async function OrdersPage() {
             )} */}
             <ProjectsBoard
               agencyMembers={agencyMembers.map((member) => ({
+                id: member.id,
                 organization_id: member.account_id,
                 settings: member.user_settings,
                 role: member.role,
