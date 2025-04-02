@@ -3,7 +3,6 @@ import { NextResponse, URLPattern } from 'next/server';
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-// import { checkRequiresMultiFactorAuthentication } from '@kit/supabase/check-requires-mfa';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 import pathsConfig from '~/config/paths.config';
@@ -17,10 +16,7 @@ import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/orga
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 import { handleCors } from './handlers/cors-handler';
-// import { handleCsrf } from './handlers/csrf-handler';
 import { Database } from './lib/database.types';
-
-// import { handleDomainCheck } from './handlers/domain-check-handler';
 
 export const config = {
   matcher: [

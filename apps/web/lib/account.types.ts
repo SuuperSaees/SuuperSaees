@@ -7,9 +7,8 @@ export namespace Account {
   export type Update = Database['public']['Tables']['accounts']['Update'];
   export type Response = Pick<
     Account.Type,
-    'email' | 'id' | 'name' | 'picture_url' | 'organization_id'
+    'email' | 'id' | 'name' | 'picture_url'
   > & {
-    email?: string;
     settings: UserSettings.Type;
   };
   export namespace Relationships {
