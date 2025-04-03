@@ -29,7 +29,6 @@ interface FileSystemResponse {
   parent_folder_id?: string;
 }
 
-type FolderTarget = 'project' | 'client' | 'team' | 'all' | null;
 type FolderType = 'subfolder' | 'mainfolder' | null;
 
 // Utility function to handle errors consistently
@@ -192,10 +191,9 @@ export async function getFoldersAndFiles(
   folderId: string,
   clientOrganizationId: string,
   agencyId: string,
-  target: FolderTarget,
   type: FolderType,
 ): Promise<FileSystemResponse> {
-  if (!target || !type) {
+  if (!type) {
     return { folders: [], files: [] };
   }
 

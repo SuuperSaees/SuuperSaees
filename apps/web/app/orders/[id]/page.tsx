@@ -64,12 +64,14 @@ async function OrderDetailsPage({
   ]);
 
   const organizationId = order?.client_organization_id;
+  const organizationName = order.client_organization?.name ?? '';
   const agencyName = agency?.name ?? organization?.name ?? '';
   const orderAgencyTags = order?.tags;
 
   const currentPath = [
-    { title: 'Projects' },
-    { title: order?.title ?? '', uuid: order?.uuid ?? '' },
+    { title: organizationName, id: organizationId },
+    { title: 'Projects', id: ''},
+    { title: order?.title ?? '', id: order?.uuid ?? '' },
   ];
 
   const orderFiles = await getFolderFiles(order?.uuid ?? '').catch((err) => {

@@ -6,79 +6,57 @@ import {
   // getFilesWithoutFolder,
   getFoldersAndFiles, // getMemberFiles,
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/get/get-files';
-import { useTranslation } from 'react-i18next';
+import { Folder } from 'lucide-react';
 
+export type FolderItem = {
+  title: string;
+  id: string;
+  icon?: React.ComponentType<{ className?: string }>;
+};
 interface FileManagementHook {
   selectedOption: string;
   setSelectedOption: (option: string) => void;
   currentFolders: Array<{ title: string | null; uuid: string }>;
   currentFiles: Array<{ id: string; url: string; name: string; type: string }>;
-  path: Array<{ title: string; uuid?: string }>;
+  folderItems: Array<FolderItem>;
   showFolders: boolean;
   showSubFolders: boolean;
   loading: boolean;
-  handleFolderClick: (
-    folderUuid: string,
-    folderTitle: string,
-    isOrderFolder?: boolean,
-  ) => void;
+  handleFolderClick: (folderUuid: string, folderTitle: string) => void;
   handlePathClick: (index: number) => Promise<void>;
-  initializeWithPath: (path: Array<{ title: string; uuid?: string }>) => void;
-  currentFolderType: 'main' | 'orders' | 'sub';
+  currentFolderType: 'mainfolder' | 'subfolder';
   queryKey: string[];
 }
 
 export function useFileManagement(
   clientOrganizationId: string,
   agencyId: string,
-  setCurrentPath?: React.Dispatch<
-    React.SetStateAction<Array<{ title: string; uuid?: string }>>
-  >,
-  initialPath?: Array<{ title: string; uuid?: string }>,
+  setCurrentPath?: React.Dispatch<React.SetStateAction<Array<FolderItem>>>,
+  initialItems?: Array<FolderItem>,
 ): FileManagementHook {
-  const { t } = useTranslation('organizations');
   const [selectedOption, setSelectedOption] = useState('all');
-  const [path, setPath] = useState<Array<{ title: string; uuid?: string }>>(
-    initialPath ?? [],
+  const [folderItems, setFolderItems] = useState<Array<FolderItem>>(
+    initialItems?.map((i) => ({ ...i, icon: Folder })) ?? [],
   );
   const [showFolders, setShowFolders] = useState(false);
   const [showSubFolders, setShowSubFolders] = useState(false);
   // Determine initial folder type based on path
-  const lastPath = path[path.length - 1];
-  const initialFolderType = !lastPath
-    ? 'main'
-    : lastPath.title === t('organizations:files.orders')
-      ? 'orders'
-      : 'sub';
-  const [currentFolderType, setCurrentFolderType] = useState<
-    'main' | 'orders' | 'sub'
-  >(initialFolderType);
+  const lastFolderItem = folderItems[folderItems.length - 1];
 
-  // Determine query parameters based on current state
-  const type =
-    currentFolderType === 'main' || currentFolderType === 'orders'
+  const initialFolderType =
+    folderItems.length === 1 || folderItems.length === 0
       ? 'mainfolder'
       : 'subfolder';
-  const target =
-    selectedOption === 'client_uploaded'
-      ? 'client'
-      : selectedOption === 'team_uploaded'
-        ? 'team'
-        : currentFolderType === 'orders' ||
-            (path[0]?.title === t('organizations:files.orders') &&
-              currentFolderType === 'sub')
-          ? 'project'
-          : 'all';
+
+  const [currentFolderType, setCurrentFolderType] = useState<
+    'mainfolder' | 'subfolder'
+  >(initialFolderType);
 
   // Determine the correct folder ID based on current state
-  const folderId =
-    (target === 'all' && type === 'mainfolder') ||
-    (target === 'project' && type === 'mainfolder')
-      ? clientOrganizationId
-      : (lastPath?.uuid ?? clientOrganizationId);
+  const folderId = lastFolderItem?.id ?? '';
 
   // Fetch data using React Query
-  const queryKey = ['filesAndFolders', folderId, target, type];
+  const queryKey = ['filesAndFolders', folderId, currentFolderType];
   const {
     data,
     refetch,
@@ -90,88 +68,67 @@ export function useFileManagement(
         folderId,
         clientOrganizationId,
         agencyId,
-        target,
-        type,
+        currentFolderType,
       ),
-    enabled: Boolean(target && type && folderId),
+    enabled: Boolean(currentFolderType && folderId),
   });
-
+  console.log('isLoading', loading);
+  console.log('data', data);
   const folders = data?.folders ?? [];
   const files = data?.files ?? [];
   const parentFolderId = data?.parent_folder_id ?? '';
 
   // Handler functions
 
-  const handleFolderClick = (
-    folderUuid: string,
-    folderTitle: string,
-    isOrderFolder = false,
-    noUpdatePath?: boolean,
-  ) => {
-    if (path.length === 0) {
-      if (folderTitle === t('organizations:files.orders') || isOrderFolder) {
-        setCurrentFolderType('orders');
-        setShowFolders(true);
-        setShowSubFolders(false);
-      } else {
-        setCurrentFolderType('sub');
-        setShowFolders(false);
-        setShowSubFolders(true);
-      }
+  const handleFolderClick = (folderUuid: string, folderTitle: string) => {
+    if (folderItems.length === 0) {
+      setCurrentFolderType('mainfolder');
+      setShowFolders(true);
+      setShowSubFolders(false);
     } else {
-      setCurrentFolderType('sub');
+      setCurrentFolderType('subfolder');
       setShowSubFolders(true);
     }
-
-    if (!noUpdatePath) {
-      const newPathItem = { title: folderTitle, uuid: folderUuid };
-      setPath((prev) => [...prev, newPathItem]);
-      setCurrentPath?.((prev) => [...prev, newPathItem]);
-    }
+    // Add the new folder to the path
+    const newPathItem = { title: folderTitle, id: folderUuid, icon: Folder };
+    setFolderItems((prev) => [...prev, newPathItem]);
+    setCurrentPath?.((prev) => [...prev, newPathItem]);
   };
 
   const handlePathClick = async (index: number) => {
-
     if (index === -1) {
-      setPath([]);
+      setFolderItems([]);
       setCurrentPath?.([]);
       setShowFolders(false);
       setShowSubFolders(false);
-      setCurrentFolderType('main');
+      setCurrentFolderType('mainfolder');
       await refetch();
       return;
     }
 
-    const path1 = path.slice(0, index + 1);
-    const projectPath = path1.find((item) => item.title == 'Projects');
-    const newProjectPath = projectPath
-      ? { ...projectPath, uuid: parentFolderId }
-      : { title: 'Projects' };
-    const path2 = [
-      ...path1.filter((item) => item.title != 'Projects'),
-      newProjectPath,
-    ];
-    const newPath =
-      path1.length === 1 && path1?.[0]?.title === 'Projects' ? path2 : path1;
-    setPath(newPath);
+    // Check and update the uuid of the previous path item relative to the current path item
+    // with the parentFolderId of the current path item
+    const currentPathIndex = folderItems.findIndex(
+      (item) => item.id === folderId,
+    );
+    const previousPathItem = folderItems[currentPathIndex - 1];
+    let newPath = [...folderItems];
+    if (parentFolderId && previousPathItem) {
+      newPath[currentPathIndex - 1] = {
+        ...previousPathItem,
+        id: parentFolderId,
+      };
+    }
+    newPath = newPath.slice(0, index + 1);
+
+    setFolderItems(newPath);
     setCurrentPath?.(newPath);
 
-    if (newPath.length === 0) {
-      setCurrentFolderType('main');
-    } else if (newPath[0]?.title === t('organizations:files.orders')) {
-      setCurrentFolderType('orders');
+    // Check if the clicked path item is the root folder
+    if (newPath.length === 1) {
+      setCurrentFolderType('mainfolder');
     } else {
-      setCurrentFolderType('sub');
-    }
-  };
-
-  const initializeWithPath = (
-    pathToInitialize: Array<{ title: string; uuid?: string }>,
-  ) => {
-    setPath(pathToInitialize);
-    const lastFolder = pathToInitialize[pathToInitialize.length - 1];
-    if (lastFolder) {
-      handleFolderClick(lastFolder.uuid ?? '', lastFolder.title, true, true);
+      setCurrentFolderType('subfolder');
     }
   };
 
@@ -180,13 +137,12 @@ export function useFileManagement(
     setSelectedOption,
     currentFolders: folders,
     currentFiles: files,
-    path,
+    folderItems,
     showFolders,
     showSubFolders,
     loading,
     handleFolderClick,
     handlePathClick,
-    initializeWithPath,
     currentFolderType,
     queryKey,
   };

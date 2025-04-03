@@ -39,7 +39,7 @@ type OrderTabsProps = {
     | undefined;
   currentPath: {
     title: string;
-    uuid?: string;
+    id: string;
   }[];
   userRole: string;
   orderId: string;

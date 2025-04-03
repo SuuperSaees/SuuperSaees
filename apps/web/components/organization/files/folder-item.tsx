@@ -14,12 +14,10 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
+import { FolderItem as FolderItemType } from './hooks/use-folder-manager';
 
 interface FolderItemProps {
-  folder: {
-    title: string;
-    id: string;
-  };
+  folder: FolderItemType;
   onClick: () => void;
   isOrderFolder?: boolean;
   queryKey: string[];
