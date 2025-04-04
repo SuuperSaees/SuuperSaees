@@ -42,6 +42,7 @@ export default function FileSection({
     handleFolderClick,
     handlePathClick,
     queryKey,
+    currentFolderId
   } = useFileManagement(
     clientOrganizationId,
     agencyId,
@@ -110,6 +111,7 @@ export default function FileSection({
             <OptionFiles
               clientOrganizationId={clientOrganizationId}
               currentFolders={folderItems}
+              currentFolderId={currentFolderId}
               queryKey={queryKey}
               userId={userWorkspace.id ?? ''}
               agencyId={agencyId}

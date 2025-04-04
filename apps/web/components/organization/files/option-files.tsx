@@ -11,7 +11,6 @@ import {
 } from 'node_modules/@kit/team-accounts/src/server/actions/files/create/create-file';
 import { downloadFiles } from 'node_modules/@kit/team-accounts/src/server/actions/files/download/download-files';
 import { createFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/create/create-folder';
-import { CheckIfItIsAnOrderFolder } from 'node_modules/@kit/team-accounts/src/server/actions/folders/get/get-folders';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -32,27 +31,31 @@ import {
 } from '@kit/ui/dropdown-menu';
 
 import { generateUUID } from '~/utils/generate-uuid';
-
+import { FolderItem } from './hooks/use-folder-manager';
+import { Folder } from '~/lib/folder.types';
+import { Spinner } from '@kit/ui/spinner';
 export function OptionFiles({
   clientOrganizationId,
   agencyId,
   userId,
-  currentPath,
+  currentFolders,
   queryKey,
+  currentFolderId,
 }: {
   clientOrganizationId: string;
   agencyId: string;
   userId: string;
-  currentPath: Array<{ title: string; uuid?: string }>;
+  currentFolders: Array<FolderItem>;
   queryKey: string[];
+  currentFolderId: string;
 }) {
   const { t } = useTranslation('organizations');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
   const showDropdown = !(
-    currentPath.length > 0 &&
-    (!currentPath[0]?.uuid || currentPath[0]?.uuid === '')
+    currentFolders.length > 0 &&
+    (!currentFolders[0]?.id || currentFolders[0]?.id === '')
   );
 
   const sanitizeFileName = (fileName: string) => {
@@ -61,42 +64,15 @@ export function OptionFiles({
 
   const queryClient = useQueryClient();
 
-  const insertFolder = useMutation({
-    mutationFn: ({
-      folderName,
-      clientOrganizationId,
-    }: {
-      folderName: string;
-      clientOrganizationId: string;
-    }) => createFolder(folderName, clientOrganizationId),
-
-    onSuccess: async () => {
-      toast.success(t('folders.new.success', { folderName }));
-      await queryClient.invalidateQueries({
-        queryKey: queryKey,
-      });
-    },
-    onError: () => {
-      toast.error(t('folders.new.error'));
-    },
-  });
 
   const insertSubFolder = useMutation({
-    mutationFn: ({
-      folderName,
-      clientOrganizationId,
-      isSubfolder,
-      currentPath,
-    }: {
-      folderName: string;
-      clientOrganizationId: string;
-      isSubfolder: boolean;
-      currentPath: Array<{ title: string; uuid?: string }>;
-    }) =>
-      createFolder(folderName, clientOrganizationId, isSubfolder, currentPath),
+    mutationFn: ({parentFolderId, folder}: {parentFolderId: string, folder: Folder.Insert}) => createFolder({
+      ...folder,
+      parent_folder_id: parentFolderId,
+    }),
 
     onSuccess: async () => {
-      const lastFolder = currentPath[currentPath.length - 1];
+      const lastFolder = currentFolders[currentFolders.length - 1];
       toast.success(
         t('folders.new.successSubfolder', {
           folderName,
@@ -118,14 +94,13 @@ export function OptionFiles({
     mutationFn: ({
       files,
       clientOrganizationId,
-      currentPath,
+      agencyId,
     }: {
       files: Array<{ name: string; size: number; type: string; url: string, user_id: string }>;
       clientOrganizationId: string;
-      currentPath: Array<{ title: string; uuid?: string }>;
+      agencyId: string;
     }) => {
-      const lastFolderPathId = currentPath[currentPath.length - 1]?.uuid ?? '';
-      return insertFilesInFolder(lastFolderPathId, files, clientOrganizationId, agencyId)
+      return insertFilesInFolder(currentFolderId, files, clientOrganizationId, agencyId)
     },
 
     onSuccess: async () => {
@@ -183,7 +158,7 @@ export function OptionFiles({
           },
         ],
         clientOrganizationId,
-        currentPath,
+        agencyId,
       });
 
       if (!fileData) {
@@ -208,31 +183,20 @@ export function OptionFiles({
     }
 
     try {
-      if (currentPath.length > 0) {
-        const lastFolder = currentPath[currentPath.length - 1];
-        const isOrderFolder = await CheckIfItIsAnOrderFolder(
-          lastFolder!.uuid! ?? '',
-        );
+      console.log('currentFolders', currentFolders);
+      if (currentFolders.length > 0) {
+    
 
-        if (isOrderFolder) {
-          toast.error(t('folders.new.cannotCreateInOrderFolder'));
-          setFolderName('');
-          setDialogOpen(false);
-          return;
-        }
 
         await insertSubFolder.mutateAsync({
-          folderName,
-          clientOrganizationId,
-          isSubfolder: true,
-          currentPath,
+          parentFolderId: currentFolderId,
+          folder: {
+            name: folderName,
+            client_organization_id: clientOrganizationId,
+            agency_id: agencyId,
+          },
         });
-      } else {
-        await insertFolder.mutateAsync({
-          folderName,
-          clientOrganizationId,
-        });
-      }
+      } 
 
       setDialogOpen(false);
       setFolderName('');
@@ -263,10 +227,10 @@ export function OptionFiles({
   };
 
   const handleDownloadFiles = async (
-    currentPath: Array<{ title: string; uuid?: string }>,
+    currentFolders: Array<FolderItem>,
   ) => {
     try {
-      const files = await downloadFiles(currentPath);
+      const files = await downloadFiles(currentFolders);
       for (const file of files!) {
         await downloadFile(file.url);
       }
@@ -281,7 +245,7 @@ export function OptionFiles({
       <Button variant="ghost">
         <div
           className="flex items-center"
-          onClick={() => handleDownloadFiles(currentPath)}
+          onClick={() => handleDownloadFiles(currentFolders)}
         >
           <Download className="mr-[4px] h-[20px] w-[20px]" />
           {t('files.download_files')}
@@ -301,7 +265,7 @@ export function OptionFiles({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56">
               <DropdownMenuGroup>
-                {currentPath.length > 0 && (
+                {currentFolders.length > 0 && (
                   <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={triggerFileInput}
@@ -344,8 +308,13 @@ export function OptionFiles({
                 <Button variant="ghost" onClick={() => setDialogOpen(false)}>
                   {t('folders.new.cancel')}
                 </Button>
-                <Button onClick={handleCreateFolder}>
+                <Button onClick={handleCreateFolder} disabled={insertSubFolder.isPending}>
                   {t('folders.new.accept')}
+                  {
+                    insertSubFolder.isPending && (
+                      <Spinner className="ml-2 h-4 w-4" />
+                    )
+                  }
                 </Button>
               </DialogFooter>
             </DialogContent>

@@ -26,6 +26,7 @@ interface FileManagementHook {
   handlePathClick: (index: number) => Promise<void>;
   currentFolderType: 'mainfolder' | 'subfolder';
   queryKey: string[];
+  currentFolderId: string;
 }
 
 export function useFileManagement(
@@ -72,12 +73,11 @@ export function useFileManagement(
       ),
     enabled: Boolean(currentFolderType && folderId),
   });
-  console.log('isLoading', loading);
-  console.log('data', data);
+
   const folders = data?.folders ?? [];
   const files = data?.files ?? [];
   const parentFolderId = data?.parent_folder_id ?? '';
-
+  const currentFolderId = folders?.[0]?.parent_folder_id ?? lastFolderItem?.id ?? '';
   // Handler functions
 
   const handleFolderClick = (folderUuid: string, folderTitle: string) => {
@@ -132,6 +132,7 @@ export function useFileManagement(
     }
   };
 
+
   return {
     selectedOption,
     setSelectedOption,
@@ -145,5 +146,6 @@ export function useFileManagement(
     handlePathClick,
     currentFolderType,
     queryKey,
+    currentFolderId
   };
 }
