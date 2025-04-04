@@ -25,19 +25,20 @@ async function StoragePage() {
   const organization = await getOrganization();
   const organizationOwnerId = await getPrimaryOwnerId();
   const userRole = await getUserRole().catch((err) => {
-    console.error(`Error client, getting user role: ${err}`)
-    return ''
+    console.error(`Error client, getting user role: ${err}`);
+    return '';
   });
   const organizationOwner = await getUserById(organizationOwnerId ?? '');
   const newOrganization = {
     ...organization,
     owner: organizationOwner ?? null, // Add owner explicitly
   };
-  const agency = await getAgencyForClient(newOrganization.id ?? '').catch((err) => {
-    console.error(`Error getting agency for client: ${err}`)
-    return null
-  });
-
+  const agency = await getAgencyForClient(newOrganization.id ?? '').catch(
+    (err) => {
+      console.error(`Error getting agency for client: ${err}`);
+      return null;
+    },
+  );
 
   return (
     <div className="space-y-10 p-8">
@@ -48,7 +49,11 @@ async function StoragePage() {
         owner={newOrganization.owner}
         currentUserRole={userRole}
       />
-      <FilesView clientOrganizationId={newOrganization.id ?? ''} agencyId={agency?.id ?? ''}/>
+      <FilesView
+        clientOrganizationId={newOrganization.id ?? ''}
+        agencyId={agency?.id ?? ''}
+        organizationName={organization.name ?? agency?.name ?? ''}
+      />
     </div>
   );
 }
