@@ -21,7 +21,6 @@ export interface FileUploadState {
   file: File;
   /** The id of the upload */
   id: string;
-
 }
 
 /**
@@ -33,12 +32,16 @@ export interface FileUploadOptions {
   bucketName: string;
   /** The path within the bucket where the file will be stored */
   path: string;
+  /** The name of the file to be stored */
+  filePath?: string;
   /** Optional chunk size for resumable uploads (in bytes) */
   chunkSize?: number;
   /** Optional cache control header value */
   cacheControl?: string;
   /** Optional callback for upload progress updates */
-  onProgress?: (progress: number) => void;
+  onProgress?: (progress: number, updatedUpload: FileUploadState) => void;
+  /** Optional callback for upload error */
+  onError?: (error: Error, errorUpload: FileUploadState) => void;
 }
 
 /**
@@ -101,7 +104,7 @@ export function useFileUpload() {
       },
     }));
 
-    const filePath = `${options.path}/${fileId}`;
+    const filePath = `${options.path}/${options.filePath ?? fileId}`;
     const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${options.bucketName}/${filePath}`;
     return new Promise((resolve, reject) => {
       // Configure TUS upload
@@ -122,16 +125,21 @@ export function useFileUpload() {
         },
         chunkSize: options.chunkSize ?? 6 * 1024 * 1024, // 6MB default
         onError: (error) => {
-          setUploads((prev) => ({
-            ...prev,
-            [fileId]: {
+          setUploads((prev) => {
+            const errorUpload = {
+              ...prev[fileId],
               progress: prev[fileId]?.progress ?? 0,
-              status: 'error',
+              status: 'error' as const,
               url: prev[fileId]?.url ?? null,
               file: prev[fileId]?.file ?? file,
               id: prev[fileId]?.id ?? fileId,
-            },
-          }));
+            }
+            options.onError?.(error, errorUpload);
+            return {
+              ...prev,
+              [fileId]: errorUpload,
+            };
+          });
           reject(error);
         },
         onProgress: (bytesUploaded, bytesTotal) => {
@@ -139,19 +147,22 @@ export function useFileUpload() {
             ((bytesUploaded / bytesTotal) * 100).toFixed(2),
           );
 
-          setUploads((prev) => ({
-            ...prev,
-            [fileId]: {
+          setUploads((prev) => {
+            const updatedUpload: FileUploadState = {
               ...prev[fileId],
               progress,
               status: progress === 100 ? 'success' : 'uploading',
               url: progress === 100 ? fileUrl : null,
               file: prev[fileId]?.file ?? file,
               id: prev[fileId]?.id ?? fileId,
-            },
-          }));
+            };
+            options.onProgress?.(progress, updatedUpload);
 
-          options.onProgress?.(progress);
+            return {
+              ...prev,
+              [fileId]: updatedUpload,
+            };
+          });
         },
         onSuccess: () => {
           resolve(filePath);

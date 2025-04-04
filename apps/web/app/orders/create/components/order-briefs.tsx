@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { InfoIcon } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
@@ -18,12 +18,14 @@ import { DatePicker } from '~/components/date-seletc';
 import { SingleChoiceDropdown } from '~/components/dropdown';
 import { MultipleChoice } from '~/components/multiple-choice';
 import RadioOptions from '~/components/single-choice';
-import UploadFileComponent from '~/components/ui/files-input';
+import { FileUploadState } from '~/hooks/use-file-upload';
 import { Brief } from '~/lib/brief.types';
+import { File } from '~/lib/file.types';
 import { FormField as FormFieldType } from '~/lib/form-field.types';
 import { containsVideo } from '~/utils/contains-video';
 import { isYouTubeUrl } from '~/utils/upload-video';
 
+import FilesUploader from '../../../components/file-preview/files-uploader';
 import { getYouTubeEmbedUrl } from '../utils/video-format';
 import VideoDescriptionRenderer from './video-description-renderer';
 
@@ -35,6 +37,7 @@ type Option = {
 export const OrderBriefs = ({
   brief,
   form,
+  orderId,
 }: {
   brief: Brief.Relationships.Services.Response | null;
   form: UseFormReturn<
@@ -45,7 +48,7 @@ export const OrderBriefs = ({
       briefCompletion: {
         brief_responses?: Record<string, string | undefined>;
         uuid: string;
-        fileIds: string[];
+        files: File.Insert[];
         description?: string | undefined;
         title?: string | undefined;
         order_followers?: string[] | undefined;
@@ -66,21 +69,29 @@ export const OrderBriefs = ({
     'video',
   ]);
 
-  const [_uploadedFileIds, setUploadedFileIds] = useState<string[]>([]);
-
-  const handleFileIdsChange = (fileIds: string[], fileUrls?: string[]) => {
-    setUploadedFileIds(fileIds);
-    const responseValue = fileUrls?.join(',') ?? '';
-    return {responseValue, fileIds};
+  const handleFilesChange = (uploads: FileUploadState[]) => {
+    const responseValue =
+      uploads.map((upload) => upload.url)
+        .join(',') ?? '';
+    return {
+      responseValue,
+      files: uploads.map((upload) => ({
+        name: upload.file.name ?? '',
+        size: upload.file.size ?? 0,
+        type: upload.file.type ?? '',
+        url: upload.url ?? '',
+        user_id: '',
+      })),
+    };
   };
 
   const setFormResponse = (
     currentFieldIndex: number,
     formField: FormFieldType.Type,
     responseValue: string,
-    uploadedFileIds: string[],
-  ) =>{
-    form.setValue('briefCompletion.fileIds', uploadedFileIds);
+    uploadedFiles: File.Insert[],
+  ) => {
+    form.setValue('briefCompletion.files', uploadedFiles);
   };
 
   const renderSpecialFormField = (formField: FormFieldType.Type) => {
@@ -143,7 +154,6 @@ export const OrderBriefs = ({
 
         return (
           <div key={brief?.id} className="flex flex-col gap-4">
-            
             <div className="flex flex-col gap-8">
               {brief?.form_fields
                 ?.sort(
@@ -209,13 +219,18 @@ export const OrderBriefs = ({
                                   (formField.field?.options as Option[]) ?? []
                                 }
                                 question={formField.field?.label ?? ''}
-                                selectedOptions={
-                                  (form.getValues(
+                                selectedOptions={(
+                                  form.getValues(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
-                                  ) ?? '').split(',').map(o => o.trim()).filter(Boolean)
-                                }
+                                  ) ?? ''
+                                )
+                                  .split(',')
+                                  .map((o) => o.trim())
+                                  .filter(Boolean)}
                                 onChange={(value) => {
-                                  const joinedValue = Array.isArray(value) ? value.join(', ') : value;
+                                  const joinedValue = Array.isArray(value)
+                                    ? value.join(', ')
+                                    : value;
                                   form.setValue(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
                                     joinedValue as never,
@@ -253,24 +268,27 @@ export const OrderBriefs = ({
                                     responseValue as never,
                                   );
                                 }}
-                                style={{whiteSpace: 'pre-wrap'}}
+                                style={{ whiteSpace: 'pre-wrap' }}
                               >
                                 {field.value}
                               </Textarea>
                             ) : formField.field?.type === 'file' ? (
-                              <UploadFileComponent
+                              <FilesUploader
                                 bucketName="orders"
-                                uuid={crypto.randomUUID()}
-                                onFileIdsChange={(fileIds, fileUrls) => {
-                                  const { responseValue, fileIds: newFileIds} =
-                                    handleFileIdsChange(fileIds, fileUrls);
-                                    setFormResponse(
+                                path={`uploads/${orderId}`}
+                                onFilesSelected={(fileUploads) => {
+                                  const { responseValue, files: newFiles } =
+                                    handleFilesChange(fileUploads);
+                                  setFormResponse(
                                     currentFieldIndex,
                                     formField.field as FormFieldType.Type,
                                     responseValue as never,
-                                    newFileIds
-                                    );
-                                    form.setValue(`${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`, responseValue as never);
+                                    newFiles,
+                                  );
+                                  form.setValue(
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    responseValue as never,
+                                  );
                                 }}
                               />
                             ) : formField.field?.type === 'date' ? (

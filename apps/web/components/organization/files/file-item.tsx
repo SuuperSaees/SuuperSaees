@@ -18,7 +18,7 @@ import {
 
 import ImageWithOptions from '~/orders/[id]/hoc/with-image-options';
 import { FileActionButtons } from './file-action-buttons';
-
+import { FolderItem } from './hooks/use-folder-manager';
 
 interface File {
   id: string | undefined;
@@ -28,7 +28,7 @@ interface File {
 }
 interface FileItemProps {
   file: File;
-  currentPath: Array<{ title: string; uuid?: string }>;
+  currentFolders: Array<FolderItem>;
 }
 
 
@@ -46,11 +46,11 @@ const FileContentWrapper: React.FC<{ url: string; children: React.ReactNode }> =
   </>
 );
 
-const FileItem = ({ file, currentPath }: FileItemProps) => {
+const FileItem = ({ file, currentFolders }: FileItemProps) => {
   const { t } = useTranslation('organizations');
   const showOptions =
-    currentPath.length > 0 &&
-    (!currentPath[0]?.uuid || currentPath[0]?.uuid === '');
+    currentFolders.length > 0 &&
+    (!currentFolders[0]?.id || currentFolders[0]?.id === '');
 
   const queryClient = useQueryClient();
 

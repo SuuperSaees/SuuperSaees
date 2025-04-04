@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { uploadFileToBucket } from '~/utils/upload-video';
 import { BriefCreationForm } from '../components/brief-creation-form';
 import { ComponentProps } from '../types/brief.types';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export const useVideoUpload = (
   index: number,
@@ -16,14 +17,14 @@ export const useVideoUpload = (
   const [selectedFileName, setSelectedFileName] = useState<string>('');
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const {workspace: userWorkspace} = useUserWorkspace();
   const handleFileUpload = async (file: File) => {
     try {
       setSelectedFileName(file.name);
       setIsUploading(true);
 
       const bucketName = 'create_brief';
-      const uploadedUrl = await uploadFileToBucket(file, bucketName, t);
+      const uploadedUrl = await uploadFileToBucket(file, bucketName,userWorkspace.id ?? '', t);
 
       setVideoUrl(uploadedUrl);
       handleQuestionChange(index, 'label', uploadedUrl);

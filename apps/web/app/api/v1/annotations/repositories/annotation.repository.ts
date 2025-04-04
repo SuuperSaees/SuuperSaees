@@ -129,63 +129,36 @@ export class AnnotationRepository implements IAnnotationRepository {
     return createdAnnotation as Annotations.Type;
   }
 
-  async getAnnotationsByFile(fileId: string): Promise<{
+  async getAnnotationsByFile(fileId: string, otherFileIds?: string[]): Promise<{
     currentFile: Annotations.Type[];
     otherFiles: Annotations.Type[];
   }> {
-    const { data: orderFile, error: orderFileError } = await this.client
-      .from('order_files')
-      .select('order_id')
-      .eq('file_id', fileId)
-      .single();
+    const allFileIds = [fileId, ...(otherFileIds ?? [])];
 
-    if (orderFileError ?? !orderFile?.order_id) {
-      throw new Error(
-        `Error fetching order_id for file_id ${fileId}: ${
-          orderFileError?.message ?? 'Order not found'
-        }`,
-      );
-    }
+    const query = this.client
+    .from('annotations')
+    .select(
+      `
+      id,
+      file_id,
+      user_id,
+      position_x,
+      position_y,
+      status,
+      created_at,
+      updated_at,
+      deleted_on,
+      page_number,
+      number,
+      message_id,
+      messages(content, created_at),
+      accounts(name, settings:user_settings(picture_url))
+    `,
+    )
+    .in('file_id', allFileIds)
+    .is('deleted_on', null);
 
-    const orderId = orderFile.order_id;
-
-    const { data: relatedFiles, error: relatedFilesError } = await this.client
-      .from('order_files')
-      .select('file_id')
-      .eq('order_id', orderId);
-
-    if (relatedFilesError ?? !relatedFiles) {
-      throw new Error(
-        `Error fetching files for order_id ${orderId}: ${
-          relatedFilesError?.message || 'No files found'
-        }`,
-      );
-    }
-
-    const relatedFileIds = relatedFiles.map((file) => file.file_id);
-
-    const { data: annotations, error: annotationsError } = await this.client
-      .from('annotations')
-      .select(
-        `
-        id,
-        file_id,
-        user_id,
-        position_x,
-        position_y,
-        status,
-        created_at,
-        updated_at,
-        deleted_on,
-        page_number,
-        number,
-        message_id,
-        messages(content, created_at),
-        accounts(name, settings:user_settings(picture_url))
-      `,
-      )
-      .in('file_id', relatedFileIds)
-      .is('deleted_on', null);
+    const { data: annotations, error: annotationsError } = await query;
 
     if (annotationsError) {
       throw new Error(

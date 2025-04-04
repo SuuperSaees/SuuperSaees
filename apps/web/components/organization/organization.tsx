@@ -29,6 +29,7 @@ function OrganizationSection({
         clientOrganizationId={clientOrganizationId}
         currentUserRole={currentUserRole}
         agencyId={agencyId}
+        clientOrganizationName={name}
       />
     </div>
   );
