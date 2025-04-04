@@ -15,7 +15,7 @@ import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/
 import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { handleApiAuth } from './handlers/api-auth-handler';
-import { handleCors } from './handlers/cors-handler';
+// import { handleCors } from './handlers/cors-handler';
 import { Database } from './lib/database.types';
 
 export const config = {
@@ -25,23 +25,23 @@ export const config = {
   ],
 };
 
-function getCachedDomain(request: NextRequest, userId: string): string | null {
-  const domainCookie = request.cookies.get(`domain_${userId}`);
-  return domainCookie ? domainCookie.value : null;
-}
+// function getCachedDomain(request: NextRequest, userId: string): string | null {
+//   const domainCookie = request.cookies.get(`domain_${userId}`);
+//   return domainCookie ? domainCookie.value : null;
+// }
 
-function setCachedDomain(
-  response: NextResponse,
-  userId: string,
-  domain: string,
-  isProd: boolean,
-) {
-  // Cache the domain for 1 hour (you can adjust this time as needed)
-  response.cookies.set(`domain_${userId}`, domain, {
-    maxAge: 60 * 60,
-    secure: isProd,
-  });
-}
+// function setCachedDomain(
+//   response: NextResponse,
+//   userId: string,
+//   domain: string,
+//   isProd: boolean,
+// ) {
+//   // Cache the domain for 1 hour (you can adjust this time as needed)
+//   response.cookies.set(`domain_${userId}`, domain, {
+//     maxAge: 60 * 60,
+//     secure: isProd,
+//   });
+// }
 
 function getCachedLanguage(request: NextRequest): string | null {
   const langCookie = request.cookies.get('lang');
@@ -78,72 +78,72 @@ export async function middleware(request: NextRequest) {
   // const domainCheckResult = await handleDomainCheck(request, response);
   // if (domainCheckResult) return domainCheckResult;
 
-  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-  const ignorePath = new Set([
-    'auth',
-    '/auth/confirm',
-    '/auth/onboarding',
-    'set-password',
-    'add-organization',
-    'api',
-    'join',
-    'join?invite_token=',
-    '/join?invite_token=',
-    '/join',
-    'home',
-    'checkout',
-    'orders',
-    'buy-success',
-    '/__nextjs_original-stack-frame',
-  ]);
-  const shouldIgnorePath = (pathname: string) =>
-    Array.from(ignorePath).some((path) => pathname.includes(path));
+  // const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+  // const ignorePath = new Set([
+  //   'auth',
+  //   '/auth/confirm',
+  //   '/auth/onboarding',
+  //   'set-password',
+  //   'add-organization',
+  //   'api',
+  //   'join',
+  //   'join?invite_token=',
+  //   '/join?invite_token=',
+  //   '/join',
+  //   'home',
+  //   'checkout',
+  //   'orders',
+  //   'buy-success',
+  //   '/__nextjs_original-stack-frame',
+  // ]);
+  // const shouldIgnorePath = (pathname: string) =>
+  //   Array.from(ignorePath).some((path) => pathname.includes(path));
 
-  if (
-    IS_PROD &&
-    !shouldIgnorePath(request.nextUrl.pathname) &&
-    new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US
-  ) {
-    try {
-      const supabase = createMiddlewareClient(request, response);
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      const userId = user?.id ?? '';
-      // Try to get the domain from cache (cookie)
-      let domain = getCachedDomain(request, userId) ?? '';
+  // if (
+  //   IS_PROD &&
+  //   !shouldIgnorePath(request.nextUrl.pathname) &&
+  //   new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US
+  // ) {
+  //   try {
+  //     const supabase = createMiddlewareClient(request, response);
+  //     const {
+  //       data: { user },
+  //     } = await supabase.auth.getUser();
+  //     const userId = user?.id ?? '';
+  //     // Try to get the domain from cache (cookie)
+  //     let domain = getCachedDomain(request, userId) ?? '';
 
-      if (!domain) {
-        // If not in cache, fetch the domain
-        try {
-          const { domain: domainByUserId } = await getDomainByUserId(
-            userId,
-            false,
-          );
-          domain = domainByUserId;
-        } catch (error) {
-          console.error('Error in middleware', error);
-        }
-        // Cache the domain in a cookie
-        setCachedDomain(response, userId, domain, IS_PROD);
-      }
+  //     if (!domain) {
+  //       // If not in cache, fetch the domain
+  //       try {
+  //         const { domain: domainByUserId } = await getDomainByUserId(
+  //           userId,
+  //           false,
+  //         );
+  //         domain = domainByUserId;
+  //       } catch (error) {
+  //         console.error('Error in middleware', error);
+  //       }
+  //       // Cache the domain in a cookie
+  //       setCachedDomain(response, userId, domain, IS_PROD);
+  //     }
 
-      const corsResult = handleCors(request, response, domain);
-      if (corsResult) return corsResult;
-      const host = new URL(request.nextUrl.origin).host;
-      if (host !== domain) {
-        throw new Error('Unauthorized: Invalid Origin');
-      }
-    } catch (error) {
-      console.error('Error in middleware', error);
-      const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
-      const supabase = createMiddlewareClient(request, response);
-      await supabase.auth.signOut();
-      return NextResponse.redirect(
-        new URL(landingPage, request.nextUrl.origin).href,
-      );
-    }
-  }
+  //     const corsResult = handleCors(request, response, domain);
+  //     if (corsResult) return corsResult;
+  //     const host = new URL(request.nextUrl.origin).host;
+  //     if (host !== domain) {
+  //       throw new Error('Unauthorized: Invalid Origin');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in middleware', error);
+  //     const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
+  //     const supabase = createMiddlewareClient(request, response);
+  //     await supabase.auth.signOut();
+  //     return NextResponse.redirect(
+  //       new URL(landingPage, request.nextUrl.origin).href,
+  //     );
+  //   }
+  // }
 
   response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);

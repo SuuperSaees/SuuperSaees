@@ -3004,6 +3004,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_organization: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       get_unread_message_counts: {
         Args: {
           p_user_id: string

@@ -1020,7 +1020,13 @@ execute procedure kit.set_slug_from_account_name ();
 
 -- 15. add_current_user_to_new_account
 drop function if exists kit.add_current_user_to_new_account() cascade;
+drop function if exists public.get_organization() cascade;
 drop trigger if exists add_current_user_to_new_account on public.accounts;
+
+alter table "auth"."sessions" add column "organization_id" uuid;
+
+alter table "auth"."sessions" add constraint "sessions_organization_id_fkey" foreign key ("organization_id") references "public"."organizations"("id") on delete cascade;
+
 
 create
 or replace function kit.add_current_user_to_new_organization () returns trigger language plpgsql security definer
@@ -1037,6 +1043,9 @@ begin
             auth.uid(),
             public.get_upper_system_role());
 
+        update auth.sessions
+        set organization_id = new.id
+        where user_id = auth.uid() and id = (auth.jwt() ->> 'session_id')::uuid;
     end if;
 
     return NEW;
@@ -1049,6 +1058,59 @@ $$;
 create trigger "add_current_user_to_new_organization"
 after insert on public.organizations for each row
 execute function kit.add_current_user_to_new_organization ();
+
+create or replace function public.get_organization()
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_session_id uuid;
+    v_org_id uuid;
+    v_result jsonb;
+begin
+    -- Get the session_id from the current JWT
+    v_session_id := (auth.jwt() ->> 'session_id')::uuid;
+    
+    -- Get the organization_id from the current session
+    select organization_id into v_org_id 
+    from auth.sessions 
+    where user_id = auth.uid() and id = v_session_id;
+    
+    -- If there is no organization associated, return null
+    if v_org_id is null then
+        return null;
+    end if;
+
+    -- Query to get all the required data
+    select 
+        jsonb_build_object(
+            'session_id', v_session_id::text,
+            'id', o.id::text,
+            'slug', o.slug,
+            'name', o.name,
+            'role', am.account_role,
+            'domain', coalesce(s.domain, '')
+        ) into v_result
+    from 
+        public.organizations o
+    left join 
+        public.accounts_memberships am on am.organization_id = o.id and am.user_id = auth.uid()
+    left join 
+        public.organization_subdomains os on os.organization_id = o.id
+    left join 
+        public.subdomains s on s.id = os.subdomain_id
+    where 
+        o.id = v_org_id
+    limit 1;
+    
+    return v_result;
+end;
+$$;
+
+grant execute on function public.get_organization() to authenticated, service_role;
+
 
 -- 17. create_order
 

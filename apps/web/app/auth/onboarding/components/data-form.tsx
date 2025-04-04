@@ -90,7 +90,8 @@ export function UserDataForm(
         try {
           const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? '';
-          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+          // const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: true, userId });
           const subscriptionResult = await createSubscription();
           if ('error' in subscriptionResult) {
             setError(t('userData.errors.subscriptionFailed'));
