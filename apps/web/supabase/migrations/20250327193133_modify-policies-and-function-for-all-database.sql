@@ -1059,57 +1059,67 @@ create trigger "add_current_user_to_new_organization"
 after insert on public.organizations for each row
 execute function kit.add_current_user_to_new_organization ();
 
-create or replace function public.get_organization()
-returns jsonb
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
+-- Primero, creamos un tipo compuesto
+CREATE TYPE public.organization_info AS (
+    session_id text,
+    id text,
+    slug varchar,
+    name varchar,
+    role varchar,
+    domain varchar
+);
+
+-- Luego modificamos la función para que retorne este tipo
+CREATE OR REPLACE FUNCTION public.get_organization()
+RETURNS public.organization_info
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
     v_session_id uuid;
     v_org_id uuid;
-    v_result jsonb;
-begin
+    result public.organization_info;
+BEGIN
     -- Get the session_id from the current JWT
     v_session_id := (auth.jwt() ->> 'session_id')::uuid;
     
     -- Get the organization_id from the current session
-    select organization_id into v_org_id 
-    from auth.sessions 
-    where user_id = auth.uid() and id = v_session_id;
+    SELECT organization_id INTO v_org_id 
+    FROM auth.sessions 
+    WHERE user_id = auth.uid() AND id = v_session_id;
     
     -- If there is no organization associated, return null
-    if v_org_id is null then
-        return null;
-    end if;
+    IF v_org_id IS NULL THEN
+        RETURN NULL;
+    END IF;
 
     -- Query to get all the required data
-    select 
-        jsonb_build_object(
-            'session_id', v_session_id::text,
-            'id', o.id::text,
-            'slug', o.slug,
-            'name', o.name,
-            'role', am.account_role,
-            'domain', coalesce(s.domain, '')
-        ) into v_result
-    from 
+    SELECT 
+        v_session_id::text,
+        o.id::text,
+        o.slug,
+        o.name,
+        am.account_role,
+        COALESCE(s.domain, '')
+    INTO result
+    FROM 
         public.organizations o
-    left join 
-        public.accounts_memberships am on am.organization_id = o.id and am.user_id = auth.uid()
-    left join 
-        public.organization_subdomains os on os.organization_id = o.id
-    left join 
-        public.subdomains s on s.id = os.subdomain_id
-    where 
+    LEFT JOIN 
+        public.accounts_memberships am ON am.organization_id = o.id AND am.user_id = auth.uid()
+    LEFT JOIN 
+        public.organization_subdomains os ON os.organization_id = o.id
+    LEFT JOIN 
+        public.subdomains s ON s.id = os.subdomain_id
+    WHERE 
         o.id = v_org_id
-    limit 1;
+    LIMIT 1;
     
-    return v_result;
-end;
+    RETURN result;
+END;
 $$;
 
-grant execute on function public.get_organization() to authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_organization() TO authenticated, service_role;
 
 
 -- 17. create_order

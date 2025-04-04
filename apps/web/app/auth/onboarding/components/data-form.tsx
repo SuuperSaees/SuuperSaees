@@ -16,7 +16,8 @@ import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/updat
 import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
 import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
-import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
+// import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
+import { useSupabase } from "@kit/supabase/hooks/use-supabase";
 import { Spinner } from "@kit/ui/spinner";
 
 export function UserDataForm(
@@ -26,6 +27,7 @@ export function UserDataForm(
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const client = useSupabase();
   const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL;
   const formSchema = z.object({
     portalUrl: userRole === 'agency_owner' 
@@ -56,7 +58,7 @@ export function UserDataForm(
         user_id: userId,
       });
 
-      const organizationData = await getOrganizationByUserId(userId);
+      const organizationData = (await client.rpc('get_organization')).data;
 
       if (userData) {
         try {
@@ -70,7 +72,7 @@ export function UserDataForm(
             await addUserToAirtable({
               name: userData?.userData?.name ?? '',
               email: userData?.accountData?.email ?? '',
-              organizationName: organizationData.name,
+              organizationName: organizationData?.name ?? '',
               phoneNumber: userData?.userData?.phone_number ?? '',
             });
           } 
@@ -91,7 +93,7 @@ export function UserDataForm(
           const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? '';
           // const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
-          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: true, userId });
+          const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
           const subscriptionResult = await createSubscription();
           if ('error' in subscriptionResult) {
             setError(t('userData.errors.subscriptionFailed'));

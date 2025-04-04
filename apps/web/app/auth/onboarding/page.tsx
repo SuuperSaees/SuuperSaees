@@ -7,7 +7,7 @@ import { decodeTokenData } from '~/team-accounts/src/server/actions/tokens/decod
 import { AppLogo } from '~/components/app-logo';
 import { Trans } from '@kit/ui/trans';
 import { getAccountOnbardingData } from '~/team-accounts/src/server/actions/accounts/get/get-account';
-import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+// import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -30,7 +30,7 @@ async function UserDataPage({
   if (userError) throw userError.message;
 
   const accountData = await getAccountOnbardingData(userData.user.id);
-  const userRole = await getUserRoleById(userData.user.id);
+  const role = (await supabase.rpc('get_organization')).data?.role;
 
   const sanitizedAccountData = accountData ? {
     ...accountData,
@@ -44,7 +44,7 @@ async function UserDataPage({
       redirect('/orders');
     }
   } else {
-    if( (userRole === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) ?? (userRole !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
+    if( (role === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) ?? (role !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
       redirect('/orders');
     }
   }
@@ -72,7 +72,7 @@ async function UserDataPage({
               <Trans i18nKey={'auth:signUpUserDataHeading2'} />
             </h2>
 
-            <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={userRole} />
+            <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={role ?? ''} />
           </div>
         </div>
         

@@ -3006,7 +3006,7 @@ export type Database = {
       }
       get_organization: {
         Args: Record<PropertyKey, never>
-        Returns: Json
+        Returns: Database["public"]["CompositeTypes"]["organization_info"]
       }
       get_unread_message_counts: {
         Args: {
@@ -3430,6 +3430,14 @@ export type Database = {
       invitation: {
         email: string | null
         role: string | null
+      }
+      organization_info: {
+        session_id: string | null
+        id: string | null
+        slug: string | null
+        name: string | null
+        role: string | null
+        domain: string | null
       }
     }
   }

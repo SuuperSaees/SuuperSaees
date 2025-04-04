@@ -1,13 +1,9 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
-
 import { Subscription } from '../../../../../../../../apps/web/lib/subscriptions.types';
-import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
+// import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
-
 
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
@@ -27,7 +23,7 @@ export const createSubscription = async (): Promise<{
 
     const email = user?.email as string;
 
-    let { domain: userBaseUrl } = await getDomainByUserId(user.id, true);
+    let userBaseUrl = `${(await client.rpc('get_organization')).data?.domain}`;
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
