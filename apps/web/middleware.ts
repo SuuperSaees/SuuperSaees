@@ -7,7 +7,6 @@ import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 import pathsConfig from '~/config/paths.config';
 import {
-  getDomainByUserId,
   getFullDomainBySubdomain,
 } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
@@ -443,7 +442,9 @@ function getPatterns() {
         const userId = user.id;
 
         // Step 2: Get the organization id fetching the domain/subdomain data
-        const { organizationId } = await getDomainByUserId(userId, true);
+        const client = createMiddlewareClient(req, res);
+        const { data: organizationData } = await client.rpc('get_organization');
+        const organizationId = organizationData?.id;
 
         // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
         const clientDeleted = await fetchDeletedClients(

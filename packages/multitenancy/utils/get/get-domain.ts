@@ -16,7 +16,7 @@ export async function getDomainByUserId(
   domain: string;
   organizationId: string | null;
   ownerEmail: string | null;
-  organization: null | Pick<Account.Type, 'name' | 'primary_owner_user_id'>;
+  organization: null | Pick<Account.Type, 'name'>;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -31,7 +31,7 @@ export async function getDomainByUserId(
     let ownerEmail: null | string = null;
     let organization: null | Pick<
       Account.Type,
-      'name' | 'primary_owner_user_id'
+      'name'
     > = null;
      const getOwnerEmail = async (id: string | undefined) => {
       if (!id) return null;

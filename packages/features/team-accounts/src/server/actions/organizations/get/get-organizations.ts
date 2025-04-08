@@ -113,7 +113,7 @@ export const getOrganizationSettingsByOrganizationId = async (
   const { data: organizationSettings, error: settingsError } = await client
     .from('organization_settings')
     .select('key, value')
-    .eq('account_id', organizationId)
+    .eq('organization_id', organizationId)
     .in('key', values);
 
   if (settingsError) {
@@ -125,43 +125,19 @@ export const getOrganizationSettingsByOrganizationId = async (
 
 export async function getOrganization(primaryOwnerId?: string): Promise<{
   id: string;
-  name: string;
-  primary_owner_user_id: string;
+  name: string | null;
+  owner_id: string | null;
   slug: string | null;
-  email: string | null;
   picture_url: string | null;
-  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    let userId = primaryOwnerId;
-    if (!userId) {
-      const { data: userData, error: userError } = await client.auth.getUser();
-      if (userError) throw userError;
-      userId = userData.user.id;
-    }
-
-    const { data: userAccountData, error: accountsError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
-      .single();
-
-    if (accountsError) {
-      console.error('Error fetching organization:', accountsError);
-      throw accountsError;
-    }
-
-    const organizationId = userAccountData?.organization_id;
-
-    if (!organizationId) {
-      console.error('Organization ID is null');
-      throw new Error('Organization ID is null');
-    }
+    const organizationData = (await client.rpc('get_organization')).data;
+    const organizationId = organizationData?.id ?? '';
 
     const { data: organizationsData, error: organizationError } = await client
-      .from('accounts')
-      .select('id, name, primary_owner_user_id, slug, email, picture_url, loom_app_id')
+      .from('organizations')
+      .select('id, name, owner_id, slug, picture_url')
       .eq('id', organizationId)
       .single();
 

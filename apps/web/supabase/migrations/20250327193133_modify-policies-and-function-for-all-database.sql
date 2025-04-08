@@ -1063,6 +1063,7 @@ execute function kit.add_current_user_to_new_organization ();
 CREATE TYPE public.organization_info AS (
     session_id text,
     id text,
+    owner_id text,
     slug varchar,
     name varchar,
     role varchar,
@@ -1098,6 +1099,7 @@ BEGIN
     SELECT 
         v_session_id::text,
         o.id::text,
+        o.owner_id::text,
         o.slug,
         o.name,
         am.account_role,
@@ -1120,6 +1122,72 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_organization() TO authenticated, service_role;
+
+create or replace function public.set_session(domain text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    v_session_id uuid;
+    v_subdomain_id uuid;
+    v_organization_id uuid;
+begin
+    -- Get the session_id from the current JWT
+    v_session_id := (auth.jwt() ->> 'session_id')::uuid;
+    
+    -- Verify that the domain is not empty
+    if domain is null or domain = '' then
+        raise exception 'Domain cannot be empty';
+    end if;
+    
+    -- Find the subdomain by the provided domain
+    select id into v_subdomain_id
+    from public.subdomains
+    where domain = set_session.domain
+    limit 1;
+    
+    -- Verify if the subdomain was found
+    if v_subdomain_id is null then
+        raise exception 'No subdomain found with domain: %', domain;
+    end if;
+    
+    -- Find the organization_id associated with the subdomain
+    select organization_id into v_organization_id
+    from public.organization_subdomains
+    where subdomain_id = v_subdomain_id
+    limit 1;
+    
+    -- Verify if the organization was found
+    if v_organization_id is null then
+        raise exception 'No organization found associated with domain: %', domain;
+    end if;
+    
+    -- Verify if the user belongs to this organization
+    if not exists (
+        select 1
+        from public.accounts_memberships
+        where user_id = auth.uid()
+        and organization_id = v_organization_id
+    ) then
+        raise exception 'User does not belong to the organization associated with domain: %', domain;
+    end if;
+    
+    -- Update the current session with the organization_id
+    update auth.sessions
+    set organization_id = v_organization_id
+    where id = v_session_id
+    and user_id = auth.uid();
+    
+    -- Verify if the update was successful
+    if not found then
+        raise exception 'Could not update the current session';
+    end if;
+end;
+$$;
+
+grant execute on function public.set_session(text) to authenticated, service_role;
 
 
 -- 17. create_order

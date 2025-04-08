@@ -30,7 +30,7 @@ async function UserDataPage({
   if (userError) throw userError.message;
 
   const accountData = await getAccountOnbardingData(userData.user.id);
-  const role = (await supabase.rpc('get_organization')).data?.role;
+  const userRole = (await supabase.rpc('get_organization')).data?.role;
 
   const sanitizedAccountData = accountData ? {
     ...accountData,
@@ -44,7 +44,7 @@ async function UserDataPage({
       redirect('/orders');
     }
   } else {
-    if( (role === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) ?? (role !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
+    if( (userRole === 'agency_owner' && sanitizedAccountData?.phone_number && sanitizedAccountData?.subdomain ) ?? (userRole !== 'agency_owner' && sanitizedAccountData?.phone_number) ) {
       redirect('/orders');
     }
   }
@@ -72,7 +72,7 @@ async function UserDataPage({
               <Trans i18nKey={'auth:signUpUserDataHeading2'} />
             </h2>
 
-            <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={role ?? ''} />
+            <UserDataForm userId={userData?.user.id} tokenId={tokenId} accountData={sanitizedAccountData} userRole={userRole ?? ''} />
           </div>
         </div>
         

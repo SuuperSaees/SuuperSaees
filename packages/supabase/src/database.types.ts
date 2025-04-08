@@ -3172,6 +3172,12 @@ export type Database = {
         }
         Returns: number
       }
+      set_session: {
+        Args: {
+          domain: string
+        }
+        Returns: undefined
+      }
       team_account_workspace: {
         Args: {
           account_slug: string
@@ -3434,6 +3440,7 @@ export type Database = {
       organization_info: {
         session_id: string | null
         id: string | null
+        owner_id: string | null
         slug: string | null
         name: string | null
         role: string | null
