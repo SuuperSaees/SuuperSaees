@@ -123,7 +123,7 @@ export const getOrganizationSettingsByOrganizationId = async (
   return organizationSettings;
 };
 
-export async function getOrganization(primaryOwnerId?: string): Promise<{
+export async function getOrganization(): Promise<{
   id: string;
   name: string | null;
   owner_id: string | null;
