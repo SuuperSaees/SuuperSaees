@@ -18,7 +18,7 @@ WITH org_info AS (
     (get_organization()).*
 )
 SELECT
-  oi.id::uuid AS id,
+  o.id::uuid AS id,
   oi.name,
   oi.slug,
   o.picture_url,
@@ -45,9 +45,6 @@ SELECT
   a.email AS email,
   a.picture_url AS picture_url,
   o.id AS organization_id,
-  o.name AS organization_name,
-  o.slug AS organization_slug,
-  o.picture_url AS organization_picture_url,
   am.account_role AS role
 FROM 
   public.accounts a

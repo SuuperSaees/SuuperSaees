@@ -207,6 +207,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "accounts_memberships_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "accounts_memberships_updated_by_fkey"
             columns: ["updated_by"]
             isOneToOne: false
@@ -331,6 +338,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "agency_statuses_agency_id_fkey1"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -828,6 +842,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "chats_agency_id_fkey1"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "chats_client_organization_id_fkey1"
             columns: ["client_organization_id"]
             isOneToOne: false
@@ -840,6 +861,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "chats_client_organization_id_fkey1"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "chats_user_id_fkey"
@@ -958,6 +986,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "client_services_agency_id_fkey1"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "client_services_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
@@ -977,6 +1012,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "client_services_client_organization_id_fkey1"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "client_services_created_by_fkey"
@@ -1039,6 +1081,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "clients_agency_id_fkey1"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "clients_organization_client_id_fkey1"
             columns: ["organization_client_id"]
             isOneToOne: false
@@ -1051,6 +1100,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "clients_organization_client_id_fkey1"
+            columns: ["organization_client_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "clients_user_client_id_fkey"
@@ -1119,6 +1175,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "credits_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1222,6 +1285,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "embeds_organization_id_fkey1"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "embeds_user_id_fkey"
@@ -1341,6 +1411,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "folder_files_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "folder_files_client_organization_id_fkey"
             columns: ["client_organization_id"]
             isOneToOne: false
@@ -1353,6 +1430,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "folder_files_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "folder_files_file_id_fkey"
@@ -1414,6 +1498,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "folders_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "folders_client_organization_id_fkey"
             columns: ["client_organization_id"]
             isOneToOne: false
@@ -1426,6 +1517,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "folders_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "folders_parent_folder_id_fkey"
@@ -1530,6 +1628,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "invitations_role_fkey"
@@ -2053,6 +2158,13 @@ export type Database = {
             referencedColumns: ["organization_id"]
           },
           {
+            foreignKeyName: "orders_v2_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_v2_brief_id_fkey"
             columns: ["brief_id"]
             isOneToOne: false
@@ -2072,6 +2184,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "orders_v2_client_organization_id_fkey1"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "orders_v2_customer_id_fkey"
@@ -2136,6 +2255,13 @@ export type Database = {
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
           },
+          {
+            foreignKeyName: "organization_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
         ]
       }
       organization_subdomains: {
@@ -2168,6 +2294,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_subdomains_organization_id_fkey1"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "organization_subdomains_subdomain_id_fkey"
@@ -2987,6 +3120,13 @@ export type Database = {
             referencedRelation: "user_account_workspace"
             referencedColumns: ["organization_id"]
           },
+          {
+            foreignKeyName: "tags_organization_id_fkey1"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
         ]
       }
       tasks: {
@@ -3170,9 +3310,6 @@ export type Database = {
           id: string | null
           name: string | null
           organization_id: string | null
-          organization_name: string | null
-          organization_picture_url: string | null
-          organization_slug: string | null
           picture_url: string | null
           role: string | null
         }
