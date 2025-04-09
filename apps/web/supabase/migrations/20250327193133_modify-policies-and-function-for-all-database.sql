@@ -1144,8 +1144,8 @@ begin
     
     -- Find the subdomain by the provided domain
     select id into v_subdomain_id
-    from public.subdomains
-    where domain = set_session.domain
+    from public.subdomains s
+    where s.domain = set_session.domain  -- Calificamos ambas referencias para evitar ambigüedad
     limit 1;
     
     -- Verify if the subdomain was found

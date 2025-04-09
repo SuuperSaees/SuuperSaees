@@ -2,7 +2,6 @@ import type { SignInWithPasswordCredentials } from '@supabase/supabase-js';
 
 import { useMutation } from '@tanstack/react-query';
 
-import { getDomainByUserId } from '../../../multitenancy/utils/get/get-domain';
 import { useSupabase } from './use-supabase';
 
 export function useSignInWithEmailPassword() {
@@ -17,10 +16,16 @@ export function useSignInWithEmailPassword() {
 
     const response = await client.auth.signInWithPassword(credentials);
 
-    console.log('domain', domain, response, credentials);
-
     if (response.error) {
       throw response.error.message;
+    }
+
+    const { error: setSessionError } = await client.rpc('set_session', {
+      domain,
+    });
+
+    if (setSessionError) {
+      throw setSessionError.message;
     }
 
     // Step 1: Get the user auhentication/logged in user 
@@ -34,9 +39,7 @@ export function useSignInWithEmailPassword() {
     const userId = user.id;
 
     // Step 2: Get the organization id fetching the domain/subdomain data
-    const { organizationId } = await getDomainByUserId(userId, true);
-
-    console.log('organizationId', organizationId);
+    const organizationId = (await client.rpc('get_organization')).data?.id ?? '';
 
     // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
     const { data: notAllowedClient, error: clientError } = await client
