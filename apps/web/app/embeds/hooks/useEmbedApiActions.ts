@@ -9,6 +9,7 @@ import {
   updateEmbed,
 } from '~/server/actions/embeds/embeds.action';
 import { FormValues } from '../schema';
+import { useTranslation } from 'react-i18next';
 
 interface UseEmbedApiActionsProps {
   agencyId: string;
@@ -29,7 +30,7 @@ export function useEmbedApiActions({
 }: UseEmbedApiActionsProps) {
   const queryClient = useQueryClient();
   const host = typeof window !== 'undefined' ? window.location.hostname : '';
-
+  const { t } = useTranslation();
   // Create mutation
   const createMutation = useMutation<Embeds.Type, Error, FormValues>({
     mutationFn: (values: FormValues) => {
@@ -42,12 +43,12 @@ export function useEmbedApiActions({
       return createEmbed(embed, embed_accounts, host);
     },
     onSuccess: async (newEmbed) => {
-      toast.success('Integration created successfully');
+      toast.success(t('responses:success.embeds.embedCreated'));
       await queryClient.invalidateQueries({ queryKey });
       onCreateSuccess?.(newEmbed);
     },
-    onError: (error: Error) => {
-      toast.error('Failed to create integration: ' + error.message);
+    onError: () => {
+      toast.error(t('responses:error.embeds.invalidEmbed'));
     },
   });
 
@@ -67,18 +68,18 @@ export function useEmbedApiActions({
     onMutate: ({ isAccountRemoval }) => {
       // Show loading toast when mutation starts
       if (isAccountRemoval) {
-        return toast.loading('Removing account from integration...');
+        return toast.loading(t('responses:embeds.removingAccountFromEmbed'));
       }
-      return toast.loading('Updating integration...');
+      return toast.loading(t('responses:embeds.updatingEmbed'));
     },
     onSuccess: (_, { isAccountRemoval }, toastId) => {
       // Dismiss loading toast and show success
       toast.dismiss(toastId as string | number);
       
       if (isAccountRemoval) {
-        toast.success('Account removed from integration successfully');
+        toast.success(t('responses:embeds.accountRemovedFromEmbed'));
       } else {
-        toast.success('Integration updated successfully');
+        toast.success(t('responses:embeds.embedUpdated'));
       }
       
       void queryClient.invalidateQueries({ queryKey });
@@ -88,9 +89,9 @@ export function useEmbedApiActions({
       toast.dismiss(toastId as string | number);
       
       if (isAccountRemoval) {
-        toast.error('Failed to remove account: ' + error.message);
+        toast.error(t('responses:embeds.failedToRemoveAccount'));
       } else {
-        toast.error('Failed to update integration: ' + error.message);
+        toast.error(t('responses:embeds.failedToUpdateEmbed'));
       }
     }
   });
@@ -100,12 +101,12 @@ export function useEmbedApiActions({
     mutationFn: (id: string) => deleteEmbed(id),
     onMutate: () => {
       // Show loading toast when mutation starts
-      return toast.loading('Deleting integration...');
+      return toast.loading(t('responses:embeds.deletingEmbed'));
     },
     onSuccess: (_, __, toastId) => {
       // Dismiss loading toast and show success
       toast.dismiss(toastId as string | number);
-      toast.success('Integration deleted successfully');
+      toast.success(t('responses:embeds.embedDeleted'));
       
       // Invalidate queries to refresh the data
       void queryClient.invalidateQueries({ queryKey }).then(() => {
@@ -116,7 +117,7 @@ export function useEmbedApiActions({
     onError: (error, _, toastId) => {
       // Dismiss loading toast and show error
       toast.dismiss(toastId as string | number);
-      toast.error('Failed to delete integration: ' + error.message);
+      toast.error(t('responses:embeds.failedToDeleteEmbed'));
     }
   });
 
@@ -127,10 +128,10 @@ export function useEmbedApiActions({
         await createMutation.mutateAsync(values);
       } catch (error) {
         // Error is handled by the mutation's onError
-        console.error('Failed to create embed:', error);
+        console.error(t('responses:error.embeds.invalidEmbed'));
       }
     },
-    [createMutation],
+    [createMutation, t],
   );
 
   const handleEmbedUpdate = useCallback(
@@ -144,10 +145,10 @@ export function useEmbedApiActions({
         });
       } catch (error) {
         // Error is handled by the mutation's onError
-        console.error('Failed to update embed:', error);
+        console.error(t('responses:error.embeds.failedToUpdateEmbed'));
       }
     },
-    [activeEmbedId, updateMutation],
+    [activeEmbedId, updateMutation, t],
   );
 
   const handleEmbedDelete = useCallback(
