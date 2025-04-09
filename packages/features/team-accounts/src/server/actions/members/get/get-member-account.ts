@@ -49,7 +49,7 @@ export async function fetchCurrentUserAccount(
         `Error fetching current user account data: ${currentUserError.message}`,
       );
     }
-    const organizationId = (await client.rpc('get_organization')).data?.id;
+    const organizationId = (await client.rpc('get_session')).data?.organization?.id;
 
     return {
       ...currentUserAccount,
@@ -96,7 +96,7 @@ export async function getPrimaryOwnerId(
   try {
     client = client ?? getSupabaseServerComponentClient();
      // don't change this line
-    const ownerId = (await client.rpc('get_organization')).data?.owner_id;
+    const ownerId = (await client.rpc('get_session')).data?.organization?.owner_id;
     return ownerId ?? '';
   } catch (error) {
     console.error('Error fetching primary owner:', error);
@@ -108,7 +108,7 @@ export async function getUserIdOfAgencyOwner() {
   try {
     const client = getSupabaseServerComponentClient();
 
-    return (await client.rpc('get_organization')).data?.id;
+    return (await client.rpc('get_session')).data?.organization?.owner_id;
   } catch (error) {
     console.error('Error fetching Agency Owner User Id:', error);
   }
@@ -141,7 +141,7 @@ export async function getUserById(userId: string) {
 export async function getUserRole() {
   try {
     const client = getSupabaseServerComponentClient();
-    return (await client.rpc('get_organization')).data?.role;
+    return (await client.rpc('get_session')).data?.organization?.role;
   } catch (error) {
     console.error('Error fetching user role:', error);
     throw error;
@@ -153,7 +153,7 @@ export async function getUserRoleById(userId: string, adminActivated = false, cl
    
     client = client ?? getSupabaseServerComponentClient({ admin: adminActivated });
     if(!adminActivated) {
-      return (await client.rpc('get_organization')).data?.role;
+      return (await client.rpc('get_session')).data?.organization?.role;
     }
 
     const { error: userAccountError, data: userAccountData } = await client
@@ -231,7 +231,7 @@ export async function getUserAccountById(
     if (userAccountError) {
       throw new Error(userAccountError.message);
     }
-    const organizationData = (await databaseClient.rpc('get_organization')).data;
+    const organizationData = (await databaseClient.rpc('get_session')).data?.organization;
     const organizationId = organizationData?.id ?? null;
     const primaryOwnerId = organizationData?.owner_id ?? null;
 
@@ -278,7 +278,7 @@ export const getUserAccountByEmail = async (
       );
     }
 
-    const organizationData = (await databaseClient.rpc('get_organization')).data;
+    const organizationData = (await databaseClient.rpc('get_session')).data?.organization;
     const organizationId = organizationData?.id ?? null;
     const primaryOwnerId = organizationData?.owner_id ?? null;
 

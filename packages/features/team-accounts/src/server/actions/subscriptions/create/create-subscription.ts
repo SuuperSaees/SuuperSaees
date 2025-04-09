@@ -23,7 +23,7 @@ export const createSubscription = async (): Promise<{
 
     const email = user?.email as string;
 
-    let userBaseUrl = `${(await client.rpc('get_organization')).data?.domain}`;
+    let userBaseUrl = `${(await client.rpc('get_session')).data?.organization?.domain}`;
 
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
 

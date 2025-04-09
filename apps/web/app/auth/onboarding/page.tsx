@@ -30,7 +30,7 @@ async function UserDataPage({
   if (userError) throw userError.message;
 
   const accountData = await getAccountOnbardingData(userData.user.id);
-  const userRole = (await supabase.rpc('get_organization')).data?.role;
+  const userRole = (await supabase.rpc('get_session')).data?.organization?.role;
 
   const sanitizedAccountData = accountData ? {
     ...accountData,

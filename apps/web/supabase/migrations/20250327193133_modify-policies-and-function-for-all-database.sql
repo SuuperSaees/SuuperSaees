@@ -1020,12 +1020,16 @@ execute procedure kit.set_slug_from_account_name ();
 
 -- 15. add_current_user_to_new_account
 drop function if exists kit.add_current_user_to_new_account() cascade;
-drop function if exists public.get_organization() cascade;
+drop function if exists public.get_session() cascade;
 drop trigger if exists add_current_user_to_new_account on public.accounts;
 
 alter table "auth"."sessions" add column "organization_id" uuid;
 
 alter table "auth"."sessions" add constraint "sessions_organization_id_fkey" foreign key ("organization_id") references "public"."organizations"("id") on delete cascade;
+
+alter table "auth"."sessions" add column "agency_id" uuid;
+
+alter table "auth"."sessions" add constraint "sessions_agency_id_fkey" foreign key ("agency_id") references "public"."organizations"("id") on delete cascade;
 
 
 create
@@ -1059,7 +1063,8 @@ create trigger "add_current_user_to_new_organization"
 after insert on public.organizations for each row
 execute function kit.add_current_user_to_new_organization ();
 
--- Primero, creamos un tipo compuesto
+-- First, modify the organization_info type to make fields nullable
+DROP TYPE IF EXISTS public.organization_info CASCADE;
 CREATE TYPE public.organization_info AS (
     session_id text,
     id text,
@@ -1070,9 +1075,17 @@ CREATE TYPE public.organization_info AS (
     domain varchar
 );
 
--- Luego modificamos la función para que retorne este tipo
-CREATE OR REPLACE FUNCTION public.get_organization()
-RETURNS public.organization_info
+-- Then modify the session_info type to make agency nullable
+DROP TYPE IF EXISTS public.session_info CASCADE;
+CREATE TYPE public.session_info AS (
+    session_id text,
+    agency public.organization_info,
+    organization public.organization_info
+);
+
+-- Now update the get_session function
+CREATE OR REPLACE FUNCTION public.get_session()
+RETURNS public.session_info
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
@@ -1080,22 +1093,27 @@ AS $$
 DECLARE
     v_session_id uuid;
     v_org_id uuid;
-    result public.organization_info;
+    v_agency_id uuid;
+    v_user_id uuid;
+    org_result public.organization_info;
+    agency_result public.organization_info;
+    session_result public.session_info;
 BEGIN
     -- Get the session_id from the current JWT
     v_session_id := (auth.jwt() ->> 'session_id')::uuid;
+    v_user_id := auth.uid();
     
-    -- Get the organization_id from the current session
-    SELECT organization_id INTO v_org_id 
+    -- Get the organization_id and agency_id from the current session
+    SELECT organization_id, agency_id INTO v_org_id, v_agency_id
     FROM auth.sessions 
-    WHERE user_id = auth.uid() AND id = v_session_id;
+    WHERE user_id = v_user_id AND id = v_session_id;
     
     -- If there is no organization associated, return null
     IF v_org_id IS NULL THEN
         RETURN NULL;
     END IF;
 
-    -- Query to get all the required data
+    -- Query to get the organization data
     SELECT 
         v_session_id::text,
         o.id::text,
@@ -1104,11 +1122,11 @@ BEGIN
         o.name,
         am.account_role,
         COALESCE(s.domain, '')
-    INTO result
+    INTO org_result
     FROM 
         public.organizations o
     LEFT JOIN 
-        public.accounts_memberships am ON am.organization_id = o.id AND am.user_id = auth.uid()
+        public.accounts_memberships am ON am.organization_id = o.id AND am.user_id = v_user_id
     LEFT JOIN 
         public.organization_subdomains os ON os.organization_id = o.id
     LEFT JOIN 
@@ -1117,77 +1135,137 @@ BEGIN
         o.id = v_org_id
     LIMIT 1;
     
-    RETURN result;
+    -- If agency_id is NOT NULL, this is a client user and we need to get agency info
+    IF v_agency_id IS NOT NULL THEN
+        -- Get agency information
+        SELECT 
+            v_session_id::text,
+            o.id::text,
+            o.owner_id::text,
+            o.slug,
+            o.name,
+            NULL, -- No role for agency since user is not a direct member
+            COALESCE(s.domain, '')
+        INTO agency_result
+        FROM 
+            public.organizations o
+        LEFT JOIN 
+            public.organization_subdomains os ON os.organization_id = o.id
+        LEFT JOIN 
+            public.subdomains s ON s.id = os.subdomain_id
+        WHERE 
+            o.id = v_agency_id
+        LIMIT 1;
+    ELSE
+        -- If agency_id is NULL, this is an agency user
+        -- agency_result remains NULL
+        agency_result := NULL;
+    END IF;
+    
+    -- Construct the final result
+    session_result := ROW(
+        v_session_id::text,
+        agency_result,
+        org_result
+    )::public.session_info;
+    
+    RETURN session_result;
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.get_organization() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_session() TO authenticated, service_role;
 
-create or replace function public.set_session(domain text)
-returns void
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare
+CREATE OR REPLACE FUNCTION public.set_session(domain text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
     v_session_id uuid;
     v_subdomain_id uuid;
     v_organization_id uuid;
-begin
-    -- Get the session_id from the current JWT
+    v_agency_id uuid;
+    v_client_organization_id uuid;
+    v_user_id uuid;
+BEGIN
+    -- Get the session_id from the current JWT and user_id
     v_session_id := (auth.jwt() ->> 'session_id')::uuid;
+    v_user_id := auth.uid();
     
     -- Verify that the domain is not empty
-    if domain is null or domain = '' then
-        raise exception 'Domain cannot be empty';
-    end if;
+    IF domain IS NULL OR domain = '' THEN
+        RAISE EXCEPTION 'Domain cannot be empty';
+    END IF;
     
     -- Find the subdomain by the provided domain
-    select id into v_subdomain_id
-    from public.subdomains s
-    where s.domain = set_session.domain  -- Calificamos ambas referencias para evitar ambigüedad
-    limit 1;
+    SELECT id INTO v_subdomain_id
+    FROM public.subdomains s
+    WHERE s.domain = set_session.domain
+    LIMIT 1;
     
     -- Verify if the subdomain was found
-    if v_subdomain_id is null then
-        raise exception 'No subdomain found with domain: %', domain;
-    end if;
+    IF v_subdomain_id IS NULL THEN
+        RAISE EXCEPTION 'No subdomain found with domain: %', domain;
+    END IF;
     
     -- Find the organization_id associated with the subdomain
-    select organization_id into v_organization_id
-    from public.organization_subdomains
-    where subdomain_id = v_subdomain_id
-    limit 1;
+    SELECT organization_id INTO v_organization_id
+    FROM public.organization_subdomains
+    WHERE subdomain_id = v_subdomain_id
+    LIMIT 1;
     
     -- Verify if the organization was found
-    if v_organization_id is null then
-        raise exception 'No organization found associated with domain: %', domain;
-    end if;
+    IF v_organization_id IS NULL THEN
+        RAISE EXCEPTION 'No organization found associated with domain: %', domain;
+    END IF;
     
-    -- Verify if the user belongs to this organization
-    if not exists (
-        select 1
-        from public.accounts_memberships
-        where user_id = auth.uid()
-        and organization_id = v_organization_id
-    ) then
-        raise exception 'User does not belong to the organization associated with domain: %', domain;
-    end if;
-    
-    -- Update the current session with the organization_id
-    update auth.sessions
-    set organization_id = v_organization_id
-    where id = v_session_id
-    and user_id = auth.uid();
+    -- Check if the user is a direct member of this organization (agency case)
+    IF EXISTS (
+        SELECT 1
+        FROM public.accounts_memberships
+        WHERE user_id = v_user_id
+        AND organization_id = v_organization_id
+    ) THEN
+        -- User is a direct member of this organization (agency case)
+        -- Set organization_id to the found organization and agency_id to NULL
+        UPDATE auth.sessions
+        SET 
+            organization_id = v_organization_id,
+            agency_id = NULL
+        WHERE id = v_session_id
+        AND user_id = v_user_id;
+    ELSE
+        -- User is not a direct member, check if this is a client organization
+        -- Look for a client relationship where this organization is the agency
+        SELECT organization_client_id INTO v_client_organization_id
+        FROM public.clients
+        WHERE agency_id = v_organization_id
+        AND user_client_id = v_user_id
+        LIMIT 1;
+        
+        -- Verify if a client relationship was found
+        IF v_client_organization_id IS NULL THEN
+            RAISE EXCEPTION 'User does not belong to the organization or any of its clients associated with domain: %', domain;
+        END IF;
+        
+        -- Set organization_id to the client organization and agency_id to the found organization
+        UPDATE auth.sessions
+        SET 
+            organization_id = v_client_organization_id,
+            agency_id = v_organization_id
+        WHERE id = v_session_id
+        AND user_id = v_user_id;
+    END IF;
     
     -- Verify if the update was successful
-    if not found then
-        raise exception 'Could not update the current session';
-    end if;
-end;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Could not update the current session';
+    END IF;
+END;
 $$;
 
-grant execute on function public.set_session(text) to authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.set_session(text) TO authenticated, service_role;
 
 
 -- 17. create_order

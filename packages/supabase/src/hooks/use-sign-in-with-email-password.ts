@@ -39,7 +39,7 @@ export function useSignInWithEmailPassword() {
     const userId = user.id;
 
     // Step 2: Get the organization id fetching the domain/subdomain data
-    const organizationId = (await client.rpc('get_organization')).data?.id ?? '';
+    const organizationId = (await client.rpc('get_session')).data?.organization?.id ?? '';
 
     // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
     const { data: notAllowedClient, error: clientError } = await client

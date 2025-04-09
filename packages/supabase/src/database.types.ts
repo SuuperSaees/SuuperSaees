@@ -3515,9 +3515,9 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
-      get_organization: {
+      get_session: {
         Args: Record<PropertyKey, never>
-        Returns: Database["public"]["CompositeTypes"]["organization_info"]
+        Returns: Database["public"]["CompositeTypes"]["session_info"]
       }
       get_unread_message_counts: {
         Args: {
@@ -3956,6 +3956,13 @@ export type Database = {
         name: string | null
         role: string | null
         domain: string | null
+      }
+      session_info: {
+        session_id: string | null
+        agency: Database["public"]["CompositeTypes"]["organization_info"] | null
+        organization:
+          | Database["public"]["CompositeTypes"]["organization_info"]
+          | null
       }
     }
   }

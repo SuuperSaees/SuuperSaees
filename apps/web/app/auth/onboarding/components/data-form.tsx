@@ -58,7 +58,7 @@ export function UserDataForm(
         user_id: userId,
       });
 
-      const organizationData = (await client.rpc('get_organization')).data;
+      const organizationData = (await client.rpc('get_session')).data?.organization;
 
       if (userData) {
         try {

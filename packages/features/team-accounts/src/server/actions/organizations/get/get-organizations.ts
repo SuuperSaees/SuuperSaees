@@ -132,7 +132,7 @@ export async function getOrganization(): Promise<{
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const organizationData = (await client.rpc('get_organization')).data;
+    const organizationData = (await client.rpc('get_session')).data?.organization;
     const organizationId = organizationData?.id ?? '';
 
     const { data: organizationsData, error: organizationError } = await client

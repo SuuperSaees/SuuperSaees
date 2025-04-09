@@ -15,7 +15,7 @@ DROP VIEW IF EXISTS public.user_accounts;
 CREATE OR REPLACE VIEW public.user_organization AS
 WITH org_info AS (
   SELECT 
-    (get_organization()).*
+    (get_session()).organization.*
 )
 SELECT
   o.id::uuid AS id,
@@ -37,7 +37,7 @@ DROP VIEW IF EXISTS public.user_account_workspace;
 CREATE OR REPLACE VIEW public.user_account_workspace AS
 WITH active_org AS (
   SELECT 
-    (get_organization()).*
+    (get_session()).organization.*
 )
 SELECT
   a.id AS id,
