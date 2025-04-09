@@ -18,36 +18,14 @@ const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);
 export const upsertOrganizationSettings = async (
   organizationSetting: Omit<
     Database['public']['Tables']['organization_settings']['Insert'],
-    'account_id'
+    'organization_id'
   >,
 ) => {
   const client = getSupabaseServerComponentClient();
 
   try {
-    const {
-      data: { user },
-      error: authError,
-    } = await client.auth.getUser();
-
-    if (authError ?? !user) {
-      throw new Error('User not authenticated');
-    }
-
     // Fetch the organization account for the current user
-    const { data: organizationAccount } = await client
-      .from('accounts')
-      .select('id')
-      .eq('primary_owner_user_id', user.id)
-      .eq('is_personal_account', false)
-      .single()
-      .throwOnError();
-
-    if (!organizationAccount) {
-      throw new CustomError(
-        HttpStatus.Error.NotFound,
-        'Organization account not found or user does not have access.',     
-        ErrorOrganizationOperations.ORGANIZATION_NOT_FOUND_OR_NOT_ACCESSIBLE);
-    }
+   const organizationId = (await client.rpc('get_session')).data?.organization?.id ?? '';
 
     // Validate hex color if key is 'theme_color'
     if (
@@ -66,7 +44,7 @@ export const upsertOrganizationSettings = async (
     const { data: existingSetting, error: fetchError } = await client
       .from('organization_settings')
       .select('*')
-      .eq('account_id', organizationAccount.id)
+      .eq('organization_id', organizationId)
       .eq('key', organizationSetting.key)
       .maybeSingle();
 
@@ -83,7 +61,7 @@ export const upsertOrganizationSettings = async (
       const { data: updatedSetting, error: updateError } = await client
         .from('organization_settings')
         .update({ value: organizationSetting.value })
-        .eq('account_id', organizationAccount.id)
+        .eq('organization_id', organizationId)
         .eq('key', organizationSetting.key)
         .select()
         .maybeSingle(); // Expecting a single result or no result
@@ -102,7 +80,7 @@ export const upsertOrganizationSettings = async (
     } else {
       // If the setting does not exist, insert it
       const newSetting = {
-        account_id: organizationAccount.id,
+        organization_id: organizationId ?? '',
         key: organizationSetting.key,
         value: organizationSetting.value,
       };
@@ -132,7 +110,7 @@ export const upsertOrganizationSettings = async (
 
 export const updateOrganization = async (
   id: string,
-  data: { name?: string, loom_app_id?: string },
+  data: { name?: string, picture_url?: string },
 ) => {
   const client = getSupabaseServerComponentClient();
 
@@ -144,7 +122,7 @@ export const updateOrganization = async (
 
     const { data: updatedOrganizationData, error: updatedOrganizationError } =
       await client
-        .from('accounts')
+        .from('organizations')
         .update(data)
         .eq('id', id)
         .select()

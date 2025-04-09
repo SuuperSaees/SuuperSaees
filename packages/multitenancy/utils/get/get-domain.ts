@@ -51,7 +51,7 @@ export async function getDomainByUserId(
       ownerEmail = await getOwnerEmail(organizationData?.primary_owner_user_id);
     } else if (availableRolesClient.has(userRole)) {
       // Case 2: Client roles
-      const agencyData = await getAgencyForClientByUserId(userId);
+      const agencyData = await getAgencyForClientByUserId();
       organization = agencyData;
       ownerEmail = await getOwnerEmail(agencyData?.primary_owner_user_id);
       organizationId = agencyData?.id ?? null;

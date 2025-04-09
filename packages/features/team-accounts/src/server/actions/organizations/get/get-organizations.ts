@@ -17,57 +17,23 @@ export const getOrganizationSettings = async () => {
   try {
     const client = getSupabaseServerComponentClient();
 
-    const {
-      data: { user },
-    } = await client.auth.getUser();
-
-    if (!user) {
-      console.error('User not found when trying to get organization settings');
-      return [];
-    }
-
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select()
-      .eq('id', user.id)
-      .single();
-
-    if (accountError) {
-      throw accountError.message;
-    }
-
-    const { data: roleData, error: roleError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', user.id)
-      .single();
-
-    if (roleError) {
-      throw roleError.message;
-    }
+    const sessionData = (await client.rpc('get_session')).data;
+    const role = sessionData?.organization?.role;
+    const organizationId = sessionData?.organization?.id;
+    const agencyId = sessionData?.agency?.id;
 
     if (
-      roleData?.account_role !== 'agency_member' &&
-      roleData?.account_role !== 'agency_owner' &&
-      roleData?.account_role !== 'agency_project_manager' &&
-      roleData?.account_role !== 'super_admin' &&
-      roleData?.account_role !== 'custom-role'
+      role !== 'agency_member' &&
+      role !== 'agency_owner' &&
+      role !== 'agency_project_manager' &&
+      role !== 'super_admin' &&
+      role !== 'custom-role'
     ) {
-      const { data: agencyOwnerClient, error: agencyOwnerClientError } =
-        await client
-          .from('clients')
-          .select('agency_id')
-          .eq('user_client_id', user.id)
-          .single();
-
-      if (agencyOwnerClientError) {
-        throw agencyOwnerClientError.message;
-      }
 
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
-        .eq('account_id', agencyOwnerClient.agency_id ?? '');
+        .eq('organization_id', agencyId ?? '');
 
       if (settingsError) {
         throw settingsError.message;
@@ -77,7 +43,7 @@ export const getOrganizationSettings = async () => {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
-        .eq('account_id', accountData.organization_id ?? '');
+        .eq('organization_id', organizationId ?? '');
 
       if (settingsError) {
         throw settingsError.message;
@@ -305,7 +271,7 @@ export async function getAgencyForClient(clientOrganizationId: string) {
   }
 }
 
-export async function getAgencyForClientByUserId(userId: string): Promise<{
+export async function getAgencyForClientByUserId(): Promise<{
   id: string;
   name: string;
   primary_owner_user_id: string;
@@ -313,30 +279,14 @@ export async function getAgencyForClientByUserId(userId: string): Promise<{
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('agency_id')
-      .eq('user_client_id', userId)
-      .single();
+    const agencyData = (await client.rpc('get_session')).data?.agency
 
-    if (clientError) {
-      throw new Error(`Error getting client: ${clientError.message}`);
-    }
-
-    const { data: agencyData, error: agencyError } = await client
-      .from('accounts')
-      //Temporarily added loom_app_id to the query
-      .select('id, name, primary_owner_user_id, loom_app_id') // if we need more data we can add it here, but for now we only need the id.
-      //IMPORTANT: ask to the team for more params on the future
-      .eq('id', clientData.agency_id)
-      .eq('is_personal_account', false)
-      .single();
-
-    if (agencyError) {
-      throw new Error(`Error getting agency: ${agencyError.message}`);
-    }
-
-    return agencyData;
+    return {
+      id: agencyData?.id ?? '',
+      name: agencyData?.name ?? '',
+      primary_owner_user_id: agencyData?.owner_id ?? '',
+      loom_app_id: null,
+    };
   } catch (error) {
     console.error('Error trying to get the agency');
     throw error;
