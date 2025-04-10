@@ -518,7 +518,7 @@ using ((has_permission_in_organizations(auth.uid(), 'embeds.read'::app_permissio
    FROM clients c
   WHERE ((c.user_client_id = auth.uid()) AND ((organization_id = c.agency_id) OR (organization_id = c.organization_client_id)) AND ((visibility <> 'private'::visibility) OR (EXISTS ( SELECT 1
            FROM embed_accounts ea
-          WHERE ((ea.embed_id = embeds.id) AND (ea.account_id = c.organization_client_id)))))))) OR (is_user_in_agency_organization(auth.uid(), organization_id)))));
+          WHERE ((ea.embed_id = embeds.id) AND (ea.organization_id = c.organization_client_id)))))))) OR (is_user_in_agency_organization(auth.uid(), organization_id)))));
 
 create policy "embeds_update_agency"
 on "public"."embeds"

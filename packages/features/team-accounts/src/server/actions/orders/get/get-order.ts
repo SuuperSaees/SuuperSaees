@@ -256,7 +256,7 @@ export const getOrders = async (
     let query = client
       .from('orders_v2')
       .select(
-        `*, client_organization:accounts!client_organization_id(id, name, settings:organization_settings!account_id(key, value)),
+        `*, client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
         assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
         tags:order_tags(tag:tags(*))

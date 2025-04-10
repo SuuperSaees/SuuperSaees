@@ -380,6 +380,47 @@ alter table "public"."credits_usage" add constraint "credits_usage_organization_
 alter table "public"."credits_usage" validate constraint "credits_usage_organization_id_fkey";
 COMMIT; 
 
+BEGIN;
+
+-- 1. Add the organization_id column to embed_accounts
+ALTER TABLE public.embed_accounts 
+ADD COLUMN IF NOT EXISTS organization_id uuid;
+
+-- 2. Update the organization_id column with the current values of account_id
+-- This assumes that the account IDs that represent organizations are the same as those used in the organizations table
+UPDATE public.embed_accounts
+SET organization_id = account_id;
+
+-- 4. Create an index on organization_id for better performance
+CREATE INDEX IF NOT EXISTS idx_embed_accounts_organization_id ON public.embed_accounts(organization_id);
+
+-- 5. Make organization_id NOT NULL after ensuring all records have a value
+ALTER TABLE public.embed_accounts
+ALTER COLUMN organization_id SET NOT NULL;
+
+-- Verify that the migration was completed correctly
+DO $$
+DECLARE
+  count_embeds_accounts INTEGER;
+  null_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO count_embeds_accounts FROM public.embed_accounts;
+  SELECT COUNT(*) INTO null_count FROM public.embed_accounts WHERE organization_id IS NULL;
+  
+  RAISE NOTICE 'Migration completed: % memberships updated, % with NULL organization_id', 
+    count_embeds_accounts, null_count;
+  
+  IF null_count > 0 THEN
+    RAISE WARNING 'There are % records with NULL organization_id', null_count;
+  END IF;
+END $$;
+
+COMMIT;
+
+alter table "public"."embed_accounts" add constraint "embed_accounts_organization_id_fkey" FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE CASCADE ON DELETE SET NULL not valid;
+
+alter table "public"."embed_accounts" validate constraint "embed_accounts_organization_id_fkey";
+
 ALTER TABLE "public"."accounts" DROP COLUMN IF EXISTS "organization_id" CASCADE;
 ALTER TABLE "public"."accounts" DROP COLUMN IF EXISTS "stripe_id" CASCADE;
 ALTER TABLE "public"."accounts" DROP COLUMN IF EXISTS "slug" CASCADE;

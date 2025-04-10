@@ -1187,43 +1187,50 @@ export type Database = {
       }
       embed_accounts: {
         Row: {
-          account_id: string
           created_at: string
           embed_id: string
           id: number
+          organization_id: string
         }
         Insert: {
-          account_id: string
           created_at?: string
           embed_id: string
           id?: number
+          organization_id: string
         }
         Update: {
-          account_id?: string
           created_at?: string
           embed_id?: string
           id?: number
+          organization_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "embed_accounts_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "embed_accounts_account_id_fkey"
-            columns: ["account_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "embed_accounts_embed_id_fkey"
             columns: ["embed_id"]
             isOneToOne: false
             referencedRelation: "embeds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "embed_accounts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
             referencedColumns: ["id"]
           },
         ]
