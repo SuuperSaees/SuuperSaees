@@ -291,20 +291,20 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  session_data public.session_info;
   org_id uuid;
   is_member boolean := false;
 BEGIN
-  -- Get the current session information
-  SELECT * INTO session_data FROM public.get_session();
+  -- Get the organization ID directly from the auth.sessions table
+  SELECT organization_id INTO org_id
+  FROM auth.sessions
+  WHERE id = (auth.jwt() ->> 'session_id')::uuid
+  AND user_id = target_user_id
+  LIMIT 1;
   
-  -- If no session data or no organization, return false
-  IF session_data IS NULL OR session_data.organization IS NULL OR session_data.organization.id IS NULL THEN
+  -- If no organization ID is found, return false
+  IF org_id IS NULL THEN
     RETURN false;
   END IF;
-  
-  -- Extract the organization ID from the session
-  org_id := session_data.organization.id::uuid;
   
   -- Check if the user belongs to this organization and it's an agency organization
   IF is_user_in_agency_organization(target_user_id, org_id) THEN
@@ -327,20 +327,20 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
-  session_data public.session_info;
   org_id uuid;
   has_perm boolean := false;
 BEGIN
   -- Get the current session information
-  SELECT * INTO session_data FROM public.get_session();
+  SELECT organization_id INTO org_id
+  FROM auth.sessions
+  WHERE id = (auth.jwt() ->> 'session_id')::uuid
+  AND user_id = target_user_id
+  LIMIT 1;
   
   -- If no session data or no organization, return false
-  IF session_data IS NULL OR session_data.organization IS NULL OR session_data.organization.id IS NULL THEN
+  IF org_id IS NULL THEN
     RETURN false;
   END IF;
-  
-  -- Extract the organization ID from the session
-  org_id := session_data.organization.id::uuid;
   
   -- Check if the user has the specified permission in this organization
   IF has_permission(target_user_id, org_id, permission_name) THEN
