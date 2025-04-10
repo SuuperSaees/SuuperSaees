@@ -291,19 +291,25 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
+  session_data public.session_info;
   org_id uuid;
   is_member boolean := false;
 BEGIN
-  FOR org_id IN 
-    SELECT am.organization_id
-    FROM accounts_memberships am
-    WHERE am.user_id = target_user_id
-    AND am.account_role IN ('agency_owner', 'agency_member', 'agency_project_manager')
-  LOOP
-    IF is_user_in_agency_organization(target_user_id, org_id) THEN
-      is_member := true;
-    END IF;
-  END LOOP;
+  -- Get the current session information
+  SELECT * INTO session_data FROM public.get_session();
+  
+  -- If no session data or no organization, return false
+  IF session_data IS NULL OR session_data.organization IS NULL OR session_data.organization.id IS NULL THEN
+    RETURN false;
+  END IF;
+  
+  -- Extract the organization ID from the session
+  org_id := session_data.organization.id::uuid;
+  
+  -- Check if the user belongs to this organization and it's an agency organization
+  IF is_user_in_agency_organization(target_user_id, org_id) THEN
+    is_member := true;
+  END IF;
   
   RETURN is_member;
 END;
@@ -321,25 +327,31 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
+  session_data public.session_info;
   org_id uuid;
   has_perm boolean := false;
 BEGIN
-  FOR org_id IN 
-    SELECT am.organization_id
-    FROM accounts_memberships am
-    WHERE am.user_id = target_user_id
-  LOOP
-    IF has_permission(target_user_id, org_id, permission_name) THEN
-      has_perm := true;
-      EXIT;
-    END IF;
-  END LOOP;
+  -- Get the current session information
+  SELECT * INTO session_data FROM public.get_session();
+  
+  -- If no session data or no organization, return false
+  IF session_data IS NULL OR session_data.organization IS NULL OR session_data.organization.id IS NULL THEN
+    RETURN false;
+  END IF;
+  
+  -- Extract the organization ID from the session
+  org_id := session_data.organization.id::uuid;
+  
+  -- Check if the user has the specified permission in this organization
+  IF has_permission(target_user_id, org_id, permission_name) THEN
+    has_perm := true;
+  END IF;
   
   RETURN has_perm;
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.has_permission_in_organizations(uuid, app_permissions) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.has_permission_in_organizations(uuid, public.app_permissions) TO authenticated, service_role;
 
 create policy "Allow agency managers to create billing accounts"
 on "public"."billing_accounts"
