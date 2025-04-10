@@ -22,7 +22,7 @@ export const hasPermissionToCreateClientOrg = async (
     const userAccountRole = await getUserRole();
 
     // Validate role
-    if (!validRoles.includes(userAccountRole)) {
+    if (!validRoles.includes(userAccountRole ?? '')) {
       console.error('Invalid role: ', userAccountRole);
       return false;
     }

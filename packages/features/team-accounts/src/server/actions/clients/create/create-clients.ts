@@ -117,7 +117,7 @@ export const createClient = async (clientData: CreateClient) => {
     // Step 3: Create or fetch the client organization user account
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
-      organization.name,
+      organization.name ?? '',
       clientData.adminActivated,
       clientData.agencyId,
       clientData.sendEmail,
@@ -164,17 +164,6 @@ export const createClient = async (clientData: CreateClient) => {
       organization.id,
       userId,
       clientOrganizationAccount.id,
-      undefined,
-      clientData.adminActivated,
-    );
-
-    // Step 8: Update client user with organization ID
-    await updateUserAccount(
-      {
-        organization_id: clientOrganizationAccount.id,
-        name: clientData.client.name,
-      },
-      userId,
       undefined,
       clientData.adminActivated,
     );
@@ -248,13 +237,13 @@ export const addClientMember = async ({
       const { data: existingClient } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_client_id', clientAccountData.id)
+        .eq('user_client_id', clientAccountData.id ?? '')
         .not('deleted_on', 'is', null)
         .single();
 
       if (existingClient) {
         await reactivateDeletedClient({
-          accountId: clientAccountData.id,
+          accountId: clientAccountData.id ?? '',
           email,
           name: '',
           slug: '',

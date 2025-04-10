@@ -5,6 +5,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import {
   fetchCurrentUser,
@@ -16,12 +17,11 @@ import { Client } from '../../../../../../../../apps/web/lib/client.types';
 
 // Helper function to fetch client members based on user role (agency or client)
 type Organization = Pick<
-  Account.Type,
+  Organization.Type,
   | 'id'
   | 'name'
-  | 'primary_owner_user_id'
+  | 'owner_id'
   | 'created_at'
-  | 'is_personal_account'
   | 'slug'
   | 'picture_url'
 >;
@@ -31,10 +31,7 @@ type UserAccount = Pick<
   | 'name'
   | 'email'
   | 'created_at'
-  | 'is_personal_account'
-  | 'organization_id'
   | 'picture_url'
-  | 'primary_owner_user_id'
 > & {
   settings?: {
     name: string | null;
@@ -87,9 +84,8 @@ async function fetchClientMembers(
   const { data: clientAccounts, error: clientAccountsError } = await client
     .from('accounts')
     .select(
-      'id, email, picture_url, name, organization_id, primary_owner_user_id, created_at, is_personal_account, settings:user_settings!user_id(name, picture_url)',
+      'id, email, picture_url, name, created_at, settings:user_settings!user_id(name, picture_url)',
     )
-    .eq('is_personal_account', true)
     .in('id', clientsIds);
 
     // Get the roles
@@ -151,7 +147,7 @@ export async function getClientMembersForOrganization(
     const clientOrganizationMembers = await fetchClientMembers(
       client,
       currentUserAccount.organization_id,
-      currentUserRole,
+      currentUserRole ?? '',
       clientOrganizacionId ?? '',
       agencyRoles,
       clientRoles,
@@ -191,12 +187,11 @@ async function fetchClientOwners(
   clientUserIds: string[],
 ) {
   const { data: clientOrganizations, error: clientOrganizationsError } = await client
-    .from('accounts')
+    .from('organizations')
     .select(
-      'name, id, picture_url, created_at, primary_owner_user_id, is_personal_account, slug',
+      'name, id, picture_url, created_at, owner_id, slug',
     )
     .in('id', clientsOrganizationIds)
-    .eq('is_personal_account', false);
 
   if (clientOrganizationsError ) {
     throw new Error(
@@ -204,15 +199,14 @@ async function fetchClientOwners(
     );
   }
 
-  const primaryOwnerIds = clientOrganizations.map((clientOrganization) => clientOrganization.primary_owner_user_id);
+  const primaryOwnerIds = clientOrganizations.map((clientOrganization) => clientOrganization.owner_id);
 
   const { data: clientOrganizationOwners, error: clientOwnersError } = await client
     .from('accounts')
     .select(
-      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
+      'name, email, id, picture_url, created_at, settings:user_settings(name, picture_url)',
     )
     .in('id', primaryOwnerIds)
-    .eq('is_personal_account', true);
 
     if (clientOwnersError) {
       throw new Error(
@@ -223,9 +217,8 @@ async function fetchClientOwners(
   const { data: clientUsers, error: clientUsersError } = await client 
     .from('accounts')
     .select(
-      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
+      'name, email, id, picture_url, created_at, settings:user_settings(name, picture_url)',
     ).in('id', clientUserIds)
-    .eq('is_personal_account', true);
   
     // Get the roles
     const adminClient = getSupabaseServerComponentClient({  

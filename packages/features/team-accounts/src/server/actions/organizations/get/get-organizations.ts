@@ -131,7 +131,7 @@ export async function getOrganizationByUserId(
 ): Promise<{
   id: string;
   name: string;
-  primary_owner_user_id: string;
+  owner_id: string;
 }> {
   try {
     const client = getSupabaseServerComponentClient({
@@ -157,8 +157,8 @@ export async function getOrganizationByUserId(
     }
 
     const { data: organizationData, error: organizationError } = await client
-      .from('accounts')
-      .select('id, name, primary_owner_user_id') // if we need more data we can add it here, but for now we only need the id.
+      .from('organizations')
+      .select('id, name, owner_id') // if we need more data we can add it here, but for now we only need the id.
       //IMPORTANT: ask to the team for more params on the future
       .eq('id', organizationId)
       .single();
@@ -220,10 +220,9 @@ export async function getOrganizationById(organizationId: string, client?: Supab
     // Step 2: Fetch the organization data
     const { data: organizationData, error: clientOrganizationError } =
       await client
-        .from('accounts')
-        .select('id, name, primary_owner_user_id, slug, email, picture_url')
+        .from('organizations')
+        .select('id, name, owner_id, slug, picture_url')
         .eq('id', organizationId)
-        .eq('is_personal_account', false)
         .single();
 
     if (clientOrganizationError) {

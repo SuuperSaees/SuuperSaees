@@ -255,6 +255,7 @@ export const getUserAccountByEmail = async (
   email: Account.Type['email'],
   databaseClient?: SupabaseClient<Database>,
   adminActivated = false,
+  agencyId?: string,
 ) => {
   databaseClient =
     databaseClient ??
@@ -278,9 +279,30 @@ export const getUserAccountByEmail = async (
       );
     }
 
-    const organizationData = (await databaseClient.rpc('get_session')).data?.organization;
-    const organizationId = organizationData?.id ?? null;
-    const primaryOwnerId = organizationData?.owner_id ?? null;
+    let organizationId = null;
+    let primaryOwnerId = null;
+
+    if(agencyId) {
+      const { data: organizationClientData, error: organizationClientError } = await databaseClient
+        .from('clients')
+        .select('organization_client_id')
+        .eq('id', agencyId)
+        .single();
+
+      if(organizationClientError && organizationClientError.code !== 'PGRST116') throw organizationClientError;
+
+      organizationId = organizationClientData?.organization_client_id ?? null;
+      
+      const { data: organizationData, error: organizationError } = await databaseClient
+        .from('organizations')
+        .select('owner_id')
+        .eq('id', organizationId ?? '')
+        .single();
+
+      if(organizationError && organizationError.code !== 'PGRST116') throw organizationError;
+
+      primaryOwnerId = organizationData?.owner_id ?? null;
+    }
 
     return {
       ...userAccountData,
