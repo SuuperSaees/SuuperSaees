@@ -187,6 +187,8 @@
     "invalidFileType": "Por favor seleccione un archivo de imagen válido"
   }, 
   "empty": {
+    "title": "¡Aún no tienes ningún brief!",
+    "description": "Comienza creando un brief haciendo clic en el botón de abajo.",
     "orderCreation": {
       "agency": {
         "title": "¡Aún no tienes ningún servicio!",

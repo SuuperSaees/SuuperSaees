@@ -103,7 +103,7 @@ export async function getOrganization(): Promise<{
 
     const { data: organizationsData, error: organizationError } = await client
       .from('organizations')
-      .select('id, name, owner_id, slug, picture_url')
+      .select('picture_url')
       .eq('id', organizationId)
       .single();
 
@@ -112,7 +112,13 @@ export async function getOrganization(): Promise<{
       throw organizationError;
     }
 
-    return organizationsData;
+    return {
+      id: organizationId,
+      picture_url: organizationsData?.picture_url ?? '',
+      name: organizationData?.name ?? '',
+      owner_id: organizationData?.owner_id ?? '',
+      slug: organizationData?.slug ?? '',
+    };
   } catch (error) {
     console.error('Error getting the organization:', error);
     throw error;

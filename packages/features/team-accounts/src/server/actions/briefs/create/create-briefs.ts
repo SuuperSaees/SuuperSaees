@@ -1,6 +1,5 @@
 'use server';
 
-// import { revalidatePath } from 'next/cache';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
@@ -22,7 +21,7 @@ export const createBrief = async (clientData: Brief.Request.Create) => {
       .from('briefs')
       .select('number')
       .order('number', { ascending: false })
-      .eq('propietary_organization_id', organization.primary_owner_user_id)
+      .eq('propietary_organization_id', organization.owner_id ?? '')
    
     const lastBrief = briefsData?.[0] ;
 
@@ -41,7 +40,7 @@ export const createBrief = async (clientData: Brief.Request.Create) => {
       .insert({
         ...clientData,
         name: `Draft #${briefDraftNumber}`,
-        propietary_organization_id: organization.primary_owner_user_id,
+        propietary_organization_id: organization.owner_id ?? '',
         isDraft: true,
         number: briefDraftNumber,
       })
