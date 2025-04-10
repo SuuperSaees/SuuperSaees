@@ -43,7 +43,8 @@ SELECT
   a.id AS id,
   a.name AS name,
   a.email AS email,
-  a.picture_url AS picture_url,
+  -- Use COALESCE to select picture_url from user_settings first, then accounts
+  COALESCE(us.picture_url, a.picture_url) AS picture_url,
   o.id AS organization_id,
   am.account_role AS role
 FROM 
@@ -54,6 +55,8 @@ JOIN
   public.organizations o ON o.id = ao.id::uuid
 JOIN 
   public.accounts_memberships am ON am.organization_id = o.id AND am.user_id = a.id
+LEFT JOIN 
+  public.user_settings us ON us.user_id = a.id
 WHERE 
   a.id = auth.uid()
   AND a.deleted_on IS NULL
