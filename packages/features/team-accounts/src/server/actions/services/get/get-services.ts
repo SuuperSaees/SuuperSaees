@@ -224,7 +224,7 @@ export async function getPaymentsMethods(primaryOwnerId?: string, client?: Supab
       });
     }
 
-    if (billingAccount.provider === BillingAccounts.BillingProviderKeys.TRELI) {
+    if (billingAccount.provider === BillingAccounts.BillingProviderKeys.TRELI && billingAccount.credentials) {
       const secretKey = Buffer.from(
         process.env.CREDENTIALS_SECRET_KEY ?? '',
         'hex',
