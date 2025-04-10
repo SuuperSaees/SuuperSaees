@@ -3015,3 +3015,37 @@ USING (
   auth.uid() IS NOT NULL
   AND bucket_id = 'chats'
 );
+
+-- ACCOUNT IMAGE
+CREATE POLICY "authenticated user select access account_image"
+ON storage.objects
+FOR SELECT
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'account_image'
+);
+CREATE POLICY "authenticated user update access account_image"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'account_image'
+);
+CREATE POLICY "authenticated user insert access account_image"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (
+auth.uid() IS NOT NULL
+AND bucket_id = 'account_image'
+);
+CREATE POLICY "authenticated user delete access account_image"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (
+auth.uid() IS NOT NULL
+AND bucket_id = 'account_image'
+);

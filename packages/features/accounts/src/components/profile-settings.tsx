@@ -133,7 +133,7 @@ function ProfileSettings({
       toast.error('Error', {
         description: t('updateProfileError'),
       });
-      console.error(error);
+      console.error('Error updating profile image:', error);
     }
   };
 
