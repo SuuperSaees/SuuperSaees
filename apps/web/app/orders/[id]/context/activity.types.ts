@@ -1,3 +1,4 @@
+import { JSONCustomResponse } from '@kit/shared/response';
 import { UseMutationResult } from '@tanstack/react-query';
 import { Activity as ServerActivity } from '~/lib/activity.types';
 import { Brief } from '~/lib/brief.types';
@@ -60,6 +61,7 @@ export type UserExtended = Pick<
 
 export type FileExtended = ServerFile.Type & {
   user: UserExtended;
+  isLoading: boolean;
 };
 
 export type MessageExtended = Omit<ServerMessage.Type, 'user' | 'files'> & {
@@ -146,6 +148,10 @@ export interface ActivityContextType {
     picture_url: string | null;
     subscription_status: Tables<'subscriptions'>['status'] | null;
   };
-  loadingMessages: boolean;
-  deleteMessage: (messageId: string, adminActived?: boolean) => Promise<void>;
+  deleteMessage:  UseMutationResult<JSONCustomResponse<null>, Error, {
+    messageId: string;
+    adminActived?: boolean;
+}, {
+    previousMessages: MessageExtended[];
+}>
 }

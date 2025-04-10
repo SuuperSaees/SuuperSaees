@@ -105,7 +105,6 @@ async function OrderDetailsPage({
         <div className="flex h-full max-h-full w-full justify-between">
           <div className="flex h-full max-h-full w-full min-w-0 flex-grow flex-col pt-2">
             <OrderHeader
-              order={order}
               agencyStatuses={agencyStatuses ?? []}
               user={user}
               userRole={role ?? ''}

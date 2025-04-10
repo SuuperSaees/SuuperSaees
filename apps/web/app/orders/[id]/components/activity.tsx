@@ -22,7 +22,7 @@ import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 
 
-const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: string, agencyStatuses: AgencyStatus.Type[], activeTab: string }) => {
+const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agencyStatuses: AgencyStatus.Type[] }) => {
   const { order } = useActivityContext();
 
   console.log('order', order);
@@ -151,7 +151,7 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
   return (
     <div className="flex w-full flex-col gap-4 h-auto min-h-full">
       <Separator className='w-full'/>
-      <Interactions agencyStatuses={agencyStatuses} activeTab={activeTab}/>
+      <Interactions agencyStatuses={agencyStatuses}/>
       <Separator className='w-full'/>
       <div 
         className={`flex flex-col justify-end pt-3 px-8 mb-4`}
@@ -180,13 +180,13 @@ const ActivityPage = ({ agencyName, agencyStatuses, activeTab }: { agencyName: s
           isEditable={true}
           onFileUpload={handleFileUpload}
           customActionButtons={[
-            // (editor: Editor) => (
-            //   <LoomRecordButton
-            //     onAction={(text: string) => editor.commands.setContent(text)}
-            //     loomAppId={organizationData.data?.loom_app_id ?? ''}
-            //     isLoading={organizationData.isLoading}
-            //   />
-            // ),
+            (editor: Editor) => (
+              <LoomRecordButton
+                onAction={(text: string) => editor.commands.setContent(text)}
+                loomAppId={organizationData.data?.loom_app_id ?? ''}
+                isLoading={organizationData.isLoading}
+              />
+            ),
             () => (
               <InternalMessagesToggle 
                 userRole={userRole} 
