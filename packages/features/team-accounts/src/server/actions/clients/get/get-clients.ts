@@ -193,13 +193,13 @@ async function fetchClientOwners(
     )
     .in('id', clientsOrganizationIds)
 
-  if (clientOrganizationsError ) {
+  if (clientOrganizationsError && clientOrganizationsError.code !== 'PGRST116') {
     throw new Error(
       `Error fetching client owners: ${clientOrganizationsError.message}`,
     );
   }
 
-  const primaryOwnerIds = clientOrganizations.map((clientOrganization) => clientOrganization.owner_id);
+  const primaryOwnerIds = clientOrganizations?.map((clientOrganization) => clientOrganization.owner_id) ?? [];
 
   const { data: clientOrganizationOwners, error: clientOwnersError } = await client
     .from('accounts')
@@ -228,6 +228,7 @@ async function fetchClientOwners(
     .from('accounts_memberships')
     .select('account_role, user_id')
     .in('user_id', clientUserIds)
+    .in('organization_id', clientsOrganizationIds)
 
     if (clientUsersRolesError) {
       throw new Error(
@@ -287,13 +288,15 @@ function combineClientData(
   return sortedOrganizations.map((organization) => {
     // Find the primary owner based on `primary_owner_user_id`
     const primaryOwner = clientOwners.find(
-      (owner) => owner.id === organization.primary_owner_user_id
+      (owner) => owner.id === organization.owner_id
     );
 
     // Find additional users for this organization
-    const users = clientUsers.filter(
-      (user) => user.organization_id === organization.id
-    );
+    // const users = clientUsers.filter(
+    //   (user) => user.id === organization.id
+    // );
+
+    const users = clientUsers;
 
     return {
       organization: {
@@ -302,8 +305,7 @@ function combineClientData(
         slug: organization.slug,
         picture_url: organization.picture_url,
         created_at: organization.created_at,
-        is_personal_account: organization.is_personal_account,
-        primary_owner_user_id: organization.primary_owner_user_id,
+        owner_id: organization.owner_id,
       },
       primaryOwner: primaryOwner
         ? {
@@ -321,7 +323,6 @@ function combineClientData(
         email: user.email,
         picture_url: user.picture_url,
         created_at: user.created_at,
-        primary_owner_user_id: user.primary_owner_user_id,
         settings: user.settings,
         role: user.role,
       })),
