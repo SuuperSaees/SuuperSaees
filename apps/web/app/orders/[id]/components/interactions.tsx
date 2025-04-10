@@ -27,11 +27,13 @@ const Interactions = ({
     order,
     briefResponses,
   } = useActivityContext();
-
+  console.log('messages', messages);
   const notValidFormTypes = useMemo(
     () => new Set(['h1', 'h2', 'h3', 'h4', 'rich-text', 'image', 'video']),
     [],
   );
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const filteredFiles = useMemo(() => {
     if (!briefResponses) {
@@ -108,16 +110,14 @@ const Interactions = ({
     },
     {} as Record<string, typeof combinedInteractions>,
   );
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Scroll to bottom / last item with smooth behaviour
   useEffect(() => {
-    if (interactionsContainerRef.current) {
-      interactionsContainerRef.current.scrollTo({
-        top: interactionsContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  }, []);
+    scrollToBottom();
+  }, [messages]);
 
   return (
 <div
@@ -159,6 +159,7 @@ const Interactions = ({
               />
             ) : null;
           })}
+          <div ref={messagesEndRef} />
         </div>
       ))}
     </div>

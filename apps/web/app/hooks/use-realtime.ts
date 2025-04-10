@@ -19,7 +19,7 @@ export type TableConfig<T> = {
   tableName: string;
   currentData: T | T[];
   setData: React.Dispatch<React.SetStateAction<T | T[]>>;
-  filter?: Record<string, ValidFilterValue>;
+  filter?: Record<string, ValidFilterValue | undefined>;
 };
 
 export type RealtimeConfig = {
@@ -98,6 +98,7 @@ function createFilterString(filter: Record<string, unknown>): string {
   try {
     // Convert each key-value pair to a filter string with proper type checking
     return Object.entries(filter)
+      .filter(([_, value]) => value !== undefined) // Skip undefined values
       .map(([key, value]) => {
         const formattedValue = formatFilterValue(value);
         return `${key}=${formattedValue}`;

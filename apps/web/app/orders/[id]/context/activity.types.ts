@@ -1,3 +1,4 @@
+import { UseMutationResult } from '@tanstack/react-query';
 import { Activity as ServerActivity } from '~/lib/activity.types';
 import { Brief } from '~/lib/brief.types';
 import { Database, Tables } from '~/lib/database.types';
@@ -138,13 +139,7 @@ export interface ActivityContextType {
   order: DataResult.Order;
   briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   userRole: string;
-  addMessage: ({
-    message,
-    fileIdsList,
-  }: {
-    message: string;
-    fileIdsList?: string[];
-  }) => Promise<ServerMessage.Type>;
+  addMessageMutation: UseMutationResult<{message: ServerMessage.Insert, files: ServerFile.Insert[]}, Error, {message: ServerMessage.Insert, files: ServerFile.Insert[], tempId: string}>
   userWorkspace: {
     id: string | null;
     name: string | null;

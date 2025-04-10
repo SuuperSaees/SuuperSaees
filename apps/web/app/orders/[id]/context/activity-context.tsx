@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Dispatch,
   ReactNode,
   createContext,
   useCallback,
@@ -9,19 +10,17 @@ import {
   useState,
 } from 'react';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateFile } from 'node_modules/@kit/team-accounts/src/server/actions/files/update/update-file';
 import { getUserById } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-import { addOrderMessage } from 'node_modules/@kit/team-accounts/src/server/actions/orders/update/update-order';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
-import { deleteMessage } from '~/team-accounts/src/server/actions/messages/delete/delete-messages';
-import { generateUUID } from '~/utils/generate-uuid';
+import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
+import { TableConfig, useRealtime } from '~/hooks/use-realtime';
+import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
+import { Brief } from '~/lib/brief.types';
+import { updateArrayData } from '~/utils/data-transform';
 
-import useInternalMessaging from '../hooks/use-messages';
+import { useOrderApiActions } from '../hooks/use-order-api-actions';
 import { useOrderSubscriptions } from '../hooks/use-subscriptions';
 import {
   ActivityContextType,
@@ -31,8 +30,6 @@ import {
   TableName,
   UserExtended,
 } from './activity.types';
-import { Brief } from '~/lib/brief.types';
-import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 
 export const ActivityContext = createContext<ActivityContextType | undefined>(
   undefined,
@@ -47,6 +44,8 @@ export const ActivityProvider = ({
   order: serverOrder,
   briefResponses: serverBriefResponses,
   userRole,
+  clientOrganizationId,
+  agencyId,
 }: {
   children: ReactNode;
   activities: DataResult.Activity[];
@@ -56,8 +55,9 @@ export const ActivityProvider = ({
   order: DataResult.Order;
   userRole: string;
   briefResponses: Brief.Relationships.FormFieldResponse.Response[];
+  clientOrganizationId: string;
+  agencyId: string;
 }) => {
-  const { t } = useTranslation('orders');
   const [order, setOrder] = useState<DataResult.Order>(serverOrder);
   const [messages, setMessages] =
     useState<DataResult.Message[]>(serverMessages);
@@ -65,161 +65,15 @@ export const ActivityProvider = ({
     useState<DataResult.Activity[]>(serverActivities);
   const [reviews, setReviews] = useState<DataResult.Review[]>(serverReviews);
   const [files, setFiles] = useState<DataResult.File[]>(serverFiles);
-  const { getInternalMessagingEnabled } = useInternalMessaging();
-  const queryClient = useQueryClient();
-  const [loadingMessages, setLoadingMessages] = useState(false);
-  const { workspace: currentUser, user } = useUserWorkspace();
+  const { workspace: currentUser } = useUserWorkspace();
 
-  const writeMessage = async (
-    { message, fileIdsList }: { message: string; fileIdsList?: string[] },
-    tempId: string,
-  ) => {
-    const messageId = crypto.randomUUID();
-    try {
-      const messageToSend = {
-        id: messageId,
-        content: message,
-        order_id: Number(order.id),
-        visibility: getInternalMessagingEnabled()
-          ? 'internal_agency'
-          : 'public',
-        temp_id: tempId,
-      };
-      const newMessage = await addOrderMessage(
-        currentUser.id ?? '',
-        Number(order.id),
-        messageToSend,
-        messageToSend.visibility as DataResult.Message['visibility'],
-      );
-      // If there are file IDs, update the files with the new message ID
-      if (fileIdsList && fileIdsList.length > 0) {
-        for (const fileId of fileIdsList) {
-          await updateFile(fileId, messageId);
-        }
-      }
-
-      toast.success(t('message.success'), {
-        description: t('message.messageSent'),
-      });
-
-      return newMessage;
-    } catch (error) {
-      toast.error(t('message.error'), {
-        description: t('message.messageSentError'),
-      });
-      throw error;
-    } finally {
-      setLoadingMessages(false);
-    }
-  };
-
-  const addMessageMutation = useMutation({
-    mutationFn: ({
-      message,
-      fileIdsList,
-      tempId,
-    }: {
-      message: string;
-      fileIdsList?: string[];
-      tempId: string;
-    }) => writeMessage({ message, fileIdsList }, tempId),
-    onMutate: async ({ message, tempId }) => {
-      // Cancel outgoing refetches (so they don't overwrite our optimistic update)
-      setLoadingMessages(true);
-      await queryClient.cancelQueries({
-        queryKey: ['messages'],
-      });
-
-      const optimisticMessage: DataResult.Message = {
-        id: 'temp-' + tempId, // Temporary ID
-        content: message,
-        order_id: Number(order.id),
-        visibility: getInternalMessagingEnabled()
-          ? 'internal_agency'
-          : 'public',
-        created_at: new Date().toISOString(),
-        user: {
-          id: currentUser?.id ?? '',
-          name: currentUser?.name ?? '',
-          email: user?.email ?? '',
-          picture_url: currentUser.picture_url ?? '',
-        },
-        user_id: currentUser?.id ?? '',
-        files: [], // Default to an empty array if not provided
-        reactions: [], // Default to an empty array if not provided,
-        temp_id: tempId,
-        pending: true,
-        updated_at: new Date().toISOString(),
-      };
-
-      setMessages((oldMessages) => [...oldMessages, optimisticMessage]);
-
-      // Return the snapshot in case of rollback
-      return { optimisticMessage };
-    },
-    onError: (_error, _variables, context) => {
-      setMessages((prevMessages) =>
-        prevMessages.filter(
-          (msg) => msg.temp_id !== context?.optimisticMessage.temp_id,
-        ),
-      );
-      toast.error('Error', {
-        description: 'The message could not be sent.',
-      });
-    },
-    onSuccess: (newMessage, _variables, context) => {
-      const realMessage = {
-        ...newMessage,
-        user: context.optimisticMessage.user,
-        files: [],
-        reactions: [],
-      };
-      setMessages((prevMessages) => {
-        return reconcileState(
-          prevMessages,
-          realMessage,
-        ) as DataResult.Message[];
-      });
-    },
-    onSettled: () => {
-      setLoadingMessages(false);
-    },
-  });
-
-  const deleteMessageMutation = useMutation({
-    mutationFn: ({ messageId, adminActived }: { messageId: string; adminActived?: boolean }) => 
-      deleteMessage(messageId, adminActived),
-    onMutate: async ({messageId}) => {
-      await queryClient.cancelQueries({ queryKey: ['messages'] });
-
-      // Store the previous messages state
-      const previousMessages = messages;
-
-      // Optimistically update the UI
-      setMessages((oldMessages) =>
-        oldMessages.map((message) =>
-          message.id === messageId
-            ? { ...message, deleted_on: new Date().toISOString() }
-            : message,
-        ),
-      );
-
-      return { previousMessages };
-    },
-    onError: (_error, _variables, context) => {
-      // Rollback on error
-      if (context?.previousMessages) {
-        setMessages(context.previousMessages);
-      }
-      toast.error(t('message.error'), {
-        description: t('message.messageDeletedError'),
-      });
-    },
-    onSuccess: () => {
-      toast.success(t('message.messageDeleted'), {
-        description: t('message.messageDeletedSuccess'),
-      });
-    },
+  const { addMessageMutation, deleteMessageMutation } = useOrderApiActions({
+    orderId: order.id,
+    orderUUID: order.uuid,
+    clientOrganizationId,
+    agencyId,
+    messages,
+    setMessages,
   });
 
   const reconcileState = (
@@ -359,68 +213,191 @@ export const ActivityProvider = ({
     },
     [files], // Dependency array to ensure that `files` is up-to-date
   );
+  // Real-time subscription handler
+  const handleSubscriptions = createSubscriptionHandler<
+    | DataResult.Message
+    | DataResult.Review
+    | DataResult.File
+    | DataResult.Activity
+    | DataResult.Order
+  >({
+    idField: 'temp_id',
+    onBeforeUpdate: async (payload) => {
+      const { eventType, new: newData, table } = payload;
 
-  const handleSubscription = useCallback(
-    async <T extends DataResult.All>(
-      payload: SubscriptionPayload,
-      currentDataStore: T[] | T,
-      stateSetter: React.Dispatch<React.SetStateAction<T[] | T>>,
-      tableName: TableName,
-    ) => {
-      try {
-        const newData = (await reconcileData(
-          payload,
-          currentDataStore as DataResult.All,
-          tableName,
-        )) as T;
-        if (tableName === TableName.MESSAGES) {
-          stateSetter((prevState) => {
-            if (Array.isArray(prevState)) {
-              return reconcileState(
-                prevState as DataResult.Message[],
-                newData as DataResult.Message,
-              ) as T[];
-            }
-            return prevState;
-          });
-        } else {
-            stateSetter((prevState) => {
-            if (Array.isArray(prevState)) {
-              return [...prevState, newData] as T[];
-            } else {
-              return newData;
-            }
-          });
+      // Handle user data enrichment for messages
+      if (table === 'messages' && eventType === 'INSERT') {
+        const message = newData as DataResult.Message;
+        // Get the user from the messages array
+        let user = messages.find((msg) => msg.id === message.id)?.user;
+        console.log('user', user);
+        if (!user) {
+          try {
+            user = await getUserById(message.user_id);
+          } catch (err) {
+            console.error('Error fetching user:', err);
+            return;
+          }
         }
-      } catch (error) {
-        console.error('Error handling subscription:', error);
+        const enrichedMessage = {
+            pending: false,
+            ...message,
+            user,
+          };
+          const updatedMessages = updateArrayData(
+            messages,
+            enrichedMessage,
+            'temp_id',
+            true,
+          );
+          console.log('updatedMessages', updatedMessages);
+          setMessages(updatedMessages);
+          return true;
       }
+
+      // Handle file updates and message associations
+      if (table === 'files' && eventType === 'INSERT') {
+        const file = newData as DataResult.File;
+        // Use the message_id to insert the file in the files messages table
+        setMessages((prev) => {
+          console.log('prev', prev);
+          const message = prev.find(
+            (message) => message.id === file.message_id,
+          );
+          if (message) {
+            const files = updateArrayData(
+              message.files ?? [],
+              file,
+              'temp_id',
+              true,
+            );
+            const newMessage = {
+              ...message,
+              files: files.map((file) => ({ ...file, isLoading: false })),
+            };
+            console.log('newMessage', newMessage);
+            const updatedItems = updateArrayData(
+              messages,
+              newMessage,
+              'temp_id',
+              false,
+            );
+            return updatedItems;
+          }
+          return prev;
+        });
+        return true;
+      }
+
+      // Handle order status updates
+      if (table === 'orders_v2' && eventType === 'UPDATE') {
+        const orderUpdate = newData as DataResult.Order;
+        if (
+          orderUpdate.status !== order.status ||
+          orderUpdate.status_id !== order.status_id ||
+          orderUpdate.priority !== order.priority ||
+          orderUpdate.due_date !== order.due_date
+        ) {
+          return orderUpdate;
+        }
+        return false;
+      }
+      return true;
     },
-    [reconcileData],
-  );
+  });
 
-  useOrderSubscriptions(
-    order.id,
-    handleSubscription,
-    order,
-    setOrder,
-    activities,
-    setActivities,
-    messages,
-    setMessages,
-    reviews,
-    setReviews,
-    files,
-    setFiles,
-  );
+  // Configure real-time subscriptions
+  const realtimeConfig = {
+    channelName: 'order-changes',
+    schema: 'public',
+  };
 
-  const { markOrderAsRead } = useUnreadMessageCounts({userId: currentUser.id ?? ''});
+  type DataUnion =
+    | DataResult.Message
+    | DataResult.Review
+    | DataResult.File
+    | DataResult.Activity
+    | DataResult.Order;
+
+  const tables: TableConfig<DataUnion>[] = [
+    {
+      tableName: 'messages',
+      currentData: messages,
+      setData: setMessages as Dispatch<
+        React.SetStateAction<DataUnion[] | DataUnion>
+      >,
+      filter: {
+        order_id: `eq.${order.id}`,
+      },
+    },
+    {
+      tableName: 'reviews',
+      currentData: reviews,
+      setData: setReviews as Dispatch<
+        React.SetStateAction<DataUnion[] | DataUnion>
+      >,
+      filter: {
+        order_id: `eq.${order.id}`,
+      },
+    },
+    {
+      tableName: 'files',
+      currentData: files,
+      setData: setFiles as Dispatch<
+        React.SetStateAction<DataUnion[] | DataUnion>
+      >,
+      filter: {
+        reference_id: `eq.${order.id}`,
+      },
+    },
+    {
+      tableName: 'activities',
+      currentData: activities,
+      setData: setActivities as Dispatch<
+        React.SetStateAction<DataUnion[] | DataUnion>
+      >,
+      filter: {
+        order_id: `eq.${order.id}`,
+      },
+    },
+    {
+      tableName: 'orders_v2',
+      currentData: order,
+      setData: setOrder as Dispatch<
+        React.SetStateAction<DataUnion[] | DataUnion>
+      >,
+      filter: {
+        id: `eq.${order.id}`,
+      },
+    },
+  ];
+
+  // Initialize real-time subscriptions
+  useRealtime(tables, realtimeConfig, handleSubscriptions);
+  // useOrderSubscriptions(
+  //   order.id,
+  //   handleSubscription,
+  //   order,
+  //   setOrder,
+  //   activities,
+  //   setActivities,
+  //   messages,
+  //   setMessages,
+  //   reviews,
+  //   setReviews,
+  //   files,
+  //   setFiles,
+  // );
+
+  const { markOrderAsRead } = useUnreadMessageCounts({
+    userId: currentUser.id ?? '',
+  });
   useEffect(() => {
-    if(order.id) {
-      markOrderAsRead(order.id);
+    if (order.id) {
+      void markOrderAsRead(order.id);
     }
   }, [order.id, markOrderAsRead]);
-  
+
   return (
     <ActivityContext.Provider
       value={{
@@ -432,20 +409,9 @@ export const ActivityProvider = ({
         order,
         briefResponses: serverBriefResponses,
         userRole,
-        addMessage: async ({
-          message,
-          fileIdsList,
-        }: {
-          message: string;
-          fileIdsList?: string[];
-        }) =>
-          await addMessageMutation.mutateAsync({
-            message,
-            fileIdsList,
-            tempId: generateUUID(),
-          }),
+        addMessageMutation,
         userWorkspace: currentUser,
-        loadingMessages,
+        loadingMessages: addMessageMutation.isPending,
         deleteMessage: async (messageId: string, adminActived?: boolean) => {
           await deleteMessageMutation.mutateAsync({ messageId, adminActived });
         },

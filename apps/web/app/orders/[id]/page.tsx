@@ -98,6 +98,8 @@ async function OrderDetailsPage({
       order={order}
       briefResponses={order?.brief_responses ?? []}
       userRole={role ?? ''}
+      clientOrganizationId={order.client_organization_id}
+      agencyId={order?.agency_id ?? ''}
     >
       <div className="flex h-full max-h-full w-full flex-col overflow-y-auto text-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2">
         <div className="flex h-full max-h-full w-full justify-between">
