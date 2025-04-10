@@ -233,30 +233,15 @@ export async function getOrganizationById(organizationId: string, client?: Supab
   }
 }
 
-export async function getAgencyForClient(clientOrganizationId: string) {
+export async function getAgencyForClient() {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
-
-    //Getting the client agency_id
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('agency_id')
-      .eq('organization_client_id', clientOrganizationId)
-     
-
-    if (clientError ?? !clientData) {
-      console.error('Error fetching agency:', clientError);
-      throw clientError;
-    }
-
-    // Retriving the corresponding agency => include also the subdomain param on the future
+    
+    const agencyId = (await client.rpc('get_session')).data?.agency?.id ?? '';
     const { data: agencyData, error: agencyError } = await client
-      .from('accounts')
-      .select('id, name, email, picture_url, slug')
-      .eq('id', clientData?.[0]?.agency_id ?? '')
-      .eq('is_personal_account', false)
+      .from('organizations')
+      .select('id, name, picture_url, slug')
+      .eq('id', agencyId)
       .single();
 
     if (agencyError ?? !agencyData) {

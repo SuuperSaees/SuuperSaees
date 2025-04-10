@@ -33,7 +33,7 @@ async function StoragePage() {
     ...organization,
     owner: organizationOwner ?? null, // Add owner explicitly
   };
-  const agency = await getAgencyForClient(newOrganization.id ?? '').catch((err) => {
+  const agency = await getAgencyForClient().catch((err) => {
     console.error(`Error getting agency for client: ${err}`)
     return null
   });

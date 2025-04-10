@@ -217,7 +217,7 @@ export const addClientMember = async ({
     }
 
     // Step 2: Get the agency organization assigned to the client
-    const agencyOrganization = await getAgencyForClient(clientOrganizationId);
+    const agencyOrganization = await getAgencyForClient();
     if (!agencyOrganization) {
       throw new CustomError(
         404,

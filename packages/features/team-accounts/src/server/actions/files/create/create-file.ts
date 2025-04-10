@@ -23,7 +23,7 @@ export const createFile = async (
 
     if (client_organization_id !== undefined) {
       // Fetch the agencies of the user
-      const agency = await getAgencyForClient(client_organization_id ?? '');
+      const agency = await getAgencyForClient();
 
       if (!agency) throw new Error('Agency not found');
 

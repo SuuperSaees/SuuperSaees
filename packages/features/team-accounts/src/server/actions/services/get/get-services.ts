@@ -153,13 +153,13 @@ export async function getClientServices(
     );
 
     // Step 3: Get the client's agency
-    const agencyData = await getAgencyForClient(clientOrganizationId);
+    const agencyData = await getAgencyForClient();
     if (!agencyData) throw new Error('No agency found');
 
     // Step 3: Verify permissions
     const hasPermission = await hasPermissionToReadClientServices(
       clientOrganizationId,
-      agencyData?.id,
+      agencyData?.id ?? '',
     );
 
     if (!hasPermission)

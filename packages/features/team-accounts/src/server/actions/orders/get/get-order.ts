@@ -237,7 +237,7 @@ export const getOrders = async (
       throw new Error('User account not found (no organization_id)');
 
     // Step 1: Get and define the user's role
-    const role = await getUserRole();
+    const role = await getUserRole() ?? '';
     const clientRoles = new Set(['client_owner', 'client_member', 'client_guest']);
     const agencyRoles = new Set([
       'agency_owner',
@@ -258,7 +258,7 @@ export const getOrders = async (
       .select(
         `*, client_organization:accounts!client_organization_id(id, name, settings:organization_settings!account_id(key, value)),
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
-        assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
+        assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
         tags:order_tags(tag:tags(*))
         ${includeBrief ? ', brief:briefs(name)' : ''}
         `,
@@ -309,10 +309,11 @@ export const getOrders = async (
 
     orders = ordersData.map(order => ({
       ...order,
-      assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on && 
-        assignment.agency_member?.organization_id === order.agency_id
-      ) ?? [],
+      assigned_to: order.assigned_to ?? [],
+      // assigned_to: order.assigned_to?.filter(assignment => 
+      //   !assignment.agency_member?.deleted_on && 
+      //   assignment.agency_member?.organization_id === order.agency_id
+      // ) ?? [],
     }));
 
     // Step 3: Collect all status_ids from orders

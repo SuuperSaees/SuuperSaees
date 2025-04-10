@@ -38,7 +38,7 @@ export default async function MemberPage(props: {
 
   const agency = agencyRoles.includes(workspace?.role ?? '')
     ? userOrganization
-    : await getAgencyForClient(userOrganization.id ?? '');
+    : await getAgencyForClient();
   const agencyId = agency?.id ?? '';
 
   const agencyStatuses =
