@@ -10,8 +10,7 @@ export const getServicesByOrganizationId = async (): Promise<{
 }> => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
-  // const accountMemberShipData = await getUserIdOfAgencyOwner()
-  // if (!primary_owner_user_id) throw new Error('No primary owner found')
+  
   try {
     const { data: fetchedProducts, error } = await client
       .from('services')

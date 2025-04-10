@@ -454,7 +454,7 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.user_belongs_to_agency_organizations(uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.user_belongs_to_client_organizations(uuid) TO authenticated, service_role;
 
 create policy "Allow agency managers to create billing services"
 on "public"."billing_services"
