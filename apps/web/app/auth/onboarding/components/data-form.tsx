@@ -16,7 +16,6 @@ import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/updat
 import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
 import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
-// import { getOrganizationByUserId } from "~/team-accounts/src/server/actions/organizations/get/get-organizations";
 import { useSupabase } from "@kit/supabase/hooks/use-supabase";
 import { Spinner } from "@kit/ui/spinner";
 

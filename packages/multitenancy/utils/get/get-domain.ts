@@ -1,6 +1,7 @@
 'use server';
 
 import { Account } from '../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../apps/web/lib/organization.types';
 import { getUserAccountById, getUserRoleById } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { getAgencyForClientByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getOrganizationByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
@@ -16,7 +17,7 @@ export async function getDomainByUserId(
   domain: string;
   organizationId: string | null;
   ownerEmail: string | null;
-  organization: null | Pick<Account.Type, 'name'>;
+  organization: null | Pick<Organization.Type, 'name'>;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -30,7 +31,7 @@ export async function getDomainByUserId(
     let organizationId: string | null = null;
     let ownerEmail: null | string = null;
     let organization: null | Pick<
-      Account.Type,
+      Organization.Type,
       'name'
     > = null;
      const getOwnerEmail = async (id: string | undefined) => {
@@ -45,10 +46,10 @@ export async function getDomainByUserId(
     };
      if (availableRolesAgency.has(userRole)) {
       // Case 1: Agency roles
-      const organizationData = await getOrganizationByUserId(userId);
+      const organizationData = await getOrganizationByUserId();
       organization = organizationData;
       organizationId = organizationData?.id ?? null;
-      ownerEmail = await getOwnerEmail(organizationData?.primary_owner_user_id);
+      ownerEmail = await getOwnerEmail(organizationData?.owner_id);
     } else if (availableRolesClient.has(userRole)) {
       // Case 2: Client roles
       const agencyData = await getAgencyForClientByUserId();

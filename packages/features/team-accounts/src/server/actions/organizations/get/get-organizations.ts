@@ -126,49 +126,57 @@ export async function getOrganization(): Promise<{
 }
 
 export async function getOrganizationByUserId(
-  userId: string,
-  adminActivated = false,
+  userId?: string,
 ): Promise<{
   id: string;
   name: string;
   owner_id: string;
 }> {
   try {
-    const client = getSupabaseServerComponentClient({
-      admin: adminActivated,
-    });
-    const { data: userAccountData, error: userAccountError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
+    const client = getSupabaseServerComponentClient();
+    const sessionData = (await client.rpc('get_session')).data;
+
+    if(!userId) {
+      const organizationData = sessionData?.organization;
+      return {
+        id: organizationData?.id ?? '',
+          name: organizationData?.name ?? '',
+          owner_id: organizationData?.owner_id ?? '',
+        };
+    }
+
+    const { data: clientData, error: clientError } = await client
+      .from('clients')
+      .select('organization_client_id')
+      .eq('user_client_id', userId)
+      .eq('agency_id', sessionData?.agency?.id ?? sessionData?.organization?.id ?? '')
       .single();
 
-    if (userAccountError) {
+    if(clientError) {
       throw new Error(
-        `Error getting organization: ${userAccountError.message}`,
+        `Error getting the client: ${clientError.message}`,
       );
     }
 
-    const organizationId = userAccountData?.organization_id;
-
-    if (!organizationId) {
-      console.error('Organization ID is null');
-      throw new Error('Organization ID is null');
-    }
+    const organizationId = clientData?.organization_client_id;
 
     const { data: organizationData, error: organizationError } = await client
       .from('organizations')
-      .select('id, name, owner_id') // if we need more data we can add it here, but for now we only need the id.
-      //IMPORTANT: ask to the team for more params on the future
+      .select('id, name, owner_id')
       .eq('id', organizationId)
       .single();
 
-    if (organizationError) {
-      console.error('Error fetching organization:', organizationError);
-      throw organizationError;
+    if(organizationError) {
+      throw new Error(
+        `Error getting the organization: ${organizationError.message}`,
+      );
     }
 
-    return organizationData;
+    return {
+      id: organizationData?.id ?? '',
+      name: organizationData?.name ?? '',
+      owner_id: organizationData?.owner_id ?? '',
+    };
   } catch (error) {
     console.error('Error trying to get the organization by user id:', error);
     throw error;

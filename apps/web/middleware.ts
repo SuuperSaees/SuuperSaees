@@ -11,7 +11,6 @@ import {
 } from '~/multitenancy/utils/get/get-domain';
 import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { getOrganizationByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 // import { handleCors } from './handlers/cors-handler';
@@ -259,33 +258,6 @@ function getPatterns() {
         return NextResponse.redirect(
           new URL(pathsConfig.app.orders, req.nextUrl.origin).href,
         );
-      },
-    },
-    {
-      pattern: new URLPattern({ pathname: '/add-organization' }),
-      handler: async (req: NextRequest, res: NextResponse) => {
-        const {
-          data: { user },
-        } = await getUser(req, res);
-        if (!user) {
-          return;
-        }
-
-        const { id: organizationId } = await getOrganizationByUserId(
-          user.id,
-          true,
-        ).catch((error) => {
-          console.error('Error fetching organization from middleware:', error);
-          return {
-            id: '',
-          };
-        });
-        if (organizationId) {
-          return NextResponse.redirect(
-            new URL(pathsConfig.app.orders, req.url).href,
-          );
-        }
-        return;
       },
     },
     {
