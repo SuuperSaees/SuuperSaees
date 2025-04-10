@@ -374,8 +374,7 @@ on "public"."billing_accounts"
 as permissive
 for update
 to public
-with check (((auth.uid() IS NOT NULL) AND (user_belongs_to_agency_organizations(auth.uid()) AND has_permission_in_organizations(auth.uid(), 'billing.manage'::app_permissions))));
-
+using (((auth.uid() IS NOT NULL) AND (user_belongs_to_agency_organizations(auth.uid()) AND has_permission_in_organizations(auth.uid(), 'billing.manage'::app_permissions))));
 
 create policy "Allow agency managers to read billing accounts"
 on "public"."billing_accounts"
