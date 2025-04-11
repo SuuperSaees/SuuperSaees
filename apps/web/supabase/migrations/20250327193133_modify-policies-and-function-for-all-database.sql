@@ -1287,7 +1287,7 @@ GRANT EXECUTE ON FUNCTION public.set_session(text) TO authenticated, service_rol
 
 set check_function_bodies = off;
 
-CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[], _domain text)
+CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[])
  RETURNS orders_v2
  LANGUAGE plpgsql
 AS $function$DECLARE
@@ -1295,7 +1295,7 @@ AS $function$DECLARE
   current_user_id uuid := auth.uid();  -- Get the authenticated user's ID
   user_role text;  -- To store the current user's role
   subdomain_id uuid;  -- To store the subdomain ID
-  organization_id uuid;  -- To store the organization ID from subdomain
+  org_id uuid;  -- To store the organization ID from subdomain
   client_data record;  -- To hold client data
   agency_organization_data record;  -- To hold agency organization data
   agency_client_id uuid;  -- To hold the agency client ID
@@ -1312,28 +1312,10 @@ BEGIN
     RAISE EXCEPTION 'User is not authenticated';
   END IF;
   
-  -- Step 0.1: Verify domain is not empty
-  IF _domain IS NULL OR _domain = '' THEN
-    RAISE EXCEPTION 'Domain parameter is required';
-  END IF;
+  -- Step 0.1: Verify organization_id is not empty
+  SELECT (get_session()).organization.id::uuid INTO org_id;
   
-  -- Step 0.2: Get subdomain ID from domain
-  SELECT id INTO subdomain_id
-  FROM public.subdomains
-  WHERE domain = _domain
-  LIMIT 1;
-  
-  IF subdomain_id IS NULL THEN
-    RAISE EXCEPTION 'Subdomain not found for domain: %', _domain;
-  END IF;
-  
-  -- Step 0.3: Get organization ID from subdomain
-  SELECT organization_id INTO organization_id
-  FROM public.organization_subdomains
-  WHERE subdomain_id = subdomain_id
-  LIMIT 1;
-  
-  IF organization_id IS NULL THEN
+  IF org_id IS NULL THEN
     RAISE EXCEPTION 'Organization not found for subdomain';
   END IF;
   
@@ -1341,7 +1323,7 @@ BEGIN
   SELECT am.account_role INTO user_role
   FROM public.accounts_memberships am
   WHERE am.user_id = current_user_id
-  AND am.organization_id = organization_id
+  AND am.organization_id = org_id
   LIMIT 1;
   
   IF user_role IS NULL THEN
@@ -1362,21 +1344,21 @@ BEGIN
   -- Step 0.7: Determine agency_client_id and client_organization_id
   IF user_role = ANY(agencyRoles) THEN
     -- User is from agency
-    agency_client_id := organization_id;
-    client_organization_id := COALESCE(client_data.organization_client_id, organization_id);
+    agency_client_id := org_id;
+    client_organization_id := COALESCE(client_data.organization_client_id, org_id);
   ELSE
     -- User is from client
-    client_organization_id := organization_id;
+    client_organization_id := org_id;
     
     -- Find the agency that this client belongs to
     SELECT agency_id INTO agency_client_id
     FROM public.clients
-    WHERE organization_client_id = organization_id
+    WHERE organization_client_id = org_id
     LIMIT 1;
     
     IF agency_client_id IS NULL THEN
       -- If no agency found, use the client's organization
-      agency_client_id := organization_id;
+      agency_client_id := org_id;
     END IF;
   END IF;
 
@@ -1531,6 +1513,7 @@ BEGIN
 END;$function$
 ;
 
+grant execute on function public.create_order(jsonb, jsonb[], text[], uuid[]) to authenticated, service_role;
 -- 20. get_account_members
 
 DROP FUNCTION IF EXISTS public.get_account_members(text) CASCADE;

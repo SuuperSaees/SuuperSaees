@@ -12,7 +12,6 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { AgencyStatus } from '../../../../../../../../apps/web/lib/agency-statuses.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
-import { User as ServerUser } from '../../../../../../../../apps/web/lib/user.types';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
 import {
   fetchFormfieldsWithResponses,
@@ -25,6 +24,7 @@ import {
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
 import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -33,12 +33,12 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     const { data: orderData, error: orderError } = await client
       .from('orders_v2')
       .select(
-        `*, client:accounts!customer_id(id, name, email, picture_url, organization_id, created_at, settings:user_settings(name, picture_url)), 
+        `*, client:accounts!customer_id(id, name, email, picture_url, created_at, settings:user_settings(name, picture_url)), 
         messages(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)), files(*)), 
         activities(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
           reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
           files(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
-         assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
+         assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          order_tags(tag:tags(id, name, color, organization_id))
         `,
@@ -97,7 +97,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
     // fetch client organization with the order
     const { data: clientOrganizationData, error: clientOrganizationError } =
       await client
-        .from('accounts')
+        .from('organizations')
         .select('name, slug')
         .eq('id', orderData.client_organization_id)
         .single();
@@ -119,14 +119,14 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         };
       }),
       assigned_to: orderData.assigned_to.filter(assignment => 
-        !assignment.agency_member?.deleted_on && 
-        assignment.agency_member?.organization_id === orderData.agency_id
+        !assignment.agency_member?.deleted_on && true
+        // assignment.agency_member?.organization_id === orderData.agency_id
       ),
       client_organization: clientOrganizationData,
       brief_responses: briefResponses,
     };
 
-    return proccesedData as Order.Relational;
+    return proccesedData as unknown as Order.Relational;
   } catch (error) {
     console.error('Error fetching order:', error);
     throw error;
@@ -134,7 +134,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 };
 
 export async function getOrderAgencyMembers(
-  agencyId: ServerUser.Type['organization_id'],
+  agencyId: Organization.Type['id'],
   orderId: Order.Type['id'],
 ) {
   try {
@@ -147,22 +147,13 @@ export async function getOrderAgencyMembers(
 
     // Retrieve authenticated account information
     const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select('organization_id, primary_owner_user_id')
-      .eq('id', userId)
-      .is('deleted_on', null)
+      .from('accounts_memberships')
+      .select('organization_id, account_role')
+      .eq('user_id', userId)
+      .eq('organization_id', agencyId)
       .single();
 
     if (accountError) throw accountError;
-
-    const { data: accountMembershipsData, error: accountMembershipsDataError } =
-      await client
-        .from('accounts_memberships')
-        .select('account_role')
-        .eq('user_id', userId)
-        .single();
-
-    if (accountMembershipsDataError) throw accountMembershipsDataError;
 
     // Retrieve the order
     const { data: orderData, error: orderError } = await client
@@ -174,10 +165,10 @@ export async function getOrderAgencyMembers(
     if (orderError) throw orderError;
 
     if (
-      accountMembershipsData.account_role &&
-      accountMembershipsData.account_role !== 'agency_project_manager' &&
-      accountMembershipsData.account_role !== 'agency_owner' &&
-      accountMembershipsData.account_role !== 'agency_member'
+      accountData.account_role &&
+      accountData.account_role !== 'agency_project_manager' &&
+      accountData.account_role !== 'agency_owner' &&
+      accountData.account_role !== 'agency_member'
     ) {
       throw new Error('Unauthorized access to order agency members');
     }
@@ -187,9 +178,9 @@ export async function getOrderAgencyMembers(
         await client
           .from('accounts')
           .select(
-            'id, name, email, picture_url, user_settings(name, picture_url, calendar)',
+            'id, name, email, picture_url, user_settings(name, picture_url, calendar), accounts_memberships(organization_id)',
           )
-          .eq('organization_id', agencyId ?? accountData.organization_id)
+          .eq('accounts_memberships.organization_id', agencyId)
           .is('deleted_on', null);
 
       if (agencyMembersError) throw agencyMembersError;
@@ -209,10 +200,11 @@ export async function getOrderAgencyMembers(
           phone_number,
           picture_url,
           calendar
-        )
+        ),
+        accounts_memberships(organization_id)
       `,
       )
-      .eq('organization_id', agencyId ?? accountData.primary_owner_user_id)
+      .eq('accounts_memberships.organization_id', agencyId)
       .is('deleted_on', null);
 
     if (agencyMembersError) throw agencyMembersError;
@@ -476,7 +468,7 @@ export async function getOrdersByUserId(
 
     // Step 1: Fetch the user's account
     const currentUserAccount = await fetchCurrentUserAccount(client, userId);
-    const userRole = await getUserRole();
+    const userRole = await getUserRole() ?? '';
 
     const agencyRoles = new Set([
       'agency_owner',
@@ -541,10 +533,11 @@ export async function getOrdersByUserId(
 
     orders = orderData?.map(order => ({
       ...order,
-      assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on && 
-        assignment.agency_member?.organization_id === order.agency_id
-      ) ?? [],
+      assigned_to: order.assigned_to ?? [],
+      // assigned_to: order.assigned_to?.filter(assignment => 
+      //   !assignment.agency_member?.deleted_on && 
+      //   assignment.agency_member?.organization_id === order.agency_id
+      // ) ?? [],
     }));
 
     
@@ -674,10 +667,11 @@ export async function getOrdersByOrganizationId(
 
     let orders = orderData.map(order => ({
       ...order,
-      assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on && 
-        assignment.agency_member?.organization_id === order.agency_id
-      ) ?? [],
+      assigned_to: order.assigned_to ?? [],
+      // assigned_to: order.assigned_to?.filter(assignment => 
+      //   !assignment.agency_member?.deleted_on && 
+      //   assignment.agency_member?.organization_id === order.agency_id
+      // ) ?? [],
     }));
 
     // Step 4: Fetch the reviews for the orders and add them to the orders (if needed)

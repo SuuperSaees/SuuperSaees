@@ -158,7 +158,7 @@ export async function getOrganizationByUserId(
       );
     }
 
-    const organizationId = clientData?.organization_client_id;
+    const organizationId = clientData?.organization_client_id ?? sessionData?.organization?.id ?? '';
 
     const { data: organizationData, error: organizationError } = await client
       .from('organizations')

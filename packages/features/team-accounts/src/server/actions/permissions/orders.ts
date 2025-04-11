@@ -80,7 +80,7 @@ export const hasPermissionToCreateOrder = async (
     // Step 1: Fetch user, account data, and user role
     const user = await fetchCurrentUser(client);
     const account = await fetchCurrentUserAccount(client, user.id);
-    const userRole = await getUserRole();
+    const userRole = await getUserRole() ?? '';
 
     if (!account.organization_id) return false;
 

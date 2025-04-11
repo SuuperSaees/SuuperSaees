@@ -16,7 +16,7 @@ import { getUserRole } from '../members/get/get-member-account';
 export const checkGeneralPermission = async (
   client: SupabaseClient<Database>,
   userId: string,
-  accountId: string,
+  organizationId: string,
   permissionName:
     | 'roles.manage'
     | 'billing.manage'
@@ -32,7 +32,7 @@ export const checkGeneralPermission = async (
     'has_permission',
     {
       user_id: userId,
-      account_id: accountId ?? '',
+      organization_id: organizationId ?? '',
       permission_name: permissionName,
     },
   );
@@ -50,15 +50,7 @@ export const hasPermissionToAddTeamMembers = async () => {
   if (userError) throw userError.message;
 
   const userId = userData.user.id;
-  const { data: accountData, error: accountError } = await client
-    .from('accounts')
-    .select('id, organization_id')
-    .eq('id', userId)
-    .eq('is_personal_account', true)
-    .single();
-
-  if (accountError) throw accountError.message;
-  const accountId = accountData.organization_id;
+  const organizationId = (await client.rpc('get_session'))?.data?.organization?.id ?? '';
 
   const role = await getUserRole();
   // There's an error on the policy for roles below owner as allow add for "same "hierarchy level when should be "equal or lower"
@@ -71,7 +63,7 @@ export const hasPermissionToAddTeamMembers = async () => {
       'has_permission',
       {
         user_id: userId,
-        account_id: accountId ?? '',
+        organization_id: organizationId ?? '',
         permission_name: 'invites.manage',
       },
     );
