@@ -79,12 +79,14 @@ export class EmbedsRepository {
         if (embedError) throw embedError;
 
         let embedsFiltered = embedData;
-        
+
         if(organizationId) {
             embedsFiltered = embedData?.filter((embed) => {
                 return embed.visibility === 'public' || embed.embed_accounts?.some((embedAccount) => embedAccount.organization_id === organizationId);
             });
         }
+
+        console.log('embedsFiltered', embedsFiltered)
 
         return embedsFiltered?.map((embed) => ({
             ...embed,
