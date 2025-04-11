@@ -73,6 +73,12 @@ export const ActivityProvider = ({
   const [reviews, setReviews] = useState<DataResult.Review[]>(serverReviews);
   const [files, setFiles] = useState<DataResult.File[]>(serverFiles);
 
+  const members = [
+    ...order.assigned_to.map((member) => member.agency_member),
+    ...order.followers.map((member) => member.client_follower),
+  ];
+
+  console.log('members', members);
   // Get current user workspace information
   const { workspace: currentUser } = useUserWorkspace();
 

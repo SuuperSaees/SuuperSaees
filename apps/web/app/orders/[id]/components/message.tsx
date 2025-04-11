@@ -45,7 +45,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     message.visibility === "internal_agency";
 
   const handleDeleteMessage = async () => {
-    await deleteMessage(message.id, userRole === 'agency_owner');
+    await deleteMessage.mutateAsync({ messageId: message.id, adminActived: userRole === 'agency_owner' });
     setIsOpen(false);
   };
 

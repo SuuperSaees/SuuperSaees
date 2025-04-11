@@ -38,7 +38,7 @@ export enum TableName {
   ORDER = 'orders_v2',
 }
 
-export type ActivityExtended = ServerActivity.Type & {
+export type ActivityExtended = Omit<ServerActivity.Type, 'user'> & {
   user: UserExtended;
 };
 

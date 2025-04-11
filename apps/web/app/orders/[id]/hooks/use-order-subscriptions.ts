@@ -1,11 +1,16 @@
 import { Dispatch } from 'react';
 
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { TableConfig, useRealtime } from '~/hooks/use-realtime';
-import { getUserById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
-import { updateArrayData } from '~/utils/data-transform';
+import { Activity } from '~/lib/activity.types';
+import { File } from '~/lib/file.types';
+import { Message } from '~/lib/message.types';
+import { Order } from '~/lib/order.types';
 
 import { DataResult } from '../context/activity.types';
+import { useOrderSubscriptionsHandlers } from './use-order-subscriptions-handlers';
 
 type DataUnion =
   | DataResult.Message
@@ -26,87 +31,44 @@ export const useOrderSubscriptions = (
   files: DataResult.File[],
   setFiles: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
 ) => {
+  const {
+    handleOrderChanges,
+    handleFileChanges,
+    handleMessageChanges,
+    handleActivityChanges,
+  } = useOrderSubscriptionsHandlers();
+
   // Real-time subscription handler
-  const handleSubscriptions = createSubscriptionHandler<
-    | DataResult.Message
-    | DataResult.Review
-    | DataResult.File
-    | DataResult.Activity
-    | DataResult.Order
-  >({
-    idField: 'temp_id' as keyof DataUnion,
+  const handleSubscriptions = createSubscriptionHandler<DataUnion>({
     onBeforeUpdate: async (payload) => {
-      const { eventType, new: newData, table } = payload;
-
-      // Handle user data enrichment for messages
-      if (table === 'messages' && eventType === 'INSERT') {
-        const message = newData as DataResult.Message;
-        // Get the user from the messages array
-        let user = messages.find((msg) => msg.id === message.id)?.user;
-        if (!user) {
-          try {
-            user = await getUserById(message.user_id);
-          } catch (err) {
-            console.error('Error fetching user:', err);
-            return;
-          }
-        }
-        const enrichedMessage = {
-          pending: false,
-          ...message,
-          user,
-        };
-        const updatedMessages = updateArrayData(
-          messages,
-          enrichedMessage,
-          'temp_id',
-          true,
-        );
-        setMessages(updatedMessages);
-        return true;
-      }
-
-      // Handle file updates and message associations
-      if (table === 'files' && eventType === 'INSERT') {
-        const file = newData as DataResult.File;
-        // Use the message_id to insert the file in the files messages table
-        setMessages((prev) => {
-          const message = prev.find(
-            (message) => message.id === file.message_id,
+      switch (payload.table) {
+        case 'messages':
+          // Handle user data enrichment for messages
+          return await handleMessageChanges(
+            payload as RealtimePostgresChangesPayload<Message.Type>,
+            messages,
+            setMessages,
           );
-          if (message) {
-            const files = updateArrayData(
-              message.files ?? [],
-              file,
-              'temp_id',
-              true,
-            );
-            const newMessage = {
-              ...message,
-              files: files.map((file) => ({ ...file, isLoading: false })),
-            };
-            const updatedItems = updateArrayData(
-              messages,
-              newMessage,
-              'temp_id',
-              false,
-            );
-            return updatedItems;
-          }
-          return prev;
-        });
-        return true;
-      }
 
-      // Handle order status updates
-      if (table === 'orders_v2' && eventType === 'UPDATE') {
-        const orderUpdate = newData as DataResult.Order;
-
-        const newOrderToUpdate: DataResult.Order =
-          updateArrayData([order], orderUpdate, 'id', false)[0] ?? order;
-        setOrder(newOrderToUpdate);
-
-        return true;
+        // Handle file updates and message associations
+        case 'files':
+          return handleFileChanges(
+            payload as RealtimePostgresChangesPayload<File.Type>,
+            setMessages,
+          );
+        // Handle order status updates
+        case 'orders_v2':
+          return handleOrderChanges(
+            payload as RealtimePostgresChangesPayload<Order.Type>,
+            order,
+            setOrder,
+          );
+        case 'activities':
+          return handleActivityChanges(
+            payload as RealtimePostgresChangesPayload<Activity.Type>,
+            activities,
+            setActivities,
+          );
       }
     },
   });
