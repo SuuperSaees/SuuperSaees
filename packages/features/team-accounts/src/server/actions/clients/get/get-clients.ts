@@ -260,12 +260,11 @@ export async function fetchClientOrganizations(
 ) {
   const { data: clientOrganizations, error: clientOrganizationsError } =
     await client
-      .from('accounts')
+      .from('organizations')
       .select(
-        'id, name, slug, picture_url, primary_owner_user_id, created_at, is_personal_account, settings:organization_settings(key, value)',
+        'id, name, slug, picture_url, owner_id, created_at, settings:organization_settings(key, value)',
       )
       .in('id', clientOrganizationIds)
-      .eq('is_personal_account', false);
   if (clientOrganizationsError) {
     throw new Error(
       `Error fetching client organizations: ${clientOrganizationsError.message}`,

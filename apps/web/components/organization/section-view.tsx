@@ -30,12 +30,14 @@ function SectionView({
   currentUserRole,
   agencyId,
   sections,
+  clientOrganizationName,
   showCardStats = true,
 }: {
   clientOrganizationId: string;
   currentUserRole: string;
   agencyId: string;
   sections?: string[];
+  clientOrganizationName: string;
   showCardStats?: boolean;
 }) {
   const { t } = useTranslation('clients');
@@ -154,6 +156,12 @@ function SectionView({
     ? sections.filter(section => section !== 'embeds').concat(embedTabs)
     : baseTabs.concat(embedTabs);
 
+  const currentPath = useMemo(() => {
+    return [
+      { title: clientOrganizationName, id: clientOrganizationId },
+    ];
+  }, [clientOrganizationId, clientOrganizationName]);
+
   // Add standard sections to the navigation options map
   const navigationOptionsMap = new Map<string, React.ReactNode>([
     [
@@ -181,6 +189,7 @@ function SectionView({
         key={'files'}
         clientOrganizationId={clientOrganizationId}
         agencyId={agencyId}
+        currentPath={currentPath}
         // setCurrentPath={setCurrentPath}  it's not used in the code for now
       />,
     ],

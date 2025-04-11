@@ -19,7 +19,7 @@ export class EmbedsService implements IEmbedsService {
 
         const embedAccounts = accountIds?.map((accountId) => ({
             embed_id: embedCreated.id,
-            account_id: accountId,
+            organization_id: accountId,
         }));
 
         if (embedAccounts && embedCreated.visibility === 'private') {

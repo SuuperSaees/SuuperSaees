@@ -87,6 +87,10 @@ end;
 
 $$ language plpgsql;
 
+grant
+execute on function public.has_permission (uuid, uuid, public.app_permissions) to authenticated,
+service_role;
+
 drop function if exists public.can_action_account_member cascade;
 
 create
