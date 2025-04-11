@@ -21,7 +21,7 @@ async function OrganizationsPage({ params }: { params: { id: string } }) {
   });
 
   const organizationOwner = await getUserById(
-    organization?.primary_owner_user_id,
+    organization?.owner_id ?? '',
   ).catch((err) => {
     console.error(`Error getting organization owner: ${err}`)
     return null
@@ -31,18 +31,18 @@ async function OrganizationsPage({ params }: { params: { id: string } }) {
     return ''
   });
   const newOrganization = { ...organization, owner: organizationOwner };
-  const agency = await getAgencyForClient(params.id).catch((err) => {
+  const agency = await getAgencyForClient().catch((err) => {
     console.error(`Error getting agency for client: ${err}`)
     return null
   });
 
   return (
     <OrganizationSection
-      name={newOrganization.name}
+      name={newOrganization.name ?? ''}
       logo={newOrganization.picture_url ?? ''}
-      owner={newOrganization.owner}
+      owner={newOrganization.owner ?? { id: '', name: '', email: '' }}
       clientOrganizationId={params.id}
-      currentUserRole={userRole}
+      currentUserRole={userRole ?? ''}
       agencyId={agency?.id ?? ''}
     />
   );

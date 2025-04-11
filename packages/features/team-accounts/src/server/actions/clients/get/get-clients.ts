@@ -226,7 +226,7 @@ async function fetchClientOwners(
     })
     const { data: clientUsersRoles, error: clientUsersRolesError } = await adminClient
     .from('accounts_memberships')
-    .select('account_role, user_id')
+    .select('account_role, user_id, organization_id')
     .in('user_id', clientUserIds)
     .in('organization_id', clientsOrganizationIds)
 
@@ -239,6 +239,7 @@ async function fetchClientOwners(
     const transformedClientUsers: UserAccount[] = (clientUsers ?? []).map((user) => ({
       ...user,
       role: clientUsersRoles?.find((role) => role.user_id === user.id)?.account_role ?? null,
+      organization_id: clientUsersRoles?.find((role) => role.user_id === user.id)?.organization_id ?? null,
     }));
 
     if (clientUsersError) {
@@ -249,7 +250,6 @@ async function fetchClientOwners(
 
     const clientOrganizationWithOwners = combineClientData(clientOrganizationOwners, clientOrganizations, transformedClientUsers);
   
-
   return clientOrganizationWithOwners ?? [];
 }
 
@@ -279,7 +279,19 @@ export async function fetchClientOrganizations(
 function combineClientData(
   clientOwners: UserAccount[],
   clientOrganizations: Organization[],
-  clientUsers: UserAccount[],
+  clientUsers: UserAccount & {
+    role: string | null;
+    id: string;
+    email: string | null;
+    picture_url: string | null;
+    created_at: string | null;
+    settings: {
+      name: string | null;
+      picture_url: string | null;
+    } | null;
+    name: string;
+    organization_id: string;
+  }[],
 ) {
   const sortedOrganizations = [...clientOrganizations].sort((a, b) => 
     new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
@@ -292,11 +304,9 @@ function combineClientData(
     );
 
     // Find additional users for this organization
-    // const users = clientUsers.filter(
-    //   (user) => user.id === organization.id
-    // );
-
-    const users = clientUsers;
+    const users = clientUsers.filter(
+      (user) => user.organization_id === organization.id
+    );
 
     return {
       organization: {

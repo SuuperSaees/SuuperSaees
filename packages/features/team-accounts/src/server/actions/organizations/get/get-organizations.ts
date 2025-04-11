@@ -250,11 +250,11 @@ export async function getAgencyForClient() {
   try {
     const client = getSupabaseServerComponentClient();
     
-    const agencyId = (await client.rpc('get_session')).data?.agency?.id ?? '';
+    const sessionData = (await client.rpc('get_session')).data;
     const { data: agencyData, error: agencyError } = await client
       .from('organizations')
       .select('id, name, picture_url, slug')
-      .eq('id', agencyId)
+      .eq('id', sessionData?.agency?.id ?? sessionData?.organization?.id ?? '')
       .single();
 
     if (agencyError ?? !agencyData) {
