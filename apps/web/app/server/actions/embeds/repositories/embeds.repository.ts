@@ -86,8 +86,6 @@ export class EmbedsRepository {
             });
         }
 
-        console.log('embedsFiltered', embedsFiltered)
-
         return embedsFiltered?.map((embed) => ({
             ...embed,
             organizations: embed.embed_accounts?.map((embedAccount) => ({

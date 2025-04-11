@@ -16,7 +16,6 @@ import {
   getPrimaryOwnerId,
   getUserAccountByEmail,
 } from '../../members/get/get-member-account';
-import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
 import {
   getAgencyForClient,
@@ -260,7 +259,7 @@ export const addClientMember = async ({
     // Step 5: Create the new client user account
     const clientOrganizationUser = await createClientUserAccount(
       email,
-      clientOrganization.name,
+      clientOrganization.name ?? '',
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {
@@ -284,13 +283,6 @@ export const addClientMember = async ({
       clientOrganizationId,
       clientUserId,
       userRole,
-      supabase,
-    );
-
-    // Step 8: Update the new user client account with its respective organization ID
-    await updateUserAccount(
-      { organization_id: clientOrganization.id },
-      clientUserId,
       supabase,
     );
 
