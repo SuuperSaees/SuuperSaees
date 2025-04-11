@@ -1,5 +1,7 @@
-import { JSONCustomResponse } from '@kit/shared/response';
 import { UseMutationResult } from '@tanstack/react-query';
+
+import { JSONCustomResponse } from '@kit/shared/response';
+
 import { Activity as ServerActivity } from '~/lib/activity.types';
 import { Brief } from '~/lib/brief.types';
 import { Database, Tables } from '~/lib/database.types';
@@ -50,7 +52,7 @@ export type ReactionExtended = {
 };
 
 export type UserExtended = Pick<
-  ServerUser.Type,
+  ServerUser.Response,
   'id' | 'name' | 'email' | 'picture_url'
 > & {
   settings?: {
@@ -59,15 +61,15 @@ export type UserExtended = Pick<
   } | null;
 };
 
-export type FileExtended = ServerFile.Type & {
-  user: UserExtended;
-  isLoading: boolean;
+export type FileExtended = ServerFile.Response & {
+  user?: UserExtended | null;
+  isLoading?: boolean;
 };
 
-export type MessageExtended = Omit<ServerMessage.Type, 'user' | 'files'> & {
-  user: UserExtended;
-  files?: FileExtended[];
-  reactions?: ReactionExtended[];
+export type MessageExtended = Omit<ServerMessage.Response, 'user' | 'files'> & {
+  user?: UserExtended | null;
+  files?: FileExtended[] | null;
+  // reactions?: ReactionExtended[];
   pending?: boolean;
 };
 
@@ -111,7 +113,7 @@ export namespace DataSource {
     | ServerActivity.Type;
   export type ObjectTarget = ServerOrder.Type;
 
-  export type All = ArrayTarget | ObjectTarget; 
+  export type All = ArrayTarget | ObjectTarget;
 }
 
 export namespace DataResult {
@@ -141,17 +143,30 @@ export interface ActivityContextType {
   order: DataResult.Order;
   briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   userRole: string;
-  addMessageMutation: UseMutationResult<{message: ServerMessage.Insert, files: ServerFile.Insert[]}, Error, {message: ServerMessage.Insert, files: ServerFile.Insert[], tempId: string}>
+  addMessageMutation: UseMutationResult<
+    { message: ServerMessage.Insert; files: ServerFile.Insert[] },
+    Error,
+    {
+      message: ServerMessage.Insert;
+      files: ServerFile.Insert[];
+      tempId: string;
+    }
+  >;
   userWorkspace: {
     id: string | null;
     name: string | null;
     picture_url: string | null;
     subscription_status: Tables<'subscriptions'>['status'] | null;
   };
-  deleteMessage:  UseMutationResult<JSONCustomResponse<null>, Error, {
-    messageId: string;
-    adminActived?: boolean;
-}, {
-    previousMessages: MessageExtended[];
-}>
+  deleteMessage: UseMutationResult<
+    JSONCustomResponse<null>,
+    Error,
+    {
+      messageId: string;
+      adminActived?: boolean;
+    },
+    {
+      previousMessages: MessageExtended[];
+    }
+  >;
 }

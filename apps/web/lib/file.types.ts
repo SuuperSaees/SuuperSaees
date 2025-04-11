@@ -10,9 +10,7 @@ export namespace File {
   export type Response = Pick<
   Type,
   'id' | 'name' | 'type' | 'size' | 'url'
-> & {
-  created_at?: string;
-};
+> & Partial<Type>
   export namespace Relationships {
     export namespace FolderFiles {
       export type Insert =

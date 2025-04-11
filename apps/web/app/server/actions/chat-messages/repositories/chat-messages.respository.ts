@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 import { ChatMessages } from '~/lib/chat-messages.types';
+import { Message } from '~/lib/message.types';
 
 export class ChatMessagesRepository {
   private client: SupabaseClient<Database>;
@@ -41,16 +42,13 @@ export class ChatMessagesRepository {
 
 
   // * GET REPOSITORIES
-  async list(chatId?: string): Promise<ChatMessages.TypeWithRelations[]> {
+  async list(chatId?: string | number): Promise<Message.Response[]> {
     const client = this.adminClient ?? this.client;
 
     const { data, error } = await client
-      .from('chat_messages')
-      .select(`
-        *,
-        messages:messages(*)
-      `)
-      .eq('chat_id', chatId ?? '')
+      .from('messages')
+      .select('*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)), files(*)')
+      .eq(`${typeof chatId === 'string' ? 'chat_id' : 'order_id'}`, chatId ?? '')
 
     if (error) {
       throw new Error(
@@ -58,7 +56,7 @@ export class ChatMessagesRepository {
       );
     }
 
-    return data as unknown as ChatMessages.TypeWithRelations[];
+    return data;
   }
 
   async listLastMessages(chatIds?: string[]): Promise<ChatMessages.TypeWithRelations[]> {

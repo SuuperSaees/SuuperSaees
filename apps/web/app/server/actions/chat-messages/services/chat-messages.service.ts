@@ -40,7 +40,7 @@ export class ChatMessagesService {
 
 
   // * GET SERVICES
-  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
+  async list(chatId: string | number): Promise<Message.Response[]> {
     return await this.chatMessagesRepository.list(chatId);
   }
 

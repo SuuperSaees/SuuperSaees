@@ -7,6 +7,7 @@ import { MessagesRepository } from '../../messages/repositories/messages.reposit
 import { ChatMessagesService } from '../services/chat-messages.service';
 import { ChatRepository } from '../../chats/repositories/chats.repository';
 import { ChatMembersRepository } from '../../chat-members/repositories/chat-members.repository';
+import { Message } from '~/lib/message.types';
 
 
 export class ChatMessagesController {
@@ -44,7 +45,7 @@ export class ChatMessagesController {
   }
 
   // * GET CONTROLLERS
-  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
+  async list(chatId: string | number): Promise<Message.Response[]> {
     try {
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatMessageService = new ChatMessagesService(chatMessagesRepository);
