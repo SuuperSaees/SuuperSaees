@@ -174,18 +174,36 @@ export async function getOrderAgencyMembers(
     }
 
     if (orderData.propietary_organization_id === accountData.organization_id) {
+      const { data: agencyMemberIds, error: agencyMemberIdsError } = await client
+        .from('accounts_memberships')
+        .select('user_id')
+        .eq('organization_id', agencyId);
+
+      if (agencyMemberIdsError) throw agencyMemberIdsError;
+      
       const { data: agencyMembersData, error: agencyMembersError } =
         await client
           .from('accounts')
           .select(
-            'id, name, email, picture_url, user_settings(name, picture_url, calendar), accounts_memberships(organization_id)',
+            'id, name, email, picture_url, user_settings(name, picture_url, calendar)',
           )
-          .eq('accounts_memberships.organization_id', agencyId)
+          .in('id', agencyMemberIds.map(member => member.user_id))
           .is('deleted_on', null);
 
       if (agencyMembersError) throw agencyMembersError;
-      return agencyMembersData;
+      return agencyMembersData.map(member => ({
+        ...member,
+        organization_id: accountData.organization_id
+      }));
     }
+
+    const { data: agencyMemberIds, error: agencyMemberIdsError } = await client
+      .from('accounts_memberships')
+      .select('user_id')
+      .eq('organization_id', agencyId);
+
+    if (agencyMemberIdsError) throw agencyMemberIdsError;
+    
 
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
@@ -200,19 +218,21 @@ export async function getOrderAgencyMembers(
           phone_number,
           picture_url,
           calendar
-        ),
-        accounts_memberships(organization_id)
+        )
       `,
       )
-      .eq('accounts_memberships.organization_id', agencyId)
+      .in('id', agencyMemberIds.map(member => member.user_id))
       .is('deleted_on', null);
 
     if (agencyMembersError) throw agencyMembersError;
 
-    return agencyMembersData;
+    return agencyMembersData?.map(member => ({
+      ...member,
+      organization_id: accountData.organization_id
+    })) ?? [];
   } catch (error) {
     console.error('Error fetching order agency members:', error);
-    // throw error;
+    throw error;
   }
 }
 
