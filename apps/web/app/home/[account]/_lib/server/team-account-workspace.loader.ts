@@ -30,7 +30,7 @@ async function workspaceLoader(accountSlug: string) {
   const [workspace, user] = await Promise.all([
     api.getAccountWorkspace(accountSlug),
     requireUserInServerComponent(),
-  ]);
+  ])
 
   // we cannot find any record for the selected account
   // so we redirect the user to the home page

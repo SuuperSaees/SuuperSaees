@@ -1557,6 +1557,52 @@ $function$
 
 grant execute on function public.get_account_members (text) to authenticated, service_role;
 
+drop function if exists public.get_account_invitations(text) cascade;
+
+create
+or replace function public.get_account_invitations (organization_slug text) returns table (
+  id integer,
+  email varchar(255),
+  organization_id uuid,
+  invited_by uuid,
+  role varchar(50),
+  created_at timestamptz,
+  updated_at timestamptz,
+  expires_at timestamptz,
+  inviter_name varchar,
+  inviter_email varchar
+)
+set
+  search_path = '' as $$
+begin
+    return query
+    select
+        invitation.id,
+        invitation.email,
+        invitation.organization_id,
+        invitation.invited_by,
+        invitation.role,
+        invitation.created_at,
+        invitation.updated_at,
+        invitation.expires_at,
+        inviter.name,
+        inviter.email
+    from
+        public.invitations AS invitation
+        JOIN public.organizations AS org ON invitation.organization_id = org.id
+        JOIN public.accounts AS inviter ON invitation.invited_by = inviter.id
+
+    where
+        org.slug = organization_slug;
+
+end;
+
+$$ language plpgsql;
+
+grant
+execute on function public.get_account_invitations (text) to authenticated,
+service_role;
+
 -- setup_new_user 
 
 drop function if exists kit.setup_new_user() cascade;
@@ -1633,3 +1679,41 @@ update of email on auth.users for each row
 execute procedure kit.handle_update_user_email ();
 
 grant execute on function kit.handle_update_user_email() to authenticated, service_role;
+
+-- drop function if exists public.team_account_workspace(text) cascade;
+
+-- CREATE OR REPLACE FUNCTION public.team_account_workspace(account_slug text)
+--  RETURNS TABLE(id uuid, name character varying, picture_url character varying, slug text, role character varying, role_hierarchy_level integer, primary_owner_user_id uuid, subscription_status subscription_status, permissions app_permissions[])
+--  LANGUAGE plpgsql
+-- AS $function$
+-- begin
+--     return QUERY
+--     select
+--         accounts.id,
+--         accounts.name,
+--         accounts.picture_url,
+--         accounts.slug,
+--         accounts_memberships.account_role,
+--         roles.hierarchy_level,
+--         accounts.primary_owner_user_id,
+--         subscriptions.status,
+--         array_agg(role_permissions.permission)
+--     from
+--         public.accounts
+--         join public.accounts_memberships on accounts.id = accounts_memberships.account_id
+--         left join public.subscriptions on accounts.id = subscriptions.account_id
+--         join public.roles on accounts_memberships.account_role = roles.name
+--         left join public.role_permissions on accounts_memberships.account_role = role_permissions.role
+--     where
+--         accounts.slug = account_slug
+--         and public.accounts_memberships.user_id = (select auth.uid())
+--     group by
+--         accounts.id,
+--         accounts_memberships.account_role,
+--         subscriptions.status,
+--         roles.hierarchy_level;
+-- end;
+-- $function$
+-- ;
+
+-- grant execute on function public.team_account_workspace(text) to authenticated, service_role;

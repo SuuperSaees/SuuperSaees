@@ -33,10 +33,10 @@ const ClientsMembersPagePresentation = ({
     members: {
         id: string;
         user_id: string;
-        account_id: string;
+        organization_id: string;
         role: string;
         role_hierarchy_level: number;
-        primary_owner_user_id: string;
+        owner_user_id: string;
         name: string;
         email: string;
         picture_url: string;
@@ -50,7 +50,7 @@ const ClientsMembersPagePresentation = ({
     invitations: {
         id: number;
         email: string;
-        account_id: string;
+        organization_id: string;
         invited_by: string;
         role: string;
         created_at: string;

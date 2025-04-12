@@ -3470,12 +3470,12 @@ export type Database = {
       }
       get_account_invitations: {
         Args: {
-          account_slug: string
+          organization_slug: string
         }
         Returns: {
           id: number
           email: string
-          account_id: string
+          organization_id: string
           invited_by: string
           role: string
           created_at: string

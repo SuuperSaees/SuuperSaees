@@ -48,7 +48,7 @@ async function loadAccountMembers(
   account: string,
 ) {
   const { data, error } = await client.rpc('get_account_members', {
-    account_slug: account,
+    organization_slug: account,
   });
 
   if (error) {
@@ -79,7 +79,7 @@ async function loadInvitations(
   account: string,
 ) {
   const { data, error } = await client.rpc('get_account_invitations', {
-    account_slug: account,
+    organization_slug: account,
   });
 
   if (error) {

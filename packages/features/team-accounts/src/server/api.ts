@@ -95,7 +95,7 @@ export class TeamAccountsApi {
       account_slug: slug,
     });
 
-    const accountsPromise = this.client.from('user_accounts').select('*');
+    const accountsPromise = this.client.from('user_organization').select('*');
 
     const [accountResult, accountsResult] = await Promise.all([
       accountPromise,
@@ -140,12 +140,12 @@ export class TeamAccountsApi {
    * @description Check if the user has permission to manage billing for the account.
    */
   async hasPermission(params: {
-    accountId: string;
+    organizationId: string;
     userId: string;
     permission: Database['public']['Enums']['app_permissions'];
   }) {
     const { data, error } = await this.client.rpc('has_permission', {
-      account_id: params.accountId,
+      organization_id: params.organizationId,
       user_id: params.userId,
       permission_name: params.permission,
     });
