@@ -92,7 +92,7 @@ export class TeamAccountsApi {
    */
   async getAccountWorkspace(slug: string) {
     const accountPromise = this.client.rpc('team_account_workspace', {
-      account_slug: slug,
+      organization_slug: slug,
     });
 
     const accountsPromise = this.client.from('user_organization').select('*');

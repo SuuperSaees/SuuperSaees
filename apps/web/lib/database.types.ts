@@ -3698,7 +3698,7 @@ export type Database = {
       }
       team_account_workspace: {
         Args: {
-          account_slug: string
+          organization_slug: string
         }
         Returns: {
           id: string

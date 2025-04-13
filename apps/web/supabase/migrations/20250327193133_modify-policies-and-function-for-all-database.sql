@@ -1680,40 +1680,40 @@ execute procedure kit.handle_update_user_email ();
 
 grant execute on function kit.handle_update_user_email() to authenticated, service_role;
 
--- drop function if exists public.team_account_workspace(text) cascade;
+drop function if exists public.team_account_workspace(text) cascade;
 
--- CREATE OR REPLACE FUNCTION public.team_account_workspace(account_slug text)
---  RETURNS TABLE(id uuid, name character varying, picture_url character varying, slug text, role character varying, role_hierarchy_level integer, primary_owner_user_id uuid, subscription_status subscription_status, permissions app_permissions[])
---  LANGUAGE plpgsql
--- AS $function$
--- begin
---     return QUERY
---     select
---         accounts.id,
---         accounts.name,
---         accounts.picture_url,
---         accounts.slug,
---         accounts_memberships.account_role,
---         roles.hierarchy_level,
---         accounts.primary_owner_user_id,
---         subscriptions.status,
---         array_agg(role_permissions.permission)
---     from
---         public.accounts
---         join public.accounts_memberships on accounts.id = accounts_memberships.account_id
---         left join public.subscriptions on accounts.id = subscriptions.account_id
---         join public.roles on accounts_memberships.account_role = roles.name
---         left join public.role_permissions on accounts_memberships.account_role = role_permissions.role
---     where
---         accounts.slug = account_slug
---         and public.accounts_memberships.user_id = (select auth.uid())
---     group by
---         accounts.id,
---         accounts_memberships.account_role,
---         subscriptions.status,
---         roles.hierarchy_level;
--- end;
--- $function$
--- ;
+CREATE OR REPLACE FUNCTION public.team_account_workspace(organization_slug text)
+ RETURNS TABLE(id uuid, name text, picture_url text, slug text, role character varying, role_hierarchy_level integer, primary_owner_user_id uuid, subscription_status subscription_status, permissions app_permissions[])
+ LANGUAGE plpgsql
+AS $function$
+begin
+    return QUERY
+    select
+        org.id,
+        org.name,
+        org.picture_url,
+        org.slug,
+        accounts_memberships.account_role,
+        roles.hierarchy_level,
+        org.owner_id,
+        subscriptions.status,
+        array_agg(role_permissions.permission)
+    from
+        public.organizations as org
+        join public.accounts_memberships on org.id = accounts_memberships.organization_id
+        left join public.subscriptions on org.owner_id = subscriptions.propietary_organization_id
+        join public.roles on accounts_memberships.account_role = roles.name
+        left join public.role_permissions on accounts_memberships.account_role = role_permissions.role
+    where
+        org.slug = organization_slug
+        and public.accounts_memberships.user_id = (select auth.uid())
+    group by
+        org.id,
+        accounts_memberships.account_role,
+        subscriptions.status,
+        roles.hierarchy_level;
+end;
+$function$
+;
 
--- grant execute on function public.team_account_workspace(text) to authenticated, service_role;
+grant execute on function public.team_account_workspace(text) to authenticated, service_role;
