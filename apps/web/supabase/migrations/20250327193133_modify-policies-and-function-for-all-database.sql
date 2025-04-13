@@ -1717,3 +1717,130 @@ $function$
 ;
 
 grant execute on function public.team_account_workspace(text) to authenticated, service_role;
+
+drop function if exists public.add_invitations_to_account(text, public.invitation[]) cascade;
+
+create
+or replace function public.add_invitations_to_organization (
+  organization_slug text,
+  invitations public.invitation[]
+) returns public.invitations[]
+set
+  search_path = '' as $$
+declare
+    new_invitation public.invitations;
+    all_invitations public.invitations[] := array[]::public.invitations[];
+    invite_token text;
+    email text;
+    role varchar(50);
+begin
+    FOREACH email,
+    role in array invitations loop
+        invite_token := extensions.uuid_generate_v4();
+
+        insert into public.invitations(
+            email,
+            organization_id,
+            invited_by,
+            role,
+            invite_token)
+        values (
+            email,
+(
+                select
+                    id
+                from
+                    public.organizations
+                where
+                    slug = organization_slug), auth.uid(), role, invite_token)
+    returning
+        * into new_invitation;
+
+        all_invitations := array_append(all_invitations, new_invitation);
+
+    end loop;
+
+    return all_invitations;
+
+end;
+
+$$ language plpgsql;
+
+grant
+execute on function public.add_invitations_to_organization (text, public.invitation[]) to authenticated,
+service_role;
+
+drop function if exists public.has_same_role_hierarchy_level_or_lower(uuid, uuid, varchar) cascade;
+
+create
+or replace function public.has_same_role_hierarchy_level_or_lower (
+  target_user_id uuid,
+  target_organization_id uuid,
+  role_name varchar
+) returns boolean
+set
+  search_path = '' as $$
+declare
+    is_primary_owner boolean;
+    user_role_hierarchy_level int;
+    target_role_hierarchy_level int;
+begin
+    -- Check if the user is the primary owner of the account
+    select
+        exists (
+            select
+                1
+            from
+                public.organizations
+            where
+                id = target_organization_id
+                and owner_id = target_user_id) into is_primary_owner;
+
+    -- If the user is the primary owner, they have the highest role and can perform any action
+    if is_primary_owner then
+        return true;
+    end if;
+
+    -- Get the hierarchy level of the user's role within the account
+    select
+        hierarchy_level into user_role_hierarchy_level
+    from
+        public.roles
+    where
+        name =(
+            select
+                account_role
+            from
+                public.accounts_memberships
+            where
+                organization_id = target_organization_id
+                and target_user_id = user_id);
+
+    -- If the user does not have a role in the account, they cannot perform the action
+    if user_role_hierarchy_level is null then
+        return false;
+    end if;
+
+    -- Get the hierarchy level of the target role
+    select
+        hierarchy_level into target_role_hierarchy_level
+    from
+        public.roles
+    where
+        name = role_name;
+
+    -- If the target role does not exist, the user cannot perform the action
+    if target_role_hierarchy_level is null then
+        return false;
+    end if;
+
+   -- check the user's role hierarchy level is same or lower as the target role
+    return user_role_hierarchy_level <= target_role_hierarchy_level;
+
+end;
+
+$$ language plpgsql;
+
+grant
+execute on function public.has_same_role_hierarchy_level_or_lower (uuid, uuid, varchar) to authenticated,
+service_role;

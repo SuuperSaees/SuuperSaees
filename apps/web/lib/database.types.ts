@@ -3351,7 +3351,7 @@ export type Database = {
       }
       add_invitations_to_account: {
         Args: {
-          account_slug: string
+          organization_slug: string
           invitations: Database["public"]["CompositeTypes"]["invitation"][]
         }
         Returns: Database["public"]["Tables"]["invitations"]["Row"][]

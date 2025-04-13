@@ -51,7 +51,7 @@ export const createInvitationsAction = enhanceAction(
     // Fetch users who already belong to an organization (using their email)
     const { data: existingUsers, error: existingUsersError } = await adminClient
       .from('accounts')
-      .select('id, email, deleted_on, organization_id')
+      .select('id, email, deleted_on')
       .in(
         'email',
         params.invitations.map((invitation) => invitation.email),
@@ -94,8 +94,8 @@ export const createInvitationsAction = enhanceAction(
     }
 
     const { data: organizationAccount, error: organizationAccountError } = await adminClient
-      .from('accounts')
-      .select('id, name, primary_owner_user_id')
+      .from('organizations')
+      .select('id, name, owner_id')
       .eq('slug', params.accountSlug)
       .single();
       
@@ -175,8 +175,8 @@ export const createInvitationsAction = enhanceAction(
         const { error: invitationError } = await adminClient
           .from('invitations')
           .insert({
-            account_id: organizationAccount.id,
-            invited_by: organizationAccount.primary_owner_user_id,
+            organization_id: organizationAccount.id,
+            invited_by: organizationAccount.owner_id ?? '',
             email: user.email,
             invite_token: invitationId,
             role: user.role,
