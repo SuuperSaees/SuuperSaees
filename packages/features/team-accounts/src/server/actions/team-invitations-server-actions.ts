@@ -57,7 +57,7 @@ export const createInvitationsAction = enhanceAction(
         params.invitations.map((invitation) => invitation.email),
       );
 
-    if (existingUsersError) {
+    if (existingUsersError && existingUsersError.code !== 'PGRST116') {
       console.error('Failed to retrieve existing users');
       throw new Error(existingUsersError.message);
     }
@@ -68,7 +68,7 @@ export const createInvitationsAction = enhanceAction(
       .select('user_id')
       .in(
         'user_id',
-        existingUsers?.map(user => user.id) || []
+        existingUsers?.map(user => user.id) ?? []
       );
 
     // Separate invitations into new users and users to reactivate
