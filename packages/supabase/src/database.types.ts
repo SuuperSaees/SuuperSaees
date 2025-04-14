@@ -3269,6 +3269,7 @@ export type Database = {
           calendar: string | null
           created_at: string
           name: string | null
+          organization_id: string | null
           phone_number: string | null
           picture_url: string | null
           preferences: Json | null
@@ -3278,6 +3279,7 @@ export type Database = {
           calendar?: string | null
           created_at?: string
           name?: string | null
+          organization_id?: string | null
           phone_number?: string | null
           picture_url?: string | null
           preferences?: Json | null
@@ -3287,12 +3289,34 @@ export type Database = {
           calendar?: string | null
           created_at?: string
           name?: string | null
+          organization_id?: string | null
           phone_number?: string | null
           picture_url?: string | null
           preferences?: Json | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "user_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
