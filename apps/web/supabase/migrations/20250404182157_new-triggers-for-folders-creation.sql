@@ -79,8 +79,7 @@ BEGIN
   END IF;
   
   -- Case: Insert into accounts (Agency or Client Organization)
-  IF TG_TABLE_NAME = 'accounts' THEN
-    IF NOT NEW.is_personal_account THEN
+  IF TG_TABLE_NAME = 'organizations' THEN
       -- Check if this account is already linked as a client to an agency
       SELECT EXISTS (
         SELECT 1 FROM clients 
@@ -121,7 +120,6 @@ BEGIN
           VALUES ('Projects', NEW.id::text, NEW.id::text, true, root_folder_id);
         END IF;
       END IF;
-    END IF;
   END IF;
   
   -- Case: Insert into clients (Client Organizations)
@@ -138,7 +136,7 @@ BEGIN
     IF root_folder_id IS NULL THEN
       INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
       VALUES (
-        (SELECT name FROM accounts WHERE id = NEW.organization_client_id),
+        (SELECT name FROM organizations WHERE id = NEW.organization_client_id),
         NEW.agency_id::text,
         NEW.organization_client_id::text,
         false,
@@ -186,7 +184,7 @@ END;
 $function$
 ;
 
-CREATE TRIGGER after_insert_accounts AFTER INSERT ON public.accounts FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
+CREATE TRIGGER after_insert_accounts AFTER INSERT ON public.organizations FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
 
 CREATE TRIGGER after_insert_clients AFTER INSERT ON public.clients FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
 
