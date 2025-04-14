@@ -425,7 +425,6 @@ export async function getAgencyClients(
         .from('accounts')
         .select('id, name, email, picture_url, settings:user_settings(name, picture_url)')
         .eq('id', clientCurrent.user_client_id)
-        .eq('is_personal_account', true)
         .single();
 
       if (accountError) throw accountError;
