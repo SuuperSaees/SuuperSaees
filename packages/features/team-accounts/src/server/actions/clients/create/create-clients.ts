@@ -60,10 +60,9 @@ export const createClient = async (clientData: CreateClient) => {
           .select('*')
           .eq('user_client_id', accountData.id)
           .eq('agency_id', agencyIdForReactivation ?? '')
-          .not('deleted_on', 'is', null)
           .single();
   
-        if (existingClient) {
+        if (existingClient?.deleted_on) {
           await reactivateDeletedClient({
             accountId: accountData.id,
             email: clientData.client.email,
@@ -76,7 +75,7 @@ export const createClient = async (clientData: CreateClient) => {
           });
           
           return CustomResponse.success(existingClient, 'clientCreated').toJSON();
-        } else {
+        } else if(!existingClient) {
           await reactivateDeletedClient({
             accountId: accountData.id,
             email: clientData.client.email,
