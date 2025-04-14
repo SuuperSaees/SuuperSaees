@@ -142,6 +142,8 @@ export class ChatRepository {
         created_at,
         updated_at,
         deleted_on,
+        agency_id,
+        client_organization_id,
         chat_members (
           user_id,
           type,
@@ -193,6 +195,18 @@ export class ChatRepository {
       throw new Error(`Chat ${chatId} not found`);
     }
 
+    const agencyId = chat.agency_id ?? '';
+    const clientOrganizationId = chat.client_organization_id ?? '';
+
+    const { data: agencyMembers, error: agencyMembersError } = await this.client
+    .from('accounts_memberships')
+    .select('user_id')
+    .eq('organization_id', agencyId);
+
+    if (agencyMembersError) {
+      throw new Error(`Error fetching agency members: ${agencyMembersError.message}`);
+    }
+
     return {
       id: chat.id,
       name: chat.name,
@@ -208,7 +222,7 @@ export class ChatRepository {
         chat_id: chatId,
         created_at: new Date().toISOString(),
         deleted_on: null,
-        // organization_id: member.account?.organization_id ?? '',
+        organization_id: agencyMembers.find((agencyMember) => agencyMember.user_id === member.user_id) ? agencyId : clientOrganizationId,
         id: member.user_id,
         name: member.account?.user_settings?.name ?? member.account?.name ?? '',
         picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
