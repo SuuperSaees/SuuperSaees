@@ -7,10 +7,11 @@ export class TokensRepository {
     }
 
     async createToken(payload: Tokens.Insert) {
-        return await this.client.from('tokens')
+        const {data} = await this.client.from('tokens')
         .upsert(payload, { onConflict: 'id' })
         .select()
         .single();
+        return data;
     }
 
     async getTokenById(id: string) {

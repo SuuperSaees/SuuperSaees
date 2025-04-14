@@ -71,11 +71,11 @@ BEGIN
     SELECT id INTO projects_folder_id
     FROM folders
     WHERE name = 'Projects'
-      AND agency_id = NEW.agency_id::text
-      AND client_organization_id = NEW.client_organization_id::text;
+      AND agency_id = NEW.agency_id
+      AND client_organization_id = NEW.client_organization_id;
     
     INSERT INTO folders (id, name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
-    VALUES (NEW.uuid::uuid, NEW.title, NEW.agency_id::text, NEW.client_organization_id::text, true, projects_folder_id);
+    VALUES (NEW.uuid::uuid, NEW.title, NEW.agency_id, NEW.client_organization_id, true, projects_folder_id);
   END IF;
   
   -- Case: Insert into accounts (Agency or Client Organization)
@@ -93,7 +93,7 @@ BEGIN
         SELECT id INTO root_folder_id
         FROM folders
         WHERE name = NEW.name
-          AND agency_id = NEW.id::text
+          AND agency_id = NEW.id
           AND is_subfolder = false
           AND parent_folder_id IS NULL
         LIMIT 1;
@@ -101,7 +101,7 @@ BEGIN
         -- If no root folder exists, create it
         IF root_folder_id IS NULL THEN
           INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
-          VALUES (NEW.name, NEW.id::text, NEW.id::text, false, NULL)
+          VALUES (NEW.name, NEW.id, NEW.id, false, NULL)
           RETURNING id INTO root_folder_id;
         END IF;
         
@@ -109,7 +109,7 @@ BEGIN
         SELECT id INTO projects_folder_id
         FROM folders
         WHERE name = 'Projects'
-          AND agency_id = NEW.id::text
+          AND agency_id = NEW.id
           AND is_subfolder = true
           AND parent_folder_id = root_folder_id
         LIMIT 1;
@@ -117,7 +117,7 @@ BEGIN
         -- If no "Projects" folder exists, create it
         IF projects_folder_id IS NULL THEN
           INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
-          VALUES ('Projects', NEW.id::text, NEW.id::text, true, root_folder_id);
+          VALUES ('Projects', NEW.id, NEW.id, true, root_folder_id);
         END IF;
       END IF;
   END IF;
@@ -137,8 +137,8 @@ BEGIN
       INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
       VALUES (
         (SELECT name FROM organizations WHERE id = NEW.organization_client_id),
-        NEW.agency_id::text,
-        NEW.organization_client_id::text,
+        NEW.agency_id,
+        NEW.organization_client_id,
         false,
         NULL
       )
@@ -147,8 +147,8 @@ BEGIN
       -- Update existing root folder to set the correct agency_id and client_organization_id
       UPDATE folders
       SET 
-        agency_id = NEW.agency_id::text,
-        client_organization_id = NEW.organization_client_id::text
+        agency_id = NEW.agency_id,
+        client_organization_id = NEW.organization_client_id
       WHERE id = root_folder_id;
     END IF;
     
@@ -164,8 +164,8 @@ BEGIN
       INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
       VALUES (
         'Projects',
-        NEW.agency_id::text,
-        NEW.organization_client_id::text,
+        NEW.agency_id,
+        NEW.organization_client_id,
         true,
         root_folder_id
       );
@@ -173,8 +173,8 @@ BEGIN
       -- Update existing Projects folder to set the correct agency_id and client_organization_id
       UPDATE folders
       SET 
-        agency_id = NEW.agency_id::text,
-        client_organization_id = NEW.organization_client_id::text
+        agency_id = NEW.agency_id,
+        client_organization_id = NEW.organization_client_id
       WHERE id = projects_folder_id;
     END IF;
   END IF;
@@ -183,6 +183,14 @@ BEGIN
 END;
 $function$
 ;
+
+drop trigger if exists "after_insert_accounts" on "public"."organizations";
+
+drop trigger if exists "after_insert_clients" on "public"."clients";
+
+drop trigger if exists "after_insert_orders_v2" on "public"."orders_v2";
+
+drop trigger if exists "before_folder_changes" on "public"."folders";
 
 CREATE TRIGGER after_insert_accounts AFTER INSERT ON public.organizations FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
 

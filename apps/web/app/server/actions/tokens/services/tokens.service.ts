@@ -42,6 +42,7 @@ export class TokensService implements ITokensService {
          refresh_token: refreshToken,
          updated_at: now.toISOString(),
         };
+        console.log('tokenData', tokenData);
         await this.tokensRepository.createToken(tokenData);
         return response;
     }
