@@ -79,7 +79,7 @@ export function useRequestResetPassword() {
 
     // step 2: Generate a token from suuper and save it in the database
     const generatedMagicLink = await generateMagicLinkRecoveryPassword(
-      userData.email,
+      userData.email ?? '',
       undefined,
       true,
     );

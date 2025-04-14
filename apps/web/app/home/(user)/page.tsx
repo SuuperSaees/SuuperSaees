@@ -6,6 +6,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 
 import { HomeAccountMetrics } from './_components/home-account-metrics';
 import { HomeLayoutPageHeader } from './_components/home-page-header';
+import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -19,28 +20,10 @@ export const generateMetadata = async () => {
 export default async function UserHomePage() {
   const supabase = getSupabaseServerComponentClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { workspace } = await loadUserWorkspace();
 
-  if (!user) {
-    return redirect('/login');
-  }
-
-  const { data: userAccount, error: userAccountError } = await supabase
-    .from('accounts')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
-  if (userAccountError) {
-    console.error('Error getting user account', userAccountError);
-    return;
-  }
-
-  const name = userAccount.name;
-  const email = user.email ?? '';
-
+  const name = workspace.name;
+  const email = workspace.email ?? '';
 
   const { data: availableInvitations, error: availableInvitationsError } = await supabase
   .from('invitations')
@@ -58,15 +41,8 @@ export default async function UserHomePage() {
       console.error('Invitation data is missing'+ availableInvitationsError);
     }
   }
-  
 
-  // const { data: accounts } = await supabase
-  //   .from('accounts')
-  //   .select('*')
-  //   .eq('id', userAccount.organization_id ?? '')
-  //   .eq('is_personal_account', false);
-
-  if (!userAccount.organization_id) {
+  if (!workspace.organization_id) {
     return redirect('/add-organization');
   }
   return redirect('/orders')

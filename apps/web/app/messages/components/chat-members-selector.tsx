@@ -83,6 +83,8 @@ export default function ChatMembersSelector({
         member.organization_id && member.organization_id !== agencyTeam.id,
     ) ?? [];
 
+    console.log('selectedClientOrganizationMembers', selectedMembers);
+
   const agencyMembersAvatars = selectedAgencyMembers.map((user) => ({
     id: user.id,
     name: user.name,

@@ -111,7 +111,7 @@ export default function ChatThread({
   const organizationData  = useQuery({
     queryKey: ['account-plugins', user.id],
     queryFn: user.role === 'client_member' || user.role === 'client_owner' ? 
-      async () => await getAgencyForClientByUserId(user.id) : 
+      async () => await getAgencyForClientByUserId() : 
       async () => await getOrganization(),
     enabled: !!user.id,
     retry: 1,

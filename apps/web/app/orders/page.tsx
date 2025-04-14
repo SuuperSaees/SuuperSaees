@@ -1,8 +1,6 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
-import Header from '~/components/organization/header';
-import SectionView from '~/components/organization/section-view';
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
@@ -41,7 +39,7 @@ async function OrdersPage() {
 
   const agency = agencyRoles.includes(userWorkspace.role ?? '')
     ? userOrganization
-    : await getAgencyForClient(userOrganization.id ?? '');
+    : await getAgencyForClient();
   const agencyId = agency?.id ?? '';
   const agencyStatuses =
     (await getAgencyStatuses(agencyId ?? '').catch(() => [])) ?? [];
@@ -49,7 +47,7 @@ async function OrdersPage() {
   const { data, error: membersError } = await client.rpc(
     'get_account_members',
     {
-      account_slug: agency?.slug ?? '',
+      organization_slug: agency?.slug ?? '',
     },
   );
   let agencyMembers = [];

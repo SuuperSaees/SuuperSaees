@@ -17,8 +17,7 @@ import { Database, Json } from '../../../../../../../../apps/web/lib/database.ty
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
 import { updateClient } from '../../clients/update/update-client';
 import { formatToTimestamptz } from '../../../../../../../../apps/web/app/utils/format-to-timestamptz';
-import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
-
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 
 export const updateUserAccount = async (
   userData: Account.Update,
@@ -36,17 +35,12 @@ export const updateUserAccount = async (
       await databaseClient
         .from('accounts')
         .update(userData)
-        .eq('primary_owner_user_id', userId)
-        .eq('is_personal_account', true);
+        .eq('id', userId)
 
     if (errorUpdateUserAccount)
       throw new Error(
         `Error updating the user account: ${errorUpdateUserAccount.message}`,
       );
-    
-      // revalidatePath('/clients');
-      // revalidatePath(`/clients/organizations/*`);
-
       
     return userId;
   } catch (error) {
@@ -56,16 +50,16 @@ export const updateUserAccount = async (
 };
 
 export const switchUserOrganization = async (
-  organizationId: Account.Type['organization_id'],
+  organizationId: Organization.Type['id'],
   userId: Account.Type['id'],
 ) => {
   try {
-    await updateUserAccount(
-      {
-        organization_id: organizationId,
-      },
-      userId,
-    );
+    // await updateUserAccount(
+    //   {
+    //     organization_id: organizationId,
+    //   },
+    //   userId,
+    // );
 
     await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
 
@@ -80,6 +74,7 @@ export const updateUserRole = async(
   role: string,
   databaseClient?: SupabaseClient<Database>,
   adminActivated = false,
+  host?: string,
 ) => {
   databaseClient =
     databaseClient ??
@@ -88,11 +83,52 @@ export const updateUserRole = async(
     });
   try {
 
+    const { data: subdomainData, error: errorGetSubdomain } = await databaseClient
+      .from('subdomains')
+      .select('id')
+      .eq('domain', host ?? '')
+      .single();
+
+    if(errorGetSubdomain)
+      throw new Error(
+        `Error getting the subdomain: ${errorGetSubdomain.message}`,
+      );
+
+    const subdomainId = subdomainData?.id;
+
+    const { data: organizationData, error: errorGetOrganization } = await databaseClient
+      .from('organization_subdomains')
+      .select('organization_id')
+      .eq('subdomain_id', subdomainId ?? '')
+      .single();
+
+    if(errorGetOrganization)
+      throw new Error(
+        `Error getting the organization: ${errorGetOrganization.message}`,
+      );
+      
+    const organizationId = organizationData?.organization_id;
+
+    const { data: existClient, error: errorExistClient } = await databaseClient
+      .from('clients')
+      .select('organization_client_id')
+      .eq('agency_id', organizationId ?? '')
+      .eq('user_client_id', userId)
+      .single();
+
+    if(errorExistClient && errorExistClient.code !== 'PGRST116')
+      throw new Error(
+        `Error getting the client: ${errorExistClient.message}`,
+      );
+
+    const clientId = existClient?.organization_client_id;
+    
     const { data: userRoleData, error: errorUpdateUserRole } =
       await databaseClient
         .from('accounts_memberships')
         .update({'account_role': role})
-        .eq('user_id', userId);
+        .eq('user_id', userId)
+        .eq('organization_id', clientId ?? organizationId ?? '');
         
 
     if (errorUpdateUserRole)
@@ -100,7 +136,7 @@ export const updateUserRole = async(
         `Error updating the user role: ${errorUpdateUserRole.message}`,
       );
     
-    await handleHierarchyChange(userId, role, databaseClient);
+    await handleHierarchyChange(userId, role, databaseClient, clientId ?? organizationId ?? '');
 
     revalidatePath('/clients')
     revalidatePath('/team')
@@ -112,28 +148,27 @@ export const updateUserRole = async(
   }
 }
 
-
 const handleHierarchyChange = async(
   userId: Account.Type['id'], //id of the new agency_owner / client_owner
   role: string, //selected role for the newly updated user
   databaseClient: SupabaseClient<Database>,
+  organizationId: Organization.Type['id'],
 ) => {
   if(role !== 'agency_owner' && role !== 'client_owner') {
     //No hierarchy change
     return;
   }
   const defaultRole = role === 'agency_owner' ? 'agency_member' : 'client_member';
-  const {id: organizationId} = await getOrganizationByUserId(userId, true);
 
   //Get the previous owner
   const { data: previousOwner, error: errorGetPreviousOwner } =
     await databaseClient
-      .from('accounts')
-      .select('primary_owner_user_id')
+      .from('organizations')
+      .select('owner_id')
       .eq('id', organizationId)
       .single();
   
-  const previousOwnerId = previousOwner?.primary_owner_user_id;
+  const previousOwnerId = previousOwner?.owner_id;
   
   if (errorGetPreviousOwner)
     throw new Error(
@@ -146,7 +181,7 @@ const handleHierarchyChange = async(
       .from('accounts_memberships')
       .update({account_role: defaultRole})
       .eq('account_role', role)
-      .eq('account_id', organizationId)
+      .eq('organization_id', organizationId)
       .neq('user_id', userId);
 
   if (updateRolesError)
@@ -157,8 +192,8 @@ const handleHierarchyChange = async(
   // Update the organization primary owner
   const { error: updatePrimaryOwnerError } =
   await databaseClient
-    .from('accounts')
-    .update({primary_owner_user_id: userId})
+    .from('organizations')
+    .update({owner_id: userId})
     .eq('id', organizationId);
   
   if (updatePrimaryOwnerError)

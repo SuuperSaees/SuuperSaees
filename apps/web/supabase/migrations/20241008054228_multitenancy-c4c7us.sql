@@ -231,6 +231,3 @@ with check (true);
 CREATE TRIGGER check_deleted_on_subdomains AFTER UPDATE OF deleted_on ON public.subdomains FOR EACH ROW EXECUTE FUNCTION handle_deleted_on();
 
 CREATE TRIGGER update_subdomains_updated_at BEFORE UPDATE ON public.subdomains FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-
-

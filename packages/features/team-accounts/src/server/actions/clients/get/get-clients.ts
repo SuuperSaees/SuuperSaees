@@ -5,6 +5,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import {
   fetchCurrentUser,
@@ -16,12 +17,11 @@ import { Client } from '../../../../../../../../apps/web/lib/client.types';
 
 // Helper function to fetch client members based on user role (agency or client)
 type Organization = Pick<
-  Account.Type,
+  Organization.Type,
   | 'id'
   | 'name'
-  | 'primary_owner_user_id'
+  | 'owner_id'
   | 'created_at'
-  | 'is_personal_account'
   | 'slug'
   | 'picture_url'
 >;
@@ -31,10 +31,7 @@ type UserAccount = Pick<
   | 'name'
   | 'email'
   | 'created_at'
-  | 'is_personal_account'
-  | 'organization_id'
   | 'picture_url'
-  | 'primary_owner_user_id'
 > & {
   settings?: {
     name: string | null;
@@ -87,9 +84,8 @@ async function fetchClientMembers(
   const { data: clientAccounts, error: clientAccountsError } = await client
     .from('accounts')
     .select(
-      'id, email, picture_url, name, organization_id, primary_owner_user_id, created_at, is_personal_account, settings:user_settings!user_id(name, picture_url)',
+      'id, email, picture_url, name, created_at, settings:user_settings!user_id(name, picture_url)',
     )
-    .eq('is_personal_account', true)
     .in('id', clientsIds);
 
     // Get the roles
@@ -151,7 +147,7 @@ export async function getClientMembersForOrganization(
     const clientOrganizationMembers = await fetchClientMembers(
       client,
       currentUserAccount.organization_id,
-      currentUserRole,
+      currentUserRole ?? '',
       clientOrganizacionId ?? '',
       agencyRoles,
       clientRoles,
@@ -191,28 +187,26 @@ async function fetchClientOwners(
   clientUserIds: string[],
 ) {
   const { data: clientOrganizations, error: clientOrganizationsError } = await client
-    .from('accounts')
+    .from('organizations')
     .select(
-      'name, id, picture_url, created_at, primary_owner_user_id, is_personal_account, slug',
+      'name, id, picture_url, created_at, owner_id, slug',
     )
     .in('id', clientsOrganizationIds)
-    .eq('is_personal_account', false);
 
-  if (clientOrganizationsError ) {
+  if (clientOrganizationsError && clientOrganizationsError.code !== 'PGRST116') {
     throw new Error(
       `Error fetching client owners: ${clientOrganizationsError.message}`,
     );
   }
 
-  const primaryOwnerIds = clientOrganizations.map((clientOrganization) => clientOrganization.primary_owner_user_id);
+  const primaryOwnerIds = clientOrganizations?.map((clientOrganization) => clientOrganization.owner_id) ?? [];
 
   const { data: clientOrganizationOwners, error: clientOwnersError } = await client
     .from('accounts')
     .select(
-      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
+      'name, email, id, picture_url, created_at, settings:user_settings(name, picture_url)',
     )
     .in('id', primaryOwnerIds)
-    .eq('is_personal_account', true);
 
     if (clientOwnersError) {
       throw new Error(
@@ -223,9 +217,8 @@ async function fetchClientOwners(
   const { data: clientUsers, error: clientUsersError } = await client 
     .from('accounts')
     .select(
-      'name, email, id, picture_url, organization_id, created_at, primary_owner_user_id, is_personal_account, settings:user_settings(name, picture_url)',
+      'name, email, id, picture_url, created_at, settings:user_settings(name, picture_url)',
     ).in('id', clientUserIds)
-    .eq('is_personal_account', true);
   
     // Get the roles
     const adminClient = getSupabaseServerComponentClient({  
@@ -233,8 +226,9 @@ async function fetchClientOwners(
     })
     const { data: clientUsersRoles, error: clientUsersRolesError } = await adminClient
     .from('accounts_memberships')
-    .select('account_role, user_id')
+    .select('account_role, user_id, organization_id')
     .in('user_id', clientUserIds)
+    .in('organization_id', clientsOrganizationIds)
 
     if (clientUsersRolesError) {
       throw new Error(
@@ -245,6 +239,7 @@ async function fetchClientOwners(
     const transformedClientUsers: UserAccount[] = (clientUsers ?? []).map((user) => ({
       ...user,
       role: clientUsersRoles?.find((role) => role.user_id === user.id)?.account_role ?? null,
+      organization_id: clientUsersRoles?.find((role) => role.user_id === user.id)?.organization_id ?? null,
     }));
 
     if (clientUsersError) {
@@ -255,7 +250,6 @@ async function fetchClientOwners(
 
     const clientOrganizationWithOwners = combineClientData(clientOrganizationOwners, clientOrganizations, transformedClientUsers);
   
-
   return clientOrganizationWithOwners ?? [];
 }
 
@@ -266,12 +260,11 @@ export async function fetchClientOrganizations(
 ) {
   const { data: clientOrganizations, error: clientOrganizationsError } =
     await client
-      .from('accounts')
+      .from('organizations')
       .select(
-        'id, name, slug, picture_url, primary_owner_user_id, created_at, is_personal_account, settings:organization_settings(key, value)',
+        'id, name, slug, picture_url, owner_id, created_at, settings:organization_settings(key, value)',
       )
       .in('id', clientOrganizationIds)
-      .eq('is_personal_account', false);
   if (clientOrganizationsError) {
     throw new Error(
       `Error fetching client organizations: ${clientOrganizationsError.message}`,
@@ -285,7 +278,19 @@ export async function fetchClientOrganizations(
 function combineClientData(
   clientOwners: UserAccount[],
   clientOrganizations: Organization[],
-  clientUsers: UserAccount[],
+  clientUsers: UserAccount & {
+    role: string | null;
+    id: string;
+    email: string | null;
+    picture_url: string | null;
+    created_at: string | null;
+    settings: {
+      name: string | null;
+      picture_url: string | null;
+    } | null;
+    name: string;
+    organization_id: string;
+  }[],
 ) {
   const sortedOrganizations = [...clientOrganizations].sort((a, b) => 
     new Date(b.created_at ?? '').getTime() - new Date(a.created_at ?? '').getTime()
@@ -294,7 +299,7 @@ function combineClientData(
   return sortedOrganizations.map((organization) => {
     // Find the primary owner based on `primary_owner_user_id`
     const primaryOwner = clientOwners.find(
-      (owner) => owner.id === organization.primary_owner_user_id
+      (owner) => owner.id === organization.owner_id
     );
 
     // Find additional users for this organization
@@ -309,8 +314,7 @@ function combineClientData(
         slug: organization.slug,
         picture_url: organization.picture_url,
         created_at: organization.created_at,
-        is_personal_account: organization.is_personal_account,
-        primary_owner_user_id: organization.primary_owner_user_id,
+        owner_id: organization.owner_id,
       },
       primaryOwner: primaryOwner
         ? {
@@ -328,7 +332,6 @@ function combineClientData(
         email: user.email,
         picture_url: user.picture_url,
         created_at: user.created_at,
-        primary_owner_user_id: user.primary_owner_user_id,
         settings: user.settings,
         role: user.role,
       })),

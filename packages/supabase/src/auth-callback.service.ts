@@ -6,7 +6,7 @@ import { TokenRecoveryType, DefaultToken } from '../../tokens/src/domain/token-t
 import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
-import { getDomainByUserId } from '../../multitenancy/utils/get/get-domain';
+import { getDomainByUserId, getDomainByOrganizationId} from '../../multitenancy/utils/get/get-domain';
 import { createClient } from '../../features/team-accounts/src/server/actions/clients/create/create-clients';
 
 /**
@@ -147,10 +147,16 @@ class AuthCallbackService {
               order_id: orderId,
               client_member_id: response.success?.data?.user_client_id,
             });
-          const { domain } = await getDomainByUserId(response.success?.data?.user_client_id ?? '', true);
+          const domain  = await getDomainByOrganizationId(response.success?.data?.agency_id ?? '', true, true);
           if (domain) {
             url.href = `${domain}${url.pathname}`
           }
+
+          const onlyDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+          await this.client.rpc('set_session', {
+            domain: onlyDomain,
+          });
           if (error) {
             console.error('Error adding follower to order', error);
             throw new Error('Error adding follower to order');

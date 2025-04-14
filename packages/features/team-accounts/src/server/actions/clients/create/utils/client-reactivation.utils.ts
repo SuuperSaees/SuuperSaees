@@ -27,7 +27,7 @@ import {
 } from '../create-client.types';
 import { SUUPER_CLIENT_ID, SUUPER_CLIENT_SECRET } from './client-account.utils';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { Account } from '../../../../../../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../../../../../../apps/web/lib/organization.types';
 
 interface ReactivateClientParams {
   accountId: string;
@@ -38,6 +38,7 @@ interface ReactivateClientParams {
   supabase?: SupabaseClient<Database>;
   adminActivated?: boolean;
   clientOrganizationId?: string;
+  agencyId?: string;
 }
 
 export const reactivateDeletedClient = async ({
@@ -49,10 +50,11 @@ export const reactivateDeletedClient = async ({
   supabase,
   adminActivated = false,
   clientOrganizationId,
+  agencyId
 }: ReactivateClientParams) => {
   supabase = supabase ?? getSupabaseServerComponentClient({ admin: adminActivated });
   // Create the new organization for this client
-  let clientOrganizationAccount: Account.Type | null = null;
+  let clientOrganizationAccount: Organization.Type | null = null;
   let clientOrganizationAccountId = clientOrganizationId;
   if (!clientOrganizationId) {
   clientOrganizationAccount = await insertOrganization(
@@ -61,7 +63,7 @@ export const reactivateDeletedClient = async ({
     supabase,
     adminActivated,
   );
-  clientOrganizationAccountId = clientOrganizationAccount.id ?? '';
+  clientOrganizationAccountId = clientOrganizationAccount?.id ?? '';
 }
 
   if (!clientOrganizationAccount && !clientOrganizationAccountId) {
@@ -75,11 +77,14 @@ export const reactivateDeletedClient = async ({
   // Reactivate the client by setting deleted_on to null
   const { error: reactivateError } = await supabase
     .from('clients')
-    .update({
+    .upsert({
       deleted_on: null,
-      organization_client_id: clientOrganizationAccountId,
+      organization_client_id: clientOrganizationAccountId ?? '',
+      user_client_id: accountId,
+      agency_id: agencyId ?? '',
+    }, {
+      onConflict: 'user_client_id, agency_id, organization_client_id',
     })
-    .eq('user_client_id', accountId);
 
   if (reactivateError) {
     throw new Error(`Error reactivating client: ${reactivateError.message}`);
@@ -89,16 +94,15 @@ export const reactivateDeletedClient = async ({
   const { error: deleteUserSettingsError } = await supabase
     .from('user_settings')
     .delete()
-    .eq('user_id', accountId);
+    .eq('user_id', accountId)
+    .eq('organization_id', clientOrganizationAccountId ?? '');
 
   if (deleteUserSettingsError && deleteUserSettingsError.code !== 'PGRST116') {
     throw new Error(`Error deleting user settings: ${deleteUserSettingsError.message}`);
   }
 
   // Update the account name and organization
-  const updateData: { organization_id: string; name?: string } = {
-    organization_id: clientOrganizationAccountId ?? '',
-  };
+  const updateData: { name?: string } = {};
 
   if (name && name.trim() !== '') {
     updateData.name = name;
@@ -116,10 +120,13 @@ export const reactivateDeletedClient = async ({
   // Update the account membership
   const { error: updateAccountMembershipError } = await supabase
     .from('accounts_memberships')
-    .update({
-      account_id: clientOrganizationAccountId,
-    })
-    .eq('user_id', accountId);
+    .upsert({
+      organization_id: clientOrganizationAccountId ?? '',
+      user_id: accountId,
+      account_role: 'client_owner',
+    }, {
+      onConflict: 'user_id, organization_id',
+    });
 
   if (updateAccountMembershipError && updateAccountMembershipError.code !== 'PGRST116') {
     throw new Error(`Error updating account membership: ${updateAccountMembershipError.message}`);

@@ -1,21 +1,14 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-
-
-
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
-
-
-
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
-
 
 interface Credentials {
   email: string;
@@ -80,31 +73,18 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
 
     if (!inviteToken) {
       // New Step: Create organization account
-      const { data: accountData, error: accountError } = await client
-        .from('accounts')
+      const { error: organizationError } = await client
+        .from('organizations')
         .insert({
-          primary_owner_user_id: userId,
+          owner_id: userId,
           name: credentials.organizationName,
-          email: null,
-          is_personal_account: false,
         })
-        .select('id')
+        .select('id, slug')
         .single();
 
-      if (accountError) {
-        console.error('Error creating account:', accountError);
+      if (organizationError) {
+        console.error('Error creating organization:', organizationError);
         throw new Error('Error occurred while creating the organization account');
-      }
-
-      // Update user with organization_id
-      const { error: userUpdateError } = await client
-        .from('accounts')
-        .update({ organization_id: accountData.id })
-        .eq('id', userId ?? '');
-
-      if (userUpdateError) {
-        console.error('Error updating user:', userUpdateError);
-        throw new Error('Error occurred while updating user organization');
       }
     }
 

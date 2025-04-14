@@ -84,7 +84,7 @@ async function ClientsMembersPage() {
   const canManageRoles =
     account?.permissions?.includes('roles.manage') ?? false;
 
-  const isPrimaryOwner = account.primary_owner_user_id === user.id;
+  const isPrimaryOwner = (await client.rpc('get_session')).data?.organization?.owner_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
 
   return (

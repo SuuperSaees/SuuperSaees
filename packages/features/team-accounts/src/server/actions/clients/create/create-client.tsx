@@ -26,8 +26,6 @@ import { Separator } from '@kit/ui/separator';
 
 import { handleResponse } from '../../../../../../../../apps/web/lib/response/handle-response';
 import { ThemedButton } from '../../../../../../accounts/src/components/ui/button-themed-with-settings';
-// import { MembershipRoleSelector } from '../../../../components/clients/membership-role-selector';
-// import { RolesDataProvider } from '../../../../components/clients/roles-data-provider';
 import { createClient } from './create-clients';
 
 const formSchema = z.object({
@@ -59,16 +57,10 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const newClient = { ...values };
-    // delete newClient?.role;
     const res = await createClient({ client: newClient, role: values.role, adminActivated: false, baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}` });
     await handleResponse(res, 'clients', t).catch(() => null);
     window.location.reload();
   }
-
-  // const handleRoleSelect = (role: string) => {
-  //   setSelectedRole(role);
-  //   form.setValue('role', role);
-  // };
 
   return (
     <>
@@ -128,49 +120,6 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
                     </FormItem>
                   )}
                 />
-                {/* <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('roleSelection')}</FormLabel>
-                      <FormControl>
-                        <Input className="hidden" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                /> */}
-                {/* <RolesDataProvider maxRoleHierarchy={5}>
-                  {(roles) => {
-                    return (
-                      <FormField
-                        name={'role'}
-                        render={({ field }) => {
-                          return (
-                            <FormItem>
-                              {/* <If condition={isFirst}> */}
-                {/* <FormLabel>{t('team:roleLabel')}</FormLabel> */}
-                {/* </If> */}
-
-                {/* <FormControl>
-                                <MembershipRoleSelector
-                                  roles={roles}
-                                  value={field.value}
-                                  onChange={(role) => {
-                                    form.setValue(field.name, role);
-                                  }}
-                                />
-                              </FormControl>
-
-                              <FormMessage />
-                            </FormItem> */}
-                {/* );
-                        }}
-                      /> */}
-                {/* ); */}
-                {/* }} */}
-                {/* </RolesDataProvider> */}
 
                 <Separator />
                 <ThemedButton type="submit" className="w-full">

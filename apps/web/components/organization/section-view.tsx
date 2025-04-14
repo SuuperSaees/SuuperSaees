@@ -61,18 +61,12 @@ function SectionView({
 
   const embedsQuery = useQuery({
     queryKey: ['organization-embeds', clientOrganizationId],
-    queryFn: async () => {
-      // Return without type assertion to avoid linter errors
-      return await getEmbeds(clientOrganizationId);
-    },
+    queryFn: async () => await getEmbeds(clientOrganizationId),
     // Always fetch embeds to check if we need to show embed tabs
     enabled: true,
   });
 
-  const embeds = useMemo(() => {
-    // Filter embeds to only show those with location === 'tab'
-    return (embedsQuery.data ?? []).filter(embed => embed.location === 'tab');
-  }, [embedsQuery.data]);
+  const embeds = (embedsQuery.data ?? []).filter(embed => embed.location === 'tab')
   const isEmbedsLoading = embedsQuery.isLoading;
 
   const serviceOptions = services?.data?.map((service) => {

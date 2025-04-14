@@ -5,9 +5,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 import { getUserAccountById } from '../../members/get/get-member-account';
-import { updateUserAccount } from '../../members/update/update-account';
+// import { updateUserAccount } from '../../members/update/update-account';
 
 export const createOrganizationServer = async (clientData: {
   organization_name: string;
@@ -43,13 +44,13 @@ export const createOrganizationServer = async (clientData: {
     );
 
     // Associate the new organization with the user
-    await updateUserAccount(
-      {
-        organization_id: organizationAccountData.id,
-      },
-      user.id,
-      client
-    );
+    // await updateUserAccount(
+    //   {
+    //     organization_id: organizationAccountData.id ?? '',
+    //   },
+    //   user.id,
+    //   client
+    // );
 
     return organizationAccountData;
   } catch (error) {
@@ -59,7 +60,7 @@ export const createOrganizationServer = async (clientData: {
 };
 
 export const insertOrganization = async (
-  organizationData: Account.Insert,
+  organizationData: Organization.Insert,
   ownerId: Account.Type['id'],
   databaseClient?: SupabaseClient<Database>,
   adminActivated = false,
@@ -70,13 +71,12 @@ export const insertOrganization = async (
   try {
     const newAccount = {
       ...organizationData,
-      primary_owner_user_id: ownerId,
-      is_personal_account: false,
+      owner_id: ownerId,
     };
 
     const { data: organization, error: organizationError } =
       await databaseClient
-        .from('accounts')
+        .from('organizations')
         .insert(newAccount)
         .select()
         .single();
