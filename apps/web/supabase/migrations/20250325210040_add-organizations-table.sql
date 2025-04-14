@@ -17,14 +17,6 @@ CREATE UNIQUE INDEX organizations_pkey ON public.organizations USING btree (id);
 
 alter table "public"."organizations" add constraint "organizations_pkey" PRIMARY KEY using index "organizations_pkey";
 
-alter table "public"."clients" add constraint "clients_agency_id_fkey" FOREIGN KEY (agency_id) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
-alter table "public"."clients" validate constraint "clients_agency_id_fkey";
-
-alter table "public"."clients" add constraint "clients_organization_client_id_fkey" FOREIGN KEY (organization_client_id) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
-alter table "public"."clients" validate constraint "clients_organization_client_id_fkey";
-
 alter table "public"."organizations" add constraint "organizations_owner_id_fkey" FOREIGN KEY (owner_id) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE SET NULL not valid;
 
 alter table "public"."organizations" validate constraint "organizations_owner_id_fkey";
