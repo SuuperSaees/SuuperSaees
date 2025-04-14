@@ -164,7 +164,14 @@ function ProfileSettings({
             <p className="text-wrap">{t('nameDescription')}</p>
           </div>
 
-          <UpdateAccountDetailsFormContainer user={user} />
+          <UpdateAccountDetailsFormContainer user={{
+            ...user, 
+            settings: {
+              ...userSettings,
+              name: userSettings?.name ?? user?.name ?? '',
+              picture_url: userSettings?.picture_url ?? user?.picture_url ?? '',
+            }
+          }} />
         </div>
 
         <Separator />

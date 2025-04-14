@@ -43,7 +43,8 @@ WITH active_org AS (
 )
 SELECT
   a.id AS id,
-  a.name AS name,
+  -- Use COALESCE to select name from user_settings first, then accounts
+  COALESCE(us.name, a.name) AS name,
   a.email AS email,
   -- Use COALESCE to select picture_url from user_settings first, then accounts
   COALESCE(us.picture_url, a.picture_url) AS picture_url,
