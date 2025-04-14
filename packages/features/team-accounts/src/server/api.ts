@@ -218,7 +218,7 @@ export class TeamAccountsApi {
           };
         }
       >(
-        'id, expires_at, account: account_id !inner (id, name, slug, picture_url)',
+        'id, expires_at, account: organization_id !inner (id, name, slug, picture_url)',
       )
       .eq('invite_token', token)
       .gte('expires_at', new Date().toISOString())

@@ -311,44 +311,12 @@ export const acceptInvitationAction = enhanceAction(
     const perSeatBillingService = createAccountPerSeatBillingService(client);
     const service = createAccountInvitationsService(client); 
 
-    // Check if the user already belongs to any organization
-    const { data: existingUser, error: existingUserError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', user.id)
-      .single();
-
-    if (existingUserError) {
-      console.error('Failed to retrieve user organization data');
-      throw new Error(existingUserError.message);
-    }
-
-    // If the user already belongs to an organization, deny the invitation
-    if (existingUser?.organization_id) {
-      throw new Error(
-        'You are already a member of an organization and cannot accept this invitation.',
-      );
-    }
-
     // Get the organization of the sender
-    const { data: senderAccount, error: senderAccountError } = await client
+    const { error: senderOrganizationError } = await client
       .from('invitations')
-      .select('invited_by')
+      .select('organization_id, role')
       .eq('invite_token', inviteToken)
       .single();
-
-    if (senderAccountError) {
-      console.error('Failed to obtain the sender account');
-      throw new Error(senderAccountError.message);
-    }
-
-    // Get the organization ID of the sender
-    const { data: senderOrganization, error: senderOrganizationError } =
-      await client
-        .from('accounts')
-        .select('organization_id')
-        .eq('id', senderAccount.invited_by)
-        .single();
 
     if (senderOrganizationError) {
       console.error('Failed to obtain the sender organization');
@@ -356,7 +324,7 @@ export const acceptInvitationAction = enhanceAction(
     }
 
     // Accept the invitation
-    const accountId = await service.acceptInvitationToTeam(
+    const organizationId = await service.acceptInvitationToTeam(
       getSupabaseServerActionClient({ admin: true }),
       {
         inviteToken,
@@ -364,23 +332,19 @@ export const acceptInvitationAction = enhanceAction(
       },
     );
 
+    const domain = await getDomainByOrganizationId(organizationId, false, true);
+
     // If the account ID is not present, throw an error
-    if (!accountId) {
+    if (!organizationId) {
       throw new Error('Failed to accept invitation');
     }
 
-    // Associate the new member with the sender's organization
-    const { error: associateMemberError } = await client
-      .from('accounts')
-      .update({ organization_id: senderOrganization?.organization_id })
-      .eq('id', user.id);
-      
-    if (associateMemberError) {
-      console.error('Failed to associate member with organization');
-      throw new Error(associateMemberError.message);
-    }
+    await client.rpc('set_session', {
+      domain: domain,
+    });
+    
     // Increase the seats for the account
-    await perSeatBillingService.increaseSeats(accountId).catch((error) => {
+    await perSeatBillingService.increaseSeats(organizationId).catch((error) => {
       console.error('Failed to increase seats', error);
       throw new Error(error.message);
     });
