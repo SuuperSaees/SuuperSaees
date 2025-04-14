@@ -1,0 +1,9 @@
+{
+  "upload": {
+    "placeholder": "Arrastra los archivos aquí o haz click para subir",
+    "dropHere": "Suelta los archivos aquí",
+    "uploading": "Subiendo...",
+    "error": "Carga fallida",
+    "success": "Carga completada"
+  }
+}

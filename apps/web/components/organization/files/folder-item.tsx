@@ -14,12 +14,10 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
+import { FolderItem as FolderItemType } from './hooks/use-folder-manager';
 
 interface FolderItemProps {
-  folder: {
-    title: string;
-    id: string;
-  };
+  folder: FolderItemType;
   onClick: () => void;
   isOrderFolder?: boolean;
   queryKey: string[];
@@ -69,7 +67,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
           className="w-[184.317px] cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-[15.661px] font-semibold text-gray-900"
           onClick={onClick}
         >
-          {folder.title}
+          {folder.title === 'Projects' ? t('orders:title') : folder.title}
         </div>
         {!isOrderFolder && (
           <DropdownMenu>

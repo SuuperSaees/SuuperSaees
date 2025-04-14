@@ -2,44 +2,59 @@
 
 import { useTranslation } from 'react-i18next';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
+import Breadcrumb from '../../app/components/shared/breadcrumb';
+import EmptyState from '../ui/empty-state';
 import { SkeletonCards } from '../ui/skeleton';
 import FileItem from './files/file-item';
 import FolderItem from './files/folder-item';
-import { useFileManagement } from './files/hooks/use-folder-manager';
+import {
+  FolderItem as FolderItemType,
+  useFileManagement,
+} from './files/hooks/use-folder-manager';
 import { OptionFiles } from './files/option-files';
-import RadioOptions from './files/radio-options';
+// import RadioOptions from './files/radio-options';
 import { SkeletonCardFile } from './skeleton-card-file';
-import EmptyState from '../ui/empty-state';
 
 interface FileSectionProps {
   clientOrganizationId: string;
   agencyId: string;
-  setCurrentPath?: React.Dispatch<
-    React.SetStateAction<Array<{ title: string; uuid?: string }>>
-  >;
-  currentPath?: Array<{ title: string; uuid?: string }>;
+  setCurrentPath?: React.Dispatch<React.SetStateAction<Array<FolderItemType>>>;
+  currentPath?: Array<FolderItemType>;
 }
 
-export default function FileSection({ clientOrganizationId, agencyId, setCurrentPath, currentPath }: FileSectionProps) {
-  const { t } = useTranslation('organizations')
+export default function FileSection({
+  clientOrganizationId,
+  agencyId,
+  setCurrentPath,
+  currentPath,
+}: FileSectionProps) {
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const { t } = useTranslation('organizations');
   const {
     selectedOption,
-    setSelectedOption,
+    // setSelectedOption,
     currentFolders,
     currentFiles,
-    path,
+    folderItems,
     loading,
     handleFolderClick,
     handlePathClick,
-    currentFolderType,
     queryKey,
-  } = useFileManagement(clientOrganizationId, agencyId, setCurrentPath, currentPath)
+    currentFolderId
+  } = useFileManagement(
+    clientOrganizationId,
+    agencyId,
+    setCurrentPath,
+    currentPath,
+  );
 
-  const options = [
-    { value: 'all', label: t('organizations:files.all') },
-    { value: 'team_uploaded', label: t('organizations:files.team_uploaded') },
-    { value: 'client_uploaded', label: t('organizations:files.client_uploaded') },
-  ]
+  // const options = [
+  //   { value: 'all', label: t('organizations:files.all') },
+  //   { value: 'team_uploaded', label: t('organizations:files.team_uploaded') },
+  //   { value: 'client_uploaded', label: t('organizations:files.client_uploaded') },
+  // ]
 
   if (loading) {
     return (
@@ -50,77 +65,12 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
           classNameLineText="h-[16px] w-14"
         />
       </SkeletonCards>
-    )
+    );
   }
 
-  const renderBreadcrumbs = () => (
-    <div className="mb-2 text-[14px] text-gray-700">
-      <span className="cursor-pointer" onClick={() => handlePathClick(-1)}>
-        {'...'}
-      </span>
-      {path.map((folder, index) => (
-        <span key={folder.uuid ?? index}>
-          {' > '}
-          <span
-            className={
-              index === path.length - 1
-                ? 'cursor-default text-gray-500'
-                : 'cursor-pointer'
-            }
-            onClick={() => index !== path.length - 1 && handlePathClick(index)}
-          >
-            {folder.title}
-          </span>
-        </span>
-      ))}
-    </div>
-  );
-
   const renderContent = () => {
-    // Root level - show orders folder and main folders/files
-    if (path.length === 0 && selectedOption === 'all') {
-      return (
-        <div className="mt-4 flex flex-wrap gap-8">
-          <FolderItem
-            folder={{ title: t('organizations:files.orders'), id: '' }}
-            onClick={() => handleFolderClick('', t('organizations:files.orders'), true)}
-            isOrderFolder
-            queryKey={queryKey}
-          />
-          {currentFolders.map((folder) => (
-            <FolderItem
-              key={folder.uuid}
-              folder={{ title: folder.title ?? '', id: folder.uuid }}
-              onClick={() => handleFolderClick(folder.uuid, folder.title ?? '')}
-              queryKey={queryKey}
-            />
-          ))}
-          {currentFiles.map((file) => (
-            <FileItem key={file.id} file={file} currentPath={path} />
-          ))}
-        </div>
-      )
-    }
-
-    // Orders folder - show project folders
-    if (currentFolderType === 'orders' && currentFolders.length > 0) {
-      return (
-        <div className="mt-4 flex flex-wrap gap-8">
-          {currentFolders.map((folder) => (
-            <FolderItem
-              key={folder.uuid}
-              folder={{ title: folder.title ?? '', id: folder.uuid }}
-              onClick={() => handleFolderClick(folder.uuid, folder.title ?? '', true)}
-              isOrderFolder
-              queryKey={queryKey}
-            />
-          ))}
-        </div>
-      )
-    }
-
     // Subfolder or empty folder
-    const hasContent = currentFolders.length > 0 || currentFiles.length > 0
+    const hasContent = currentFolders.length > 0 || currentFiles.length > 0;
     return (
       <div className="mt-4 flex flex-wrap gap-8">
         {currentFolders.map((folder) => (
@@ -132,7 +82,7 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
           />
         ))}
         {currentFiles.map((file) => (
-          <FileItem key={file.id} file={file} currentPath={path} />
+          <FileItem key={file.id} file={file} currentFolders={folderItems} />
         ))}
         {!hasContent && (
           <EmptyState
@@ -142,26 +92,35 @@ export default function FileSection({ clientOrganizationId, agencyId, setCurrent
           />
         )}
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div>
       <div className="flex flex-wrap justify-between">
-        <RadioOptions
+        {folderItems.length > 0 && selectedOption === 'all' && (
+          <Breadcrumb items={folderItems} handlePathClick={handlePathClick} />
+        )}
+        {/* <RadioOptions
           options={options}
           selectedOption={selectedOption}
           onChange={(e) => setSelectedOption(e.target.value)}
-        />
+        /> */}
         {selectedOption === 'all' && (
-          <div className="flex-shrink-0">
-            <OptionFiles clientOrganizationId={clientOrganizationId} currentPath={path} queryKey={queryKey}/>
+          <div className="ml-auto flex-shrink-0">
+            <OptionFiles
+              clientOrganizationId={clientOrganizationId}
+              currentFolders={folderItems}
+              currentFolderId={currentFolderId}
+              queryKey={queryKey}
+              userId={userWorkspace.id ?? ''}
+              agencyId={agencyId}
+            />
           </div>
         )}
       </div>
 
-      {path.length > 0 && selectedOption === 'all' && renderBreadcrumbs()}
       {renderContent()}
     </div>
-  )
+  );
 }

@@ -1,0 +1,9 @@
+{
+  "upload": {
+    "placeholder": "Drag and drop files here or click to upload",
+    "dropHere": "Drop files here",
+    "uploading": "Uploading...",
+    "error": "Upload failed",
+    "success": "Upload completed"
+  }
+}

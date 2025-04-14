@@ -1,0 +1,198 @@
+drop trigger if exists "after_update_accounts" on "public"."accounts";
+
+drop trigger if exists "after_update_organization_settings" on "public"."organization_settings";
+
+alter table "public"."folders" alter column "client_organization_id" drop not null;
+
+set check_function_bodies = off;
+
+CREATE OR REPLACE FUNCTION public.enforce_folder_constraints()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  existing_count INTEGER;
+BEGIN
+  -- Check for duplicate root folders (for the same organization)
+  IF NEW.is_subfolder = FALSE AND NEW.parent_folder_id IS NULL THEN
+    -- Count existing root folders with the same agency_id and client_organization_id
+    SELECT COUNT(*) INTO existing_count
+    FROM folders
+    WHERE is_subfolder = FALSE 
+      AND parent_folder_id IS NULL
+      AND agency_id = NEW.agency_id
+      AND (
+        (NEW.client_organization_id IS NULL AND client_organization_id IS NULL) OR
+        (NEW.client_organization_id IS NOT NULL AND client_organization_id = NEW.client_organization_id)
+      );
+      
+    -- If a root folder already exists for this organization, raise an exception
+    IF existing_count > 0 AND TG_OP = 'INSERT' THEN
+      RAISE EXCEPTION 'A root folder already exists for this organization';
+    END IF;
+  END IF;
+  
+  -- Check for duplicate special subfolders (like "Projects")
+  IF NEW.is_subfolder = TRUE AND NEW.parent_folder_id IS NOT NULL AND NEW.name = 'Projects' THEN
+    -- Count existing "Projects" folders with the same agency_id and client_organization_id
+    SELECT COUNT(*) INTO existing_count
+    FROM folders
+    WHERE name = 'Projects'
+      AND is_subfolder = TRUE
+      AND agency_id = NEW.agency_id
+      AND (
+        (NEW.client_organization_id IS NULL AND client_organization_id IS NULL) OR
+        (NEW.client_organization_id IS NOT NULL AND client_organization_id = NEW.client_organization_id)
+      );
+      
+    -- If a "Projects" folder already exists for this agency-client combination, raise an exception
+    IF existing_count > 0 AND TG_OP = 'INSERT' THEN
+      RAISE EXCEPTION 'A "Projects" folder already exists for this agency-client combination';
+    END IF;
+  END IF;
+  
+  -- All checks passed, allow the operation
+  RETURN NEW;
+END;
+$function$
+;
+
+CREATE OR REPLACE FUNCTION public.handle_insert_operations_with_folders()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  root_folder_id UUID;
+  projects_folder_id UUID;
+  is_client BOOLEAN;
+BEGIN
+  -- Case: Insert into orders_v2
+  IF TG_TABLE_NAME = 'orders_v2' THEN
+    SELECT id INTO projects_folder_id
+    FROM folders
+    WHERE name = 'Projects'
+      AND agency_id = NEW.agency_id::text
+      AND client_organization_id = NEW.client_organization_id::text;
+    
+    INSERT INTO folders (id, name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
+    VALUES (NEW.uuid::uuid, NEW.title, NEW.agency_id::text, NEW.client_organization_id::text, true, projects_folder_id);
+  END IF;
+  
+  -- Case: Insert into accounts (Agency or Client Organization)
+  IF TG_TABLE_NAME = 'accounts' THEN
+    IF NOT NEW.is_personal_account THEN
+      -- Check if this account is already linked as a client to an agency
+      SELECT EXISTS (
+        SELECT 1 FROM clients 
+        WHERE organization_client_id = NEW.id
+      ) INTO is_client;
+      
+      -- Only create folders if this is not a client account
+      -- For client accounts, the folders will be created by the clients trigger
+      IF NOT is_client THEN
+        -- Find existing root folder for the agency
+        SELECT id INTO root_folder_id
+        FROM folders
+        WHERE name = NEW.name
+          AND agency_id = NEW.id::text
+          AND is_subfolder = false
+          AND parent_folder_id IS NULL
+        LIMIT 1;
+        
+        -- If no root folder exists, create it
+        IF root_folder_id IS NULL THEN
+          INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
+          VALUES (NEW.name, NEW.id::text, NEW.id::text, false, NULL)
+          RETURNING id INTO root_folder_id;
+        END IF;
+        
+        -- Find existing "Projects" folder
+        SELECT id INTO projects_folder_id
+        FROM folders
+        WHERE name = 'Projects'
+          AND agency_id = NEW.id::text
+          AND is_subfolder = true
+          AND parent_folder_id = root_folder_id
+        LIMIT 1;
+        
+        -- If no "Projects" folder exists, create it
+        IF projects_folder_id IS NULL THEN
+          INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
+          VALUES ('Projects', NEW.id::text, NEW.id::text, true, root_folder_id);
+        END IF;
+      END IF;
+    END IF;
+  END IF;
+  
+  -- Case: Insert into clients (Client Organizations)
+  IF TG_TABLE_NAME = 'clients' THEN
+    -- Get the root folder for the client organization
+    SELECT id INTO root_folder_id
+    FROM folders
+    WHERE name = (SELECT name FROM accounts WHERE id = NEW.organization_client_id)
+      AND is_subfolder = false
+      AND parent_folder_id IS NULL
+    LIMIT 1;
+    
+    -- Create client root folder if it doesn't exist
+    IF root_folder_id IS NULL THEN
+      INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
+      VALUES (
+        (SELECT name FROM accounts WHERE id = NEW.organization_client_id),
+        NEW.agency_id::text,
+        NEW.organization_client_id::text,
+        false,
+        NULL
+      )
+      RETURNING id INTO root_folder_id;
+    ELSE
+      -- Update existing root folder to set the correct agency_id and client_organization_id
+      UPDATE folders
+      SET 
+        agency_id = NEW.agency_id::text,
+        client_organization_id = NEW.organization_client_id::text
+      WHERE id = root_folder_id;
+    END IF;
+    
+    -- Get the "Projects" folder under this root folder
+    SELECT id INTO projects_folder_id
+    FROM folders
+    WHERE name = 'Projects'
+      AND parent_folder_id = root_folder_id
+    LIMIT 1;
+    
+    -- Create Projects folder if it doesn't exist
+    IF projects_folder_id IS NULL THEN
+      INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
+      VALUES (
+        'Projects',
+        NEW.agency_id::text,
+        NEW.organization_client_id::text,
+        true,
+        root_folder_id
+      );
+    ELSE
+      -- Update existing Projects folder to set the correct agency_id and client_organization_id
+      UPDATE folders
+      SET 
+        agency_id = NEW.agency_id::text,
+        client_organization_id = NEW.organization_client_id::text
+      WHERE id = projects_folder_id;
+    END IF;
+  END IF;
+  
+  RETURN NULL;
+END;
+$function$
+;
+
+CREATE TRIGGER after_insert_accounts AFTER INSERT ON public.accounts FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
+
+CREATE TRIGGER after_insert_clients AFTER INSERT ON public.clients FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
+
+CREATE TRIGGER after_insert_orders_v2 AFTER INSERT ON public.orders_v2 FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
+
+CREATE TRIGGER before_folder_changes BEFORE INSERT ON public.folders FOR EACH ROW EXECUTE FUNCTION enforce_folder_constraints();
+
+GRANT EXECUTE ON FUNCTION handle_insert_operations_with_folders() TO authenticated, service_role;
+

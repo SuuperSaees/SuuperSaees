@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { createUploadBucketURL } from '../create/create-file';
+import {  createUploadBucketURL, insertFilesInFolder } from '../create/create-file';
 import { useTranslation } from 'react-i18next';
 import { deleteFile } from '../delete/delete-file';
-import { createFile } from '../../../../../../../../apps/web/app/server/actions/files/files.action';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface FileWithServerId {
   file: File;
@@ -17,6 +17,9 @@ interface UseFileUploadProps {
   onFileIdsChange?: (fileIds: string[]) => void;
   onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
   thereAreFilesUploaded?: (value: boolean) => void;
+  agencyId: string;
+  clientOrganizationId: string;
+  folderId: string;
   referenceId?: string;
 }
 
@@ -25,13 +28,16 @@ export const useFileUpload = ({
   onFileIdsChange,
   onFileUploadStatusUpdate,
   thereAreFilesUploaded,
+  agencyId,
+  clientOrganizationId,
+  folderId,
   referenceId
 }: UseFileUploadProps) => {
   const { t } = useTranslation();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<File[]>([]);
   const [globalFileList, setGlobalFileList] = useState<FileWithServerId[]>([]);
-
+  const {workspace: userWorkspace} = useUserWorkspace();
   const sanitizeFileName = (fileName: string) => {
     return fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   };
@@ -123,15 +129,14 @@ export const useFileUpload = ({
         size: file.size,
         type: file.type,
         url: fileUrl,
+        user_id: userWorkspace.id ?? '',
         reference_id: referenceId,
       };
 
-      const createdFiles = await createFile({
-        files: [newFileData]
-      });
-      
+      const createdFiles = await insertFilesInFolder(folderId, [newFileData], clientOrganizationId, agencyId);
       if (onFileSelect) {
-        const allServerIds = createdFiles.map((file: { id: string }) => file.id);
+
+        const allServerIds = createdFiles.map((file) => file.id);
         onFileSelect(allServerIds);
         if (onFileIdsChange) {
           onFileIdsChange(allServerIds);

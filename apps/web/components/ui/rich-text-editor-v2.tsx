@@ -36,13 +36,14 @@ import { Switch } from '@kit/ui/switch';
 import { Trans } from '@kit/ui/trans';
 
 import {
+  createFiles,
   createUploadBucketURL,
 } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { generateUUID } from '~/utils/generate-uuid';
 
 import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
-import { createFile } from '~/server/actions/files/files.action';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface GroupedImageNodeViewProps {
   node: {
@@ -173,6 +174,7 @@ const RichTextEditorV2 = ({
   // useInForm = false,
 }: RichTextEditorProps) => {
   const insertedImages = useRef(new Set<string>());
+  const { workspace: userWorkspace } = useUserWorkspace();
   const uploadImage = async (file: File) => {
     if (!file) return;
 
@@ -201,17 +203,16 @@ const RichTextEditorV2 = ({
 
     const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/orders/${newFilepath}`;
 
-    const fileData = await createFile({
-      files: [
-        {
-          name: sanitizedFileName,
-          size: file.size,
-          type: file.type,
-          url: fileUrl,
-          reference_id: referenceId,
-        },
-      ]
-    });
+    const fileData = await createFiles([
+      {
+        name: sanitizedFileName,
+        size: file.size,
+        type: file.type,
+        url: fileUrl,
+        user_id: userWorkspace.id ?? '',
+        reference_id: referenceId,
+      },
+    ]);
 
     if (!fileData) {
       throw new Error('Error creating file');

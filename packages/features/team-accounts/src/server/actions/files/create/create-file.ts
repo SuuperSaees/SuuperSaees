@@ -2,14 +2,13 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { File } from '../../../../../../../../apps/web/lib/file.types';
 import { CheckIfItIsAnOrderFolder } from '../../folders/get/get-folders';
 import { getAgencyForClient } from '../../organizations/get/get-organizations';
 
 type CreateFileProps = Omit<File.Insert, 'user_id'>;
 
+// Check files in frontend where is being used
 export const createFile = async (
   files: CreateFileProps[],
   client_organization_id?: string,
@@ -60,13 +59,16 @@ export const createFile = async (
 
         // Insert the files in folder_files table
 
-        const canInsertFolderFiles = folderFilesToInsert.some(folderFile => folderFile.folder_id !== undefined && folderFile.folder_id !== null);
-        if(canInsertFolderFiles) {
-          const {  error: folderFilesError } = await client
+        const canInsertFolderFiles = folderFilesToInsert.some(
+          (folderFile) =>
+            folderFile.folder_id !== undefined && folderFile.folder_id !== null,
+        );
+        if (canInsertFolderFiles) {
+          const { error: folderFilesError } = await client
             .from('folder_files')
             .insert(folderFilesToInsert)
             .select();
-  
+
           if (folderFilesError) throw folderFilesError;
         }
 
@@ -93,14 +95,16 @@ export const createFile = async (
       }));
 
       // Insert the files in folder_files table
-      const canInsertFolderFiles = folderFilesToInsert.some(folderFile => folderFile?.folder_id !== undefined && folderFile?.folder_id !== null);
-      if(canInsertFolderFiles) {
-
+      const canInsertFolderFiles = folderFilesToInsert.some(
+        (folderFile) =>
+          folderFile?.folder_id !== undefined && folderFile?.folder_id !== null,
+      );
+      if (canInsertFolderFiles) {
         const { error: folderFilesError } = await client
           .from('folder_files')
           .insert(folderFilesToInsert)
           .select();
-  
+
         if (folderFilesError) throw folderFilesError;
       }
 
@@ -127,6 +131,88 @@ export const createFile = async (
   }
 };
 
+// // New function for create files => helper function
+
+export const createFiles = async (files: File.Insert[]) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: filesData, error: fileError } = await client
+      .from('files')
+      .insert(files)
+      .select();
+
+    if (fileError)
+      throw new Error(`Error creating files: ${fileError.message}`);
+
+    return filesData;
+  } catch (error) {
+    console.error('Error creating files:', error);
+    throw error;
+  }
+};
+
+export const createFolderFiles = async (
+  folderFiles: File.Relationships.FolderFiles.Insert[],
+) => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const { data: folderFilesData, error: folderFilesError } = await client
+      .from('folder_files')
+      .insert(folderFiles)
+      .select();
+
+    if (folderFilesError)
+      throw new Error(
+        `Error creating folder files: ${folderFilesError.message}`,
+      );
+
+    return folderFilesData;
+  } catch (error) {
+    console.error('Error creating folder files:', error);
+    throw error;
+  }
+};
+
+// New function for create files in folder
+/**
+ * Create file for a specific folder (root or sub)
+ * @param  {string} [folderId] - The ID of the folder.
+ * @param {files} [files] - The files to be created.
+ * @param {string} [clientOrganizationId] - The ID of the client organization.
+ * @param {string} [agencyId] - The ID of the agency.
+ * @returns {Promise<Array<File>>}
+ */
+
+export const insertFilesInFolder = async (
+  folderId: string,
+  files: File.Insert[],
+  clientOrganizationId: string,
+  agencyId: string,
+) => {
+  try {
+    const filesData = await createFiles(files);
+
+    const folderFilesToInsert = filesData.map((file) => ({
+      file_id: file.id,
+      client_organization_id: clientOrganizationId,
+      agency_id: agencyId,
+      folder_id: folderId,
+    }));
+
+    // Insert the files in folder_files table
+    const canInsertFolderFiles = folderFilesToInsert.some(
+      (folderFile) =>
+        folderFile?.folder_id !== undefined && folderFile?.folder_id !== null,
+    );
+    if (canInsertFolderFiles) await createFolderFiles(folderFilesToInsert);
+
+    return filesData;
+  } catch (error) {
+    console.error(`Error inseting files in folder ${folderId}`, error);
+    throw error;
+  }
+};
+
 export const createUploadBucketURL = async (
   bucketName: string,
   filePath: string,
@@ -146,11 +232,8 @@ export const createUploadBucketURL = async (
   }
 };
 
-
-export const insertOrderFiles = async (
-  orderId: string,
-  fileId: string,
-) => {
+// Check files in frontend where is being used
+export const insertOrderFiles = async (orderId: string, fileId: string) => {
   try {
     const client = getSupabaseServerComponentClient();
 

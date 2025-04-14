@@ -21,6 +21,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from 'node_modules/@kit/ui/src/shadcn/hover-card';
+import { File } from '~/lib/file.types';
 
 interface FileProps {
   src: string;
@@ -32,7 +33,7 @@ interface FileProps {
   actualPage?: number;
   onLoadPDF?: (total: number) => void;
   zoomLevel?: number;
-  files?: File[];
+  files?: File.Type[];
   triggerComponent?: React.ReactNode;
   noPreview?: boolean;
 }
@@ -147,7 +148,7 @@ export const FileDialogView: React.FC<FileProps> = ({
   fileType,
   files,
 }) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File.Type | null>(null);
   const [currentFileType, setCurrentFileType] = useState(fileType);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
@@ -175,7 +176,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     resetZoom,
   } = useFileHandlers(1, currentFileType);
 
-
+  const otherFileIds = files?.filter((file) => file.id !== selectedFile?.id).map((file) => file.id);
   const { 
     annotations, 
     isLoadingAnnotations,
@@ -189,7 +190,7 @@ export const FileDialogView: React.FC<FileProps> = ({
     setSelectedAnnotation,
     deleteAnnotation,
     updateAnnotation
-  } = useAnnotations({ fileId: selectedFile?.id ?? '', fileName: selectedFile?.name ?? '', isDialogOpen, isInitialMessageOpen });
+  } = useAnnotations({ fileId: selectedFile?.id ?? '', fileName: selectedFile?.name ?? '', isDialogOpen, isInitialMessageOpen, otherFileIds });
   
   useEffect(() => {
     if (files?.length) {

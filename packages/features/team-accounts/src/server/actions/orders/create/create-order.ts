@@ -24,9 +24,7 @@ type OrderInsert = Omit<
   | 'client_organization_id'
   | 'agency_id'
   | 'propietary_organization_id'
-> & {
-  fileIds?: string[];
-};
+> 
 
 export const createOrder = async (
   order: OrderInsert,
@@ -43,7 +41,7 @@ export const createOrder = async (
       ...order,
       brief_ids: briefIds,
     };
-    delete orderToInsert.fileIds;
+  
     const processedBriefResponses = briefResponses?.map(response => ({
       ...response,
       response: typeof response.response === 'string' ? textFormat.encode(response.response) : response.response
@@ -57,7 +55,7 @@ export const createOrder = async (
         _order: orderToInsert,
         _brief_responses: processedBriefResponses ?? [],
         _order_followers: orderFollowers ?? [],
-        _order_file_ids: order.fileIds ?? [],
+        _order_file_ids: [],
       },
     );
 

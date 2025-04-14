@@ -35,9 +35,10 @@ interface useAnnotationsProps {
   fileName: string;
   isDialogOpen: boolean;
   isInitialMessageOpen?: boolean;
+  otherFileIds?: string[];
 }
 
-export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessageOpen=false }: useAnnotationsProps) => {
+export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessageOpen=false, otherFileIds }: useAnnotationsProps) => {
   const { t } = useTranslation('orders');
   const supabase = useSupabase();
   const { user, workspace } = useUserWorkspace();
@@ -49,7 +50,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
   const { data: annotations = [], isLoading: isLoadingAnnotations } = useQuery({
     queryKey: ['annotations', fileId],
     queryFn: async () => {
-      const response = await fetch(`/api/v1/annotations?file_id=${fileId}`);
+      const response = await fetch(`/api/v1/annotations?file_id=${fileId}&other_file_ids=${otherFileIds?.join(',')}`);
       const data = await response.json();
       const currentAnnotations = data.data.current_file.filter((annotation: Annotation) => annotation.deleted_on === null);
       const allAnnotations = data.data.other_files.filter((annotation: Annotation) => annotation.deleted_on === null);
