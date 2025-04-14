@@ -3049,18 +3049,3 @@ USING (
 auth.uid() IS NOT NULL
 AND bucket_id = 'account_image'
 );
-
--- REALTIME
-alter publication supabase_realtime
-add table public.activities,
-    public.agency_statuses,
-    public.chat_messages,
-    public.files,
-    public.messages,
-    public.order_files,
-    public.orders_v2,
-    public.reviews,
-    public.subtask_assignations,
-    public.subtask_followers,
-    public.subtasks,
-    public.tasks;

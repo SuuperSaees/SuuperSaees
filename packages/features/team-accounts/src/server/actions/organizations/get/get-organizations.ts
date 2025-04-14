@@ -153,7 +153,7 @@ export async function getOrganizationByUserId(
       .single();
 
     if(clientError) {
-      console.error('Error fetching client:', clientError);
+      console.error('Warning fetching client:', clientError);
     }
 
     const organizationId = clientData?.organization_client_id ?? sessionData?.organization?.id ?? '';

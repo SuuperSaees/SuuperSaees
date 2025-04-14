@@ -195,4 +195,3 @@ CREATE TRIGGER after_insert_orders_v2 AFTER INSERT ON public.orders_v2 FOR EACH 
 CREATE TRIGGER before_folder_changes BEFORE INSERT ON public.folders FOR EACH ROW EXECUTE FUNCTION enforce_folder_constraints();
 
 GRANT EXECUTE ON FUNCTION handle_insert_operations_with_folders() TO authenticated, service_role;
-
