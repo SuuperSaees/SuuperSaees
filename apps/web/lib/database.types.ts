@@ -1464,7 +1464,7 @@ export type Database = {
       folders: {
         Row: {
           agency_id: string
-          client_organization_id: string
+          client_organization_id: string | null
           created_at: string
           id: string
           is_subfolder: boolean | null
@@ -1473,7 +1473,7 @@ export type Database = {
         }
         Insert: {
           agency_id: string
-          client_organization_id: string
+          client_organization_id?: string | null
           created_at?: string
           id?: string
           is_subfolder?: boolean | null
@@ -1482,7 +1482,7 @@ export type Database = {
         }
         Update: {
           agency_id?: string
-          client_organization_id?: string
+          client_organization_id?: string | null
           created_at?: string
           id?: string
           is_subfolder?: boolean | null
@@ -3296,14 +3296,14 @@ export type Database = {
           {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
@@ -3611,7 +3611,7 @@ export type Database = {
       has_same_role_hierarchy_level_or_lower: {
         Args: {
           target_user_id: string
-          target_account_id: string
+          target_organization_id: string
           role_name: string
         }
         Returns: boolean

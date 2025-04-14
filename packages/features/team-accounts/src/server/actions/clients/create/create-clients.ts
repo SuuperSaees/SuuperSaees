@@ -51,12 +51,15 @@ export const createClient = async (clientData: CreateClient) => {
       .eq('email', clientData.client.email)
       .single();
 
+      const agencyIdForReactivation = !clientData.adminActivated ? (await supabase.rpc('get_session')).data?.organization?.id : clientData.agencyId;
+
       if (accountData?.id) {
         // Now check if this account was a deleted client
         const { data: existingClient } = await supabase
           .from('clients')
           .select('*')
           .eq('user_client_id', accountData.id)
+          .eq('agency_id', agencyIdForReactivation ?? '')
           .not('deleted_on', 'is', null)
           .single();
   
@@ -69,9 +72,21 @@ export const createClient = async (clientData: CreateClient) => {
             baseUrl: clientData.baseUrl,
             supabase: undefined,
             adminActivated: true,
+            agencyId: agencyIdForReactivation ?? '',
           });
           
           return CustomResponse.success(existingClient, 'clientCreated').toJSON();
+        } else {
+          await reactivateDeletedClient({
+            accountId: accountData.id,
+            email: clientData.client.email,
+            name: clientData.client.name,
+            slug: clientData.client.slug,
+            baseUrl: clientData.baseUrl,
+            supabase: undefined,
+            adminActivated: true,
+            agencyId: agencyIdForReactivation ?? '',
+          });
         }
       }
 

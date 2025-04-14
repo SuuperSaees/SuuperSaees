@@ -110,3 +110,5 @@ $$ language plpgsql;
 
 grant
 execute on function accept_invitation (text, uuid) to service_role;
+
+ALTER TABLE user_settings DROP CONSTRAINT user_settings_pkey;
