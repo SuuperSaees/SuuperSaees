@@ -63,11 +63,13 @@ export class ChatMessagesRepository {
 
   async listLastMessages(chatIds?: string[]): Promise<ChatMessages.TypeWithRelations[]> {
     const client = this.client;
+
+    // here we can qyery to accounts_memberships ---> accounts
     const { data, error } = await client
       .from('chat_messages')
       .select(`
         *,
-        messages!inner(*, user:accounts(id, name, email, picture_url, organization_id))
+        messages!inner(*, user:accounts(id, name, email, picture_url))
       `)
       .in('chat_id', chatIds ?? [])
       .is('messages.deleted_on', null)

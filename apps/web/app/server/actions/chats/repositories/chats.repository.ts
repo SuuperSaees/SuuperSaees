@@ -2,6 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
 import { Chats } from '~/lib/chats.types';
+import { AccountRoles } from '~/lib/account.types';
 
 export class ChatRepository {
   private client: SupabaseClient<Database>;
@@ -43,29 +44,62 @@ export class ChatRepository {
 
   // * GET REPOSITORIES
   async list(userId: string, chatIds?: string[]): Promise<Chats.TypeWithRelations[]> {
+    const sessionData = (await this.client.rpc('get_session')).data;
+
+    const isClient = AccountRoles.clientRoles.has(sessionData?.organization?.role ?? '');
+
     const client = this.adminClient ?? this.client;
 
     let chatList: Chats.Type[] = [];
 
     if (chatIds) {
-      const { data: chatMembers, error: membersError } = await client
+      const query = client
       .from('chats')
-      .select(`*, members:chat_members (user:accounts(organization_id))`)
+      .select(`*, members:chat_members (user:accounts())`)
       .in('id', chatIds)
       .is('deleted_on', null);
+
+      if (isClient) {
+        const { data: chatMembers, error: membersError } = await query
+        .eq('agency_id', sessionData?.agency?.id ?? '');
+
+        if (membersError) {
+          throw new Error(`Error fetching chats as members: ${membersError.message}`);
+        }
+
+        chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
+      } else {
+        const { data: chatMembers, error: membersError } = await query
 
       if (membersError) {
         throw new Error(`Error fetching chats as members: ${membersError.message}`);
       }
 
-      chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
+        chatList = chatList.concat(chatMembers as unknown as Chats.Type[]);
+      }
     }
     
-    const { data, error } = await client
+    const query = client  
     .from('chats')
     .select(`*`)
     .eq('user_id', userId)
-    .is('deleted_on', null)
+    .is('deleted_on', null);
+
+    if (isClient) {
+      const { data, error } = await query
+      .eq('agency_id', sessionData?.agency?.id ?? '');
+
+
+    if (error) {
+      throw new Error(`Error fetching chats: ${error.message}`);
+    }
+
+    chatList = chatList.concat(data.filter((chat) => !chatIds?.includes(chat.id)) as unknown as Chats.Type[]);  
+
+    return chatList;
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       throw new Error(`Error fetching chats: ${error.message}`);
@@ -115,7 +149,6 @@ export class ChatRepository {
           account:accounts(
             email,
             name,
-            organization_id,
             picture_url,
             user_settings (
               name,
@@ -175,7 +208,7 @@ export class ChatRepository {
         chat_id: chatId,
         created_at: new Date().toISOString(),
         deleted_on: null,
-        organization_id: member.account?.organization_id ?? '',
+        // organization_id: member.account?.organization_id ?? '',
         id: member.user_id,
         name: member.account?.user_settings?.name ?? member.account?.name ?? '',
         picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',

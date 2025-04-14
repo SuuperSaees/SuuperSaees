@@ -279,6 +279,7 @@ export const useChatManagement = ({
     queryKey: ['chats'],
     queryFn: async () => {
       const response = await getChats(userId);
+      console.log('response', response);
       return response;
     },
   });

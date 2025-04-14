@@ -376,29 +376,15 @@ export async function getAgencyClients(
   try {
     const client = getSupabaseServerComponentClient();
 
-    const { error: userAuthenticatedError, data: userAuthenticatedData } =
-      await client.auth.getUser();
+    const { data: userData, error: userError } = await client.auth.getUser();
 
-    if (userAuthenticatedError) throw userAuthenticatedError;
-    const userId = userAuthenticatedData?.user?.id;
+    if (userError) throw userError;
 
-    // Retrieve authenticated account information
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
-      .single();
+    const userId = userData?.user?.id ?? '';
 
-    if (accountError) throw accountError;
-
-    const { data: accountMembershipsData, error: accountMembershipsDataError } =
-      await client
-        .from('accounts_memberships')
-        .select('account_role')
-        .eq('user_id', userId)
-        .single();
-
-    if (accountMembershipsDataError) throw accountMembershipsDataError;
+    const organizationData = (await client.rpc('get_session'))?.data?.organization;
+    const role = organizationData?.role ?? '';
+    const organizationId = organizationData?.id ?? '';
 
     const userRoles = new Set([
       'agency_owner',
@@ -406,7 +392,7 @@ export async function getAgencyClients(
       'client_owner',
     ]);
 
-    if (!userRoles.has(accountMembershipsData.account_role)) {
+    if (!userRoles.has(role)) {
       throw new Error('Unauthorized access to agency clients');
     }
 
@@ -419,8 +405,8 @@ export async function getAgencyClients(
     if (orderError) throw orderError;
 
     if (
-      orderData.agency_id !== accountData.organization_id &&
-      accountMembershipsData.account_role !== 'client_owner'
+      orderData.agency_id !== organizationId &&
+      role !== 'client_owner'
     ) {
       throw new Error('Unauthorized access to this order');
     }

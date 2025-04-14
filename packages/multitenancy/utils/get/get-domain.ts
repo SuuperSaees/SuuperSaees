@@ -110,6 +110,10 @@ export async function getDomainByOrganizationId(
 
   const domain = subdomains?.domain;
 
+  if(domain.includes('localhost')) {
+    return parsedUrl ? `http://${domain}/` : domain;
+  }
+
   return parsedUrl
     ? `${IS_PROD ? 'https' : 'http'}://${domain}/`
     : (domain ?? process.env.NEXT_PUBLIC_SITE_URL ?? '');

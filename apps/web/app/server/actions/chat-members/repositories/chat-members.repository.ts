@@ -106,7 +106,7 @@ export class ChatMembersRepository {
     if(userId && !chatId	) {
       const { data, error } = await client
         .from('chat_members')
-        .select(`*, user:accounts(email, organization_id, settings:user_settings(name, picture_url))`)
+        .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
         .eq('user_id', userId);
 
       if (error) {
@@ -120,7 +120,7 @@ export class ChatMembersRepository {
 
         const { data: allMembers, error: allMembersError } = await client
           .from('chat_members')
-          .select(`*, user:accounts(email, organization_id, settings:user_settings(name, picture_url))`)
+          .select(`*, user:accounts(email, settings:user_settings(name, picture_url))`)
           .in('chat_id', chatIds);
 
         if (allMembersError) {
