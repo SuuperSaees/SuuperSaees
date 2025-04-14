@@ -94,16 +94,15 @@ export const reactivateDeletedClient = async ({
   const { error: deleteUserSettingsError } = await supabase
     .from('user_settings')
     .delete()
-    .eq('user_id', accountId);
+    .eq('user_id', accountId)
+    .eq('organization_id', clientOrganizationAccountId ?? '');
 
   if (deleteUserSettingsError && deleteUserSettingsError.code !== 'PGRST116') {
     throw new Error(`Error deleting user settings: ${deleteUserSettingsError.message}`);
   }
 
   // Update the account name and organization
-  const updateData: { organization_id: string; name?: string } = {
-    organization_id: clientOrganizationAccountId ?? '',
-  };
+  const updateData: { name?: string } = {};
 
   if (name && name.trim() !== '') {
     updateData.name = name;
@@ -121,10 +120,13 @@ export const reactivateDeletedClient = async ({
   // Update the account membership
   const { error: updateAccountMembershipError } = await supabase
     .from('accounts_memberships')
-    .update({
-      account_id: clientOrganizationAccountId,
-    })
-    .eq('user_id', accountId);
+    .upsert({
+      organization_id: clientOrganizationAccountId ?? '',
+      user_id: accountId,
+      account_role: 'client_owner',
+    }, {
+      onConflict: 'user_id, organization_id',
+    });
 
   if (updateAccountMembershipError && updateAccountMembershipError.code !== 'PGRST116') {
     throw new Error(`Error updating account membership: ${updateAccountMembershipError.message}`);
