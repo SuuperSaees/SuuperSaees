@@ -1129,9 +1129,9 @@ BEGIN
     END IF;
 
     -- Update user_settings if organization_id is NULL
-    UPDATE user_settings
-    SET organization_id = v_org_id
-    WHERE user_id = v_user_id AND organization_id IS NULL;
+    -- UPDATE user_settings
+    -- SET organization_id = v_org_id
+    -- WHERE user_id = v_user_id AND organization_id IS NULL;
 
     -- Query to get the organization data
     SELECT 

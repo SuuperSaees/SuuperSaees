@@ -59,7 +59,7 @@ JOIN
 JOIN 
   public.accounts_memberships am ON am.organization_id = o.id AND am.user_id = a.id
 LEFT JOIN 
-  public.user_settings us ON us.user_id = a.id AND us.organization_id = o.id
+  public.user_settings us ON us.user_id = a.id
 WHERE 
   a.id = auth.uid()
   AND a.deleted_on IS NULL
@@ -110,5 +110,3 @@ $$ language plpgsql;
 
 grant
 execute on function accept_invitation (text, uuid) to service_role;
-
-ALTER TABLE user_settings DROP CONSTRAINT user_settings_pkey;

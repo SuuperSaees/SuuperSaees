@@ -494,12 +494,6 @@ alter table "public"."tags" validate constraint "tags_organization_id_fkey1";
 
 -- alter table "public"."invitations" add constraint "invitations_email_account_id_key" UNIQUE using index "invitations_email_account_id_key";
 
-alter table "public"."user_settings" add column "organization_id" uuid;
-
-alter table "public"."user_settings" add constraint "user_settings_organization_id_fkey" FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
-
-alter table "public"."user_settings" validate constraint "user_settings_organization_id_fkey";
-
 set check_function_bodies = off;
 
 DROP TRIGGER IF EXISTS after_account_insert_default_agency_statuses ON public.accounts;
