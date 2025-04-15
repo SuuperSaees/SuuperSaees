@@ -14,6 +14,8 @@ export function useSignInWithEmailPassword() {
       ? window.location.origin.replace(/^https?:\/\//, '')
       : '');
 
+    console.log('domain', domain);
+
     const response = await client.auth.signInWithPassword(credentials);
 
     if (response.error) {
