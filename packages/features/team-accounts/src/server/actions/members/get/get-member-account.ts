@@ -223,7 +223,7 @@ export async function getUserAccountById(
     const { data: userAccount, error: userAccountError } = await databaseClient
       .from('accounts')
       .select(
-        'name, email, id, picture_url, settings:user_settings(name)',
+        'name, email, id, picture_url',
       )
       .eq('id', userId)
       .single();
@@ -235,6 +235,15 @@ export async function getUserAccountById(
     const organizationId = organizationData?.id ?? null;
     const primaryOwnerId = organizationData?.owner_id ?? null;
 
+    const { data: userSettings, error: userSettingsError } = await databaseClient
+      .from('user_settings')
+      .select('name')
+      .eq('account_id', userId)
+      .eq('organization_id', organizationId ?? '')
+      .single();
+
+    if (userSettingsError) throw userSettingsError;
+
     return {
       organization_id: organizationId ?? '',
       primary_owner_user_id: primaryOwnerId ?? '',
@@ -242,7 +251,7 @@ export async function getUserAccountById(
       email: userAccount.email,
       id: userAccount.id,
       picture_url: userAccount.picture_url,
-      settings: userAccount.settings
+      settings: userSettings
     };
 
   } catch (error) {
