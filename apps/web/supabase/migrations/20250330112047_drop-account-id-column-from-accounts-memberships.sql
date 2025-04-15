@@ -1,6 +1,6 @@
-alter table "public"."accounts_memberships" drop constraint "accounts_memberships_account_id_fkey1";
+alter table "public"."accounts_memberships" drop constraint if exists "accounts_memberships_account_id_fkey1";
 
-alter table "public"."accounts_memberships" drop constraint "accounts_memberships_pkey";
+alter table "public"."accounts_memberships" drop constraint if exists "accounts_memberships_pkey";
 
 drop index if exists "public"."accounts_memberships_pkey";
 
