@@ -201,3 +201,73 @@ CREATE TRIGGER after_insert_orders_v2 AFTER INSERT ON public.orders_v2 FOR EACH 
 CREATE TRIGGER before_folder_changes BEFORE INSERT ON public.folders FOR EACH ROW EXECUTE FUNCTION enforce_folder_constraints();
 
 GRANT EXECUTE ON FUNCTION handle_insert_operations_with_folders() TO authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.get_unread_message_counts(p_user_id uuid)
+ RETURNS TABLE(chat_id uuid, chat_unread_count bigint, order_id integer, order_unread_count bigint)
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  is_agency_role boolean;
+  cutoff_date timestamp with time zone := '2025-03-11 18:04:00-05'::timestamp with time zone; -- March 11, 2025, 6:04 PM Colombia time (UTC-5)
+BEGIN
+  -- Use a CTE to get the organizationId from the session
+  WITH session_org AS (
+    SELECT (get_session()).organization.id AS organization_id
+  )
+  -- Check if the user has any agency role within the current organization
+  SELECT EXISTS (
+    SELECT 1 
+    FROM accounts_memberships am, session_org so
+    WHERE am.user_id = p_user_id 
+    AND am.organization_id = so.organization_id
+    AND am.account_role IN ('agency_owner', 'agency_member', 'agency_project_manager')
+  ) INTO is_agency_role;
+
+  -- First, return chat counts
+  RETURN QUERY
+  SELECT 
+    m.chat_id, 
+    COUNT(m.id)::BIGINT AS chat_unread_count,
+    NULL::integer AS order_id,
+    0::BIGINT AS order_unread_count
+  FROM messages m
+  JOIN chats c ON m.chat_id = c.id  -- Join with chats to ensure chat exists
+  WHERE m.chat_id IS NOT NULL
+  AND m.order_id IS NULL  -- Exclude order-related messages
+  AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+  AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
+  AND (
+    is_agency_role = true  -- Agency roles can see all messages
+    OR m.visibility = 'public'  -- Non-agency roles can only see public messages
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM message_reads mr 
+    WHERE mr.message_id = m.id AND mr.user_id = p_user_id
+  )
+  GROUP BY m.chat_id;
+
+  -- Then, return order counts
+  RETURN QUERY
+  SELECT 
+    NULL::uuid AS chat_id,
+    0::BIGINT AS chat_unread_count,
+    m.order_id::integer,
+    COUNT(m.id)::BIGINT AS order_unread_count
+  FROM messages m
+  WHERE m.order_id IS NOT NULL
+  AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+  AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
+  AND (
+    is_agency_role = true  -- Agency roles can see all messages
+    OR m.visibility = 'public'  -- Non-agency roles can only see public messages
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM message_reads mr 
+    WHERE mr.message_id = m.id AND mr.user_id = p_user_id
+  )
+  GROUP BY m.order_id;
+END;
+$function$
+;
+
+GRANT EXECUTE ON FUNCTION get_unread_message_counts(uuid) TO anon, authenticated, service_role;
