@@ -386,6 +386,46 @@ as permissive
 for select
 to public
 using (((auth.uid() IS NOT NULL) AND (user_belongs_to_agency_organizations(auth.uid()) AND has_permission_in_organizations(auth.uid(), 'billing.read'::app_permissions))));
+
+drop policy "Read for all authenticated users" on "public"."messages";
+
+create policy "Read for all authenticated users"
+on "public"."messages"
+as permissive
+for select
+to authenticated
+using (has_permission_in_organizations(auth.uid(), 'messages.read'::app_permissions) AND 
+  (
+    (
+      (order_id IS NOT NULL) AND 
+      (
+        (EXISTS (SELECT 1 FROM order_assignations oa WHERE ((oa.order_id)::text = (messages.order_id)::text) AND (oa.agency_member_id = auth.uid()))) OR 
+        (EXISTS (SELECT 1 FROM order_followers ofollow WHERE ((ofollow.order_id)::text = (messages.order_id)::text) AND (ofollow.client_member_id = auth.uid()))) OR 
+        has_role(auth.uid(), (get_session()).organization.id, 'agency_owner'::text) OR 
+        has_role(auth.uid(), (get_session()).organization.id, 'agency_project_manager'::text)
+      ) AND 
+      (
+        (is_user_in_agency_organization(auth.uid(), (get_session()).organization.id) AND 
+         (EXISTS (SELECT 1 FROM orders_v2 o WHERE ((o.id)::text = (messages.order_id)::text) AND (o.agency_id = (get_session()).organization.id)))) OR 
+        (NOT is_user_in_agency_organization(auth.uid(), (get_session()).organization.id) AND 
+         (EXISTS (SELECT 1 FROM orders_v2 o WHERE ((o.id)::text = (messages.order_id)::text) AND (o.client_organization_id = (get_session()).organization.id))))
+      )
+    ) OR 
+    (
+      (chat_id IS NOT NULL) AND 
+      (EXISTS (SELECT 1 FROM chat_members cm WHERE (cm.chat_id = messages.chat_id) AND (cm.user_id = auth.uid())))
+    )
+  ) AND 
+  (
+    (visibility = 'public'::messages_types) OR 
+    (
+      (visibility = 'internal_agency'::messages_types) AND 
+      (EXISTS (SELECT 1 FROM accounts a JOIN accounts_memberships am ON (am.user_id = a.id) 
+               WHERE (a.id = messages.user_id) AND (am.user_id = auth.uid()) AND 
+               ((am.account_role)::text = ANY (ARRAY['agency_owner'::text, 'agency_project_manager'::text, 'agency_member'::text]))))
+    )
+  )
+);
     
 --  IMPORTANT: billing_customers It's not needed to fix because it's not used in the app
     
@@ -662,6 +702,8 @@ $$;
 grant execute on function public.get_agency_id_from_orders_v2(uuid, bigint) to authenticated, service_role;
 grant execute on function public.get_client_organization_id_from_orders_v2(uuid, bigint) to authenticated, service_role;
 
+drop policy if exists "Read for all authenticated users" on "public"."messages";
+
 create policy "Read for all authenticated users"
 on "public"."messages"
 as permissive
@@ -676,7 +718,7 @@ using ((has_permission_in_organizations(auth.uid(), 'messages.read'::app_permiss
    FROM order_followers ofollow
   WHERE (((ofollow.order_id)::text = (messages.order_id)::text) AND (ofollow.client_member_id = auth.uid())))) OR
   
-  has_role(auth.uid(), get_agency_id_from_orders_v2(auth.uid(), order_id::integer), 'agency_owner'::text) OR has_role(auth.uid(), get_agency_id_from_orders_v2(auth.uid(), order_id::integer), 'agency_project_manager'::text))
+  has_role_on_account(get_agency_id_from_orders_v2(auth.uid(), order_id::integer), 'agency_owner'::text) OR has_role_on_account(get_agency_id_from_orders_v2(auth.uid(), order_id::integer), 'agency_project_manager'::text))
   AND ((user_belongs_to_agency_organizations(auth.uid()) AND (EXISTS ( SELECT 1
    FROM orders_v2 o
   WHERE (((o.id)::text = (messages.order_id)::text) AND (o.agency_id = get_agency_id_from_orders_v2(auth.uid(), order_id::integer)))))) OR ((EXISTS ( SELECT 1
@@ -686,8 +728,8 @@ using ((has_permission_in_organizations(auth.uid(), 'messages.read'::app_permiss
   OR ((chat_id IS NOT NULL) AND (EXISTS ( SELECT 1
    FROM chat_members cm
   WHERE ((cm.chat_id = messages.chat_id) AND (cm.user_id = auth.uid())))))) AND ((visibility = 'public'::messages_types) OR ((visibility = 'internal_agency'::messages_types) AND (EXISTS ( SELECT 1
-   FROM (accounts a
-     JOIN accounts_memberships am ON ((am.user_id = auth.uid())))
+   FROM accounts a
+   JOIN accounts_memberships am ON (am.user_id = a.id)
   WHERE ((a.id = messages.user_id) AND (am.user_id = auth.uid()) AND ((am.account_role)::text = ANY (ARRAY['agency_owner'::text, 'agency_project_manager'::text, 'agency_member'::text])))))))));
         
 -- orders_v2
