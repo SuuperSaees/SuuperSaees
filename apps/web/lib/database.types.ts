@@ -132,29 +132,14 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "accounts_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       accounts_memberships: {
         Row: {
           account_role: string
           created_at: string
           created_by: string | null
-          organization_id: string
+          organization_id: string | null
           updated_at: string
           updated_by: string | null
           user_id: string
@@ -163,7 +148,7 @@ export type Database = {
           account_role?: string
           created_at?: string
           created_by?: string | null
-          organization_id: string
+          organization_id?: string | null
           updated_at?: string
           updated_by?: string | null
           user_id: string
@@ -172,7 +157,7 @@ export type Database = {
           account_role?: string
           created_at?: string
           created_by?: string | null
-          organization_id?: string
+          organization_id?: string | null
           updated_at?: string
           updated_by?: string | null
           user_id?: string
@@ -184,13 +169,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "roles"
             referencedColumns: ["name"]
-          },
-          {
-            foreignKeyName: "accounts_memberships_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "accounts_memberships_organization_id_fkey"
@@ -211,20 +189,6 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "user_organization"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_memberships_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_memberships_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -1615,13 +1579,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "invitations_invited_by_fkey"
-            columns: ["invited_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "invitations_organization_id_fkey"
             columns: ["organization_id"]
@@ -3269,7 +3226,6 @@ export type Database = {
           calendar: string | null
           created_at: string
           name: string | null
-          organization_id: string | null
           phone_number: string | null
           picture_url: string | null
           preferences: Json | null
@@ -3279,7 +3235,6 @@ export type Database = {
           calendar?: string | null
           created_at?: string
           name?: string | null
-          organization_id?: string | null
           phone_number?: string | null
           picture_url?: string | null
           preferences?: Json | null
@@ -3289,7 +3244,6 @@ export type Database = {
           calendar?: string | null
           created_at?: string
           name?: string | null
-          organization_id?: string | null
           phone_number?: string | null
           picture_url?: string | null
           preferences?: Json | null
@@ -3297,37 +3251,16 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "user_settings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_settings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_account_workspace"
-            referencedColumns: ["organization_id"]
-          },
-          {
-            foreignKeyName: "user_settings_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "user_organization"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "accounts"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "user_settings_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "user_account_workspace"
             referencedColumns: ["id"]
           },
@@ -3367,13 +3300,10 @@ export type Database = {
     }
     Functions: {
       accept_invitation: {
-        Args: {
-          token: string
-          user_id: string
-        }
+        Args: { token: string; user_id: string }
         Returns: string
       }
-      add_invitations_to_account: {
+      add_invitations_to_organization: {
         Args: {
           organization_slug: string
           invitations: Database["public"]["CompositeTypes"]["invitation"][]
@@ -3381,18 +3311,11 @@ export type Database = {
         Returns: Database["public"]["Tables"]["invitations"]["Row"][]
       }
       can_action_account_member: {
-        Args: {
-          target_organization_id: string
-          target_user_id: string
-        }
+        Args: { target_organization_id: string; target_user_id: string }
         Returns: boolean
       }
       create_invitation: {
-        Args: {
-          account_id: string
-          email: string
-          role: string
-        }
+        Args: { account_id: string; email: string; role: string }
         Returns: {
           created_at: string
           email: string
@@ -3405,72 +3328,38 @@ export type Database = {
           updated_at: string
         }
       }
-      create_order:
-        | {
-            Args: {
-              _order: Json
-              _brief_responses: Json[]
-              _order_followers: string[]
-              _order_file_ids: string[]
-            }
-            Returns: {
-              agency_id: string
-              brief_id: string | null
-              brief_ids: string[] | null
-              client_organization_id: string
-              created_at: string
-              customer_id: string
-              deleted_on: string | null
-              description: string
-              due_date: string | null
-              id: number
-              position: number | null
-              priority: Database["public"]["Enums"]["priority_types"] | null
-              propietary_organization_id: string
-              status: string | null
-              status_id: number | null
-              stripe_account_id: string | null
-              title: string
-              updated_at: string | null
-              uuid: string
-              visibility: Database["public"]["Enums"]["visibility"]
-            }
-          }
-        | {
-            Args: {
-              _order: Json
-              _brief_responses: Json[]
-              _order_followers: string[]
-              _order_file_ids: string[]
-              _domain: string
-            }
-            Returns: {
-              agency_id: string
-              brief_id: string | null
-              brief_ids: string[] | null
-              client_organization_id: string
-              created_at: string
-              customer_id: string
-              deleted_on: string | null
-              description: string
-              due_date: string | null
-              id: number
-              position: number | null
-              priority: Database["public"]["Enums"]["priority_types"] | null
-              propietary_organization_id: string
-              status: string | null
-              status_id: number | null
-              stripe_account_id: string | null
-              title: string
-              updated_at: string | null
-              uuid: string
-              visibility: Database["public"]["Enums"]["visibility"]
-            }
-          }
-      create_team_account: {
+      create_order: {
         Args: {
-          account_name: string
+          _order: Json
+          _brief_responses: Json[]
+          _order_followers: string[]
+          _order_file_ids: string[]
         }
+        Returns: {
+          agency_id: string
+          brief_id: string | null
+          brief_ids: string[] | null
+          client_organization_id: string
+          created_at: string
+          customer_id: string
+          deleted_on: string | null
+          description: string
+          due_date: string | null
+          id: number
+          position: number | null
+          priority: Database["public"]["Enums"]["priority_types"] | null
+          propietary_organization_id: string
+          status: string | null
+          status_id: number | null
+          stripe_account_id: string | null
+          title: string
+          updated_at: string | null
+          uuid: string
+          visibility: Database["public"]["Enums"]["visibility"]
+        }
+      }
+      create_team_account: {
+        Args: { account_name: string }
         Returns: {
           created_at: string | null
           created_by: string | null
@@ -3486,16 +3375,11 @@ export type Database = {
         }
       }
       deduct_credits: {
-        Args: {
-          account_id: string
-          amount: number
-        }
+        Args: { account_id: string; amount: number }
         Returns: undefined
       }
       get_account_invitations: {
-        Args: {
-          organization_slug: string
-        }
+        Args: { organization_slug: string }
         Returns: {
           id: number
           email: string
@@ -3510,9 +3394,7 @@ export type Database = {
         }[]
       }
       get_account_members: {
-        Args: {
-          organization_slug: string
-        }
+        Args: { organization_slug: string }
         Returns: {
           id: string
           user_id: string
@@ -3529,17 +3411,11 @@ export type Database = {
         }[]
       }
       get_agency_id_from_orders_v2: {
-        Args: {
-          target_user_id: string
-          order_id: number
-        }
+        Args: { target_user_id: string; order_id: number }
         Returns: string
       }
       get_client_organization_id_from_orders_v2: {
-        Args: {
-          target_user_id: string
-          order_id: number
-        }
+        Args: { target_user_id: string; order_id: number }
         Returns: string
       }
       get_config: {
@@ -3551,9 +3427,7 @@ export type Database = {
         Returns: Database["public"]["CompositeTypes"]["session_info"]
       }
       get_unread_message_counts: {
-        Args: {
-          p_user_id: string
-        }
+        Args: { p_user_id: string }
         Returns: {
           chat_id: string
           chat_unread_count: number
@@ -3575,15 +3449,11 @@ export type Database = {
         Returns: number
       }
       has_active_subscription: {
-        Args: {
-          target_account_id: string
-        }
+        Args: { target_account_id: string }
         Returns: boolean
       }
       has_credits: {
-        Args: {
-          account_id: string
-        }
+        Args: { account_id: string }
         Returns: boolean
       }
       has_more_elevated_role: {
@@ -3610,18 +3480,11 @@ export type Database = {
         Returns: boolean
       }
       has_role: {
-        Args: {
-          _user_id: string
-          _org_id: string
-          _role_name: string
-        }
+        Args: { _user_id: string; _org_id: string; _role_name: string }
         Returns: boolean
       }
       has_role_on_account: {
-        Args: {
-          organization_id: string
-          account_role?: string
-        }
+        Args: { organization_id: string; account_role?: string }
         Returns: boolean
       }
       has_same_role_hierarchy_level: {
@@ -3640,90 +3503,54 @@ export type Database = {
         }
         Returns: boolean
       }
-      insert_service_brief_relation:
-        | {
-            Args: {
-              service_id: number
-              brief_id: string
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              service_id: string
-              brief_id: string
-            }
-            Returns: undefined
-          }
+      insert_service_brief_relation: {
+        Args:
+          | { service_id: string; brief_id: string }
+          | { service_id: number; brief_id: string }
+        Returns: undefined
+      }
       is_account_owner: {
-        Args: {
-          organization_id: string
-        }
+        Args: { organization_id: string }
         Returns: boolean
       }
       is_account_team_member: {
-        Args: {
-          target_account_id: string
-        }
+        Args: { target_account_id: string }
         Returns: boolean
       }
       is_agency_client: {
-        Args: {
-          _agency_id: string
-        }
+        Args: { _agency_id: string }
         Returns: boolean
       }
       is_set: {
-        Args: {
-          field_name: string
-        }
+        Args: { field_name: string }
         Returns: boolean
       }
       is_team_member: {
-        Args: {
-          organization_id: string
-          user_id: string
-        }
+        Args: { organization_id: string; user_id: string }
         Returns: boolean
       }
       is_user_in_agency_organization: {
-        Args: {
-          user_id: string
-          target_organization_id: string
-        }
+        Args: { user_id: string; target_organization_id: string }
         Returns: boolean
       }
       is_user_in_client_organization: {
-        Args: {
-          user_id: string
-          target_organization_id: string
-        }
+        Args: { user_id: string; target_organization_id: string }
         Returns: boolean
       }
       mark_messages_as_read: {
-        Args: {
-          p_user_id: string
-          p_chat_id: string
-        }
+        Args: { p_user_id: string; p_chat_id: string }
         Returns: number
       }
       mark_order_messages_as_read: {
-        Args: {
-          p_user_id: string
-          p_order_id: number
-        }
+        Args: { p_user_id: string; p_order_id: number }
         Returns: number
       }
       set_session: {
-        Args: {
-          domain: string
-        }
+        Args: { domain: string }
         Returns: undefined
       }
       team_account_workspace: {
-        Args: {
-          organization_slug: string
-        }
+        Args: { organization_slug: string }
         Returns: {
           id: string
           name: string
@@ -3737,10 +3564,7 @@ export type Database = {
         }[]
       }
       transfer_team_account_ownership: {
-        Args: {
-          target_account_id: string
-          new_owner_id: string
-        }
+        Args: { target_account_id: string; new_owner_id: string }
         Returns: undefined
       }
       update_order_with_position: {
@@ -3832,15 +3656,11 @@ export type Database = {
         }
       }
       user_belongs_to_agency_organizations: {
-        Args: {
-          target_user_id: string
-        }
+        Args: { target_user_id: string }
         Returns: boolean
       }
       user_belongs_to_client_organizations: {
-        Args: {
-          target_user_id: string
-        }
+        Args: { target_user_id: string }
         Returns: boolean
       }
     }
@@ -4065,6 +3885,7 @@ export type Database = {
           created_at: string | null
           id: string
           last_accessed_at: string | null
+          level: number | null
           metadata: Json | null
           name: string | null
           owner: string | null
@@ -4079,6 +3900,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_accessed_at?: string | null
+          level?: number | null
           metadata?: Json | null
           name?: string | null
           owner?: string | null
@@ -4093,6 +3915,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_accessed_at?: string | null
+          level?: number | null
           metadata?: Json | null
           name?: string | null
           owner?: string | null
@@ -4105,6 +3928,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "objects_bucketId_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prefixes: {
+        Row: {
+          bucket_id: string
+          created_at: string | null
+          level: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string | null
+          level?: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string | null
+          level?: number
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prefixes_bucketId_fkey"
             columns: ["bucket_id"]
             isOneToOne: false
             referencedRelation: "buckets"
@@ -4215,31 +4070,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      can_insert_object: {
-        Args: {
-          bucketid: string
-          name: string
-          owner: string
-          metadata: Json
-        }
+      add_prefixes: {
+        Args: { _bucket_id: string; _name: string }
         Returns: undefined
       }
+      can_insert_object: {
+        Args: { bucketid: string; name: string; owner: string; metadata: Json }
+        Returns: undefined
+      }
+      delete_prefix: {
+        Args: { _bucket_id: string; _name: string }
+        Returns: boolean
+      }
       extension: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       filename: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
         Returns: string
       }
       foldername: {
-        Args: {
-          name: string
-        }
+        Args: { name: string }
+        Returns: string[]
+      }
+      get_level: {
+        Args: { name: string }
+        Returns: number
+      }
+      get_prefix: {
+        Args: { name: string }
+        Returns: string
+      }
+      get_prefixes: {
+        Args: { name: string }
         Returns: string[]
       }
       get_size_by_bucket: {
@@ -4304,6 +4168,63 @@ export type Database = {
           metadata: Json
         }[]
       }
+      search_legacy_v1: {
+        Args: {
+          prefix: string
+          bucketname: string
+          limits?: number
+          levels?: number
+          offsets?: number
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          name: string
+          id: string
+          updated_at: string
+          created_at: string
+          last_accessed_at: string
+          metadata: Json
+        }[]
+      }
+      search_v1_optimised: {
+        Args: {
+          prefix: string
+          bucketname: string
+          limits?: number
+          levels?: number
+          offsets?: number
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
+        }
+        Returns: {
+          name: string
+          id: string
+          updated_at: string
+          created_at: string
+          last_accessed_at: string
+          metadata: Json
+        }[]
+      }
+      search_v2: {
+        Args: {
+          prefix: string
+          bucket_name: string
+          limits?: number
+          levels?: number
+          start_after?: string
+        }
+        Returns: {
+          key: string
+          name: string
+          id: string
+          updated_at: string
+          created_at: string
+          metadata: Json
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
@@ -4314,27 +4235,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -4342,20 +4265,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -4363,20 +4288,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -4384,15 +4311,181 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      action_type: ["create", "update", "delete", "complete"],
+      activity_type: [
+        "message",
+        "review",
+        "status",
+        "priority",
+        "assign",
+        "due_date",
+        "description",
+        "title",
+        "assigned_to",
+        "task",
+        "annotation",
+      ],
+      annotations_status: ["active", "completed", "draft"],
+      app_permissions: [
+        "roles.manage",
+        "billing.manage",
+        "settings.manage",
+        "members.manage",
+        "invites.manage",
+        "tasks.write",
+        "tasks.delete",
+        "messages.write",
+        "messages.read",
+        "orders.write",
+        "orders.read",
+        "orders.manage",
+        "orders.delete",
+        "services.write",
+        "services.read",
+        "services.manage",
+        "services.delete",
+        "billing.write",
+        "billing.read",
+        "billing.delete",
+        "timers.write",
+        "timers.read",
+        "timers.manage",
+        "timers.delete",
+        "embeds.write",
+        "embeds.read",
+        "embeds.manage",
+        "embeds.delete",
+      ],
+      billing_provider: [
+        "stripe",
+        "lemon-squeezy",
+        "paddle",
+        "treli",
+        "suuper",
+      ],
+      chat_role: ["user", "assistant"],
+      chat_role_type: ["project_manager", "assistant", "owner", "guest"],
+      embed_location: ["tab", "sidebar"],
+      embed_types: ["url", "iframe"],
+      field_types: [
+        "date",
+        "multiple_choice",
+        "select",
+        "text",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "text-short",
+        "text-large",
+        "number",
+        "file",
+        "dropdown",
+        "rich-text",
+        "image",
+        "video",
+      ],
+      file_types: ["image", "video", "pdf", "fig"],
+      message_category: ["chat_message", "annotation"],
+      messages_types: ["public", "internal_agency"],
+      notification_channel: ["in_app", "email"],
+      notification_type: ["info", "warning", "error"],
+      order_status_types: [
+        "in_progress",
+        "in_review",
+        "pending",
+        "completed",
+        "annulled",
+      ],
+      organization_setting_key: [
+        "theme_color",
+        "background_color",
+        "logo_url",
+        "timezone",
+        "language",
+        "date_format",
+        "sidebar_background_color",
+        "portal_name",
+        "favicon_url",
+        "sender_name",
+        "sender_email",
+        "sender_domain",
+        "logo_dark_url",
+        "auth_card_background_color",
+        "auth_section_background_color",
+        "dashboard_url",
+        "pinned_organizations",
+        "catalog_provider_url",
+        "catalog_product_url",
+        "tool_copy_list_url",
+      ],
+      payment_status: ["pending", "succeeded", "failed"],
+      plugin_status: ["installed", "uninstalled", "failed", "in progress"],
+      plugin_type: ["tool", "internal", "external", "integration"],
+      priority_types: ["high", "medium", "low"],
+      reaction_types: ["like", "favorite"],
+      service_status: [
+        "active",
+        "inactive",
+        "draft",
+        "expired",
+        "paused",
+        "blocked",
+        "scheduled",
+        "pending",
+        "deleted",
+      ],
+      subscription_item_type: ["flat", "per_seat", "metered"],
+      subscription_status: [
+        "active",
+        "trialing",
+        "past_due",
+        "canceled",
+        "unpaid",
+        "incomplete",
+        "incomplete_expired",
+        "paused",
+      ],
+      visibility: ["public", "private"],
+    },
+  },
+  storage: {
+    Enums: {},
+  },
+} as const
 
