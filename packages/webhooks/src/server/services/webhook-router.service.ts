@@ -210,9 +210,9 @@ class WebhookRouterService {
               data: accountDataAgencyOwnerData,
               error: accountDataAgencyOwnerError,
             } = await this.adminClient
-              .from('accounts')
-              .select('id, organization_id')
-              .eq('stripe_id', stripeAccountId)
+              .from('billing_accounts')
+              .select('account_id, accounts(id, organizations(id))')
+              .eq('provider_id', stripeAccountId)
               .single();
 
             if (accountDataAgencyOwnerError) {
@@ -231,23 +231,23 @@ class WebhookRouterService {
               slug: `${customer?.client_name}'s Organization`,
               name: customer?.client_name ?? '', // TODO: Check if this is the correct field
             };
-            const createdBy = accountDataAgencyOwnerData?.id;
-            const agencyId = accountDataAgencyOwnerData?.organization_id;
+            const createdBy = accountDataAgencyOwnerData?.account_id;
+            const agencyId = Array.isArray(accountDataAgencyOwnerData?.accounts?.organizations) ? accountDataAgencyOwnerData?.accounts?.organizations[0]?.id : accountDataAgencyOwnerData?.accounts?.organizations?.id;
 
             // Check if the client already exists
-            const { data: clientData, error: clientError } =
+            const { data: accountClientData, error: accountClientErrror } =
               await this.adminClient
                 .from('accounts')
-                .select('id, organization_id')
+                .select('id')
                 .eq('email', newClient.email ?? '')
-                .eq('is_personal_account', true)
                 .single();
 
-            if (clientError) {
-              console.error('Error fetching user account: ', clientError);
+            if (accountClientErrror) {
+              console.error('Error fetching user account: ', accountClientErrror);
             }
+
             let client;
-            if (!clientData) {
+            if (!accountClientData) {
               client = await createClient({
                 client: newClient,
                 role: this.ClientRoleStripeInvitation,
@@ -256,6 +256,22 @@ class WebhookRouterService {
               });
             }
 
+            let clientOrganizationId;
+
+            if(accountClientData) {
+              const { data: clientData, error: clientError} = await this.adminClient
+            .from('clients')
+            .select('organization_client_id')
+            .eq('user_client_id', accountClientData?.id ?? '')
+            .eq('agency_id', agencyId ?? '')
+            .single();
+
+            if (clientError) {
+              console.error('Error fetching client: ', clientError);
+            }
+
+            clientOrganizationId = clientData?.organization_client_id;
+            }
 
             // After assign a service to the client, we need to create the subscription
             // Search in the database, by checkout session id
@@ -275,16 +291,19 @@ class WebhookRouterService {
               throw checkoutServiceError;
             }
 
-            const clientOrganizationId = clientData
-              ? clientData.organization_id
+            clientOrganizationId = accountClientData
+              ? clientOrganizationId
               : client?.success?.data?.organization_client_id;
+
             let clientId;
-            if (clientData) {
+
+            if (accountClientData) {
               const { data: clientDataWithChecker, error: clientError } =
                 await this.adminClient
                   .from('clients')
                   .select('id')
-                  .eq('user_client_id', clientData.id)
+                  .eq('user_client_id', accountClientData.id)
+                  .eq('agency_id', agencyId ?? '')
                   .single();
 
               if (clientError) {
@@ -298,9 +317,9 @@ class WebhookRouterService {
                 await this.adminClient
                   .from('clients')
                   .insert({
-                    agency_id: accountDataAgencyOwnerData.organization_id ?? '',
+                    agency_id: agencyId ?? '',
                     organization_client_id: clientOrganizationId ?? '',
-                    user_client_id: clientData.id,
+                    user_client_id: accountClientData.id,
                   })
                   .select('id')
                   .single();
@@ -315,6 +334,7 @@ class WebhookRouterService {
             } else {
               clientId = client?.success?.data?.id;
             }
+
             await insertServiceToClient(
               this.adminClient,
               clientOrganizationId ?? '',

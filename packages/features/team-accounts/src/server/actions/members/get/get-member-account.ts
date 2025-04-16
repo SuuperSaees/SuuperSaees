@@ -206,7 +206,7 @@ export async function getStripeAccountID(primaryOwnerId?: string, adminActivated
       userId: userId,
     };
   } catch (error) {
-    console.error('Error fetching primary owner hola:', error);
+    console.error('Error fetching primary owner:', error);
     return {
       stripeId: '',
       userId: '',
