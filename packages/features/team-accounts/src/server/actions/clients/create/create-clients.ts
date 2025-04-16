@@ -13,7 +13,6 @@ import {
 } from '../../../../../../../../packages/shared/src/response';
 import { addUserAccountRole } from '../../members/create/create-account';
 import {
-  getPrimaryOwnerId,
   getUserAccountByEmail,
 } from '../../members/get/get-member-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
@@ -90,10 +89,6 @@ export const createClient = async (clientData: CreateClient) => {
       }
 
     // Step 1: Fetch primary owner ID and organization
-    let primaryOwnerId;
-    if (!clientData.adminActivated) {
-      primaryOwnerId = await getPrimaryOwnerId();
-    }
 
     const organization = !clientData.agencyId
       ? await getOrganization()
@@ -102,9 +97,6 @@ export const createClient = async (clientData: CreateClient) => {
           undefined,
           clientData.adminActivated,
         );
-
-    if (!primaryOwnerId && !clientData.adminActivated)
-      throw new Error('No primary owner user id found');
 
     if (!organization)
       throw new CustomError(
