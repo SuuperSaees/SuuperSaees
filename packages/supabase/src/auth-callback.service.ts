@@ -259,6 +259,14 @@ class AuthCallbackService {
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
         url.pathname = callbackParam ?? baseUrl;
         url.href = callbackParam ?? baseUrl;
+
+        const fullUrl = url.href;
+        const domainMatch = fullUrl.match(/^https?:\/\/([^\\/]+)/);
+        const onlyDomain = domainMatch ? domainMatch[1] : '';
+
+        await this.client.rpc('set_session', {
+          domain: onlyDomain,
+        });
         
         if (!error) {
           return url;
