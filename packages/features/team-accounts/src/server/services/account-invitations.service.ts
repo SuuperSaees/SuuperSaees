@@ -138,7 +138,7 @@ class AccountInvitationsService {
       throw new Error('Organization not found');
     }
 
-    const response = await this.client.rpc('add_invitations_to_account', {
+    const response = await this.client.rpc('add_invitations_to_organization', {
       invitations,
       organization_slug: accountSlug,
     });
