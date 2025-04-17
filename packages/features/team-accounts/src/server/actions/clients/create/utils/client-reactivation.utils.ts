@@ -10,7 +10,7 @@ import { getFullDomainBySubdomain } from '../../../../../../../../multitenancy/u
 import { getClientConfirmEmailTemplate } from '../../send-email/utils/client-confirm-email-template';
 import { HttpStatus } from '../../../../../../../../shared/src/response/http-status';
 import { ErrorUserOperations } from '../../../../../../../../shared/src/response';
-import { getTextColorBasedOnBackground } from '../../../../utils/generate-colors';
+import { getTextColorBasedOnBackground, generateRandomPassword } from '../../../../utils/generate-colors';
 import {
   senderNameKey,
   senderEmailKey,
@@ -94,8 +94,7 @@ export const reactivateDeletedClient = async ({
   const { error: deleteUserSettingsError } = await supabase
     .from('user_settings')
     .delete()
-    .eq('user_id', accountId)
-    .eq('organization_id', clientOrganizationAccountId ?? '');
+    .eq('user_id', accountId);
 
   if (deleteUserSettingsError && deleteUserSettingsError.code !== 'PGRST116') {
     throw new Error(`Error deleting user settings: ${deleteUserSettingsError.message}`);
@@ -132,6 +131,12 @@ export const reactivateDeletedClient = async ({
     throw new Error(`Error updating account membership: ${updateAccountMembershipError.message}`);
   }
 
+  await supabase.rpc('create_user_credentials', {
+    p_domain: baseUrl?.replace('http://', '').replace('https://', '') ?? '',
+    p_email: email,
+    p_password: generateRandomPassword(12),
+  });
+
   await sendReactivationEmail({ email, baseUrl, supabase });
 };
 
@@ -149,7 +154,7 @@ async function sendReactivationEmail({ email, baseUrl, supabase }: SendReactivat
   };
   const { tokenId } = await createToken(tokenRecoveryType);
 
-  const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${email}&type=recovery&next=${baseUrl}/orders`;
+  const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${email}&type=recovery&next=${baseUrl}/set-password`;
   let lang: 'en' | 'es' = 'en';
 
   const { settings } = await getFullDomainBySubdomain(

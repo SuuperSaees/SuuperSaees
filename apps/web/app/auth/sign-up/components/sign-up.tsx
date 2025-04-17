@@ -91,6 +91,7 @@ export default function SignUp({ searchParams }: Props) {
                   displayTermsCheckbox={authConfig.displayTermsCheckbox}
                   inviteToken={inviteToken}
                   paths={paths}
+                  currentAppOrigin={currentAppOrigin}
                 />
               </div>
             </div>
