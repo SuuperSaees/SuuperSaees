@@ -149,6 +149,12 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     // don't send confirmation email if is a member invitation (/auth/sign-up?invite_token=xxxx) 
     if (inviteToken) {
       inviteRedirectUrl = `${callbackUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${encodeURIComponent(callbackUrl + '/join?invite_token=' + inviteToken + '&email=' + email)}`;
+
+      await client.rpc('update_user_credentials', {
+        p_domain: currentBaseUrl?.replace('http://', '').replace('https://', '') ?? '',
+        p_email: email,
+        p_password: '',
+      });
     } else {
       const res = await fetch(`${baseUrl}/api/v1/mailer`, {
         method: 'POST',

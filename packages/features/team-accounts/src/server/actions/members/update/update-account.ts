@@ -402,10 +402,32 @@ function deepMerge<T extends Record<string, unknown>>(target: T, source: Record<
   return output;
 }
 
+export const verifyUserCredentials = async (
+  domain: string,
+  email: string,
+  password: string,
+) => {
+  const client = getSupabaseServerComponentClient({
+    admin: true,
+  });
+  const { data, error } = await client.rpc('verify_user_credentials', {
+    p_domain: domain,
+    p_email: email,
+    p_password: password,
+  });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
 export const generateMagicLinkRecoveryPassword = async (
   email: Account.Type['email'],
   databaseClient?: SupabaseClient<Database>,
   adminActivated = false,
+  fetchMagicLink = false,
 ) => {
   databaseClient =
     databaseClient ??
@@ -426,6 +448,24 @@ export const generateMagicLinkRecoveryPassword = async (
       throw new Error(
         `Error generating the magic link: ${errorGenerateLink.message}`,
       );
+
+    if (fetchMagicLink) {
+      if (!generateLinkData?.properties?.action_link) {
+        throw new Error('Error signing in with email and password');
+      }
+      const response = await fetch(generateLinkData?.properties?.action_link ?? '', {
+        method: 'GET',
+        redirect: 'manual',
+      });
+  
+      const location = response.headers.get('Location');
+  
+      if (!location) {
+        throw new Error(`Error signing in with email and password`);
+      }
+
+      return location;
+    }
 
     return generateLinkData?.properties?.action_link;
   } catch (error) {

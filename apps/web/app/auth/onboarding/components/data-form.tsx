@@ -93,6 +93,13 @@ export function UserDataForm(
           const cleanedDomain = data.portalUrl?.replace(/[^a-zA-Z0-9]/g, '') ?? '';
           // const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
           const subdomain = await createIngress({ domain: cleanedDomain, isCustom: false, userId });
+
+          await client.rpc('update_user_credentials', {
+            p_domain: subdomain.domain,
+            p_email: userData?.accountData?.email ?? '',
+            p_password:  '',
+          });
+          
           const subscriptionResult = await createSubscription();
           if ('error' in subscriptionResult) {
             setError(t('userData.errors.subscriptionFailed'));

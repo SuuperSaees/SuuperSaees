@@ -1,5 +1,5 @@
 import type { SignInWithPasswordCredentials } from '@supabase/supabase-js';
-
+import { generateMagicLinkRecoveryPassword, verifyUserCredentials } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { useMutation } from '@tanstack/react-query';
 
 import { useSupabase } from './use-supabase';
@@ -14,18 +14,28 @@ export function useSignInWithEmailPassword() {
       ? window.location.origin.replace(/^https?:\/\//, '')
       : '');
 
+      if (!('email' in credentials)) {
+        throw new Error('The email is required to sign in');
+      }
+
+    const responseVerifyUserCredentials = await verifyUserCredentials(domain, credentials.email, credentials.password);
+
+    const isUserAllowed = responseVerifyUserCredentials.is_allowed;
+    const isUserPrimary = responseVerifyUserCredentials.is_primary;
+
+    if (!isUserAllowed) {
+      throw new Error('User is not allowed to sign in');
+    }
+
+    let userId = '';
+    let data = {};
+
+    if (isUserPrimary) {
+
     const response = await client.auth.signInWithPassword(credentials);
 
     if (response.error) {
       throw response.error.message;
-    }
-
-    const { error: setSessionError } = await client.rpc('set_session', {
-      domain,
-    });
-
-    if (setSessionError) {
-      throw setSessionError.message;
     }
 
     // Step 1: Get the user auhentication/logged in user 
@@ -36,7 +46,38 @@ export function useSignInWithEmailPassword() {
     if (identities.length === 0) {
       throw new Error('User already registered');
     }
-    const userId = user.id;
+    userId = user.id;
+    data = response.data;
+  } else {
+    const location = await generateMagicLinkRecoveryPassword(credentials.email, undefined, true, true);
+
+    if (!location) {
+      throw new Error(`Error signing in with email and password`);
+    }
+
+    const hash = new URL(location).hash.substring(1);
+    const query = new URLSearchParams(hash);
+    const accessToken = query.get('access_token');
+    const refreshToken = query.get('refresh_token');
+    
+    if (accessToken && refreshToken && !(await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
+      const { data: userData } = await client.auth.getUser();
+      userId = userData?.user?.id ?? '';
+      data = userData;
+    } else {
+      throw new Error('Error signing in with email and password');
+    }
+  }
+
+    const { error: setSessionError } = await client.rpc('set_session', {
+      domain,
+    });
+
+    if (setSessionError) {
+      throw setSessionError.message;
+    }
+
+    
 
     // Step 2: Get the organization id fetching the domain/subdomain data
     const organizationId = (await client.rpc('get_session')).data?.organization?.id ?? '';
@@ -68,7 +109,7 @@ export function useSignInWithEmailPassword() {
       throw new Error('User cannot sign in with this account');
     } else {
     // Step 7: If the user is allowed, just proceed (return as normal)
-      return response.data;
+      return data;
     }
   };
 
