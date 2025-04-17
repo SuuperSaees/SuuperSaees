@@ -151,7 +151,9 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
       inviteRedirectUrl = `${callbackUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${encodeURIComponent(callbackUrl + '/join?invite_token=' + inviteToken + '&email=' + email)}`;
 
       await client.rpc('update_user_credentials', {
-        p_domain: currentBaseUrl?.replace('http://', '').replace('https://', '') ?? '',
+        p_domain: currentBaseUrl?.replace('http://', '')
+                                .replace('https://', '')
+                                .replace(/\/+$/, '') ?? '',
         p_email: email,
         p_password: '',
       });
