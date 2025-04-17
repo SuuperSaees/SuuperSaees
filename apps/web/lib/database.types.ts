@@ -3505,8 +3505,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: string; brief_id: string }
           | { service_id: number; brief_id: string }
+          | { service_id: string; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {

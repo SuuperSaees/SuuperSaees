@@ -300,8 +300,8 @@ DECLARE
 BEGIN
   -- Get the organization ID directly from the auth.sessions table
   SELECT organization_id INTO org_id
-  FROM auth.sessions
-  WHERE id = (auth.jwt() ->> 'session_id')::uuid
+  FROM auth.user_sessions
+  WHERE session_id = (auth.jwt() ->> 'session_id')::uuid
   AND user_id = target_user_id
   LIMIT 1;
   
@@ -336,8 +336,8 @@ DECLARE
 BEGIN
   -- Get the current session information
   SELECT organization_id INTO org_id
-  FROM auth.sessions
-  WHERE id = (auth.jwt() ->> 'session_id')::uuid
+  FROM auth.user_sessions
+  WHERE session_id = (auth.jwt() ->> 'session_id')::uuid
   AND user_id = target_user_id
   LIMIT 1;
   
@@ -1008,14 +1008,61 @@ drop function if exists kit.add_current_user_to_new_account() cascade;
 drop function if exists public.get_session() cascade;
 drop trigger if exists add_current_user_to_new_account on public.accounts;
 
-alter table "auth"."sessions" add column "organization_id" uuid;
+-- delete the table if it exists
+DROP TABLE IF EXISTS "auth"."user_sessions";
 
-alter table "auth"."sessions" add constraint "sessions_organization_id_fkey" foreign key ("organization_id") references "public"."organizations"("id") on delete cascade;
+-- create the table
+CREATE TABLE "auth"."user_sessions" (
+  user_id uuid not null,
+  session_id uuid not null,
+  organization_id uuid,
+  agency_id uuid,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
 
-alter table "auth"."sessions" add column "agency_id" uuid;
+grant all on table "auth"."user_sessions" to anon, authenticated, service_role;
 
-alter table "auth"."sessions" add constraint "sessions_agency_id_fkey" foreign key ("agency_id") references "public"."organizations"("id") on delete cascade;
+alter table "auth"."user_sessions" add constraint "user_sessions_user_id_fkey" foreign key ("user_id") references "auth"."users"("id") on delete cascade;
 
+alter table "auth"."user_sessions" add constraint "user_sessions_session_id_fkey" foreign key ("session_id") references "auth"."sessions"("id") on delete cascade;
+
+alter table "auth"."user_sessions" add constraint "user_sessions_organization_id_fkey" foreign key ("organization_id") references "public"."organizations"("id") on delete cascade;
+
+alter table "auth"."user_sessions" add constraint "user_sessions_agency_id_fkey" foreign key ("agency_id") references "public"."organizations"("id") on delete cascade;
+
+DROP FUNCTION IF EXISTS auth.handle_session_insert() CASCADE;
+
+create or replace function auth.handle_session_insert()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_session_id uuid;
+  v_user_id uuid;
+begin
+  -- Use directly the values of the newly inserted row
+  v_session_id := NEW.id;
+  v_user_id := NEW.user_id;
+
+  -- Insert the session into the user_sessions table, organization_id and agency_id are not available in the newly inserted row
+  insert into auth.user_sessions (user_id, session_id, organization_id, agency_id)
+  values (v_user_id, v_session_id, NULL, NULL);
+
+  return NEW;
+end;
+$$;
+
+grant execute on function auth.handle_session_insert() to anon, authenticated, service_role;
+
+drop trigger if exists on_session_insert on auth.sessions;
+
+create trigger on_session_insert 
+after insert on auth.sessions
+for each row
+execute function auth.handle_session_insert();
 
 create
 or replace function kit.add_current_user_to_new_organization () returns trigger language plpgsql security definer
@@ -1032,9 +1079,9 @@ begin
             auth.uid(),
             public.get_upper_system_role());
 
-        update auth.sessions
+        update auth.user_sessions
         set organization_id = new.id
-        where user_id = auth.uid() and id = (auth.jwt() ->> 'session_id')::uuid;
+        where user_id = auth.uid() and session_id = (auth.jwt() ->> 'session_id')::uuid;
     end if;
 
     return NEW;
@@ -1090,8 +1137,8 @@ BEGIN
     
     -- Get the organization_id and agency_id from the current session
     SELECT organization_id, agency_id INTO v_org_id, v_agency_id
-    FROM auth.sessions 
-    WHERE user_id = v_user_id AND id = v_session_id;
+    FROM auth.user_sessions 
+    WHERE user_id = v_user_id AND session_id = v_session_id;
     
     -- If there is no organization associated, return null
     IF v_org_id IS NULL THEN
@@ -1279,11 +1326,11 @@ BEGIN
     ) THEN
         -- User is a direct member of this organization (agency case)
         -- Set organization_id to the found organization and agency_id to NULL
-        UPDATE auth.sessions
+        UPDATE auth.user_sessions
         SET 
             organization_id = v_organization_id,
             agency_id = NULL
-        WHERE id = v_session_id
+        WHERE session_id = v_session_id
         AND user_id = v_user_id;
     ELSE
         -- User is not a direct member, check if this is a client organization
@@ -1300,11 +1347,11 @@ BEGIN
         END IF;
         
         -- Set organization_id to the client organization and agency_id to the found organization
-        UPDATE auth.sessions
+        UPDATE auth.user_sessions
         SET 
             organization_id = v_client_organization_id,
             agency_id = v_organization_id
-        WHERE id = v_session_id
+        WHERE session_id = v_session_id
         AND user_id = v_user_id;
     END IF;
     
