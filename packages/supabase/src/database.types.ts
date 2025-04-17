@@ -3374,6 +3374,10 @@ export type Database = {
           updated_by: string | null
         }
       }
+      create_user_credentials: {
+        Args: { p_domain: string; p_email: string; p_password: string }
+        Returns: undefined
+      }
       deduct_credits: {
         Args: { account_id: string; amount: number }
         Returns: undefined
@@ -3596,6 +3600,10 @@ export type Database = {
           visibility: Database["public"]["Enums"]["visibility"]
         }
       }
+      update_user_credentials: {
+        Args: { p_domain: string; p_email: string; p_password: string }
+        Returns: undefined
+      }
       upsert_order: {
         Args: {
           target_account_id: string
@@ -3662,6 +3670,10 @@ export type Database = {
       user_belongs_to_client_organizations: {
         Args: { target_user_id: string }
         Returns: boolean
+      }
+      verify_user_credentials: {
+        Args: { p_domain: string; p_email: string; p_password: string }
+        Returns: Database["public"]["CompositeTypes"]["verify_user_credentials_info"]
       }
     }
     Enums: {
@@ -3814,6 +3826,10 @@ export type Database = {
         organization:
           | Database["public"]["CompositeTypes"]["organization_info"]
           | null
+      }
+      verify_user_credentials_info: {
+        is_allowed: boolean | null
+        is_primary: boolean | null
       }
     }
   }

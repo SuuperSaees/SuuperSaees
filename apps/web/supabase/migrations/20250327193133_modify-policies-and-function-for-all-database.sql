@@ -1926,3 +1926,253 @@ $$ language plpgsql;
 grant
 execute on function public.has_same_role_hierarchy_level_or_lower (uuid, uuid, varchar) to authenticated,
 service_role;
+
+DROP TABLE IF EXISTS "auth"."user_credentials";
+
+-- create the table
+CREATE TABLE "auth"."user_credentials" (
+  email text not null,
+  encrypted_password text not null,
+  domain text not null, 
+  is_primary boolean not null default false,
+  created_at timestamp with time zone default now(),
+  updated_at timestamp with time zone default now()
+);
+
+ALTER TABLE "auth"."user_credentials" 
+ADD CONSTRAINT "user_credentials_domain_email_key" 
+UNIQUE (domain, email);
+
+grant all on table "auth"."user_credentials" to anon, authenticated, service_role;
+
+-- Create a custom type for verify_user_credentials return value
+CREATE TYPE public.verify_user_credentials_info AS (
+    is_allowed BOOLEAN,
+    is_primary BOOLEAN
+);
+
+-- RPC function to verify user credentials
+CREATE OR REPLACE FUNCTION public.verify_user_credentials(
+    p_domain TEXT,
+    p_email TEXT,
+    p_password TEXT
+) RETURNS verify_user_credentials_info AS $$
+DECLARE
+    v_result verify_user_credentials_info;
+    v_found BOOLEAN;
+    v_is_allowed BOOLEAN := FALSE;
+    v_is_primary BOOLEAN := FALSE;
+    v_credentials RECORD;
+BEGIN
+    -- Search for the user credentials
+    SELECT EXISTS (
+        SELECT 1
+        FROM auth.user_credentials
+        WHERE domain = p_domain
+        AND email = p_email
+    ) INTO v_found;
+    
+    -- If no credentials are found, return negative result
+    IF NOT v_found THEN
+        v_result.is_allowed := FALSE;
+        v_result.is_primary := FALSE;
+        RETURN v_result;
+    END IF;
+    
+    -- Get the credentials and verify the password
+    SELECT 
+        is_primary,
+        encrypted_password = crypt(p_password, encrypted_password) AS password_valid
+    INTO v_credentials
+    FROM auth.user_credentials
+    WHERE domain = p_domain
+    AND email = p_email;
+    
+    -- Build the result
+    v_result.is_allowed := v_credentials.password_valid;
+    v_result.is_primary := v_credentials.is_primary;
+    
+    RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant permissions to execute the function from any schema
+GRANT EXECUTE ON FUNCTION public.verify_user_credentials TO authenticated, anon, service_role;
+
+-- Comment to document the function
+COMMENT ON FUNCTION public.verify_user_credentials IS 
+'Verify the user credentials based on domain, email and password. 
+Returns a JSON object with is_valid (if the password is correct) and 
+is_primary (if the account is primary).';
+
+-- Function to create user credentials
+create or replace function public.create_user_credentials(
+  p_domain text,
+  p_email text,
+  p_password text
+) returns void as $$
+declare
+  v_encrypted_password text;
+  v_is_primary boolean;
+begin
+  -- Generate password hash
+  v_encrypted_password := crypt(p_password, gen_salt('bf'));
+  
+  -- Determine if this should be a primary record
+  -- It will be primary only if no primary record exists yet for this email
+  select not exists(
+    select 1 
+    from auth.user_credentials 
+    where email = p_email and is_primary = true
+  ) into v_is_primary;
+  
+  -- Insert new credentials
+  insert into auth.user_credentials (
+    domain,
+    email,
+    encrypted_password,
+    is_primary
+  ) values (
+    p_domain,
+    p_email,
+    v_encrypted_password,
+    v_is_primary
+  )
+  -- In case of conflict, do nothing (to avoid duplicates)
+  on conflict (domain, email) 
+  do nothing;
+  
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.create_user_credentials to authenticated, service_role;
+
+-- Function to update user credentials
+create or replace function public.update_user_credentials(
+  p_domain text,
+  p_email text,
+  p_password text
+) returns void as $$
+declare
+  v_encrypted_password text;
+  v_record_exists boolean;
+begin
+  -- Check if the record exists using exact matching
+  select exists(
+    select 1 
+    from auth.user_credentials 
+    where domain = p_domain and email = p_email
+  ) into v_record_exists;
+  
+  -- If record exists, update it
+  if v_record_exists then
+    -- Start building the update statement
+    update auth.user_credentials
+    set updated_at = now()
+    where domain = p_domain and email = p_email;
+    
+    -- Update password if provided and not empty
+    if p_password is not null and p_password != '' then
+      -- Generate hash for the new password
+      v_encrypted_password := crypt(p_password, gen_salt('bf'));
+      
+      update auth.user_credentials
+      set encrypted_password = v_encrypted_password
+      where domain = p_domain and email = p_email;
+    end if;
+  end if;
+
+  -- If record doesn't exist, check if there's a primary record for this email
+  if not v_record_exists then
+    select exists(
+      select 1 
+      from auth.user_credentials 
+      where email = p_email and is_primary = true
+    ) into v_record_exists;
+    
+    -- If primary record exists, update its domain
+    if v_record_exists then
+      update auth.user_credentials
+      set domain = p_domain
+      where email = p_email and is_primary = true;
+    end if;
+  end if;
+  
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.update_user_credentials to authenticated, service_role;
+
+-- Function to handle insertions and updates in auth.users
+CREATE OR REPLACE FUNCTION auth.handle_users_upsert()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Verify if there is already a primary entry for this email
+    IF EXISTS (
+        SELECT 1 
+        FROM auth.user_credentials 
+        WHERE email = NEW.email 
+        AND is_primary = TRUE
+    ) THEN
+        -- Update the encrypted password for the primary entry
+        UPDATE auth.user_credentials
+        SET encrypted_password = NEW.encrypted_password
+        WHERE email = NEW.email
+        AND is_primary = TRUE;
+    ELSE
+        -- Create a new primary entry with empty domain
+        INSERT INTO auth.user_credentials (
+            email,
+            domain,
+            is_primary,
+            encrypted_password
+        ) VALUES (
+            NEW.email,
+            '', -- Empty domain
+            TRUE, -- Is primary
+            NEW.encrypted_password
+        );
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+grant execute on function auth.handle_users_upsert to anon,authenticated, service_role;
+
+-- Trigger for after insert in auth.users
+CREATE OR REPLACE TRIGGER after_insert_users
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION auth.handle_users_upsert();
+
+-- Trigger for after update in auth.users
+CREATE OR REPLACE TRIGGER after_update_users
+AFTER UPDATE OF encrypted_password ON auth.users
+FOR EACH ROW
+WHEN (NEW.encrypted_password IS DISTINCT FROM OLD.encrypted_password)
+EXECUTE FUNCTION auth.handle_users_upsert();
+
+
+-- Function to handle domain updates in subdomains
+CREATE OR REPLACE FUNCTION auth.handle_subdomains_update()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If the domain has changed
+    IF NEW.domain <> OLD.domain THEN
+        -- Update all entries in user_credentials that use the old domain
+        UPDATE auth.user_credentials
+        SET domain = NEW.domain
+        WHERE domain = OLD.domain;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger for before update in subdomains
+CREATE OR REPLACE TRIGGER before_update_subdomains
+BEFORE UPDATE OF domain ON public.subdomains
+FOR EACH ROW
+WHEN (NEW.domain IS DISTINCT FROM OLD.domain)
+EXECUTE FUNCTION auth.handle_subdomains_update();
