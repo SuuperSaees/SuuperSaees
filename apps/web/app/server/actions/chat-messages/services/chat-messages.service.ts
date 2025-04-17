@@ -40,8 +40,8 @@ export class ChatMessagesService {
 
 
   // * GET SERVICES
-  async list(chatId: string | number): Promise<Message.Response[]> {
-    return await this.chatMessagesRepository.list(chatId);
+  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response[]> {
+    return await this.chatMessagesRepository.list(chatId, config);
   }
 
 
@@ -81,7 +81,7 @@ export class ChatMessagesService {
         // If message is internal_agency, only include agency roles
         if (messageVisibility === 'internal_agency') {
           const agencyRoles = ['agency_owner', 'agency_project_manager', 'agency_member'];
-          return agencyRoles.includes(member.user.role);
+          return agencyRoles.includes(member.user.role ?? '');
         }
         
         // Default case (should not happen, but include for safety)

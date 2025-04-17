@@ -22,8 +22,8 @@ export class ChatMessagesAction extends BaseAction implements IChatMessagesActio
     return await this.controller.create(payload);
   }
 
-  async list(chatId: string | number): Promise<Message.Response[]> {
-    return await this.controller.list(chatId);
+  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response[]> {
+    return await this.controller.list(chatId, config);
   }
 
   async delete(

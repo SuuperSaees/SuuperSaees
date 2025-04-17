@@ -10,7 +10,6 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { Order } from '~/lib/order.types';
 import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
 import { getTags } from '~/server/actions/tags/tags.action';
-import { getFolderFiles } from '~/team-accounts/src/server/actions/files/get/get-files';
 
 import { getOrderById } from '../../../../../packages/features/team-accounts/src/server/actions/orders/get/get-order';
 import AsideOrderInformation from './components/aside-order-information';
@@ -74,14 +73,6 @@ async function OrderDetailsPage({
     { title: order?.title ?? '', id: order?.uuid ?? '' },
   ];
 
-  const orderFiles = await getFolderFiles(order?.uuid ?? '').catch((err) => {
-    console.error(`Error getting order files: ${err}`);
-    return [];
-  });
-  // const role = await getUserRole().catch((err) => {
-  //   console.error(`Error client, getting user role: ${err}`)
-  //   return ''
-  // });
 
   const role = workspace?.role;
 
@@ -89,10 +80,9 @@ async function OrderDetailsPage({
     return redirect('/orders');
   }
 
+  console.log('order', order);
   return (
     <ActivityProvider
-      messages={order?.messages ?? []}
-      files={orderFiles ?? []}
       activities={order?.activities ?? []}
       reviews={order?.reviews ?? []}
       order={order}

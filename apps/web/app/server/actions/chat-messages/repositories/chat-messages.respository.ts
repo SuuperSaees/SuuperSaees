@@ -42,13 +42,22 @@ export class ChatMessagesRepository {
 
 
   // * GET REPOSITORIES
-  async list(chatId?: string | number): Promise<Message.Response[]> {
+  async list(chatId?: string | number, config?: ChatMessages.Configuration): Promise<Message.Response[]> {
     const client = this.adminClient ?? this.client;
 
-    const { data, error } = await client
+    let baseQuery = client
       .from('messages')
       .select('*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)), files(*)')
       .eq(`${typeof chatId === 'string' ? 'chat_id' : 'order_id'}`, chatId ?? '')
+      .order('created_at', { ascending: false })
+      .limit(config?.pagination?.limit ?? 10)
+      .is('deleted_on', null)
+
+    if (config?.pagination) {
+      baseQuery = baseQuery.lt('created_at', config.pagination.cursor)
+    }
+
+    const { data, error } = await baseQuery
 
     if (error) {
       throw new Error(

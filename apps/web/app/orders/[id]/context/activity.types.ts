@@ -1,4 +1,4 @@
-import { UseMutationResult } from '@tanstack/react-query';
+import { InfiniteData, UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query';
 
 import { JSONCustomResponse } from '@kit/shared/response';
 
@@ -136,7 +136,7 @@ export namespace DataResult {
 
 export interface ActivityContextType {
   activities: DataResult.Activity[];
-  messages: DataResult.Message[];
+  messages:  DataResult.Message[];
   reviews: DataResult.Review[];
   files: DataResult.File[];
   allFiles: DataResult.File[];
@@ -169,4 +169,5 @@ export interface ActivityContextType {
       previousMessages: MessageExtended[];
     }
   >;
+  messagesQuery:  UseInfiniteQueryResult<InfiniteData<ServerMessage.Response[], unknown>, Error>
 }

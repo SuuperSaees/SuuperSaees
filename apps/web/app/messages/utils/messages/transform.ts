@@ -2,15 +2,17 @@ import { format } from 'date-fns';
 
 import { Activity } from '~/lib/activity.types';
 import { Message } from '~/lib/message.types';
+import { Review } from '~/lib/review.types';
 
 // Enum to distinguish between message and activity types in chat interactions
 export enum ChatInteractionType {
   MESSAGE = 'message',
   ACTIVITY = 'activity',
+  REVIEW = 'review',
 }
 
 // Union type representing either a Message or an Activity with a class identifier
-export type ChatInteraction = (Message.Type | Activity.Type) & {
+export type ChatInteraction = (Message.Type | Activity.Type | Review.Type) & {
   class: ChatInteractionType;
 };
 
@@ -24,6 +26,7 @@ export type ChatInteraction = (Message.Type | Activity.Type) & {
 export const combineChatInteractions = (
   messages: Message.Type[],
   activities: Activity.Type[],
+  reviews?: Review.Type[],
 ): ChatInteraction[] => {
   return [
     ...messages.map((message) => ({
@@ -33,6 +36,10 @@ export const combineChatInteractions = (
     ...(activities?.map((activity) => ({
       ...activity,
       class: ChatInteractionType.ACTIVITY,
+    })) ?? []),
+    ...(reviews?.map((review) => ({
+      ...review,
+      class: ChatInteractionType.REVIEW,
     })) ?? []),
   ];
 };

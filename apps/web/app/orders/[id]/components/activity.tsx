@@ -25,7 +25,6 @@ import { Message } from '~/lib/message.types';
 const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agencyStatuses: AgencyStatus.Type[] }) => {
   const { order } = useActivityContext();
 
-  console.log('order', order);
   const { addMessageMutation, userRole, userWorkspace } = useActivityContext();
 
   const { getInternalMessagingEnabled } = useInternalMessaging()
@@ -93,14 +92,14 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
     }
   };
 
-  const organizationData  = useQuery({
-    queryKey: ['account-plugins', userWorkspace],
-    queryFn: userRole === 'client_member' || userRole === 'client_owner' ? 
-      async () => await getAgencyForClientByUserId  (userWorkspace.id ?? '') : 
-      async () => await getOrganization(),
-    enabled: !!userWorkspace.id,
-    retry: 1,
-  });
+  // const organizationData  = useQuery({
+  //   queryKey: ['account-plugins', userWorkspace],
+  //   queryFn: userRole === 'client_member' || userRole === 'client_owner' ? 
+  //     async () => await getAgencyForClientByUserId  (userWorkspace.id ?? '') : 
+  //     async () => await getOrganization(),
+  //   enabled: !!userWorkspace.id,
+  //   retry: 1,
+  // });
 
  /**
    * Handles file uploads for the current chat
@@ -149,7 +148,7 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
   [upload, order.uuid],
 );
   return (
-    <div className="flex w-full flex-col gap-4 h-auto min-h-full">
+    <div className="flex w-full flex-col gap-4 h-full min-h-0 max-h-full">
       <Separator className='w-full'/>
       <Interactions agencyStatuses={agencyStatuses} />
       <Separator className='w-full'/>

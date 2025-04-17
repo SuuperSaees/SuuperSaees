@@ -34,17 +34,13 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       .from('orders_v2')
       .select(
         `*, client:accounts!customer_id(id, name, email, picture_url, organization_id, created_at, settings:user_settings(name, picture_url)), 
-        messages(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)), files(*)), 
-        activities(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
-          reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
-          files(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, organization_id, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          order_tags(tag:tags(id, name, color, organization_id))
         `,
       )
       .eq('id', orderId)
-      .single();
+      .single()
 
       if (orderData?.followers?.length) {
         const adminClient = getSupabaseServerComponentClient({
@@ -112,12 +108,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       tags: Array.isArray(orderData.order_tags) 
         ? orderData.order_tags.map(tagItem => tagItem.tag) 
         : orderData.order_tags ? [orderData.order_tags?.tag as Tags.Type] : [],
-      messages: orderData.messages.map((message) => {
-        return {
-          ...message,
-          user: message.user,
-        };
-      }),
+
       assigned_to: orderData.assigned_to.filter(assignment => 
         !assignment.agency_member?.deleted_on && 
         assignment.agency_member?.organization_id === orderData.agency_id

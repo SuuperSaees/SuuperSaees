@@ -9,7 +9,7 @@ import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { Order } from '~/lib/order.types';
 
-import { DataResult } from '../context/activity.types';
+import { DataResult, UserExtended } from '../context/activity.types';
 import { useOrderSubscriptionsHandlers } from './use-order-subscriptions-handlers';
 
 type DataUnion =
@@ -30,6 +30,8 @@ export const useOrderSubscriptions = (
   setReviews: React.Dispatch<React.SetStateAction<DataResult.Review[]>>,
   files: DataResult.File[],
   setFiles: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
+  members: UserExtended[],
+
 ) => {
   const {
     handleOrderChanges,
@@ -48,6 +50,7 @@ export const useOrderSubscriptions = (
             payload as RealtimePostgresChangesPayload<Message.Type>,
             messages,
             setMessages,
+            members,
           );
 
         // Handle file updates and message associations
@@ -68,6 +71,7 @@ export const useOrderSubscriptions = (
             payload as RealtimePostgresChangesPayload<Activity.Type>,
             activities,
             setActivities,
+            members,
           );
       }
     },

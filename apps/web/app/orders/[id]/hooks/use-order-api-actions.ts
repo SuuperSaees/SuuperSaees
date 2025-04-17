@@ -71,7 +71,7 @@ export const useOrderApiActions = ({
     onMutate: async ({ message, files, tempId }) => {
       // Cancel outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({
-        queryKey: ['messages'],
+        queryKey: ['messages', orderId],
       });
 
       // Snapshot the previous messages and chats
@@ -153,7 +153,7 @@ export const useOrderApiActions = ({
         });
       });
       // Invalidate the messages query to refresh the data
-      void queryClient.invalidateQueries({ queryKey: ['messages'] });
+      void queryClient.invalidateQueries({ queryKey: ['messages', orderId] });
     },
   });
 
@@ -170,7 +170,7 @@ export const useOrderApiActions = ({
       adminActived?: boolean;
     }) => deleteMessage(messageId, adminActived),
     onMutate: async ({ messageId }) => {
-      await queryClient.cancelQueries({ queryKey: ['messages'] });
+      await queryClient.cancelQueries({ queryKey: ['messages', orderId] });
 
       // Store the previous messages state
       const previousMessages = messages;
