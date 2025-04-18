@@ -123,24 +123,24 @@ class AccountInvitationsService {
 
     logger.info(ctx, 'Storing invitations...');
 
-    const accountResponse = await this.client
-      .from('accounts')
+    const organizationResponse = await this.client
+      .from('organizations')
       .select('name')
       .eq('slug', accountSlug)
       .single();
 
-    if (!accountResponse.data) {
+    if (!organizationResponse.data) {
       logger.error(
         ctx,
-        'Account not found in database. Cannot send invitations.',
+        'Organization not found in database. Cannot send invitations.',
       );
 
-      throw new Error('Account not found');
+      throw new Error('Organization not found');
     }
 
-    const response = await this.client.rpc('add_invitations_to_account', {
+    const response = await this.client.rpc('add_invitations_to_organization', {
       invitations,
-      account_slug: accountSlug,
+      organization_slug: accountSlug,
     });
 
     if (response.error) {
@@ -149,7 +149,7 @@ class AccountInvitationsService {
           ...ctx,
           error: response.error,
         },
-        `Failed to add invitations to account ${accountSlug}`,
+        `Failed to add invitations to organization ${accountSlug}`,
       );
 
       throw response.error;

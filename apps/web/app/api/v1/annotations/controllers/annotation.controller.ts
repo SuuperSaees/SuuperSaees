@@ -61,7 +61,8 @@ export class AnnotationController extends BaseController {
 
     try {
       const { searchParams } = new URL(req.url);
-      const fileId = searchParams.get('file_id');
+      const fileId = searchParams.get('file_id')
+      const otherFileIds = searchParams.get('other_file_ids')?.split(',');
 
       if (!fileId) {
         throw ApiError.badRequest(
@@ -73,7 +74,7 @@ export class AnnotationController extends BaseController {
       const client = getSupabaseServerComponentClient({ admin: true });
       const annotationService = await createAnnotationService(client);
 
-      const annotations = await annotationService.listAnnotations(fileId);
+      const annotations = await annotationService.listAnnotations(fileId, otherFileIds);
       return this.ok(
         {
           current_file: annotations.currentFile || [],

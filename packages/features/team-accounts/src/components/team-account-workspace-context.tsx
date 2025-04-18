@@ -7,7 +7,7 @@ import { User } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
 
 interface AccountWorkspace {
-  accounts: Database['public']['Views']['user_accounts']['Row'][];
+  accounts: Database['public']['Views']['user_organization']['Row'][];
   account: Database['public']['Functions']['team_account_workspace']['Returns'][0];
   user: User;
 }

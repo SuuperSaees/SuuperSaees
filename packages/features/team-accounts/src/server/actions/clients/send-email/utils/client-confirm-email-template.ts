@@ -11,12 +11,14 @@ export const getClientConfirmEmailTemplate = (
   agencyLogo: string,
   agencyColor: string,
   textColor: string,
-  type: 'confirm' | 'recovery' | 'invitation' = 'confirm',
+  type: 'confirm' | 'recovery' | 'invitation' | 'reactivation' = 'confirm',
 ) => {
   const { t } = type === 'confirm' 
     ? getEmailTranslations('clientConfirmEmail', lang)
     : type === 'invitation'
     ? getEmailTranslations('clientInvitationEmail', lang) 
+    : type === 'reactivation'
+    ? getEmailTranslations('clientConfirmEmail', lang)
     : getEmailTranslations('clientRecoveryEmail', lang);
   const template = `
   <!doctype html>

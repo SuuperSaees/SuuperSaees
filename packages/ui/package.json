@@ -122,7 +122,8 @@
     "./card-button": "./src/makerkit/card-button.tsx",
     "./version-updater": "./src/makerkit/version-updater.tsx",
     "./multi-step-form": "./src/makerkit/multi-step-form.tsx",
-    "./marketing": "./src/makerkit/marketing/index.tsx"
+    "./marketing": "./src/makerkit/marketing/index.tsx",
+    "./breadcrumb": "./src/shadcn/breadcrumb.tsx"
   },
   "typesVersions": {
     "*": {

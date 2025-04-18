@@ -7,7 +7,20 @@ export namespace File {
   };
   export type Insert = Database['public']['Tables']['files']['Insert'];
   export type Update = Database['public']['Tables']['files']['Update'];
-  export type Response = Pick<Type, 'id' | 'name' | 'type' | 'size' | 'url'> & {
-    created_at?: string;
+
+  export namespace Relationships {
+    export namespace FolderFiles {
+      export type Insert =
+        Database['public']['Tables']['folder_files']['Insert'];
+      export type Update =
+        Database['public']['Tables']['folder_files']['Update'];
+      export type Type = Database['public']['Tables']['folder_files']['Row'];
+    }
+    export type Response = Pick<
+      Type,
+      'id' | 'name' | 'type' | 'size' | 'url'
+    > & {
+      created_at?: string;
+    };
   }
 }

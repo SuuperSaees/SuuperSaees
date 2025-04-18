@@ -56,7 +56,13 @@ export const generateOrderCreationSchema = (
       : z.string().min(2, {
           message: t('creation.validation.minDescriptionCharacters'),
         }),
-    fileIds: z.array(z.string()),
+    files: z.array(z.object({
+      name: z.string(),
+      size: z.number(),
+      type: z.string(),
+      url: z.string(),
+      user_id: z.string(),
+    })),
     brief_responses: z.object({
       ...briefCompletionSchemaShape,
     }),

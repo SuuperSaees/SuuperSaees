@@ -10,7 +10,7 @@ import { getFullDomainBySubdomain } from '../../../../../../../../multitenancy/u
 import { getClientConfirmEmailTemplate } from '../../send-email/utils/client-confirm-email-template';
 import { HttpStatus } from '../../../../../../../../shared/src/response/http-status';
 import { ErrorUserOperations } from '../../../../../../../../shared/src/response';
-import { getTextColorBasedOnBackground } from '../../../../utils/generate-colors';
+import { getTextColorBasedOnBackground, generateRandomPassword } from '../../../../utils/generate-colors';
 import {
   senderNameKey,
   senderEmailKey,
@@ -27,7 +27,7 @@ import {
 } from '../create-client.types';
 import { SUUPER_CLIENT_ID, SUUPER_CLIENT_SECRET } from './client-account.utils';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { Account } from '../../../../../../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../../../../../../apps/web/lib/organization.types';
 
 interface ReactivateClientParams {
   accountId: string;
@@ -38,6 +38,8 @@ interface ReactivateClientParams {
   supabase?: SupabaseClient<Database>;
   adminActivated?: boolean;
   clientOrganizationId?: string;
+  agencyId?: string;
+  newAgency?: boolean;
 }
 
 export const reactivateDeletedClient = async ({
@@ -49,10 +51,12 @@ export const reactivateDeletedClient = async ({
   supabase,
   adminActivated = false,
   clientOrganizationId,
+  agencyId,
+  newAgency = false,
 }: ReactivateClientParams) => {
   supabase = supabase ?? getSupabaseServerComponentClient({ admin: adminActivated });
   // Create the new organization for this client
-  let clientOrganizationAccount: Account.Type | null = null;
+  let clientOrganizationAccount: Organization.Type | null = null;
   let clientOrganizationAccountId = clientOrganizationId;
   if (!clientOrganizationId) {
   clientOrganizationAccount = await insertOrganization(
@@ -61,7 +65,7 @@ export const reactivateDeletedClient = async ({
     supabase,
     adminActivated,
   );
-  clientOrganizationAccountId = clientOrganizationAccount.id ?? '';
+  clientOrganizationAccountId = clientOrganizationAccount?.id ?? '';
 }
 
   if (!clientOrganizationAccount && !clientOrganizationAccountId) {
@@ -75,30 +79,31 @@ export const reactivateDeletedClient = async ({
   // Reactivate the client by setting deleted_on to null
   const { error: reactivateError } = await supabase
     .from('clients')
-    .update({
+    .upsert({
       deleted_on: null,
-      organization_client_id: clientOrganizationAccountId,
+      organization_client_id: clientOrganizationAccountId ?? '',
+      user_client_id: accountId,
+      agency_id: agencyId ?? '',
+    }, {
+      onConflict: 'user_client_id, agency_id, organization_client_id',
     })
-    .eq('user_client_id', accountId);
 
   if (reactivateError) {
     throw new Error(`Error reactivating client: ${reactivateError.message}`);
   }
 
   // Delete the user settings row for this user
-  const { error: deleteUserSettingsError } = await supabase
-    .from('user_settings')
-    .delete()
-    .eq('user_id', accountId);
+  // const { error: deleteUserSettingsError } = await supabase
+  //   .from('user_settings')
+  //   .delete()
+  //   .eq('user_id', accountId);
 
-  if (deleteUserSettingsError && deleteUserSettingsError.code !== 'PGRST116') {
-    throw new Error(`Error deleting user settings: ${deleteUserSettingsError.message}`);
-  }
+  // if (deleteUserSettingsError && deleteUserSettingsError.code !== 'PGRST116') {
+  //   throw new Error(`Error deleting user settings: ${deleteUserSettingsError.message}`);
+  // }
 
   // Update the account name and organization
-  const updateData: { organization_id: string; name?: string } = {
-    organization_id: clientOrganizationAccountId ?? '',
-  };
+  const updateData: { name?: string } = {};
 
   if (name && name.trim() !== '') {
     updateData.name = name;
@@ -116,25 +121,35 @@ export const reactivateDeletedClient = async ({
   // Update the account membership
   const { error: updateAccountMembershipError } = await supabase
     .from('accounts_memberships')
-    .update({
-      account_id: clientOrganizationAccountId,
-    })
-    .eq('user_id', accountId);
+    .upsert({
+      organization_id: clientOrganizationAccountId ?? '',
+      user_id: accountId,
+      account_role: 'client_owner',
+    }, {
+      onConflict: 'user_id, organization_id',
+    });
 
   if (updateAccountMembershipError && updateAccountMembershipError.code !== 'PGRST116') {
     throw new Error(`Error updating account membership: ${updateAccountMembershipError.message}`);
   }
 
-  await sendReactivationEmail({ email, baseUrl, supabase });
+  await supabase.rpc('create_user_credentials', {
+    p_domain: baseUrl?.replace('http://', '').replace('https://', '') ?? '',
+    p_email: email,
+    p_password: generateRandomPassword(12),
+  });
+
+  await sendReactivationEmail({ email, baseUrl, supabase, newAgency });
 };
 
 interface SendReactivationEmailParams {
   email: string;
   baseUrl?: string;
   supabase: SupabaseClient<Database>;
+  newAgency?: boolean;
 }
 
-async function sendReactivationEmail({ email, baseUrl, supabase }: SendReactivationEmailParams) {
+async function sendReactivationEmail({ email, baseUrl, supabase, newAgency = false }: SendReactivationEmailParams) {
   const generatedMagicLink = await generateMagicLinkRecoveryPassword(email, supabase, true);
   const tokenRecoveryType: TokenRecoveryType = {
     email: email,
@@ -142,7 +157,7 @@ async function sendReactivationEmail({ email, baseUrl, supabase }: SendReactivat
   };
   const { tokenId } = await createToken(tokenRecoveryType);
 
-  const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${email}&type=recovery&next=${baseUrl}/orders`;
+  const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${email}&type=recovery&next=${baseUrl}/set-password`;
   let lang: 'en' | 'es' = 'en';
 
   const { settings } = await getFullDomainBySubdomain(
@@ -179,14 +194,16 @@ async function sendReactivationEmail({ email, baseUrl, supabase }: SendReactivat
     logoUrl,
     themeColor,
     getTextColorBasedOnBackground(themeColor),
-    'confirm',
+    newAgency ? 'reactivation' : 'confirm',
   );
 
   const fromSenderIdentity = senderName
     ? `${senderName} <${senderEmail}@${senderDomain}>`
     : `${defaultAgencySenderName} ${t('at')} ${defaultAgencyName} <${senderEmail}@${senderDomain}>`;
 
-  const res = await fetch(`${baseUrl}/api/v1/mailer`, {
+  const onlyBaseUrl = baseUrl?.includes('localhost') && baseUrl?.includes('https') ? baseUrl.replace('https', 'http') : baseUrl;
+
+  const res = await fetch(`${onlyBaseUrl}/api/v1/mailer`, {
     method: 'POST',
     headers: new Headers({
       Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,

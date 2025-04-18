@@ -16,7 +16,7 @@ import { UpdateAccountOrganizationDomain } from './personal-account-settings/upd
 interface SiteSettingsProps {
   role: string;
   handleChangeLanguage: (locale: string) => void;
-  user: Account.Type;
+  user: Account.Type & { organization_id: string };
   accountStripe: AccountStripe;
 }
 

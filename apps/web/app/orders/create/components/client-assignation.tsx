@@ -22,7 +22,10 @@ import {
   getClientsOrganizations,
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
-export default function ClientAssignation() {
+interface ClientAssignationProps {
+  onSelectOrganization: (organizationId: string) => void;
+}
+export default function ClientAssignation({ onSelectOrganization }: ClientAssignationProps) {
   const { form } = useMultiStepFormContext();
 
   const [selectedOrganization, setSelectedOrganization] =
@@ -140,11 +143,11 @@ export default function ClientAssignation() {
           className="w-full bg-transparent"
           groupName={t('dialogs.add.select.label')}
           onSelectHandler={(value: string) => {
-            setSelectedOrganization(
-              clientsOrganizationsQuery?.data?.find(
-                (cOrg) => cOrg.id === value,
-              ),
+            const selectedOrganization = clientsOrganizationsQuery?.data?.find(
+              (cOrg) => cOrg.id === value,
             );
+            setSelectedOrganization(selectedOrganization ?? null);
+            onSelectOrganization(selectedOrganization?.id ?? '');
             form.setValue('briefCompletion.order_followers', undefined);
             setSelectedMembers([]);
           }}

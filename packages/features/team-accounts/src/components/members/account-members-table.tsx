@@ -80,7 +80,7 @@ export function AccountMembersTable({
       );
     })
     .sort((prev, next) => {
-      if (prev.primary_owner_user_id === prev.user_id) {
+      if (prev.owner_user_id === prev.user_id) {
         return -1;
       }
 
@@ -147,8 +147,8 @@ function useGetColumns(
       {
         header: t('roleLabel'),
         cell: ({ row }) => {
-          const { role, primary_owner_user_id, user_id } = row.original;
-          const isPrimaryOwner = primary_owner_user_id === user_id;
+          const { role, owner_user_id, user_id } = row.original;
+          const isPrimaryOwner = owner_user_id === user_id;
 
           return (
             <span className={'flex items-center space-x-1'}>

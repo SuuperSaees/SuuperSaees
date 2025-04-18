@@ -57,13 +57,13 @@ export class AnnotationService {
     }
   }
 
-  async listAnnotations(fileId: string): Promise<{
+  async listAnnotations(fileId: string, otherFileIds?: string[]): Promise<{
     currentFile: Annotations.Type[];
     otherFiles: Annotations.Type[];
   }> {
     try {
       const annotations =
-        await this.annotationRepository.getAnnotationsByFile(fileId);
+        await this.annotationRepository.getAnnotationsByFile(fileId, otherFileIds);
 
       return {
         currentFile: annotations.currentFile,

@@ -1,21 +1,21 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
+import { FolderItem } from '../../../../../../../../apps/web/components/organization/files/hooks/use-folder-manager';
 
 export async function downloadFiles(
-    currentPath: Array<{ title: string; uuid?: string }>
+    currentFolders: Array<FolderItem>
   ) {
     const client = getSupabaseServerComponentClient();
   
-    if (currentPath.length > 0) {
-        const firstItem = currentPath[0];
+    if (currentFolders.length > 0) {
+        const firstItem = currentFolders[0];
         const title = firstItem!.title || '';
-        const uuid = firstItem!.uuid ?? '';
+        const uuid = firstItem!.id ?? '';
         
         if (!uuid && title) {
-            const lastItem = currentPath[currentPath.length - 1];
-            const orderUuid = lastItem!.uuid ?? '';
+            const lastItem = currentFolders[currentFolders.length - 1];
+            const orderUuid = lastItem!.id ?? '';
             if (!orderUuid) {
                 return;
             } else {
@@ -43,8 +43,8 @@ export async function downloadFiles(
             }
         }
         
-        const lastItem = currentPath[currentPath.length - 1];
-        const lastItemUuid = lastItem!.uuid ?? '';
+        const lastItem = currentFolders[currentFolders.length - 1];
+        const lastItemUuid = lastItem!.id ?? '';
         
         const { data: folderFiles, error: folderFilesError } = await client
             .from('folder_files')

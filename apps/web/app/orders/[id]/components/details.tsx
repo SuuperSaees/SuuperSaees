@@ -67,7 +67,7 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
 };
 
 const DetailsPage = () => {
-  const { order } = useActivityContext();
+  const { order, files } = useActivityContext();
 
   const convertLinks = (text: string) => {
     const urlRegex =
@@ -166,7 +166,7 @@ const DetailsPage = () => {
       )}
 
       <div className="flex flex-wrap gap-8 pb-8">
-        {order?.files?.map((file) => (
+        {files?.map((file) => (
           <div
             key={file.id}
             className="flex h-[209px] w-[220px] flex-col items-start gap-2 rounded-md border border-gray-200 bg-white p-[10px] px-[14px]"

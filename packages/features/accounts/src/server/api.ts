@@ -53,7 +53,7 @@ class AccountsApi {
    */
   async loadUserAccounts() {
     const { data: accounts, error } = await this.client
-      .from('user_accounts')
+      .from('user_organization')
       .select(
         `id, name, slug, picture_url, settings:organization_settings!left(*)`
       );

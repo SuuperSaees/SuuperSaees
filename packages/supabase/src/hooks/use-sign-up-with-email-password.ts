@@ -1,21 +1,14 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-
-
-
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
-
-
-
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { Tokens } from '../../../../apps/web/lib/tokens.types';
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
 import { decodeToken } from '../../../tokens/src/decode-token';
 import { useSupabase } from './use-supabase';
-
 
 interface Credentials {
   email: string;
@@ -77,43 +70,33 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
 
     const newUserData = response.data;
     const userId = newUserData.user?.id;
+    let organizationId: string | undefined;
 
     if (!inviteToken) {
       // New Step: Create organization account
-      const { data: accountData, error: accountError } = await client
-        .from('accounts')
+      const { error: organizationError, data: organizationData } = await client
+        .from('organizations')
         .insert({
-          primary_owner_user_id: userId,
+          owner_id: userId,
           name: credentials.organizationName,
-          email: null,
-          is_personal_account: false,
         })
-        .select('id')
+        .select('id, slug')
         .single();
 
-      if (accountError) {
-        console.error('Error creating account:', accountError);
+      if (organizationError) {
+        console.error('Error creating organization:', organizationError);
         throw new Error('Error occurred while creating the organization account');
       }
 
-      // Update user with organization_id
-      const { error: userUpdateError } = await client
-        .from('accounts')
-        .update({ organization_id: accountData.id })
-        .eq('id', userId ?? '');
-
-      if (userUpdateError) {
-        console.error('Error updating user:', userUpdateError);
-        throw new Error('Error occurred while updating user organization');
-      }
+      organizationId = organizationData.id;
     }
 
     const { error: accountInsertDataError } = await client
         .from('user_settings')
         .insert({
           user_id: userId ?? '',
+          organization_id: organizationId,
         })
-        .select('user_id')
         .single();
     
     if (accountInsertDataError) {
@@ -169,6 +152,14 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
     // don't send confirmation email if is a member invitation (/auth/sign-up?invite_token=xxxx) 
     if (inviteToken) {
       inviteRedirectUrl = `${callbackUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${encodeURIComponent(callbackUrl + '/join?invite_token=' + inviteToken + '&email=' + email)}`;
+
+      await client.rpc('update_user_credentials', {
+        p_domain: currentBaseUrl?.replace('http://', '')
+                                .replace('https://', '')
+                                .replace(/\/+$/, '') ?? '',
+        p_email: email,
+        p_password: '',
+      });
     } else {
       const res = await fetch(`${baseUrl}/api/v1/mailer`, {
         method: 'POST',

@@ -22,7 +22,7 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
   const { data: getOrganizationData, error: getOrganizationError, isLoading, isPending } = useQuery({
     queryKey: ['account-settings', currentUserId],
     queryFn: currentRole === 'client_member' || currentRole === 'client_owner' ? 
-      async () => await getAgencyForClientByUserId(currentUserId) : 
+      async () => await getAgencyForClientByUserId() : 
       async () => await getOrganization(),
     enabled: !!currentUserId,
   });

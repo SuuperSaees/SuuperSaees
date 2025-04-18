@@ -30,12 +30,14 @@ function SectionView({
   currentUserRole,
   agencyId,
   sections,
+  clientOrganizationName,
   showCardStats = true,
 }: {
   clientOrganizationId: string;
   currentUserRole: string;
   agencyId: string;
   sections?: string[];
+  clientOrganizationName: string;
   showCardStats?: boolean;
 }) {
   const { t } = useTranslation('clients');
@@ -59,18 +61,12 @@ function SectionView({
 
   const embedsQuery = useQuery({
     queryKey: ['organization-embeds', clientOrganizationId],
-    queryFn: async () => {
-      // Return without type assertion to avoid linter errors
-      return await getEmbeds(clientOrganizationId);
-    },
+    queryFn: async () => await getEmbeds(clientOrganizationId),
     // Always fetch embeds to check if we need to show embed tabs
     enabled: true,
   });
 
-  const embeds = useMemo(() => {
-    // Filter embeds to only show those with location === 'tab'
-    return (embedsQuery.data ?? []).filter(embed => embed.location === 'tab');
-  }, [embedsQuery.data]);
+  const embeds = (embedsQuery.data ?? []).filter(embed => embed.location === 'tab')
   const isEmbedsLoading = embedsQuery.isLoading;
 
   const serviceOptions = services?.data?.map((service) => {
@@ -154,6 +150,12 @@ function SectionView({
     ? sections.filter(section => section !== 'embeds').concat(embedTabs)
     : baseTabs.concat(embedTabs);
 
+  const currentPath = useMemo(() => {
+    return [
+      { title: clientOrganizationName, id: clientOrganizationId },
+    ];
+  }, [clientOrganizationId, clientOrganizationName]);
+
   // Add standard sections to the navigation options map
   const navigationOptionsMap = new Map<string, React.ReactNode>([
     [
@@ -181,6 +183,7 @@ function SectionView({
         key={'files'}
         clientOrganizationId={clientOrganizationId}
         agencyId={agencyId}
+        currentPath={currentPath}
         // setCurrentPath={setCurrentPath}  it's not used in the code for now
       />,
     ],

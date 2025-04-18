@@ -52,27 +52,6 @@ export default function BillingContainerConfig({ tab }: { tab: string }) {
         return total / 100;
     };
 
-
-    //   const getPlanValue = (plan: string): number => {
-    //     const planValues: Record<string, number> = {
-    //       starter: 1,
-    //       standard: 5,
-    //       premium: 10,
-    //       enterprise: 20
-    //     };
-      
-    //     return planValues[plan?.toLowerCase()] ?? 0;
-    //   };
-
-    //   const getProgressPercentage = (occupied: any, available: any) => {
-    //     if (available <= 0) return 0;
-    //     if (occupied < 0) occupied = 0;
-        
-    //     const percentage = (occupied / available) * 100;
-      
-    //     return Math.max(1, Math.min(100, Math.round(percentage)));
-    //   };
-      
       const handleCancelSubscription = async (subscriptionId: string) => {
         // Implement cancel subscription logic here
         try {

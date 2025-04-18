@@ -54,133 +54,135 @@ class WebhookRouterService {
 
     await service.handleWebhookEvent(event, {
       onCheckoutSessionCompleted: async (data) => {
+        console.log('onCheckoutSessionCompleted', data);
+        await Promise.resolve();
         try {
-          if (stripeAccountId) {
-            // Search organization by accountId
-            const {
-              data: accountDataAgencyOwnerData,
-              error: accountDataAgencyOwnerError,
-            } = await this.adminClient
-              .from('billing_accounts')
-              .select('id, account:accounts(id, organization_id)')
-              .eq('provider_id', stripeAccountId)
-              .single();
+          // if (stripeAccountId) {
+          //   // Search organization by accountId
+          //   const {
+          //     data: accountDataAgencyOwnerData,
+          //     error: accountDataAgencyOwnerError,
+          //   } = await this.adminClient
+          //     .from('accounts')
+          //     .select('id, organization_id')
+          //     .eq('stripe_id', stripeAccountId)
+          //     .single();
 
-            if (accountDataAgencyOwnerError) {
-              console.error(
-                'Error fetching organization:',
-                accountDataAgencyOwnerError,
-              );
-              throw accountDataAgencyOwnerError;
-            }
+          //   if (accountDataAgencyOwnerError) {
+          //     console.error(
+          //       'Error fetching organization:',
+          //       accountDataAgencyOwnerError,
+          //     );
+          //     throw accountDataAgencyOwnerError;
+          //   }
 
-            const newClient = {
-              email: data?.customer_details?.email, // TODO: Check if this is the correct field
-              slug: `${data?.customer_details?.name}'s Organization`,
-              name: data?.customer_details?.name, // TODO: Check if this is the correct field
-            };
-            const createdBy = accountDataAgencyOwnerData?.account?.id;
-            const agencyId = accountDataAgencyOwnerData?.account?.organization_id;
+          //   const newClient = {
+          //     email: data?.customer_details?.email, // TODO: Check if this is the correct field
+          //     slug: `${data?.customer_details?.name}'s Organization`,
+          //     name: data?.customer_details?.name, // TODO: Check if this is the correct field
+          //   };
+          //   const createdBy = accountDataAgencyOwnerData?.id;
+          //   const agencyId = accountDataAgencyOwnerData?.organization_id;
 
-            // Check if the client already exists
-            const { data: clientData, error: clientError } =
-              await this.adminClient
-                .from('accounts')
-                .select('id, organization_id')
-                .eq('email', newClient.email)
-                .eq('is_personal_account', true)
-                .single();
+          //   // Check if the client already exists
+          //   const { data: clientData, error: clientError } =
+          //     await this.adminClient
+          //       .from('accounts')
+          //       .select('id, organization_id')
+          //       .eq('email', newClient.email)
+          //       .eq('is_personal_account', true)
+          //       .single();
 
-            if (clientError) {
-              console.error('Error fetching user account:', clientError);
-            }
-            let client;
-            if (!clientData) {
-              client = await createClient({
-                client: newClient,
-                role: this.ClientRoleStripeInvitation,
-                agencyId: agencyId ?? '',
-                adminActivated: true,
-              });
-            }
+          //   if (clientError) {
+          //     console.error('Error fetching user account:', clientError);
+          //   }
+          //   let client;
+          //   if (!clientData) {
+          //     client = await createClient({
+          //       client: newClient,
+          //       role: this.ClientRoleStripeInvitation,
+          //       agencyId: agencyId ?? '',
+          //       adminActivated: true,
+          //     });
+          //   }
 
-            // After assign a service to the client, we need to create the subscription
-            // Search in the database, by checkout session id
+          //   // After assign a service to the client, we need to create the subscription
+          //   // Search in the database, by checkout session id
 
-            const { data: checkoutServiceData, error: checkoutServiceError } =
-              await this.adminClient
-                .from('checkouts')
-                .select('id, checkout_services(service_id)')
-                .eq('provider_id', data?.id)
-                .single();
+          //   const { data: checkoutServiceData, error: checkoutServiceError } =
+          //     await this.adminClient
+          //       .from('checkouts')
+          //       .select('id, checkout_services(service_id)')
+          //       .eq('provider_id', data?.id)
+          //       .single();
 
-            if (checkoutServiceError) {
-              console.error(
-                'Error fetching checkout service:',
-                checkoutServiceError,
-              );
-              throw checkoutServiceError;
-            }
+          //   if (checkoutServiceError) {
+          //     console.error(
+          //       'Error fetching checkout service:',
+          //       checkoutServiceError,
+          //     );
+          //     throw checkoutServiceError;
+          //   }
 
-            const clientOrganizationId = clientData
-              ? clientData.organization_id
-              : client?.success?.data?.organization_client_id;
-            let clientId;
-            if (clientData) {
-              const { data: clientDataWithChecker, error: clientError } =
-                await this.adminClient
-                  .from('clients')
-                  .select('id')
-                  .eq('user_client_id', clientData.id)
-                  .single();
+          //   const clientOrganizationId = clientData
+          //     ? clientData.organization_id
+          //     : client?.success?.data?.organization_client_id;
+          //   let clientId;
+          //   if (clientData) {
+          //     const { data: clientDataWithChecker, error: clientError } =
+          //       await this.adminClient
+          //         .from('clients')
+          //         .select('id')
+          //         .eq('user_client_id', clientData.id)
+          //         .single();
 
-              if (clientError) {
-                console.error('Error fetching client:', clientError);
-              }
-              // clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
-              if (clientDataWithChecker) {
-                clientId = clientDataWithChecker.id;
-              } else {
-                const { data: createClientDataWithChecker, error: clientError } =
-                await this.adminClient
-                  .from('clients')
-                  .insert({
-                    agency_id: accountDataAgencyOwnerData.account?.organization_id ?? '',
-                    organization_client_id: clientOrganizationId ?? '',
-                    user_client_id: clientData.id,
-                  })
-                  .select('id')
-                  .single();
+          //     if (clientError) {
+          //       console.error('Error fetching client:', clientError);
+          //     }
+          //     // clientId = clientDataWithChecker?.id ?? client?.success?.data?.id;
+          //     if (clientDataWithChecker) {
+          //       clientId = clientDataWithChecker.id;
+          //     } else {
+          //       const { data: createClientDataWithChecker, error: clientError } =
+          //       await this.adminClient
+          //         .from('clients')
+          //         .insert({
+          //           agency_id: accountDataAgencyOwnerData.organization_id ?? '',
+          //           organization_client_id: clientOrganizationId ?? '',
+          //           user_client_id: clientData.id,
+          //         })
+          //         .select('id')
+          //         .single();
 
-                if (clientError) {
-                  console.error('Error creating client:', clientError);
-                }
+          //       if (clientError) {
+          //         console.error('Error creating client:', clientError);
+          //       }
 
-                clientId = createClientDataWithChecker?.id;
-              }
-            } else {
-              clientId = client?.success?.data?.id;
-            }
-            await insertServiceToClient(
-              this.adminClient,
-              clientOrganizationId ?? '',
-              checkoutServiceData?.checkout_services[0]?.service_id ?? 0,
-              clientId ?? '',
-              createdBy ?? '',
-              agencyId ?? '',
-            );
+          //       clientId = createClientDataWithChecker?.id;
+          //     }
+          //   } else {
+          //     clientId = client?.success?.data?.id;
+          //   }
+          //   await insertServiceToClient(
+          //     this.adminClient,
+          //     clientOrganizationId ?? '',
+          //     checkoutServiceData?.checkout_services[0]?.service_id ?? 0,
+          //     clientId ?? '',
+          //     createdBy ?? '',
+          //     agencyId ?? '',
+          //   );
 
-            await this.adminClient
-              .from('checkouts')
-              .update({
-                deleted_on: new Date().toISOString(),
-              })
-              .eq('id', checkoutServiceData?.id);
-          } else {
-            // TODO: Implement logic to handle checkout session completed
-            console.log('Account ID not found in the event');
-          }
-          return;
+          //   await this.adminClient
+          //     .from('checkouts')
+          //     .update({
+          //       deleted_on: new Date().toISOString(),
+          //     })
+          //     .eq('id', checkoutServiceData?.id);
+          // } else {
+          //   // TODO: Implement logic to handle checkout session completed
+          //   console.log('Account ID not found in the event');
+          // }
+          // return;
         } catch (error) {
           console.error('Error handling checkout session completed:', error);
           return;
@@ -210,7 +212,7 @@ class WebhookRouterService {
               error: accountDataAgencyOwnerError,
             } = await this.adminClient
               .from('billing_accounts')
-              .select('id, account:accounts(id, organization_id)')
+              .select('account_id, accounts(id, organizations(id))')
               .eq('provider_id', stripeAccountId)
               .single();
 
@@ -229,23 +231,23 @@ class WebhookRouterService {
               slug: `${customer?.client_name}'s Organization`,
               name: customer?.client_name ?? '', // TODO: Check if this is the correct field
             };
-            const createdBy = accountDataAgencyOwnerData?.account?.id;
-            const agencyId = accountDataAgencyOwnerData?.account?.organization_id;
+            const createdBy = accountDataAgencyOwnerData?.account_id;
+            const agencyId = Array.isArray(accountDataAgencyOwnerData?.accounts?.organizations) ? accountDataAgencyOwnerData?.accounts?.organizations[0]?.id : accountDataAgencyOwnerData?.accounts?.organizations?.id;
 
             // Check if the client already exists
-            const { data: clientData, error: clientError } =
+            const { data: accountClientData, error: accountClientErrror } =
               await this.adminClient
                 .from('accounts')
-                .select('id, organization_id')
+                .select('id')
                 .eq('email', newClient.email ?? '')
-                .eq('is_personal_account', true)
                 .single();
 
-            if (clientError) {
-              console.error('Error fetching user account: ', clientError);
+            if (accountClientErrror) {
+              console.error('Error fetching user account: ', accountClientErrror);
             }
+
             let client;
-            if (!clientData) {
+            if (!accountClientData) {
               client = await createClient({
                 client: newClient,
                 role: this.ClientRoleStripeInvitation,
@@ -254,6 +256,22 @@ class WebhookRouterService {
               });
             }
 
+            let clientOrganizationId;
+
+            if(accountClientData) {
+              const { data: clientData, error: clientError} = await this.adminClient
+            .from('clients')
+            .select('organization_client_id')
+            .eq('user_client_id', accountClientData?.id ?? '')
+            .eq('agency_id', agencyId ?? '')
+            .single();
+
+            if (clientError) {
+              console.error('Error fetching client: ', clientError);
+            }
+
+            clientOrganizationId = clientData?.organization_client_id;
+            }
 
             // After assign a service to the client, we need to create the subscription
             // Search in the database, by checkout session id
@@ -273,16 +291,19 @@ class WebhookRouterService {
               throw checkoutServiceError;
             }
 
-            const clientOrganizationId = clientData
-              ? clientData.organization_id
+            clientOrganizationId = accountClientData
+              ? clientOrganizationId
               : client?.success?.data?.organization_client_id;
+
             let clientId;
-            if (clientData) {
+
+            if (accountClientData) {
               const { data: clientDataWithChecker, error: clientError } =
                 await this.adminClient
                   .from('clients')
                   .select('id')
-                  .eq('user_client_id', clientData.id)
+                  .eq('user_client_id', accountClientData.id)
+                  .eq('agency_id', agencyId ?? '')
                   .single();
 
               if (clientError) {
@@ -296,9 +317,9 @@ class WebhookRouterService {
                 await this.adminClient
                   .from('clients')
                   .insert({
-                    agency_id: accountDataAgencyOwnerData.account?.organization_id ?? '',
+                    agency_id: agencyId ?? '',
                     organization_client_id: clientOrganizationId ?? '',
-                    user_client_id: clientData.id,
+                    user_client_id: accountClientData.id,
                   })
                   .select('id')
                   .single();
@@ -313,6 +334,7 @@ class WebhookRouterService {
             } else {
               clientId = client?.success?.data?.id;
             }
+
             await insertServiceToClient(
               this.adminClient,
               clientOrganizationId ?? '',

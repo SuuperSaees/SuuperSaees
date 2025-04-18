@@ -24,8 +24,6 @@ export async function GET(req: NextRequest) {
           stripeAccount: accountId, 
       }) as StripeProductResponse;
 
-    //   console.log('Products:', products);
-
       return NextResponse.json(products);
   } catch (error) {
       console.error('Error retrieving products:', error);

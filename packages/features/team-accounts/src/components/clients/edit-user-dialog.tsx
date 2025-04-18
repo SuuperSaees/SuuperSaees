@@ -120,6 +120,8 @@ function EditUserDialog({
     },
   });
 
+  const host = typeof window !== 'undefined' ? window.location.host : '';
+
   const mutateUser = useMutation({
     mutationFn: async () => {
       // await updateUserEmail(userId, form.getValues('email'), undefined, true);
@@ -135,7 +137,7 @@ function EditUserDialog({
         );
       }
       if (userRole !== form.getValues('role')) {
-        await updateUserRole(userId, form.getValues('role'), undefined, true);
+        await updateUserRole(userId, form.getValues('role'), undefined, true, host);
       }
     },
     onSuccess: () => {
@@ -182,6 +184,7 @@ function EditUserDialog({
     }
   }, [isOpen, form, name, userRole, agencyRoles, clientRoles]);
 
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -223,29 +226,7 @@ function EditUserDialog({
                 </FormItem>
               )}
             />
-            {/* <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="space-y-0">
-                  <FormControl className="w-full">
-                    <div className="my-4">
-                      <FormLabel aria-required={true}>
-                        {t('editUser.email')}
-                      </FormLabel>
-                      <Input
-                        required={true}
-                        type="email"
-                        placeholder="Enter email"
-                        {...field}
-                        className='mt-2'
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
+           
             {
               //If my role is not agency_owner and the user's role is agency_owner, I cannot change his role
               //If my role is agency_owner and the user's role is agency_owner, I cannot change his role either. This is used to disable role switching for owners and prevent errors where the organization might end up without an owner

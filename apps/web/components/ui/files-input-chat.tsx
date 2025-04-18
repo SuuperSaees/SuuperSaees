@@ -46,11 +46,14 @@ interface FileUploaderProps {
   onMessageSend?: boolean;
   onFileUploadStatusUpdate?: (file: File, status: 'uploading' | 'completed' | 'error', serverId?: string) => void;
   thereAreFilesUploaded?: (value: boolean) => void;
+  agencyId: string;
+  clientOrganizationId: string;
+  folderId: string;
   referenceId?: string;
 }
 
 const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
-  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded, referenceId }, ref) => {
+  ({ onFileSelect, onFileIdsChange, onMessageSend = false, onFileUploadStatusUpdate, thereAreFilesUploaded, agencyId, clientOrganizationId, folderId, referenceId }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [hoveredFileId, setHoveredFileId] = useState<number | null>(null);
     const videoRefs = useRef<{ [key: number]: HTMLVideoElement }>({});
@@ -66,6 +69,9 @@ const FileUploader = forwardRef<HTMLInputElement, FileUploaderProps>(
       onFileIdsChange,
       onFileUploadStatusUpdate,
       thereAreFilesUploaded,
+      agencyId,
+      clientOrganizationId,
+      folderId,
       referenceId
     });
 
