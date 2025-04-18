@@ -59,7 +59,7 @@ JOIN
 JOIN 
   public.accounts_memberships am ON am.organization_id = o.id AND am.user_id = a.id
 LEFT JOIN 
-  public.user_settings us ON us.user_id = a.id
+  public.user_settings us ON us.user_id = a.id AND us.organization_id = o.id
 WHERE 
   a.id = auth.uid()
   AND a.deleted_on IS NULL
