@@ -194,7 +194,7 @@ async function sendReactivationEmail({ email, baseUrl, supabase, newAgency = fal
     logoUrl,
     themeColor,
     getTextColorBasedOnBackground(themeColor),
-    newAgency ? 'recovery' : 'confirm',
+    newAgency ? 'reactivation' : 'confirm',
   );
 
   const fromSenderIdentity = senderName
