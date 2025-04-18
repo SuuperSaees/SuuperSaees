@@ -1295,7 +1295,7 @@ using (has_permission_in_organizations(auth.uid(), 'messages.read'::app_permissi
     (visibility = 'public'::messages_types) OR 
     (
       (visibility = 'internal_agency'::messages_types) AND 
-      (EXISTS (SELECT 1 FROM accounts a JOIN accounts_memberships am ON (am.user_id = a.id) 
+      (EXISTS (SELECT 1 FROM accounts a JOIN accounts_memberships am ON (am.organization_id = (get_session()).organization.id::uuid) 
                WHERE (a.id = messages.user_id) AND (am.user_id = auth.uid()) AND 
                ((am.account_role)::text = ANY (ARRAY['agency_owner'::text, 'agency_project_manager'::text, 'agency_member'::text]))))
     )
