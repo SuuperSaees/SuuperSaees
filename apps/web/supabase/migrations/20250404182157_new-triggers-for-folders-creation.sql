@@ -219,7 +219,7 @@ BEGIN
     SELECT 1 
     FROM accounts_memberships am, session_org so
     WHERE am.user_id = p_user_id 
-    AND am.organization_id = so.organization_id
+    AND am.organization_id = so.organization_id::uuid
     AND am.account_role IN ('agency_owner', 'agency_member', 'agency_project_manager')
   ) INTO is_agency_role;
 
@@ -232,21 +232,25 @@ BEGIN
     0::BIGINT AS order_unread_count
   FROM messages m
   JOIN chats c ON m.chat_id = c.id  -- Join with chats to ensure chat exists
-  WHERE m.chat_id IS NOT NULL
-  AND m.order_id IS NULL  -- Exclude order-related messages
-  AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
-  AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
-  AND (
-    is_agency_role = true  -- Agency roles can see all messages
-    OR m.visibility = 'public'  -- Non-agency roles can only see public messages
-  )
-  AND NOT EXISTS (
-    SELECT 1 FROM message_reads mr 
-    WHERE mr.message_id = m.id AND mr.user_id = p_user_id
-  )
+  LEFT JOIN message_reads mr ON 
+    mr.user_id = p_user_id AND 
+    mr.chat_id = m.chat_id
+  WHERE 
+    m.chat_id IS NOT NULL
+    AND m.order_id IS NULL  -- Exclude order-related messages
+    AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+    AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
+    AND (
+      is_agency_role = true  -- Agency roles can see all messages
+      OR m.visibility = 'public'  -- Non-agency roles can only see public messages
+    )
+    AND (
+      mr.read_at IS NULL OR 
+      m.created_at > mr.read_at
+    )
   GROUP BY m.chat_id;
-
-  -- Then, return order counts
+  
+-- Then, return order counts
   RETURN QUERY
   SELECT 
     NULL::uuid AS chat_id,
@@ -254,17 +258,21 @@ BEGIN
     m.order_id::integer,
     COUNT(m.id)::BIGINT AS order_unread_count
   FROM messages m
-  WHERE m.order_id IS NOT NULL
-  AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
-  AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
-  AND (
-    is_agency_role = true  -- Agency roles can see all messages
-    OR m.visibility = 'public'  -- Non-agency roles can only see public messages
-  )
-  AND NOT EXISTS (
-    SELECT 1 FROM message_reads mr 
-    WHERE mr.message_id = m.id AND mr.user_id = p_user_id
-  )
+  LEFT JOIN message_reads mr ON 
+    mr.user_id = p_user_id AND 
+    mr.order_id = m.order_id::integer  -- Explicit conversion to integer
+  WHERE 
+    m.order_id IS NOT NULL
+    AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+    AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
+    AND (
+      is_agency_role = true  -- Agency roles can see all messages
+      OR m.visibility = 'public'  -- Non-agency roles can only see public messages
+    )
+    AND (
+      mr.read_at IS NULL OR 
+      m.created_at > mr.read_at
+    )
   GROUP BY m.order_id;
 END;
 $function$
