@@ -19,7 +19,7 @@ async function OrganizationsPage() {
   const organization = await getOrganization();
 
   const organizationOwner = await getUserById(
-    organization.primary_owner_user_id,
+    organization.owner_id ?? '',
   );
 
   const userRole = await getUserRole().catch((err) => {
@@ -39,11 +39,11 @@ async function OrganizationsPage() {
 
   return (
     <OrganizationSection
-      name={newOrganization.name}
+      name={newOrganization.name ?? ''}
       logo={newOrganization.picture_url ?? ''}
       owner={newOrganization.owner}
       clientOrganizationId={newOrganization.id ?? ''}
-      currentUserRole={userRole}
+      currentUserRole={userRole ?? ''}
       agencyId={agency?.id ?? ''}
     />
   );
