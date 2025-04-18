@@ -114,7 +114,7 @@ const useOrdersFilterConfigs = ({
       return new Map<string, string[]>();
     }
     
-    console.time('Building search index');
+    // console.time('Building search index');
     const searchIndex = new Map<string, string[]>();
     
     orders.forEach(order => {
@@ -126,7 +126,7 @@ const useOrdersFilterConfigs = ({
       }
     });
     
-    console.timeEnd('Building search index');
+    // console.timeEnd('Building search index');
     return searchIndex;
   }, [orders]);
 
@@ -258,7 +258,7 @@ const useOrdersFilterConfigs = ({
           'toggle',
           (order) =>
             order.assigned_to
-              ?.map((assignee) => assignee.agency_member?.id)
+            ?.map((assignee) => assignee.agency_member?.id)
               .includes(member.id) ?? false,
           member.id,
         ),

@@ -69,6 +69,13 @@
       "failedToDeleteReview": "Couldn't delete the review. Please try again later.",
       "failedToGetReviews": "Couldn't get the reviews. Please try again later.",
       "failedToGetReview": "Couldn't get the review. Please try again later."
+    },
+    "embeds": {
+      "invalidEmbed": "Embedding this URL isn’t allowed. Please try a different one.",
+      "failedToCreateEmbed": "Couldn't create the embed. Please try again later.",
+      "failedToUpdateEmbed": "Couldn't update the embed. Please try again later.",
+      "failedToDeleteEmbed": "Couldn't delete the embed. Please try again later.",
+      "failedToRemoveAccount": "Couldn't remove the account from the embed. Please try again later."
     }
   },
   "success": {
@@ -121,6 +128,19 @@
     },
     "reviews": {
       "reviewCreated": "Review added successfully."
+    },
+    "embeds": {
+      "embedCreated": "Embed created successfully.",
+      "embedUpdated": "Embed updated successfully.",
+      "embedDeleted": "Embed deleted successfully.",
+      "accountRemovedFromEmbed": "Account removed from embed successfully."
+    }
+  },
+  "loading": {
+    "embeds": {
+      "removingAccountFromEmbed": "Removing account from embed...",
+      "updatingEmbed": "Updating embed...",
+      "deletingEmbed": "Deleting embed..."
     }
   }
 }
