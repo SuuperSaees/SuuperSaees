@@ -9,7 +9,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
-// import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
+import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
 
@@ -60,7 +60,7 @@ export const getOrganizationSettings = async () => {
 export const getOrganizationSettingsByOrganizationId = async (
   organizationId: string,
   adminActived = false,
-  values: string[] = [
+  values: OrganizationSettings.KeysEnum[] = [
     'theme_color',
     'logo_url',
     'sidebar_background_color',
