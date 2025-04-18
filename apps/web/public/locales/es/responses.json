@@ -68,6 +68,13 @@
       "failedToDeleteReview": "No se pudo eliminar la reseña. Inténtalo más tarde.",
       "failedToGetReviews": "No se pudieron obtener las reseñas. Inténtalo más tarde.",
       "failedToGetReview": "No se pudo obtener la reseña. Inténtalo más tarde."
+    },
+    "embeds": {
+      "invalidEmbed": "No esta permitido insertar este enlace. Por favor, inténtalo con otro.",
+      "failedToCreateEmbed": "No se pudo crear el enlace. Inténtalo más tarde.",
+      "failedToUpdateEmbed": "No se pudo actualizar el enlace. Inténtalo más tarde.",
+      "failedToDeleteEmbed": "No se pudo eliminar el enlace. Inténtalo más tarde.",
+      "failedToRemoveAccount": "No se pudo eliminar la cuenta del enlace. Inténtalo más tarde."
     }
   },
   "success": {
@@ -119,6 +126,19 @@
     },
     "reviews": {
       "reviewCreated": "La reseña se añadió correctamente."
+    },
+    "embeds": {
+      "embedCreated": "El enlace se añadió correctamente.",
+      "embedUpdated": "El enlace se actualizó correctamente.",
+      "embedDeleted": "El enlace se eliminó correctamente.",
+      "accountRemovedFromEmbed": "La cuenta se eliminó del enlace correctamente."
+    }
+  },
+  "loading": {
+    "embeds": {
+      "removingAccountFromEmbed": "Eliminando cuenta del enlace...",
+      "updatingEmbed": "Actualizando enlace...",
+      "deletingEmbed": "Eliminando enlace..."
     }
   }
 }

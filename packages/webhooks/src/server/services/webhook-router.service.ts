@@ -204,7 +204,6 @@ class WebhookRouterService {
         return Promise.resolve();
       },
       onPaymentIntentSucceeded: async (data) => {
-        console.log('Payment subscription or unique payment succeeded:', data);
         try {
           if (stripeAccountId) {
             // Search organization by accountId
@@ -226,7 +225,6 @@ class WebhookRouterService {
             }
 
             const customer = await getSessionById(data.metadata.sessionId);
-
 
             const newClient = {
               email: customer?.client_email ?? '', // TODO: Check if this is the correct field
