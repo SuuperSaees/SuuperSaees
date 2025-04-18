@@ -658,3 +658,18 @@ alter table "public"."clients" add constraint "clients_organization_client_id_fk
 alter table "public"."clients" validate constraint "clients_organization_client_id_fkey1";
 
 alter table "public"."invitations" drop column if exists "account_id" cascade;
+
+-- add organization_id to user_settings
+ALTER TABLE public.user_settings
+ADD COLUMN IF NOT EXISTS organization_id uuid;
+
+-- delete pk from user_id of user_settings
+ALTER TABLE public.user_settings
+DROP CONSTRAINT IF EXISTS user_settings_pkey;
+
+-- add fk to organization_id of user_settings
+ALTER TABLE public.user_settings
+ADD CONSTRAINT user_settings_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
+
+ALTER TABLE public.user_settings
+validate constraint "user_settings_organization_id_fkey";

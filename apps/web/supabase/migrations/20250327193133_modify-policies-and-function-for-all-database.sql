@@ -1127,6 +1127,8 @@ DECLARE
     v_org_id uuid;
     v_agency_id uuid;
     v_user_id uuid;
+    v_user_settings_exists boolean;
+    v_null_settings_exists boolean;
     org_result public.organization_info;
     agency_result public.organization_info;
     session_result public.session_info;
@@ -1145,10 +1147,39 @@ BEGIN
         RETURN NULL;
     END IF;
 
-    -- Update user_settings if organization_id is NULL
-    -- UPDATE user_settings
-    -- SET organization_id = v_org_id
-    -- WHERE user_id = v_user_id AND organization_id IS NULL;
+    -- Check if there's a user_settings entry for this user and organization
+    SELECT EXISTS(
+        SELECT 1
+        FROM public.user_settings
+        WHERE user_id = v_user_id AND organization_id = v_org_id
+    ) INTO v_user_settings_exists;
+    
+    -- If no entry exists for this specific organization
+    IF NOT v_user_settings_exists THEN
+        -- Check if there's an entry with NULL organization_id
+        SELECT EXISTS(
+            SELECT 1
+            FROM public.user_settings
+            WHERE user_id = v_user_id AND organization_id IS NULL
+            LIMIT 1
+        ) INTO v_null_settings_exists;
+        
+        IF v_null_settings_exists THEN
+            -- Update the first NULL entry found
+            UPDATE public.user_settings
+            SET organization_id = v_org_id
+            WHERE ctid IN (
+                SELECT ctid
+                FROM public.user_settings
+                WHERE user_id = v_user_id AND organization_id IS NULL
+                LIMIT 1
+            );
+        ELSE
+            -- No entry exists at all, create a new one
+            INSERT INTO public.user_settings(user_id, organization_id)
+            VALUES (v_user_id, v_org_id);
+        END IF;
+    END IF;
 
     -- Query to get the organization data
     SELECT 
@@ -2176,3 +2207,101 @@ BEFORE UPDATE OF domain ON public.subdomains
 FOR EACH ROW
 WHEN (NEW.domain IS DISTINCT FROM OLD.domain)
 EXECUTE FUNCTION auth.handle_subdomains_update();
+
+-- Add an index to organization_id and user_id of user_settings
+CREATE INDEX IF NOT EXISTS idx_user_settings_organization_id_user_id
+ON public.user_settings (organization_id, user_id);
+
+drop policy if exists "Policy with security definer functions" on "public"."user_settings";
+
+create policy "Allow authenticated users to insert user_settings"
+on "public"."user_settings"
+as permissive
+for insert
+to authenticated
+with check (true);
+
+create policy "Allow authenticated users to delete user_settings"
+on "public"."user_settings"
+as permissive
+for delete
+to authenticated
+using (true);
+
+create policy "Allow authenticated users to update user_settings"
+on "public"."user_settings"
+as permissive
+for update
+to authenticated
+using (
+  -- If organization_id is NULL, allow update
+  organization_id IS NULL OR
+  (
+    -- Get session info
+    (get_session()).organization.id::uuid = organization_id OR
+    (get_session()).agency.id::uuid = organization_id OR
+    (
+      -- Check client-agency relationship
+      (get_session()).agency.id IS NOT NULL AND
+      EXISTS (
+        SELECT 1
+        FROM public.clients
+        WHERE agency_id = (get_session()).agency.id::uuid
+        AND organization_client_id = organization_id
+      )
+    ) OR
+    (
+      -- Check agency-client relationship
+      (get_session()).agency.id IS NULL AND
+      EXISTS (
+        SELECT 1
+        FROM public.clients
+        WHERE agency_id = (get_session()).organization.id::uuid
+        AND organization_client_id = organization_id
+      )
+    )
+  )
+);
+
+create policy "Allow authenticated users to select user_settings"
+on "public"."user_settings"
+as permissive
+for select
+to authenticated
+using (
+  -- No allow selection if organization_id is NULL
+  organization_id IS NOT NULL AND
+  (
+    -- Get session info
+    (get_session()).organization.id::uuid = organization_id OR
+    (get_session()).agency.id::uuid = organization_id OR
+    (
+      -- Check client-agency relationship
+      (get_session()).agency.id IS NOT NULL AND
+      EXISTS (
+        SELECT 1
+        FROM public.clients
+        WHERE agency_id = (get_session()).agency.id::uuid
+        AND organization_client_id = organization_id
+      )
+    ) OR
+    (
+      -- Check agency-client relationship
+      (get_session()).agency.id IS NULL AND
+      EXISTS (
+        SELECT 1
+        FROM public.clients
+        WHERE agency_id = (get_session()).organization.id::uuid
+        AND organization_client_id = organization_id
+      )
+    )
+  )
+);
+
+ALTER TABLE clients
+ADD CONSTRAINT unique_client_constraint
+UNIQUE (user_client_id, agency_id, organization_client_id);
+
+ALTER TABLE accounts_memberships
+ADD CONSTRAINT unique_accounts_memberships
+UNIQUE (user_id, organization_id);

@@ -70,10 +70,11 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
 
     const newUserData = response.data;
     const userId = newUserData.user?.id;
+    let organizationId: string | undefined;
 
     if (!inviteToken) {
       // New Step: Create organization account
-      const { error: organizationError } = await client
+      const { error: organizationError, data: organizationData } = await client
         .from('organizations')
         .insert({
           owner_id: userId,
@@ -86,14 +87,16 @@ export function useSignUpWithEmailAndPassword(currentBaseUrl?: string) {
         console.error('Error creating organization:', organizationError);
         throw new Error('Error occurred while creating the organization account');
       }
+
+      organizationId = organizationData.id;
     }
 
     const { error: accountInsertDataError } = await client
         .from('user_settings')
         .insert({
           user_id: userId ?? '',
+          organization_id: organizationId,
         })
-        .select('user_id')
         .single();
     
     if (accountInsertDataError) {

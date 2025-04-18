@@ -84,7 +84,12 @@ export const createClient = async (clientData: CreateClient) => {
             supabase: undefined,
             adminActivated: true,
             agencyId: agencyIdForReactivation ?? '',
-          });
+            newAgency: true,
+          })
+
+          return CustomResponse.success(existingClient, 'clientCreated').toJSON();
+        
+
         }
       }
 
