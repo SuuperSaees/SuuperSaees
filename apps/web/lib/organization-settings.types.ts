@@ -33,6 +33,7 @@ export namespace OrganizationSettings {
     catalog_provider_url: 'catalog_provider_url',
     catalog_product_url: 'catalog_product_url',
     tool_copy_list_url: 'tool_copy_list_url',
+    pinned_organizations: 'pinned_organizations',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 
