@@ -22,13 +22,15 @@ export interface OrderApiActionsProps {
   orderUUID: string;
   clientOrganizationId: string;
   agencyId: string;
-  messages: DataResult.Message[];
-  setMessages:
-    | Dispatch<SetStateAction<DataResult.Message[]>>
+  interactions: DataResult.InteractionPages;
+  setInteractions:
+    | Dispatch<SetStateAction<DataResult.InteractionPages>>
     | ((
         updater:
-          | DataResult.Message[]
-          | ((prev: DataResult.Message[]) => DataResult.Message[]),
+          | DataResult.InteractionPages
+          | ((
+              prev: DataResult.InteractionPages,
+            ) => DataResult.InteractionPages),
       ) => void);
 }
 
@@ -42,8 +44,8 @@ export const useOrderApiActions = ({
   orderUUID,
   clientOrganizationId,
   agencyId,
-  messages,
-  setMessages,
+  interactions,
+  setInteractions,
 }: OrderApiActionsProps) => {
   const queryClient = useQueryClient();
   const { getInternalMessagingEnabled } = useInternalMessaging();
@@ -71,11 +73,11 @@ export const useOrderApiActions = ({
     onMutate: async ({ message, files, tempId }) => {
       // Cancel outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({
-        queryKey: ['messages', orderId],
+        queryKey: ['interactions', orderId],
       });
 
       // Snapshot the previous messages and chats
-      const previousMessages = messages;
+      const previousInteractions = interactions;
 
       const optimisticMessage: DataResult.Message = {
         id: message.id ?? '', // Temporary ID
@@ -107,18 +109,31 @@ export const useOrderApiActions = ({
         type: 'chat_message',
       };
 
-      setMessages((oldMessages) => {
+      setInteractions((oldInteractions) => {
         console.log('setting messages', optimisticMessage);
-        const newMessages = [...oldMessages, optimisticMessage];
-        return newMessages;
+        const newPages = [...(oldInteractions?.pages ?? [])];
+        const newInitialPageMessages = [
+          ...(newPages[0]?.messages ?? []),
+          optimisticMessage,
+        ];
+        newPages[0] = {
+          ...newPages[0],
+          messages: newInitialPageMessages,
+          activities: newPages[0]?.activities ?? [],
+          reviews: newPages[0]?.reviews ?? [],
+        };
+        return {
+          pages: newPages,
+          pageParams: oldInteractions?.pageParams ?? [],
+        };
       });
 
       // Return the snapshot in case of rollback
-      return { optimisticMessage, previousMessages };
+      return { optimisticMessage, previousInteractions };
     },
     onError: (_error, _variables, context) => {
-      if (context?.previousMessages) {
-        setMessages(context.previousMessages);
+      if (context?.previousInteractions) {
+        setInteractions(context.previousInteractions);
       }
       toast.error('Error', {
         description: 'The message could not be sent.',
@@ -136,21 +151,31 @@ export const useOrderApiActions = ({
         );
       }
       //  Remove the pending state of the message and for each file of the message the isLoading state
-      setMessages((prev) => {
-        // Only for the message that was sent
-        return prev.map((message) => {
-          if (message.id === data.message.id && message.files) {
-            return {
-              ...message,
-              pending: false,
-              files: message.files.map((file) => ({
-                ...file,
-                isLoading: false,
-              })),
-            };
-          }
-          return message;
-        });
+      setInteractions((prev) => {
+        const newPages = [...(prev?.pages ?? [])];
+        const newInitialPageMessages =
+          newPages[0]?.messages.map((message) => {
+            return message.id === data.message.id && message.files
+              ? {
+                  ...message,
+                  pending: false,
+                  files: message.files.map((file) => ({
+                    ...file,
+                    isLoading: false,
+                  })),
+                }
+              : message;
+          }) ?? [];
+        newPages[0] = {
+          ...newPages[0],
+          messages: newInitialPageMessages,
+          activities: newPages[0]?.activities ?? [],
+          reviews: newPages[0]?.reviews ?? [],
+        };
+        return {
+          pages: newPages,
+          pageParams: prev?.pageParams ?? [],
+        };
       });
       // Invalidate the messages query to refresh the data
       void queryClient.invalidateQueries({ queryKey: ['messages', orderId] });
@@ -173,23 +198,49 @@ export const useOrderApiActions = ({
       await queryClient.cancelQueries({ queryKey: ['messages', orderId] });
 
       // Store the previous messages state
-      const previousMessages = messages;
+      const previousInteractions = interactions;
 
       // Optimistically update the UI
-      setMessages((oldMessages) =>
-        oldMessages.map((message) =>
-          message.id === messageId
-            ? { ...message, deleted_on: new Date().toISOString() }
-            : message,
-        ),
-      );
 
-      return { previousMessages };
+      setInteractions((oldInteractions) => {
+        const newPages = [...(oldInteractions?.pages ?? [])];
+        let pageIndex = -1;
+        let messageIndex = -1;
+        interactions?.pages.some((page, pIndex) => {
+          const mIndex = page.messages.findIndex(
+            (message) => message.id === messageId,
+          );
+          if (mIndex !== -1) {
+            pageIndex = pIndex;
+            messageIndex = mIndex;
+            return true;
+          }
+          return oldInteractions;
+        });
+        const messagesToUpdate = [
+          ...(interactions?.pages[pageIndex]?.messages ?? []),
+        ];
+        const messageToUpdate = messagesToUpdate[messageIndex];
+        if (!messageToUpdate) return oldInteractions;
+        messageToUpdate.deleted_on = new Date().toISOString();
+        newPages[pageIndex] = {
+          ...newPages[pageIndex],
+          messages: messagesToUpdate,
+          activities: newPages[pageIndex]?.activities ?? [],
+          reviews: newPages[pageIndex]?.reviews ?? [],
+        };
+        return {
+          pages: newPages,
+          pageParams: oldInteractions?.pageParams ?? [],
+        };
+      });
+
+      return { previousInteractions };
     },
     onError: (_error, _variables, context) => {
       // Rollback on error
-      if (context?.previousMessages) {
-        setMessages(context.previousMessages);
+      if (context?.previousInteractions) {
+        setInteractions(context.previousInteractions);
       }
       toast.error(t('message.error'), {
         description: t('message.messageDeletedError'),

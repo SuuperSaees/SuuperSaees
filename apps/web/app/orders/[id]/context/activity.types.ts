@@ -1,4 +1,4 @@
-import { InfiniteData, UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query';
+import { UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query';
 
 import { JSONCustomResponse } from '@kit/shared/response';
 
@@ -40,8 +40,8 @@ export enum TableName {
   ORDER = 'orders_v2',
 }
 
-export type ActivityExtended = Omit<ServerActivity.Type, 'user'> & {
-  user: UserExtended;
+export type ActivityExtended = Omit<ServerActivity.Response, 'user'> & {
+  user?: UserExtended | null;
 };
 
 export type ReactionExtended = {
@@ -73,8 +73,8 @@ export type MessageExtended = Omit<ServerMessage.Response, 'user' | 'files'> & {
   pending?: boolean;
 };
 
-export type ReviewExtended = ServerReview.Type & {
-  user: UserExtended;
+export type ReviewExtended = Omit<ServerReview.Response, 'user'> & {
+  user?: UserExtended | null;
 };
 
 export type OrderExtended = ServerOrder.Relational;
@@ -122,7 +122,15 @@ export namespace DataResult {
   export type Review = ReviewExtended;
   export type Activity = ActivityExtended;
   export type Order = OrderExtended;
-
+  export type Interaction = {
+    messages: MessageExtended[];
+    activities: ActivityExtended[];
+    reviews: ReviewExtended[];
+  }
+  export type InteractionPages = {
+    pages: Interaction[];
+    pageParams: unknown[];
+  } | undefined;
   export type ArrayTarget =
     | FileExtended
     | MessageExtended
@@ -136,7 +144,7 @@ export namespace DataResult {
 
 export interface ActivityContextType {
   activities: DataResult.Activity[];
-  messages:  DataResult.Message[];
+  messages: DataResult.Message[];
   reviews: DataResult.Review[];
   files: DataResult.File[];
   allFiles: DataResult.File[];
@@ -166,8 +174,8 @@ export interface ActivityContextType {
       adminActived?: boolean;
     },
     {
-      previousMessages: MessageExtended[];
+      previousInteractions: DataResult.InteractionPages;
     }
   >;
-  messagesQuery:  UseInfiniteQueryResult<InfiniteData<ServerMessage.Response[], unknown>, Error>
+  interactionsQuery: UseInfiniteQueryResult<DataResult.InteractionPages, Error>;
 }

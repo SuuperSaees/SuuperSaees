@@ -27,7 +27,7 @@ const Interactions = ({
 }: {
   agencyStatuses: AgencyStatus.Type[];
 }) => {
-  const { messages, activities, reviews, messagesQuery } = useActivityContext();
+  const { messages, activities, reviews, interactionsQuery } = useActivityContext();
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
 
 
@@ -43,10 +43,10 @@ const Interactions = ({
 
  
   const { loadMoreRef } = useInfiniteScroll({
-    hasNextPage: messagesQuery.hasNextPage,
-    isFetchingNextPage: messagesQuery.isFetchingNextPage,
-    isFetching: messagesQuery.isFetching,
-    fetchNextPage: messagesQuery.fetchNextPage,
+    hasNextPage: interactionsQuery.hasNextPage,
+    isFetchingNextPage: interactionsQuery.isFetchingNextPage,
+    isFetching: interactionsQuery.isFetching,
+    fetchNextPage: interactionsQuery.fetchNextPage,
     containerRef: interactionsContainerRef,
     anchorSelector: '[data-message-id]',
   });
@@ -55,7 +55,7 @@ const Interactions = ({
       className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8"
       ref={interactionsContainerRef}
     >
-      {messagesQuery.isFetchingNextPage && (
+      {interactionsQuery.isFetchingNextPage && (
         <Spinner className="mx-auto h-5 w-5 text-gray-500" />
       )}
 
@@ -65,7 +65,7 @@ const Interactions = ({
         className="absolute left-0 right-0 top-0 -z-10 h-20"
       />
 
-      {messagesQuery.isLoading ? (
+      {interactionsQuery.isLoading ? (
         <Spinner className="mx-auto h-5 w-5" />
       ) : (
         Object.entries(groupedInteractions).map(([date, interactions]) => {

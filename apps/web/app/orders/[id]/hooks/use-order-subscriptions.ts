@@ -19,15 +19,16 @@ type DataUnion =
   | DataResult.Activity
   | DataResult.Order;
 
+type UpdaterFunction = (updater: DataResult.InteractionPages | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages)) => void
 export const useOrderSubscriptions = (
   order: DataResult.Order,
   setOrder: React.Dispatch<React.SetStateAction<DataResult.Order>>,
-  activities: DataResult.Activity[],
-  setActivities: React.Dispatch<React.SetStateAction<DataResult.Activity[]>>,
-  messages: DataResult.Message[],
-  setMessages: React.Dispatch<React.SetStateAction<DataResult.Message[]>>,
-  reviews: DataResult.Review[],
-  setReviews: React.Dispatch<React.SetStateAction<DataResult.Review[]>>,
+  activities: DataResult.InteractionPages,
+  setActivities: UpdaterFunction,
+  messages: DataResult.InteractionPages,
+  setMessages: UpdaterFunction,
+  reviews: DataResult.InteractionPages,
+  setReviews: UpdaterFunction,
   files: DataResult.File[],
   setFiles: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
   members: UserExtended[],
@@ -87,9 +88,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'messages',
       currentData: messages,
-      setData: setMessages as Dispatch<
-        React.SetStateAction<DataUnion[] | DataUnion>
-      >,
+      setData: setMessages as UpdaterFunction,
       filter: {
         order_id: `eq.${order.id}`,
       },
@@ -97,9 +96,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'reviews',
       currentData: reviews,
-      setData: setReviews as Dispatch<
-        React.SetStateAction<DataUnion[] | DataUnion>
-      >,
+      setData: setReviews as UpdaterFunction,
       filter: {
         order_id: `eq.${order.id}`,
       },
@@ -117,9 +114,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'activities',
       currentData: activities,
-      setData: setActivities as Dispatch<
-        React.SetStateAction<DataUnion[] | DataUnion>
-      >,
+      setData: setActivities as UpdaterFunction,
       filter: {
         order_id: `eq.${order.id}`,
       },

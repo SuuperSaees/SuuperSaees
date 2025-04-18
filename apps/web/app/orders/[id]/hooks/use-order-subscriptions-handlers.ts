@@ -13,6 +13,7 @@ import { updateArrayData } from '~/utils/data-transform';
 
 import type { DataResult, UserExtended } from '../context/activity.types';
 
+type UpdaterFunction = (updater: DataResult.InteractionPages | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages)) => void
 /**
  * Helper function to enrich data with user information
  */
@@ -76,8 +77,8 @@ export const useOrderSubscriptionsHandlers = () => {
    */
   const handleMessageChanges = async (
     payload: RealtimePostgresChangesPayload<Message.Type>,
-    messages: DataResult.Message[],
-    setMessages: React.Dispatch<React.SetStateAction<DataResult.Message[]>>,
+    interactions: DataResult.InteractionPages,
+    setInteractions: UpdaterFunction,
     members?: UserExtended[],
   ): Promise<void | boolean> => {
     const { eventType, new: newData } = payload;
@@ -88,19 +89,31 @@ export const useOrderSubscriptionsHandlers = () => {
       try {
         // Create enriched message with user data
         const enrichedMessage = {
-          ...(await enrichWithUser(message, messages, members)),
+          ...(await enrichWithUser(message, interactions?.pages[0]?.messages ?? [], members)),
           pending: false,
         } as DataResult.Message;
 
         // Update messages array, matching by temp_id
         const updatedMessages = updateArrayData(
-          messages,
+          interactions?.pages[0]?.messages ?? [],
           enrichedMessage,
           'temp_id',
           true,
         );
 
-        setMessages(updatedMessages);
+        setInteractions((prevInteractions) => {
+          const newPages = [...(prevInteractions?.pages ?? [])];
+          newPages[0] = {
+            ...newPages[0],
+            messages: updatedMessages,
+            activities: newPages[0]?.activities ?? [],
+            reviews: newPages[0]?.reviews ?? [],
+          };
+          return {
+            pages: newPages,
+            pageParams: prevInteractions?.pageParams ?? [],
+          };
+        });
         return true;
       } catch (err) {
         return false;
@@ -108,9 +121,25 @@ export const useOrderSubscriptionsHandlers = () => {
     } else if (eventType === 'UPDATE') {
       const { new: newMessage } = payload;
 
-      const messageIndex = messages.findIndex((msg) => msg.id === newData.id);
-      if (messageIndex === -1) return false;
-      const messagesToUpdate = [...messages];
+      // Map over all the pages and messages and find the message to update (index) and also the page index
+      let pageIndex = -1;
+      let messageIndex = -1;
+      console.log('interactions', interactions);
+      interactions?.pages.some((page, pIndex) => {
+        const mIndex = page.messages.findIndex(
+          (message) => message.id === newMessage.id
+        );
+      
+        if (mIndex !== -1) {
+          pageIndex = pIndex;
+          messageIndex = mIndex;
+          return true; // stop iteration early
+        }
+      
+        return false;
+      });
+      if (messageIndex === -1 || pageIndex === -1) return false;
+      const messagesToUpdate = [...interactions?.pages[pageIndex]?.messages ?? []];
       // Handle soft delete (use is_deleted_on)
       // Filter the message from messages array that has is_deleted_on
       const messageToUpdate = messagesToUpdate[messageIndex];
@@ -119,16 +148,40 @@ export const useOrderSubscriptionsHandlers = () => {
       if (newMessage.deleted_on) {
         messageToUpdate.deleted_on = newMessage.deleted_on;
 
-        setMessages(messagesToUpdate);
+          setInteractions((prevInteractions) => {
+          const newPages = [...(prevInteractions?.pages ?? [])];
+          newPages[pageIndex] = {
+            ...newPages[pageIndex],
+            messages: messagesToUpdate,
+            activities: newPages[pageIndex]?.activities ?? [],
+            reviews: newPages[pageIndex]?.reviews ?? [],
+          };
+          return {
+            pages: newPages,
+            pageParams: prevInteractions?.pageParams ?? [],
+          };
+        });
       } else {
         // For normal cases, just update the messages
         const updatedMessages = updateArrayData(
-          messages,
+          messagesToUpdate,
           newMessage as DataResult.Message,
           'temp_id',
           false,
         );
-        setMessages(updatedMessages);
+        setInteractions((prevInteractions) => {
+          const newPages = [...(prevInteractions?.pages ?? [])];
+          newPages[pageIndex] = {
+            ...newPages[pageIndex],
+            messages: updatedMessages,
+            activities: newPages[pageIndex]?.activities ?? [],
+            reviews: newPages[pageIndex]?.reviews ?? [],
+          };
+          return {
+            pages: newPages,
+            pageParams: prevInteractions?.pageParams ?? [],
+          };
+        });
       }
 
       return true;
