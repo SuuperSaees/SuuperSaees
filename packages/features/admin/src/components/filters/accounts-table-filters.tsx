@@ -12,7 +12,7 @@ import { Form } from '@kit/ui/form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@kit/ui/tooltip';
 
 import { SearchInput, FiltersSchema, SearchField } from './search-input';
-import { TypeFilter } from './type-filter';
+// import { TypeFilter } from './type-filter';
 import { DateFilter } from './date-filter';
 
 type AccountsTableFiltersProps = {
@@ -109,7 +109,7 @@ export function AccountsTableFilters({ filters }: AccountsTableFiltersProps) {
             {/* Compact filter buttons */}
             <div className="flex items-center gap-1.5">
               {/* Type filter */}
-              <TypeFilter form={form} onSubmit={onSubmit} />
+              {/* <TypeFilter form={form} onSubmit={onSubmit} /> */}
               
               {/* Date filter */}
               <DateFilter form={form} onSubmit={onSubmit} />

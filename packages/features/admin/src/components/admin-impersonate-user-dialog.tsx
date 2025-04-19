@@ -123,6 +123,10 @@ function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
   const supabase = useSupabase();
   const router = useRouter();
 
+  const domain = (typeof window !== 'undefined' 
+    ? window.location.origin.replace(/^https?:\/\//, '')
+    : '');
+
   return useQuery({
     queryKey: ['impersonate-user', tokens.accessToken, tokens.refreshToken],
     gcTime: 0,
@@ -140,6 +144,10 @@ function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
           refresh_token: tokens.refreshToken,
           access_token: tokens.accessToken,
         });
+
+        await supabase.rpc('set_session', {
+          domain,
+        })
 
         //Push to /home page and then use refresh to reload the page with updated user data
         router.push('/home');

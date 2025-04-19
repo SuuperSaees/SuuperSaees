@@ -119,9 +119,9 @@ export function getAccountColumns({ isPersonalAccount }: { isPersonalAccount: bo
       id: 'actions',
       header: '',
       cell: ({ row }) => {
-        const userId = row.original.id;
+        const id = row.original.id;
 
-        return <AccountActions userId={userId} isPersonalAccount={isPersonalAccount} />;
+        return <AccountActions id={id} isPersonalAccount={isPersonalAccount} />;
       },
     },
   ];
