@@ -537,7 +537,7 @@ drop policy if exists "invitations_create_self" on "public"."invitations";
 drop policy if exists "invitations_delete" on "public"."invitations";
 drop policy if exists "invitations_update" on "public"."invitations";
 
-create policy "invitations_create_self"
+create policy invitations_create_self
 on "public"."invitations"
 as permissive
 for insert

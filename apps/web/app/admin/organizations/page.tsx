@@ -1,4 +1,4 @@
-import { AdminAccountsTable } from '@kit/admin/components/admin-accounts-table';
+import { AdminOrganizationsTable } from '@kit/admin/components/admin-organizations-table';
 import { AdminGuard } from '@kit/admin/components/admin-guard';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody, PageHeader } from '@kit/ui/page';
@@ -32,7 +32,7 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
   
   try {
     // Start building the query
-    let query = client.from('accounts').select('*', { count: 'exact' });
+    let query = client.from('organizations').select('*', { count: 'exact' });
     
     // Apply date filter if provided
     if (searchParams.created_after) {
@@ -52,8 +52,8 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
           orFilters.push(`name.ilike.${searchTerm}`);
         }
         
-        if (searchFields.includes('email')) {
-          orFilters.push(`email.ilike.${searchTerm}`);
+        if (searchFields.includes('owner_id')) {
+          orFilters.push(`owner_id.ilike.${searchTerm}`);
         }
         
         if (orFilters.length > 0) {
@@ -61,7 +61,7 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
         }
       } else {
         // Search in all fields using OR
-        query = query.or(`name.ilike.${searchTerm},email.ilike.${searchTerm}`);
+        query = query.or(`name.ilike.${searchTerm},owner_id.ilike.${searchTerm}`);
       }
     }
     
@@ -69,16 +69,20 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
     query = query.range(from, to);
     
     // Execute the query
-    const { data: dataAccounts, error: errorAccounts, count: countAccounts } = await query;
+    const { data: dataOrganizations, error: errorOrganizations, count: countOrganizations } = await query;
     
-    if (errorAccounts) {
-      console.error('Error fetching accounts:', errorAccounts);
-      throw errorAccounts;
+    if (errorOrganizations) {
+      console.error('Error fetching organizations:', errorOrganizations);
+      throw errorOrganizations;
     }
 
+    if (errorOrganizations) {
+      console.error('Error fetching organizations:', errorOrganizations);
+      throw errorOrganizations;
+    }
     
     // Calculate page count
-    const pageCount = countAccounts ? Math.ceil(countAccounts / pageSize) : 0;
+    const pageCount = countOrganizations ? Math.ceil(countOrganizations / pageSize) : 0;
     
     return (
       <>
@@ -89,11 +93,11 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
         />
 
         <PageBody className='mx-auto flex w-full lg:px-16 p-8"'>
-          <AdminAccountsTable
+          <AdminOrganizationsTable
             page={page}
             pageSize={pageSize}
             pageCount={pageCount}
-            data={dataAccounts ?? []}
+            data={dataOrganizations ?? []}
             filters={{
               type: searchParams.account_type ?? 'all',
               created_after: searchParams.created_after,
