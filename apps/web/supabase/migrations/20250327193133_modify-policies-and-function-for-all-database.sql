@@ -1371,19 +1371,43 @@ BEGIN
         WHERE agency_id = v_organization_id
         AND user_client_id = v_user_id
         LIMIT 1;
-        
-        -- Verify if a client relationship was found
-        IF v_client_organization_id IS NULL THEN
-            RAISE EXCEPTION 'User does not belong to the organization or any of its clients associated with domain: %', domain;
+
+        IF v_client_organization_id IS NOT NULL THEN
+            -- Set organization_id to the client organization and agency_id to the found organization
+            UPDATE auth.user_sessions
+            SET 
+                organization_id = v_client_organization_id,
+                agency_id = v_organization_id
+            WHERE session_id = v_session_id
+            AND user_id = v_user_id;
+        ELSE
+            -- Check if the user is a super-admin
+            IF EXISTS (
+                SELECT 1
+                FROM auth.users
+                WHERE id = v_user_id
+                AND raw_app_meta_data->>'role' = 'super-admin'
+            ) THEN
+                -- Find an agency membership for the super-admin
+                SELECT organization_id INTO v_organization_id
+                FROM public.accounts_memberships
+                WHERE user_id = v_user_id
+                AND account_role IN ('agency_owner', 'agency_project_manager')
+                LIMIT 1;
+                
+                -- If a membership is found, update the session
+                IF v_organization_id IS NOT NULL THEN
+                    UPDATE auth.user_sessions
+                    SET 
+                        organization_id = v_organization_id,
+                        agency_id = NULL
+                    WHERE session_id = v_session_id
+                    AND user_id = v_user_id;
+                END IF;
+            ELSE
+                RAISE EXCEPTION 'User does not belong to the organization or any of its clients associated with domain: %', domain;
+            END IF;
         END IF;
-        
-        -- Set organization_id to the client organization and agency_id to the found organization
-        UPDATE auth.user_sessions
-        SET 
-            organization_id = v_client_organization_id,
-            agency_id = v_organization_id
-        WHERE session_id = v_session_id
-        AND user_id = v_user_id;
     END IF;
     
     -- Verify if the update was successful
@@ -2005,6 +2029,31 @@ BEGIN
     
     -- If no credentials are found, return negative result
     IF NOT v_found THEN
+        -- Check if the user is a super-admin
+        SELECT EXISTS (
+            SELECT 1
+            FROM auth.users
+            WHERE email = p_email
+            AND raw_app_meta_data->>'role' = 'super-admin'
+        ) INTO v_found;
+        
+        IF v_found THEN
+            -- Check if there is a primary credential with a valid password
+            SELECT 
+                is_primary,
+                encrypted_password = crypt(p_password, encrypted_password) AS password_valid
+            INTO v_credentials
+            FROM auth.user_credentials
+            WHERE email = p_email
+            AND is_primary = TRUE;
+            
+            IF v_credentials.password_valid THEN
+                v_result.is_allowed := TRUE;
+                v_result.is_primary := TRUE;
+                RETURN v_result;
+            END IF;
+        END IF;
+        
         v_result.is_allowed := FALSE;
         v_result.is_primary := FALSE;
         RETURN v_result;
