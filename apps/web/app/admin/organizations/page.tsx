@@ -12,10 +12,10 @@ interface SearchParams {
 }
 
 export const metadata = {
-  title: `Accounts`,
+  title: `Organizations`,
 };
 
-async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
+async function OrganizationsPage({ searchParams }: { searchParams: SearchParams }) {
   const client = getSupabaseServerComponentClient({
     admin: true,
   });
@@ -129,8 +129,8 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
 function renderError(error: unknown) {
   return (
     <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
-      <h3 className="text-lg font-semibold mb-2">Error loading accounts</h3>
-      <p>There was a problem fetching the accounts data. Please try again later.</p>
+      <h3 className="text-lg font-semibold mb-2">Error loading organizations</h3>
+      <p>There was a problem fetching the organizations data. Please try again later.</p>
       <p className="mt-2 text-sm text-red-600">
         {error instanceof Error ? error.message : 'Unknown error'}
       </p>
@@ -151,4 +151,4 @@ function getSearchFields(searchField?: string | string[]): string[] {
   return [searchField];
 }
 
-export default AdminGuard(AccountsPage);
+export default AdminGuard(OrganizationsPage);
