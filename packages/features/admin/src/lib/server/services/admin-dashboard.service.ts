@@ -65,8 +65,7 @@ export class AdminDashboardService {
 
     const accountsPromise = this.client
       .from('accounts')
-      .select('*', selectParams)
-      .eq('is_personal_account', true)
+      .select('id', selectParams)
       .then((response) => {
         if (response.error) {
           logger.error(
@@ -81,14 +80,13 @@ export class AdminDashboardService {
       });
 
     const teamAccountsPromise = this.client
-      .from('accounts')
-      .select('*', selectParams)
-      .eq('is_personal_account', false)
+      .from('organizations')
+      .select('id', selectParams)
       .then((response) => {
         if (response.error) {
           logger.error(
             { ...ctx, error: response.error.message },
-            `Error fetching team accounts`,
+            `Error fetching team organizations`,
           );
 
           throw new Error();

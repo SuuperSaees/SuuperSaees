@@ -103,6 +103,10 @@ export function PersonalAccountDropdown({
   //   logSession().catch(console.error);
   // }, []);
 
+  const domain = (typeof window !== 'undefined' 
+    ? window.location.origin.replace(/^https?:\/\//, '')
+    : '');
+
   const stopImpersonating = async () => {
     const token = await getTokenData(impersonatingTokenId);
     if (token) {
@@ -114,6 +118,9 @@ export function PersonalAccountDropdown({
       await supabase.auth.setSession({
         refresh_token: token.refresh_token,
         access_token: token.access_token,
+      });
+      await supabase.rpc('set_session', {
+        domain,
       });
       localStorage.clear();
 

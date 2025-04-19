@@ -10,8 +10,9 @@ import { Badge } from '@kit/ui/badge';
 import { AccountActions } from './account-actions';
 
 type Account = Database['public']['Tables']['accounts']['Row'];
+type Organization = Database['public']['Tables']['organizations']['Row'];
 
-export function getAccountColumns(): ColumnDef<Account>[] {
+export function getAccountColumns({ isPersonalAccount }: { isPersonalAccount: boolean }): ColumnDef<Account | Organization>[] {
   return [
     {
       id: 'name',
@@ -20,7 +21,7 @@ export function getAccountColumns(): ColumnDef<Account>[] {
         return (
           <Link
             className="font-medium hover:underline flex items-center"
-            href={`/admin/accounts/${row.original.id}`}
+            href={isPersonalAccount ? `/admin/accounts/${row.original.id}` : `/admin/organizations/${row.original.id}`}
           >
             {row.original.name}
           </Link>
@@ -28,18 +29,21 @@ export function getAccountColumns(): ColumnDef<Account>[] {
       },
     },
     {
-      id: 'email',
-      header: 'Email',
-      accessorKey: 'email',
+      id: isPersonalAccount ? 'email' : 'owner_id',
+      header: isPersonalAccount ? 'Email' : 'Owner',
+      accessorKey: 'id',
       cell: ({ row }) => {
-        return <span className="text-muted-foreground">{row.original.email}</span>;
+        const email = isPersonalAccount 
+          ? (row.original as Account).email 
+          : (row.original as Organization).owner_id;
+        return <span className="text-muted-foreground">{email}</span>;
       },
     },
     {
       id: 'type',
       header: 'Type',
-      cell: ({ row }) => {
-        const isPersonal = row.original.is_personal_account;
+      cell: () => {
+        const isPersonal = isPersonalAccount;
         return (
           <Badge 
             variant="outline"
@@ -115,10 +119,9 @@ export function getAccountColumns(): ColumnDef<Account>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => {
-        const isPersonalAccount = row.original.is_personal_account;
-        const userId = row.original.id;
+        const id = row.original.id;
 
-        return <AccountActions userId={userId} isPersonalAccount={isPersonalAccount} />;
+        return <AccountActions id={id} isPersonalAccount={isPersonalAccount} />;
       },
     },
   ];
