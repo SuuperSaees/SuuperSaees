@@ -15,7 +15,7 @@ export const getOrdersReviewsForUser = async (
   try {
     const client = getSupabaseServerComponentClient();
     // Step 1: Fetch the user's role
-    const userRole = await getUserRole();
+    const userRole = await getUserRole() ?? '';
 
     const agencyRoles = new Set([
       'agency_owner',
@@ -43,7 +43,7 @@ export const getOrdersReviewsForUser = async (
     // Step 3: Fetch the reviews associated with the orders and the user
     const { data: reviewsData, error: reviewsError } = await client
       .from('reviews')
-      .select('*, order:orders_v2(id, title), user:accounts(id, name, email, picture_url, organization_id, settings:user_settings(name, picture_url))')
+      .select('*, order:orders_v2(id, title), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))')
       .in('order_id', ordersIds);
 
     if (reviewsError) throw reviewsError.message;
@@ -64,7 +64,7 @@ export const getOrdersReviewsById = async (
     // Fetch the reviews associated with the given order IDs
     const { data: reviewsData, error: reviewsError } = await client
       .from('reviews')
-      .select('*, order:orders_v2(id, title), user:accounts(id, name, email, picture_url, organization_id, settings:user_settings(name, picture_url))')
+      .select('*, order:orders_v2(id, title), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))')
       .in('order_id', orderIds);
 
     if (reviewsError) throw reviewsError.message;

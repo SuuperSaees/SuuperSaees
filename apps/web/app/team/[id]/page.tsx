@@ -47,7 +47,7 @@ export default async function MemberPage(props: {
   const { data, error: membersError } = await client.rpc(
     'get_account_members',
     {
-      account_slug: agencySlug ?? '',
+      organization_slug: agencySlug ?? '',
     },
   );
   let agencyMembers = [];
