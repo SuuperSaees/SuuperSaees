@@ -131,7 +131,10 @@ export async function getUserById(userId: string) {
 
     if (userError) throw userError;
 
-    return userData;
+    return {
+      ...userData,
+      settings: userData?.settings?.[0],
+    };
   } catch (error) {
     console.error('Error fetching user:', error);
     throw error;

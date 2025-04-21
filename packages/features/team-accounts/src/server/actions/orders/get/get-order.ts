@@ -331,11 +331,13 @@ export const getOrders = async (
         picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
         settings: order.customer?.settings?.[0],
       },
-      assigned_to: order.assigned_to ?? [],
       // assigned_to: order.assigned_to?.filter(assignment => 
       //   !assignment.agency_member?.deleted_on && 
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on
+      ) ?? [],
     }));
 
     // Step 3: Collect all status_ids from orders
@@ -554,11 +556,13 @@ export async function getOrdersByUserId(
         picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
         settings: order.customer?.settings?.[0],
       },
-      assigned_to: order.assigned_to ?? [],
       // assigned_to: order.assigned_to?.filter(assignment => 
       //   !assignment.agency_member?.deleted_on && 
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on
+      ) ?? [],
     }));
 
     
@@ -653,7 +657,7 @@ export async function getOrdersByOrganizationId(
       .from('orders_v2')
       .select(
         `*, client_organization:organizations!client_organization_id(id, name),
-      customer:accounts!customer_id(id, name),
+      customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
       assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, deleted_on, settings:user_settings(name, picture_url))), 
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       ${includeBrief ? ', brief:briefs(name)' : ''}
@@ -694,11 +698,13 @@ export async function getOrdersByOrganizationId(
         picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
         settings: order.customer?.settings?.[0],
       },
-      assigned_to: order.assigned_to ?? [],
       // assigned_to: order.assigned_to?.filter(assignment => 
       //   !assignment.agency_member?.deleted_on && 
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on
+      ) ?? [],
     }));
 
     // Step 4: Fetch the reviews for the orders and add them to the orders (if needed)
