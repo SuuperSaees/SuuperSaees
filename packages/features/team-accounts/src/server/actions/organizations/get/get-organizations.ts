@@ -9,7 +9,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
-// import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
+import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
 
@@ -17,57 +17,23 @@ export const getOrganizationSettings = async () => {
   try {
     const client = getSupabaseServerComponentClient();
 
-    const {
-      data: { user },
-    } = await client.auth.getUser();
-
-    if (!user) {
-      console.error('User not found when trying to get organization settings');
-      return [];
-    }
-
-    const { data: accountData, error: accountError } = await client
-      .from('accounts')
-      .select()
-      .eq('id', user.id)
-      .single();
-
-    if (accountError) {
-      throw accountError.message;
-    }
-
-    const { data: roleData, error: roleError } = await client
-      .from('accounts_memberships')
-      .select('account_role')
-      .eq('user_id', user.id)
-      .single();
-
-    if (roleError) {
-      throw roleError.message;
-    }
+    const sessionData = (await client.rpc('get_session')).data;
+    const role = sessionData?.organization?.role;
+    const organizationId = sessionData?.organization?.id;
+    const agencyId = sessionData?.agency?.id;
 
     if (
-      roleData?.account_role !== 'agency_member' &&
-      roleData?.account_role !== 'agency_owner' &&
-      roleData?.account_role !== 'agency_project_manager' &&
-      roleData?.account_role !== 'super_admin' &&
-      roleData?.account_role !== 'custom-role'
+      role !== 'agency_member' &&
+      role !== 'agency_owner' &&
+      role !== 'agency_project_manager' &&
+      role !== 'super_admin' &&
+      role !== 'custom-role'
     ) {
-      const { data: agencyOwnerClient, error: agencyOwnerClientError } =
-        await client
-          .from('clients')
-          .select('agency_id')
-          .eq('user_client_id', user.id)
-          .single();
-
-      if (agencyOwnerClientError) {
-        throw agencyOwnerClientError.message;
-      }
 
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
-        .eq('account_id', agencyOwnerClient.agency_id ?? '');
+        .eq('organization_id', agencyId ?? '');
 
       if (settingsError) {
         throw settingsError.message;
@@ -77,7 +43,7 @@ export const getOrganizationSettings = async () => {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
-        .eq('account_id', accountData.organization_id ?? '');
+        .eq('organization_id', organizationId ?? '');
 
       if (settingsError) {
         throw settingsError.message;
@@ -94,7 +60,7 @@ export const getOrganizationSettings = async () => {
 export const getOrganizationSettingsByOrganizationId = async (
   organizationId: string,
   adminActived = false,
-  values: string[] = [
+  values: OrganizationSettings.KeysEnum[] = [
     'theme_color',
     'logo_url',
     'sidebar_background_color',
@@ -113,7 +79,7 @@ export const getOrganizationSettingsByOrganizationId = async (
   const { data: organizationSettings, error: settingsError } = await client
     .from('organization_settings')
     .select('key, value')
-    .eq('account_id', organizationId)
+    .eq('organization_id', organizationId)
     .in('key', values);
 
   if (settingsError) {
@@ -123,45 +89,21 @@ export const getOrganizationSettingsByOrganizationId = async (
   return organizationSettings;
 };
 
-export async function getOrganization(primaryOwnerId?: string): Promise<{
+export async function getOrganization(): Promise<{
   id: string;
-  name: string;
-  primary_owner_user_id: string;
+  name: string | null;
+  owner_id: string | null;
   slug: string | null;
-  email: string | null;
   picture_url: string | null;
-  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    let userId = primaryOwnerId;
-    if (!userId) {
-      const { data: userData, error: userError } = await client.auth.getUser();
-      if (userError) throw userError;
-      userId = userData.user.id;
-    }
-
-    const { data: userAccountData, error: accountsError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
-      .single();
-
-    if (accountsError) {
-      console.error('Error fetching organization:', accountsError);
-      throw accountsError;
-    }
-
-    const organizationId = userAccountData?.organization_id;
-
-    if (!organizationId) {
-      console.error('Organization ID is null');
-      throw new Error('Organization ID is null');
-    }
+    const organizationData = (await client.rpc('get_session')).data?.organization;
+    const organizationId = organizationData?.id ?? '';
 
     const { data: organizationsData, error: organizationError } = await client
-      .from('accounts')
-      .select('id, name, primary_owner_user_id, slug, email, picture_url, loom_app_id')
+      .from('organizations')
+      .select('picture_url')
       .eq('id', organizationId)
       .single();
 
@@ -170,7 +112,13 @@ export async function getOrganization(primaryOwnerId?: string): Promise<{
       throw organizationError;
     }
 
-    return organizationsData;
+    return {
+      id: organizationId,
+      picture_url: organizationsData?.picture_url ?? '',
+      name: organizationData?.name ?? '',
+      owner_id: organizationData?.owner_id ?? '',
+      slug: organizationData?.slug ?? '',
+    };
   } catch (error) {
     console.error('Error getting the organization:', error);
     throw error;
@@ -178,49 +126,55 @@ export async function getOrganization(primaryOwnerId?: string): Promise<{
 }
 
 export async function getOrganizationByUserId(
-  userId: string,
-  adminActivated = false,
+  userId?: string,
 ): Promise<{
   id: string;
   name: string;
-  primary_owner_user_id: string;
+  owner_id: string;
 }> {
   try {
-    const client = getSupabaseServerComponentClient({
-      admin: adminActivated,
-    });
-    const { data: userAccountData, error: userAccountError } = await client
-      .from('accounts')
-      .select('organization_id')
-      .eq('id', userId)
+    const client = getSupabaseServerComponentClient();
+    const sessionData = (await client.rpc('get_session')).data;
+
+    if(!userId) {
+      const organizationData = sessionData?.organization;
+      return {
+        id: organizationData?.id ?? '',
+          name: organizationData?.name ?? '',
+          owner_id: organizationData?.owner_id ?? '',
+        };
+    }
+
+    const { data: clientData, error: clientError } = await client
+      .from('clients')
+      .select('organization_client_id')
+      .eq('user_client_id', userId)
+      .eq('agency_id', sessionData?.agency?.id ?? sessionData?.organization?.id ?? '')
       .single();
 
-    if (userAccountError) {
-      throw new Error(
-        `Error getting organization: ${userAccountError.message}`,
-      );
+    if(clientError) {
+      console.error('Warning fetching client:', clientError);
     }
 
-    const organizationId = userAccountData?.organization_id;
-
-    if (!organizationId) {
-      console.error('Organization ID is null');
-      throw new Error('Organization ID is null');
-    }
+    const organizationId = clientData?.organization_client_id ?? sessionData?.organization?.id ?? '';
 
     const { data: organizationData, error: organizationError } = await client
-      .from('accounts')
-      .select('id, name, primary_owner_user_id') // if we need more data we can add it here, but for now we only need the id.
-      //IMPORTANT: ask to the team for more params on the future
+      .from('organizations')
+      .select('id, name, owner_id')
       .eq('id', organizationId)
       .single();
 
-    if (organizationError) {
-      console.error('Error fetching organization:', organizationError);
-      throw organizationError;
+    if(organizationError) {
+      throw new Error(
+        `Error getting the organization: ${organizationError.message}`,
+      );
     }
 
-    return organizationData;
+    return {
+      id: organizationData?.id ?? '',
+      name: organizationData?.name ?? '',
+      owner_id: organizationData?.owner_id ?? '',
+    };
   } catch (error) {
     console.error('Error trying to get the organization by user id:', error);
     throw error;
@@ -272,10 +226,9 @@ export async function getOrganizationById(organizationId: string, client?: Supab
     // Step 2: Fetch the organization data
     const { data: organizationData, error: clientOrganizationError } =
       await client
-        .from('accounts')
-        .select('id, name, primary_owner_user_id, slug, email, picture_url')
+        .from('organizations')
+        .select('id, name, owner_id, slug, picture_url')
         .eq('id', organizationId)
-        .eq('is_personal_account', false)
         .single();
 
     if (clientOrganizationError) {
@@ -291,30 +244,15 @@ export async function getOrganizationById(organizationId: string, client?: Supab
   }
 }
 
-export async function getAgencyForClient(clientOrganizationId: string) {
+export async function getAgencyForClient() {
   try {
     const client = getSupabaseServerComponentClient();
-    const { error: userError } = await client.auth.getUser();
-    if (userError) throw userError;
-
-    //Getting the client agency_id
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('agency_id')
-      .eq('organization_client_id', clientOrganizationId)
-     
-
-    if (clientError ?? !clientData) {
-      console.error('Error fetching agency:', clientError);
-      throw clientError;
-    }
-
-    // Retriving the corresponding agency => include also the subdomain param on the future
+    
+    const sessionData = (await client.rpc('get_session')).data;
     const { data: agencyData, error: agencyError } = await client
-      .from('accounts')
-      .select('id, name, email, picture_url, slug')
-      .eq('id', clientData?.[0]?.agency_id ?? '')
-      .eq('is_personal_account', false)
+      .from('organizations')
+      .select('id, name, picture_url, slug')
+      .eq('id', sessionData?.agency?.id ?? sessionData?.organization?.id ?? '')
       .single();
 
     if (agencyError ?? !agencyData) {
@@ -329,7 +267,7 @@ export async function getAgencyForClient(clientOrganizationId: string) {
   }
 }
 
-export async function getAgencyForClientByUserId(userId: string): Promise<{
+export async function getAgencyForClientByUserId(): Promise<{
   id: string;
   name: string;
   primary_owner_user_id: string;
@@ -337,30 +275,14 @@ export async function getAgencyForClientByUserId(userId: string): Promise<{
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const { data: clientData, error: clientError } = await client
-      .from('clients')
-      .select('agency_id')
-      .eq('user_client_id', userId)
-      .single();
+    const agencyData = (await client.rpc('get_session')).data?.agency
 
-    if (clientError) {
-      throw new Error(`Error getting client: ${clientError.message}`);
-    }
-
-    const { data: agencyData, error: agencyError } = await client
-      .from('accounts')
-      //Temporarily added loom_app_id to the query
-      .select('id, name, primary_owner_user_id, loom_app_id') // if we need more data we can add it here, but for now we only need the id.
-      //IMPORTANT: ask to the team for more params on the future
-      .eq('id', clientData.agency_id)
-      .eq('is_personal_account', false)
-      .single();
-
-    if (agencyError) {
-      throw new Error(`Error getting agency: ${agencyError.message}`);
-    }
-
-    return agencyData;
+    return {
+      id: agencyData?.id ?? '',
+      name: agencyData?.name ?? '',
+      primary_owner_user_id: agencyData?.owner_id ?? '',
+      loom_app_id: null,
+    };
   } catch (error) {
     console.error('Error trying to get the agency');
     throw error;

@@ -19,7 +19,7 @@ async function OrganizationsPage() {
   const organization = await getOrganization();
 
   const organizationOwner = await getUserById(
-    organization.primary_owner_user_id,
+    organization.owner_id ?? '',
   );
 
   const userRole = await getUserRole().catch((err) => {
@@ -32,18 +32,18 @@ async function OrganizationsPage() {
     owner: organizationOwner ?? null, // Add owner explicitly
   };
 
-  const agency = await getAgencyForClient(newOrganization.id ?? '').catch((err) => {
+  const agency = await getAgencyForClient().catch((err) => {
     console.error(`Error getting agency for client: ${err}`)
     return null
   });
 
   return (
     <OrganizationSection
-      name={newOrganization.name}
+      name={newOrganization.name ?? ''}
       logo={newOrganization.picture_url ?? ''}
       owner={newOrganization.owner}
       clientOrganizationId={newOrganization.id ?? ''}
-      currentUserRole={userRole}
+      currentUserRole={userRole ?? ''}
       agencyId={agency?.id ?? ''}
     />
   );

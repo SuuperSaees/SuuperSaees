@@ -133,7 +133,7 @@ function ProfileSettings({
       toast.error('Error', {
         description: t('updateProfileError'),
       });
-      console.error(error);
+      console.error('Error updating profile image:', error);
     }
   };
 
@@ -164,7 +164,14 @@ function ProfileSettings({
             <p className="text-wrap">{t('nameDescription')}</p>
           </div>
 
-          <UpdateAccountDetailsFormContainer user={user} />
+          <UpdateAccountDetailsFormContainer user={{
+            ...user, 
+            settings: {
+              ...userSettings,
+              name: userSettings?.name ?? user?.name ?? '',
+              picture_url: userSettings?.picture_url ?? user?.picture_url ?? '',
+            }
+          }} />
         </div>
 
         <Separator />

@@ -9,10 +9,11 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
 
 export const addUserAccountRole = async (
-  accountId: Account.Relationships.Membership['account_id'],
+  organizationId: Organization.Type['id'],
   userId: Account.Type['id'],
   accountRole: Account.Relationships.Membership['account_role'],
   databaseClient?: SupabaseClient<Database>,
@@ -26,7 +27,7 @@ export const addUserAccountRole = async (
   try {
     const { data: accountRoleData, error: accountRoleError } =
       await databaseClient.from('accounts_memberships').insert({
-        account_id: accountId,
+        organization_id: organizationId,
         user_id: userId,
         account_role: accountRole,
       });

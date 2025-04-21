@@ -38,7 +38,7 @@ export const createClientUserAccount = async (
   
       // Step 1: Pre-authentication of the user
       const password = generateRandomPassword(12);
-  
+
       const { logo_url, theme_color } = OrganizationSettingsType.KEYS;
   
       const { default_sender_logo, default_sender_color } =

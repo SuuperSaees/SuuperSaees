@@ -92,10 +92,10 @@ export class TeamAccountsApi {
    */
   async getAccountWorkspace(slug: string) {
     const accountPromise = this.client.rpc('team_account_workspace', {
-      account_slug: slug,
+      organization_slug: slug,
     });
 
-    const accountsPromise = this.client.from('user_accounts').select('*');
+    const accountsPromise = this.client.from('user_organization').select('*');
 
     const [accountResult, accountsResult] = await Promise.all([
       accountPromise,
@@ -140,12 +140,12 @@ export class TeamAccountsApi {
    * @description Check if the user has permission to manage billing for the account.
    */
   async hasPermission(params: {
-    accountId: string;
+    organizationId: string;
     userId: string;
     permission: Database['public']['Enums']['app_permissions'];
   }) {
     const { data, error } = await this.client.rpc('has_permission', {
-      account_id: params.accountId,
+      organization_id: params.organizationId,
       user_id: params.userId,
       permission_name: params.permission,
     });
@@ -218,7 +218,7 @@ export class TeamAccountsApi {
           };
         }
       >(
-        'id, expires_at, account: account_id !inner (id, name, slug, picture_url)',
+        'id, expires_at, account: organization_id !inner (id, name, slug, picture_url)',
       )
       .eq('invite_token', token)
       .gte('expires_at', new Date().toISOString())

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useAuthDetails } from '@kit/auth/sign-in';
 import { SignUpMethodsContainer } from '@kit/auth/sign-up';
 import { Trans } from '@kit/ui/trans';
@@ -21,19 +22,20 @@ const paths = {
 };
 export default function SignUp({ searchParams }: Props) {
   const inviteToken = searchParams.invite_token;
-  let host = 'localhost:3000';
-
-  if (typeof window !== 'undefined') {
-    host = window.location.host;
-  }
-
+  const [host, setHost] = useState('localhost:3000');
+  const [currentAppOrigin, setCurrentAppOrigin] = useState('http://localhost:3000/');
+  const [isCustomDomain, setIsCustomDomain] = useState(false);
+  
   const { authDetails, isLoading } = useAuthDetails(host);
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
-  let currentAppOrigin = 'http://localhost:3000/';
-  if (typeof window !== 'undefined') {
-    currentAppOrigin = window.location.origin + '/';
-  }
-  const isCustomDomain = originalAppOrigin !== currentAppOrigin;
+  
+  useEffect(() => {
+    // Solo ejecutar en el cliente
+    setHost(window.location.host);
+    setCurrentAppOrigin(window.location.origin + '/');
+    setIsCustomDomain(originalAppOrigin !== window.location.origin + '/');
+  }, [originalAppOrigin]);
+  
   const textcolor = getTextColorBasedOnBackground(
     authDetails?.background_color ?? '#ffffff',
   );
@@ -89,6 +91,7 @@ export default function SignUp({ searchParams }: Props) {
                   displayTermsCheckbox={authConfig.displayTermsCheckbox}
                   inviteToken={inviteToken}
                   paths={paths}
+                  currentAppOrigin={currentAppOrigin}
                 />
               </div>
             </div>

@@ -1,8 +1,7 @@
 import type { SignInWithPasswordCredentials } from '@supabase/supabase-js';
-
+import { generateMagicLinkRecoveryPassword, verifyUserCredentials } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { useMutation } from '@tanstack/react-query';
 
-import { getDomainByUserId } from '../../../multitenancy/utils/get/get-domain';
 import { useSupabase } from './use-supabase';
 
 export function useSignInWithEmailPassword() {
@@ -10,11 +9,35 @@ export function useSignInWithEmailPassword() {
   const mutationKey = ['auth', 'sign-in-with-email-password'];
 
   const mutationFn = async (credentials: SignInWithPasswordCredentials) => {
+    // set session
+    const domain = (typeof window !== 'undefined' 
+      ? window.location.origin.replace(/^https?:\/\//, '')
+      : '');
+
+      if (!('email' in credentials)) {
+        throw new Error('The email is required to sign in');
+      }
+
+    const responseVerifyUserCredentials = await verifyUserCredentials(domain, credentials.email, credentials.password);
+
+    const isUserAllowed = responseVerifyUserCredentials.is_allowed;
+    const isUserPrimary = responseVerifyUserCredentials.is_primary;
+
+    if (!isUserAllowed) {
+      throw new Error('User is not allowed to sign in');
+    }
+
+    let userId = '';
+    let data = {};
+
+    if (isUserPrimary) {
+
     const response = await client.auth.signInWithPassword(credentials);
 
     if (response.error) {
       throw response.error.message;
     }
+
     // Step 1: Get the user auhentication/logged in user 
     const user = response.data?.user;
     const identities = user?.identities ?? [];
@@ -23,10 +46,41 @@ export function useSignInWithEmailPassword() {
     if (identities.length === 0) {
       throw new Error('User already registered');
     }
-    const userId = user.id;
+    userId = user.id;
+    data = response.data;
+  } else {
+    const location = await generateMagicLinkRecoveryPassword(credentials.email, undefined, true, true);
+
+    if (!location) {
+      throw new Error(`Error signing in with email and password`);
+    }
+
+    const hash = new URL(location).hash.substring(1);
+    const query = new URLSearchParams(hash);
+    const accessToken = query.get('access_token');
+    const refreshToken = query.get('refresh_token');
+    
+    if (accessToken && refreshToken && !(await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
+      const { data: userData } = await client.auth.getUser();
+      userId = userData?.user?.id ?? '';
+      data = userData;
+    } else {
+      throw new Error('Error signing in with email and password');
+    }
+  }
+
+    const { error: setSessionError } = await client.rpc('set_session', {
+      domain,
+    });
+
+    if (setSessionError) {
+      throw setSessionError.message;
+    }
+
+    
 
     // Step 2: Get the organization id fetching the domain/subdomain data
-    const { organizationId } = await getDomainByUserId(userId, true);
+    const organizationId = (await client.rpc('get_session')).data?.organization?.id ?? '';
 
     // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
     const { data: notAllowedClient, error: clientError } = await client
@@ -55,7 +109,7 @@ export function useSignInWithEmailPassword() {
       throw new Error('User cannot sign in with this account');
     } else {
     // Step 7: If the user is allowed, just proceed (return as normal)
-      return response.data;
+      return data;
     }
   };
 

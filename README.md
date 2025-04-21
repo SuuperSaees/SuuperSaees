@@ -214,8 +214,8 @@ graph TD
    - Handle token renewal
 
 2. **Automation**
-   - Leverage APIs for automatic configuration
-   - Implement bidirectional synchronization
+   - Leverage APIs for automatic configuration.
+   - Implement bidirectional synchronization.
 
 3. **Monitoring**
    - Use Stripe Dashboard for supervision.

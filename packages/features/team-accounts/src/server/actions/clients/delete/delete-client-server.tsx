@@ -39,7 +39,7 @@ export const deleteClient = async (
     }
 
     // Fetch the agency details for permission validation
-    const agencyAccount = await getAgencyForClient(clientOrganizationId ?? '');
+    const agencyAccount = await getAgencyForClient();
     if (!agencyAccount) {
       throw new Error('Error fetching agency account');
     }

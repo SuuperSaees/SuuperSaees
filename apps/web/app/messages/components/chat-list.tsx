@@ -10,21 +10,22 @@ import { Spinner } from '@kit/ui/spinner';
 export default function ChatList() {
   const { chatId, chatsQuery, searchQuery, activeChat, setActiveChat } = useChat();
   const chats = useMemo(() => chatsQuery.data?.filter((chat) => !chat.deleted_on) ?? [], [chatsQuery.data]);
+
   const filteredChats = useMemo(() => {
     if (!searchQuery) return chats;
     if (!Array.isArray(chats) || !chats.length) return [];
     return chats.filter((chat) => {
-      // Verificar nombre del chat de forma segura
+      // Verify chat name
       if (chat?.name?.toLowerCase().includes(searchQuery.toLowerCase())) {
         return true;
       }
       
-      // Verificar mensajes de forma segura
+      // Verify messages
       const hasMatchingMessage = Array.isArray(chat?.messages) && chat.messages.some((message) =>
         message?.content?.toLowerCase().includes(searchQuery.toLowerCase())
       );
       
-      // Verificar miembros de forma segura
+      // Verify members 
       const hasMatchingMember = Array.isArray(chat?.chat_members) && chat.chat_members.some((member) =>
         member?.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -39,10 +40,10 @@ export default function ChatList() {
     }
   }, [filteredChats, activeChat, setActiveChat]);
 
-  // Estado de carga
+  // Loading state
   if (chatsQuery.isLoading) return <Spinner className="w-5 h-5 mx-auto mt-6 text-gray-500" />
 
-  // Estado de error
+  // Error state
   if (chatsQuery.error) {
     return (
       <div className="flex flex-1 items-center justify-center text-red-500">

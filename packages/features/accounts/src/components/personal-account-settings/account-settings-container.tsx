@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { useTranslation } from 'react-i18next';
-// import { If } from '@kit/ui/if';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 import { Trans } from '@kit/ui/trans';
@@ -22,8 +21,6 @@ import SiteSettings from '../site-settings';
 import { useQuery } from '@tanstack/react-query';
 import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
 
-
-// const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 type AccountStripe = {
   id: string;
@@ -46,7 +43,7 @@ export function PersonalAccountSettingsContainer(
   const { t } = useTranslation('account');
   const tab = searchParams.get('tab');
   const checkoutResult = searchParams.get('checkout');
-  const [user, setUser] = useState<Account.Type | null>();
+  const [user, setUser] = useState<Account.Type & { organization_id: string } | null>();
   const {accountBillingTab, setAccountBillingTab, upgradeSubscription } = useBilling();
   const [role, setRole] =
     useState<Database['public']['Tables']['roles']['Row']['name']>();
@@ -60,17 +57,12 @@ export function PersonalAccountSettingsContainer(
       .single();
 
     if (userAccountError) console.error(userAccountError.message);
-    return user;
+    const organizationId = (await client.rpc('get_session')).data?.organization?.id;
+    return {
+      ...user,
+      organization_id: organizationId ?? '',
+    };
   };
-
-  // const {data: userSettings} = useQuery<UserSettings.Type>({
-  //   queryKey: ['user-settings', props.userId],
-  //   queryFn: async () => {
-  //     const data = await getAccountSettings(props.userId);
-  //     return data;
-  //   },
-  //   staleTime: 1000 * 60 * 5,
-  // }) as UseQueryResult<UserSettings.Type, unknown>;
 
   const fetchSettings = async () => {
     const response = await getAccountSettings(props.userId);
@@ -89,11 +81,12 @@ export function PersonalAccountSettingsContainer(
   });
 
   useEffect(() => {
-    let user: Account.Type | null;
+    let user: Account.Type & { organization_id: string } | null;
     void fetchUserAccount()
       .then((data) => {
-        setUser(data);
-        user = data;
+        const typedData = data as Account.Type & { organization_id: string };
+        setUser(typedData);
+        user = typedData;
       })
       .then(() => {
         const fetchAccountStripe = async () => {
@@ -128,7 +121,7 @@ export function PersonalAccountSettingsContainer(
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const role = await getUserRole();
+        const role = await getUserRole() as string; 
         if (checkoutResult === 'success') {
           await upgradeSubscription();
           router.push('/home/settings')
@@ -216,11 +209,3 @@ export function PersonalAccountSettingsContainer(
     </div>
   );
 }
-
-// function useSupportMultiLanguage() {
-//   const { i18n } = useTranslation();
-//   const langs = (i18n?.options?.supportedLngs as string[]) ?? [];
-//   const supportedLangs = langs.filter((lang) => lang !== 'cimode');
-
-//   return supportedLangs.length > 1;
-// }

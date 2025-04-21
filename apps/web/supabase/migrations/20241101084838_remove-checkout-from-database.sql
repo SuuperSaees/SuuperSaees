@@ -14,5 +14,3 @@ $function$
 ;
 
 CREATE TRIGGER after_update_checkouts_deleted_on AFTER UPDATE OF deleted_on ON public.checkouts FOR EACH ROW WHEN ((old.deleted_on IS DISTINCT FROM new.deleted_on)) EXECUTE FUNCTION delete_checkout_if_deleted_on_not_null();
-
-

@@ -71,16 +71,15 @@ BEGIN
     SELECT id INTO projects_folder_id
     FROM folders
     WHERE name = 'Projects'
-      AND agency_id = NEW.agency_id::text
-      AND client_organization_id = NEW.client_organization_id::text;
+      AND agency_id = NEW.agency_id
+      AND client_organization_id = NEW.client_organization_id;
     
     INSERT INTO folders (id, name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
-    VALUES (NEW.uuid::uuid, NEW.title, NEW.agency_id::text, NEW.client_organization_id::text, true, projects_folder_id);
+    VALUES (NEW.uuid::uuid, NEW.title, NEW.agency_id, NEW.client_organization_id, true, projects_folder_id);
   END IF;
   
   -- Case: Insert into accounts (Agency or Client Organization)
-  IF TG_TABLE_NAME = 'accounts' THEN
-    IF NOT NEW.is_personal_account THEN
+  IF TG_TABLE_NAME = 'organizations' THEN
       -- Check if this account is already linked as a client to an agency
       SELECT EXISTS (
         SELECT 1 FROM clients 
@@ -94,7 +93,7 @@ BEGIN
         SELECT id INTO root_folder_id
         FROM folders
         WHERE name = NEW.name
-          AND agency_id = NEW.id::text
+          AND agency_id = NEW.id
           AND is_subfolder = false
           AND parent_folder_id IS NULL
         LIMIT 1;
@@ -102,7 +101,7 @@ BEGIN
         -- If no root folder exists, create it
         IF root_folder_id IS NULL THEN
           INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
-          VALUES (NEW.name, NEW.id::text, NEW.id::text, false, NULL)
+          VALUES (NEW.name, NEW.id, NEW.id, false, NULL)
           RETURNING id INTO root_folder_id;
         END IF;
         
@@ -110,7 +109,7 @@ BEGIN
         SELECT id INTO projects_folder_id
         FROM folders
         WHERE name = 'Projects'
-          AND agency_id = NEW.id::text
+          AND agency_id = NEW.id
           AND is_subfolder = true
           AND parent_folder_id = root_folder_id
         LIMIT 1;
@@ -118,10 +117,9 @@ BEGIN
         -- If no "Projects" folder exists, create it
         IF projects_folder_id IS NULL THEN
           INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
-          VALUES ('Projects', NEW.id::text, NEW.id::text, true, root_folder_id);
+          VALUES ('Projects', NEW.id, NEW.id, true, root_folder_id);
         END IF;
       END IF;
-    END IF;
   END IF;
   
   -- Case: Insert into clients (Client Organizations)
@@ -138,9 +136,9 @@ BEGIN
     IF root_folder_id IS NULL THEN
       INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
       VALUES (
-        (SELECT name FROM accounts WHERE id = NEW.organization_client_id),
-        NEW.agency_id::text,
-        NEW.organization_client_id::text,
+        (SELECT name FROM organizations WHERE id = NEW.organization_client_id),
+        NEW.agency_id,
+        NEW.organization_client_id,
         false,
         NULL
       )
@@ -149,8 +147,8 @@ BEGIN
       -- Update existing root folder to set the correct agency_id and client_organization_id
       UPDATE folders
       SET 
-        agency_id = NEW.agency_id::text,
-        client_organization_id = NEW.organization_client_id::text
+        agency_id = NEW.agency_id,
+        client_organization_id = NEW.organization_client_id
       WHERE id = root_folder_id;
     END IF;
     
@@ -166,8 +164,8 @@ BEGIN
       INSERT INTO folders (name, agency_id, client_organization_id, is_subfolder, parent_folder_id)
       VALUES (
         'Projects',
-        NEW.agency_id::text,
-        NEW.organization_client_id::text,
+        NEW.agency_id,
+        NEW.organization_client_id,
         true,
         root_folder_id
       );
@@ -175,8 +173,8 @@ BEGIN
       -- Update existing Projects folder to set the correct agency_id and client_organization_id
       UPDATE folders
       SET 
-        agency_id = NEW.agency_id::text,
-        client_organization_id = NEW.organization_client_id::text
+        agency_id = NEW.agency_id,
+        client_organization_id = NEW.organization_client_id
       WHERE id = projects_folder_id;
     END IF;
   END IF;
@@ -186,7 +184,15 @@ END;
 $function$
 ;
 
-CREATE TRIGGER after_insert_accounts AFTER INSERT ON public.accounts FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
+drop trigger if exists "after_insert_accounts" on "public"."organizations";
+
+drop trigger if exists "after_insert_clients" on "public"."clients";
+
+drop trigger if exists "after_insert_orders_v2" on "public"."orders_v2";
+
+drop trigger if exists "before_folder_changes" on "public"."folders";
+
+CREATE TRIGGER after_insert_accounts AFTER INSERT ON public.organizations FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
 
 CREATE TRIGGER after_insert_clients AFTER INSERT ON public.clients FOR EACH ROW EXECUTE FUNCTION handle_insert_operations_with_folders();
 
@@ -196,3 +202,80 @@ CREATE TRIGGER before_folder_changes BEFORE INSERT ON public.folders FOR EACH RO
 
 GRANT EXECUTE ON FUNCTION handle_insert_operations_with_folders() TO authenticated, service_role;
 
+CREATE OR REPLACE FUNCTION public.get_unread_message_counts(p_user_id uuid)
+ RETURNS TABLE(chat_id uuid, chat_unread_count bigint, order_id integer, order_unread_count bigint)
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  is_agency_role boolean;
+  cutoff_date timestamp with time zone := '2025-03-11 18:04:00-05'::timestamp with time zone; -- March 11, 2025, 6:04 PM Colombia time (UTC-5)
+BEGIN
+  -- Use a CTE to get the organizationId from the session
+  WITH session_org AS (
+    SELECT (get_session()).organization.id AS organization_id
+  )
+  -- Check if the user has any agency role within the current organization
+  SELECT EXISTS (
+    SELECT 1 
+    FROM accounts_memberships am, session_org so
+    WHERE am.user_id = p_user_id 
+    AND am.organization_id = so.organization_id::uuid
+    AND am.account_role IN ('agency_owner', 'agency_member', 'agency_project_manager')
+  ) INTO is_agency_role;
+
+  -- First, return chat counts
+  RETURN QUERY
+  SELECT 
+    m.chat_id, 
+    COUNT(m.id)::BIGINT AS chat_unread_count,
+    NULL::integer AS order_id,
+    0::BIGINT AS order_unread_count
+  FROM messages m
+  JOIN chats c ON m.chat_id = c.id  -- Join with chats to ensure chat exists
+  LEFT JOIN message_reads mr ON 
+    mr.user_id = p_user_id AND 
+    mr.chat_id = m.chat_id
+  WHERE 
+    m.chat_id IS NOT NULL
+    AND m.order_id IS NULL  -- Exclude order-related messages
+    AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+    AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
+    AND (
+      is_agency_role = true  -- Agency roles can see all messages
+      OR m.visibility = 'public'  -- Non-agency roles can only see public messages
+    )
+    AND (
+      mr.read_at IS NULL OR 
+      m.created_at > mr.read_at
+    )
+  GROUP BY m.chat_id;
+  
+-- Then, return order counts
+  RETURN QUERY
+  SELECT 
+    NULL::uuid AS chat_id,
+    0::BIGINT AS chat_unread_count,
+    m.order_id::integer,
+    COUNT(m.id)::BIGINT AS order_unread_count
+  FROM messages m
+  LEFT JOIN message_reads mr ON 
+    mr.user_id = p_user_id AND 
+    mr.order_id = m.order_id::integer  -- Explicit conversion to integer
+  WHERE 
+    m.order_id IS NOT NULL
+    AND m.user_id != p_user_id  -- Exclude messages sent by the user themselves
+    AND m.created_at >= cutoff_date  -- Only count messages created after the cutoff date
+    AND (
+      is_agency_role = true  -- Agency roles can see all messages
+      OR m.visibility = 'public'  -- Non-agency roles can only see public messages
+    )
+    AND (
+      mr.read_at IS NULL OR 
+      m.created_at > mr.read_at
+    )
+  GROUP BY m.order_id;
+END;
+$function$
+;
+
+GRANT EXECUTE ON FUNCTION get_unread_message_counts(uuid) TO anon, authenticated, service_role;

@@ -48,8 +48,11 @@ export class ChatService {
 
     const chats = await this.chatRepository.list(userId, chatIds);
 
-    const organizationsIds = [...new Set(chatsResult?.map((chat) => chat.user?.organization_id ?? ''))];
-    
+    const clientOrganizationIdsAndAgencyIds = chats?.map((chat) => chat?.client_organization_id ?? '') 
+      .concat(chats?.map((chat) => chat?.agency_id ?? ''));
+
+    const organizationsIds = [...new Set(clientOrganizationIdsAndAgencyIds)];
+
     const [teamResult, lastMessages] = await Promise.all([
       this.teamRepository?.list({ 
         organizationIds: organizationsIds, 
@@ -58,16 +61,14 @@ export class ChatService {
       }),
       this.chatMessagesRepository?.listLastMessages(chatIds)
     ]);
-  
+
     const chatsSorted = chats
       .map(chat => {
-        const uniqueOrgIds = [...new Set(
-          chat.members?.map(member => member.user?.organization_id).filter(Boolean)
-        )];
-  
-        const organizations = uniqueOrgIds
+        const organizations = organizationsIds
+          .filter(orgId => orgId === chat.client_organization_id || orgId === chat.agency_id)
           .map(orgId => teamResult?.[orgId ?? ''])
           .filter(Boolean) as Members.Organization[];
+
   
         const lastMessage = lastMessages?.find(msg => msg.chat_id === chat.id)?.messages ?? [];
         const messages = Array.isArray(lastMessage) ? lastMessage : [lastMessage];

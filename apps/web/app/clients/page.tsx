@@ -19,7 +19,7 @@ async function ClientsMembersPage() {
   const clientsWithOrganizations = await getAllClients().catch((err) => {
     console.error(`Error getting clients with organizations: ${err}`)
     return []
-  });;
+  });
 
   return (
     <PageBody>

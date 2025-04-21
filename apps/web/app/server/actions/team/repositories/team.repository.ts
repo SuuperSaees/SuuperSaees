@@ -11,7 +11,6 @@ export class TeamRepository {
 
   async list({ organizationIds, includeMembers, includeAgency }: GetTeamsOptions): Promise<Members.TeamResponse> {
     const client = this.adminClient ?? this.client;
-    console.log('includeAgency', includeAgency);
     if (!organizationIds.length && !includeAgency) {
       return {}
     }
@@ -29,9 +28,8 @@ export class TeamRepository {
 
       const { data: getAccountInfo, error: getAccountInfoError } = await this.client
       .from('accounts_memberships')
-      .select('account_id, account_role')
+      .select('organization_id, account_role')
       .eq('user_id', user?.user?.id ?? '')
-
       .or('account_role.eq.client_owner,account_role.eq.client_member,account_role.eq.client_guest')
       .single();
       
@@ -42,7 +40,7 @@ export class TeamRepository {
       const { data: getClientInfo, error: getClientInfoError } = await this.client
       .from('clients')
       .select('agency_id')
-      .eq('organization_client_id', getAccountInfo.account_id)
+      .eq('organization_client_id', getAccountInfo.organization_id)
       .eq('user_client_id', user?.user?.id ?? '')
       .single();
       
@@ -51,10 +49,9 @@ export class TeamRepository {
       }
       
       const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
-      .from('accounts')
+      .from('organizations')
       .select('id, name, organization_settings(value)')
       .eq('id', getClientInfo.agency_id)
-      .eq('is_personal_account', false)
       .eq('organization_settings.key', 'logo_url')
       .single();
 
@@ -64,7 +61,7 @@ export class TeamRepository {
 
       resultMembers[getClientInfo.agency_id]  = {
         id: getAgencyInfo.id,
-        name: getAgencyInfo.name,
+        name: getAgencyInfo.name ?? '',
         picture_url: getAgencyInfo.organization_settings?.[0]?.value ?? '',
         is_agency: true,
       }
@@ -78,21 +75,20 @@ export class TeamRepository {
       .from('organization_settings')
       .select('value')
       .eq('key', 'logo_url')
-      .eq('account_id', organizationId)
+      .eq('organization_id', organizationId)
       .single();
 
       const { data: organization, error: organizationError } = await client
-      .from('accounts')
+      .from('organizations')
       .select('id, name, picture_url, accounts_memberships(account_role)')
       .eq('id', organizationId)
-      .eq('is_personal_account', false)
       .single();
 
       if (organizationError) throw organizationError;
 
       resultMembers[organizationId] = {
         id: organization.id,
-        name: organization.name,
+        name: organization.name ?? '',
         picture_url: organizationSettings?.value ?? organization.picture_url ?? '',
         is_agency: agencyRoles.has(organization.accounts_memberships[0]?.account_role ?? ''),
       }
@@ -101,7 +97,7 @@ export class TeamRepository {
         const { data: members, error: membersError } = await client
         .from('accounts_memberships')
         .select('user_id, account_role')
-        .eq('account_id', organizationId);
+        .eq('organization_id', organizationId);
 
         if (membersError) throw membersError;
 
@@ -124,6 +120,7 @@ export class TeamRepository {
           organization_id: organizationId,
           role: member.account_role,
           picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
+          // visibility: true,
         }
       ));
       }

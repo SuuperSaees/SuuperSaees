@@ -38,7 +38,7 @@ export default async function MemberPage(props: {
 
   const agency = agencyRoles.includes(workspace?.role ?? '')
     ? userOrganization
-    : await getAgencyForClient(userOrganization.id ?? '');
+    : await getAgencyForClient();
   const agencyId = agency?.id ?? '';
 
   const agencyStatuses =
@@ -47,7 +47,7 @@ export default async function MemberPage(props: {
   const { data, error: membersError } = await client.rpc(
     'get_account_members',
     {
-      account_slug: agencySlug ?? '',
+      organization_slug: agencySlug ?? '',
     },
   );
   let agencyMembers = [];

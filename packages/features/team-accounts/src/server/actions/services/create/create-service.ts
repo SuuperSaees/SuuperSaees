@@ -114,7 +114,7 @@ export const createService = async (clientData: ServiceData) => {
     const generateCheckoutUrlPromise = new RetryOperationService(
       async () => {
         const { stripeId } = await getStripeAccountID(primary_owner_user_id)
-        const organization = await getOrganization(primary_owner_user_id)
+        const organization = await getOrganization()
         const baseUrl = await getDomainByOrganizationId(organization.id, true, true);
 
         const checkoutUrl = await createUrlForCheckout({

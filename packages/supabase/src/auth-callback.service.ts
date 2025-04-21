@@ -6,7 +6,7 @@ import { TokenRecoveryType, DefaultToken } from '../../tokens/src/domain/token-t
 import { verifyToken } from '../../tokens/src/verify-token';
 // import { decodeToken } from '../../tokens/src/decode-token';
 import { getSupabaseServerComponentClient } from './clients/server-component.client';
-import { getDomainByUserId } from '../../multitenancy/utils/get/get-domain';
+import { getDomainByUserId, getDomainByOrganizationId} from '../../multitenancy/utils/get/get-domain';
 import { createClient } from '../../features/team-accounts/src/server/actions/clients/create/create-clients';
 
 /**
@@ -147,10 +147,16 @@ class AuthCallbackService {
               order_id: orderId,
               client_member_id: response.success?.data?.user_client_id,
             });
-          const { domain } = await getDomainByUserId(response.success?.data?.user_client_id ?? '', true);
+          const domain  = await getDomainByOrganizationId(response.success?.data?.agency_id ?? '', true, true);
           if (domain) {
             url.href = `${domain}${url.pathname}`
           }
+
+          const onlyDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+          await this.client.rpc('set_session', {
+            domain: onlyDomain,
+          });
           if (error) {
             console.error('Error adding follower to order', error);
             throw new Error('Error adding follower to order');
@@ -196,6 +202,13 @@ class AuthCallbackService {
       
       if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
+        const fullUrl = url.href;
+        const domainMatch = fullUrl.match(/^https?:\/\/([^\\/]+)/);
+        const onlyDomain = domainMatch ? domainMatch[1] : '';
+
+        await this.client.rpc('set_session', {
+          domain: onlyDomain,
+        });
         return url;
       } else {
         console.error('error setting session');
@@ -235,24 +248,47 @@ class AuthCallbackService {
     });
     if (token_hash_session) {
       // search in the database for the token_hash_session
-      const { data, error } = await supabaseServerComponentClient
-        .from('tokens')
-        .select('*')
-        .eq('id', token_hash_session)
-        .single();
+      const query = supabaseServerComponentClient
+      .from('tokens')
+      .select('*')
 
-      if (error) {
-        console.error('Error verifying token hash session', error);
+      let accessToken: string | undefined;
+      let refreshToken: string | undefined;
+
+      if(token_hash_session.includes('suuper')){
+        const { data, error } = await query.eq('id_token_provider', token_hash_session).single();
+        if (error) {
+          console.error('Error verifying token hash session', error);
+        }
+        accessToken = data?.access_token;
+        refreshToken = data?.refresh_token;
+      } else {
+        const { data, error } = await query.eq('id', token_hash_session).single();
+        if (error) {
+          console.error('Error verifying token hash session', error);
+        }
+        accessToken = data?.access_token;
+        refreshToken = data?.refresh_token;
       }
-      if (data) {
+
+      
+      if (accessToken && refreshToken) {
         // set session with the user data
         const { error } = await this.client.auth.setSession({
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
+          access_token: accessToken,
+          refresh_token: refreshToken,
         });
         const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
         url.pathname = callbackParam ?? baseUrl;
         url.href = callbackParam ?? baseUrl;
+
+        const fullUrl = url.href;
+        const domainMatch = fullUrl.match(/^https?:\/\/([^\\/]+)/);
+        const onlyDomain = domainMatch ? domainMatch[1] : '';
+
+        await this.client.rpc('set_session', {
+          domain: onlyDomain,
+        });
         
         if (!error) {
           return url;

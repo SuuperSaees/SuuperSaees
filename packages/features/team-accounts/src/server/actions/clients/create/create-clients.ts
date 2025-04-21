@@ -13,10 +13,8 @@ import {
 } from '../../../../../../../../packages/shared/src/response';
 import { addUserAccountRole } from '../../members/create/create-account';
 import {
-  getPrimaryOwnerId,
   getUserAccountByEmail,
 } from '../../members/get/get-member-account';
-import { updateUserAccount } from '../../members/update/update-account';
 import { insertOrganization } from '../../organizations/create/create-organization-server';
 import {
   getAgencyForClient,
@@ -52,16 +50,18 @@ export const createClient = async (clientData: CreateClient) => {
       .eq('email', clientData.client.email)
       .single();
 
+      const agencyIdForReactivation = !clientData.adminActivated ? (await supabase.rpc('get_session')).data?.organization?.id : clientData.agencyId;
+
       if (accountData?.id) {
         // Now check if this account was a deleted client
         const { data: existingClient } = await supabase
           .from('clients')
           .select('*')
           .eq('user_client_id', accountData.id)
-          .not('deleted_on', 'is', null)
+          .eq('agency_id', agencyIdForReactivation ?? '')
           .single();
   
-        if (existingClient) {
+        if (existingClient?.deleted_on) {
           await reactivateDeletedClient({
             accountId: accountData.id,
             email: clientData.client.email,
@@ -70,17 +70,30 @@ export const createClient = async (clientData: CreateClient) => {
             baseUrl: clientData.baseUrl,
             supabase: undefined,
             adminActivated: true,
+            agencyId: agencyIdForReactivation ?? '',
           });
           
           return CustomResponse.success(existingClient, 'clientCreated').toJSON();
+        } else if(!existingClient) {
+          await reactivateDeletedClient({
+            accountId: accountData.id,
+            email: clientData.client.email,
+            name: clientData.client.name,
+            slug: clientData.client.slug,
+            baseUrl: clientData.baseUrl,
+            supabase: undefined,
+            adminActivated: true,
+            agencyId: agencyIdForReactivation ?? '',
+            newAgency: true,
+          })
+
+          return CustomResponse.success(existingClient, 'clientCreated').toJSON();
+        
+
         }
       }
 
     // Step 1: Fetch primary owner ID and organization
-    let primaryOwnerId;
-    if (!clientData.adminActivated) {
-      primaryOwnerId = await getPrimaryOwnerId();
-    }
 
     const organization = !clientData.agencyId
       ? await getOrganization()
@@ -89,9 +102,6 @@ export const createClient = async (clientData: CreateClient) => {
           undefined,
           clientData.adminActivated,
         );
-
-    if (!primaryOwnerId && !clientData.adminActivated)
-      throw new Error('No primary owner user id found');
 
     if (!organization)
       throw new CustomError(
@@ -117,7 +127,7 @@ export const createClient = async (clientData: CreateClient) => {
     // Step 3: Create or fetch the client organization user account
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
-      organization.name,
+      organization.name ?? '',
       clientData.adminActivated,
       clientData.agencyId,
       clientData.sendEmail,
@@ -168,17 +178,6 @@ export const createClient = async (clientData: CreateClient) => {
       clientData.adminActivated,
     );
 
-    // Step 8: Update client user with organization ID
-    await updateUserAccount(
-      {
-        organization_id: clientOrganizationAccount.id,
-        name: clientData.client.name,
-      },
-      userId,
-      undefined,
-      clientData.adminActivated,
-    );
-
     if (clientData.sendEmail) {
       return CustomResponse.success(client, 'clientCreated').toJSON();
     } else {
@@ -217,7 +216,7 @@ export const addClientMember = async ({
     }
 
     // Step 2: Get the agency organization assigned to the client
-    const agencyOrganization = await getAgencyForClient(clientOrganizationId);
+    const agencyOrganization = await getAgencyForClient();
     if (!agencyOrganization) {
       throw new CustomError(
         404,
@@ -248,13 +247,13 @@ export const addClientMember = async ({
       const { data: existingClient } = await supabase
         .from('clients')
         .select('*')
-        .eq('user_client_id', clientAccountData.id)
+        .eq('user_client_id', clientAccountData.id ?? '')
         .not('deleted_on', 'is', null)
         .single();
 
       if (existingClient) {
         await reactivateDeletedClient({
-          accountId: clientAccountData.id,
+          accountId: clientAccountData.id ?? '',
           email,
           name: '',
           slug: '',
@@ -271,7 +270,7 @@ export const addClientMember = async ({
     // Step 5: Create the new client user account
     const clientOrganizationUser = await createClientUserAccount(
       email,
-      clientOrganization.name,
+      clientOrganization.name ?? '',
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {
@@ -295,13 +294,6 @@ export const addClientMember = async ({
       clientOrganizationId,
       clientUserId,
       userRole,
-      supabase,
-    );
-
-    // Step 8: Update the new user client account with its respective organization ID
-    await updateUserAccount(
-      { organization_id: clientOrganization.id },
-      clientUserId,
       supabase,
     );
 
