@@ -104,6 +104,7 @@ async function OrdersPage() {
                 id: member.id,
                 organization_id: member.organization_id,
                 role: member.role,
+                settings: member.user_settings,
               }))}
               tags={tags}
             />

@@ -2,8 +2,6 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-
 import { Embeds } from '~/lib/embeds.types';
 import { Order } from '~/lib/order.types';
 
