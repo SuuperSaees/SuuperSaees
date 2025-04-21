@@ -105,8 +105,9 @@ async function fetchClientMembers(
 
     const transformedClientAccounts = clientAccounts?.map((client) => ({
       ...client,
+      name: client.settings?.[0]?.name ?? client.name,
       role: clientUsersRoles?.find((role) => role.user_id === client.id)?.account_role ?? null,
-      picture_url: client.settings?.picture_url ?? client.picture_url,
+      picture_url: client.settings?.[0]?.picture_url ?? client.picture_url,
     }));
 
   if (clientAccountsError) {
@@ -323,16 +324,16 @@ function combineClientData(
             email: primaryOwner.email,
             picture_url: primaryOwner.picture_url,
             created_at: primaryOwner.created_at,
-            settings: primaryOwner.settings,
+            settings: primaryOwner.settings?.[0],
           }
-        : null,
+        : null, 
       users: users.map((user) => ({
         id: user.id,
         name: user.name,
         email: user.email,
         picture_url: user.picture_url,
         created_at: user.created_at,
-        settings: user.settings,
+        settings: user.settings?.[0],
         role: user.role,
       })),
     };

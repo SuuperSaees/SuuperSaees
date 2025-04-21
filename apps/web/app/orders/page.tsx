@@ -60,10 +60,11 @@ async function OrdersPage() {
       ...member,
       role: member.role.toLowerCase(),
       user_settings: {
-        picture_url: member.picture_url,
-        name: member.name,
+        picture_url: member.settings?.picture_url ?? member.picture_url,
+        name: member.settings?.name ?? member.name,
       },
     })) ?? [];
+
 
   const tags = await getTags(agencyId ?? '');
 
@@ -101,9 +102,9 @@ async function OrdersPage() {
             <ProjectsBoard
               agencyMembers={agencyMembers.map((member) => ({
                 id: member.id,
-                organization_id: member.account_id,
-                settings: member.user_settings,
+                organization_id: member.organization_id,
                 role: member.role,
+                settings: member.user_settings,
               }))}
               tags={tags}
             />

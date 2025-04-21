@@ -9,11 +9,11 @@ import { AccountsTableFilters } from './filters/accounts-table-filters';
 import { getAccountColumns } from './account-columns';
 import { FiltersSchema } from './filters/search-input';
 
-type Account = Database['public']['Tables']['accounts']['Row'];
+type Organization = Database['public']['Tables']['organizations']['Row'];
 
-export function AdminAccountsTable(
+export function AdminOrganizationsTable(
   props: React.PropsWithChildren<{
-    data: Account[];
+    data: Organization[];
     pageCount: number;
     pageSize: number;
     page: number;
@@ -43,7 +43,7 @@ export function AdminAccountsTable(
           pageIndex={props.page - 1}
           pageCount={props.pageCount}
           data={props.data}
-          columns={getAccountColumns({ isPersonalAccount: true })}
+          columns={getAccountColumns({ isPersonalAccount: false })}
         />
       </div>
     </div>

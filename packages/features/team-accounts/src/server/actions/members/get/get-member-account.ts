@@ -131,7 +131,10 @@ export async function getUserById(userId: string) {
 
     if (userError) throw userError;
 
-    return userData;
+    return {
+      ...userData,
+      settings: userData?.settings?.[0],
+    };
   } catch (error) {
     console.error('Error fetching user:', error);
     throw error;
@@ -238,7 +241,7 @@ export async function getUserAccountById(
     const { data: userSettings, error: userSettingsError } = await databaseClient
       .from('user_settings')
       .select('name')
-      .eq('account_id', userId)
+      .eq('user_id', userId)
       .eq('organization_id', organizationId ?? '')
       .single();
 

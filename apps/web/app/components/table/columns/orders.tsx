@@ -200,6 +200,7 @@ const RowAssignedTo = ({
   const membersAssignedSchema = z.object({
     members: z.array(z.string()),
   });
+  
 
   const defaultValues = {
     members: row?.assigned_to
@@ -228,14 +229,22 @@ const RowAssignedTo = ({
     () =>
       row?.assigned_to?.map((assignee) => ({
         name:
-          assignee.agency_member?.settings?.name ??
-          assignee?.agency_member?.name ??
-          '',
+          Array.isArray(assignee.agency_member?.settings)
+            ? assignee.agency_member?.settings[0]?.name ??
+              assignee?.agency_member?.name ??
+              ''
+            : assignee.agency_member?.settings?.name ??
+              assignee?.agency_member?.name ??
+              '',
         email: assignee.agency_member?.email ?? '',
         picture_url:
-          assignee.agency_member?.settings?.picture_url ??
-          assignee?.agency_member?.picture_url ??
-          '',
+          Array.isArray(assignee.agency_member?.settings)
+            ? assignee.agency_member?.settings[0]?.picture_url ??
+              assignee?.agency_member?.picture_url ??
+              ''
+            : assignee.agency_member?.settings?.picture_url ??
+              assignee?.agency_member?.picture_url ??
+              '',
       })) ?? [],
     [row?.assigned_to],
   );

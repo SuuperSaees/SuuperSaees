@@ -28,6 +28,7 @@ import { AdminReactivateUserDialog } from './admin-reactivate-user-dialog';
 
 type Db = Database['public']['Tables'];
 type Account = Db['accounts']['Row'];
+type Organization = Db['organizations']['Row'];
 type Membership = Db['accounts_memberships']['Row'];
 
 // Helper function to safely format dates
@@ -46,15 +47,15 @@ function formatDate(dateString: string | null): string {
 }
 
 export function AdminAccountPage(props: {
-  account: Account & { memberships: Membership[] };
+  account: Account | Organization & { memberships: Membership[] };
+  isPersonalAccount: boolean;
 }) {
-  const isPersonalAccount = props.account.is_personal_account;
 
-  if (isPersonalAccount) {
-    return <PersonalAccountPage account={props.account} />;
+  if (props.isPersonalAccount) {
+    return <PersonalAccountPage account={props.account as Account} />;
   }
 
-  return <TeamAccountPage account={props.account} />;
+  return <TeamAccountPage account={props.account as Organization & { memberships: Membership[] }} />;
 }
 
 async function PersonalAccountPage(props: { account: Account }) {
@@ -66,7 +67,7 @@ async function PersonalAccountPage(props: { account: Account }) {
   const { data, error } = await client.auth.admin.getUserById(props.account.id);
 
   if (!data || error) {
-    throw new Error(`User not found, adm`);
+    throw new Error(`User not found, admin account page`);
   }
 
   const isBanned =
@@ -201,7 +202,7 @@ async function PersonalAccountPage(props: { account: Account }) {
 }
 
 async function TeamAccountPage(props: {
-  account: Account & { memberships: Membership[] };
+  account: Organization & { memberships: Membership[] };
 }) {
   const members = await getMembers(props.account.slug ?? '');
 
@@ -225,7 +226,7 @@ async function TeamAccountPage(props: {
                 <h2 className="text-2xl font-bold">{props.account.name}</h2>
                 <div className="flex items-center text-muted-foreground">
                   <Mail className="mr-1 h-4 w-4" />
-                  <span>{props.account.email}</span>
+                  <span>{props.account.owner_id}</span>
                 </div>
                 <div className="flex items-center space-x-2 mt-1">
                   <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700 flex items-center">
@@ -453,7 +454,7 @@ async function getMemberships(userId: string) {
           name: string;
         };
       }
-    >('*, account: account_id !inner (id, name)')
+    >('*, account: organization_id !inner (id, name)')
     .eq('user_id', userId);
 
   if (memberships.error) {
@@ -463,13 +464,13 @@ async function getMemberships(userId: string) {
   return memberships.data;
 }
 
-async function getMembers(accountSlug: string) {
+async function getMembers(organizationSlug: string) {
   const client = getSupabaseServerComponentClient({
     admin: true,
   });
 
   const members = await client.rpc('get_account_members', {
-    account_slug: accountSlug,
+    organization_slug: organizationSlug,
   });
 
   if (members.error) {

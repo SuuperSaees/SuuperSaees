@@ -93,9 +93,9 @@ const ActivityAssignations = ({
         {avatarsWithStatus.map((avatar, index) => (
           <AvatarDisplayer
             key={avatar?.id ?? index}
-            displayName={avatar?.settings?.name ?? avatar?.name ?? ""}
+            displayName={Array.isArray(avatar?.settings) ? avatar?.settings[0].name ?? avatar?.name ?? "" : avatar?.settings?.name ?? avatar?.name ?? ""}
             isAssignedOrFollower={true}
-            pictureUrl={avatar?.settings?.picture_url ?? avatar?.picture_url}
+            pictureUrl={Array.isArray(avatar?.settings) ? avatar?.settings[0].picture_url ?? avatar?.picture_url : avatar?.settings?.picture_url ?? avatar?.picture_url}
             status={avatar?.status}
             className="h-8 w-8 border-2 border-white"
           />

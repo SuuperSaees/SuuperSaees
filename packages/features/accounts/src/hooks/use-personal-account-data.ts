@@ -29,12 +29,10 @@ export function usePersonalAccountData(
         id,
         name,
         picture_url,
-        stripe_id,
         settings:user_settings(name,picture_url)
     `,
       )
-      .eq('primary_owner_user_id', userId)
-      .eq('is_personal_account', true)
+      .eq('id', userId)
       .single();
 
     const transformerResponse = {
@@ -42,7 +40,6 @@ export function usePersonalAccountData(
       name: response.data?.settings?.name ?? response.data?.name,
       picture_url:
         response.data?.settings?.picture_url ?? response.data?.picture_url,
-      stripe_id: response.data?.stripe_id,
     };
 
     if (response.error) {

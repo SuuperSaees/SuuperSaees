@@ -40,7 +40,7 @@ export class TeamRepository {
       const { data: getClientInfo, error: getClientInfoError } = await this.client
       .from('clients')
       .select('agency_id')
-      .eq('organization_client_id', getAccountInfo.organization_id)
+      .eq('organization_client_id', getAccountInfo.organization_id ?? '')
       .eq('user_client_id', user?.user?.id ?? '')
       .single();
       
@@ -108,18 +108,17 @@ export class TeamRepository {
         .select('id, email, name, picture_url, user_settings(name, picture_url)')
         .in('id', membersIds);
 
-
         if (membersDataError) throw membersDataError;
 
         const membersDataMap = new Map(membersData.map((member) => [member.id, member]));
         
         resultMembers[organizationId].members = members.map((member) => ({
           id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.user_settings?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
+          name: membersDataMap.get(member.user_id)?.user_settings?.[0]?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
           email: membersDataMap.get(member.user_id)?.email ?? '',
           organization_id: organizationId,
           role: member.account_role,
-          picture_url: membersDataMap.get(member.user_id)?.user_settings?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
+          picture_url: membersDataMap.get(member.user_id)?.user_settings?.[0]?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
           // visibility: true,
         }
       ));
