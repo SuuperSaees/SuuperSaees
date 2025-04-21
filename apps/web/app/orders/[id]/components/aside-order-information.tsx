@@ -218,9 +218,9 @@ const AsideOrderInformation = ({
 
   const searchUserOptionsFollowers =
     orderAgencyClientsFollowers?.filter((currentUser) => currentUser.role !== 'client_guest').map((user) => ({
-      picture_url: user?.settings?.picture_url ?? user?.picture_url ?? '',
+      picture_url: Array.isArray(user?.settings) ? user?.settings[0]?.picture_url ?? user?.picture_url : user?.settings?.picture_url ?? user?.picture_url,
       value: user.id,
-      label: user?.settings?.name ?? user.name ?? '',
+      label: Array.isArray(user?.settings) ? user?.settings[0]?.name ?? user.name ?? '' : user?.settings?.name ?? user.name ?? '',
       role: user.role,
     })) ?? [];
 
