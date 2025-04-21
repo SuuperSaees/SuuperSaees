@@ -50,7 +50,7 @@ function getColumns(): ColumnDef<Membership>[] {
             <Users className="h-3.5 w-3.5 mr-1.5 text-blue-500" />
             <Link
               className="font-medium hover:underline"
-              href={`/admin/accounts/${row.original.account_id}`}
+              href={`/admin/accounts/${row.original.organization_id}`}
             >
               {row.original.account.name}
             </Link>
@@ -63,7 +63,7 @@ function getColumns(): ColumnDef<Membership>[] {
       cell: ({ row }) => {
         return (
           <div className="flex items-center">
-            <span className="text-xs font-mono text-muted-foreground">{row.original.account_id}</span>
+            <span className="text-xs font-mono text-muted-foreground">{row.original.organization_id}</span>
           </div>
         );
       },

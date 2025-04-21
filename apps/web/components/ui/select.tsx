@@ -16,6 +16,7 @@ import { cn } from '@kit/ui/utils';
 export type Option = {
   label: string;
   value: string | number;
+  picture_url?: string | null;
   action?: (option: string | number) => void;
 };
 

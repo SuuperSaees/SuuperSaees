@@ -99,7 +99,7 @@ export default function ClientAssignation({ onSelectOrganization }: ClientAssign
     return (
       clientsOrganizationsQuery.data?.map((organization) => ({
         value: organization.id,
-        label: organization.name,
+        label: organization.name ?? '',
       })) ?? []
     );
   }, [clientsOrganizationsQuery.data]);
@@ -109,6 +109,7 @@ export default function ClientAssignation({ onSelectOrganization }: ClientAssign
       clientMembersQuery.data?.map((member) => ({
         value: member.id,
         label: member.name,
+        picture_url: member.picture_url,
       })) ?? []
     );
   }, [clientMembersQuery.data]);

@@ -13,35 +13,35 @@ interface Params {
 
 export const generateMetadata = async (props: Params) => {
   const params = await props.params;
-  const account = await loadAccount(params.id);
+  const organization = await loadOrganization(params.id);
 
   return {
-    title: `Admin | ${account.name}`,
+    title: `Admin | ${organization.name}`,
   };
 };
 
-async function AccountPage({ params }: Params) {
-  const account = await loadAccount(params.id);
+async function OrganizationPage({ params }: Params) {
+  const organization = await loadOrganization(params.id);
 
   return (
     <PageBody className={'mx-auto flex w-full lg:px-16 p-8'}>
-      <AdminAccountPage account={account} isPersonalAccount={true} />
+      <AdminAccountPage account={organization} isPersonalAccount={false} />
     </PageBody>
   );
 }
 
-export default AdminGuard(AccountPage);
+export default AdminGuard(OrganizationPage);
 
-const loadAccount = cache(accountLoader);
+const loadOrganization = cache(organizationLoader);
 
-async function accountLoader(id: string) {
+async function organizationLoader(id: string) {
   const client = getSupabaseServerComponentClient({
     admin: true,
   });
 
   const { data, error } = await client
-    .from('accounts')
-    .select('*')
+    .from('organizations')
+    .select('*, memberships: accounts_memberships (*)')
     .eq('id', id)
     .single();
 
@@ -49,10 +49,5 @@ async function accountLoader(id: string) {
     throw error;
   }
 
-  const { data: memberships } = await client
-    .from('accounts_memberships')
-    .select('*')
-    .eq('user_id', id);
-
-  return { ...data, memberships };
+  return data;
 }
