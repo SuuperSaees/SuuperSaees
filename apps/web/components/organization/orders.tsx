@@ -67,7 +67,7 @@ export default function OrdersSection({
     queryKey: ['agencyMembers', agencySlug],
     queryFn: async () =>
       await client.rpc('get_account_members', {
-        account_slug: agencySlug ?? '',
+        organization_slug: agencySlug ?? '',
       }),
     enabled: !!agencySlug && validAgencyRoles.has(workspace?.role ?? ''),
   });

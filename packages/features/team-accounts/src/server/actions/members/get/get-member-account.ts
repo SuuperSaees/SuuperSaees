@@ -238,7 +238,7 @@ export async function getUserAccountById(
     const { data: userSettings, error: userSettingsError } = await databaseClient
       .from('user_settings')
       .select('name')
-      .eq('account_id', userId)
+      .eq('user_id', userId)
       .eq('organization_id', organizationId ?? '')
       .single();
 
