@@ -125,6 +125,15 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
           },
         };
       }),
+      activities: orderData.activities.map((activity) => {
+        return {
+          ...activity,
+          user: {
+            ...activity.user,
+            settings: activity.user?.settings?.[0],
+          },
+        };
+      }),
       assigned_to: orderData.assigned_to.filter(assignment => 
         !assignment.agency_member?.deleted_on && true
         // assignment.agency_member?.organization_id === orderData.agency_id
