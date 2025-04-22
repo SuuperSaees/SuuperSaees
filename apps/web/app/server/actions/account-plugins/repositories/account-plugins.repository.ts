@@ -130,13 +130,23 @@ export class AccountPluginsRepository {
       if (name) {
         const sessionData = (await this.client.rpc('get_session')).data;
         const accountId = sessionData?.agency?.owner_id ?? sessionData?.organization?.owner_id ?? '';
-        const { data, error } = await query
-        .eq('account_id', accountId)
-        .eq('plugins.name', name)
+
+        const { data: dataPlugin, error: errorPlugin } = await this.client
+        .from('plugins')
+        .select('id')
+        .eq('name', name)
         .single();
 
-        console.log('data', data, accountId, name);
-        console.log('error', error);
+        if (errorPlugin) {
+          throw new Error(
+            `[REPOSITORY] Error fetching plugin by name: ${errorPlugin.message}`,
+          );
+        }
+
+        const { data, error } = await query
+        .eq('account_id', accountId)
+        .eq('plugin_id', dataPlugin?.id)
+        .single();
 
         if (error) {
           throw new Error(
