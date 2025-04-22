@@ -18,12 +18,11 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
   const currentUserId = user?.id;
   const currentRole = workspace?.role;
 
-
   const { data: getOrganizationData, error: getOrganizationError, isLoading, isPending } = useQuery({
     queryKey: ['account-settings', currentUserId],
     queryFn: currentRole === 'client_member' || currentRole === 'client_owner' ? 
       async () => await getAgencyForClientByUserId() : 
-      async () => await getOrganization(),
+      async () => await getOrganization(true),
     enabled: !!currentUserId,
   });
 

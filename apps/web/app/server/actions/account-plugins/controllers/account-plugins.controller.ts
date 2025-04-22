@@ -62,11 +62,11 @@ export class AccountPluginsController {
             throw error;
         }
     }
-    async get(id: string): Promise<AccountPlugin> {
+    async get(id?: string, accountId?: string, name?: string): Promise<AccountPlugin> {
         try {
             const accountPluginRepository = new AccountPluginsRepository(this.client, this.adminClient);
             const accountPluginService = new AccountPluginsService(accountPluginRepository);
-            return await accountPluginService.get(id);
+            return await accountPluginService.get(id, accountId, name);
         } catch (error) {
             console.log(error);
             throw error;
