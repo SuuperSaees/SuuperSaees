@@ -102,7 +102,7 @@ export const ActivityProvider = ({
   );
 
   // Mark order as read when it changes
-  const { markOrderAsRead } = useUnreadMessageCounts({
+  const { markOrderAsRead, getUnreadCountForOrder, unreadCounts } = useUnreadMessageCounts({
     userId: currentUser.id ?? '',
   });
 
@@ -125,6 +125,10 @@ export const ActivityProvider = ({
         userWorkspace: currentUser,
         deleteMessage: deleteMessageMutation,
         interactionsQuery,
+        getUnreadCountForOrder,
+        markOrderAsRead,
+        orderId: order.id,
+        unreadCounts,
       }}
     >
       {children}

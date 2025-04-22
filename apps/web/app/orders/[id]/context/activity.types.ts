@@ -10,6 +10,7 @@ import { Message as ServerMessage } from '~/lib/message.types';
 import { Order as ServerOrder } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
+import { UnreadMessageCount } from '~/hooks/use-unread-message-counts';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -149,6 +150,7 @@ export interface ActivityContextType {
   // files: DataResult.File[];
   // allFiles: DataResult.File[];
   order: DataResult.Order;
+  orderId: number;
   briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   userRole: string;
   addMessageMutation: UseMutationResult<
@@ -178,4 +180,7 @@ export interface ActivityContextType {
     }
   >;
   interactionsQuery: UseInfiniteQueryResult<DataResult.InteractionPages, Error>;
+  getUnreadCountForOrder: (orderId: number) => number;
+  markOrderAsRead: (orderId: number) => Promise<void>;
+  unreadCounts: UnreadMessageCount[];
 }

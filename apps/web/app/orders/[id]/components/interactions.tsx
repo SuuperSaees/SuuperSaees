@@ -1,10 +1,11 @@
-import { useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Check } from 'lucide-react';
-
+import { useTranslation } from 'react-i18next';
 
 import { Spinner } from '@kit/ui/spinner';
 
+import useInfiniteScroll from '~/hooks/use-infinite-scroll';
 import { Activity } from '~/lib/activity.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Review } from '~/lib/review.types';
@@ -17,20 +18,30 @@ import {
 import { useActivityContext } from '../context/activity-context';
 import { DataSource } from '../context/activity.types';
 import ActivityAction from './activity-actions';
+import ScrollToBottomButton from './scroll-to-bottom-button';
 import UserFirstMessage from './user-first-message';
 import UserMessage from './user-message';
 import UserReviewMessage from './user-review-message';
-import useInfiniteScroll from '~/hooks/use-infinite-scroll';
 
 const Interactions = ({
   agencyStatuses,
 }: {
   agencyStatuses: AgencyStatus.Type[];
 }) => {
-  const { messages, activities, reviews, interactionsQuery } = useActivityContext();
+  const {
+    messages,
+    activities,
+    reviews,
+    interactionsQuery,
+    userWorkspace,
+    getUnreadCountForOrder,
+    orderId,
+    markOrderAsRead,
+    unreadCounts,
+  } = useActivityContext();
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
-
-
+  const [isFirstRender, setIsFirstRender] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const groupedInteractions = useMemo(() => {
     const combinedInteractions = combineChatInteractions(
       messages,
@@ -41,7 +52,8 @@ const Interactions = ({
     return groupChatInteractionsByDay(sortedInteractions);
   }, [messages, activities, reviews]);
 
- 
+  const { t } = useTranslation('orders');
+
   const { loadMoreRef } = useInfiniteScroll({
     hasNextPage: interactionsQuery.hasNextPage,
     isFetchingNextPage: interactionsQuery.isFetchingNextPage,
@@ -50,12 +62,99 @@ const Interactions = ({
     containerRef: interactionsContainerRef,
     anchorSelector: '[data-message-id]',
   });
+  // Is the last message of the first page but is not self message
+  const lastMessageForReadId =
+    interactionsQuery.data?.pages[0]?.messages[
+      interactionsQuery.data?.pages[0]?.messages.findLastIndex(
+        (m) => m.user_id !== userWorkspace.id,
+      ) ?? 0
+    ]?.id ?? '';
 
-  console.log('MESSAGES', messages);
+  const lastMessageIsRead = unreadCounts.find((count) =>
+    count.message_ids.includes(lastMessageForReadId),
+  )?.message_ids.length;
+
+  const handleContainerScroll = () => {
+    if (!interactionsContainerRef.current) return;
+    const { scrollHeight, scrollTop, clientHeight } =
+      interactionsContainerRef.current;
+    const scrollPosition = scrollHeight - scrollTop - clientHeight;
+    setShowScrollButton(scrollPosition > clientHeight);
+
+    // Read messages when the user scrolls to the bottom, so it means is in the last message
+    // And only if the message is not already read
+
+    if (scrollPosition <= clientHeight && lastMessageIsRead) {
+      void markOrderAsRead(orderId).catch((error) => {
+        console.error('Failed to read messages', error);
+      });
+    }
+  };
+
+  const scrollToReadMessages = () => {
+    if (!interactionsContainerRef.current) return;
+    try {
+      void markOrderAsRead(orderId);
+      return interactionsContainerRef.current?.scrollTo({
+        top: interactionsContainerRef.current.scrollHeight,
+        behavior: 'auto',
+      });
+    } catch (error) {
+      console.error('Failed to read messages', error);
+    }
+  };
+
+  // Scroll to new messages when they are added
+  const scrollToBottom = useCallback(
+    (isFirstRender = false) => {
+      // Only scroll if are new messages, not old ones
+      // And for better UX, scroll only if the user is on the view of the new message or if the message is sent by the user
+      if (!interactionsContainerRef.current) return;
+      const { scrollHeight, scrollTop, clientHeight } =
+        interactionsContainerRef.current;
+      // First, calculate the scroll position from the bottom of the container
+      const scrollPosition = scrollHeight - scrollTop - clientHeight;
+
+      const lastMessage =
+        interactionsQuery.data?.pages[0]?.messages[
+          interactionsQuery.data?.pages[0]?.messages.length - 1
+        ];
+      const messageIsSentBySelf = lastMessage?.user_id === userWorkspace.id;
+      const scrollIsInView = scrollPosition <= clientHeight;
+
+      if (
+        isFirstRender ||
+        messageIsSentBySelf ||
+        (interactionsQuery.data?.pages[0]?.messages.length && scrollIsInView)
+      ) {
+        interactionsContainerRef.current?.scrollTo({
+          top: scrollHeight,
+          behavior: 'auto',
+        });
+      }
+    },
+    [interactionsQuery.data?.pages, userWorkspace.id],
+  );
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [scrollToBottom]);
+
+  // Call scrollToBottom with isFirstRender=true on first render
+  useEffect(() => {
+    if (isFirstRender && !interactionsQuery.isLoading) {
+      scrollToBottom(true);
+      setIsFirstRender(false);
+    }
+  }, [isFirstRender, interactionsQuery.isLoading, scrollToBottom]);
+
+  const unreadCount = getUnreadCountForOrder(orderId);
+  console.log('unreadCount', unreadCount);
   return (
     <div
       className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8"
       ref={interactionsContainerRef}
+      onScroll={handleContainerScroll}
     >
       {interactionsQuery.isFetchingNextPage && (
         <Spinner className="mx-auto h-5 w-5 text-gray-500" />
@@ -120,6 +219,18 @@ const Interactions = ({
             </div>
           );
         })
+      )}
+      {showScrollButton && (
+        <ScrollToBottomButton
+          content={
+            unreadCount > 0 ? unreadCount === 1
+              ? t('message.newMessages.singular')
+              : t('message.newMessages.plural')
+            : t('message.scrollToBottom')
+          }
+          unreadMessages={unreadCount}
+          onClick={scrollToReadMessages}
+        />
       )}
     </div>
   );

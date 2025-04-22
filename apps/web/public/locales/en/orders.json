@@ -167,7 +167,12 @@
     "messageSentError": "The message could not be sent.",
     "messageDeleted": "Message deleted",
     "messageDeletedSuccess": "The message has been deleted.",
-    "messageDeletedError": "The message could not be deleted."
+    "messageDeletedError": "The message could not be deleted.",
+    "newMessages": {
+      "singular": "new message",
+      "plural": "new messages"
+    },
+    "scrollToBottom": "Scroll to bottom"
   },
   "dragAndDropDictionary": {
     "dropHere": "Drop your files here",
