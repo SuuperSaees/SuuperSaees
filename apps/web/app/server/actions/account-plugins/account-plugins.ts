@@ -36,8 +36,8 @@ class AccountPluginsAction extends BaseAction implements IAccountPluginsAction {
         return await this.controller.delete(id, accountId, provider);
     }
 
-    async get(id: string): Promise<AccountPlugin> {
-        return await this.controller.get(id);
+    async get(id?: string, name?: string): Promise<AccountPlugin> {
+        return await this.controller.get(id, name);
     }
 }
 

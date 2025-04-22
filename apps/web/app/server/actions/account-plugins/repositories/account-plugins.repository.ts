@@ -105,8 +105,10 @@ export class AccountPluginsRepository {
    */
   async get({
     id,
+    name,
   }: {
     id?: string;
+    name?: string;
   }): Promise<AccountPlugin> {
     try {
       const query = this.client
@@ -124,6 +126,23 @@ export class AccountPluginsRepository {
           plugins(id, name)
         `)
         .is('deleted_on', null);
+
+      if (name) {
+        const sessionData = (await this.client.rpc('get_session')).data;
+        const accountId = sessionData?.agency?.owner_id ?? sessionData?.organization?.owner_id ?? '';
+        const { data, error } = await query
+        .eq('account_id', accountId)
+        .eq('plugins.name', name)
+        .single();
+
+        if (error) {
+          throw new Error(
+            `[REPOSITORY] Error fetching account plugin by ID: ${error.message}`,
+          );
+        }
+        
+        return data as AccountPlugin;
+      }
 
       if (id) {
         const { data, error } = await query.eq('id', id).single();

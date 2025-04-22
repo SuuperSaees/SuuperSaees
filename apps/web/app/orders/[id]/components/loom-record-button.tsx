@@ -4,8 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { setup } from "@loomhq/record-sdk";
 import { isSupported } from "@loomhq/record-sdk/is-supported";
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-import { getAgencyForClientByUserId, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { Spinner } from '@kit/ui/spinner';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 interface LoomRecordButtonProps {
   setCustomEditorText?: (text: string) => void;
@@ -14,17 +14,14 @@ interface LoomRecordButtonProps {
 function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
   const [loomAppId, setLoomAppId] = useState<string>('');
   const [buttonName, setButtonName] = useState<string>('');
-  const {user, workspace} = useUserWorkspace();
+  const {user} = useUserWorkspace();
   const currentUserId = user?.id;
-  const currentRole = workspace?.role;
 
-
-  const { data: getOrganizationData, error: getOrganizationError, isLoading, isPending } = useQuery({
-    queryKey: ['account-settings', currentUserId],
-    queryFn: currentRole === 'client_member' || currentRole === 'client_owner' ? 
-      async () => await getAgencyForClientByUserId() : 
-      async () => await getOrganization(),
+  const { data: getAccountPluginData, isLoading: isAccountPluginLoading, isPending: isAccountPluginPending } = useQuery({
+    queryKey: ['account-plugin', currentUserId],
+    queryFn: async () => await getAccountPlugin(undefined, 'loom'),
     enabled: !!currentUserId,
+    retry: 3,
   });
 
   const setupLoom = useCallback(async (buttonName: string, loomAppId: string) => {
@@ -52,13 +49,13 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
   }, []);
 
   useEffect(() => { 
-    if (getOrganizationData) {
-      const newLoomAppId = getOrganizationData.loom_app_id ?? '';
+    if (getAccountPluginData) {
+      const newLoomAppId = getAccountPluginData.credentials?.loom_app_id ?? '';
       const newButtonName = `loom-${currentUserId}`;
       setLoomAppId(newLoomAppId);
       setButtonName(newButtonName);
     }
-  }, [getOrganizationData, getOrganizationError, currentUserId]);
+  }, [getAccountPluginData, currentUserId]);
 
   useEffect(() => {
     if (loomAppId && buttonName) {
@@ -71,7 +68,7 @@ function LoomRecordButton({setCustomEditorText}: LoomRecordButtonProps) {
     }
   }, [loomAppId, buttonName, setupLoom]);
 
-  if (isLoading || isPending || !getOrganizationData) {
+  if (isAccountPluginLoading || isAccountPluginPending || !getAccountPluginData) {
     return <Spinner className='h-5 text-gray-400' />;
   }
 
