@@ -22,8 +22,8 @@ export async function deleteAccountPlugin(id: string, accountId: string, provide
     return await getAccountPluginsAction().delete(id, accountId, provider);
 }
 
-export async function getAccountPlugin(id?: string, accountId?: string, name?: string) {
-    return await getAccountPluginsAction().get(id, accountId, name);
+export async function getAccountPlugin(id?: string, name?: string) {
+    return await getAccountPluginsAction().get(id, name);
 }
 
 export async function getAccountPlugins(accountId: string, limit = 10, offset = 0) {

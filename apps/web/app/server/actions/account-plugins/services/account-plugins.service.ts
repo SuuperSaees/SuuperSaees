@@ -176,8 +176,8 @@ export class AccountPluginsService {
         return this.repository.delete(id, accountId, provider);
     }
 
-    async get(id?: string, accountId?: string, name?: string): Promise<AccountPlugin> {
-        const accountPlugin = await this.repository.get({ id, accountId, name});
+    async get(id?: string, name?: string): Promise<AccountPlugin> {
+        const accountPlugin = await this.repository.get({ id, name});
         const pluginName = accountPlugin.plugins?.name.toLowerCase();
 
         if (

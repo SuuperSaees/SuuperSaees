@@ -7,8 +7,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { getAccountPlugin } from '../../../../../../../../apps/web/app/server/actions/account-plugins/account-plugins.action';
-
 import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
@@ -89,13 +87,12 @@ export const getOrganizationSettingsByOrganizationId = async (
   return organizationSettings;
 };
 
-export async function getOrganization(includeLoomAppId = false): Promise<{
+export async function getOrganization(): Promise<{
   id: string;
   name: string | null;
   owner_id: string | null;
   slug: string | null;
   picture_url: string | null;
-  loom_app_id: string | null;
 }> {
   try {
     const client = getSupabaseServerComponentClient();
@@ -113,22 +110,12 @@ export async function getOrganization(includeLoomAppId = false): Promise<{
       throw organizationError;
     }
 
-    let loomAppId = null;
-    if (includeLoomAppId) {
-      const accountPlugin = await getAccountPlugin(undefined, organizationData?.owner_id ?? '', 'loom');
-
-      console.log('accountPlugin', accountPlugin);
-
-      loomAppId = '';
-    }
-
     return {
       id: organizationId,
       picture_url: organizationsData?.picture_url ?? '',
       name: organizationData?.name ?? '',
       owner_id: organizationData?.owner_id ?? '',
-      slug: organizationData?.slug ?? '',
-      loom_app_id: loomAppId,
+      slug: organizationData?.slug ?? ''
     };
   } catch (error) {
     console.error('Error getting the organization:', error);

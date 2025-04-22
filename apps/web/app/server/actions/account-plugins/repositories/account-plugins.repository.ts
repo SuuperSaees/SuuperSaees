@@ -105,11 +105,9 @@ export class AccountPluginsRepository {
    */
   async get({
     id,
-    accountId,
     name,
   }: {
     id?: string;
-    accountId?: string;
     name?: string;
   }): Promise<AccountPlugin> {
     try {
@@ -129,7 +127,9 @@ export class AccountPluginsRepository {
         `)
         .is('deleted_on', null);
 
-      if (accountId) {
+      if (name) {
+        const sessionData = (await this.client.rpc('get_session')).data;
+        const accountId = sessionData?.agency?.owner_id ?? sessionData?.organization?.owner_id ?? '';
         const { data, error } = await query
         .eq('account_id', accountId)
         .eq('plugins.name', name)
