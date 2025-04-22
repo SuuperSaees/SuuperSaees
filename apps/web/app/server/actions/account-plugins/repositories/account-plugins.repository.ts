@@ -135,6 +135,9 @@ export class AccountPluginsRepository {
         .eq('plugins.name', name)
         .single();
 
+        console.log('data', data, accountId, name);
+        console.log('error', error);
+
         if (error) {
           throw new Error(
             `[REPOSITORY] Error fetching account plugin by ID: ${error.message}`,
