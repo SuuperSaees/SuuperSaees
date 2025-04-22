@@ -13,7 +13,22 @@ import { updateArrayData } from '~/utils/data-transform';
 
 import type { DataResult, UserExtended } from '../context/activity.types';
 
-type UpdaterFunction = (updater: DataResult.InteractionPages | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages)) => void
+type UpdaterFunction = (
+  updater:
+    | DataResult.InteractionPages
+    | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages),
+) => void;
+
+type IndexResult = {
+  pageIndex: number;
+  itemIndex: number;
+};
+
+type InteractionItem =
+  | DataResult.Message
+  | DataResult.Activity
+  | DataResult.Review;
+
 /**
  * Helper function to enrich data with user information
  */
@@ -26,26 +41,102 @@ const enrichWithUser = async (
   members?: UserExtended[],
 ): Promise<DataResult.Message | DataResult.Activity | DataResult.File> => {
   // Try to find existing user data or fetch from API
-  // First check with members array, otherwise with existingItems array
-  let user = null;
-  if (members?.length) {
-    user = members.find((member) => member.id === data.user_id);
-  } else if (existingItems?.length) {
-    user = existingItems.find((item) => item.user_id === data.user_id)?.user;
-  }
+  let user =
+    members?.find((member) => member.id === data.user_id) ??
+    existingItems?.find((item) => item.user_id === data.user_id)?.user;
+
   if (!user) {
     try {
-      user = await getUserById(data.user_id);
+      // Ensure the user fetched from API is compatible with UserExtended
+      const fetchedUser = await getUserById(data.user_id);
+      user = {
+        id: fetchedUser.id,
+        name: fetchedUser.name,
+        email: fetchedUser.email,
+        picture_url: fetchedUser.picture_url,
+        settings:
+          fetchedUser.settings && Array.isArray(fetchedUser.settings)
+            ? {
+                name: fetchedUser.settings[0]?.name ?? null,
+                picture_url: fetchedUser.settings[0]?.picture_url ?? null,
+              }
+            : null,
+      };
     } catch (err) {
       console.error('Error fetching user:', err);
       throw err;
     }
   }
 
+  return { ...data, user } as
+    | DataResult.Message
+    | DataResult.Activity
+    | DataResult.File;
+};
+
+/**
+ * Find the page and item indexes in interactions data
+ */
+const findIndexes = (
+  interactions: DataResult.InteractionPages,
+  findPredicate: (item: InteractionItem) => boolean,
+  collection: 'messages' | 'activities' | 'reviews',
+): IndexResult => {
+  if (!interactions) {
+    return { pageIndex: -1, itemIndex: -1 };
+  }
+
+  for (let pageIndex = 0; pageIndex < interactions.pages.length; pageIndex++) {
+    const page = interactions.pages[pageIndex];
+    if (!page) continue;
+
+    const items = page[collection] || [];
+    for (let itemIndex = 0; itemIndex < items.length; itemIndex++) {
+      const item = items[itemIndex];
+      if (item && findPredicate(item)) {
+        return { pageIndex, itemIndex };
+      }
+    }
+  }
+
+  return { pageIndex: -1, itemIndex: -1 };
+};
+
+// Helper function to update pages array
+const updateInteractionPage = (
+  prevInteractions: DataResult.InteractionPages,
+  pageIndex: number,
+  updatedData: Partial<{
+    messages: DataResult.Message[];
+    activities: DataResult.Activity[];
+    reviews: DataResult.Review[];
+  }>,
+): DataResult.InteractionPages => {
+  if (!prevInteractions) {
+    return {
+      pages: [
+        {
+          messages: updatedData.messages ?? [],
+          activities: updatedData.activities ?? [],
+          reviews: updatedData.reviews ?? [],
+        },
+      ],
+      pageParams: [],
+    };
+  }
+
+  const newPages = [...prevInteractions.pages];
+  newPages[pageIndex] = {
+    ...newPages[pageIndex],
+    messages: updatedData.messages ?? newPages[pageIndex]?.messages ?? [],
+    activities: updatedData.activities ?? newPages[pageIndex]?.activities ?? [],
+    reviews: updatedData.reviews ?? newPages[pageIndex]?.reviews ?? [],
+  };
+
   return {
-    ...data,
-    user,
-  } as DataResult.Message | DataResult.Activity | DataResult.File;
+    pages: newPages,
+    pageParams: prevInteractions.pageParams ?? [],
+  };
 };
 
 /**
@@ -60,11 +151,9 @@ export const useOrderSubscriptionsHandlers = () => {
     order: DataResult.Order,
     setOrder: React.Dispatch<React.SetStateAction<DataResult.Order>>,
   ): void | boolean => {
-    const { new: newData } = payload;
-
     if (payload.eventType === 'UPDATE') {
       const updatedOrder =
-        updateArrayData([order], newData, 'id', false)[0] ?? order;
+        updateArrayData([order], payload.new, 'id', false)[0] ?? order;
       setOrder(updatedOrder);
       return true;
     }
@@ -84,16 +173,16 @@ export const useOrderSubscriptionsHandlers = () => {
     const { eventType, new: newData } = payload;
 
     if (eventType === 'INSERT') {
-      const message = newData;
-
       try {
-        // Create enriched message with user data
         const enrichedMessage = {
-          ...(await enrichWithUser(message, interactions?.pages[0]?.messages ?? [], members)),
+          ...(await enrichWithUser(
+            newData,
+            interactions?.pages[0]?.messages ?? [],
+            members,
+          )),
           pending: false,
         } as DataResult.Message;
 
-        // Update messages array, matching by temp_id
         const updatedMessages = updateArrayData(
           interactions?.pages[0]?.messages ?? [],
           enrichedMessage,
@@ -101,19 +190,11 @@ export const useOrderSubscriptionsHandlers = () => {
           true,
         );
 
-        setInteractions((prevInteractions) => {
-          const newPages = [...(prevInteractions?.pages ?? [])];
-          newPages[0] = {
-            ...newPages[0],
+        setInteractions((prevInteractions) =>
+          updateInteractionPage(prevInteractions, 0, {
             messages: updatedMessages,
-            activities: newPages[0]?.activities ?? [],
-            reviews: newPages[0]?.reviews ?? [],
-          };
-          return {
-            pages: newPages,
-            pageParams: prevInteractions?.pageParams ?? [],
-          };
-        });
+          }),
+        );
         return true;
       } catch (err) {
         return false;
@@ -121,68 +202,34 @@ export const useOrderSubscriptionsHandlers = () => {
     } else if (eventType === 'UPDATE') {
       const { new: newMessage } = payload;
 
-      // Map over all the pages and messages and find the message to update (index) and also the page index
-      let pageIndex = -1;
-      let messageIndex = -1;
-      console.log('interactions', interactions);
-      interactions?.pages.some((page, pIndex) => {
-        const mIndex = page.messages.findIndex(
-          (message) => message.id === newMessage.id
-        );
-      
-        if (mIndex !== -1) {
-          pageIndex = pIndex;
-          messageIndex = mIndex;
-          return true; // stop iteration early
-        }
-      
-        return false;
-      });
+      // Find message to update across all pages
+      const { pageIndex, itemIndex: messageIndex } = findIndexes(
+        interactions,
+        (message) => message.id === newMessage.id,
+        'messages',
+      );
+
       if (messageIndex === -1 || pageIndex === -1) return false;
-      const messagesToUpdate = [...interactions?.pages[pageIndex]?.messages ?? []];
-      // Handle soft delete (use is_deleted_on)
-      // Filter the message from messages array that has is_deleted_on
-      const messageToUpdate = messagesToUpdate[messageIndex];
+
+      const updatedMessages = updateArrayData(
+        interactions?.pages[pageIndex]?.messages ?? [],
+        newMessage as DataResult.Message,
+        'temp_id',
+        false,
+      );
+
+      const messageToUpdate = updatedMessages[messageIndex];
       if (!messageToUpdate) return false;
 
       if (newMessage.deleted_on) {
         messageToUpdate.deleted_on = newMessage.deleted_on;
-
-          setInteractions((prevInteractions) => {
-          const newPages = [...(prevInteractions?.pages ?? [])];
-          newPages[pageIndex] = {
-            ...newPages[pageIndex],
-            messages: messagesToUpdate,
-            activities: newPages[pageIndex]?.activities ?? [],
-            reviews: newPages[pageIndex]?.reviews ?? [],
-          };
-          return {
-            pages: newPages,
-            pageParams: prevInteractions?.pageParams ?? [],
-          };
-        });
-      } else {
-        // For normal cases, just update the messages
-        const updatedMessages = updateArrayData(
-          messagesToUpdate,
-          newMessage as DataResult.Message,
-          'temp_id',
-          false,
-        );
-        setInteractions((prevInteractions) => {
-          const newPages = [...(prevInteractions?.pages ?? [])];
-          newPages[pageIndex] = {
-            ...newPages[pageIndex],
-            messages: updatedMessages,
-            activities: newPages[pageIndex]?.activities ?? [],
-            reviews: newPages[pageIndex]?.reviews ?? [],
-          };
-          return {
-            pages: newPages,
-            pageParams: prevInteractions?.pageParams ?? [],
-          };
-        });
       }
+
+      setInteractions((prevInteractions) =>
+        updateInteractionPage(prevInteractions, pageIndex, {
+          messages: updatedMessages,
+        }),
+      );
 
       return true;
     }
@@ -195,41 +242,48 @@ export const useOrderSubscriptionsHandlers = () => {
    */
   const handleFileChanges = (
     payload: RealtimePostgresChangesPayload<File.Type>,
-    setMessages: React.Dispatch<React.SetStateAction<DataResult.Message[]>>,
+    setInteractions: UpdaterFunction,
   ): void | boolean => {
     const { eventType, new: newData } = payload;
 
     if (eventType === 'INSERT') {
-      const file = newData;
-
-      setMessages((prevMessages) => {
+      setInteractions((prevInteractions) => {
         // Find the message this file belongs to
-        const messageIndex = prevMessages.findIndex(
-          (msg) => msg.id === file.message_id,
-        );
-        if (messageIndex === -1) return prevMessages;
-
-        // Create a copy of the messages array
-        const updatedMessages = [...prevMessages];
-        const message = updatedMessages[messageIndex];
-
-        if (!message) return prevMessages;
-
-        // Update the files array for this message
-        const updatedFiles = updateArrayData(
-          message?.files ?? [],
-          { ...file, isLoading: false },
-          'temp_id',
-          true,
+        const { pageIndex, itemIndex: messageIndex } = findIndexes(
+          prevInteractions,
+          (message) => message.id === newData.message_id,
+          'messages',
         );
 
-        // Update the message with the new files array
-        updatedMessages[messageIndex] = {
-          ...message,
-          files: updatedFiles,
+        if (pageIndex === -1 || messageIndex === -1) return prevInteractions;
+
+        const messageToUpdate =
+          prevInteractions?.pages[pageIndex]?.messages[messageIndex];
+
+        if (!messageToUpdate) return prevInteractions;
+
+        // Update the message with new file
+        const updatedMessage = {
+          ...messageToUpdate,
+          files: updateArrayData(
+            messageToUpdate?.files ?? [],
+            { ...newData, isLoading: false },
+            'temp_id',
+            true,
+          ),
         };
 
-        return updatedMessages;
+        // Update messages array with the updated message
+        const updatedMessages = updateArrayData(
+          prevInteractions?.pages[pageIndex]?.messages ?? [],
+          updatedMessage,
+          'id',
+          false,
+        );
+
+        return updateInteractionPage(prevInteractions, pageIndex, {
+          messages: updatedMessages,
+        });
       });
 
       return true;
@@ -243,32 +297,33 @@ export const useOrderSubscriptionsHandlers = () => {
    */
   const handleActivityChanges = async (
     payload: RealtimePostgresChangesPayload<Activity.Type>,
-    activities: DataResult.Activity[],
-    setActivities: React.Dispatch<React.SetStateAction<DataResult.Activity[]>>,
+    activities: DataResult.InteractionPages,
+    setActivities: UpdaterFunction,
     members?: UserExtended[],
   ): Promise<void | boolean> => {
     const { eventType, new: newData } = payload;
 
     if (eventType === 'INSERT') {
-      const activity = newData;
-
       try {
         // Create enriched activity with user data
         const enrichedActivity = (await enrichWithUser(
-          activity,
-          activities,
+          newData,
+          activities?.pages[0]?.activities ?? [],
           members,
         )) as DataResult.Activity;
 
-        // Update activities array, matching by temp_id
         const updatedActivities = updateArrayData(
-          activities,
+          activities?.pages[0]?.activities ?? [],
           enrichedActivity,
           'id',
           true,
         );
 
-        setActivities(updatedActivities);
+        setActivities((prevInteractions) =>
+          updateInteractionPage(prevInteractions, 0, {
+            activities: updatedActivities,
+          }),
+        );
         return true;
       } catch (err) {
         return false;

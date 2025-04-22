@@ -96,10 +96,10 @@ export const useOrderApiActions = ({
         user_id: currentUser?.id ?? '',
         files: files.map((file) => ({
           ...file,
+          // id: file.id ?? '',
           isLoading: true,
           temp_id: file.temp_id,
         })),
-        reactions: [], // Default to an empty array if not provided,
         temp_id: tempId,
         pending: true,
         updated_at: new Date().toISOString(),
@@ -151,34 +151,11 @@ export const useOrderApiActions = ({
         );
       }
       //  Remove the pending state of the message and for each file of the message the isLoading state
-      setInteractions((prev) => {
-        const newPages = [...(prev?.pages ?? [])];
-        const newInitialPageMessages =
-          newPages[0]?.messages.map((message) => {
-            return message.id === data.message.id && message.files
-              ? {
-                  ...message,
-                  pending: false,
-                  files: message.files.map((file) => ({
-                    ...file,
-                    isLoading: false,
-                  })),
-                }
-              : message;
-          }) ?? [];
-        newPages[0] = {
-          ...newPages[0],
-          messages: newInitialPageMessages,
-          activities: newPages[0]?.activities ?? [],
-          reviews: newPages[0]?.reviews ?? [],
-        };
-        return {
-          pages: newPages,
-          pageParams: prev?.pageParams ?? [],
-        };
-      });
       // Invalidate the messages query to refresh the data
-      void queryClient.invalidateQueries({ queryKey: ['messages', orderId] });
+      await queryClient.fetchInfiniteQuery({
+        queryKey: ['interactions', orderId],
+        initialPageParam: new Date().toISOString(), // works because descending,
+      });
     },
   });
 
@@ -195,7 +172,7 @@ export const useOrderApiActions = ({
       adminActived?: boolean;
     }) => deleteMessage(messageId, adminActived),
     onMutate: async ({ messageId }) => {
-      await queryClient.cancelQueries({ queryKey: ['messages', orderId] });
+      await queryClient.cancelQueries({ queryKey: ['interactions', orderId] });
 
       // Store the previous messages state
       const previousInteractions = interactions;
@@ -215,13 +192,14 @@ export const useOrderApiActions = ({
             messageIndex = mIndex;
             return true;
           }
-          return oldInteractions;
+          return false;
         });
         const messagesToUpdate = [
           ...(interactions?.pages[pageIndex]?.messages ?? []),
         ];
         const messageToUpdate = messagesToUpdate[messageIndex];
         if (!messageToUpdate) return oldInteractions;
+
         messageToUpdate.deleted_on = new Date().toISOString();
         newPages[pageIndex] = {
           ...newPages[pageIndex],
@@ -246,9 +224,12 @@ export const useOrderApiActions = ({
         description: t('message.messageDeletedError'),
       });
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(t('message.messageDeleted'), {
         description: t('message.messageDeletedSuccess'),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ['interactions', orderId],
       });
     },
   });

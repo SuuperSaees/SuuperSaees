@@ -1,20 +1,6 @@
 'use client';
 
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-
-import {
-  InfiniteData,
-  useInfiniteQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { ReactNode, createContext, useContext, useEffect } from 'react';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
@@ -23,12 +9,9 @@ import { Activity } from '~/lib/activity.types';
 import { Brief } from '~/lib/brief.types';
 import { Message } from '~/lib/message.types';
 import { Review } from '~/lib/review.types';
-import {
-  InteractionResponse,
-  getInteractions,
-} from '~/server/actions/interactions/get-interactions';
 
 import { useOrderApiActions } from '../hooks/use-order-api-actions';
+import { useOrderState } from '../hooks/use-order-state';
 import { useOrderSubscriptions } from '../hooks/use-order-subscriptions';
 import { ActivityContextType, DataResult } from './activity.types';
 
@@ -76,97 +59,19 @@ export const ActivityProvider = ({
   clientOrganizationId,
   agencyId,
 }: ActivityProviderProps) => {
-  // State management for various data types
-  const [order, setOrder] = useState<DataResult.Order>(serverOrder);
-  // const [messages, setMessages] =
-  //   useState<DataResult.Message[]>(serverMessages);
-  // const [activities, setActivities] =
-  //   useState<DataResult.Activity[]>(serverActivities);
-  // const [reviews, setReviews] = useState<DataResult.Review[]>(serverReviews);
-  const [files, setFiles] = useState<DataResult.File[]>([]);
 
-  const members = [
-    ...order.assigned_to.map((member) => member.agency_member),
-    ...order.followers.map((member) => member.client_follower),
-  ];
-
-  const queryClient = useQueryClient();
-  const interactionsQuery = useInfiniteQuery({
-    queryKey: ['interactions', order.id],
-    initialPageParam: new Date().toISOString(), // works because descending
-    queryFn: async ({ pageParam }) =>
-      await getInteractions(order.id, {
-        pagination: {
-          cursor: pageParam, // strict less than this
-          limit: 10,
-        },
-      }),
-    getNextPageParam: (lastPage) => {
-      // get last message from the *last page* (remember, descending order)
-      const mergedInteractions = [
-        ...lastPage.messages,
-        ...lastPage.activities,
-        ...lastPage.reviews,
-      ];
-      const orderedInteractions = mergedInteractions.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-      const lastInteraction =
-        orderedInteractions[orderedInteractions.length - 1];
-      const lastInteractionDate = lastInteraction?.created_at ?? undefined;
-      return lastInteractionDate; // this becomes the new cursor
-    },
-  });
-
-  console.log('interactionsQuery', interactionsQuery.data);
-  const interactionsGroups: InfiniteData<InteractionResponse, unknown> =
-    interactionsQuery.data ?? {
-      pages: [],
-      pageParams: [],
-    };
-  const messages = interactionsGroups.pages
-    .flatMap((page) => page.messages)
-    .filter((message) =>
-      !['agency_owner', 'agency_member', 'agency_project_manager'].includes(
-        userRole,
-      )
-        ? message?.visibility !== 'internal_agency'
-        : true,
-    );
-
-  const activities = interactionsGroups.pages.flatMap(
-    (page) => page.activities,
-  );
-  const reviews = interactionsGroups.pages.flatMap((page) => page.reviews);
-  /**
-   * Updates messages in the React Query cache while preserving other chat data
-   *
-   * @param updater - New messages array or update function
-   */
-  const messagesQueryKey = useMemo(() => ['interactions', order.id], [order.id]);
-  const setInteractions = useCallback(
-    (
-      updater:
-        | DataResult.InteractionPages
-        | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages),
-    ) => {
-      queryClient.setQueryData<DataResult.InteractionPages>(
-        messagesQueryKey,
-        (oldData) => {
-          if (!oldData) return oldData;
-          const currentInteractions = oldData ?? { pages: [], pageParams: [] };
-          const newInteractions =
-            typeof updater === 'function' ? updater(currentInteractions) : updater;
-          return newInteractions;
-        },
-      );
-    },
-    [queryClient, messagesQueryKey],
-  );
-
-
-
+  // Manage order state and related interactions
+  const {
+    order,
+    setOrder,
+    members,
+    messages,
+    activities,
+    reviews,
+    setInteractions,
+    interactionsQuery,
+    interactionsGroups,
+  } = useOrderState({ initialOrder: serverOrder });
 
   // Get current user workspace information
   const { workspace: currentUser } = useUserWorkspace();
@@ -191,8 +96,8 @@ export const ActivityProvider = ({
     setInteractions,
     interactionsGroups,
     setInteractions,
-    files,
-    setFiles,
+    interactionsGroups,
+    setInteractions,
     members,
   );
 
@@ -213,8 +118,6 @@ export const ActivityProvider = ({
         activities,
         messages: messages.filter((msg) => !msg.deleted_on),
         reviews,
-        files: files.filter((svFile) => !svFile.message_id),
-        allFiles: files,
         order,
         briefResponses: serverBriefResponses,
         userRole,

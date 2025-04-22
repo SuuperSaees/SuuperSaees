@@ -1,5 +1,3 @@
-import { Dispatch } from 'react';
-
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
@@ -19,7 +17,11 @@ type DataUnion =
   | DataResult.Activity
   | DataResult.Order;
 
-type UpdaterFunction = (updater: DataResult.InteractionPages | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages)) => void
+type UpdaterFunction = (
+  updater:
+    | DataResult.InteractionPages
+    | ((prev: DataResult.InteractionPages) => DataResult.InteractionPages),
+) => void;
 export const useOrderSubscriptions = (
   order: DataResult.Order,
   setOrder: React.Dispatch<React.SetStateAction<DataResult.Order>>,
@@ -29,10 +31,9 @@ export const useOrderSubscriptions = (
   setMessages: UpdaterFunction,
   reviews: DataResult.InteractionPages,
   setReviews: UpdaterFunction,
-  files: DataResult.File[],
-  setFiles: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
+  files: DataResult.InteractionPages,
+  setFiles: UpdaterFunction,
   members: UserExtended[],
-
 ) => {
   const {
     handleOrderChanges,
@@ -58,7 +59,7 @@ export const useOrderSubscriptions = (
         case 'files':
           return handleFileChanges(
             payload as RealtimePostgresChangesPayload<File.Type>,
-            setMessages,
+            setFiles,
           );
         // Handle order status updates
         case 'orders_v2':
@@ -84,11 +85,11 @@ export const useOrderSubscriptions = (
     schema: 'public',
   };
 
-  const tables: TableConfig<DataUnion>[] = [
+  const tables = [
     {
       tableName: 'messages',
       currentData: messages,
-      setData: setMessages as UpdaterFunction,
+      setData: setMessages,
       filter: {
         order_id: `eq.${order.id}`,
       },
@@ -96,7 +97,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'reviews',
       currentData: reviews,
-      setData: setReviews as UpdaterFunction,
+      setData: setReviews,
       filter: {
         order_id: `eq.${order.id}`,
       },
@@ -104,9 +105,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'files',
       currentData: files,
-      setData: setFiles as Dispatch<
-        React.SetStateAction<DataUnion[] | DataUnion>
-      >,
+      setData: setFiles,
       filter: {
         reference_id: `eq.${order.id}`,
       },
@@ -114,7 +113,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'activities',
       currentData: activities,
-      setData: setActivities as UpdaterFunction,
+      setData: setActivities,
       filter: {
         order_id: `eq.${order.id}`,
       },
@@ -122,9 +121,7 @@ export const useOrderSubscriptions = (
     {
       tableName: 'orders_v2',
       currentData: order,
-      setData: setOrder as Dispatch<
-        React.SetStateAction<DataUnion[] | DataUnion>
-      >,
+      setData: setOrder,
       filter: {
         id: `eq.${order.id}`,
       },
@@ -132,5 +129,9 @@ export const useOrderSubscriptions = (
   ];
 
   // Initialize real-time subscriptions
-  useRealtime(tables, realtimeConfig, handleSubscriptions);
+  useRealtime(
+    tables as unknown as TableConfig<DataUnion>[],
+    realtimeConfig,
+    handleSubscriptions,
+  );
 };

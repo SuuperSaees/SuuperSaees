@@ -146,8 +146,8 @@ export interface ActivityContextType {
   activities: DataResult.Activity[];
   messages: DataResult.Message[];
   reviews: DataResult.Review[];
-  files: DataResult.File[];
-  allFiles: DataResult.File[];
+  // files: DataResult.File[];
+  // allFiles: DataResult.File[];
   order: DataResult.Order;
   briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   userRole: string;

@@ -50,6 +50,8 @@ const Interactions = ({
     containerRef: interactionsContainerRef,
     anchorSelector: '[data-message-id]',
   });
+
+  console.log('MESSAGES', messages);
   return (
     <div
       className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8"
