@@ -119,7 +119,10 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       messages: orderData.messages.map((message) => {
         return {
           ...message,
-          user: message.user,
+          user: {
+            ...message.user,
+            settings: message.user?.settings?.[0],
+          },
         };
       }),
       assigned_to: orderData.assigned_to.filter(assignment => 
