@@ -101,6 +101,57 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
       ? (service.price ?? 0) - discountAmount
       : (service.price ?? 0)) * quantity;
 
+      const secondaryTextColor = isDarkBackground
+      ? 'text-gray-300'
+      : 'text-gray-500';
+
+      const getTextPeriodForBilling = () => {
+        if (service.recurrence?.includes('day')) {
+          return t('checkout.trial.dayBilling');
+        }
+        if (service.recurrence?.includes('week')) {
+          return t('checkout.trial.weekBilling');
+        }
+        if (service.recurrence?.includes('month')) {
+          return t('checkout.trial.monthBilling');
+        }
+        if (service.recurrence?.includes('year')) {
+          return t('checkout.trial.yearBilling');
+        }
+      };
+
+      const getStartPeriod = () => {
+        const testPeriodDuration = service.test_period_duration ?? 0;
+        const testPeriodUnit = service.test_period_duration_unit_of_measurement ?? '';
+        const currentDate = new Date();
+
+        if(testPeriodUnit.includes('day')) {
+          currentDate.setDate(currentDate.getDate() + testPeriodDuration);
+        }
+        if(testPeriodUnit.includes('week')) {
+          currentDate.setDate(currentDate.getDate() + testPeriodDuration * 7);
+        }
+        if(testPeriodUnit.includes('month')) {
+          currentDate.setMonth(currentDate.getMonth() + testPeriodDuration);
+        }
+        if(testPeriodUnit.includes('year')) {
+          currentDate.setFullYear(currentDate.getFullYear() + testPeriodDuration);
+        }
+
+        const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+
+        const monthName = monthNames[currentDate.getMonth()];
+        const day = currentDate.getDate();
+        const year = currentDate.getFullYear();
+
+        const monthNameFormatted = t(`checkout.trial.${monthName}`);
+
+        const dateFormatted = t('language') === 'es' ? day + ' ' + monthNameFormatted + ', ' + year : monthNameFormatted + ' ' + day + ', ' + year;
+
+        return t('checkout.trial.startingAt') + ' ' + dateFormatted;
+      };
+      
+
   return (
     <div className="space-y-4">
       <div
@@ -116,7 +167,6 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
         <ServiceTypeSection
           service={service}
           isDarkBackground={isDarkBackground}
-          quantity={quantity} // Pasamos la cantidad actual
         />
       </div>
 
@@ -201,7 +251,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
       />
 
       {/* Subtotal */}
-      <div className="flex justify-between">
+      {!service.test_period && <div className="flex justify-between">
         <div
           className={`text-sm font-medium leading-5 ${
             isDarkBackground ? 'text-gray-300' : 'text-gray-700'
@@ -214,39 +264,90 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
             isDarkBackground ? 'text-gray-300' : 'text-gray-700'
           }`}
         >
-          ${(service.price! * quantity)?.toFixed(2)}
+          ${(service.price! * quantity)?.toFixed(2)} {service.currency.toUpperCase()}
         </div>
-      </div>
+      </div>}
+
+      
+
+      {
+        service.test_period && (
+          <div className="flex justify-between">
+            <div className={`text-sm font-normal leading-5 ${secondaryTextColor}`}>
+              <p>{getTextPeriodForBilling()}</p>
+              <p>{getStartPeriod()}</p>
+            </div>
+            <span className={`text-sm ${secondaryTextColor}`}>
+              ${(service.price ?? 0 * quantity)?.toFixed(2)} {service.currency.toUpperCase()}
+            </span>
+          </div>
+        )
+      }
 
       {/* Descuento */}
       {discountAmount !== null && (
-        <div className="flex justify-between text-green-600">
+        <div className={`flex justify-between ${secondaryTextColor}`}>
           <div className="text-sm font-medium leading-5">
             {t('checkout.discount')}
           </div>
           <div className="text-sm font-medium leading-5">
-            -${(discountAmount * quantity).toFixed(2)}
+            -${(discountAmount * quantity).toFixed(2)} {service.currency.toUpperCase()}
           </div>
         </div>
       )}
 
       {/* Total */}
-      <div className="flex justify-between">
+      {!service.test_period ? (<div className="flex justify-between">
         <div
           className={`text-sm font-bold leading-5 ${
             isDarkBackground ? 'text-white' : 'text-gray-950'
           }`}
         >
-          {t('checkout.total')} {`(${service.currency.toUpperCase()})`}
+          {service.recurring_subscription ? t('checkout.trial.totalDueToday') : t('checkout.total')}
         </div>
         <div
           className={`text-sm font-bold leading-5 ${
             isDarkBackground ? 'text-white' : 'text-gray-950'
           }`}
         >
-          ${(discountedTotal)?.toFixed(2)}
+          ${(discountedTotal)?.toFixed(2)} {service.currency.toUpperCase()}
+        </div>
+      </div>) : (
+        <div>
+          <div className="flex justify-between">
+        <div
+          className={`text-sm font-bold leading-5 ${
+            isDarkBackground ? 'text-white' : 'text-gray-950'
+          }`}
+        >
+          {t('checkout.trial.totalAfterTrial')}
+        </div>
+        <div
+          className={`text-sm font-bold leading-5 ${
+            isDarkBackground ? 'text-white' : 'text-gray-950'
+          }`}
+        >
+          ${(discountedTotal)?.toFixed(2)} {service.currency.toUpperCase()}
         </div>
       </div>
+      <div className="flex justify-between">
+      <div
+        className={`text-sm font-bold leading-5 ${
+          isDarkBackground ? 'text-white' : 'text-gray-950'
+        }`}
+      >
+        {t('checkout.trial.totalDueToday')}
+      </div>
+      <div
+        className={`text-sm font-bold leading-5 ${
+          isDarkBackground ? 'text-white' : 'text-gray-950'
+        }`}
+      >
+        ${service.test_period_price?.toFixed(2)} {service.currency.toUpperCase()}
+      </div>
+    </div>
+        </div>
+      )}
 
       {/* Botón de suscripción */}
       <div>
@@ -264,7 +365,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
             className="w-full transform transition duration-300 ease-in-out hover:scale-105"
             onClick={onSubmit}
           >
-            {t('checkout.subscribe')}
+            {service.test_period ? t('checkout.trial.subscribe') : service.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
             {loading && <Spinner className="ml-2 h-4 w-4" />}
           </ThemedButton>
         )}

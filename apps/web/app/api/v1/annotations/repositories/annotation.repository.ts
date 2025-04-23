@@ -160,20 +160,29 @@ export class AnnotationRepository implements IAnnotationRepository {
 
     const { data: annotations, error: annotationsError } = await query;
 
-    if (annotationsError) {
+    if (annotationsError && annotationsError.code !== 'PGRST116') {
       throw new Error(
         `Error fetching annotations: ${annotationsError.message}`,
       );
     }
 
-    const currentFileAnnotations = annotations.filter(
+
+    const cleanedAnnotations = annotations?.map((annotation) => ({
+      ...annotation,
+      accounts: annotation.accounts ? {
+        ...annotation.accounts,
+        settings: annotation.accounts?.settings?.[0] ?? null,
+      } : null,
+    }));
+
+    const currentFileAnnotations = cleanedAnnotations?.filter(
       (annotation) => annotation.file_id === fileId,
     );
-    const otherFileAnnotations = annotations.filter(
+    const otherFileAnnotations = cleanedAnnotations?.filter(
       (annotation) => annotation.file_id !== fileId,
     );
 
-    const formattedCurrentFileAnnotations = currentFileAnnotations.map(
+    const formattedCurrentFileAnnotations = currentFileAnnotations?.map(
       (annotation) => ({
         ...annotation,
         message_content: annotation.messages?.content ?? null,
@@ -182,7 +191,7 @@ export class AnnotationRepository implements IAnnotationRepository {
       }),
     );
 
-    const formattedOtherFileAnnotations = otherFileAnnotations.map(
+    const formattedOtherFileAnnotations = otherFileAnnotations?.map(
       (annotation) => ({
         ...annotation,
         message_content: annotation.messages?.content ?? null,
@@ -230,7 +239,10 @@ export class AnnotationRepository implements IAnnotationRepository {
     return childMessages.map((message) => ({
       ...message,
       content: message.content ?? '',
-      accounts: message.accounts ?? null,
+      accounts: message.accounts ? {
+        ...message.accounts,
+        settings: message.accounts?.settings?.[0] ?? null,
+      } : null,
     }));
   }
 

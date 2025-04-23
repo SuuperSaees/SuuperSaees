@@ -19,8 +19,8 @@ import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';
 import MessageList from './message-list';
 import { useQuery } from '@tanstack/react-query';
-import { getAgencyForClientByUserId, getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { InternalMessagesToggle, useInternalMessaging } from '../../components/messages';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 export default function ChatThread({
   agencyTeam,
@@ -108,15 +108,13 @@ export default function ChatThread({
     }
   };
 
-  const organizationData  = useQuery({
+  const { data: accountPluginData, isLoading: isAccountPluginLoading } = useQuery({
     queryKey: ['account-plugins', user.id],
-    queryFn: user.role === 'client_member' || user.role === 'client_owner' ? 
-      async () => await getAgencyForClientByUserId() : 
-      async () => await getOrganization(),
+    queryFn: async () => await getAccountPlugin(undefined, 'loom'),
     enabled: !!user.id,
     retry: 1,
   });
-  // Set
+  // Set the loom app id to the state
   // members
   useEffect(() => {
     if (chatByIdQuery.data && chatByIdQuery.data.members) {
@@ -209,8 +207,8 @@ export default function ChatThread({
             (editor: Editor) => (
               <LoomRecordButton
                 onAction={(text: string) => editor.commands.setContent(text)}
-                loomAppId={organizationData.data?.loom_app_id ?? ''}
-                isLoading={organizationData.isLoading}
+                loomAppId={accountPluginData?.credentials?.loom_app_id ?? ''}
+                isLoading={isAccountPluginLoading}
               />
             ),
             () => (

@@ -35,6 +35,43 @@
   "step_service_details_title": "Service Details",
   "step_service_price": "Price Settings",
   "checkout": {
+    "pay": "Pay",
+    "trial": {
+      "perDay": "per Day",
+      "perWeek": "per Week",
+      "perMonth": "per Month",
+      "perYear": "per Year",
+      "day": "Day Trial",
+      "week": "Week Trial",
+      "month": "Month Trial",
+      "year": "Year Trial",
+      "days": "Days of Trial",
+      "weeks": "Weeks of Trial",
+      "months": "Months of Trial",
+      "years": "Years of Trial",
+      "today": "Today",
+      "totalForRenovation": "Total for renovation",
+      "totalAfterTrial": "Total after trial",
+      "totalDueToday": "Total due today",
+      "dayBilling": "Daily Billing",
+      "weekBilling": "Weekly Billing",
+      "monthBilling": "Monthly Billing",
+      "yearBilling": "Yearly Billing",
+      "subscribe": "Start Trial",
+      "startingAt": "Starting at",
+      "january": "Jan",
+      "february": "Feb",
+      "march": "Mar",
+      "april": "Apr",
+      "may": "May",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Aug",
+      "september": "Sep",
+      "october": "Oct",
+      "november": "Nov",
+      "december": "Dec"
+    },
     "tokenExpired": "Token expired or invalid",
     "title": "Acquire Service",
     "signIn": "Sign In",
@@ -193,5 +230,8 @@
       "description": "You have not yet added any services for this client, add one by clicking the 'Add service' button."
     }
   },
-  "selectImage": "Select an image"
+  "selectImage": "Select an image",
+  "language": "en",
+  "for": "for", 
+  "then": "then"
 }
