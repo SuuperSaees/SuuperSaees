@@ -7,8 +7,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
 import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
 
@@ -117,7 +115,7 @@ export async function getOrganization(): Promise<{
       picture_url: organizationsData?.picture_url ?? '',
       name: organizationData?.name ?? '',
       owner_id: organizationData?.owner_id ?? '',
-      slug: organizationData?.slug ?? '',
+      slug: organizationData?.slug ?? ''
     };
   } catch (error) {
     console.error('Error getting the organization:', error);

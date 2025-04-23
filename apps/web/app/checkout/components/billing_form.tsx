@@ -657,7 +657,7 @@ const BillingForm: React.FC<{
                     className="w-full transform transition duration-300 ease-in-out hover:scale-105"
                     onClick={onSubmit}
                   >
-                    {t('checkout.subscribe')}
+                    {service.test_period ? t('checkout.trial.subscribe') : service.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
                     {loading && <Spinner className="ml-2 h-4 w-4" />}
                   </ThemedButton>
                 </div>
