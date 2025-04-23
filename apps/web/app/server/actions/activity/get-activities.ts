@@ -6,6 +6,7 @@ interface Config {
   pagination?: {
     cursor?: string | number;
     limit?: number;
+    endCursor?: string | number;
   };
 }
 
@@ -25,8 +26,12 @@ export async function getActivities(orderId?: number, config?: Config): Promise<
       baseQuery = baseQuery.eq('order_id', orderId);
     }
 
-    if (config?.pagination) {
+    if (config?.pagination?.cursor) {
       baseQuery = baseQuery.lt('created_at', config.pagination.cursor);
+    }
+    
+    if (config?.pagination?.endCursor) {
+      baseQuery = baseQuery.gte('created_at', config.pagination.endCursor);
     }
 
     const { data: activities, error: activitiesError } = await baseQuery;

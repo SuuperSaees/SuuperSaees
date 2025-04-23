@@ -6,6 +6,7 @@ interface Config {
   pagination?: {
     cursor?: string | number;
     limit?: number;
+    endCursor?: string | number;
   };
 }
 export async function getReviews(orderId?: number, config?: Config): Promise<Review.Response[]> {
@@ -24,8 +25,12 @@ export async function getReviews(orderId?: number, config?: Config): Promise<Rev
       baseQuery = baseQuery.eq('order_id', orderId);
     }
 
-    if (config?.pagination) {
+    if (config?.pagination?.cursor) {
       baseQuery = baseQuery.lt('created_at', config.pagination.cursor);
+    }
+
+    if (config?.pagination?.endCursor) {
+      baseQuery = baseQuery.gte('created_at', config.pagination.endCursor);
     }
 
     const { data: reviews, error: reviewsError } = await baseQuery;
