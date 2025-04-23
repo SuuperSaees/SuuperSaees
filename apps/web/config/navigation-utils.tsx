@@ -90,6 +90,7 @@ export function getBaseNavigationConfig(
   const getFilteredConfig = (config: NavigationConfig) => {
     if (isAgencyOwner) return config;
 
+    // Filter client route for roles different than agency_owner
     return {
       ...config,
       routes: config.routes.map((item) => {
@@ -180,7 +181,8 @@ export function addAgencyEmbedsToNavigation(
   baseConfig: NavigationConfig,
   embeds: Embed[],
   AvatarComponent: React.ComponentType<AvatarProps>,
-  clientOrganizations?: Organization[],
+  t: (t: string) => string,
+  clientOrganizations?: Organization[]
 ): NavigationConfig {
   const routes = [...baseConfig.routes];
 
@@ -241,9 +243,9 @@ export function addAgencyEmbedsToNavigation(
   // Always add the clients section
   routes.push({
     type: 'section',
-    path: pathsConfig.app.clients,
+    // path: pathsConfig.app.clients,
     section: true,
-    label: 'Clients',
+    label: t('common:sidebar.favoriteClients'),
     menu: <AddClientButton />,
     className: "text-xs font-normal text-muted-foreground",
     groups: clientGroups,
@@ -263,7 +265,8 @@ export function buildNavigationConfig(
   userRole: string | null | undefined,
   embeds: Embed[] | undefined,
   AvatarComponent: React.ComponentType<AvatarProps>,
-  clientOrganizations?: Organization[],
+  t: (t: string) => string,
+  clientOrganizations?: Organization[]
 ): NavigationConfig {
   // Get base config
   const baseConfig = getBaseNavigationConfig(userRole);
@@ -279,6 +282,7 @@ export function buildNavigationConfig(
         baseConfig,
         embeds ?? [],
         AvatarComponent,
+        t,
         clientOrganizations,
       );
     } else {

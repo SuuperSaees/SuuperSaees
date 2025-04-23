@@ -109,7 +109,7 @@ export function SidebarContent({
   className?: string;
 }>) {
   return (
-    <div className={cn('flex w-full flex-col space-y-1 px-4', className)}>
+    <div className={cn('flex w-full flex-col px-4', className)}>
       {children}
     </div>
   );
@@ -222,7 +222,7 @@ export function SidebarGroup({
   );
 
   return (
-    <div className={cn('flex flex-col space-y-2 rounded-md py-1', className)}>
+    <div className={cn('flex flex-col rounded-md ', className)}>
       <div
         className={wrapperClassName}
         onClick={collapsible && !path ? toggleGroup : undefined}
@@ -257,7 +257,7 @@ export function SidebarGroup({
 
       {/* Render children if not collapsible or if group is open */}
       {(!collapsible || isGroupOpen) && (
-        <div id={id} className="flex flex-col space-y-1 overflow-y-auto pl-7">
+        <div id={id} className="flex flex-col overflow-y-auto pl-3">
           {children}
         </div>
       )}
@@ -312,7 +312,7 @@ export function SidebarSection({
     if (path) {
       return (
         <div
-          className="group/sidebar-section mt-4 flex items-center justify-between rounded-md px-3 py-2 opacity-100 font-semibold opacity-70"
+          className="group/sidebar-section flex items-center justify-between rounded-md px-3 py-2 opacity-100 font-semibold opacity-70"
           style={active && itemActiveStyle ? itemActiveStyle : undefined}
           onMouseEnter={(e) => {
             if (itemHoverStyle) {
@@ -358,9 +358,9 @@ export function SidebarSection({
     }
 
     return (
-      <div className="mt-4 flex justify-between px-3">
+      <div className="flex justify-between px-3 py-2 opacity-70">
         <h3
-          className={cn('text-xs font-normal', className)}
+          className={cn('text-xs font-semibold', className)}
         >
           <Trans i18nKey={label as string} defaults={label as string} />
         </h3>
@@ -425,16 +425,16 @@ export function SidebarSection({
   return (
     <div
       className={cn(
-        'mt-4 flex flex-col gap-1',
+        'mt-4 flex flex-col',
         className,
       )}
     >
       <SectionHeader />
-      <div className="scrollbar-on-hover flex-col space-y-1 overflow-y-auto">
+      <div className="scrollbar-on-hover flex-col overflow-y-auto">
         {safeGroups.length > 0 ? renderGroups(safeGroups) : null}
-        <div className="py-1">
+   
           {children}
-        </div>
+    
       </div>
     </div>
   );
@@ -476,7 +476,7 @@ export function SidebarItem({
           <span className="flex h-5 w-5 shrink-0 items-center justify-center">
             {Icon}
           </span>
-          <span className="flex w-full items-center truncate">{children}</span>
+          <span className="line-clamp-1 w-full font-normal text-left">{children}</span>
         </>
       )}
     </>
@@ -512,7 +512,7 @@ export function SidebarItem({
         className={cn(
           'text-md flex w-full bg-transparent shadow-none hover:bg-transparent',
           {
-            'justify-start px-3': !collapsed,
+            'justify-start px-3 py-1.5': !collapsed,
           },
           className,
         )}
@@ -520,7 +520,7 @@ export function SidebarItem({
         <Link
           key={path}
           href={path}
-          className="flex w-full min-w-0 items-center gap-2 py-1 font-normal"
+          className="flex w-full  items-center gap-2 font-normal line-clamp-1"
         >
           {buttonContent}
         </Link>

@@ -11,6 +11,7 @@ import {
   Inbox,
   Briefcase,
   CopyCheck,
+  Store,
   // Wallet,
 } from 'lucide-react';
 
@@ -43,6 +44,12 @@ const routes = [
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
+  },
+  {
+    type: 'route',
+    label: 'common:clientsName',
+    path: pathsConfig.app.clients,
+    Icon: <Store className={iconClasses} />,
   },
   // {
   //   type: 'group',
