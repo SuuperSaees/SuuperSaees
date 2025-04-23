@@ -64,7 +64,7 @@ export const hasPermissionToAddClientMembers = async (
     const userAccountRole = await getUserRole();
 
     // Check if the role is valid
-    if (!validRoles.includes(userAccountRole)) {
+    if (!validRoles.includes(userAccountRole ?? '')) {
       console.error('Invalid role: ', userAccountRole);
       return false;
     }
@@ -125,7 +125,7 @@ export const hasPermissionToDeleteClient = async (
     }
 
     // Step 3: Ensure the user has the correct role for deleting individual clients
-    if (!removeClientOrganization && !allowedRolesToDeleteMembers.has(userAccountRole)) {
+    if (!removeClientOrganization && !allowedRolesToDeleteMembers.has(userAccountRole ?? '')) {
       console.error('User does not have permission to delete individual clients');
       return false;
     }
