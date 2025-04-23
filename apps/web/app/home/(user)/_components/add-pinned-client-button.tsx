@@ -12,11 +12,11 @@ export function AddPinnedClientButton() {
   return (
     <>
       <button 
-        className="flex items-center px-3 py-1.5 bg-transparent border-none gap-2 opacity-70 hover:opacity-100"
+        className="flex items-center px-3 py-2 bg-transparent border-none gap-2 opacity-70 hover:opacity-100"
         onClick={() => setIsDialogOpen(true)}
       >
         <Plus className="h-4 w-4" />
-        <span className="text-sm font-medium">{t('sidebar.pinClient')}</span>
+        <span className="text-xs font-semibold">{t('sidebar.pinClient')}</span>
       </button>
       <PinClientsDialog 
         open={isDialogOpen} 

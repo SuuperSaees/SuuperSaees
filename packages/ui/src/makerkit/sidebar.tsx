@@ -185,7 +185,7 @@ export function SidebarGroup({
 
   // Render the menu if provided
   const menuElement = menu && (
-    <div className="invisible ml-auto flex shrink-0 items-center justify-center group-hover/sidebar-group:visible">
+    <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-group:w-auto group-hover/sidebar-group:opacity-100">
       {menu}
     </div>
   );
@@ -350,7 +350,7 @@ export function SidebarSection({
               <Trans i18nKey={label as string} defaults={label as string} />
             </h3>
           </Link>
-          <div className="invisible flex shrink-0 items-center justify-center group-hover/sidebar-section:visible">
+          <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-section:w-auto group-hover/sidebar-section:opacity-100">
             {menu}
           </div>
         </div>
@@ -364,7 +364,7 @@ export function SidebarSection({
         >
           <Trans i18nKey={label as string} defaults={label as string} />
         </h3>
-        <div className="invisible flex shrink-0 items-center justify-center group-hover/sidebar-section:visible">
+        <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-section:w-auto group-hover/sidebar-section:opacity-100">
           {menu}
         </div>
       </div>
@@ -484,7 +484,7 @@ export function SidebarItem({
 
   return (
     <div
-      className="group/sidebar-item flex w-full items-center rounded-md"
+      className="group/sidebar-item flex w-full items-center rounded-md px-3 py-1.5 gap-2"
       style={active && itemActiveStyle ? itemActiveStyle : undefined}
       onMouseEnter={(e) => {
         if (itemHoverStyle) {
@@ -512,7 +512,7 @@ export function SidebarItem({
         className={cn(
           'text-md flex w-full bg-transparent shadow-none hover:bg-transparent',
           {
-            'justify-start px-3 py-1.5': !collapsed,
+            'justify-start': !collapsed,
           },
           className,
         )}
@@ -526,7 +526,7 @@ export function SidebarItem({
         </Link>
       </button>
       {!collapsed && menu && (
-        <div className="invisible flex shrink-0 items-center justify-center px-3 group-hover/sidebar-item:visible">
+        <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-item:w-auto group-hover/sidebar-item:opacity-100">
           {menu}
         </div>
       )}

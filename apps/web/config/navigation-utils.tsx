@@ -1,12 +1,11 @@
 'use client';
 import React from 'react';
 
-import { Box } from 'lucide-react';
 import { z } from 'zod';
 
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
-import { DynamicIcon } from '../app/components/shared/dynamic-icon';
+import { DynamicEmoji } from '../app/components/shared/dynamic-emoji';
 import { ClientOptionsDropdown } from '../app/home/(user)/_components/client-options-dropdown';
 import {
   clientAccountGuestNavigationConfig,
@@ -120,11 +119,7 @@ export function getBaseNavigationConfig(
  * Creates an icon component from an embed's icon property
  */
 export function createEmbedIcon(embed: Embed) {
-  return embed.icon ? (
-    <DynamicIcon name={embed.icon} className="w-4" />
-  ) : (
-    <Box className="w-4" />
-  );
+  return <DynamicEmoji emoji={embed.icon} fallback="🔗" className="w-4" />;
 }
 
 /**
@@ -228,7 +223,7 @@ export function addAgencyEmbedsToNavigation(
           src={client.picture_url ?? ''}
           alt={client.name}
           username={client.name}
-          className="h-5 w-5 border-none"
+          className="h-5 w-5 border-none [&>img]:object-contain"
         />
       ),
       collapsible: true,

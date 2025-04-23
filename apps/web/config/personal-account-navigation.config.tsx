@@ -7,11 +7,10 @@ import {
   Bot,
   Package,
   ShoppingBag,
-
+  Wallet,
+  ShoppingCart,
   Inbox,
-  Briefcase,
   CopyCheck,
-  Store,
   // Wallet,
 } from 'lucide-react';
 
@@ -49,7 +48,13 @@ const routes = [
     type: 'route',
     label: 'common:clientsName',
     path: pathsConfig.app.clients,
-    Icon: <Store className={iconClasses} />,
+    Icon: <ShoppingCart className={iconClasses} />,
+  },
+  {
+    type: 'route',
+    label: 'common:teamName',
+    path: pathsConfig.app.team,
+    Icon: <Users className={iconClasses} />,
   },
   // {
   //   type: 'group',
@@ -67,7 +72,18 @@ const routes = [
   //     },
   //   ],
   // },
-
+  {
+    type: 'route',
+    label: 'common:servicesName',
+    path: pathsConfig.app.services,
+    Icon: <Wallet className={iconClasses} />,
+  },
+  {
+    type: 'route',
+    label: 'common:briefsName',
+    path: pathsConfig.app.briefs,
+    Icon: <CopyCheck className={iconClasses} />,
+  },
   {
     type: 'group',
     label: 'common:aiToolsName',
@@ -98,24 +114,9 @@ const routes = [
     ],
   },
 
-  {
-    type: 'route',
-    label: 'common:servicesName',
-    path: pathsConfig.app.services,
-    Icon: <Briefcase className={iconClasses} />,
-  },
-  {
-    type: 'route',
-    label: 'common:briefsName',
-    path: pathsConfig.app.briefs,
-    Icon: <CopyCheck className={iconClasses} />,
-  },
-  {
-    type: 'route',
-    label: 'common:teamName',
-    path: pathsConfig.app.team,
-    Icon: <Users className={iconClasses} />,
-  },
+
+
+
   // {
   //   label: 'Facturas',
   //   path: pathsConfig.app.invoices,

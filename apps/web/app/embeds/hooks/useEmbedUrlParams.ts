@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -21,7 +21,14 @@ export function useEmbedUrlParams({
   setDefaultCreationValues,
 }: UseEmbedUrlParamsProps) {
   const searchParams = useSearchParams();
-  const processedQueryRef = useRef<{id: string | null, action: string | null}>({ id: null, action: null });
+  // Track whether we've already processed the URL parameters to avoid re-initialization
+  const processedQueryRef = useRef<{id: string | null, action: string | null, accountId: string | null}>({ 
+    id: null, 
+    action: null, 
+    accountId: null 
+  });
+  // Track whether we've already set default values from URL
+  const [hasSetDefaultValues, setHasSetDefaultValues] = useState(false);
 
   useEffect(() => {
     const id = searchParams.get("id");
@@ -30,12 +37,13 @@ export function useEmbedUrlParams({
 
     // Skip if we've already processed these exact parameters
     if (processedQueryRef.current.id === id && 
-        processedQueryRef.current.action === action) {
+        processedQueryRef.current.action === action &&
+        processedQueryRef.current.accountId === accountId) {
       return;
     }
 
     // Update the ref with current parameters
-    processedQueryRef.current = { id, action };
+    processedQueryRef.current = { id, action, accountId };
 
     // Clear query parameters
     const clearQueryParams = () => {
@@ -47,10 +55,7 @@ export function useEmbedUrlParams({
     };
 
     // Handle create action (without id)
-    if (action === "create") {
-      // Clear query parameters
-      clearQueryParams();
-      
+    if (action === "create" && !hasSetDefaultValues) {
       // Set active tab to 'new'
       setActiveEmbedId('new');
       
@@ -68,21 +73,22 @@ export function useEmbedUrlParams({
         
         // Set default values for the creation form
         setDefaultCreationValues(defaultValues);
+        setHasSetDefaultValues(true);
       }
       
+      // Clear query parameters after setting the state to prevent re-initialization
+      clearQueryParams();
       return;
     }
 
     // Handle actions that require an id
     if (id && action) {
-      // Clear query parameters
-      clearQueryParams();
-
       // Check if the embed with the given ID exists
       const embed = formattedEmbeds.find((embed) => embed.id === id);
 
       if (!embed) {
         toast.error("Integration not found");
+        clearQueryParams();
         return;
       }
 
@@ -103,6 +109,7 @@ export function useEmbedUrlParams({
           // If this was the last account, delete the entire embed
           if (updatedEmbedAccounts.length === 0) {
             deleteEmbed(id);
+            clearQueryParams();
             return;
           }
           
@@ -125,6 +132,9 @@ export function useEmbedUrlParams({
           deleteEmbed(id);
         }
       }
+      
+      // Clear query parameters after processing
+      clearQueryParams();
     }
-  }, [searchParams, formattedEmbeds, setActiveEmbedId, updateEmbed, deleteEmbed, setDefaultCreationValues]);
+  }, [searchParams, formattedEmbeds, setActiveEmbedId, updateEmbed, deleteEmbed, setDefaultCreationValues, hasSetDefaultValues]);
 } 
