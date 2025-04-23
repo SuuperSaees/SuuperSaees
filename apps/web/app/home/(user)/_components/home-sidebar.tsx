@@ -18,6 +18,7 @@ import {
   shouldShowDashboardUrl,
   type Embed
 } from '~/config/navigation-utils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Home sidebar component that displays navigation based on user role and embeds
@@ -25,7 +26,7 @@ import {
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user, pinnedOrganizations, organization } = props.workspace;
   const userRole = workspace.role;
-
+  const { t } = useTranslation();
   // Get organization settings
   const settings = useOrganizationSettings();
   
@@ -44,6 +45,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
     userRole,
     organization?.embeds as Embed[] | undefined,
     Avatar,
+    t,
     pinnedOrganizations
   );
 

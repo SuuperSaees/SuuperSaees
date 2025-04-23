@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -45,6 +45,8 @@ export function EmbedEditor({
   // showEmbedSelector = false
 }: EmbedEditorProps) {
   const { t } = useTranslation('embeds');
+  // Track if form has been initialized from defaultValue
+  const initializedRef = useRef(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -61,17 +63,22 @@ export function EmbedEditor({
 
   // Effect to handle defaultValue changes
   useEffect(() => {
+    // Only reset the form with defaultValue on mount or if defaultValue changes significantly
+    // This prevents re-initializing the form when editing and maintains user edits
     if (!defaultValue) return;
-
-    form.reset({
-      title: defaultValue.title ?? '',
-      icon: defaultValue.icon ?? '',
-      location: defaultValue.location ?? 'tab',
-      type: defaultValue.type ?? 'url',
-      visibility: defaultValue.visibility ?? 'public',
-      value: defaultValue.value ?? '',
-      embed_accounts: defaultValue.embed_accounts ?? [],
-    });
+    
+    if (!initializedRef.current) {
+      form.reset({
+        title: defaultValue.title ?? '',
+        icon: defaultValue.icon ?? '',
+        location: defaultValue.location ?? 'tab',
+        type: defaultValue.type ?? 'url',
+        visibility: defaultValue.visibility ?? 'public',
+        value: defaultValue.value ?? '',
+        embed_accounts: defaultValue.embed_accounts ?? [],
+      });
+      initializedRef.current = true;
+    }
   }, [defaultValue, form]);
 
   // Watch value field for real-time preview
