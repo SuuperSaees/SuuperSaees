@@ -30,10 +30,10 @@ export const ActivityContext = createContext<ActivityContextType | undefined>(
 
 interface ActivityProviderProps {
   children: ReactNode;
-  activities: Activity.Response[];
-  messages?: Message.Response[];
-  reviews: Review.Response[];
-  order: DataResult.Order;
+  initialMessages?: Message.Response[];
+  initialActivities?: Activity.Response[];
+  initialReviews?: Review.Response[];
+  initialOrder: DataResult.Order;
   userRole: string;
   briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   clientOrganizationId: string;
@@ -50,10 +50,10 @@ interface ActivityProviderProps {
  */
 export const ActivityProvider = ({
   children,
-  // activities: serverActivities,
-  // messages: serverMessages,
-  // reviews: serverReviews,
-  order: serverOrder,
+  initialMessages,
+  initialActivities,
+  initialReviews,
+  initialOrder,
   briefResponses: serverBriefResponses,
   userRole,
   clientOrganizationId,
@@ -71,7 +71,7 @@ export const ActivityProvider = ({
     setInteractions,
     interactionsQuery,
     interactionsGroups,
-  } = useOrderState({ initialOrder: serverOrder });
+  } = useOrderState({ initialOrder, initialMessages, initialActivities, initialReviews });
 
   // Get current user workspace information
   const { workspace: currentUser } = useUserWorkspace();

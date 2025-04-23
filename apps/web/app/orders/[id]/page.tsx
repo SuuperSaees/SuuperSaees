@@ -69,10 +69,9 @@ async function OrderDetailsPage({
 
   const currentPath = [
     { title: organizationName, id: organizationId },
-    { title: 'Projects', id: ''},
+    { title: 'Projects', id: '' },
     { title: order?.title ?? '', id: order?.uuid ?? '' },
   ];
-
 
   const role = workspace?.role;
 
@@ -83,9 +82,10 @@ async function OrderDetailsPage({
   console.log('order', order);
   return (
     <ActivityProvider
-      activities={order?.activities ?? []}
-      reviews={order?.reviews ?? []}
-      order={order}
+      initialMessages={order?.messages ?? []}
+      initialActivities={order?.activities ?? []}
+      initialReviews={order?.reviews ?? []}
+      initialOrder={order}
       briefResponses={order?.brief_responses ?? []}
       userRole={role ?? ''}
       clientOrganizationId={order.client_organization_id}

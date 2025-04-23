@@ -5,6 +5,9 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
+import { Activity } from '~/lib/activity.types';
+import { Message } from '~/lib/message.types';
+import { Review } from '~/lib/review.types';
 import {
   InteractionResponse,
   getInteractions,
@@ -14,12 +17,20 @@ import { DataResult } from '../context/activity.types';
 
 interface UseOrderStateProps {
   initialOrder: DataResult.Order;
+  initialMessages?: Message.Response[];
+  initialActivities?: Activity.Response[];
+  initialReviews?: Review.Response[];
 }
 
 /**
  * Hook to manage order state and related interactions
  */
-export const useOrderState = ({ initialOrder }: UseOrderStateProps) => {
+export const useOrderState = ({
+  initialOrder,
+  // initialMessages,
+  // initialActivities,
+  // initialReviews,
+}: UseOrderStateProps) => {
   // State management for various data types
   const { workspace: userWorkspace } = useUserWorkspace();
   const userRole = userWorkspace?.role ?? '';
@@ -41,6 +52,19 @@ export const useOrderState = ({ initialOrder }: UseOrderStateProps) => {
    */
   const interactionsQuery = useInfiniteQuery({
     queryKey: ['interactions', order.id],
+    // initialData:
+    //   initialMessages && initialActivities && initialReviews
+    //     ? {
+    //         pages: [
+    //           {
+    //             messages: initialMessages,
+    //             activities: initialActivities,
+    //             reviews: initialReviews,
+    //           },
+    //         ],
+    //         pageParams: [],
+    //       }
+    //     : undefined,
     initialPageParam: new Date().toISOString(), // works because descending
     queryFn: async ({ pageParam }) =>
       await getInteractions(order.id, {
@@ -66,7 +90,7 @@ export const useOrderState = ({ initialOrder }: UseOrderStateProps) => {
       return lastInteractionDate; // this becomes the new cursor
     },
   });
-
+  console.log('interactionsQuery', interactionsQuery.data);
   /**
    * Memoized interaction data with fallback for empty state
    */
