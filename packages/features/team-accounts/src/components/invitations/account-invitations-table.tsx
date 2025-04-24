@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { Ellipsis, Search } from 'lucide-react';
+import { MoreVertical, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { Database } from '@kit/supabase/database';
@@ -14,7 +14,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 
 import { RoleBadge } from '../members/role-badge';
@@ -60,9 +59,9 @@ export function AccountInvitationsTable({
   }, [filteredInvitations]);
 
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div className={'flex flex-col space-y-5 pt-12'}>
       <div className="flex items-center justify-between">
-        <h3 className="font-bold">
+        <h3 className="font-inter text-xl font-medium leading-4">
           <Trans i18nKey={'team:pendingInvitesHeading'} />
         </h3>
         <div className="relative flex-1 md:grow-0">
@@ -76,7 +75,6 @@ export function AccountInvitationsTable({
         </div>
       </div>
 
-      <Separator className="mb-4 mt-4" />
       <div className='bg-white rounded-md'>
       <DataTable
         data-cy={'invitations-table'}
@@ -188,7 +186,7 @@ function ActionsDropdown({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant={'ghost'} size={'icon'}>
-            <Ellipsis className={'h-5 w-5'} />
+            <MoreVertical className={'h-4 w-4 text-gray-400'} />
           </Button>
         </DropdownMenuTrigger>
 

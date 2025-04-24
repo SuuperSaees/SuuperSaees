@@ -222,7 +222,7 @@ export function SidebarGroup({
   );
 
   return (
-    <div className={cn('flex flex-col rounded-md ', className)}>
+    <div className={cn('flex flex-col rounded-md gap-0.5', className)}>
       <div
         className={wrapperClassName}
         onClick={collapsible && !path ? toggleGroup : undefined}

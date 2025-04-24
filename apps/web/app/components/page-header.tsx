@@ -1,17 +1,17 @@
-import { PageTitle } from "./page-title";
+import { Trans } from '@kit/ui/trans';
 
 interface PageHeaderProps {
   title: string;
   rightContent?: React.ReactNode;
 }
-  
+
 export function PageHeader({ title, rightContent }: PageHeaderProps) {
   return (
-    <div className="mb-[36px] flex items-center justify-between">
-      <div className="flex w-full justify-between">
-        <PageTitle i18nKey={title} />
-        {rightContent}
-      </div>
+    <div className="flex items-center justify-between">
+      <h2 className="font-inter text-xl font-medium leading-4">
+        <Trans i18nKey={title} />
+      </h2>
+      {rightContent}
     </div>
   );
 }

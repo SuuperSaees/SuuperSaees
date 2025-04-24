@@ -57,7 +57,7 @@ export default function ChatList() {
       <div className="flex flex-col">
         {!Array.isArray(filteredChats) || filteredChats.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
-            {searchQuery ? 'No chats found' : 'No chats yet'}
+            {searchQuery ? 'No chats found' : ''}
           </div>
         ) : (
           filteredChats.map((chat) => (

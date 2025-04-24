@@ -1,17 +1,18 @@
+import { redirect } from 'next/navigation';
+
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { AccountRoles } from '~/lib/account.types';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-
 import { getAccountPlugins } from '~/server/actions/account-plugins/account-plugins.action';
 import { getPlugins } from '~/server/actions/plugins/plugins.actions';
+
 import { PageHeader } from '../components/page-header';
 import PluginCard from './components/plugin-card';
 import PluginsHeaderCard from './components/plugins-header-card';
-import { AccountRoles } from '~/lib/account.types';
-import { redirect } from 'next/navigation';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -23,7 +24,7 @@ export const generateMetadata = async () => {
 interface EnrichedPlugin {
   id: string;
   name: string;
-  description: string; 
+  description: string;
   type: 'integration' | 'tool' | 'internal' | 'external';
   created_at: string;
   updated_at: string;
@@ -46,14 +47,12 @@ async function PluginsPage() {
     return [];
   });
 
-  const accountPlugins = await getAccountPlugins(
-    userId,
-    100,
-    0,
-  ).catch((error) => {
-    console.error('Error fetching account plugins:', error);
-    return [];
-  });
+  const accountPlugins = await getAccountPlugins(userId, 100, 0).catch(
+    (error) => {
+      console.error('Error fetching account plugins:', error);
+      return [];
+    },
+  );
 
   const enrichedPlugins: EnrichedPlugin[] = allPlugins.map((plugin) => {
     const accountPlugin = accountPlugins.find(
@@ -61,8 +60,8 @@ async function PluginsPage() {
     );
     return {
       id: plugin.id,
-      name: plugin.name ?? 'Unknown', 
-      description: plugin.description ?? '', 
+      name: plugin.name ?? 'Unknown',
+      description: plugin.description ?? '',
       type: plugin.type,
       created_at: plugin.created_at,
       updated_at: plugin.updated_at,
@@ -94,23 +93,21 @@ async function PluginsPage() {
 
   return (
     <PageBody>
-      <div className="p-[35px]">
-        <PageHeader title="plugins:title" />
-        <PluginsHeaderCard plugins={enrichedPlugins} />
-        <Separator className="my-4" />
-        <div className="flex flex-col gap-3">
-          {installedPlugins.map((plugin) => (
-            <PluginCard
-              key={plugin.id}
-              id={plugin.id}
-              pluginId={plugin.pluginId}
-              name={plugin.name}
-              status={plugin.status}
-              icon_url={plugin.icon_url}
-              mode="settings"
-            />
-          ))}
-        </div>
+      <PageHeader title="plugins:title" />
+      <PluginsHeaderCard plugins={enrichedPlugins} />
+      {installedPlugins.length > 0 && <Separator className="my-4" />}
+      <div className="flex flex-col gap-3">
+        {installedPlugins.map((plugin) => (
+          <PluginCard
+            key={plugin.id}
+            id={plugin.id}
+            pluginId={plugin.pluginId}
+            name={plugin.name}
+            status={plugin.status}
+            icon_url={plugin.icon_url}
+            mode="settings"
+          />
+        ))}
       </div>
     </PageBody>
   );

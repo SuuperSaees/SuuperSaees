@@ -159,10 +159,10 @@ const handleCopyCheckoutUrl = () => {
           <Tooltip content={copied ? t('services:checkoutURLCopied') : t('services:checkoutURL')}>
             <Button
               variant="ghost"
-              className="cursor-pointer"
+              className="cursor-pointer p-2"
               onClick={handleCopyCheckoutUrl}
             >
-              {copied ? <Check className="h-5 w-5 cursor-pointer text-gray-600" /> : <Link2 className="h-6 w-6 cursor-pointer text-gray-600" />}
+              {copied ? <Check className="h-[20px] w-[20px] cursor-pointer text-gray-600" /> : <Link2 className="h-[20px] w-[20px] cursor-pointer text-gray-600" />}
             </Button>
           </Tooltip>
         )

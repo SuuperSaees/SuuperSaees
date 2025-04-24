@@ -59,11 +59,12 @@ export function AppLogo({
   const {theme} = getColorLuminance(sidebar_background_color ?? '#f2f2f2');
   const themedLogoUrl = theme === 'dark' ? (logo_dark_url ?? logo_url): logo_url  
   logoUrl = logoUrl ?? themedLogoUrl;
+  console.log('logoUrl', logoUrl)
   return (
     <Link
       aria-label={label}
       href={href}
-      className={`flex h-full max-h-[50px] w-[160px] items-center justify-start overflow-hidden ${className}`}
+      className={`flex h-full max-h-[50px] w-[130px] items-center justify-start overflow-hidden ${className}`}
     >
       {logoUrl ? (
         <CustomLogoImage url={logoUrl} className="h-full " />
