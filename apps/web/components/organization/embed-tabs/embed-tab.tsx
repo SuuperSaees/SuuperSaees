@@ -8,7 +8,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import Dropdown from '~/components/ui/dropdown';
 
-import { DynamicIcon } from '../../../app/components/shared/dynamic-icon';
+import { DynamicEmoji } from '../../../app/components/shared/dynamic-emoji';
 
 type EmbedTabProps = {
   id: string;
@@ -65,7 +65,7 @@ export function EmbedTab({
       value={id}
       className="group flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
     >
-      <DynamicIcon name={icon ?? ''} className="h-4 w-4" />
+      <DynamicEmoji emoji={icon ?? ''} fallback={"🔗"} className="h-4 w-4" />
       <span>{title}</span>
       {(onDelete ?? onEdit) && (
         <Dropdown
