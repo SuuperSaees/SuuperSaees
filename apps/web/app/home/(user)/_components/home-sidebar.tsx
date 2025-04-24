@@ -56,12 +56,12 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
 
   return (
     <ThemedSidebar className="text-sm scrollbar-on-hover">
-      <div className="padding-24">
+      <div className="pt-8 pb-6 px-6.5">
         <AppLogo />
       </div>
 
       <SidebarContent
-        className={`b-["#f2f2f2"] mt-5 h-[calc(100%-160px)] overflow-y-auto`}
+        className={`b-["#f2f2f2"] h-[calc(100%-160px)] overflow-y-auto`}
       >
         <CustomSidebarNavigation
           config={navigationConfig}
