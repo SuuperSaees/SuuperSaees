@@ -247,7 +247,7 @@ const AsideOrderInformation = ({
         [&>div]:px-4 first:[&>div]:py-[28px]`}
         {...rest}
       >
-        <div className="border-b border-gray-200 flex flex-col gap-[9px]">
+        <div className="border-b border-gray-200 flex flex-col gap-[8.5px]">
           <div className="flex items-start justify-between">
           <h3 className="font-inter text-xl font-medium leading-4">
             {t('details.createdBy')}
@@ -286,10 +286,10 @@ const AsideOrderInformation = ({
                   }
                 />
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-600">
+                  <span className="text-sm font-medium text-gray-600 line-clamp-1">
                     {order.client?.settings?.name ?? order.client?.name ?? ''}
                   </span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-gray-600 line-clamp-1">
                     {order.client_organization?.name
                       ? order.client_organization?.name
                       : ''}
