@@ -243,12 +243,13 @@ const AsideOrderInformation = ({
   return (
     <AgencyStatusesProvider initialStatuses={agencyStatuses} initialTags={orderAgencyTags}>
       <div
-        className={`no-scrollbar relative flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200 pl-4 pr-1 pt-4 text-gray-700 ${className}`}
+        className={`no-scrollbar relative flex h-full min-h-full w-full min-w-0 max-w-80 shrink-0 flex-col gap-4 overflow-y-auto border-b-0 border-l border-r-0 border-t-0 border-gray-200  text-gray-700 ${className}
+        [&>div]:px-4 first:[&>div]:py-[28px]`}
         {...rest}
       >
-        <div className="border-b border-gray-200 pb-7">
-          <div className="flex items-center justify-between">
-          <h3 className="pb-4 font-bold">
+        <div className="border-b border-gray-200 flex flex-col gap-[9px]">
+          <div className="flex items-start justify-between">
+          <h3 className="font-inter text-xl font-medium leading-4">
             {t('details.createdBy')}
           </h3>
 
@@ -257,10 +258,10 @@ const AsideOrderInformation = ({
               <div className='flex items-center'>
                 {
                   canAddAssignes && (
-                    <Tooltip content={t('details.visibility')}>
+                    <Tooltip content={t('details.visibility')} >
                     <button onClick={() => {
                       changeVisibility.mutate(isPublic ? 'private' : 'public');
-                    }}>
+                    }} className='h-fit'>
                       <Switch checked={isPublic} />
                     </button>
                     </Tooltip>

@@ -186,7 +186,7 @@ export default function CreateOrganizationsChatDialog({
     >
       <DialogTrigger asChild>
         <Button variant="ghost">
-          <SquarePen className="cursor-pointer text-gray-600" />
+          <SquarePen className="cursor-pointer text-gray-900 w-5 h-5" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">

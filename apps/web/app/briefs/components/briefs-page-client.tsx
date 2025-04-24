@@ -87,46 +87,46 @@ export function BriefsPageClient() {
   const { config } = useTableConfigs('table-config');
 
   return (
-    <div className="p-[35px] flex flex-col">
-      <PageHeader title="briefs:briefs" rightContent={<TimerContainer />} />
-      <div className="ml-auto flex items-center gap-4">
-        <div className="relative">
-          <ThemedInput
-            type="text"
-            placeholder={t('briefs:search')}
-            value={searchTerm}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchTerm(e.target.value)
-            }
-            className="h-10 w-[280px] pl-10"
-          />
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+    <>
+      <div className="flex flex-wrap justify-between gap-5">
+        <PageHeader title="briefs:briefs" rightContent={<TimerContainer />} />
+        <div className="ml-auto flex items-center gap-4">
+          <div className="relative">
+            <ThemedInput
+              type="text"
+              placeholder={t('briefs:search')}
+              value={searchTerm}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearchTerm(e.target.value)
+              }
+              className="h-10 w-[280px] pl-10"
+            />
+            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+          </div>
+          {hasPermissionToActionBriefs() && createButton}
         </div>
-        {hasPermissionToActionBriefs() && createButton}
       </div>
 
-      <div className="mt-8">
-        {briefsAreLoading ? (
-          <SkeletonTable columns={4} rows={7} className="mt-4" />
-        ) : filteredBriefs.length === 0 ? (
-          <EmptyState
-            imageSrc="/images/illustrations/Illustration-cloud.svg"
-            title={t('briefs:empty.title')}
-            description={t('briefs:empty.description')}
-            button={hasPermissionToActionBriefs() ? createButton : undefined}
-          />
-        ) : (
-          <Table
-            data={filteredBriefs}
-            columns={briefColumns}
-            filterKey="name"
-            controllers={{
-              search: { value: searchTerm, setValue: setSearchTerm },
-            }}
-            configs={config}
-          />
-        )}
-      </div>
-    </div>
+      {briefsAreLoading ? (
+        <SkeletonTable columns={4} rows={7} className="mt-4" />
+      ) : filteredBriefs.length === 0 ? (
+        <EmptyState
+          imageSrc="/images/illustrations/Illustration-cloud.svg"
+          title={t('briefs:empty.title')}
+          description={t('briefs:empty.description')}
+          button={hasPermissionToActionBriefs() ? createButton : undefined}
+        />
+      ) : (
+        <Table
+          data={filteredBriefs}
+          columns={briefColumns}
+          filterKey="name"
+          controllers={{
+            search: { value: searchTerm, setValue: setSearchTerm },
+          }}
+          configs={config}
+        />
+      )}
+    </>
   );
 }

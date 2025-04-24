@@ -56,12 +56,12 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
 
   return (
     <ThemedSidebar className="text-sm scrollbar-on-hover">
-      <div className="pt-8 pb-6 px-6.5">
+      <div className="pt-5 pb-3 px-6.5">
         <AppLogo />
       </div>
 
       <SidebarContent
-        className={`b-["#f2f2f2"] h-[calc(100%-160px)] overflow-y-auto`}
+        className={`b-["#fdfdfd"] h-[calc(100%-160px)] overflow-y-auto gap-0.5`}
       >
         <CustomSidebarNavigation
           config={navigationConfig}
@@ -78,7 +78,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
         )}
       </SidebarContent>
 
-      <div className={'w-full mb-4'}>
+      <div className={'w-full mb-4 mt-auto'}>
         {userRole !== 'client_guest' && (
           <SidebarContent>
             <ProfileAccountDropdownContainer

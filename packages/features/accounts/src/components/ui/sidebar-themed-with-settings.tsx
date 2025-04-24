@@ -28,23 +28,22 @@ export const ThemedSidebar: React.FC<{
   [key: string]: unknown;
 }> = ({ children, className, ...rest }) => {
   const { sidebar_background_color, theme_color } = useOrganizationSettings();
-  const defaultBackgroundColor = '#f2f2f2';
+  const defaultBackgroundColor = '#fdfdfd';
 
   // Provide a default value to prevent undefined
   const effectiveBackgroundColor = sidebar_background_color ? sidebar_background_color : defaultBackgroundColor;
   const textColor = getTextColorBasedOnBackground(effectiveBackgroundColor);
 
   // Hover item background color
-  const hoverItemBackgroundColor = 'rgba(255 255 255 / 0.2)';
+  const hoverItemBackgroundColor = 'rgba(253 253 253 / 0.2)';
   // Hover item color
   const hoverItemColor = getTextColorBasedOnBackground(effectiveBackgroundColor);
   return (
     <Sidebar
-      className={` ${className} border-none`}
+      className={` ${className} border-r border-[#EBEBEB]`}
       style={{
         backgroundColor: effectiveBackgroundColor, // Color de fondo por defecto
         color: textColor, // Color de texto por defecto
-        border: 'none', // Sin borde
         boxShadow: 'none', // Sin sombras
       }}
       itemActiveStyle={{

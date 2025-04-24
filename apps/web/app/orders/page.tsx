@@ -77,8 +77,8 @@ async function OrdersPage() {
         initialStatuses={agencyStatuses ?? []}
         agencyMembers={agencyMembers ?? []}
       >
-        <PageBody className="h-screen">
-          <div className="flex h-full max-h-full min-h-0 flex-1 flex-col p-[35px]">
+        <PageBody className="h-screen flex max-h-full min-h-0 flex-1 flex-col">
+ 
             <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
@@ -125,7 +125,7 @@ async function OrdersPage() {
                 />
               )
             } */}
-          </div>
+   
         </PageBody>
       </AgencyStatusesProvider>
     </OrdersProvider>
