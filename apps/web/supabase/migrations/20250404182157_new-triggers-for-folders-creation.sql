@@ -212,7 +212,7 @@ DECLARE
   cutoff_date timestamp with time zone := '2025-03-11 18:04:00-05'::timestamp with time zone; -- March 11, 2025, 6:04 PM Colombia time (UTC-5)
 BEGIN
   -- Get the organization ID from the session
-  SELECT (get_session()).organization.id INTO v_org_id;
+  SELECT get_current_organization_id() INTO v_org_id;
   
   -- Check if the user has any agency role within the current organization
   SELECT EXISTS (

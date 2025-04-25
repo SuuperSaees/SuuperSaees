@@ -3450,6 +3450,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_current_organization_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_session: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["CompositeTypes"]["session_info"]
@@ -3533,8 +3537,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: string; brief_id: string }
           | { service_id: number; brief_id: string }
+          | { service_id: string; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
