@@ -10,6 +10,7 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { PageBody } from '@kit/ui/page';
 
 import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
@@ -22,13 +23,11 @@ import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
   header: string;
 }
-
 
 export function ServicesPageClient() {
   const { t } = useTranslation(['services']);
@@ -96,43 +95,40 @@ export function ServicesPageClient() {
 
   return (
     <PageBody>
-      <div className="p-[35px]">
+      <div className='flex flex-wrap gap-5 justify-between'>
+
         <PageHeader title="services:title" rightContent={<TimerContainer />} />
 
-        <div className="flex justify-between">
-          <div className="ml-auto flex items-center gap-2">
-            <SearchBar
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder={t('searchServices')}
-            />
-            {filteredData.length > 0 &&
-              (accountRole === 'agency_owner' ||
-                accountRole === 'agency_project_manager') && (
-                <Link href="/services/create">
-                  <ThemedButton>{t('createService')}</ThemedButton>
-                </Link>
-              )}
-          </div>
-        </div>
-
-        <div className="mt-8">
-          {servicesAreLoading ? (
-            <SkeletonTable columns={4} rows={7} className="mt-4" />
-          ) : (
-            <Table
-              data={filteredData}
-              columns={servicesColumns}
-              filterKey="name"
-              controllers={{
-                search: { value: searchTerm, setValue: setSearchTerm },
-              }}
-              emptyStateComponent={renderEmptyState()}
-              configs={config}
-            />
-          )}
+        <div className="ml-auto flex items-center justify-between gap-2">
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder={t('searchServices')}
+          />
+          {filteredData.length > 0 &&
+            (accountRole === 'agency_owner' ||
+              accountRole === 'agency_project_manager') && (
+              <Link href="/services/create">
+                <ThemedButton>{t('createService')}</ThemedButton>
+              </Link>
+            )}
         </div>
       </div>
+
+      {servicesAreLoading ? (
+        <SkeletonTable columns={4} rows={7} className="mt-4" />
+      ) : (
+        <Table
+          data={filteredData}
+          columns={servicesColumns}
+          filterKey="name"
+          controllers={{
+            search: { value: searchTerm, setValue: setSearchTerm },
+          }}
+          emptyStateComponent={renderEmptyState()}
+          configs={config}
+        />
+      )}
     </PageBody>
   );
 }

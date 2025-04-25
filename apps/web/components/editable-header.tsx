@@ -76,14 +76,14 @@ const EditableHeader = ({
   };
 
   const getInputClassName = () => {
-    const baseClass = "items-center overflow-hidden rounded-md border-none bg-slate-50 pr-1 text-[20px] font-semibold text-primary-900 outline-none";
+    const baseClass = "items-center overflow-hidden rounded-md border-none bg-slate-50 pr-1 text-xl font-medium font-inter leading-4 text-primary-900 outline-none bg-transparent";
     return variant === 'chat'
       ? `w-full h-15 ${baseClass} ${inputClassName ?? ''}`
       : `h-15 flex min-w-[80%] max-w-[80%] ${baseClass} ${inputClassName ?? ''}`;
   };
 
   const getTextClassName = () => {
-    const baseClass = "text-[20px] font-semibold text-primary-900";
+    const baseClass = "text-xl font-medium font-inter leading-4";
     return variant === 'chat'
       ? `block overflow-hidden text-ellipsis whitespace-nowrap ${baseClass} ${textClassName ?? ''}`
       : `max-w-[100%] overflow-hidden whitespace-nowrap pr-1 w-full ${baseClass} ${textClassName ?? ''}`;
@@ -153,12 +153,12 @@ const EditableHeader = ({
               onChange={(event) => setName(event.target.value)}
               onBlur={handleSave}
             />
-            <span
+            <h2
               ref={spanRef}
               className="invisible absolute min-w-[80%] max-w-[80%] overflow-hidden whitespace-nowrap pr-1 text-[20px] font-semibold text-primary-900"
             >
               {name}
-            </span>
+            </h2>
             <TimerContainer />
           </>
         )}

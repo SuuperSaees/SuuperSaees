@@ -86,11 +86,11 @@ export const OrderTabs = ({
 
   return (
     <Tabs
-      className="flex h-full max-h-full min-h-0 flex-col gap-6"
+      className="flex h-full max-h-full min-h-0 flex-col gap-2"
       value={activeTab}
       onValueChange={handleTabChange}
     >
-      <TabsList className="flex w-fit gap-2 bg-transparent px-8">
+      <TabsList className="flex w-fit gap-2 bg-transparent px-6.5">
         <ThemedTabTrigger
           value="activity"
           activeTab={activeTab}
@@ -129,7 +129,7 @@ export const OrderTabs = ({
 
       <TabsContent
         value="details"
-        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto px-8"
+        className="no-scrollbar h-full max-h-full min-h-0 overflow-y-auto px-6.5"
       >
         {activeTab === 'details' && <DetailsPage />}
       </TabsContent>
@@ -145,7 +145,7 @@ export const OrderTabs = ({
         )}
       </TabsContent>
       <TabsContent value="tasks">
-        <div className="w-full px-8">
+        <div className="w-full px-6.5">
           {activeTab === 'tasks' && (
             <TasksSection
               userRole={userRole}
@@ -157,7 +157,7 @@ export const OrderTabs = ({
         </div>
       </TabsContent>
       <TabsContent value="files">
-        <div className="w-full px-8">
+        <div className="w-full px-6.5">
           {activeTab === 'files' && (
             <FileSection
               key={'files'}
@@ -169,11 +169,10 @@ export const OrderTabs = ({
         </div>
       </TabsContent>
       <TabsContent value="calendar">
-        <div className="w-full px-8">
+        <div className="w-full px-6.5">
           {activeTab === 'calendar' && (
             <CalendarSection
               orderAgencyMembers={orderAgencyMembers ?? []}
-              loading={isLoading}
             />
           )}
         </div>

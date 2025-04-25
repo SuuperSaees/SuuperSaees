@@ -127,7 +127,7 @@ BEGIN
     -- Get the root folder for the client organization
     SELECT id INTO root_folder_id
     FROM folders
-    WHERE name = (SELECT name FROM accounts WHERE id = NEW.organization_client_id)
+    WHERE name = (SELECT name FROM organizations WHERE id = NEW.organization_client_id)
       AND is_subfolder = false
       AND parent_folder_id IS NULL
     LIMIT 1;

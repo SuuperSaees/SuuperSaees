@@ -1,53 +1,21 @@
 import React, { useState } from "react"
 import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Text, Image, Link, FileText, ExternalLink, BarChart, PieChart, Calendar, Mail, MessageSquare, Settings, User, Users, Home, Box, LayoutDashboard, Globe, Database, Table, Kanban, Trello, ClipboardList, FileSpreadsheet, FileCode, Map, LineChart, Activity, Bell, Bookmark, Briefcase, CreditCard, ShoppingCart, Truck, Video, Phone } from "lucide-react"
+import dynamic from "next/dynamic"
 import { FormControl, FormField, FormItem, FormLabel } from "@kit/ui/form"
 import { Input } from "@kit/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@kit/ui/popover"
 import { Button } from "@kit/ui/button"
-import { ScrollArea } from "@kit/ui/scroll-area"
 import type { FormValues } from "../../../schema"
+import { EmojiStyle, Theme } from "emoji-picker-react"
 
-// Common icons that might be useful for embeds
-const COMMON_ICONS = [
-  { name: "text", icon: Text },
-  { name: "image", icon: Image },
-  { name: "link", icon: Link },
-  { name: "file-text", icon: FileText },
-  { name: "external-link", icon: ExternalLink },
-  { name: "bar-chart", icon: BarChart },
-  { name: "pie-chart", icon: PieChart },
-  { name: "calendar", icon: Calendar },
-  { name: "mail", icon: Mail },
-  { name: "message-square", icon: MessageSquare },
-  { name: "settings", icon: Settings },
-  { name: "user", icon: User },
-  { name: "users", icon: Users },
-  { name: "home", icon: Home },
-  { name: "box", icon: Box },
-  // Additional common icons for embed apps
-  { name: "layout-dashboard", icon: LayoutDashboard },
-  { name: "globe", icon: Globe },
-  { name: "database", icon: Database },
-  { name: "table", icon: Table },
-  { name: "kanban", icon: Kanban },
-  { name: "trello", icon: Trello },
-  { name: "clipboard-list", icon: ClipboardList },
-  { name: "file-spreadsheet", icon: FileSpreadsheet },
-  { name: "file-code", icon: FileCode },
-  { name: "map", icon: Map },
-  { name: "line-chart", icon: LineChart },
-  { name: "activity", icon: Activity },
-  { name: "bell", icon: Bell },
-  { name: "bookmark", icon: Bookmark },
-  { name: "briefcase", icon: Briefcase },
-  { name: "credit-card", icon: CreditCard },
-  { name: "shopping-cart", icon: ShoppingCart },
-  { name: "truck", icon: Truck },
-  { name: "video", icon: Video },
-  { name: "phone", icon: Phone },
-]
+// Dynamically import EmojiPicker to reduce initial bundle size
+const EmojiPicker = dynamic(() => import("emoji-picker-react").then(mod => {
+  return { default: mod.default }
+}), {
+  ssr: false,
+  loading: () => <div className="p-4 text-center text-sm text-gray-500">Loading emoji picker...</div>
+})
 
 interface TitleFieldProps {
   control: Control<FormValues>
@@ -55,15 +23,8 @@ interface TitleFieldProps {
 
 export function TitleField({ control }: TitleFieldProps) {
   const { t } = useTranslation("embeds")
-  const [isIconPopoverOpen, setIsIconPopoverOpen] = useState(false)
-
-  // Function to get the icon component by name
-  const getIconByName = (iconName: string | null | undefined) => {
-    if (!iconName) return Text
-    const foundIcon = COMMON_ICONS.find(i => i.name === iconName)
-    return foundIcon?.icon ?? Text
-  }
-
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
+  
   return (
     <>
       <FormField
@@ -81,37 +42,45 @@ export function TitleField({ control }: TitleFieldProps) {
                   control={control}
                   name="icon"
                   render={({ field: iconField }) => (
-                    <Popover open={isIconPopoverOpen} onOpenChange={setIsIconPopoverOpen}>
+                    <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg bg-transparent p-0">
-                          {(() => {
-                            const IconComponent = getIconByName(iconField.value);
-                            return <IconComponent className="h-4 w-4" />;
-                          })()}
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-9 w-9 rounded-lg bg-transparent hover:bg-gray-100 transition-colors"
+                        >
+                          <span className="text-lg">
+                            {iconField.value ? iconField.value : "🔗"}
+                          </span>
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-2">
-                        <ScrollArea className="h-60">
-                          <div className="grid grid-cols-4 gap-2">
-                            {COMMON_ICONS.map((item) => (
-                              <Button
-                                key={item.name}
-                                variant="ghost"
-                                size="icon"
-                                className={`h-9 w-9 rounded-md ${iconField.value === item.name ? "bg-gray-100" : ""}`}
-                                onClick={() => {
-                                  iconField.onChange(item.name);
-                                  setIsIconPopoverOpen(false);
-                                }}
-                              >
-                                {(() => {
-                                  const IconComponent = item.icon;
-                                  return <IconComponent className="h-4 w-4" />;
-                                })()}
-                              </Button>
-                            ))}
-                          </div>
-                        </ScrollArea>
+                      <PopoverContent side="bottom" align="start" className="w-auto p-0 border-gray-200 shadow-lg">
+                        {isEmojiPickerOpen && (
+                          <EmojiPicker
+                            onEmojiClick={(emojiData) => {
+                              iconField.onChange(emojiData.emoji);
+                              setIsEmojiPickerOpen(false);
+                            }}
+                            theme={Theme.LIGHT}
+                            lazyLoadEmojis={true}
+                            emojiStyle={EmojiStyle.NATIVE}
+                            width={280}
+                            height={350}
+                            previewConfig={{ showPreview: false }}
+                            searchPlaceHolder="Search emoji..."
+                            style={{ 
+                              "--epr-emoji-size": "18px",
+                              "--epr-category-emoji-size": "18px",
+                              "--epr-emoji-gap": "4px",
+                              "--epr-category-font-size": "0.4rem",
+                              "--epr-input-font-size": "0.4rem",
+                              "--epr-input-padding": "0.2rem",
+                              "--epr-input-line-height": "1.2"
+                            } as React.CSSProperties}
+                            className="bg-white"
+                          
+                          />
+                        )}
                       </PopoverContent>
                     </Popover>
                   )}
