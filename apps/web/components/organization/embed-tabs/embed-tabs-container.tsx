@@ -199,7 +199,7 @@ export function EmbedTabsContainer({
           <div className="sticky left-0 z-10 flex h-full items-stretch">
             <button
               onClick={() => scroll('left')}
-              className="flex w-8 items-center justify-center bg-[#FAFAFA] shadow-lg backdrop-blur-[1px] hover:bg-[#FAFAFA]"
+              className="flex w-8 items-center justify-center bg-[#FFFFFF] shadow-lg backdrop-blur-[1px] hover:bg-[#FFFFFF]"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
@@ -210,7 +210,7 @@ export function EmbedTabsContainer({
           <div className="sticky right-0 z-10 flex h-full items-stretch">
             <button
               onClick={() => scroll('right')}
-              className="flex w-8 items-center justify-center bg-[#FAFAFA] shadow-lg backdrop-blur-[1px] hover:bg-[#FAFAFA]"
+              className="flex w-8 items-center justify-center bg-[#FFFFFF] shadow-lg backdrop-blur-[1px] hover:bg-[#FFFFFF]"
             >
               <ChevronRight className="h-5 w-5" />
             </button>

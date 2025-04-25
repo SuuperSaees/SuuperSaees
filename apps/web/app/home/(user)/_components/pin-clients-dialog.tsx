@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Search, Check, AlertCircle, Loader2, Star } from 'lucide-react';
+import { X, Search, Check, AlertCircle, Loader2, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
@@ -177,7 +177,7 @@ export function PinClientsDialog({ open, onOpenChange }: PinClientsDialogProps) 
         <div className="p-5 border-b border-gray-100">
           <DialogHeader className="mb-0 space-y-1">
             <div className="flex items-center gap-2">
-              <Star className="h-4 w-4 text-gray-500" />
+              <Plus className="h-4 w-4 text-gray-500" />
               <DialogTitle className="text-lg font-medium">{t('sidebar.pinClients')}</DialogTitle>
             </div>
             <p className="text-sm text-gray-500 mt-1">

@@ -65,7 +65,7 @@ const Options = ({
   ]);
 
   return (
-    <div className={`flex bg-[#FAFAFA] p-2 rounded-md gap-2 ${className}`} {...rest}>
+    <div className={`flex bg-[#FFFFFF] p-2 rounded-md gap-2 ${className}`} {...rest}>
       {Array.from(options.values()).map((option, index) => (
         <button
           key={index}

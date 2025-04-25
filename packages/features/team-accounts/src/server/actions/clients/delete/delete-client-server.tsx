@@ -17,26 +17,39 @@ export const deleteClient = async (
   organizationId?: string,
 ) => {
   try {
+    if (!organizationId && !clientId) {
+      throw new Error('Either clientId or organizationId must be provided');
+    }
+
     const client = getSupabaseServerComponentClient();
     // Step 1: Determine the organization ID and check for required permissions
     let clientOrganizationId = organizationId;
     if (clientId && !organizationId) {
       // Fetch the organization ID for the specific client if not provided
-      const { data: clientAccount, error: clientAccountError } = await client
-        .from('accounts')
-        .select('organization_id')
-        .eq('id', clientId)
-        .single();
+      const sessionData = (await client.rpc('get_session')).data;
 
-      if (clientAccountError ?? !clientAccount?.organization_id) {
-        throw new Error(
-          `Error fetching client account: ${clientAccountError?.message ?? 'No organization found'}`,
-        );
+      const agencyId = sessionData?.agency?.id;
+      const sessionOrganizationId = sessionData?.organization?.id;
+
+      if (!agencyId && !sessionOrganizationId) {
+        throw new Error('Error fetching session data');
       }
-      clientOrganizationId = clientAccount.organization_id;
-    } else if (!organizationId && !clientId) {
-      throw new Error('Either clientId or organizationId must be provided');
-    }
+
+        if(agencyId){
+          clientOrganizationId = sessionOrganizationId ?? '';
+        } else if(sessionOrganizationId){
+          const query = client
+        .from('clients')
+        .select('organization_client_id')
+        .eq('user_client_id', clientId)
+          const {data: clientAccount, error: clientAccountError} = await query.eq('agency_id', sessionOrganizationId).single();
+          if(clientAccountError) throw new Error('Error fetching client account');
+
+          clientOrganizationId = clientAccount.organization_client_id;
+        }
+    } 
+    
+    
 
     // Fetch the agency details for permission validation
     const agencyAccount = await getAgencyForClient();

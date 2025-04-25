@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import * as React from 'react';
 
-import { useTranslation } from 'react-i18next';
+import Link from 'next/link';
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -16,26 +17,26 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table';
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/data-table';
 import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Separator } from '@kit/ui/separator';
-import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
+import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
+import { Account } from '../../../../../../apps/web/lib/account.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
-import { Account } from '../../../../../../apps/web/lib/account.types';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
-import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';  
 import { OrganizationOptionsDropdown } from './organization-options-dropdown';
-import Link from 'next/link';
 
-const getUniqueOrganizations = (clients: ClientsWithOrganization[]): Organization[] => {
+const getUniqueOrganizations = (
+  clients: ClientsWithOrganization[],
+): Organization[] => {
   return clients.map((client) => ({
     ...client.organization,
     primary_owner: client.primaryOwner?.name ?? '',
@@ -51,7 +52,7 @@ const getUniqueClients = (clients: ClientsWithOrganization[]): Client[] => {
         id: client.organization.id,
         name: client.organization.name,
       },
-    }))
+    })),
   );
 };
 // organization type based on getUniqueOrganizations
@@ -99,19 +100,22 @@ type ClientsTableProps = {
   view?: 'clients' | 'organizations';
 };
 
-// CLIENTS TABLE 
+// CLIENTS TABLE
 // accountIds, accountNames
 export function ClientsTable({ clients, view }: ClientsTableProps) {
   const { t } = useTranslation();
   clients = clients.filter((client) => {
-    const isClientGuest = client.primaryOwner?.name.toLowerCase().includes('guest') && client.primaryOwner?.email?.toLowerCase().includes('guest') && client.primaryOwner?.email?.toLowerCase().includes('@suuper.co')
-    return !isClientGuest
+    const isClientGuest =
+      client.primaryOwner?.name.toLowerCase().includes('guest') &&
+      client.primaryOwner?.email?.toLowerCase().includes('guest') &&
+      client.primaryOwner?.email?.toLowerCase().includes('@suuper.co');
+    return !isClientGuest;
   });
   const [activeButton, setActiveButton] = useState<'clients' | 'organizations'>(
     'clients',
   );
-  const {workspace} = useUserWorkspace()
-  const userRole = workspace.role ?? ''
+  const { workspace } = useUserWorkspace();
+  const userRole = workspace.role ?? '';
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -124,10 +128,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const [search, setSearch] = React.useState('');
-  const uniqueClients = useMemo(
-    () => getUniqueClients(clients),
-    [clients],
-  );
+  const uniqueClients = useMemo(() => getUniqueClients(clients), [clients]);
   const uniqueOrganizations = useMemo(
     () => getUniqueOrganizations(clients),
     [clients],
@@ -135,11 +136,11 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
   const organizationColumns = useOrganizationColumns(t);
   const filteredOrganizations = uniqueOrganizations.filter((org) => {
     const searchString = search?.toLowerCase();
-    
+
     if (org.name?.toLowerCase().includes(searchString)) return true;
-    
+
     if (org.primary_owner?.toLowerCase().includes(searchString)) return true;
-    
+
     return false;
   });
   const clientColumns = useClientColumns(t, userRole, filteredOrganizations);
@@ -148,13 +149,14 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
 
   const filteredClients = uniqueClients.filter((client) => {
     const searchString = search?.toLowerCase();
-    
+
     if (client.name?.toLowerCase().includes(searchString)) return true;
-    
+
     if (client.email?.toLowerCase().includes(searchString)) return true;
-    
-    if (client.organization?.name?.toLowerCase().includes(searchString)) return true;
-    
+
+    if (client.organization?.name?.toLowerCase().includes(searchString))
+      return true;
+
     return false;
   });
 
@@ -187,7 +189,7 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
     setActiveButton(button);
   };
 
-  const {config} = useTableConfigs('table-config');
+  const { config } = useTableConfigs('table-config');
 
   React.useEffect(() => {
     if (view) {
@@ -197,97 +199,88 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
   }, [view]);
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col">
-        <div className="flex justify-between mb-[20px]">
-          <div className='gap-2 min-h-[40px]'>
-          {!view && (
-            <>
-<Button
-  variant="ghost"
-  className={`
-    max-h-[32px] inline-flex items-center text-[#667085] gap-2 px-3 py-1.5 hover:text-[#667085] 
-    active:bg-[#EBECEF] text-sm font-semibold transition-all rounded-sm whitespace-nowrap
-    ${activeButton === 'clients' ? 
-      'shadow-sm data-[state=active]:shadow-sm data-[state=active]:text-[#667085] data-[state=active]:bg-[#d0d6f799] text-[#667085] bg-[#EBECEF]' :
-      'bg-transparent text-[#667085]'
-    }
-  `}
-  onClick={() => handleButtonClick('clients')}
->
-  <span className="leading-5">
-    {t('clients:clients')}
-  </span>
-</Button>
+        <div className="flex justify-between">
+          <div className="min-h-[40px] gap-2">
+            {!view && (
+              <>
+                <Button
+                  variant="ghost"
+                  className={`inline-flex max-h-[32px] items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold text-[#667085] transition-all hover:text-[#667085] active:bg-[#EBECEF] ${
+                    activeButton === 'clients'
+                      ? 'bg-[#EBECEF] text-[#667085] shadow-sm data-[state=active]:bg-[#d0d6f799] data-[state=active]:text-[#667085] data-[state=active]:shadow-sm'
+                      : 'bg-transparent text-[#667085]'
+                  } `}
+                  onClick={() => handleButtonClick('clients')}
+                >
+                  <span className="leading-5">{t('clients:clients')}</span>
+                </Button>
 
-<Button
-  variant="ghost"
-  className={`
-    max-h-[32px] ml-[.5rem] inline-flex items-center gap-2 text-[#667085] px-3 py-1.5 hover:text-[#667085] 
-    active:bg-[#EBECEF] text-sm font-semibold transition-all rounded-sm whitespace-nowrap
-    ${activeButton === 'organizations' ? 
-      'shadow-sm data-[state=active]:shadow-sm data-[state=active]:text-[#667085] data-[state=active]:bg-[#d0d6f799] text-[#667085] bg-[#EBECEF]' :
-      'bg-transparent text-[#667085]'
-    }
-  `}
-  onClick={() => handleButtonClick('organizations')}
->
-  <span className="leading-5">
-    {t('clients:organizations.title')}
-  </span>
-</Button>
-</>
-          )}
-        </div>
-        <div className='justify-end flex'>
-        <div className="flex gap-4">
-          <div className="relative ml-auto flex w-fit flex-1 md:grow-0 max-h-[36px] px-3">
-            
-          <Search className="text-muted-foreground absolute left-5 top-2.5 h-4 w-4" />
-            <ThemedInput
-              value={search}
-              onInput={(
-                e:
-                  | React.ChangeEvent<HTMLInputElement>
-                  | React.FormEvent<HTMLFormElement>,
-              ) => setSearch((e.target as HTMLInputElement).value)}
-              placeholder={
-                activeButton === 'clients'
-                  ? t('clients:searchClients')
-                  : t('clients:searchOrganizations')
-              }
-              className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[320px]"
-            />
-            </div>
+                <Button
+                  variant="ghost"
+                  className={`ml-[.5rem] inline-flex max-h-[32px] items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold text-[#667085] transition-all hover:text-[#667085] active:bg-[#EBECEF] ${
+                    activeButton === 'organizations'
+                      ? 'bg-[#EBECEF] text-[#667085] shadow-sm data-[state=active]:bg-[#d0d6f799] data-[state=active]:text-[#667085] data-[state=active]:shadow-sm'
+                      : 'bg-transparent text-[#667085]'
+                  } `}
+                  onClick={() => handleButtonClick('organizations')}
+                >
+                  <span className="leading-5">
+                    {t('clients:organizations.title')}
+                  </span>
+                </Button>
+              </>
+            )}
           </div>
-          {(activeButton === 'organizations' &&
-            filteredOrganizations.length > 0) ||
-            (filteredClients.length > 0 && <CreateClientDialog />)}
+          <div className="flex justify-end gap-2">
+            <div className="flex gap-4">
+              <div className="relative ml-auto flex max-h-[36px] w-fit flex-1 md:grow-0 gap-2">
+                <Search className="text-muted-foreground absolute left-3 top-2.5 h-4 w-4" />
+                <ThemedInput
+                  value={search}
+                  onInput={(
+                    e:
+                      | React.ChangeEvent<HTMLInputElement>
+                      | React.FormEvent<HTMLFormElement>,
+                  ) => setSearch((e.target as HTMLInputElement).value)}
+                  placeholder={
+                    activeButton === 'clients'
+                      ? t('clients:searchClients')
+                      : t('clients:searchOrganizations')
+                  }
+                  className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[320px]"
+                />
+              </div>
+            </div>
+            {(activeButton === 'organizations' &&
+              filteredOrganizations.length > 0) ||
+              (filteredClients.length > 0 && <CreateClientDialog />)}
+          </div>
         </div>
-        </div>
-        {!view && <Separator />}
+
       </div>
-      <div className='bg-white mt-4 rounded-xl'>
-      {(activeButton === 'organizations' && !uniqueClients.length) ||
-      !clients.length ? (
-        <EmptyState
-          imageSrc="/images/illustrations/Illustration-cloud.svg"
-          title={t('startWithFirstClientTitle')}
-          description={t('noClientsDescription')}
-          button={<CreateClientDialog />}
-        />
-      ) : (
-        <DataTable
-          data={
-            (activeButton === 'organizations'
-              ? filteredOrganizations
-              : filteredClients) as Client[]
-          }
-          columns={columns as ColumnDef<Client>[]}
-          options={options as TableOptions<Client>}
-          configs={config}
-        />
-      )}
+      <div className="rounded-xl bg-white">
+        {(activeButton === 'organizations' && !uniqueClients.length) ||
+        !clients.length ? (
+          <EmptyState
+            imageSrc="/images/illustrations/Illustration-cloud.svg"
+            title={t('startWithFirstClientTitle')}
+            description={t('noClientsDescription')}
+            button={<CreateClientDialog />}
+          />
+        ) : (
+          <DataTable
+            data={
+              (activeButton === 'organizations'
+                ? filteredOrganizations
+                : filteredClients) as Client[]
+            }
+            columns={columns as ColumnDef<Client>[]}
+            options={options as TableOptions<Client>}
+            configs={config}
+          />
+        )}
       </div>
     </div>
   );
@@ -310,8 +303,14 @@ const useClientColumns = (
           >
             <span>
               <ProfileAvatar
-                displayName={row.original?.settings?.name ?? row.original?.name ?? ''}
-                pictureUrl={row.original?.settings?.picture_url ?? row.original?.picture_url ?? ''}
+                displayName={
+                  row.original?.settings?.name ?? row.original?.name ?? ''
+                }
+                pictureUrl={
+                  row.original?.settings?.picture_url ??
+                  row.original?.picture_url ??
+                  ''
+                }
               />
             </span>
             <div className="flex flex-col">
@@ -350,11 +349,7 @@ const useClientColumns = (
 
           const formattedDate = `${day}/${month}/${year}`;
 
-          return (
-            <span className="text-sm text-gray-600">
-              {formattedDate}
-            </span>
-          );
+          return <span className="text-sm text-gray-600">{formattedDate}</span>;
         },
       },
       {
@@ -363,13 +358,28 @@ const useClientColumns = (
         enableHiding: false,
         cell: ({ row }) => {
           const client = row.original;
-          const organizationOptions = filteredOrganizations.map((org: Organization) => ({ id: org.id, name: org.name, slug: org.slug ?? '' }));
-          return (userRole === 'agency_owner' || userRole === 'agency_project_manager') &&(
-            <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              {/* <UpdateClientDialog {...client} /> */}
-              {/* <DeleteUserDialog userId={client.id} /> */}
-              <AgencyClientCrudMenu organizationOptions = {organizationOptions} userId = {client.id} name = {client.name} email = {client.email ?? ''} targetRole={client.role ?? undefined}/>
-            </div>
+          const organizationOptions = filteredOrganizations.map(
+            (org: Organization) => ({
+              id: org.id,
+              name: org.name,
+              slug: org.slug ?? '',
+            }),
+          );
+          return (
+            (userRole === 'agency_owner' ||
+              userRole === 'agency_project_manager') && (
+              <div className="h-18 flex items-center gap-4 self-stretch p-4">
+                {/* <UpdateClientDialog {...client} /> */}
+                {/* <DeleteUserDialog userId={client.id} /> */}
+                <AgencyClientCrudMenu
+                  organizationOptions={organizationOptions}
+                  userId={client.id}
+                  name={client.name}
+                  email={client.email ?? ''}
+                  targetRole={client.role ?? undefined}
+                />
+              </div>
+            )
           );
         },
       },
@@ -378,7 +388,9 @@ const useClientColumns = (
   );
 };
 
-{/* // ORGANIZATIONS TABLE */}
+{
+  /* // ORGANIZATIONS TABLE */
+}
 const useOrganizationColumns = (
   t: TFunction<'clients', undefined>,
 ): ColumnDef<Organization>[] => {
@@ -399,7 +411,7 @@ const useOrganizationColumns = (
               />
             </span>
             <div className="flex flex-col">
-              <span className="text-sm font-medium leading-[1.42857] font-semibold">
+              <span className="text-sm font-medium font-semibold leading-[1.42857]">
                 {row.original.name}
               </span>
               <span className="text-sm font-normal leading-[1.42857] text-gray-600">
@@ -417,7 +429,7 @@ const useOrganizationColumns = (
             <ProfileAvatar
               displayName={row.original.name}
               pictureUrl={row.original.picture_url}
-              className='mx-0'
+              className="mx-0"
             />
           </div>
         ),
@@ -435,18 +447,14 @@ const useOrganizationColumns = (
 
           const formattedDate = `${day}/${month}/${year}`;
 
-          return (
-            <span className="text-sm text-gray-600">
-              {formattedDate}
-            </span>
-          );
+          return <span className="text-sm text-gray-600">{formattedDate}</span>;
         },
       },
       {
         id: 'actions',
         header: t('actions'),
         enableHiding: false,
-        cell: ({row}) => {
+        cell: ({ row }) => {
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
               <OrganizationOptionsDropdown organizationId={row.original.id} />

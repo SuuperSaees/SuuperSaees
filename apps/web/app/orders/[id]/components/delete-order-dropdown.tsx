@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { EllipsisVertical, Trash2, ExternalLink } from 'lucide-react';
+import { MoreVertical, Trash2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { deleteOrderById } from '~/team-accounts/src/server/actions/orders/delete/delete-order';
 
@@ -52,12 +52,10 @@ function DeleteOrderDropdown({orderId, isPublic, tokenId}: {orderId: number, isP
   }
 
   return (
-    <div className="mb-[0.20rem] ml-2 w-auto items-center flex">
+    <div className="mb-[0.20rem] ml-2 w-auto items-start flex">
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <Button variant="ghost" className='mr-2 h-10 m-0 text-slate-500 px-1'>
-            <EllipsisVertical className="w-[20px] h-[20px]" />
-          </Button>
+            <MoreVertical className="h-4 w-4 mr-2 h-10 m-0 p-0 hover:text-gray-700 text-gray-400 bg-transparent " />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {isPublic && (

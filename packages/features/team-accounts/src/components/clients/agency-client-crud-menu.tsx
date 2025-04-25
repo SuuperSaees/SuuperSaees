@@ -1,4 +1,4 @@
-import { EllipsisVertical, LockKeyhole, Users, Pen } from 'lucide-react';
+import { MoreVertical, LockKeyhole, Users, Pen } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,14 +56,14 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, currentUserRole, c
     <>
       <DropdownMenu>
         <DropdownMenuTrigger>
-          <EllipsisVertical />
+          <MoreVertical className='w-4 h-4 text-gray-400'/>
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-56 text-gray-600' align="end" sideOffset={5}>
           <DropdownMenuItem onSelect={() => {
             setOpenEditUserDialog(true);
           }}>
             <div className="flex items-center gap-2 w-full h-full cursor-pointer">
-              <Pen className="h-4 w-4" />
+              <Pen className="h-4 w-4 text-gray-400" />
               {t('editUser.edit')}
             </div>
           </DropdownMenuItem>
@@ -74,7 +74,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, currentUserRole, c
               }}
             >
               <div className="flex gap-2 items-center w-full h-full cursor-pointer">
-                <Users className="w-4 h-4" />
+                <Users className="w-4 h-4 text-gray-400" />
                 {t('editUser.supplant')}
               </div>
             </DropdownMenuItem>
@@ -87,7 +87,7 @@ function AgencyClientCrudMenu({userId, name, email, queryKey, currentUserRole, c
             </div>
           </DropdownMenuItem> */}
           <DropdownMenuItem className='flex gap-2 items-center w-full h-full cursor-pointer' onSelect={() => setOpenResetPasswordDialog(true)}>
-            <LockKeyhole className='w-4 h-4' /> 
+            <LockKeyhole className='w-4 h-4 text-gray-400' /> 
             {t('editUser.resetPassword')}
           </DropdownMenuItem>
           {

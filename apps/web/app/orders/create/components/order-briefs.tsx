@@ -306,7 +306,7 @@ export const OrderBriefs = ({
                                 items={
                                   (formField.field?.options as Option[]) ?? []
                                 }
-                                question={formField.field?.label ?? ''}
+                                // question={formField.field?.label ?? ''}
                                 selectedOption={
                                   form.getValues(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,

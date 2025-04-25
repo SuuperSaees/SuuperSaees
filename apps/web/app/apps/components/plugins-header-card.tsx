@@ -26,15 +26,15 @@ function PluginsHeaderCard({ plugins }: PluginsHeaderCardProps) {
   return (
     <>
       <Card
-        className="group cursor-pointer border border-BlueDark-600 shadow-md transition-colors hover:bg-gray-50"
+        className="group cursor-pointer border border-gray-600 shadow-md transition-colors hover:bg-gray-50"
         onClick={() => setIsOpenStoreDialog(true)}
       >
         <div className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-BlueDark-600 bg-BlueDark-600/15 text-blue-500">
-            <Rocket className="h-5 w-5 text-BlueDark-600" strokeWidth={1.5} />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-gray-600 bg-gray-600/15 text-gray-600">
+            <Rocket className="h-5 w-5 text-gray-600" strokeWidth={1.5} />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-blue-700">{t('headerTitle')}</h3>
+            <h3 className="font-semibold text-gray-700">{t('headerTitle')}</h3>
             <p className="text-sm text-muted-foreground">
               {t('headerDescription')}
             </p>

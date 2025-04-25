@@ -18,7 +18,6 @@ interface DropdownProps {
 
 export function SingleChoiceDropdown({
     items,
-    question,
     selectedOption,
     onChange
 }: DropdownProps) {
@@ -38,9 +37,6 @@ export function SingleChoiceDropdown({
 
     return (
         <div className="relative">
-            <div className="mb-4">
-                <p className="text-base">{question}</p>
-            </div>
             <div className="border border-gray-300 rounded-md" onClick={() => setIsOpen(!isOpen)}>
                 <div className="p-2 flex items-center justify-between text-gray-500 text-[16px] font-medium leading-6 ">
                     {selected ? items.find(item => item.value === selected)?.label : t('orders:dropdown')}
