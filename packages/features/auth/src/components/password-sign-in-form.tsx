@@ -1,33 +1,41 @@
 'use client';
 
-import Link from 'next/link';
-
-
-
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowRight } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-// import { useTranslation } from 'react-i18next';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
 import { Button } from '@kit/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@kit/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@kit/ui/form';
 import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
-import { Trans } from '@kit/ui/trans';
-import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
-import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
+import { Spinner } from '@kit/ui/spinner';
+import { cn } from '@kit/ui/utils';
 
+import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
+import { PasswordSignInSchema } from '../schemas/password-sign-in.schema';
 
 export function PasswordSignInForm({
   onSubmit,
   themeColor,
   loading,
+  className,
 }: {
   onSubmit: (params: z.infer<typeof PasswordSignInSchema>) => unknown;
   themeColor: string | undefined;
   loading: boolean;
+  className?: string;
 }) {
+  const { t } = useTranslation('common');
+  const [showPassword, setShowPassword] = useState(false);
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
     defaultValues: {
@@ -39,32 +47,25 @@ export function PasswordSignInForm({
   return (
     <Form {...form}>
       <form
-        className={'w-full space-y-2.5'}
+        className={cn('flex w-full flex-col gap-5 text-gray-900', className)}
         onSubmit={form.handleSubmit(onSubmit)}
       >
+        <span className="text-5xl font-bold text-black">{t('signIn.title')}</span>
+
+        <span>{t('signIn.description', { organizationName: 'Suuper' })}</span>
+
         <FormField
           control={form.control}
           name={'email'}
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="pt-2 flex justify-center items-start text-2xl font-semibold " >
-                <Trans i18nKey={'common:plsDetailInputs'} />  
-              </FormLabel>
-
-              <FormLabel className="flex justify-center items-start font-normal " >
-              <Trans i18nKey={'common:continueToYourAccount'} />
-              </FormLabel>
-
-              <div className=" text-left text-sm" style={{ marginTop: '30px' }}>
-                <Trans i18nKey={'common:emailLabel'} />
-              </div>
-
               <FormControl>
                 <Input
                   data-test={'email-input'}
                   required
                   type="email"
-                  className="focus-visible:ring-brand"
+                  className="focus-visible:ring-brand placeholder:text-inherit"
+                  placeholder={t('signIn.form.email.placeholder')}
                   {...field}
                 />
               </FormControl>
@@ -79,20 +80,29 @@ export function PasswordSignInForm({
           name={'password'}
           render={({ field }) => (
             <FormItem>
-              <div className="text-left text-sm" >
-                <Trans i18nKey={'common:password'} />
-              </div>
-
               <FormControl>
-                <Input
-                  required
-                  data-test={'password-input'}
-                  type="password"
-                  placeholder={''}
-                  {...field}
-                  className="focus-visible:ring-brand"
-                  
-                />
+                <div className="relative">
+                  <Input
+                    required
+                    data-test={'password-input'}
+                    type={showPassword ? "text" : "password"}
+                    placeholder={t('signIn.form.password.placeholder')}
+                    {...field}
+                    className="focus-visible:ring-brand placeholder:text-inherit pr-10"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </FormControl>
 
               <FormMessage />
@@ -103,10 +113,9 @@ export function PasswordSignInForm({
                     type="checkbox"
                     id="rememberMe"
                     className="form-checkbox"
-                    
                   />
-                  <label htmlFor="rememberMe" className="text-xs" >
-                    <Trans i18nKey={'auth:rememberMe'} />
+                  <label htmlFor="rememberMe" className="text-xs font-medium">
+                    {t('signIn.form.rememberMe')}
                   </label>
                 </div>
 
@@ -115,12 +124,11 @@ export function PasswordSignInForm({
                   type={'button'}
                   size={'sm'}
                   variant={'link'}
-                  className={`font-inter flex items-center space-y-3 text-xs font-semibold leading-[20px] tracking-normal ${themeColor}`}
-                  
+                  className={`text-xs font-medium ${themeColor}`}
                 >
-                  <Link href={'/auth/password-reset'}>
-                    <Trans i18nKey={'auth:passwordForgottenQuestion'} />
-                  </Link>
+                  <a href={'/auth/password-reset'}>
+                    {t('signIn.form.forgotPassword')}
+                  </a>
                 </Button>
               </div>
             </FormItem>
@@ -129,28 +137,38 @@ export function PasswordSignInForm({
 
         <ThemedButton
           data-test="auth-submit-button"
-          className="w-full"
+          className="w-full transition-all duration-300 hover:-translate-y-0.5"
           type="submit"
           disabled={loading}
           themeColor={themeColor}
         >
           <If
-            condition={loading}
+            condition={!loading}
             fallback={
               <>
-                <Trans i18nKey={'auth:signInWithEmail'} />
+                {t('signIn.label')}
 
-                <ArrowRight
-                  className={
-                    'zoom-in animate-in slide-in-from-left-2 fill-mode-both h-4 delay-500 duration-500'
-                  }
-                />
+                <Spinner className="h-4 w-4" />
               </>
             }
           >
-            <Trans i18nKey={'auth:signingIn'} />
+            {t('signIn.label')}
           </If>
         </ThemedButton>
+        {/* Or sign-up */}
+        <div className="flex flex-col items-center gap-3 text-sm">
+          <div className="flex w-full items-center justify-center gap-8">
+            <div className="h-[1px] w-full bg-gray-200"></div>
+            <span className="text-gray-500">{t('signIn.or.title')}</span>
+            <div className="h-[1px] w-full bg-gray-200"></div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>{t('signIn.or.question')}</span>
+            <a href={'/auth/sign-up'} className="underline">
+              {t('signIn.or.link')}
+            </a>
+          </div>
+        </div>
       </form>
     </Form>
   );

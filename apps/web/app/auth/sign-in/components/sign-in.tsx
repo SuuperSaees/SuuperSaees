@@ -4,7 +4,6 @@ import { SignInMethodsContainer } from '@kit/auth/sign-in';
 
 import { AppLogo } from '~/components/app-logo';
 import authConfig from '~/config/auth.config';
-import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 
 // import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 import { useAuthDetails } from '../../../../../../packages/features/auth/src/hooks/use-auth-details';
@@ -24,56 +23,52 @@ const SignIn = ({
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const { authDetails, isLoading } = useAuthDetails(host);
+  const { authDetails } = useAuthDetails(host);
   //   const textcolor = getTextColorBasedOnBackground(
   //     authDetails?.background_color ?? '#ffffff',
-  //   );
+
+  const defaultBackgroundURL = process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/suuper/auth_sign_in_background.webp';
+  const customBackgroundURL = authDetails?.auth_sign_in_background_url;
   return (
-    <>
+    // <AppLogo logoUrl={authDetails?.logo_url} />
+    <div className="flex h-full w-full">
+      {/* Left Login Container */}
+      <div className="flex w-1/2 flex-col items-start justify-start p-10">
+        <AppLogo
+          logoUrl={authDetails?.logo_url}
+          className="max-h-[30px] w-auto"
+        />
+        <SignInMethodsContainer
+          providers={authConfig.providers}
+          inviteToken={inviteToken}
+          paths={paths}
+          themeColor={authDetails?.theme_color}
+          className="font-inter m-auto max-w-sm"
+        />
+      </div>
+
+      {/* Right Image background  container*/}
       <div
-        className={`from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] relative flex h-screen w-full items-center justify-center overflow-hidden bg-gradient-to-r`}
+        className="relative w-1/2 overflow-hidden border-[16px] border-white"
         style={{
-          background: authDetails?.auth_section_background_color
-            ? authDetails.auth_section_background_color
-            : authDetails?.background_color,
+          backgroundImage: `url(${customBackgroundURL || defaultBackgroundURL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          borderRadius: '24px',
         }}
       >
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="from-gray-['#f2f2f2'] to-gray-['#f2f2f2'] absolute w-full animate-pulse bg-gradient-to-r opacity-100" />
-        </div>
-
-        <div className="absolute hidden md:left-8 md:top-8 md:block md:h-auto md:w-[142px] md:object-contain"></div>
-
+        {/* Overlay */}
         <div
-          className={`align-center relative z-10 w-[90%] max-w-[360px] rounded-lg bg-white text-black shadow-lg backdrop-blur-[95%] md:px-[32px] md:py-[48px] transition pointer-events-none opacity-0 ${!isLoading && 'pointer-events-auto opacity-100'}`}
+          className="absolute inset-0 bg-transparent opacity-50"
           style={{
-            color: getTextColorBasedOnBackground(
-              authDetails?.auth_card_background_color
-                ? authDetails.auth_card_background_color
-                : '#ffffff',
-            ),
-            padding: '32px', // Additional padding for the form
-            backgroundColor: authDetails?.auth_card_background_color
-              ? authDetails.auth_card_background_color
-              : 'white',
+            backgroundColor: authDetails?.theme_color
+              ? authDetails?.theme_color
+              : undefined,
           }}
-        >
-          <div className="flex w-full items-start justify-center pb-[32px]">
-            <div className="flex h-full items-center justify-center">
-              <AppLogo logoUrl={authDetails?.logo_url} />
-            </div>
-          </div>
-          <div className="h-auto">
-            <SignInMethodsContainer
-              providers={authConfig.providers}
-              inviteToken={inviteToken}
-              paths={paths}
-              themeColor={authDetails?.theme_color}
-            />
-          </div>
-        </div>
+        ></div>
       </div>
-    </>
+    </div>
   );
 };
 

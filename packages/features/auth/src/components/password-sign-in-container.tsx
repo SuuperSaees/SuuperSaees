@@ -14,9 +14,11 @@ import { PasswordSignInForm } from './password-sign-in-form';
 export function PasswordSignInContainer({
   onSignIn,
   themeColor,
+  className,
 }: {
   onSignIn?: (userId?: string) => unknown;
   themeColor: string | undefined;
+  className?: string;
 }) {
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
   const signInMutation = useSignInWithEmailPassword();
@@ -48,7 +50,7 @@ export function PasswordSignInContainer({
     <>
       <AuthErrorAlert error={signInMutation.error} />
 
-      <PasswordSignInForm onSubmit={onSubmit} loading={isLoading} themeColor={themeColor} />
+      <PasswordSignInForm onSubmit={onSubmit} loading={isLoading} themeColor={themeColor} className={className} />
     </>
   );
 }

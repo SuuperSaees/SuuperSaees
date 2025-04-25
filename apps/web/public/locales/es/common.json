@@ -22,12 +22,32 @@
   "loading": "Estamos cargando la pagina...",
   "genericServerErrorHeading": "Lo siento, algo salió mal al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
   "pageNotFound": "Lo siento, esta página no existe.",
+  "signIn": {
+    "label": "Iniciar sesión",
+    "title": "Bienvenid@",
+    "description": "Inicia sesión en tu cuenta",
+    "form": {
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "Correo electrónico"
+      },
+      "password": {
+        "label": "Contraseña",
+        "placeholder": "Contraseña"
+      },
+      "rememberMe": "Recuérdame",
+      "forgotPassword": "Olvidé mi contraseña"
+    },
+    "or": {
+      "title": "O",
+      "question": "¿No tienes una cuenta?",
+      "link": "Registrarme"
+    }
+  },
   "pageNotFoundSubHeading": "Lo sentimos, la página que buscabas no fue encontrada",
   "genericError": "Lo siento, algo salió mal.",
   "genericErrorSubHeading": "Lo sentimos, ocurrió un error al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
   "goBack": "Volver",
-  "continueToYourAccount": "Continúa con tu cuenta",
-  "plsDetailInputs": "Inicia sesión",
   "backToHomePage": "Regresar a la página principal",
   "anonymousUser": "Anónimo",
   "profile": "Mi perfil",
