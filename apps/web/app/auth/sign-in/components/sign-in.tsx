@@ -22,10 +22,13 @@ const SignIn = ({
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const { authDetails } = useAuthDetails(host);
+  const { authDetails, isLoading } = useAuthDetails(host);
 
   return (
-    <AuthLayout authDetails={authDetails}>
+    <AuthLayout
+      authDetails={authDetails}
+      isLoading={isLoading}
+    >
       <SignInMethodsContainer
         providers={authConfig.providers}
         inviteToken={inviteToken}

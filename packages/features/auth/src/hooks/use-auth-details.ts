@@ -22,8 +22,12 @@ export const useAuthDetails = (hostname: string) => {
 
   useEffect(() => {
     const fetchAuthDetails = async () => {
-      const isCustomDomain = () => true;
-      console.log('isCustomDomain', isCustomDomain());
+      const isCustomDomain = () => {
+        const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+        const currentAppOrigin = window.location.origin + '/';
+        return originalAppOrigin !== currentAppOrigin;
+      };
+      
       if (!isCustomDomain()) {
         // Clear cached data if the domain is not custom
         localStorage.removeItem(`authDetails_${hostname}`);

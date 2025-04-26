@@ -9,13 +9,18 @@ import { AppLogo } from '~/components/app-logo';
 interface AuthLayoutProps {
   children: ReactNode;
   authDetails: AuthDetails | null;
+  isLoading: boolean;
 }
 
-export const AuthLayout = ({ children, authDetails }: AuthLayoutProps) => {
+export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLayoutProps) => {
   const defaultBackgroundURL =
     process.env.NEXT_PUBLIC_SUPABASE_URL +
     '/storage/v1/object/public/suuper/auth_sign_in_background.webp';
   const customBackgroundURL = authDetails?.auth_sign_in_background_url;
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div className="flex h-full w-full justify-between">
