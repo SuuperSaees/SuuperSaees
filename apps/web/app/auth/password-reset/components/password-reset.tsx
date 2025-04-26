@@ -12,14 +12,17 @@ export function PasswordReset() {
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const { authDetails } = useAuthDetails(host);
+  const { authDetails, isLoading } = useAuthDetails(host);
 
   const { callback } = pathsConfig.auth;
   const { setPassword } = pathsConfig.app;
   const redirectPath = `${callback}?next=${setPassword}`;
 
   return (
-    <AuthLayout authDetails={authDetails}>
+    <AuthLayout
+      authDetails={authDetails}
+      isLoading={isLoading}
+    >
       <PasswordResetRequestContainer
         redirectPath={redirectPath}
         themeColor={authDetails?.theme_color}
