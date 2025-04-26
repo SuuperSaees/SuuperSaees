@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@kit/ui/button';
 
 import {
-  getTextColorBasedOnBackground,
+  getContrastColor,
   hexToRgb,
 } from '../../../../../../apps/web/app/utils/generate-colors';
 import { useOrganizationSettings } from '../../context/organization-settings-context';
@@ -21,9 +21,10 @@ export const ThemedButton: React.FC<{
 }> = ({ children, className, themeColor, opacity, ...rest }) => {
   const { theme_color } = useOrganizationSettings();
   if (!themeColor) {
-    themeColor = theme_color;
+    themeColor = theme_color ?? '#85EFFF';
   }
-  const textColor = getTextColorBasedOnBackground(themeColor ?? '#ffffff');
+  const textColor = getContrastColor(themeColor ?? '#85EFFF');
+
   return (
     <Button
       className={`bg-brand flex gap-2 ${className}`}
