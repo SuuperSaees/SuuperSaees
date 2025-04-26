@@ -3,6 +3,9 @@
 import { useCallback, useRef, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
+
+import { useTranslation } from 'react-i18next';
+
 import { useAppEvents } from '@kit/shared/events';
 import { useSignUpWithEmailAndPassword } from '@kit/supabase/hooks/use-sign-up-with-email-password';
 
@@ -43,10 +46,18 @@ export function EmailPasswordSignUpContainer({
   const appEvents = useAppEvents();
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const loading = signUpMutation.isPending || redirecting.current || isRedirecting;
+  const loading =
+    signUpMutation.isPending || redirecting.current || isRedirecting;
+  const [error, setError] = useState(false);
+  const { t } = useTranslation('auth');
 
   const onSignupRequested = useCallback(
-    async (credentials: { email: string; password: string; organizationName: string; repeatPassword: string }) => {
+    async (credentials: {
+      email: string;
+      password: string;
+      organizationName: string;
+      repeatPassword: string;
+    }) => {
       if (loading) {
         return;
       }
@@ -59,7 +70,7 @@ export function EmailPasswordSignUpContainer({
           emailRedirectTo,
           captchaToken,
         });
-
+        setError(false);
         appEvents.emit({
           type: 'user.signedUp',
           payload: {
@@ -78,6 +89,7 @@ export function EmailPasswordSignUpContainer({
         }
       } catch (error) {
         console.error(error);
+        setError(true);
         setIsRedirecting(false);
       } finally {
         resetCaptchaToken();
@@ -91,15 +103,18 @@ export function EmailPasswordSignUpContainer({
       onSignUp,
       resetCaptchaToken,
       signUpMutation,
-      showConfirmEmail,
       router,
-      inviteToken,
     ],
   );
 
   return (
     <>
-      <AuthErrorAlert error={signUpMutation.error} />
+      <AuthErrorAlert
+        title={t('signUp2.error.title')}
+        description={t('signUp2.error.description')}
+        visible={!error}
+        onClose={() => setError(false)}
+      />
 
       <PasswordSignUpForm
         onSubmit={onSignupRequested}

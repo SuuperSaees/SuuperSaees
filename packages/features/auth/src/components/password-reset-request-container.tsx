@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { useRequestResetPassword } from '@kit/supabase/hooks/use-request-reset-password';
-import { Alert, AlertDescription } from '@kit/ui/alert';
 // import { Button } from '@kit/ui/button';
 import {
   Form,
@@ -16,13 +15,15 @@ import {
   FormLabel,
   FormMessage,
 } from '@kit/ui/form';
-import { If } from '@kit/ui/if';
 import { Input } from '@kit/ui/input';
-import { Trans } from '@kit/ui/trans';
-import { getTextColorBasedOnBackground } from '../../../../../apps/web/app/utils/generate-colors';
-import { AuthErrorAlert } from './auth-error-alert';
-import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
+import { Spinner } from '@kit/ui/spinner';
 import { cn } from '@kit/ui/utils';
+
+import { ThemedButton } from '../../../accounts/src/components/ui/button-themed-with-settings';
+import { AuthErrorAlert } from './auth-error-alert';
+import { AuthSuccessAlert } from './auth-success-alert';
+import { If } from '@kit/ui/if';
+import { useState } from 'react';
 
 const PasswordResetSchema = z.object({
   email: z.string().email(),
@@ -32,12 +33,13 @@ export function PasswordResetRequestContainer(params: {
   redirectPath: string;
   themeColor: string | undefined;
   backgroundColor: string | undefined;
+  className?: string;
 }) {
   const { t } = useTranslation('auth');
   const resetPasswordMutation = useRequestResetPassword();
-  const error = resetPasswordMutation.error;
+  const [error, setError] = useState(false);
   const success = resetPasswordMutation.data;
-
+  
   const form = useForm<z.infer<typeof PasswordResetSchema>>({
     resolver: zodResolver(PasswordResetSchema),
     defaultValues: {
@@ -46,88 +48,102 @@ export function PasswordResetRequestContainer(params: {
   });
 
   return (
-    <>
-      <If condition={success}>
-        <Alert variant={'success'}>
-          <AlertDescription>
-            <Trans i18nKey={'auth:passwordResetSuccessMessage'} />
-          </AlertDescription>
-        </Alert>
-      </If>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(({ email }) => {
+          return resetPasswordMutation
+            .mutateAsync({
+              email,
+              redirectTo: new URL(params.redirectPath, window.location.origin)
+                .href,
+            })
+            .then(() => {
+              setError(false);
+            })
+            .catch(() => {
+              console.error('Error requesting password reset');
+              setError(true);
+            });
+        })}
+        className={cn(
+          'flex w-full flex-col gap-6 text-gray-900',
+          params.className,
+        )}
+      >
+        <span className="text-3xl font-bold text-black">
+          {t('forgotPassword.title')}
+        </span>
 
-      <If condition={!resetPasswordMutation.data}>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(({ email }) => {
-              return resetPasswordMutation.mutateAsync({
-                email,
-                redirectTo: new URL(params.redirectPath, window.location.origin)
-                  .href,
-              }).catch(() => {
-                console.error('Error requesting password reset');
-              });
-            })}
-            className={'w-full'}
-          >
-            <div className={'flex flex-col space-y-4'}>
-              <div style={{
-                color: getTextColorBasedOnBackground(
-                  params.backgroundColor
-                    ? params.backgroundColor
-                    : '#ffffff',
-                ),
-              }}>
-                <p className={'text-sm'}>
-                  <Trans i18nKey={'auth:passwordResetSubheading'} />
-                </p>
-              </div>
+        <span>{t('forgotPassword.description')}</span>
+        <If condition={success}>
+          <AuthSuccessAlert
+            title={t('forgotPassword.success.title')}
+            description={t('forgotPassword.success.description')}
+          />
+        </If>
 
-              <AuthErrorAlert error={error} />
+        <If condition={error}>
+          <AuthErrorAlert
+            title={t('forgotPassword.error.title')}
+            description={t('forgotPassword.error.description')}
+            visible={!error}
+            onClose={() => setError(false)}
+          />
+        </If>
+        {!success && !error && (
+          <>
+            <FormField
+              name={'email'}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="sr-only">
+                    {t('forgotPassword.form.email.label')}
+                  </FormLabel>
 
-              <FormField
-                name={'email'}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel style={{
-                      color: getTextColorBasedOnBackground(
-                        params.backgroundColor
-                          ? params.backgroundColor
-                          : '#ffffff',
-                      ),
-                    }}>
-                      <Trans i18nKey={'common:emailAddress'} />
-                    </FormLabel>
+                  <FormControl>
+                    <Input
+                      required
+                      type="email"
+                      placeholder={t('forgotPassword.form.email.placeholder')}
+                      {...field}
+                      className="focus-visible:ring-brand placeholder:text-inherit"
+                    />
+                  </FormControl>
 
-                    <FormControl>
-                      <Input
-                        required
-                        type="email"
-                        placeholder={t('emailPlaceholder')}
-                        {...field}
-                        style={{
-                          color: getTextColorBasedOnBackground(
-                            params.backgroundColor
-                              ? params.backgroundColor
-                              : '#ffffff',
-                          ),
-                        }}
-                      />
-                    </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <ThemedButton
+              disabled={resetPasswordMutation.isPending}
+              themeColor={params.themeColor}
+              className="w-full transition-all duration-300 hover:-translate-y-0.5"
+            >
+              {resetPasswordMutation.isPending && (
+                <Spinner className="h-4 w-4" />
+              )}
+              {t('forgotPassword.form.submit')}
+            </ThemedButton>
+          </>
+        )}
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <ThemedButton
-                disabled={resetPasswordMutation.isPending}
-                themeColor={params.themeColor}
-              >
-                <Trans i18nKey={'auth:passwordResetLabel'} />
-              </ThemedButton>
-            </div>
-          </form>
-        </Form>
-      </If>
-    </>
+        {/* Or sign-in */}
+        <div className="flex flex-col items-center gap-3 text-sm">
+          <div className="flex w-full items-center justify-center gap-8">
+            <div className="h-[1px] w-full bg-gray-200"></div>
+            <span className="text-gray-500">
+              {t('forgotPassword.or.title')}
+            </span>
+            <div className="h-[1px] w-full bg-gray-200"></div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>{t('forgotPassword.or.question')}</span>
+            <a href={'/auth/sign-in'} className="underline">
+              {t('forgotPassword.or.link')}
+            </a>
+          </div>
+        </div>
+      </form>
+    </Form>
   );
 }

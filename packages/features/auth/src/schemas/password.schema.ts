@@ -19,8 +19,12 @@ const requirements = {
  */
 export const PasswordSchema = z
   .string()
-  .min(requirements.minLength)
-  .max(requirements.maxLength);
+  .min(requirements.minLength, {
+    message: 'auth:errors.minPasswordLength',
+  })
+  .max(requirements.maxLength, {
+    message: 'auth:errors.maxPasswordLength',
+  });
 
 /**
  * Refined password schema with additional requirements

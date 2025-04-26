@@ -21,8 +21,6 @@
   "emailLabel": "Email",
   "confirmClose": "Are you sure you want to continue?",
   "password": "Password",
-  "plsDetailInputs": "Log In",
-  "continueToYourAccount": "Continue to your account",
   "modalConfirmationQuestion": "Are you sure you want to continue?",
   "loading": "Loading the page...",
   "genericServerErrorHeading": "Sorry, something went wrong while processing your request. Please contact us if the issue persists.",
