@@ -1,11 +1,7 @@
 import type { Config } from 'tailwindcss';
 
-
-
 import baseConfig from '@kit/tailwind-config';
-
-
-const defaultTheme = require('tailwindcss/defaultTheme');
+import defaultTheme from 'tailwindcss/defaultTheme';
 
 export default {
   content: [...baseConfig.content],
@@ -70,19 +66,19 @@ export default {
           950: '#0C111D',
         },
         brand: {
-          DEFAULT: '#1A38D7',
-          25: '#E7EAFB',
-          50: '#D0D6F7',
-          100: '#B8C1F3',
-          200: '#A1ADEF',
-          300: '#8999EA',
-          400: '#7285E6',
-          500: '#5A70E2',
-          600: '#435CDE',
-          700: '#2543d4',
-          800: '#2B47DA',
-          900: '#203DD8',
-          950: '#1A38D7',
+          DEFAULT: '#85EFFF',
+          25: '#F5FEFF',
+          50: '#ECFDFF',
+          100: '#D9FBFF',
+          200: '#C0F7FF',
+          300: '#A7F3FF',
+          400: '#8EF1FF',
+          500: '#85EFFF',
+          600: '#5CEAFF',
+          700: '#33E6FF',
+          800: '#0AD2EC',
+          900: '#00A8BC',
+          950: '#007A89',
         },
         error: {
           DEFAULT: '#F04438',

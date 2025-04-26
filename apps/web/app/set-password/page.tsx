@@ -1,16 +1,9 @@
-import { PageBody } from '@kit/ui/page';
+import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@kit/ui/card';
-import { Trans } from '@kit/ui/trans';
+
 import { UpdatePasswordFormContainer } from '../../../../packages/features/accounts/src/components/personal-account-settings/password/update-password-container';
 import { getDomainByUserId } from '../../../../packages/multitenancy/utils/get/get-domain';
-import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -24,39 +17,15 @@ export const generateMetadata = async () => {
 export default async function UserAddOrganizationPage() {
   const supabase = getSupabaseServerComponentClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
+
   if (userError) throw userError.message;
-  const { domain: baseUrl } = await getDomainByUserId(userData?.user.id, true).catch(
-    () => {
-      console.error('Error getting domain');
-      return { domain: '' };
-    }
-  );
+  const { domain: baseUrl } = await getDomainByUserId(
+    userData?.user.id,
+    true,
+  ).catch(() => {
+    console.error('Error getting domain');
+    return { domain: '' };
+  });
 
-  return (
-    <>
-      <PageBody className='flex flex-col items-center justify-center'>
-        <div className='flex flex-col items-center justify-center'>
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                <Trans i18nKey={'account:updatePasswordCardTitle'} />
-              </CardTitle>
-
-              <CardDescription>
-                <Trans i18nKey={'account:updatePasswordCardDescription'} />
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <UpdatePasswordFormContainer callbackPath={`${baseUrl}home`} />
-            </CardContent>
-          </Card>
-        </div>
-      
-      </PageBody>
-    </>
-  );
+  return <UpdatePasswordFormContainer callbackPath={`${baseUrl}home`} />;
 }
-
-
-

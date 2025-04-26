@@ -1,17 +1,10 @@
+'use client';
 
-import { CircleAlert, X } from 'lucide-react';
+import { CheckCircle2, X } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 
-/**
- * @name AuthErrorAlert
- * @param error This error comes from Supabase as the code returned on errors
- * This error is mapped from the translation auth:errors.{error}
- * To update the error messages, please update the translation file
- * https://github.com/supabase/gotrue-js/blob/master/src/lib/errors.ts
- * @constructor
- */
-export function AuthErrorAlert({
+export function AuthSuccessAlert({
   title,
   description,
   visible = true,
@@ -26,12 +19,12 @@ export function AuthErrorAlert({
   return (
     <Alert
       variant={'default'}
-      className="relative flex items-start gap-3 px-2 py-4 text-gray-600"
+      className="flex items-start gap-3 px-2 py-4 text-gray-600"
     >
       <div className="relative flex w-9 items-center justify-center">
-        <div className="absolute h-9 w-9 animate-pulse rounded-full border-2 border-red-200"></div>
-        <div className="absolute h-7 w-7 animate-pulse rounded-full border-2 border-red-300"></div>
-        <CircleAlert className="h-5 w-5 text-red-500" />
+        <div className="absolute h-9 w-9 animate-pulse rounded-full border-2 border-gray-200"></div>
+        <div className="absolute h-7 w-7 animate-pulse rounded-full border-2 border-gray-300"></div>
+        <CheckCircle2 className="h-5 w-5 text-gray-500" />
       </div>
       <div className="flex flex-col justify-start gap-1 text-start">
         <AlertTitle className="flex gap-2">{title}</AlertTitle>

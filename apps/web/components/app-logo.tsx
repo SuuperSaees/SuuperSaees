@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from '@kit/ui/utils';
 import Link from 'next/link';
 
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
@@ -64,12 +65,12 @@ export function AppLogo({
     <Link
       aria-label={label}
       href={href}
-      className={`flex h-full max-h-[50px] w-[130px] items-center justify-start overflow-hidden ${className}`}
+      className={cn(`flex h-full max-h-[50px] w-[130px] items-center justify-start overflow-hidden`, className)}
     >
       {logoUrl ? (
         <CustomLogoImage url={logoUrl} className="h-full " />
       ) : (
-        <LogoImage className="h-[50px] w-full object-contain" />
+        <LogoImage className="h-full w-full object-contain" />
       )}
     </Link>
   );
