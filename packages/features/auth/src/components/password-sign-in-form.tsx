@@ -34,7 +34,7 @@ export function PasswordSignInForm({
   loading: boolean;
   className?: string;
 }) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation('auth');
   const [showPassword, setShowPassword] = useState(false);
   const form = useForm<z.infer<typeof PasswordSignInSchema>>({
     resolver: zodResolver(PasswordSignInSchema),
@@ -52,7 +52,7 @@ export function PasswordSignInForm({
       >
         <span className="text-5xl font-bold text-black">{t('signIn.title')}</span>
 
-        <span>{t('signIn.description', { organizationName: 'Suuper' })}</span>
+        <span>{t('signIn.description')}</span>
 
         <FormField
           control={form.control}

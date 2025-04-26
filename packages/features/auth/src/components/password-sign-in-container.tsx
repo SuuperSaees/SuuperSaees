@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
+import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
 import { useSignInWithEmailPassword } from '@kit/supabase/hooks/use-sign-in-with-email-password';
@@ -23,7 +24,8 @@ export function PasswordSignInContainer({
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
   const signInMutation = useSignInWithEmailPassword();
   const isLoading = signInMutation.isPending;
-
+  const { t } = useTranslation('auth');
+  const [error, setError] = useState(false);
   const onSubmit = useCallback(
     async (credentials: z.infer<typeof PasswordSignInSchema>) => {
       try {
@@ -37,8 +39,10 @@ export function PasswordSignInContainer({
 
           onSignIn(userId);
         }
+        setError(false);
       } catch (e) {
         // wrong credentials, do nothing
+        setError(true);
       } finally {
         resetCaptchaToken();
       }
@@ -48,9 +52,19 @@ export function PasswordSignInContainer({
 
   return (
     <>
-      <AuthErrorAlert error={signInMutation.error} />
+      <AuthErrorAlert
+        title={t('signIn.error.title')}
+        description={t('signIn.error.description')}
+        visible={error}
+        onClose={() => setError(false)}
+      />
 
-      <PasswordSignInForm onSubmit={onSubmit} loading={isLoading} themeColor={themeColor} className={className} />
+      <PasswordSignInForm
+        onSubmit={onSubmit}
+        loading={isLoading}
+        themeColor={themeColor}
+        className={className}
+      />
     </>
   );
 }

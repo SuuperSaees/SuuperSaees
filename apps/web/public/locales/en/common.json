@@ -21,30 +21,6 @@
   "emailLabel": "Email",
   "confirmClose": "Are you sure you want to continue?",
   "password": "Password",
-  "signIn": {
-    "label": "Sign in",
-    "title": "Welcome",
-    "description": "Log in to your account",
-    "form": {
-      "email": {
-        "label": "Email",
-        "placeholder": "Email"
-      },
-      "password": {
-        "label": "Password",
-        "placeholder": "Password"
-      },
-      "rememberMe": "Remember me",
-      "forgotPassword": "I forgot my password"
-      
-    },
-    "or": {
-      "title": "Or",
-      "question": "Don't have an account?",
-      "link": "Register"
-    }
-
-  },
   "modalConfirmationQuestion": "Are you sure you want to continue?",
   "loading": "Loading the page...",
   "genericServerErrorHeading": "Sorry, something went wrong while processing your request. Please contact us if the issue persists.",
