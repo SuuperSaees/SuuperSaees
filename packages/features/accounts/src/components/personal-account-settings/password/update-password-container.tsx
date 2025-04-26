@@ -17,7 +17,7 @@ export function UpdatePasswordFormContainer(
 ) {
   const { data: user, isPending } = useUser();
   const host = window.location.host;
-  const { authDetails } = useAuthDetails(host);
+  const { authDetails, isLoading } = useAuthDetails(host);
   if (isPending) {
     return <LoadingOverlay fullPage={false} />;
   }
@@ -35,7 +35,10 @@ export function UpdatePasswordFormContainer(
   }
 
   return (
-    <AuthLayout authDetails={authDetails}>
+    <AuthLayout
+      authDetails={authDetails}
+      isLoading={isLoading}
+    >
       <UpdatePasswordForm callbackPath={props.callbackPath} user={user} />
     </AuthLayout>
   );
