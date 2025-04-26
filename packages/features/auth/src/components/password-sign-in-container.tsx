@@ -51,12 +51,12 @@ export function PasswordSignInContainer({
   );
 
   return (
-    <>
+    <div className="relative flex flex-col gap-4">
       <AuthErrorAlert
-        title={t('signIn.error.title')}
         description={t('signIn.error.description')}
         visible={error}
         onClose={() => setError(false)}
+        className="absolute -top-24 left-0"
       />
 
       <PasswordSignInForm
@@ -65,6 +65,6 @@ export function PasswordSignInContainer({
         themeColor={themeColor}
         className={className}
       />
-    </>
+    </div>
   );
 }

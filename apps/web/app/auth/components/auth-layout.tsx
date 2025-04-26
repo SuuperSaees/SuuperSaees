@@ -30,7 +30,7 @@ export const AuthLayout = ({ children, authDetails }: AuthLayoutProps) => {
 
       {/* Right Image background container */}
       <div
-        className="relative h-full w-full max-w-2xl border-[16px] border-white"
+        className="relative hidden h-full w-full max-w-2xl border-[16px] border-white sm:block"
         style={{
           background: authDetails?.theme_color
             ? `linear-gradient(0deg, ${authDetails.theme_color} 0%, ${authDetails.theme_color} 100%), url(${customBackgroundURL ?? defaultBackgroundURL}) lightgray 50% / cover no-repeat`
