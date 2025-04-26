@@ -35,6 +35,43 @@
   "step_service_details_title": "Detalles del servicio",
   "step_service_price": "Configuración de precios",
   "checkout": {
+    "pay": "Pagar",
+    "trial": {
+      "perDay": "por día",
+      "perWeek": "por semana",
+      "perMonth": "por mes",
+      "perYear": "por año",
+      "day": "Día de Prueba",
+      "week": "Semana de Prueba",
+      "month": "Mes de Prueba",
+      "year": "Año de Prueba",
+      "days": "Días de Prueba",
+      "weeks": "Semanas de Prueba",
+      "months": "Meses de Prueba",
+      "years": "Años de Prueba",
+      "today": "Hoy",
+      "totalForRenovation": "Total para renovación",
+      "totalAfterTrial": "Total después de la prueba",
+      "totalDueToday": "Total a pagar hoy",
+      "dayBilling": "Facturación diaria",
+      "weekBilling": "Facturación semanal",
+      "monthBilling": "Facturación mensual",
+      "yearBilling": "Facturación anual",
+      "subscribe": "Comenzar prueba",
+      "startingAt": "Comenzando el",
+      "january": "Ene",
+      "february": "Feb",
+      "march": "Mar",
+      "april": "Abr",
+      "may": "May",
+      "june": "Jun",
+      "july": "Jul",
+      "august": "Ago",
+      "september": "Sep",
+      "october": "Oct",
+      "november": "Nov",
+      "december": "Dic"
+    },
     "tokenExpired": "Token expirado o inválido",
     "title": "Adquirir servicio",
     "signIn": "Iniciar sesión",
@@ -193,5 +230,8 @@
       "description": "Aún no has agregado ningún servicio para este cliente. Agrega uno haciendo clic en el botón de 'Añadir servicio'."
     }
   },
-  "selectImage": "Seleccionar imagen"
+  "selectImage": "Seleccionar imagen",
+  "language": "es",
+  "for": "por",
+  "then": "luego"
 }

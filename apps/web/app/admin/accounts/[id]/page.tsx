@@ -25,7 +25,7 @@ async function AccountPage({ params }: Params) {
 
   return (
     <PageBody className={'mx-auto flex w-full lg:px-16 p-8'}>
-      <AdminAccountPage account={account} />
+      <AdminAccountPage account={account} isPersonalAccount={true} />
     </PageBody>
   );
 }
@@ -41,7 +41,7 @@ async function accountLoader(id: string) {
 
   const { data, error } = await client
     .from('accounts')
-    .select('*, memberships: accounts_memberships (*)')
+    .select('*')
     .eq('id', id)
     .single();
 
@@ -49,5 +49,10 @@ async function accountLoader(id: string) {
     throw error;
   }
 
-  return data;
+  const { data: memberships } = await client
+    .from('accounts_memberships')
+    .select('*')
+    .eq('user_id', id);
+
+  return { ...data, memberships };
 }

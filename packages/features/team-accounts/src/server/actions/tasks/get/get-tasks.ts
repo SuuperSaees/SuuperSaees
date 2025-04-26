@@ -48,11 +48,18 @@ export const getSubtaskAssigns = async (subtaskId: string) => {
     const client = getSupabaseServerComponentClient();
     const { data: assignsData, error: assignsDataError } = await client
       .from('subtask_assignations')
-      .select(`*, accounts(*)`)
+      .select(`*, accounts(*, settings:user_settings(picture_url, name))`)
       .eq('subtask_id', subtaskId);
     if (assignsDataError) throw new Error(assignsDataError.message);
 
-    return assignsData;
+    return assignsData?.map((assign) => ({
+      ...assign,
+      accounts: {
+        ...assign.accounts,
+        picture_url: assign.accounts?.settings[0]?.picture_url ?? assign.accounts?.picture_url ?? null,
+        name: assign.accounts?.settings[0]?.name ?? assign.accounts?.name ?? null,
+      },
+    }));
   } catch (error) {
     console.error('Error fetching subtask assigns:', error);
   }
@@ -63,11 +70,18 @@ export const getSubtaskFollowers = async (subtaskId: string) => {
     const client = getSupabaseServerComponentClient();
     const { data: assignsData, error: assignsDataError } = await client
       .from('subtask_followers')
-      .select(`*, accounts(*)`)
+      .select(`*, accounts(*, settings:user_settings(picture_url, name))`)
       .eq('subtask_id', subtaskId);
     if (assignsDataError) throw new Error(assignsDataError.message);
 
-    return assignsData;
+    return assignsData?.map((assign) => ({
+      ...assign,
+      accounts: {
+        ...assign.accounts,
+        picture_url: assign.accounts?.settings[0]?.picture_url ?? assign.accounts?.picture_url ?? null,
+        name: assign.accounts?.settings[0]?.name ?? assign.accounts?.name ?? null,
+      },
+    }));
   } catch (error) {
     console.error('Error fetching subtask assigns:', error);
   }

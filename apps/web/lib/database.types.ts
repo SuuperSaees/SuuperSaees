@@ -3940,6 +3940,7 @@ export type Database = {
         | "catalog_provider_url"
         | "catalog_product_url"
         | "tool_copy_list_url"
+        | "auth_background_url"
       payment_status: "pending" | "succeeded" | "failed"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
       plugin_type: "tool" | "internal" | "external" | "integration"

@@ -1,5 +1,7 @@
 // component to display rounded avatar with fallback text - simirlar to shadcn/ui/avatar but not using the library
 
+import { getTextColorBasedOnBackground } from "~/utils/generate-colors";
+
 export default function Avatar({
   src,
   alt,
@@ -30,5 +32,8 @@ export const AvatarFallback = ({
 }: {
   fallback: string;
 }) => {
-  return <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded-full">{fallback}</div>;
+  const colorText = getTextColorBasedOnBackground('#E4E7EC')
+  return (
+  <div className="flex items-center justify-center h-full w-full bg-gray-200 rounded-full" style={{ color: colorText }}>{fallback}</div>
+);
 };

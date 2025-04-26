@@ -1,5 +1,6 @@
 'use client';
 
+import { cn } from '@kit/ui/utils';
 import Link from 'next/link';
 
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
@@ -38,7 +39,7 @@ export function CustomLogoImage({
     <img
       src={url}
       alt="Organization Logo"
-      className={`max-h-full max-w-full object-contain ${className}`}
+      className={`object-contain ${className}`}
       onError={(e) => (e.currentTarget.src = '/path/to/default/logo.png')} // Replace with a valid path to a default logo
     />
   );
@@ -59,16 +60,17 @@ export function AppLogo({
   const {theme} = getColorLuminance(sidebar_background_color ?? '#f2f2f2');
   const themedLogoUrl = theme === 'dark' ? (logo_dark_url ?? logo_url): logo_url  
   logoUrl = logoUrl ?? themedLogoUrl;
+  console.log('logoUrl', logoUrl)
   return (
     <Link
       aria-label={label}
       href={href}
-      className={`flex h-full max-h-[100px] w-full max-w-[200px] items-center justify-center overflow-hidden ${className}`}
+      className={cn(`flex h-full max-h-[50px] w-[130px] items-center justify-start overflow-hidden`, className)}
     >
       {logoUrl ? (
-        <CustomLogoImage url={logoUrl} className="h-full w-full" />
+        <CustomLogoImage url={logoUrl} className="h-full " />
       ) : (
-        <LogoImage className="h-[32px] w-full object-contain" />
+        <LogoImage className="h-full w-full object-contain" />
       )}
     </Link>
   );

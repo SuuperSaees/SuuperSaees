@@ -60,7 +60,7 @@ const ActivityFollowers = ({
     // First try to find in followers
     const follower = followers?.find(
       (f) => f.client_follower.id === followerId,
-    )?.client_follower;
+    )?.client_follower
     // If not found, search in searchUserOptions
     if (!follower) {
       const searchOption = searchUserOptions.find((option) => option.value === followerId);

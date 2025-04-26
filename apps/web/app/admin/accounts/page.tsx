@@ -34,11 +34,6 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
     // Start building the query
     let query = client.from('accounts').select('*', { count: 'exact' });
     
-    // Apply account type filter
-    if (searchParams.account_type && searchParams.account_type !== 'all') {
-      query = query.eq('is_personal_account', searchParams.account_type === 'personal');
-    }
-    
     // Apply date filter if provided
     if (searchParams.created_after) {
       query = query.gte('created_at', searchParams.created_after);
@@ -74,15 +69,16 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
     query = query.range(from, to);
     
     // Execute the query
-    const { data, error, count } = await query;
+    const { data: dataAccounts, error: errorAccounts, count: countAccounts } = await query;
     
-    if (error) {
-      console.error('Error fetching accounts:', error);
-      throw error;
+    if (errorAccounts) {
+      console.error('Error fetching accounts:', errorAccounts);
+      throw errorAccounts;
     }
+
     
     // Calculate page count
-    const pageCount = count ? Math.ceil(count / pageSize) : 0;
+    const pageCount = countAccounts ? Math.ceil(countAccounts / pageSize) : 0;
     
     return (
       <>
@@ -97,7 +93,7 @@ async function AccountsPage({ searchParams }: { searchParams: SearchParams }) {
             page={page}
             pageSize={pageSize}
             pageCount={pageCount}
-            data={data ?? []}
+            data={dataAccounts ?? []}
             filters={{
               type: searchParams.account_type ?? 'all',
               created_after: searchParams.created_after,

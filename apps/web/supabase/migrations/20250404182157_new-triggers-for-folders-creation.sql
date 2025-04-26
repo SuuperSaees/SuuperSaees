@@ -127,7 +127,7 @@ BEGIN
     -- Get the root folder for the client organization
     SELECT id INTO root_folder_id
     FROM folders
-    WHERE name = (SELECT name FROM accounts WHERE id = NEW.organization_client_id)
+    WHERE name = (SELECT name FROM organizations WHERE id = NEW.organization_client_id)
       AND is_subfolder = false
       AND parent_folder_id IS NULL
     LIMIT 1;
@@ -208,18 +208,18 @@ CREATE OR REPLACE FUNCTION public.get_unread_message_counts(p_user_id uuid)
 AS $function$
 DECLARE
   is_agency_role boolean;
+  v_org_id uuid;
   cutoff_date timestamp with time zone := '2025-03-11 18:04:00-05'::timestamp with time zone; -- March 11, 2025, 6:04 PM Colombia time (UTC-5)
 BEGIN
-  -- Use a CTE to get the organizationId from the session
-  WITH session_org AS (
-    SELECT (get_session()).organization.id AS organization_id
-  )
+  -- Get the organization ID from the session
+  SELECT (get_session()).organization.id INTO v_org_id;
+  
   -- Check if the user has any agency role within the current organization
   SELECT EXISTS (
     SELECT 1 
-    FROM accounts_memberships am, session_org so
+    FROM accounts_memberships am
     WHERE am.user_id = p_user_id 
-    AND am.organization_id = so.organization_id::uuid
+    AND am.organization_id = v_org_id
     AND am.account_role IN ('agency_owner', 'agency_member', 'agency_project_manager')
   ) INTO is_agency_role;
 

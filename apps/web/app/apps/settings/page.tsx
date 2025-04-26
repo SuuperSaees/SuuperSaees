@@ -18,10 +18,8 @@ async function PluginSettingsPage() {
 
   return (
     <PageBody>
-      <div className="p-[35px]">
         <ButtonsHeader />
         <SettingsContent userId = {user.id} />
-      </div>
     </PageBody>
   );
 }

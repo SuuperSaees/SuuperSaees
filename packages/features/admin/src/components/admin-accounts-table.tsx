@@ -43,7 +43,7 @@ export function AdminAccountsTable(
           pageIndex={props.page - 1}
           pageCount={props.pageCount}
           data={props.data}
-          columns={getAccountColumns()}
+          columns={getAccountColumns({ isPersonalAccount: true })}
         />
       </div>
     </div>

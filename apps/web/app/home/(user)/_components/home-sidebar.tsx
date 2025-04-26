@@ -18,6 +18,7 @@ import {
   shouldShowDashboardUrl,
   type Embed
 } from '~/config/navigation-utils';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Home sidebar component that displays navigation based on user role and embeds
@@ -25,7 +26,7 @@ import {
 export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const { workspace, user, pinnedOrganizations, organization } = props.workspace;
   const userRole = workspace.role;
-
+  const { t } = useTranslation();
   // Get organization settings
   const settings = useOrganizationSettings();
   
@@ -44,6 +45,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
     userRole,
     organization?.embeds as Embed[] | undefined,
     Avatar,
+    t,
     pinnedOrganizations
   );
 
@@ -54,12 +56,12 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
 
   return (
     <ThemedSidebar className="text-sm scrollbar-on-hover">
-      <div className="padding-24">
+      <div className="pt-5 pb-3 px-6.5">
         <AppLogo />
       </div>
 
       <SidebarContent
-        className={`b-["#f2f2f2"] mt-5 h-[calc(100%-160px)] overflow-y-auto`}
+        className={`b-["#fdfdfd"] h-[calc(100%-160px)] overflow-y-auto gap-0.5`}
       >
         <CustomSidebarNavigation
           config={navigationConfig}
@@ -76,7 +78,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
         )}
       </SidebarContent>
 
-      <div className={'w-full mb-4'}>
+      <div className={'w-full mb-4 mt-auto'}>
         {userRole !== 'client_guest' && (
           <SidebarContent>
             <ProfileAccountDropdownContainer

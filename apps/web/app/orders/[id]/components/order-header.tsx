@@ -54,7 +54,7 @@ export const OrderHeader = ({
     agencyStatuses.find((s) => s.status_name === 'completed')?.id ?? null;
 
   return (
-    <div className="px-8">
+    <div className="lg:px-6.5 lg:pt-6">
       <div className="flex flex-wrap lg:flex-nowrap items-center">
         <EditableHeader
           initialName={order.title}

@@ -19,11 +19,9 @@ export async function POST(request: NextRequest) {
       }, {
         stripeAccount: accountId,
       });
-      
       const matchingPromoCode = promotionCodes.data.find(
-        promo => promo.code === discountCode.toUpperCase()
+        promo => promo.code.toLowerCase() === discountCode.toLowerCase()
       );
-      
       if (matchingPromoCode) {
         discountDetails = matchingPromoCode.coupon;
       } else {
@@ -40,7 +38,6 @@ export async function POST(request: NextRequest) {
         }
       }
     } catch (error) {
-      console.error('Error listing promotion codes:', error);
       return NextResponse.json(
         { error: { message: 'Error processing discount code' } },
         { status: 500 }
@@ -60,6 +57,7 @@ export async function POST(request: NextRequest) {
       discountType: discountDetails.amount_off ? 'fixed' : 'percentage',
       discountDetails: discountDetails
     };
+
     return NextResponse.json(response);
     
   } catch (error) {

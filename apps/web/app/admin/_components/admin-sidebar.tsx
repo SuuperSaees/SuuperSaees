@@ -1,6 +1,6 @@
 import { User } from '@supabase/supabase-js';
 
-import { Home, Users } from 'lucide-react';
+import { Home, Users, Building } from 'lucide-react';
 
 import {
   Sidebar,
@@ -30,6 +30,13 @@ export function AdminSidebar(props: { user: User }) {
             Icon={<Users className={'h-4'} />}
           >
             Accounts
+          </SidebarItem>
+
+          <SidebarItem
+            path={'/admin/organizations'}
+            Icon={<Building className={'h-4'} />}
+          >
+            Organizations
           </SidebarItem>
         </SidebarGroup>
       </SidebarContent>

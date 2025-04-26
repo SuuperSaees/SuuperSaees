@@ -71,7 +71,7 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
                 name: follower.client_follower?.name,
                 email: follower.client_follower?.email,
                 picture_url: follower.client_follower?.picture_url,
-                settings: follower.client_follower?.settings,
+                settings: follower.client_follower?.settings?.[0],
                 role: userRole
               }
             };
@@ -105,10 +105,13 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
 
     const proccesedData = {
       ...orderData,
+      client: {
+        ...orderData.client,
+        settings: orderData.client?.settings?.[0],
+      },
       tags: Array.isArray(orderData.order_tags) 
         ? orderData.order_tags.map(tagItem => tagItem.tag) 
         : orderData.order_tags ? [orderData.order_tags?.tag as Tags.Type] : [],
-
       assigned_to: orderData.assigned_to.filter(assignment => 
         !assignment.agency_member?.deleted_on && true
         // assignment.agency_member?.organization_id === orderData.agency_id
@@ -312,11 +315,19 @@ export const getOrders = async (
 
     orders = ordersData.map(order => ({
       ...order,
-      assigned_to: order.assigned_to ?? [],
+      customer: {
+        ...order.customer,
+        name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
+        picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
+        settings: order.customer?.settings?.[0],
+      },
       // assigned_to: order.assigned_to?.filter(assignment => 
       //   !assignment.agency_member?.deleted_on && 
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on
+      ) ?? [],
     }));
 
     // Step 3: Collect all status_ids from orders
@@ -501,7 +512,7 @@ export async function getOrdersByUserId(
       .from('orders_v2')
       .select(
         `*, client_organization:organizations!client_organization_id(id, name),
-      customer:accounts!customer_id(id, name),
+      customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
       assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       ${includeBrief ? ', brief:briefs(name)' : ''}
@@ -529,11 +540,19 @@ export async function getOrdersByUserId(
 
     orders = orderData?.map(order => ({
       ...order,
-      assigned_to: order.assigned_to ?? [],
+      customer: {
+        ...order.customer,
+        name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
+        picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
+        settings: order.customer?.settings?.[0],
+      },
       // assigned_to: order.assigned_to?.filter(assignment => 
       //   !assignment.agency_member?.deleted_on && 
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on
+      ) ?? [],
     }));
 
     
@@ -628,7 +647,7 @@ export async function getOrdersByOrganizationId(
       .from('orders_v2')
       .select(
         `*, client_organization:organizations!client_organization_id(id, name),
-      customer:accounts!customer_id(id, name),
+      customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
       assigned_to:order_assignations(agency_member:accounts(id, name, email, picture_url, deleted_on, settings:user_settings(name, picture_url))), 
       reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
       ${includeBrief ? ', brief:briefs(name)' : ''}
@@ -663,11 +682,19 @@ export async function getOrdersByOrganizationId(
 
     let orders = orderData.map(order => ({
       ...order,
-      assigned_to: order.assigned_to ?? [],
+      customer: {
+        ...order.customer,
+        name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
+        picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
+        settings: order.customer?.settings?.[0],
+      },
       // assigned_to: order.assigned_to?.filter(assignment => 
       //   !assignment.agency_member?.deleted_on && 
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
+      assigned_to: order.assigned_to?.filter(assignment => 
+        !assignment.agency_member?.deleted_on
+      ) ?? [],
     }));
 
     // Step 4: Fetch the reviews for the orders and add them to the orders (if needed)

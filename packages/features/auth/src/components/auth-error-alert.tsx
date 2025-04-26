@@ -1,7 +1,7 @@
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+
+import { CircleAlert, X } from 'lucide-react';
 
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
-import { Trans } from '@kit/ui/trans';
 
 /**
  * @name AuthErrorAlert
@@ -12,32 +12,37 @@ import { Trans } from '@kit/ui/trans';
  * @constructor
  */
 export function AuthErrorAlert({
-  error,
+  title,
+  description,
+  visible = true,
+  onClose,
 }: {
-  error: Error | null | undefined | string;
+  title: string;
+  description: string;
+  visible?: boolean;
+  onClose?: () => void;
 }) {
-  if (!error) {
-    return null;
-  }
-
-  const DefaultError = <Trans i18nKey="auth:errors.default" />;
-  const errorCode = error instanceof Error ? error.message : error;
-  const formattedErrorCode = errorCode.replace(/ /g, '');
+  if (!visible) return null;
   return (
-    <Alert variant={'destructive'}>
-      <ExclamationTriangleIcon className={'w-4'} />
-
-      <AlertTitle>
-        <Trans i18nKey={`auth:errorAlertHeading`} />
-      </AlertTitle>
-
-      <AlertDescription data-test={'auth-error-message'}>
-        <Trans
-          i18nKey={`auth:errors.${formattedErrorCode}`}
-          defaults={'<DefaultError />'}
-          components={{ DefaultError }}
-        />
-      </AlertDescription>
+    <Alert
+      variant={'default'}
+      className="relative flex items-start gap-3 px-2 py-4 text-gray-600"
+    >
+      <div className="relative flex w-9 items-center justify-center">
+        <div className="absolute h-9 w-9 animate-pulse rounded-full border-2 border-red-200"></div>
+        <div className="absolute h-7 w-7 animate-pulse rounded-full border-2 border-red-300"></div>
+        <CircleAlert className="h-5 w-5 text-red-500" />
+      </div>
+      <div className="flex flex-col justify-start gap-1 text-start">
+        <AlertTitle className="flex gap-2">{title}</AlertTitle>
+        <AlertDescription>{description}</AlertDescription>
+      </div>
+      <button
+        onClick={onClose}
+        className="absolute right-2 top-2 text-gray-400 transition-all hover:text-gray-600"
+      >
+        <X className="h-5 w-5" />
+      </button>
     </Alert>
   );
 }

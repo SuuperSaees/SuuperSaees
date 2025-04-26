@@ -5,6 +5,7 @@ import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+
 import { PageHeader } from '../components/page-header';
 import { TimerContainer } from '../components/timer-container';
 
@@ -17,26 +18,19 @@ export const generateMetadata = async () => {
 
 async function ClientsMembersPage() {
   const clientsWithOrganizations = await getAllClients().catch((err) => {
-    console.error(`Error getting clients with organizations: ${err}`)
-    return []
+    console.error(`Error getting clients with organizations: ${err}`);
+    return [];
   });
 
   return (
     <PageBody>
-      <div className="p-[35px]">
-        <PageHeader
-            title="clients:client" 
-            rightContent={
-              <TimerContainer /> 
-            }
-        />
-        <ClientsTable
-          clients={clientsWithOrganizations ?? []}
- 
-          // accountIds={accountIds}
-          // accountNames={accountNames}
-        />
-      </div>
+      <PageHeader title="clients:client" rightContent={<TimerContainer />} />
+      <ClientsTable
+        clients={clientsWithOrganizations ?? []}
+
+        // accountIds={accountIds}
+        // accountNames={accountNames}
+      />
     </PageBody>
   );
 }

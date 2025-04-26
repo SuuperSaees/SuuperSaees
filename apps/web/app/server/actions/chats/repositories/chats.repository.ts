@@ -224,8 +224,8 @@ export class ChatRepository {
         deleted_on: null,
         organization_id: agencyMembers.find((agencyMember) => agencyMember.user_id === member.user_id) ? agencyId : clientOrganizationId,
         id: member.user_id,
-        name: member.account?.user_settings?.name ?? member.account?.name ?? '',
-        picture_url: member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
+        name: Array.isArray(member.account?.user_settings) ? member.account?.user_settings[0]?.name ?? member.account?.name ?? '' : member.account?.user_settings?.name ?? member.account?.name ?? '',
+        picture_url: Array.isArray(member.account?.user_settings) ? member.account?.user_settings[0]?.picture_url ?? member.account?.picture_url ?? '' : member.account?.user_settings?.picture_url ?? member.account?.picture_url ?? '',
         email: member.account?.email ?? '',
         settings: {},
         type: member.type,
@@ -250,9 +250,9 @@ export class ChatRepository {
         parent_id: message.parent_id,
         user: {
           id: message.user_id,
-          name: message.user?.user_settings?.name ?? message.user?.name ?? '',
+          name: Array.isArray(message.user?.user_settings) ? message.user?.user_settings[0]?.name ?? message.user?.name ?? '' : message.user?.user_settings?.name ?? message.user?.name ?? '',
           email: message.user?.email ?? '',
-          picture_url: message.user?.user_settings?.picture_url ?? message.user?.picture_url ?? '',
+          picture_url: Array.isArray(message.user?.user_settings) ? message.user?.user_settings[0]?.picture_url ?? message.user?.picture_url ?? '' : message.user?.user_settings?.picture_url ?? message.user?.picture_url ?? '',
         },
         files: message.files
       })),

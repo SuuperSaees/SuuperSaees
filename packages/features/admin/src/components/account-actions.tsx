@@ -19,11 +19,11 @@ import { AdminDeleteUserDialog } from './admin-delete-user-dialog';
 import { AdminImpersonateUserDialog } from './admin-impersonate-user-dialog';
 
 type AccountActionsProps = {
-  userId: string;
+  id: string;
   isPersonalAccount: boolean;
 };
 
-export function AccountActions({ userId, isPersonalAccount }: AccountActionsProps) {
+export function AccountActions({ id, isPersonalAccount }: AccountActionsProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -38,7 +38,7 @@ export function AccountActions({ userId, isPersonalAccount }: AccountActionsProp
         <DropdownMenuItem className="cursor-pointer rounded-md flex items-center h-9 px-2 py-1.5 hover:bg-gray-50">
           <Link
             className="flex w-full items-center"
-            href={`/admin/accounts/${userId}`}
+            href={ isPersonalAccount ? `/admin/accounts/${id}` : `/admin/organizations/${id}`}
           >
             <Eye className="h-4 w-4 mr-2 text-gray-500" />
             <span>View Account Details</span>
@@ -46,7 +46,7 @@ export function AccountActions({ userId, isPersonalAccount }: AccountActionsProp
         </DropdownMenuItem>
 
         <If condition={isPersonalAccount}>
-          <AdminImpersonateUserDialog userId={userId}>
+          <AdminImpersonateUserDialog userId={id}>
             <DropdownMenuItem 
               onSelect={(e) => e.preventDefault()} 
               className="cursor-pointer rounded-md flex items-center h-9 px-2 py-1.5 hover:bg-gray-50"
@@ -58,7 +58,7 @@ export function AccountActions({ userId, isPersonalAccount }: AccountActionsProp
 
           <DropdownMenuSeparator className="my-1 bg-gray-200" />
 
-          <AdminDeleteUserDialog userId={userId}>
+          <AdminDeleteUserDialog userId={id}>
             <DropdownMenuItem 
               onSelect={(e) => e.preventDefault()} 
               className="cursor-pointer rounded-md flex items-center h-9 px-2 py-1.5 hover:bg-red-50 text-destructive"
@@ -72,7 +72,7 @@ export function AccountActions({ userId, isPersonalAccount }: AccountActionsProp
         <If condition={!isPersonalAccount}>
           <DropdownMenuSeparator className="my-1 bg-gray-200" />
           
-          <AdminDeleteAccountDialog accountId={userId}>
+          <AdminDeleteAccountDialog accountId={id}>
             <DropdownMenuItem 
               onSelect={(e) => e.preventDefault()} 
               className="cursor-pointer rounded-md flex items-center h-9 px-2 py-1.5 hover:bg-red-50 text-destructive"
