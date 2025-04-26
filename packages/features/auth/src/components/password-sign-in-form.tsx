@@ -156,7 +156,7 @@ export function PasswordSignInForm({
           </If>
         </ThemedButton>
         {/* Or sign-up */}
-        <div className="flex flex-col items-center gap-3 text-sm">
+        {/* <div className="flex flex-col items-center gap-3 text-sm">
           <div className="flex w-full items-center justify-center gap-8">
             <div className="h-[1px] w-full bg-gray-200"></div>
             <span className="text-gray-500">{t('signIn.or.title')}</span>
@@ -168,7 +168,7 @@ export function PasswordSignInForm({
               {t('signIn.or.link')}
             </a>
           </div>
-        </div>
+        </div> */}
       </form>
     </Form>
   );

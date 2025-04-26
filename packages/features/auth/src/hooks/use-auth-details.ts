@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { getFullDomainBySubdomain } from '../../../../multitenancy/utils/get/get-domain';
 
-interface AuthDetails {
+export interface AuthDetails {
   logo_url: string;
   theme_color: string;
   background_color: string;
@@ -13,6 +13,7 @@ interface AuthDetails {
   auth_section_background_color: string;
   logo_dark_url: string;
   sidebar_background_color: string;
+  auth_sign_in_background_url?: string;
 }
 
 export const useAuthDetails = (hostname: string) => {
@@ -26,6 +27,7 @@ export const useAuthDetails = (hostname: string) => {
         const currentAppOrigin = window.location.origin + '/';
         return originalAppOrigin !== currentAppOrigin;
       };
+      
       if (!isCustomDomain()) {
         // Clear cached data if the domain is not custom
         localStorage.removeItem(`authDetails_${hostname}`);
@@ -43,6 +45,7 @@ export const useAuthDetails = (hostname: string) => {
       // Fetch from the database
       let domainFullData = null;
       try {
+
         setIsLoading(true);
         domainFullData =
           isCustomDomain() &&
