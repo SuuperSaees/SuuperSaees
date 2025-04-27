@@ -87,7 +87,7 @@ export default function Message({ message, canDelete = false }: MessageProps) {
           {message.files && message.files.length > 0 && (
             <div className="scrollbar-custom flex max-w-full gap-4 overflow-x-auto items-end">
               {message.files.map((file) => (
-                <UserFile key={file.id} file={file}  />
+                <UserFile key={file.id} file={file} files={message.files} />
               ))}
             </div>
           )}
