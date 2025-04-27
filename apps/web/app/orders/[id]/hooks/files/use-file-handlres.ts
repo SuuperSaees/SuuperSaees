@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Position {
   x: number;
@@ -41,7 +41,7 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
-  const handleWheel = (e: WheelEvent) => {
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
     const isScrollableElement = (e.target as HTMLElement)?.closest('.overflow-y-auto, .overflow-auto');
     if (isScrollableElement ?? currentFileType.startsWith('video/')) return;
 
@@ -75,6 +75,9 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
   const handleMouseUp = () => {
    setIsDragging(false);
  };
+ const resetZoom = useCallback(() => {
+  setZoomLevel(1)
+ }, [])
   return {
    isZoomedIn,
    zoomLevel,
@@ -85,6 +88,6 @@ export const useFileHandlers = (initialZoomLevel = 1, currentFileType: string) =
    handleMouseDown,
    handleMouseMove,
    handleMouseUp,
-   resetZoom: () => setZoomLevel(1)
+   resetZoom
  };
 };

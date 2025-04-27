@@ -7,20 +7,9 @@ import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Activity } from '~/lib/activity.types';
 import { addActivityAction } from '~/team-accounts/src/server/actions/activity/create/create-activity';
 import { useActivityContext } from '../context/activity-context';
+import { Annotation } from '~/lib/annotations.types';
 
-interface Annotation {
-  id: string;
-  file_id: string;
-  user_id: string;
-  position_x: number;
-  position_y: number;
-  status: 'active' | 'completed' | 'draft';
-  page_number?: number;
-  number: number;
-  message_id?: string;
-  created_at: string;
-  updated_at: string;
-}
+
 
 interface Message {
   id: string;
@@ -45,7 +34,7 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
   const { order } = useActivityContext();
   const queryClient = useQueryClient();
   const [isCreatingAnnotation, setIsCreatingAnnotation] = useState(true);
-  const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
+  const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation.Type | null>(null);
 
   const { data: annotations = [], isLoading: isLoadingAnnotations } = useQuery({
     queryKey: ['annotations', fileId],

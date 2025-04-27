@@ -184,7 +184,8 @@
       "move": "Moverte sobre la imagen:",
       "zoom": "Hacer zoom:",
       "spacebar": "Mantén presionada la tecla Espacio y haz clic mientras arrastras.",
-      "mouseWheel": "Usa la rueda del ratón para acercar o alejar."
+      "mouseWheel": "Usa la rueda del ratón para acercar o alejar.",
+      "open": "Abrir búsqueda:"
     },
     "page": "Página",
     "chat": {

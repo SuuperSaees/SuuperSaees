@@ -184,7 +184,8 @@
       "move": "Move around the image:",
       "zoom": "Zoom in/out:",
       "spacebar": "Hold Spacebar and click while dragging.",
-      "mouseWheel": "Use the mouse wheel to zoom."
+      "mouseWheel": "Use the mouse wheel to zoom.",
+      "open": "Open search:"
     },
     "page": "Page",
     "chat": {
