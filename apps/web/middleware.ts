@@ -7,8 +7,6 @@ import pathsConfig from '~/config/paths.config';
 import {
   getFullDomainBySubdomain,
 } from '~/multitenancy/utils/get/get-domain';
-// import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
-// import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 // import { handleCors } from './handlers/cors-handler';
@@ -329,52 +327,6 @@ function getPatterns() {
         }
       },
     },
-    // {
-    //   // Verify if the client is eliminated from the agency
-    //   pattern: new URLPattern({ pathname: '/*' }),
-    //   handler: async (req: NextRequest, res: NextResponse) => {
-
-    //     console.log('I am here, hello');
-    //     const supabase = createMiddlewareClient(req, res);
-    //     const {
-    //       data: { user },
-    //     } = await getUser(req, res);
-    //     if (req.nextUrl.pathname === '/add-organization') {
-    //       return;
-    //     }
-    //     // the user is logged out, so we don't need to do anything
-    //     if (!user) {
-    //       return;
-    //     }
-    //     const userId = user.id;
-
-    //     // Step 2: Get the organization id fetching the domain/subdomain data
-    //     const client = createMiddlewareClient(req, res);
-    //     const dataSession = await client.auth.getSession();
-
-    //     console.log('dataSession', dataSession);
-    //     const { data: organizationData } = await client.rpc('get_current_organization_id');
-    //     const organizationId = organizationData ?? '';
-
-    //     // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
-    //     const clientDeleted = await fetchDeletedClients(
-    //       supabase,
-    //       organizationId ?? '',
-    //       userId,
-    //     ).catch((error) =>
-    //       console.error('Error fetching deleted from middleware:', error),
-    //     );
-
-    //     // Step 4: If the client is deleted, sign out the user
-    //     if (clientDeleted) {
-    //       await supabase.auth.signOut();
-    //       return NextResponse.redirect(
-    //         new URL(pathsConfig.auth.signIn, req.url).href,
-    //       );
-    //     }
-    //     return;
-    //   },
-    // },
   ];
 }
 
