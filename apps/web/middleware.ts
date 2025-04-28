@@ -415,8 +415,8 @@ function getPatterns() {
 
         // Step 2: Get the organization id fetching the domain/subdomain data
         const client = createMiddlewareClient(req, res);
-        const { data: organizationData } = await client.rpc('get_session');
-        const organizationId = organizationData?.organization?.id;
+        const { data: organizationData } = await client.rpc('get_current_organization_id');
+        const organizationId = organizationData ?? '';
 
         // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
         const clientDeleted = await fetchDeletedClients(
