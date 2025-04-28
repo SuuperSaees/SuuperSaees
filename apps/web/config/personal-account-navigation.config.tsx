@@ -11,6 +11,8 @@ import {
   ShoppingCart,
   Inbox,
   CopyCheck,
+  GraduationCap,
+  Handshake,
   // Wallet,
 } from 'lucide-react';
 
@@ -40,9 +42,64 @@ const routes = [
   },
   {
     type: 'route',
+    label: 'common:trainingName',
+    path: pathsConfig.app.training,
+    Icon: <GraduationCap className={iconClasses} />,
+  },
+  {
+    type: 'route',
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
+  },
+  // {
+  //   type: 'group',
+  //   label: 'common:catalogName',
+  //   Icon: <Package className={iconClasses} />,
+  //   collapsed: true,
+  //   children: [
+  //     {
+  //       type: 'group',
+  //       label: 'common:catalogProductName',
+  //       children: [
+  //         {
+  //           label: 'common:catalogWholesaleName',
+  //           path: pathsConfig.app.catalogWholesale,
+  //         },
+  //         {
+  //           label: 'common:catalogPrivateLabelName',
+  //           path: pathsConfig.app.catalogPrivateLabel,
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       label: 'common:catalogProviderName',
+  //       path: pathsConfig.app.catalogProvider,
+  //     },
+  //     {
+  //       label: 'common:catalogSourcingChinaName',
+  //       path: pathsConfig.app.catalogSourcingChina,
+  //     }
+  //   ],
+  // },
+  {
+    type: 'group',
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
+    ],
+  },
+  {
+    type: 'route',
+    label: 'common:partnersName',
+    path: pathsConfig.app.partners,
+    Icon: <Handshake className={iconClasses} />,
   },
   {
     type: 'route',
@@ -84,38 +141,8 @@ const routes = [
     path: pathsConfig.app.briefs,
     Icon: <CopyCheck className={iconClasses} />,
   },
-  {
-    type: 'group',
-    label: 'common:aiToolsName',
-    Icon: <Bot className={iconClasses} />,
-    collapsed: true,
-    children: [
-      {
-        label: 'common:toolCopyListName',
-        path: pathsConfig.app.toolCopyList,
-      },
-      
-    ],
-  },
-  {
-    type: 'group',
-    label: 'common:catalogName',
-    Icon: <Package className={iconClasses} />,
-    collapsed: true,
-    children: [
-      {
-        label: 'common:catalogProviderName',
-        path: pathsConfig.app.catalogProvider,
-      },
-      {
-        label: 'common:catalogProductName',
-        path: pathsConfig.app.catalogProduct,
-      }
-    ],
-  },
-
-
-
+  
+ 
 
   // {
   //   label: 'Facturas',
