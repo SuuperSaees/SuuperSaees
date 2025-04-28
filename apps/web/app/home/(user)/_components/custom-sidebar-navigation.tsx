@@ -62,6 +62,26 @@ export function CustomSidebarNavigation({
           );
         }
 
+        if ('groups' in item) {
+          return (
+            <SidebarGroups
+              key={typeof item.label === 'string' ? item.label : ''}
+              label={item.label}
+              path={item.path}
+              Icon={item.Icon}
+              collapsed={item.collapsed}
+              groups={item.groups}
+              className={item.className}
+              menu={item.menu}
+              showCatalogProviderUrl={catalogProviderUrl}
+              showCatalogProductUrl={catalogProductUrl}
+              showCatalogProductWholesaleUrl={catalogProductWholesaleUrl}
+              showCatalogProductPrivateLabelUrl={catalogProductPrivateLabelUrl}
+              showCatalogSourcingChinaUrl={catalogSourcingChinaUrl}
+            />
+          );
+        }
+
         if (
           item.label === 'common:catalogName' &&
           !catalogProviderUrl &&
@@ -147,25 +167,7 @@ export function CustomSidebarNavigation({
           );
         }
 
-        if ('groups' in item) {
-          return (
-            <SidebarGroups
-              key={typeof item.label === 'string' ? item.label : ''}
-              label={item.label}
-              path={item.path}
-              Icon={item.Icon}
-              collapsed={item.collapsed}
-              groups={item.groups}
-              className={item.className}
-              menu={item.menu}
-              showCatalogProviderUrl={catalogProviderUrl}
-              showCatalogProductUrl={catalogProductUrl}
-              showCatalogProductWholesaleUrl={catalogProductWholesaleUrl}
-              showCatalogProductPrivateLabelUrl={catalogProductPrivateLabelUrl}
-              showCatalogSourcingChinaUrl={catalogSourcingChinaUrl}
-            />
-          );
-        }
+       
         return (
           <SidebarItem
             key={item.path}
