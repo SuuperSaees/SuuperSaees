@@ -571,6 +571,11 @@ export function SidebarGroups({
   className,
   menu,
   showFilters = {},
+  showCatalogProviderUrl,
+  showCatalogProductUrl,
+  showCatalogProductWholesaleUrl,
+  showCatalogProductPrivateLabelUrl,
+  showCatalogSourcingChinaUrl,
 }: {
   label: string;
   Icon?: React.ReactNode;
@@ -601,6 +606,11 @@ export function SidebarGroups({
   className?: string;
   menu?: React.ReactNode;
   showFilters?: Record<string, boolean>;
+  showCatalogProviderUrl?: boolean;
+  showCatalogProductUrl?: boolean;
+  showCatalogProductWholesaleUrl?: boolean;
+  showCatalogProductPrivateLabelUrl?: boolean;
+  showCatalogSourcingChinaUrl?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(!collapsed);
   const { collapsed: sidebarCollapsed, itemActiveStyle, itemHoverStyle } = useContext(SidebarContext);
@@ -703,6 +713,10 @@ export function SidebarGroups({
                 return null;
               }
 
+              if((group.label === 'common:catalogProductName' && !showCatalogProductUrl)) {
+                return null;
+              }
+
               return (
                 <SidebarGroup
                   key={`group-${index}-${group.label}`}
@@ -714,7 +728,16 @@ export function SidebarGroups({
                   className={group.className}
                   menu={group.menu}
                 >
-                  {filteredChildren.map((child, childIndex) => (
+                  {filteredChildren.filter(child => {
+                    if((child.label === 'common:catalogWholesaleName' && !showCatalogProductWholesaleUrl)) {
+                      return null;
+                    }
+                    if((child.label === 'common:catalogPrivateLabelName' && !showCatalogProductPrivateLabelUrl)) {
+                      return null;
+                    }
+                    return child;
+                  }).map((child, childIndex) => (
+                    
                     <SidebarItem
                       key={`${child.path}-${childIndex}`}
                       path={child.path}
@@ -729,6 +752,15 @@ export function SidebarGroups({
                 </SidebarGroup>
               );
             } else if (group.type === 'route') {
+              if((group.label === 'common:catalogSourcingChinaName' && !showCatalogSourcingChinaUrl)) {
+                return null;
+              }
+              if((group.label === 'common:catalogProviderName' && !showCatalogProviderUrl)) {
+                return null;
+              }
+
+
+
               return (
                 <SidebarItem
                   key={`route-${index}-${group.path}`}
