@@ -75,6 +75,7 @@ export const getOrganizationSettingsByOrganizationId = async (
     'catalog_product_private_label_url',
     'training_url',
     'catalog_sourcing_china_url',
+    'calendar_url',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {

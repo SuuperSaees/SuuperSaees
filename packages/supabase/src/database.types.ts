@@ -3813,6 +3813,7 @@ export type Database = {
         | "catalog_product_private_label_url"
         | "training_url"
         | "catalog_sourcing_china_url"
+        | "calendar_url"
       payment_status: "pending" | "succeeded" | "failed"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
       plugin_type: "tool" | "internal" | "external" | "integration"
@@ -4509,6 +4510,7 @@ export const Constants = {
         "catalog_product_private_label_url",
         "training_url",
         "catalog_sourcing_china_url",
+        "calendar_url",
       ],
       payment_status: ["pending", "succeeded", "failed"],
       plugin_status: ["installed", "uninstalled", "failed", "in progress"],
