@@ -4,24 +4,24 @@ import { OrganizationSettings } from '~/lib/organization-settings.types';
 import { redirect } from 'next/navigation';
 import pathsConfig from '~/config/paths.config';
 
-export default async function DashboardPage() {
+export default async function TrainingPage() {
   const { organization, agency, workspace } = await loadUserWorkspace();
 
-  const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['dashboard_url']).catch((err) => {
+  const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['training_url']).catch((err) => {
     console.error(`Error client, getting organization settings: ${err}`)
     return []
   });
 
-  const dashboardUrl = organizationSettings?.find((setting) => setting.key === OrganizationSettings.KEYS.dashboard_url)?.value;
+  const trainingUrl = organizationSettings?.find((setting) => setting.key === OrganizationSettings.KEYS.training_url)?.value;
 
-  if (!dashboardUrl) {
+  if (!trainingUrl) {
     return redirect(pathsConfig.app.orders);
   }
 
   const clientRoles = new Set(['client_owner', 'client_member']);
-  const urlHasUserIds = dashboardUrl.includes('userIds=');
+  const urlHasUserIds = trainingUrl.includes('userIds=');
   if (urlHasUserIds && clientRoles.has(workspace.role ?? '')) {
-    const userIds = new URL(dashboardUrl).searchParams.get('userIds')?.split(',') ?? [];
+    const userIds = new URL(trainingUrl).searchParams.get('userIds')?.split(',') ?? [];
     if (!userIds.includes(workspace.id ?? '')) {
       return redirect(pathsConfig.app.orders);
     }
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
 
   return (
       <div className="flex h-full border-t">
-        <iframe src={dashboardUrl} className="w-full h-full" />
+        <iframe src={trainingUrl} className="w-full h-full" />
       </div>
   );
 }

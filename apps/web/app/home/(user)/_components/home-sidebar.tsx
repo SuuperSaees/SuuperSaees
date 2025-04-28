@@ -61,15 +61,6 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const sourcingChinaUrl = Boolean(settings.catalog_sourcing_china_url);
   const catalogProductUrl = wholesaleUrl || privateLabelUrl;
 
-  console.log(settings);
-  console.log(catalogProviderUrl);
-  console.log(catalogProductUrl);
-  console.log(toolCopyListUrl);
-  console.log(partenersUrl);
-  console.log(wholesaleUrl);
-  console.log(privateLabelUrl);
-  console.log(trainingUrl);
-
   return (
     <ThemedSidebar className="text-sm scrollbar-on-hover">
       <div className="pt-5 pb-3 px-6.5">

@@ -60,7 +60,6 @@ export function AppLogo({
   const {theme} = getColorLuminance(sidebar_background_color ?? '#f2f2f2');
   const themedLogoUrl = theme === 'dark' ? (logo_dark_url ?? logo_url): logo_url  
   logoUrl = logoUrl ?? themedLogoUrl;
-  console.log('logoUrl', logoUrl)
   return (
     <Link
       aria-label={label}

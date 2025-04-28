@@ -7,6 +7,7 @@ import { MessageBadge } from './message-badge';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 import { z } from 'zod';
 import pathsConfig from '~/config/paths.config';
+import { SidebarGroups } from './sidebar-groups';
 
 type NavigationConfig = z.infer<typeof NavigationConfigSchema>;
 
@@ -17,6 +18,11 @@ export function CustomSidebarNavigation({
   catalogProductUrl,
   toolCopyListUrl,
   userId,
+  partenersUrl,
+  catalogProductWholesaleUrl,
+  catalogProductPrivateLabelUrl,
+  trainingUrl,
+  catalogSourcingChinaUrl,
 }: React.PropsWithChildren<{
   config: NavigationConfig;
   showDashboardUrl?: boolean;
@@ -24,6 +30,11 @@ export function CustomSidebarNavigation({
   catalogProductUrl?: boolean;
   toolCopyListUrl?: boolean;
   userId?: string;
+  partenersUrl?: boolean;
+  catalogProductWholesaleUrl?: boolean;
+  catalogProductPrivateLabelUrl?: boolean;
+  trainingUrl?: boolean;
+  catalogSourcingChinaUrl?: boolean;
 }>) {
   return (
     <>
@@ -36,7 +47,6 @@ export function CustomSidebarNavigation({
           return (
             <SidebarSection
               key={`section-${index}`}
-  
               label={
                 <Trans
                   i18nKey={typeof item.label === 'string' ? item.label : ''}
@@ -47,12 +57,13 @@ export function CustomSidebarNavigation({
               path={item.path}
               menu={item.menu}
               groups={item.groups}
-              
             >
               {item.children}
             </SidebarSection>
           );
         }
+
+        
 
         if (
           item.label === 'common:catalogName' &&
@@ -61,6 +72,10 @@ export function CustomSidebarNavigation({
         ) {
           return null;
         } else if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
+          return null;
+        } else if (item.label === 'common:partnersName' && !partenersUrl) {
+          return null;
+        } else if(item.label === 'common:trainingName' && !trainingUrl){
           return null;
         } else if ('children' in item) {
           return (
@@ -87,7 +102,13 @@ export function CustomSidebarNavigation({
                   (child.label === 'common:catalogProductName' &&
                     !catalogProductUrl) ||
                   (child.label === 'common:toolCopyListName' &&
-                    !toolCopyListUrl)
+                    !toolCopyListUrl) ||
+                  (child.label === 'common:partnersName' &&
+                    !partenersUrl) ||
+                  (child.label === 'common:catalogWholesaleName' &&
+                    !catalogProductWholesaleUrl) ||
+                  (child.label === 'common:catalogPrivateLabelName' &&
+                    !catalogProductPrivateLabelUrl)
                 ) {
                   return null;
                 }
@@ -95,7 +116,7 @@ export function CustomSidebarNavigation({
                   <SidebarItem
                     key={child.path}
                     end={child.end}
-                    path={child.path}
+                    path={child.path ?? ''}
                     Icon={child.Icon}
                     className={child.className}
                     menu={child.menu}
@@ -126,6 +147,26 @@ export function CustomSidebarNavigation({
               <Trans i18nKey={item.label} defaults={item.label} />
               <MessageBadge userId={userId ?? ''} />
             </SidebarItem>
+          );
+        }
+
+        if ('groups' in item) {
+          return (
+            <SidebarGroups
+              key={typeof item.label === 'string' ? item.label : ''}
+              label={item.label}
+              path={item.path}
+              Icon={item.Icon}
+              collapsed={item.collapsed}
+              groups={item.groups}
+              className={item.className}
+              menu={item.menu}
+              showCatalogProviderUrl={catalogProviderUrl}
+              showCatalogProductUrl={catalogProductUrl}
+              showCatalogProductWholesaleUrl={catalogProductWholesaleUrl}
+              showCatalogProductPrivateLabelUrl={catalogProductPrivateLabelUrl}
+              showCatalogSourcingChinaUrl={catalogSourcingChinaUrl}
+            />
           );
         }
         return (

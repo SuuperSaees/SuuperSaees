@@ -20,7 +20,7 @@ import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/ser
 import { RootProviders } from '~/components/root-providers';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 
-async function DashboardLayout({ children }: React.PropsWithChildren) {
+async function SourcingChinaLayout({ children }: React.PropsWithChildren) {
   const workspace = await loadUserWorkspace();
   const style = getLayoutStyle();
   const organizationSettings = await loadOrganizationSettings();
@@ -57,7 +57,7 @@ async function DashboardLayout({ children }: React.PropsWithChildren) {
   );
 }
 
-export default withI18n(DashboardLayout);
+export default withI18n(SourcingChinaLayout);
 
 function getLayoutStyle() {
   const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('layout-style')?.value as PageLayoutStyle;

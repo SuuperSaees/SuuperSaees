@@ -37,14 +37,13 @@ const routes = [
     path: pathsConfig.app.messages,
     Icon: <Inbox className={iconClasses} />,
     end: true,
-    children: [],
-    divider: true,
   },
   {
     type: 'route',
     label: 'common:trainingName',
     path: pathsConfig.app.training,
     Icon: <GraduationCap className={iconClasses} />,
+    end: true,
   },
   {
     type: 'route',
@@ -52,36 +51,46 @@ const routes = [
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
   },
-  // {
-  //   type: 'group',
-  //   label: 'common:catalogName',
-  //   Icon: <Package className={iconClasses} />,
-  //   collapsed: true,
-  //   children: [
-  //     {
-  //       type: 'group',
-  //       label: 'common:catalogProductName',
-  //       children: [
-  //         {
-  //           label: 'common:catalogWholesaleName',
-  //           path: pathsConfig.app.catalogWholesale,
-  //         },
-  //         {
-  //           label: 'common:catalogPrivateLabelName',
-  //           path: pathsConfig.app.catalogPrivateLabel,
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       label: 'common:catalogProviderName',
-  //       path: pathsConfig.app.catalogProvider,
-  //     },
-  //     {
-  //       label: 'common:catalogSourcingChinaName',
-  //       path: pathsConfig.app.catalogSourcingChina,
-  //     }
-  //   ],
-  // },
+  {
+    type: 'groups',
+    label: 'common:catalogName',
+    Icon: <Package className={iconClasses} />,
+    path: pathsConfig.app.catalog,
+    collapsible: true,
+    collapsed: true,
+    groups: [
+      {
+        type: 'group',
+        label: 'common:catalogProductName',
+        collapsible: true,
+        collapsed: true,
+        children: [
+          {
+            label: 'common:catalogWholesaleName',
+            path: pathsConfig.app.catalogWholesale,
+          },
+          {
+            label: 'common:catalogPrivateLabelName',
+            path: pathsConfig.app.catalogPrivateLabel,
+          },
+        ],
+      },
+      {
+        type: 'route',
+        label: 'common:catalogProviderName',
+        path: pathsConfig.app.catalogProvider,
+        collapsible: true,
+        collapsed: true,
+      },
+      {
+        type: 'route',
+        label: 'common:catalogSourcingChinaName',
+        path: pathsConfig.app.catalogSourcingChina,
+        collapsible: true,
+        collapsed: true,
+      }
+    ],
+  },
   {
     type: 'group',
     label: 'common:aiToolsName',
