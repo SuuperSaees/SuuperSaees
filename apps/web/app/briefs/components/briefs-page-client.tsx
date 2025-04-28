@@ -24,6 +24,7 @@ import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
+import { PlusIcon } from 'lucide-react';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -80,6 +81,7 @@ export function BriefsPageClient() {
       onClick={() => briefMutation.mutate()}
       disabled={briefMutation.isPending}
     >
+      <PlusIcon className="h-4 w-4" />
       {t('briefs:createBrief')}
     </ThemedButton>
   );

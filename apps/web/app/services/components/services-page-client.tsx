@@ -22,6 +22,7 @@ import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
+import { PlusIcon } from 'lucide-react';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -83,7 +84,10 @@ export function ServicesPageClient() {
         (accountRole === 'agency_owner' ||
           accountRole === 'agency_project_manager') && (
           <Link href="/services/create">
-            <ThemedButton>{t('createService')}</ThemedButton>
+            <ThemedButton>
+              <PlusIcon className="h-4 w-4" />
+              {t('createService')}
+            </ThemedButton>
           </Link>
         )
       }
@@ -113,7 +117,10 @@ export function ServicesPageClient() {
             (accountRole === 'agency_owner' ||
               accountRole === 'agency_project_manager') && (
               <Link href="/services/create">
-                <ThemedButton>{t('createService')}</ThemedButton>
+                <ThemedButton>
+                  <PlusIcon className="h-4 w-4" />
+                  {t('createService')}
+                </ThemedButton>
               </Link>
             )}
         </div>

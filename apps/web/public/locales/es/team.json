@@ -98,7 +98,7 @@
   "inviteMembersDescription": "Invite a miembros a su equipo ingresando su correo electrónico y función.",
   "emailPlaceholder": "miembro@correo electrónico.com",
   "membersPageHeading": "Miembros",
-  "inviteMembersButton": "Agregar miembro",
+  "inviteMembersButton": "Agregar",
   "invitingMembers": "Invitando miembros...",
   "inviteMembersSuccessMessage": "Miembros invitados exitosamente",
   "inviteMembersErrorMessage": "Lo sentimos, no se pudo invitar a los miembros. ",

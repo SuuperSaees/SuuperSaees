@@ -99,7 +99,7 @@
   "inviteMembersDescription": "Invite members to your team by entering their email and role.",
   "emailPlaceholder": "member@email.com",
   "membersPageHeading": "Members",
-  "inviteMembersButton": "Add Member",
+  "inviteMembersButton": "Add",
   "invitingMembers": "Inviting members...",
   "inviteMembersSuccessMessage": "Members invited successfully",
   "inviteMembersErrorMessage": "Sorry, we couldn't invite the members.",

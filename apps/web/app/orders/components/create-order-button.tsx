@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { PlusIcon } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 const CreateOrderButton = ({
@@ -13,7 +14,10 @@ const CreateOrderButton = ({
     <>
       {hasOrders && (
         <Link href="/orders/create">
-          <ThemedButton className="h-fit">{t('creation.title')}</ThemedButton>
+          <ThemedButton className="h-fit">
+            <PlusIcon className="h-4 w-4" />
+            {t('orders:create')}
+          </ThemedButton>
         </Link>
       )}
     </>

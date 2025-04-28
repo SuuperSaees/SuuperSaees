@@ -1,5 +1,6 @@
 'use client';
 
+import { PlusIcon } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
@@ -78,38 +79,37 @@ const ClientsMembersPagePresentation = ({
           className="w-full"
         >
           <div className="flex items-center gap-2">
-          <h2 className="font-inter text-xl font-medium leading-4">
-            <Trans i18nKey={'team:team'} />
-          </h2>
+            <h2 className="font-inter text-xl font-medium leading-4">
+              <Trans i18nKey={'team:team'} />
+            </h2>
 
             {members && (
               <div className="flex items-center rounded-full border border-gray-500 bg-gray-50 px-2 text-gray-500">
                 <span className="inline-flex gap-2 text-[12px]">
-                <span>{members.length}</span>
-                {members.length === 1 ? (
-                  <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
-                ) : (
-                  <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
-                )}
-              </span>
+                  <span>{members.length}</span>
+                  {members.length === 1 ? (
+                    <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
+                  ) : (
+                    <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
+                  )}
+                </span>
               </div>
             )}
           </div>
         </PageHeader>
-
-        <ThemedButton
-          data-test={'invite-members-form-trigger'}
-          className="ml-auto p-0"
+        <InviteMembersDialogContainer
+          userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+          accountSlug={slug}
         >
-          <InviteMembersDialogContainer
-            userRoleHierarchy={currentUserRoleHierarchy ?? 0}
-            accountSlug={slug}
+          <ThemedButton
+            data-test={'invite-members-form-trigger'}
+            className="ml-auto"
           >
-            <span className="p-2">
-              <Trans i18nKey={'team:inviteMembersButton'} />
-            </span>
-          </InviteMembersDialogContainer>
-        </ThemedButton>
+            <PlusIcon className="h-4 w-4" />
+
+            <Trans i18nKey={'team:inviteMembersButton'} />
+          </ThemedButton>
+        </InviteMembersDialogContainer>
       </div>
 
       {/* Temporary fix with user roles while error 500 issue is solved */}
