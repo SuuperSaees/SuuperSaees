@@ -151,7 +151,9 @@ export function SidebarGroup({
   }, [collapsed, collapsible, id, setOpenGroupId]);
 
   // Toggle group open/closed
-  const toggleGroup = () => {
+  const toggleGroup = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setOpenGroupId(isGroupOpen ? null : id);
   };
 
@@ -222,10 +224,13 @@ export function SidebarGroup({
   );
 
   return (
-    <div className={cn('flex flex-col rounded-md gap-0.5', className)}>
+    <div 
+      className={cn('flex flex-col rounded-md gap-0.5', className)}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         className={wrapperClassName}
-        onClick={collapsible && !path ? toggleGroup : undefined}
+        onClick={collapsible && !path ? (e) => toggleGroup(e) : undefined}
         style={active && itemActiveStyle ? itemActiveStyle : undefined}
         onMouseEnter={(e) => {
           if (itemHoverStyle) {
@@ -257,7 +262,11 @@ export function SidebarGroup({
 
       {/* Render children if not collapsible or if group is open */}
       {(!collapsible || isGroupOpen) && (
-        <div id={id} className="flex flex-col overflow-y-auto pl-3">
+        <div 
+          id={id} 
+          className="flex flex-col overflow-y-auto pl-3"
+          onClick={(e) => e.stopPropagation()}
+        >
           {children}
         </div>
       )}
@@ -593,42 +602,24 @@ export function SidebarGroups({
   menu?: React.ReactNode;
   showFilters?: Record<string, boolean>;
 }) {
-  const {
-    collapsed: sidebarCollapsed,
-    openGroupId,
-    setOpenGroupId,
-    itemActiveStyle,
-    itemHoverStyle,
-  } = useContext(SidebarContext);
-  const id = useId();
+  const [isOpen, setIsOpen] = useState(!collapsed);
+  const { collapsed: sidebarCollapsed, itemActiveStyle, itemHoverStyle } = useContext(SidebarContext);
   const pathname = usePathname();
-  const isGroupOpen = openGroupId === id;
   const active = isRouteActive(pathname, path ?? '', true);
-  // Initialize group state on mount
-  useEffect(() => {
-    if (!collapsed && collapsible) {
-      setOpenGroupId(id);
-    }
-  }, [collapsed, collapsible, id, setOpenGroupId]);
 
-  // Toggle group open/closed
-  const toggleGroup = () => {
-    setOpenGroupId(isGroupOpen ? null : id);
+  const toggleMainGroup = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(!isOpen);
   };
-
   
   const shouldShowItem = (filterKey?: string) => {
     if (!filterKey || !showFilters) return true;
     return showFilters[filterKey] !== false; 
   };
 
-   // Prepare the label content
-   const labelContent =
-   typeof label === 'string' ? (
-     <Trans i18nKey={label} defaults={label} />
-   ) : (
-     label
-   );
+  const labelContent = typeof label === 'string' ? 
+    <Trans i18nKey={label} defaults={label} /> : label;
 
   const wrapperClassName = cn(
     'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center',
@@ -638,65 +629,56 @@ export function SidebarGroups({
     className,
   );
 
-    // Render the icon if provided
-    const iconElement = Icon && (
-      <div
-        className={cn('block flex h-5 w-5 shrink-0 items-center justify-center', {
-          'group-hover/sidebar-group:hidden': collapsible,
+  const iconElement = Icon && (
+    <div
+      className={cn('block flex h-5 w-5 shrink-0 items-center justify-center', {
+        'group-hover/sidebar-group:hidden': collapsible,
+      })}
+    >
+      {Icon}
+    </div>
+  );
+
+  const menuElement = menu && (
+    <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-group:w-auto group-hover/sidebar-group:opacity-100">
+      {menu}
+    </div>
+  );
+
+  const chevronElement = collapsible && (
+    <button
+      aria-expanded={isOpen}
+      onClick={toggleMainGroup}
+      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent"
+    >
+      <ChevronDown
+        className={cn('block h-3 w-3', {
+          'rotate-180': isOpen,
         })}
-      >
-        {Icon}
-      </div>
-    );
-  
-    // Render the menu if provided
-    const menuElement = menu && (
-      <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-group:w-auto group-hover/sidebar-group:opacity-100">
-        {menu}
-      </div>
-    );
-  
-    // Render the chevron for collapsible groups
-    const chevronElement = collapsible && (
-      <button
-        aria-expanded={isGroupOpen}
-        aria-controls={id}
-        onClick={toggleGroup}
-        className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent"
-      >
-        <ChevronDown
-          className={cn('block h-3 w-3', {
-            'rotate-180': isGroupOpen,
-          })}
-        />
-      </button>
-    );
-  
-    // Render the label content, either as a link or plain text
-    const labelElement = <span className="line-clamp-1">{labelContent}</span>
+      />
+    </button>
+  );
+
+  const labelElement = <span className="line-clamp-1">{labelContent}</span>;
 
   return (
     <div className={cn("flex flex-col", className)}> 
       <div
         className={wrapperClassName}
-        onClick={collapsible ? toggleGroup : undefined}
+        onClick={collapsible ? toggleMainGroup : undefined}
         style={active && itemActiveStyle ? itemActiveStyle : undefined}
         onMouseEnter={(e) => {
           if (itemHoverStyle) {
-            e.currentTarget.style.backgroundColor =
-              itemHoverStyle.backgroundColor as string;
+            e.currentTarget.style.backgroundColor = itemHoverStyle.backgroundColor as string;
             e.currentTarget.style.color = itemHoverStyle.color as string;
           }
         }}
         onMouseLeave={(e) => {
           if (itemHoverStyle) {
-            // If the item is active, restore the active style
             if (active && itemActiveStyle) {
-              e.currentTarget.style.backgroundColor =
-                itemActiveStyle.backgroundColor as string;
+              e.currentTarget.style.backgroundColor = itemActiveStyle.backgroundColor as string;
               e.currentTarget.style.color = itemActiveStyle.color as string;
             } else {
-              // Otherwise, clear the styles
               e.currentTarget.style.backgroundColor = '';
               e.currentTarget.style.color = '';
             }
@@ -709,65 +691,61 @@ export function SidebarGroups({
         {menuElement}
       </div>
       
-{
-  collapsible && isGroupOpen && (
-    <div className={cn("flex flex-col", { "pl-4": !sidebarCollapsed })}>
-    {groups.filter(group => shouldShowItem(group.filterKey)).map((group, index) => {
-      if (group.type === 'group') {
-        // Filtrar los hijos según showFilters
-        const filteredChildren = group.children?.filter(
-          child => shouldShowItem(child.filterKey)
-        ) ?? [];
-        
-        // Si no hay hijos después del filtrado, no mostrar el grupo
-        if (filteredChildren.length === 0) {
-          return null;
-        }
+      {collapsible && isOpen && (
+        <div className={cn("flex flex-col", { "pl-4": !sidebarCollapsed })}>
+          {groups.filter(group => shouldShowItem(group.filterKey)).map((group, index) => {
+            if (group.type === 'group') {
+              const filteredChildren = group.children?.filter(
+                child => shouldShowItem(child.filterKey)
+              ) ?? [];
+              
+              if (filteredChildren.length === 0) {
+                return null;
+              }
 
-        return (
-          <SidebarGroup
-            key={`group-${index}-${group.label}`}
-            label={group.label}
-            collapsible={group.collapsible}
-            collapsed={group.collapsed}
-            Icon={group.Icon}
-            path={group.path}
-            className={group.className}
-            menu={group.menu}
-          >
-            {filteredChildren.map((child, childIndex) => (
-              <SidebarItem
-                key={`${child.path}-${childIndex}`}
-                path={child.path}
-                Icon={child.Icon ?? <span />}
-                className={child.className}
-                menu={child.menu}
-                end={child.end}
-              >
-                <Trans i18nKey={child.label} defaults={child.label} />
-              </SidebarItem>
-            ))}
-          </SidebarGroup>
-        );
-      } else if (group.type === 'route') {
-        return (
-          <SidebarItem
-            key={`route-${index}-${group.path}`}
-            path={group.path ?? ''}
-            Icon={group.Icon ?? <span />}
-            className={group.className}
-            menu={group.menu}
-            end={group.end}
-          >
-            <Trans i18nKey={group.label} defaults={group.label} />
-          </SidebarItem>
-        );
-      }
-      return null;
-    })}
-  </div>
-  )
-}
+              return (
+                <SidebarGroup
+                  key={`group-${index}-${group.label}`}
+                  label={group.label}
+                  collapsible={group.collapsible}
+                  collapsed={group.collapsed}
+                  Icon={group.Icon}
+                  path={group.path}
+                  className={group.className}
+                  menu={group.menu}
+                >
+                  {filteredChildren.map((child, childIndex) => (
+                    <SidebarItem
+                      key={`${child.path}-${childIndex}`}
+                      path={child.path}
+                      Icon={child.Icon ?? <span />}
+                      className={child.className}
+                      menu={child.menu}
+                      end={child.end}
+                    >
+                      <Trans i18nKey={child.label} defaults={child.label} />
+                    </SidebarItem>
+                  ))}
+                </SidebarGroup>
+              );
+            } else if (group.type === 'route') {
+              return (
+                <SidebarItem
+                  key={`route-${index}-${group.path}`}
+                  path={group.path ?? ''}
+                  Icon={group.Icon ?? <span />}
+                  className={group.className}
+                  menu={group.menu}
+                  end={group.end}
+                >
+                  <Trans i18nKey={group.label} defaults={group.label} />
+                </SidebarItem>
+              );
+            }
+            return null;
+          })}
+        </div>
+      )}
     </div>
   );
 }
