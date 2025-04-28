@@ -5,14 +5,10 @@ import { Trans } from '@kit/ui/trans';
 
 export function SidebarGroups({
   label,
-  path,
   Icon,
-  collapsed,
   groups,
   className,
-  menu,
   showCatalogProviderUrl,
-  showCatalogProductUrl,
   showCatalogProductWholesaleUrl,
   showCatalogProductPrivateLabelUrl,
   showCatalogSourcingChinaUrl,
@@ -21,7 +17,26 @@ export function SidebarGroups({
   path: string;
   Icon: React.ReactNode;
   collapsed?: boolean;
-  groups: any[];
+  groups: {
+    type: 'group' | 'route';
+    end?: boolean;
+    label: string;
+    path: string;
+    Icon: React.ReactNode;
+    collapsible: boolean;
+    collapsed: boolean;
+    className: string;
+    menu: React.ReactNode;
+    children: {
+      type: 'group' | 'route';
+      label: string;
+      path: string;
+      Icon: React.ReactNode;
+      end: boolean;
+      className: string;
+      menu: React.ReactNode;
+    }[];
+  }[];
   className?: string;
   menu?: React.ReactNode;
   showCatalogProviderUrl?: boolean;
@@ -31,7 +46,7 @@ export function SidebarGroups({
   showCatalogSourcingChinaUrl?: boolean;
 }) {
   return (
-    <div className={`sidebar-groups ${className || ''}`}>
+    <div className={`sidebar-groups ${className ?? ''}`}>
       <div className="sidebar-groups-header flex items-center gap-2 px-3 py-2">
         {Icon}
         <Trans i18nKey={label} defaults={label} />
@@ -40,7 +55,7 @@ export function SidebarGroups({
         {groups.map((group, index) => {
           if (group.type === 'group') {
             // Filtrar elementos hijos según las flags
-            const filteredChildren = group.children.filter((child: any) => {
+            const filteredChildren = group.children.filter((child: { label: string; type: string; }) => {
               if (
                 (child.label === 'common:catalogWholesaleName' && !showCatalogProductWholesaleUrl) ||
                 (child.label === 'common:catalogPrivateLabelName' && !showCatalogProductPrivateLabelUrl)
@@ -70,10 +85,17 @@ export function SidebarGroups({
                 className={group.className}
                 menu={group.menu}
               >
-                {filteredChildren.map((child: any, childIndex: number) => (
+                {filteredChildren.map((child: {
+                  label: string;
+                  path: string;
+                  Icon: React.ReactNode;
+                  end: boolean;
+                  className: string;
+                  menu: React.ReactNode;
+                }, childIndex: number) => (
                   <SidebarItem
                     key={`${child.path}-${childIndex}`}
-                    path={child.path || ''}
+                    path={child.path ?? ''}
                     Icon={child.Icon}
                     className={child.className}
                     menu={child.menu}

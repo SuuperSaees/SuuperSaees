@@ -63,8 +63,6 @@ export function CustomSidebarNavigation({
           );
         }
 
-        
-
         if (
           item.label === 'common:catalogName' &&
           !catalogProviderUrl &&
@@ -95,7 +93,7 @@ export function CustomSidebarNavigation({
               path={item.path}
               menu={item.menu}
             >
-              {item.children.map((child) => {
+              {item.children?.map((child) => {
                 if (
                   (child.label === 'common:catalogProviderName' &&
                     !catalogProviderUrl) ||
