@@ -165,7 +165,7 @@ export function SidebarGroup({
 
   // Common wrapper class names
   const wrapperClassName = cn(
-    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center  ',
+    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center',
     {
       'w-full px-3': !sidebarCollapsed,
     },
@@ -196,7 +196,7 @@ export function SidebarGroup({
       aria-expanded={isGroupOpen}
       aria-controls={id}
       onClick={toggleGroup}
-      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent yo"
+      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent"
     >
       <ChevronDown
         className={cn('block h-3 w-3', {
@@ -210,7 +210,7 @@ export function SidebarGroup({
   const labelElement = path ? (
     <Link
       href={path}
-      className={cn('line-clamp-1 w-full font-normal ', {
+      className={cn('line-clamp-1 w-full font-normal', {
         'font-normal': isRouteActive(pathname, path, true),
       })}
       onClick={collapsible ? (e) => e.stopPropagation() : undefined}
@@ -596,11 +596,11 @@ export function SidebarGroups({
   };
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex flex-col", className)}> 
       {!collapsed && (
         <div className="flex items-center gap-2 px-3 py-2 opacity-70">
-          {Icon && <span className="flex h-5 w-5 items-center justify-center">{Icon}</span>}
-          <h3 className="text-xs font-semibold">
+          {Icon && <span className="flex h-5 w-5 items-center justify-center text-slate-950">{Icon}</span>}
+          <h3 className="text-md font-normal text-slate-950">
             <Trans i18nKey={label} defaults={label} />
           </h3>
           {menu && (

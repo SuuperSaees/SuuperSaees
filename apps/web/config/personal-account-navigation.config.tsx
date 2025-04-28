@@ -64,6 +64,7 @@ const routes = [
         label: 'common:catalogProductName',
         collapsible: true,
         collapsed: true,
+        Icon: <Package className={'text-transparent'} />,
         children: [
           {
             label: 'common:catalogWholesaleName',
