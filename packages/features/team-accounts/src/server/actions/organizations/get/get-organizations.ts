@@ -70,6 +70,12 @@ export const getOrganizationSettingsByOrganizationId = async (
     'auth_card_background_color',
     'auth_section_background_color',
     'dashboard_url',
+    'parteners_url',
+    'catalog_product_wholesale_url',
+    'catalog_product_private_label_url',
+    'training_url',
+    'catalog_sourcing_china_url',
+    'calendar_url',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {

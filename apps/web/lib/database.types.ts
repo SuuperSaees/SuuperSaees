@@ -3450,6 +3450,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: Json
       }
+      get_current_organization_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_session: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["CompositeTypes"]["session_info"]
@@ -3533,8 +3537,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: string; brief_id: string }
           | { service_id: number; brief_id: string }
+          | { service_id: string; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
@@ -3804,6 +3808,12 @@ export type Database = {
         | "catalog_product_url"
         | "tool_copy_list_url"
         | "auth_background_url"
+        | "parteners_url"
+        | "catalog_product_wholesale_url"
+        | "catalog_product_private_label_url"
+        | "training_url"
+        | "catalog_sourcing_china_url"
+        | "calendar_url"
       payment_status: "pending" | "succeeded" | "failed"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
       plugin_type: "tool" | "internal" | "external" | "integration"
@@ -4495,6 +4505,12 @@ export const Constants = {
         "catalog_product_url",
         "tool_copy_list_url",
         "auth_background_url",
+        "parteners_url",
+        "catalog_product_wholesale_url",
+        "catalog_product_private_label_url",
+        "training_url",
+        "catalog_sourcing_china_url",
+        "calendar_url",
       ],
       payment_status: ["pending", "succeeded", "failed"],
       plugin_status: ["installed", "uninstalled", "failed", "in progress"],

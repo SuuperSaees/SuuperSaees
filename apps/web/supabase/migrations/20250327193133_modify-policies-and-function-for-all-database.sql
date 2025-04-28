@@ -1262,6 +1262,38 @@ $function$
 
 GRANT EXECUTE ON FUNCTION has_role(UUID, UUID, TEXT) TO authenticated, service_role;
 
+
+CREATE OR REPLACE FUNCTION public.get_current_organization_id()
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+    v_session_id uuid;
+    v_user_id uuid;
+    v_org_id uuid;
+BEGIN
+    -- Get the current user and session
+    v_session_id := (auth.jwt() ->> 'session_id')::uuid;
+    v_user_id := auth.uid();
+    
+    -- Get only the organization_id from the current session
+    SELECT organization_id INTO v_org_id
+    FROM auth.user_sessions 
+    WHERE user_id = v_user_id AND session_id = v_session_id;
+    
+    -- Return the organization_id (will be NULL if not found)
+    RETURN v_org_id;
+END;
+$$;
+
+-- Grant execute permission to authenticated users and service_role only
+GRANT EXECUTE ON FUNCTION public.get_current_organization_id() TO authenticated, service_role;
+
+-- Add comment to the function
+COMMENT ON FUNCTION public.get_current_organization_id() IS 'Returns the organization_id for the current user session';
+
 drop policy if exists "Read for all authenticated users" on "public"."messages";
 
 create policy "Read for all authenticated users"
@@ -1269,21 +1301,36 @@ on "public"."messages"
 as permissive
 for select
 to authenticated
-using (has_permission_in_organizations(auth.uid(), 'messages.read'::app_permissions) AND 
+using (
+  has_permission_in_organizations(auth.uid(), 'messages.read'::app_permissions) AND 
   (
     (
       (order_id IS NOT NULL) AND 
       (
-        (EXISTS (SELECT 1 FROM order_assignations oa WHERE ((oa.order_id)::text = (messages.order_id)::text) AND (oa.agency_member_id = auth.uid()))) OR 
-        (EXISTS (SELECT 1 FROM order_followers ofollow WHERE ((ofollow.order_id)::text = (messages.order_id)::text) AND (ofollow.client_member_id = auth.uid()))) OR 
-        has_role(auth.uid(), (get_session()).organization.id::uuid, 'agency_owner'::text) OR 
-        has_role(auth.uid(), (get_session()).organization.id::uuid, 'agency_project_manager'::text)
-      ) AND 
-      (
-        (is_user_in_agency_organization(auth.uid(), (get_session()).organization.id::uuid) AND 
-         (EXISTS (SELECT 1 FROM orders_v2 o WHERE ((o.id)::text = (messages.order_id)::text) AND (o.agency_id = (get_session()).organization.id::uuid)))) OR 
-        (NOT is_user_in_agency_organization(auth.uid(), (get_session()).organization.id::uuid) AND 
-         (EXISTS (SELECT 1 FROM orders_v2 o WHERE ((o.id)::text = (messages.order_id)::text) AND (o.client_organization_id = (get_session()).organization.id::uuid))))
+        EXISTS (
+          SELECT 1 
+          FROM orders_v2 o 
+          WHERE o.id = messages.order_id
+          AND (
+            (
+              o.agency_id = (SELECT get_current_organization_id()) AND
+              (
+                (has_role(auth.uid(), o.agency_id, 'agency_member') AND 
+                 EXISTS (SELECT 1 FROM order_assignations oa WHERE oa.order_id = o.id AND oa.agency_member_id = auth.uid())) OR
+                has_role(auth.uid(), o.agency_id, 'agency_owner') OR
+                has_role(auth.uid(), o.agency_id, 'agency_project_manager')
+              )
+            ) OR
+            (
+              o.client_organization_id = (SELECT get_current_organization_id()) AND
+              (
+                (has_role(auth.uid(), o.client_organization_id, 'client_member') AND 
+                 EXISTS (SELECT 1 FROM order_followers ofollow WHERE ofollow.order_id = o.id AND ofollow.client_member_id = auth.uid())) OR
+                has_role(auth.uid(), o.client_organization_id, 'client_owner')
+              )
+            )
+          )
+        )
       )
     ) OR 
     (
@@ -1295,13 +1342,12 @@ using (has_permission_in_organizations(auth.uid(), 'messages.read'::app_permissi
     (visibility = 'public'::messages_types) OR 
     (
       (visibility = 'internal_agency'::messages_types) AND 
-      (EXISTS (SELECT 1 FROM accounts a JOIN accounts_memberships am ON (am.organization_id = (get_session()).organization.id::uuid) 
+      (EXISTS (SELECT 1 FROM accounts a JOIN accounts_memberships am ON (am.organization_id = (SELECT get_current_organization_id())) 
                WHERE (a.id = messages.user_id) AND (am.user_id = auth.uid()) AND 
                ((am.account_role)::text = ANY (ARRAY['agency_owner'::text, 'agency_project_manager'::text, 'agency_member'::text]))))
     )
   )
 );
-    
 
 CREATE OR REPLACE FUNCTION public.set_session(domain text)
 RETURNS void

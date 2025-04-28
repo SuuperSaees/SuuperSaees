@@ -16,6 +16,7 @@ export const NavigationConfigSchema = z.object({
         end: RouteMatchingEnd,
         className: z.string().optional(),
         menu: z.custom<React.ReactNode>().optional(),
+        children: z.array(z.any()).optional(),
       }),
       z.object({
         type: z.literal('group').default('group'),
@@ -29,8 +30,8 @@ export const NavigationConfigSchema = z.object({
         children: z.array(
           z.object({
             label: z.string(),
-            path: z.string(),
-            Icon: z.custom<React.ReactNode>(),
+            path: z.string().optional(),
+            Icon: z.custom<React.ReactNode>().optional(),
             end: RouteMatchingEnd,
             className: z.string().optional(),
             menu: z.custom<React.ReactNode>().optional(),
@@ -62,14 +63,61 @@ export const NavigationConfigSchema = z.object({
             children: z.array(
               z.object({
                 label: z.string(),
-                path: z.string(),
-                Icon: z.custom<React.ReactNode>(),
+                path: z.string().optional(),
+                Icon: z.custom<React.ReactNode>().optional(),
                 end: RouteMatchingEnd,
                 className: z.string().optional(),
                 menu: z.custom<React.ReactNode>().optional(),
               }),
             ),
           })
+        ),
+      }),
+      z.object({
+        type: z.literal('groups').default('groups'),
+        label: z.string(),
+        path: z.string(),
+        Icon: z.custom<React.ReactNode>(),
+        end: RouteMatchingEnd,
+        className: z.string().optional(),
+        menu: z.custom<React.ReactNode>().optional(),
+        collapsible: z.boolean().optional(),
+        collapsed: z.boolean().optional(),
+        groups: z.array(
+          z.discriminatedUnion('type', [
+            z.object({
+              type: z.literal('group').default('group'),
+              label: z.string(),
+              collapsible: z.boolean().optional(),
+              collapsed: z.boolean().optional(),
+              path: z.string().optional(),
+              Icon: z.custom<React.ReactNode>().optional(),
+              end: RouteMatchingEnd,
+              className: z.string().optional(),
+              menu: z.custom<React.ReactNode>().optional(),
+              children: z.array(
+                z.object({
+                  label: z.string(),
+                  path: z.string().optional(),
+                  Icon: z.custom<React.ReactNode>().optional(),
+                  end: RouteMatchingEnd,
+                  className: z.string().optional(),
+                  menu: z.custom<React.ReactNode>().optional(),
+                }),
+              ),
+            }),
+            z.object({
+              type: z.literal('route').default('route'),
+              label: z.string(),
+              collapsible: z.boolean().optional(),
+              collapsed: z.boolean().optional(),
+              path: z.string(),
+              Icon: z.custom<React.ReactNode>().optional(),
+              end: RouteMatchingEnd,
+              className: z.string().optional(),
+              menu: z.custom<React.ReactNode>().optional(),
+            }),
+          ])
         ),
       }),
     ]),

@@ -9,7 +9,6 @@ import { UseMutationResult, useMutation // useQuery,
 import { toast } from 'sonner';
 
 
-
 import { Database } from '../../../../../apps/web/lib/database.types';
 // import { getOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/get/get-organizations';
 import { upsertOrganizationSettings } from '../../../team-accounts/src/server/actions/organizations/update/update-organizations';
@@ -31,6 +30,11 @@ export type OrganizationSettingKeys =
   | 'catalog_product_url'
   | 'tool_copy_list_url'
   | 'pinned_organizations'
+  | 'parteners_url'
+  | 'catalog_product_wholesale_url'
+  | 'catalog_product_private_label_url'
+  | 'training_url'
+  | 'catalog_sourcing_china_url'
   | Database['public']['Enums']['organization_setting_key'];
 
 export type OrganizationSettingValue =
