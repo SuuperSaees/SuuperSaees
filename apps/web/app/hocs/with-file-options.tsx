@@ -10,7 +10,7 @@ import { File } from '~/lib/file.types';
 import { useFileActions } from '../hooks/use-file-actions';
 
 const AnnotationsDialog = dynamic(
-  () => import('~/(annotations)/components/annotations-dialog'),
+  () => import('~/(annotations)/components/dialog'),
   {
     ssr: false,
   },

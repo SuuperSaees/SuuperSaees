@@ -5,7 +5,6 @@ import { useState } from 'react';
 
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { ArrowDownToLine, MessageCircle, X } from 'lucide-react';
-
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -22,17 +21,18 @@ import { Separator } from '@kit/ui/separator';
 import { Spinner } from '@kit/ui/spinner';
 
 import Tooltip from '~/components/ui/tooltip';
+import { Annotation } from '~/lib/annotations.types';
 import { File } from '~/lib/file.types';
 import ActiveChats from '~/orders/[id]/components/files/active-chats';
-import { FilePagination } from '~/orders/[id]/components/files/file-pagination';
-import { FilePreview } from '~/orders/[id]/components/files/file-preview';
 import FileViewer from '~/orders/[id]/components/files/file-viewer';
 import ResolvedChat from '~/orders/[id]/components/files/resolved-chat';
 import { useFileHandlers } from '~/orders/[id]/hooks/files/use-file-handlres';
 import { useAnnotations } from '~/orders/[id]/hooks/use-annotations';
 import { handleFileDownload } from '~/orders/[id]/utils/file-utils';
-import AnnotationsHelpTooltip from './annotations-help-tooltip';
-import { Annotation } from '~/lib/annotations.types';
+
+import AnnotationsHelpTooltip from './help-tooltip';
+import AnnotationsThumbnailsSidebar from './thumbnails-sidebar';
+import AnnotationsCommentsPanel from './comments-panel';
 
 export interface AnnotationsProps {
   triggerComponent: React.ReactNode;
@@ -160,7 +160,7 @@ const AnnotationsDialog = ({
     }
   }, [selectedFile, isDialogMounted]);
 
-  const handleImageClick =  (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       !isCreatingAnnotation ||
       !imageRef.current ||
@@ -339,7 +339,7 @@ const AnnotationsDialog = ({
           <DialogTitle>{selectedFile?.name ?? fileName}</DialogTitle>
           <div className="flex">
             <Tooltip
-              className="w-80 bg-white text-gray-700 shadow-lg rounded-md p-2"
+              className="w-80 rounded-md bg-white p-2 text-gray-700 shadow-lg"
               content={<AnnotationsHelpTooltip />}
             >
               <QuestionMarkCircledIcon className="mr-[34px] h-6 w-6 text-[#A4A7AE]" />
@@ -348,7 +348,10 @@ const AnnotationsDialog = ({
             <ArrowDownToLine
               className="mr-[34px] h-6 w-6 cursor-pointer text-[#A4A7AE]"
               onClick={() =>
-                handleFileDownload(selectedFile?.url ?? '', selectedFile?.name ?? '')
+                handleFileDownload(
+                  selectedFile?.url ?? '',
+                  selectedFile?.name ?? '',
+                )
               }
             />
             <DialogClose className="rounded-sm opacity-70 hover:opacity-100 focus:outline-none">
@@ -360,126 +363,55 @@ const AnnotationsDialog = ({
 
         <Separator />
         <div className="flex min-h-0 flex-1">
-          <div
-            ref={filesContainerRef}
-            className="flex w-52 flex-col items-center gap-4 overflow-y-auto py-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2"
-          >
-            {files
-              ?.filter(
-                (file, index, self) =>
-                  index === self.findIndex((f) => f.id === file.id),
-              )
-              .map((file, index) => (
-                <div
-                  data-file-name={file.name}
-                  className="flex cursor-pointer flex-col hover:opacity-80"
-                  key={index}
-                  onClick={() => {
-                    setSelectedFile(file);
-                    setCurrentFileType(file.type);
-                    resetZoom();
-                    setCurrentPage(1);
-                  }}
-                >
-                  <div
-                    className={`item-center flex h-[150px] w-[150px] justify-center rounded-lg border ${
-                      selectedFile?.name === file.name
-                        ? 'border-2 border-blue-500'
-                        : 'bg-gray-100'
-                    }`}
-                  >
-                    <FilePreview
-                      src={file.url}
-                      fileName={file.name}
-                      fileType={file.type}
-                      className="max-h-full max-w-full"
-                    />
-                  </div>
-                  <p className="w-[150px] truncate text-sm font-medium text-gray-400">
-                    {file.name ?? 'fileName'}
-                  </p>
-                </div>
-              ))}
-          </div>
-          <div
-            className={`flex flex-col items-stretch ${currentFileType.startsWith('image/') || currentFileType.startsWith('application/pdf') ? 'w-[70%]' : 'w-[90%] px-4'}`}
-          >
-            <div className="flex-1 overflow-hidden">
-              <FileViewer
-                currentFileType={currentFileType}
-                containerRef={containerRef}
-                handleMouseUp={handleMouseUp}
-                handleMouseMove={handleMouseMove}
-                handleWheel={handleWheel}
-                imageRef={imageRef}
-                handleImageClick={handleImageClick}
-                handleMouseDown={handleMouseDown}
-                zoomLevel={zoomLevel}
-                position={position}
-                isDragging={isDragging}
-                selectedFile={selectedFile}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                setTotalPages={setTotalPages}
-                isLoadingAnnotations={isLoadingAnnotations}
-                annotations={annotations}
-                selectedAnnotation={selectedAnnotation}
-                isChatOpen={isChatOpen}
-                setIsChatOpen={setIsChatOpen}
-                setSelectedAnnotation={setSelectedAnnotation}
-                handleAnnotationClick={handleAnnotationClick}
-                handleChatClose={handleChatClose}
-                handleMessageSubmit={handleSendMessage}
-                isLoadingMessages={isLoadingMessages}
-                messages={messages}
-                isSpacePressed={isSpacePressed}
-                isInitialMessageOpen={isInitialMessageOpen}
-                setIsInitialMessageOpen={setIsInitialMessageOpen}
-              />
-            </div>
-            {currentFileType.startsWith('application/pdf') &&
-              totalPages > 1 && (
-                <div className="flex shrink-0 items-center justify-center py-4">
-                  <FilePagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              )}
-          </div>
+          <AnnotationsThumbnailsSidebar
+            files={files}
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+            setCurrentFileType={setCurrentFileType}
+            resetZoom={resetZoom}
+            setCurrentPage={setCurrentPage}
+          />
 
-          {!currentFileType.startsWith('video/') && (
-            <div className="flex min-h-0 w-80 flex-col">
-              <div className="flex h-10 shrink-0 border-b">
-                <button
-                  className={`flex-1 py-2 text-sm font-medium ${
-                    activeTab === 'active'
-                      ? 'border-b-2 border-brand text-brand'
-                      : 'text-gray-500'
-                  }`}
-                  onClick={() => setActiveTab('active')}
-                >
-                  {t('annotations.chat.active')} (
-                  {annotations.filter((a) => a.status === 'active').length})
-                </button>
-                <button
-                  className={`flex-1 py-2 text-sm font-medium ${
-                    activeTab === 'resolved'
-                      ? 'border-b-2 border-brand text-brand'
-                      : 'text-gray-500'
-                  }`}
-                  onClick={() => setActiveTab('resolved')}
-                >
-                  {t('annotations.chat.resolved')} (
-                  {annotations.filter((a) => a.status === 'completed').length})
-                </button>
-              </div>
-              <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2">
-                {renderAnnotationsContent()}
-              </div>
-            </div>
-          )}
+          <FileViewer
+            currentFileType={currentFileType}
+            containerRef={containerRef}
+            handleMouseUp={handleMouseUp}
+            handleMouseMove={handleMouseMove}
+            handleWheel={handleWheel}
+            imageRef={imageRef}
+            handleImageClick={handleImageClick}
+            handleMouseDown={handleMouseDown}
+            zoomLevel={zoomLevel}
+            position={position}
+            isDragging={isDragging}
+            selectedFile={selectedFile}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setTotalPages={setTotalPages}
+            isLoadingAnnotations={isLoadingAnnotations}
+            annotations={annotations}
+            selectedAnnotation={selectedAnnotation}
+            isChatOpen={isChatOpen}
+            setIsChatOpen={setIsChatOpen}
+            setSelectedAnnotation={setSelectedAnnotation}
+            handleAnnotationClick={handleAnnotationClick}
+            handleChatClose={handleChatClose}
+            handleMessageSubmit={handleSendMessage}
+            isLoadingMessages={isLoadingMessages}
+            messages={messages}
+            isSpacePressed={isSpacePressed}
+            isInitialMessageOpen={isInitialMessageOpen}
+            setIsInitialMessageOpen={setIsInitialMessageOpen}
+            setCurrentPage={setCurrentPage}
+          />
+
+          <AnnotationsCommentsPanel
+            currentFileType={currentFileType}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            annotations={annotations}
+            renderAnnotationsContent={renderAnnotationsContent}
+          />
         </div>
       </DialogContent>
     </Dialog>
