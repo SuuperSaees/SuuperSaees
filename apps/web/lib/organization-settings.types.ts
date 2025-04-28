@@ -40,6 +40,7 @@ export namespace OrganizationSettings {
     catalog_product_private_label_url: 'catalog_product_private_label_url',
     training_url: 'training_url',
     catalog_sourcing_china_url: 'catalog_sourcing_china_url',
+    calendar_url: 'calendar_url',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 
