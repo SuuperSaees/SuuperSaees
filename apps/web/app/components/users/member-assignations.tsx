@@ -83,7 +83,7 @@ const MembersAssignations = ({
         avatars={avatars ?? []}
         displayNormal
         className={className}
-        avatarClassName={'border-white border-[0.5px] ' + avatarClassName}
+        avatarClassName={'border-white border-[0.5px] w-6 h-6' + avatarClassName}
         maxAvatars={maxAvatars}
         options={searchUserOptions ?? []}
         onSubmit={handleFormSubmit}

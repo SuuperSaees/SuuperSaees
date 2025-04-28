@@ -104,7 +104,7 @@ export function PageBody(
     className?: string;
   }>,
 ) {
-const className = cn('bg-[#FFFFFF] w-full flex flex-col flex-1 lg:px-6.5 lg:py-8 gap-5', props.className);
+const className = cn('bg-[#FFFFFF] w-full flex flex-col flex-1 lg:px-6.5 lg:py-3 gap-5', props.className);
 
   return <div className={className}>{props.children}</div>;
 }
