@@ -7,12 +7,12 @@ import pathsConfig from '~/config/paths.config';
 export default async function WholesalePage() {
   const { organization, agency, workspace } = await loadUserWorkspace();
 
-  const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['catalog_wholesale_url']).catch((err) => {
+  const organizationSettings = await getOrganizationSettingsByOrganizationId(agency ? agency.id : organization?.id ?? '', true, ['catalog_product_wholesale_url']).catch((err) => {
     console.error(`Error client, getting organization settings: ${err}`)
     return []
   });
 
-  const wholesaleUrl = organizationSettings?.find((setting) => setting.key === OrganizationSettings.KEYS.catalog_wholesale_url)?.value;
+  const wholesaleUrl = organizationSettings?.find((setting) => setting.key === OrganizationSettings.KEYS.catalog_product_wholesale_url)?.value;
 
   if (!wholesaleUrl) {
     return redirect(pathsConfig.app.orders);
