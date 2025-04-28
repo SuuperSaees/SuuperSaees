@@ -59,6 +59,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const privateLabelUrl = Boolean(settings.catalog_product_private_label_url);
   const trainingUrl = Boolean(settings.training_url);
   const sourcingChinaUrl = Boolean(settings.catalog_sourcing_china_url);
+  const calendarUrl = Boolean(settings.calendar_url);
   const catalogProductUrl = wholesaleUrl || privateLabelUrl;
 
   return (
@@ -81,6 +82,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
           catalogProductPrivateLabelUrl={privateLabelUrl}
           trainingUrl={trainingUrl}
           catalogSourcingChinaUrl={sourcingChinaUrl}
+          calendarUrl={calendarUrl}
           userId={user?.id ?? ''}
         />
         {userRole === 'client_guest' && (

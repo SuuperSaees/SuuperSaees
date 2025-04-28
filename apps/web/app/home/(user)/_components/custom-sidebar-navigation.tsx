@@ -22,6 +22,7 @@ export function CustomSidebarNavigation({
   catalogProductPrivateLabelUrl,
   trainingUrl,
   catalogSourcingChinaUrl,
+  calendarUrl,
 }: React.PropsWithChildren<{
   config: NavigationConfig;
   showDashboardUrl?: boolean;
@@ -32,8 +33,9 @@ export function CustomSidebarNavigation({
   partenersUrl?: boolean;
   catalogProductWholesaleUrl?: boolean;
   catalogProductPrivateLabelUrl?: boolean;
-  trainingUrl?: boolean;
+  trainingUrl?: boolean;  
   catalogSourcingChinaUrl?: boolean;
+  calendarUrl?: boolean;
 }>) {
   return (
     <>
@@ -96,6 +98,8 @@ export function CustomSidebarNavigation({
         } else if (item.label === 'common:partnersName' && !partenersUrl) {
           return null;
         } else if(item.label === 'common:trainingName' && !trainingUrl){
+          return null;
+        } else if (item.label === 'common:calendarName' && !calendarUrl) {
           return null;
         } else if ('children' in item) {
           return (

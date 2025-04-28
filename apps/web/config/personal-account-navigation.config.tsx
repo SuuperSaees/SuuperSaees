@@ -13,6 +13,7 @@ import {
   CopyCheck,
   GraduationCap,
   Handshake,
+  Calendar,
   // Wallet,
 } from 'lucide-react';
 
@@ -91,6 +92,12 @@ const routes = [
         collapsed: true,
       }
     ],
+  },
+  {
+    type: 'route',
+    label: 'common:calendarName',
+    path: pathsConfig.app.calendar,
+    Icon: <Calendar className={iconClasses} />,
   },
   {
     type: 'group',

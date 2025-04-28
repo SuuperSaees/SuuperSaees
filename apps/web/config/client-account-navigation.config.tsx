@@ -9,6 +9,7 @@ import { // Briefcase,
   Bot,
   Handshake,
   GraduationCap,
+  Calendar,
 } from 'lucide-react';
 
 
@@ -101,6 +102,12 @@ const routes = [
         collapsed: true,
       }
     ],
+  },
+  {
+    type: 'route',
+    label: 'common:calendarName',
+    path: pathsConfig.app.calendar,
+    Icon: <Calendar className={iconClasses} />,
   },
   {
     type: 'group',

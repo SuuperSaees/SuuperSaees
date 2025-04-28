@@ -23,6 +23,7 @@ const PathsSchema = z.object({
     catalogPrivateLabel: z.string().min(1),
     messages: z.string().min(1),
     orders: z.string().min(1),
+    calendar: z.string().min(1),
     users: z.string().min(1),
     services: z.string().min(1),
     invoices: z.string().min(1),
@@ -89,6 +90,7 @@ const pathsConfig = PathsSchema.parse({
     setPassword: '/set-password',
     apps: '/apps',
     embeds: '/embeds',
+    calendar: '/calendar',
   },
 } satisfies z.infer<typeof PathsSchema>);
 
