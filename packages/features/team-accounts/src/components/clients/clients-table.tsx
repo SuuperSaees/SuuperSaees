@@ -16,7 +16,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from '@tanstack/react-table';
-import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
@@ -26,10 +25,10 @@ import { ProfileAvatar } from '@kit/ui/profile-avatar';
 
 import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';
 import EmptyState from '../../../../../../apps/web/components/ui/empty-state';
+import SearchInput from '../../../../../../apps/web/components/ui/search-input';
 import { Account } from '../../../../../../apps/web/lib/account.types';
 import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import CreateClientDialog from '../../../../../../packages/features/team-accounts/src/server/actions/clients/create/create-client';
-import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
 import { OrganizationOptionsDropdown } from './organization-options-dropdown';
@@ -233,32 +232,24 @@ export function ClientsTable({ clients, view }: ClientsTableProps) {
               </>
             )}
           </div>
-          <div className="flex justify-end gap-2">
-            <div className="flex gap-4">
-              <div className="relative ml-auto flex max-h-[36px] w-fit flex-1 md:grow-0 gap-2">
-                <Search className="text-muted-foreground absolute left-3 top-2.5 h-4 w-4" />
-                <ThemedInput
-                  value={search}
-                  onInput={(
-                    e:
-                      | React.ChangeEvent<HTMLInputElement>
-                      | React.FormEvent<HTMLFormElement>,
-                  ) => setSearch((e.target as HTMLInputElement).value)}
-                  placeholder={
-                    activeButton === 'clients'
-                      ? t('clients:searchClients')
-                      : t('clients:searchOrganizations')
-                  }
-                  className="bg-background w-full rounded-lg pl-8 md:w-[200px] lg:w-[320px]"
-                />
-              </div>
-            </div>
+          <div className="flex justify-end gap-4 items-center">
+            <SearchInput
+              value={search}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setSearch(e.target.value)
+              }
+              placeholder={
+                activeButton === 'clients'
+                  ? t('clients:searchClients')
+                  : t('clients:searchOrganizations')
+              }
+            />
+
             {(activeButton === 'organizations' &&
               filteredOrganizations.length > 0) ||
               (filteredClients.length > 0 && <CreateClientDialog />)}
           </div>
         </div>
-
       </div>
       <div className="rounded-xl bg-white">
         {(activeButton === 'organizations' && !uniqueClients.length) ||

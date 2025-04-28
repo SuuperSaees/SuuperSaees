@@ -79,8 +79,8 @@
   "startWithFirstClientTitle": "Let's start with your first client",
   "noClientsDescription": "You haven't created any clients yet, add one by clicking below.",
   "clients": "Clients",
-  "searchClients": "Search",
-  "searchOrganizations": "Search",
+  "searchClients": "Search clients...",
+  "searchOrganizations": "Search organizations...",
   "deletion": {
     "title": "Delete client",
     "titleInTeamMembers": "Delete team member",

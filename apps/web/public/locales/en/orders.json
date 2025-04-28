@@ -26,6 +26,7 @@
   "create": "Create",
   "calendarTitle": "Available calendars",
   "calendarEmpty": "No calendars available",
+  "search": "Search projects...",
   "creation": {
     "title": "Create project",
     "form": {
