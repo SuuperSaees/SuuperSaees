@@ -169,8 +169,8 @@ export default function ChatMembersSelector({
 const TriggerButton = ({ avatars }: { avatars: AvatarType[] }) => {
   return (
     <div className="flex items-center gap-2">
-      <MultiAvatarDisplayer avatars={avatars} className="w-fit" />
-      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-gray-200">
+      <MultiAvatarDisplayer avatars={avatars} className="w-fit" avatarClassName="h-6 w-6"/>
+      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-200">
         <PlusIcon className="h-4 w-4 text-gray-500" />
       </div>
     </div>
@@ -184,6 +184,7 @@ interface OrganizationMembersSelectorProps {
   onMembersUpdate: (userIds: string[]) => Promise<void>;
   isLoading?: boolean;
   canAddMembers?: boolean;
+  avatarClassName?: string;
 }
 
 const OrganizationMembersSelector = ({
@@ -193,6 +194,7 @@ const OrganizationMembersSelector = ({
   onMembersUpdate,
   isLoading,
   canAddMembers = true,
+  avatarClassName = ' h-8 w-8',
 }: OrganizationMembersSelectorProps) => {
   return (
     <div className="flex flex-col gap-2">
@@ -206,6 +208,7 @@ const OrganizationMembersSelector = ({
           updateOrderUsersFn={onMembersUpdate}
           isLoading={isLoading}
           canAddMembers={canAddMembers}
+          avatarClassName={avatarClassName}
         />
       )}
     </div>
