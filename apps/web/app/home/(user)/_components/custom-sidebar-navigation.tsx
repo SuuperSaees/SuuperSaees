@@ -63,6 +63,9 @@ export function CustomSidebarNavigation({
         }
 
         if ('groups' in item) {
+          if(item.label === 'common:catalogName' && !catalogProviderUrl && !catalogProductUrl && !catalogProductWholesaleUrl && !catalogProductPrivateLabelUrl && !catalogSourcingChinaUrl) {
+            return null;
+          }
           return (
             <SidebarGroups
               key={typeof item.label === 'string' ? item.label : ''}
