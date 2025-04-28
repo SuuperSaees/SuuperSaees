@@ -11,6 +11,8 @@ import {
   ShoppingCart,
   Inbox,
   CopyCheck,
+  GraduationCap,
+  Handshake,
   // Wallet,
 } from 'lucide-react';
 
@@ -35,14 +37,79 @@ const routes = [
     path: pathsConfig.app.messages,
     Icon: <Inbox className={iconClasses} />,
     end: true,
-    children: [],
-    divider: true,
+  },
+  {
+    type: 'route',
+    label: 'common:trainingName',
+    path: pathsConfig.app.training,
+    Icon: <GraduationCap className={iconClasses} />,
+    end: true,
   },
   {
     type: 'route',
     label: 'common:ordersName',
     path: pathsConfig.app.orders,
     Icon: <Layers className={iconClasses} />,
+  },
+  {
+    type: 'groups',
+    label: 'common:catalogName',
+    Icon: <Package className={iconClasses} />,
+    path: pathsConfig.app.catalog,
+    collapsible: true,
+    collapsed: true,
+    groups: [
+      {
+        type: 'group',
+        label: 'common:catalogProductName',
+        collapsible: true,
+        collapsed: true,
+        Icon: <Package className={'text-transparent'} />,
+        children: [
+          {
+            label: 'common:catalogWholesaleName',
+            path: pathsConfig.app.catalogWholesale,
+          },
+          {
+            label: 'common:catalogPrivateLabelName',
+            path: pathsConfig.app.catalogPrivateLabel,
+          },
+        ],
+      },
+      {
+        type: 'route',
+        label: 'common:catalogProviderName',
+        path: pathsConfig.app.catalogProvider,
+        collapsible: true,
+        collapsed: true,
+      },
+      {
+        type: 'route',
+        label: 'common:catalogSourcingChinaName',
+        path: pathsConfig.app.catalogSourcingChina,
+        collapsible: true,
+        collapsed: true,
+      }
+    ],
+  },
+  {
+    type: 'group',
+    label: 'common:aiToolsName',
+    Icon: <Bot className={iconClasses} />,
+    collapsed: true,
+    children: [
+      {
+        label: 'common:toolCopyListName',
+        path: pathsConfig.app.toolCopyList,
+      },
+      
+    ],
+  },
+  {
+    type: 'route',
+    label: 'common:partnersName',
+    path: pathsConfig.app.partners,
+    Icon: <Handshake className={iconClasses} />,
   },
   {
     type: 'route',
@@ -84,38 +151,8 @@ const routes = [
     path: pathsConfig.app.briefs,
     Icon: <CopyCheck className={iconClasses} />,
   },
-  {
-    type: 'group',
-    label: 'common:aiToolsName',
-    Icon: <Bot className={iconClasses} />,
-    collapsed: true,
-    children: [
-      {
-        label: 'common:toolCopyListName',
-        path: pathsConfig.app.toolCopyList,
-      },
-      
-    ],
-  },
-  {
-    type: 'group',
-    label: 'common:catalogName',
-    Icon: <Package className={iconClasses} />,
-    collapsed: true,
-    children: [
-      {
-        label: 'common:catalogProviderName',
-        path: pathsConfig.app.catalogProvider,
-      },
-      {
-        label: 'common:catalogProductName',
-        path: pathsConfig.app.catalogProduct,
-      }
-    ],
-  },
-
-
-
+  
+ 
 
   // {
   //   label: 'Facturas',

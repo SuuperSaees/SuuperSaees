@@ -1,6 +1,6 @@
 'use client';
 
-import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection } from '@kit/ui/sidebar';
+import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection, SidebarGroups } from '@kit/ui/sidebar';
 import { Trans } from '@kit/ui/trans';
 
 import { MessageBadge } from './message-badge';
@@ -17,6 +17,11 @@ export function CustomSidebarNavigation({
   catalogProductUrl,
   toolCopyListUrl,
   userId,
+  partenersUrl,
+  catalogProductWholesaleUrl,
+  catalogProductPrivateLabelUrl,
+  trainingUrl,
+  catalogSourcingChinaUrl,
 }: React.PropsWithChildren<{
   config: NavigationConfig;
   showDashboardUrl?: boolean;
@@ -24,6 +29,11 @@ export function CustomSidebarNavigation({
   catalogProductUrl?: boolean;
   toolCopyListUrl?: boolean;
   userId?: string;
+  partenersUrl?: boolean;
+  catalogProductWholesaleUrl?: boolean;
+  catalogProductPrivateLabelUrl?: boolean;
+  trainingUrl?: boolean;
+  catalogSourcingChinaUrl?: boolean;
 }>) {
   return (
     <>
@@ -36,7 +46,6 @@ export function CustomSidebarNavigation({
           return (
             <SidebarSection
               key={`section-${index}`}
-  
               label={
                 <Trans
                   i18nKey={typeof item.label === 'string' ? item.label : ''}
@@ -47,10 +56,32 @@ export function CustomSidebarNavigation({
               path={item.path}
               menu={item.menu}
               groups={item.groups}
-              
             >
               {item.children}
             </SidebarSection>
+          );
+        }
+
+        if ('groups' in item) {
+          if(item.label === 'common:catalogName' && !catalogProviderUrl && !catalogProductUrl && !catalogProductWholesaleUrl && !catalogProductPrivateLabelUrl && !catalogSourcingChinaUrl) {
+            return null;
+          }
+          return (
+            <SidebarGroups
+              key={typeof item.label === 'string' ? item.label : ''}
+              label={item.label}
+              path={item.path}
+              Icon={item.Icon}
+              collapsed={item.collapsed}
+              groups={item.groups}
+              className={item.className}
+              menu={item.menu}
+              showCatalogProviderUrl={catalogProviderUrl}
+              showCatalogProductUrl={catalogProductUrl}
+              showCatalogProductWholesaleUrl={catalogProductWholesaleUrl}
+              showCatalogProductPrivateLabelUrl={catalogProductPrivateLabelUrl}
+              showCatalogSourcingChinaUrl={catalogSourcingChinaUrl}
+            />
           );
         }
 
@@ -61,6 +92,10 @@ export function CustomSidebarNavigation({
         ) {
           return null;
         } else if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
+          return null;
+        } else if (item.label === 'common:partnersName' && !partenersUrl) {
+          return null;
+        } else if(item.label === 'common:trainingName' && !trainingUrl){
           return null;
         } else if ('children' in item) {
           return (
@@ -80,14 +115,20 @@ export function CustomSidebarNavigation({
               path={item.path}
               menu={item.menu}
             >
-              {item.children.map((child) => {
+              {item.children?.map((child) => {
                 if (
                   (child.label === 'common:catalogProviderName' &&
                     !catalogProviderUrl) ||
                   (child.label === 'common:catalogProductName' &&
                     !catalogProductUrl) ||
                   (child.label === 'common:toolCopyListName' &&
-                    !toolCopyListUrl)
+                    !toolCopyListUrl) ||
+                  (child.label === 'common:partnersName' &&
+                    !partenersUrl) ||
+                  (child.label === 'common:catalogWholesaleName' &&
+                    !catalogProductWholesaleUrl) ||
+                  (child.label === 'common:catalogPrivateLabelName' &&
+                    !catalogProductPrivateLabelUrl)
                 ) {
                   return null;
                 }
@@ -95,7 +136,7 @@ export function CustomSidebarNavigation({
                   <SidebarItem
                     key={child.path}
                     end={child.end}
-                    path={child.path}
+                    path={child.path ?? ''}
                     Icon={child.Icon}
                     className={child.className}
                     menu={child.menu}
@@ -128,6 +169,8 @@ export function CustomSidebarNavigation({
             </SidebarItem>
           );
         }
+
+       
         return (
           <SidebarItem
             key={item.path}

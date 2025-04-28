@@ -51,8 +51,15 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
 
   // Get additional settings with type assertion for the UI
   const catalogProviderUrl = Boolean(settings.catalog_provider_url);
-  const catalogProductUrl = Boolean(settings.catalog_product_url);
+  // const catalogProductUrl = Boolean(settings.catalog_product_url);
+  
   const toolCopyListUrl = Boolean(settings.tool_copy_list_url);
+  const partenersUrl = Boolean(settings.parteners_url);
+  const wholesaleUrl = Boolean(settings.catalog_product_wholesale_url);
+  const privateLabelUrl = Boolean(settings.catalog_product_private_label_url);
+  const trainingUrl = Boolean(settings.training_url);
+  const sourcingChinaUrl = Boolean(settings.catalog_sourcing_china_url);
+  const catalogProductUrl = wholesaleUrl || privateLabelUrl;
 
   return (
     <ThemedSidebar className="text-sm scrollbar-on-hover">
@@ -69,6 +76,11 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
           catalogProviderUrl={catalogProviderUrl}
           catalogProductUrl={catalogProductUrl}
           toolCopyListUrl={toolCopyListUrl}
+          partenersUrl={partenersUrl}
+          catalogProductWholesaleUrl={wholesaleUrl}
+          catalogProductPrivateLabelUrl={privateLabelUrl}
+          trainingUrl={trainingUrl}
+          catalogSourcingChinaUrl={sourcingChinaUrl}
           userId={user?.id ?? ''}
         />
         {userRole === 'client_guest' && (
