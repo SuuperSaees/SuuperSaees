@@ -28,7 +28,7 @@ export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLay
       <div className="flex w-full flex-col items-start justify-start p-10">
         <AppLogo
           logoUrl={authDetails?.logo_url}
-          className="max-h-[30px] w-auto"
+          className="max-h-[36px] w-auto"
         />
         <div className="font-inter m-auto w-full max-w-sm">{children}</div>
       </div>

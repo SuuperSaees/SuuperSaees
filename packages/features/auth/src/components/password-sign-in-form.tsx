@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
@@ -50,7 +51,9 @@ export function PasswordSignInForm({
         className={cn('flex w-full flex-col gap-5 text-gray-900', className)}
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <span className="text-5xl font-bold text-black">{t('signIn.title')}</span>
+        <span className="text-5xl font-bold text-black">
+          {t('signIn.title')}
+        </span>
 
         <span>{t('signIn.description')}</span>
 
@@ -64,7 +67,7 @@ export function PasswordSignInForm({
                   data-test={'email-input'}
                   required
                   type="email"
-                  className="focus-visible:ring-brand placeholder:text-inherit"
+                  className="focus-visible:ring-brand h-fit py-3 placeholder:text-inherit"
                   placeholder={t('signIn.form.email.placeholder')}
                   {...field}
                 />
@@ -85,10 +88,10 @@ export function PasswordSignInForm({
                   <Input
                     required
                     data-test={'password-input'}
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? 'text' : 'password'}
                     placeholder={t('signIn.form.password.placeholder')}
                     {...field}
-                    className="focus-visible:ring-brand placeholder:text-inherit pr-10"
+                    className="focus-visible:ring-brand h-fit py-3 pr-10 placeholder:text-inherit"
                   />
                   <button
                     type="button"
@@ -106,38 +109,26 @@ export function PasswordSignInForm({
               </FormControl>
 
               <FormMessage />
-
-              <div className="flex w-full items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="rememberMe"
-                    className="form-checkbox"
-                  />
-                  <label htmlFor="rememberMe" className="text-xs font-medium">
-                    {t('signIn.form.rememberMe')}
-                  </label>
-                </div>
-
-                <Button
-                  asChild
-                  type={'button'}
-                  size={'sm'}
-                  variant={'link'}
-                  className={`text-xs font-medium ${themeColor}`}
-                >
-                  <a href={'/auth/password-reset'}>
-                    {t('signIn.form.forgotPassword')}
-                  </a>
-                </Button>
-              </div>
             </FormItem>
           )}
         />
+        {/* Remember and forgot password */}
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <input type="checkbox" id="rememberMe" className="form-checkbox" />
+            <label htmlFor="rememberMe" className="text-xs font-medium">
+              {t('signIn.form.rememberMe')}
+            </label>
+          </div>
 
+            <a href={'/auth/password-reset'} className="text-xs font-medium font-inter">
+              {t('signIn.form.forgotPassword')}
+            </a>
+  
+        </div>
         <ThemedButton
           data-test="auth-submit-button"
-          className="w-full transition-all duration-300 hover:-translate-y-0.5"
+          className="h-fit w-full py-3 transition-all duration-300 hover:-translate-y-0.5"
           type="submit"
           disabled={loading}
           themeColor={themeColor}
