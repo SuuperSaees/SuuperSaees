@@ -2,7 +2,7 @@
   "title": "Clientes",
   "client": "Clientes",
   "yourTeams": "Tus equipos ({{teamsCount}})",
-  "createClient": "Crear cliente",
+  "createClient": "Nuevo",
   "personalAccount": "Cuenta personal",
   "searchAccount": "Buscar cuenta...",
   "teamsTabLabel": "Equipo",
@@ -114,6 +114,12 @@
     "badInputFullName": "El nombre completo debe tener al menos 3 caracteres",
     "badInputEmail": "Por favor, introduce una dirección de correo electrónico válida",
     "badInputRole": "Por favor, selecciona un rol"
+  },
+  "creation": {
+    "title": "Crear cliente",
+    "form": {
+      "submitMessage": "Crear cliente"
+    }
   },
   "success": "¡Todo listo!",
   "clientOwner": "Líder",

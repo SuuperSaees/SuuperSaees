@@ -5,7 +5,7 @@
     "services": "Connected services",
     "createdAt": "Created at",
     "actions": "Actions",
-    "createBrief": "Create brief",
+    "createBrief": "New",
     "briefNameLabel": "Enter the brief name",
     "briefName": "Name",
     "deleteBrief": "Delete brief",

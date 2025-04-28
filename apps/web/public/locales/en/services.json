@@ -7,7 +7,7 @@
   "status": "Status",
   "createdAt": "Created At",
   "actions": "Actions",
-  "createService": "Create service",
+  "createService": "New",
   "addService": "Add service",
   "serviceNameLabel": "Enter the service name",
   "serviceName": "Name",
@@ -233,5 +233,11 @@
   "selectImage": "Select an image",
   "language": "en",
   "for": "for", 
-  "then": "then"
+  "then": "then",
+  "creation": {
+    "title": "Create service",
+    "form": {
+      "submitMessage": "Create service"
+    }
+  }
 }

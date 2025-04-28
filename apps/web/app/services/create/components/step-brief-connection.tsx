@@ -270,7 +270,7 @@ export default function BriefConnectionStep(
             onClick={async () => await createServiceMutation.mutateAsync()}
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           >
-            <span>{t('createService')}</span>
+            <span>{t('creation.form.submitMessage')}</span>
             {createServiceMutation.isPending && (
               <Spinner className="h-5 w-5 text-white" />
             )}
