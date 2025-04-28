@@ -95,9 +95,9 @@ export function ServicesPageClient() {
 
   return (
     <PageBody>
-      <div className='flex flex-wrap gap-5 justify-between'>
+      <div className='flex sm:flex-nowrap flex-wrap gap-5 justify-between'>
 
-        <PageHeader title="services:title" rightContent={<TimerContainer />} />
+        <PageHeader title="services:title" rightContent={<TimerContainer />} className="w-full" />
 
         <div className="ml-auto flex items-center justify-between gap-2">
           <SearchBar
