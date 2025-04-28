@@ -88,8 +88,8 @@ export function BriefsPageClient() {
 
   return (
     <>
-      <div className="flex flex-wrap justify-between gap-5">
-        <PageHeader title="briefs:briefs" rightContent={<TimerContainer />} />
+      <div className="flex sm:flex-nowrap flex-wrap justify-between gap-5">
+        <PageHeader title="briefs:briefs" rightContent={<TimerContainer />} className='w-full'/>
         <div className="ml-auto flex items-center gap-4">
           <div className="relative">
             <ThemedInput

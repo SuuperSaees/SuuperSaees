@@ -72,19 +72,30 @@ const ClientsMembersPagePresentation = ({
   return (
     <PageBody>
       <div className="flex items-center gap-2">
-        <PageHeader title="team:team" rightContent={<TimerContainer />} />
-        {members && (
-          <div className="rounded-full border border-gray-500 bg-gray-50 px-2 flex items-center text-gray-500">
-            <span className="inline-flex gap-2 text-[12px]">
-              <span>{members.length}</span>
-              {members.length === 1 ? (
-                <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
-              ) : (
-                <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
-              )}
-            </span>
+        <PageHeader
+          title="team:team"
+          rightContent={<TimerContainer />}
+          className="w-full"
+        >
+          <div className="flex items-center gap-2">
+          <h2 className="font-inter text-xl font-medium leading-4">
+            <Trans i18nKey={'team:team'} />
+          </h2>
+
+            {members && (
+              <div className="flex items-center rounded-full border border-gray-500 bg-gray-50 px-2 text-gray-500">
+                <span className="inline-flex gap-2 text-[12px]">
+                <span>{members.length}</span>
+                {members.length === 1 ? (
+                  <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
+                ) : (
+                  <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
+                )}
+              </span>
+              </div>
+            )}
           </div>
-        )}
+        </PageHeader>
 
         <ThemedButton
           data-test={'invite-members-form-trigger'}
