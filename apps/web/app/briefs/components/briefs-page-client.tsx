@@ -14,7 +14,6 @@ import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 import EmptyState from '~/components/ui/empty-state';
 import SearchInput from '~/components/ui/search-input';
-import { SkeletonTable } from '~/components/ui/skeleton';
 import { useColumns } from '~/hooks/use-columns';
 import type { Brief } from '~/lib/brief.types';
 import { handleResponse } from '~/lib/response/handle-response';
@@ -24,6 +23,7 @@ import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-bri
 import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
+import TableSkeleton from '~/(views)/components/table/table-skeleton';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -106,7 +106,7 @@ export function BriefsPageClient() {
       </div>
 
       {briefsAreLoading ? (
-        <SkeletonTable columns={4} rows={7} className="mt-4" />
+        <TableSkeleton columns={4} rows={4} />
       ) : filteredBriefs.length === 0 ? (
         <EmptyState
           imageSrc="/images/illustrations/Illustration-cloud.svg"

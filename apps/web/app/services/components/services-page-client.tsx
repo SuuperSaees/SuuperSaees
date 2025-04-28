@@ -14,7 +14,6 @@ import { PageBody } from '@kit/ui/page';
 import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 import EmptyState from '~/components/ui/empty-state';
 import SearchInput from '~/components/ui/search-input';
-import { SkeletonTable } from '~/components/ui/skeleton';
 import { useColumns } from '~/hooks/use-columns';
 import type { Service } from '~/lib/services.types';
 
@@ -22,6 +21,7 @@ import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
+import TableSkeleton from '~/(views)/components/table/table-skeleton';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -120,7 +120,7 @@ export function ServicesPageClient() {
       </div>
 
       {servicesAreLoading ? (
-        <SkeletonTable columns={4} rows={7} className="mt-4" />
+        <TableSkeleton columns={6} rows={7} />
       ) : (
         <Table
           data={filteredData}
