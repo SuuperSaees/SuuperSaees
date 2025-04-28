@@ -551,127 +551,6 @@ function getClassNameBuilder(className: string) {
     },
   );
 }
-export function SidebarNavigation({
-  config,
-  showDashboardUrl,
-  catalogProviderUrl,
-  catalogProductUrl,
-  toolCopyListUrl,
-}: React.PropsWithChildren<{
-  config: SidebarConfig;
-  showDashboardUrl?: boolean;
-  catalogProviderUrl?: boolean;
-  catalogProductUrl?: boolean;
-  toolCopyListUrl?: boolean;
-}>) {
-  return (
-    <>
-      {config.routes.map((item, index) => {
-        if ('divider' in item) {
-          return <SidebarDivider key={index} />;
-        }
-
-        if ('section' in item) {
-          return (
-            <SidebarSection
-              key={`section-${index}`}
-              label={
-                <Trans
-                  i18nKey={typeof item.label === 'string' ? item.label : ''}
-                  defaults={typeof item.label === 'string' ? item.label : ''}
-                  key={
-                    typeof item.label === 'string'
-                      ? item.label + index
-                      : index + ''
-                  }
-                />
-              }
-              path={item.path}
-              className={item.className}
-              menu={item.menu}
-              groups={item.groups}
-            />
-          );
-        }
-
-        if (
-          item.label === 'common:catalogName' &&
-          !catalogProviderUrl &&
-          !catalogProductUrl
-        ) {
-          return null;
-        } else if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
-          return null;
-        } else if ('children' in item) {
-          return (
-            <SidebarGroup
-              key={typeof item.label === 'string' ? item.label : ''}
-              label={
-                <Trans
-                  i18nKey={typeof item.label === 'string' ? item.label : ''}
-                  defaults={typeof item.label === 'string' ? item.label : ''}
-                  key={
-                    typeof item.label === 'string'
-                      ? item.label + index
-                      : index + ''
-                  }
-                />
-              }
-              collapsible={item.collapsible}
-              collapsed={item.collapsed}
-              Icon={item.Icon}
-              className={item.className}
-              path={item.path}
-              menu={item.menu}
-            >
-              {item.children.map((child) => {
-                if (
-                  (child.label === 'common:catalogProviderName' &&
-                    !catalogProviderUrl) ||
-                  (child.label === 'common:catalogProductName' &&
-                    !catalogProductUrl) ||
-                  (child.label === 'common:toolCopyListName' &&
-                    !toolCopyListUrl)
-                ) {
-                  return null;
-                }
-                return (
-                  <SidebarItem
-                    key={child.path}
-                    end={child.end}
-                    path={child.path}
-                    Icon={child.Icon}
-                    className={child.className}
-                    menu={child.menu}
-                  >
-                    <Trans i18nKey={child.label} defaults={child.label} />
-                  </SidebarItem>
-                );
-              })}
-            </SidebarGroup>
-          );
-        }
-
-        if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
-          return null;
-        }
-
-        return (
-          <SidebarItem
-            key={item.path}
-            end={item.end}
-            path={item.path}
-            Icon={item.Icon}
-            className={item.className}
-            menu={item.menu}
-          >
-            <Trans i18nKey={item.label} defaults={item.label} />
-          </SidebarItem>
-        );
-      })}
-    </>
-  );
-}
 
 export function SidebarGroups({
   label,
@@ -710,10 +589,10 @@ export function SidebarGroups({
 }) {
   const { collapsed } = useContext(SidebarContext);
 
-  // Función para filtrar elementos basados en showFilters
+  
   const shouldShowItem = (filterKey?: string) => {
     if (!filterKey || !showFilters) return true;
-    return showFilters[filterKey] !== false; // Si no está definido o es true, mostrar
+    return showFilters[filterKey] !== false; 
   };
 
   return (
@@ -774,8 +653,8 @@ export function SidebarGroups({
             return (
               <SidebarItem
                 key={`route-${index}-${group.path}`}
-                path={group.path || ''}
-                Icon={group.Icon || <span />}
+                path={group.path ?? ''}
+                Icon={group.Icon ?? <span />}
                 className={group.className}
                 menu={group.menu}
                 end={group.end}
