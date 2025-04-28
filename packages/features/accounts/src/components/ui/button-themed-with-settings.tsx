@@ -20,11 +20,10 @@ export const ThemedButton: React.FC<{
   [key: string]: unknown;
 }> = ({ children, className, themeColor, opacity, ...rest }) => {
   const { theme_color } = useOrganizationSettings();
-  if (!themeColor) {
-    themeColor = theme_color ?? '#85EFFF';
+  if (!themeColor || !theme_color?.length) {
+    themeColor = theme_color?.length ? theme_color : '#85EFFF';
   }
   const textColor = getContrastColor(themeColor ?? '#85EFFF');
-
   return (
     <Button
       className={`bg-brand flex gap-2 ${className}`}

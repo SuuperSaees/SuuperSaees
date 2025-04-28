@@ -26,6 +26,7 @@
   "create": "Crear",
   "calendarTitle": "Agendas disponibles",
   "calendarEmpty": "No hay calendarios disponibles",
+  "search": "Buscar proyectos...",
   "creation": {
     "title": "Crear proyecto",
     "form": {
