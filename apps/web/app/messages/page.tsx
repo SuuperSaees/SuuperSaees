@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { withI18n } from '~/lib/i18n/with-i18n';
 import { Members } from '~/lib/members.types';
 import { getTeams } from '~/server/actions/team/team.action';
 
@@ -8,8 +10,14 @@ import ChatInbox from './components/chat-inbox';
 import ChatThread from './components/chat-thread';
 import { ChatProvider } from './components/context/chat-context';
 
+export const generateMetadata = async () => {
+  const i18n = await createI18nServerInstance();
+  return {
+    title: i18n.t('common:messagesName'),
+  };
+};
 
-export default async function MessagesPage() {
+const MessagesPage = async () => {
   const { organization, agency, workspace } = await loadUserWorkspace();
   // Always bring the agency members and the organization data
   // This because this data is always needed for the messages page and not changes frequently
@@ -41,7 +49,7 @@ export default async function MessagesPage() {
             />
           </Suspense>
         </div>
-        <div className="flex flex-1 flex-col bg-white min-w-0">
+        <div className="flex min-w-0 flex-1 flex-col bg-white">
           <Suspense fallback={<div>Loading...</div>}>
             <ChatThread agencyTeam={agencyTeam} />
           </Suspense>
@@ -49,4 +57,6 @@ export default async function MessagesPage() {
       </div>
     </ChatProvider>
   );
-}
+};
+
+export default withI18n(MessagesPage);
