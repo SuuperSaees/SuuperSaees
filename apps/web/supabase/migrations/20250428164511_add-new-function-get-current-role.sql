@@ -82,7 +82,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 grant execute on function update_user_metadata_on_client_delete() to authenticated, service_role;
 
