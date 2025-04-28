@@ -143,7 +143,7 @@ export function ServicesTable({
           </div>
           {services.length > 0 && (accountRole === 'agency_owner' || accountRole === 'agency_project_manager') ? (
             <Link href="/services/create">
-              <ThemedButton>{t('createService')}</ThemedButton>
+              <ThemedButton>{t('creation.form.submitMessage')}</ThemedButton>
             </Link>
           ) : null}
         </div>
@@ -161,7 +161,7 @@ export function ServicesTable({
             button={
               accountRole === 'agency_owner' || accountRole === 'agency_project_manager' ? (
                 <Link href="/services/create">
-                  <ThemedButton>{t('createService')}</ThemedButton>
+                  <ThemedButton>{t('creation.form.submitMessage')}</ThemedButton>
                 </Link>
               ) : undefined
             }

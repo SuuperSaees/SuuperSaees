@@ -23,7 +23,7 @@
   "deleteConfirmation": "Do you really want to delete this project?",
   "deleteSuccess": "Project deleted successfully",
   "deleteError": "Error deleting project",
-  "create": "Create",
+  "create": "New",
   "calendarTitle": "Available calendars",
   "calendarEmpty": "No calendars available",
   "creation": {

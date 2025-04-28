@@ -6,16 +6,14 @@ import { useRouter } from 'next/navigation';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import type { ColumnDefBase } from '@tanstack/react-table';
-import { Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 import EmptyState from '~/components/ui/empty-state';
-import { SkeletonTable } from '~/components/ui/skeleton';
+import SearchInput from '~/components/ui/search-input';
 import { useColumns } from '~/hooks/use-columns';
 import type { Brief } from '~/lib/brief.types';
 import { handleResponse } from '~/lib/response/handle-response';
@@ -25,6 +23,8 @@ import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-bri
 import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
+import TableSkeleton from '~/(views)/components/table/table-skeleton';
+import { PlusIcon } from 'lucide-react';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -81,34 +81,34 @@ export function BriefsPageClient() {
       onClick={() => briefMutation.mutate()}
       disabled={briefMutation.isPending}
     >
-      {t('briefs:create')}
+      <PlusIcon className="h-4 w-4" />
+      {t('briefs:createBrief')}
     </ThemedButton>
   );
   const { config } = useTableConfigs('table-config');
 
   return (
     <>
-      <div className="flex flex-wrap justify-between gap-5">
-        <PageHeader title="briefs:briefs" rightContent={<TimerContainer />} />
-        <div className="ml-auto flex items-center gap-4">
-          <div className="relative">
-            <ThemedInput
-              type="text"
-              placeholder={t('briefs:search')}
-              value={searchTerm}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setSearchTerm(e.target.value)
-              }
-              className="h-10 w-[280px] pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-          </div>
-          {hasPermissionToActionBriefs() && createButton}
-        </div>
+      <div className="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
+        <PageHeader
+          title="briefs:briefs"
+          rightContent={<TimerContainer />}
+          className="w-full"
+        />
+
+        <SearchInput
+          placeholder={t('briefs:search')}
+          value={searchTerm}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchTerm(e.target.value)
+          }
+        />
+
+        {hasPermissionToActionBriefs() && createButton}
       </div>
 
       {briefsAreLoading ? (
-        <SkeletonTable columns={4} rows={7} className="mt-4" />
+        <TableSkeleton columns={4} rows={4} />
       ) : filteredBriefs.length === 0 ? (
         <EmptyState
           imageSrc="/images/illustrations/Illustration-cloud.svg"

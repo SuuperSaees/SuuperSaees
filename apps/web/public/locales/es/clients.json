@@ -2,7 +2,7 @@
   "title": "Clientes",
   "client": "Clientes",
   "yourTeams": "Tus equipos ({{teamsCount}})",
-  "createClient": "Crear cliente",
+  "createClient": "Nuevo",
   "personalAccount": "Cuenta personal",
   "searchAccount": "Buscar cuenta...",
   "teamsTabLabel": "Equipo",
@@ -79,8 +79,8 @@
   "startWithFirstClientTitle": "Comencemos con tu primer cliente",
   "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
   "clients": "Clientes",
-  "searchClients": "Buscar",
-  "searchOrganizations": "Buscar",
+  "searchClients": "Buscar clientes...",
+  "searchOrganizations": "Buscar organizaciones...",
   "deletion": {
     "title": "Eliminar cliente",
     "titleInTeamMembers": "Eliminar miembro del equipo",
@@ -114,6 +114,12 @@
     "badInputFullName": "El nombre completo debe tener al menos 3 caracteres",
     "badInputEmail": "Por favor, introduce una dirección de correo electrónico válida",
     "badInputRole": "Por favor, selecciona un rol"
+  },
+  "creation": {
+    "title": "Crear cliente",
+    "form": {
+      "submitMessage": "Crear cliente"
+    }
   },
   "success": "¡Todo listo!",
   "clientOwner": "Líder",

@@ -23,7 +23,7 @@
   "deleteConfirmation": "¿Estás seguro de que deseas eliminar este proyecto?",
   "deleteSuccess": "Proyecto eliminado con éxito",
   "deleteError": "Error al eliminar el proyecto",
-  "create": "Crear",
+  "create": "Nuevo",
   "calendarTitle": "Agendas disponibles",
   "calendarEmpty": "No hay calendarios disponibles",
   "creation": {

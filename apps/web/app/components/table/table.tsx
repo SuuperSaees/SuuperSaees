@@ -145,7 +145,7 @@ export default function Table<T>({
   }, [data, filterKey, search, activeFilters]);
 
   return (
-    <div className={`flex flex-col gap-4 ${className}`}>
+    <div className={`flex flex-col ${className}`}>
       {presetFilters && !controllerBarComponents && (
         <PresetFilters
           columns={columns}

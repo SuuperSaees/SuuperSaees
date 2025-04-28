@@ -5,9 +5,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 
 import type { ColumnDefBase } from '@tanstack/react-table';
-import { Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
@@ -15,7 +13,7 @@ import { PageBody } from '@kit/ui/page';
 
 import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 import EmptyState from '~/components/ui/empty-state';
-import { SkeletonTable } from '~/components/ui/skeleton';
+import SearchInput from '~/components/ui/search-input';
 import { useColumns } from '~/hooks/use-columns';
 import type { Service } from '~/lib/services.types';
 
@@ -23,6 +21,8 @@ import { PageHeader } from '../../components/page-header';
 import Table from '../../components/table/table';
 import { TimerContainer } from '../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
+import TableSkeleton from '~/(views)/components/table/table-skeleton';
+import { PlusIcon } from 'lucide-react';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -84,7 +84,10 @@ export function ServicesPageClient() {
         (accountRole === 'agency_owner' ||
           accountRole === 'agency_project_manager') && (
           <Link href="/services/create">
-            <ThemedButton>{t('createService')}</ThemedButton>
+            <ThemedButton>
+              <PlusIcon className="h-4 w-4" />
+              {t('createService')}
+            </ThemedButton>
           </Link>
         )
       }
@@ -95,28 +98,36 @@ export function ServicesPageClient() {
 
   return (
     <PageBody>
-      <div className='flex flex-wrap gap-5 justify-between'>
+      <div className="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
+        <PageHeader
+          title="services:title"
+          rightContent={<TimerContainer />}
+          className="w-full"
+        />
 
-        <PageHeader title="services:title" rightContent={<TimerContainer />} />
-
-        <div className="ml-auto flex items-center justify-between gap-2">
-          <SearchBar
+        <div className="ml-auto flex items-center justify-between gap-4">
+          <SearchInput
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
             placeholder={t('searchServices')}
           />
           {filteredData.length > 0 &&
             (accountRole === 'agency_owner' ||
               accountRole === 'agency_project_manager') && (
               <Link href="/services/create">
-                <ThemedButton>{t('createService')}</ThemedButton>
+                <ThemedButton>
+                  <PlusIcon className="h-4 w-4" />
+                  {t('createService')}
+                </ThemedButton>
               </Link>
             )}
         </div>
       </div>
 
       {servicesAreLoading ? (
-        <SkeletonTable columns={4} rows={7} className="mt-4" />
+        <TableSkeleton columns={6} rows={7} />
       ) : (
         <Table
           data={filteredData}
@@ -132,26 +143,3 @@ export function ServicesPageClient() {
     </PageBody>
   );
 }
-
-const SearchBar = ({
-  value,
-  onChange,
-  placeholder,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-}) => (
-  <div className="relative flex flex-1 md:grow-0">
-    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-    <ThemedInput
-      type="search"
-      value={value}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-        onChange(e.target.value)
-      }
-      placeholder={placeholder}
-      className="focus-visible:ring-none w-full rounded-xl bg-white pl-8 focus-visible:ring-0 md:w-[200px] lg:w-[320px]"
-    />
-  </div>
-);

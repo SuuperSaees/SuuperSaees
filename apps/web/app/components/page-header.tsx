@@ -1,16 +1,27 @@
 import { Trans } from '@kit/ui/trans';
+import { cn } from '@kit/ui/utils';
 
 interface PageHeaderProps {
   title: string;
   rightContent?: React.ReactNode;
+  className?: string;
+  children?: React.ReactNode;
 }
 
-export function PageHeader({ title, rightContent }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  rightContent,
+  className,
+  children,
+}: PageHeaderProps) {
   return (
-    <div className="flex items-center justify-between h-9">
-      <h2 className="font-inter text-xl font-medium leading-4">
-        <Trans i18nKey={title} />
-      </h2>
+    <div className={cn('flex h-9 items-center justify-between', className)}>
+      {!children && (
+        <h2 className="font-inter text-xl font-medium leading-4">
+          <Trans i18nKey={title} />
+        </h2>
+      )}
+      {children}
       {rightContent}
     </div>
   );
