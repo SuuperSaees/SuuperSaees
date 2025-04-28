@@ -672,3 +672,121 @@ export function SidebarNavigation({
     </>
   );
 }
+
+export function SidebarGroups({
+  label,
+  Icon,
+  groups,
+  className,
+  menu,
+  showFilters = {},
+}: {
+  label: string;
+  Icon?: React.ReactNode;
+  groups: Array<{
+    type: 'group' | 'route';
+    label: string;
+    path?: string;
+    Icon?: React.ReactNode;
+    collapsible?: boolean;
+    collapsed?: boolean;
+    className?: string;
+    menu?: React.ReactNode;
+    end?: boolean | ((path: string) => boolean);
+    children?: Array<{
+      label: string;
+      path: string;
+      Icon?: React.ReactNode;
+      end?: boolean | ((path: string) => boolean);
+      className?: string;
+      menu?: React.ReactNode;
+      filterKey?: string;
+    }>;
+    filterKey?: string;
+  }>;
+  className?: string;
+  menu?: React.ReactNode;
+  showFilters?: Record<string, boolean>;
+}) {
+  const { collapsed } = useContext(SidebarContext);
+
+  // Función para filtrar elementos basados en showFilters
+  const shouldShowItem = (filterKey?: string) => {
+    if (!filterKey || !showFilters) return true;
+    return showFilters[filterKey] !== false; // Si no está definido o es true, mostrar
+  };
+
+  return (
+    <div className={cn("flex flex-col", className)}>
+      {!collapsed && (
+        <div className="flex items-center gap-2 px-3 py-2 opacity-70">
+          {Icon && <span className="flex h-5 w-5 items-center justify-center">{Icon}</span>}
+          <h3 className="text-xs font-semibold">
+            <Trans i18nKey={label} defaults={label} />
+          </h3>
+          {menu && (
+            <div className="ml-auto flex shrink-0 items-center justify-center opacity-0 group-hover:opacity-100">
+              {menu}
+            </div>
+          )}
+        </div>
+      )}
+      
+      <div className={cn("flex flex-col", { "pl-4": !collapsed })}>
+        {groups.filter(group => shouldShowItem(group.filterKey)).map((group, index) => {
+          if (group.type === 'group') {
+            // Filtrar los hijos según showFilters
+            const filteredChildren = group.children?.filter(
+              child => shouldShowItem(child.filterKey)
+            ) ?? [];
+            
+            // Si no hay hijos después del filtrado, no mostrar el grupo
+            if (filteredChildren.length === 0) {
+              return null;
+            }
+
+            return (
+              <SidebarGroup
+                key={`group-${index}-${group.label}`}
+                label={group.label}
+                collapsible={group.collapsible}
+                collapsed={group.collapsed}
+                Icon={group.Icon}
+                path={group.path}
+                className={group.className}
+                menu={group.menu}
+              >
+                {filteredChildren.map((child, childIndex) => (
+                  <SidebarItem
+                    key={`${child.path}-${childIndex}`}
+                    path={child.path}
+                    Icon={child.Icon ?? <span />}
+                    className={child.className}
+                    menu={child.menu}
+                    end={child.end}
+                  >
+                    <Trans i18nKey={child.label} defaults={child.label} />
+                  </SidebarItem>
+                ))}
+              </SidebarGroup>
+            );
+          } else if (group.type === 'route') {
+            return (
+              <SidebarItem
+                key={`route-${index}-${group.path}`}
+                path={group.path || ''}
+                Icon={group.Icon || <span />}
+                className={group.className}
+                menu={group.menu}
+                end={group.end}
+              >
+                <Trans i18nKey={group.label} defaults={group.label} />
+              </SidebarItem>
+            );
+          }
+          return null;
+        })}
+      </div>
+    </div>
+  );
+}
