@@ -250,8 +250,8 @@ ON public.accounts_memberships
 FOR SELECT
 TO authenticated 
 USING (
-  user_id = auth.uid()
-  OR public.is_team_member(organization_id, user_id)
+  user_id = (select auth.uid())
+  OR (select public.is_team_member(organization_id, user_id))
 );
 
     
@@ -337,7 +337,7 @@ BEGIN
   -- Get the current session information
   SELECT organization_id INTO org_id
   FROM auth.user_sessions
-  WHERE session_id = (auth.jwt() ->> 'session_id')::uuid
+  WHERE session_id = ((select auth.jwt()) ->> 'session_id')::uuid
   AND user_id = target_user_id
   LIMIT 1;
   
@@ -1275,8 +1275,8 @@ DECLARE
     v_org_id uuid;
 BEGIN
     -- Get the current user and session
-    v_session_id := (auth.jwt() ->> 'session_id')::uuid;
-    v_user_id := auth.uid();
+    v_session_id := ((select auth.jwt()) ->> 'session_id')::uuid;
+    v_user_id := (select auth.uid());
     
     -- Get only the organization_id from the current session
     SELECT organization_id INTO v_org_id
@@ -1302,7 +1302,7 @@ as permissive
 for select
 to authenticated
 using (
-  has_permission_in_organizations(auth.uid(), 'messages.read'::app_permissions) AND 
+  has_permission_in_organizations((select auth.uid()), 'messages.read'::app_permissions) AND 
   (
     (
       (order_id IS NOT NULL) AND 
@@ -1315,18 +1315,18 @@ using (
             (
               o.agency_id = (SELECT get_current_organization_id()) AND
               (
-                (has_role(auth.uid(), o.agency_id, 'agency_member') AND 
-                 EXISTS (SELECT 1 FROM order_assignations oa WHERE oa.order_id = o.id AND oa.agency_member_id = auth.uid())) OR
-                has_role(auth.uid(), o.agency_id, 'agency_owner') OR
-                has_role(auth.uid(), o.agency_id, 'agency_project_manager')
+                (has_role((select auth.uid()), o.agency_id, 'agency_member') AND 
+                 EXISTS (SELECT 1 FROM order_assignations oa WHERE oa.order_id = o.id AND oa.agency_member_id = (select auth.uid()))) OR
+                has_role((select auth.uid()), o.agency_id, 'agency_owner') OR
+                has_role((select auth.uid()), o.agency_id, 'agency_project_manager')
               )
             ) OR
             (
               o.client_organization_id = (SELECT get_current_organization_id()) AND
               (
-                (has_role(auth.uid(), o.client_organization_id, 'client_member') AND 
-                 EXISTS (SELECT 1 FROM order_followers ofollow WHERE ofollow.order_id = o.id AND ofollow.client_member_id = auth.uid())) OR
-                has_role(auth.uid(), o.client_organization_id, 'client_owner')
+                (has_role((select auth.uid()), o.client_organization_id, 'client_member') AND 
+                 EXISTS (SELECT 1 FROM order_followers ofollow WHERE ofollow.order_id = o.id AND ofollow.client_member_id = (select auth.uid()))) OR
+                has_role((select auth.uid()), o.client_organization_id, 'client_owner')
               )
             )
           )
@@ -1335,7 +1335,7 @@ using (
     ) OR 
     (
       (chat_id IS NOT NULL) AND 
-      (EXISTS (SELECT 1 FROM chat_members cm WHERE (cm.chat_id = messages.chat_id) AND (cm.user_id = auth.uid())))
+      (EXISTS (SELECT 1 FROM chat_members cm WHERE (cm.chat_id = messages.chat_id) AND (cm.user_id = (select auth.uid()))))
     )
   ) AND 
   (
@@ -1343,7 +1343,7 @@ using (
     (
       (visibility = 'internal_agency'::messages_types) AND 
       (EXISTS (SELECT 1 FROM accounts a JOIN accounts_memberships am ON (am.organization_id = (SELECT get_current_organization_id())) 
-               WHERE (a.id = messages.user_id) AND (am.user_id = auth.uid()) AND 
+               WHERE (a.id = messages.user_id) AND (am.user_id = (select auth.uid())) AND 
                ((am.account_role)::text = ANY (ARRAY['agency_owner'::text, 'agency_project_manager'::text, 'agency_member'::text]))))
     )
   )
