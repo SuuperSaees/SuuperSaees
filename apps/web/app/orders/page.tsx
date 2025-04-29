@@ -11,8 +11,8 @@ import {
   getOrganization,
 } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
-import { PageHeader } from '../components/page-header';
-import { TimerContainer } from '../components/timer-container';
+// import { PageHeader } from '../components/page-header';
+// import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
@@ -78,11 +78,11 @@ async function OrdersPage() {
         agencyMembers={agencyMembers ?? []}
       >
         <PageBody className="h-screen flex max-h-full min-h-0 flex-1 flex-col">
- 
+{/*  
             <PageHeader
               title="orders:title"
               rightContent={<TimerContainer />}
-            />
+            /> */}
             {/* {agencyRoles.includes(userWorkspace.role ?? '') ? (
               <PageHeader
                 title="orders:title"
