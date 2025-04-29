@@ -483,7 +483,7 @@ export async function getUserByEmail(
 
     const { data: userData, error: userError } = await client
       .from('accounts')
-      .select('id, email, organization_id')
+      .select('id, email')
       .eq('email', email)
       .single();
 

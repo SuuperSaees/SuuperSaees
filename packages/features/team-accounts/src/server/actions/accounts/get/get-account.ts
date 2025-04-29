@@ -16,7 +16,7 @@ export const getAccountOnbardingData = async (accountId: string) => {
 
     if (userDataError) return null;
 
-    const organizationData = await getOrganizationByUserId(user_id);
+    const organizationData = await getOrganizationByUserId(accountId);
     if (!organizationData) return null;
 
     const {
