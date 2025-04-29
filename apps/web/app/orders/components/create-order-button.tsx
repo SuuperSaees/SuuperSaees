@@ -13,7 +13,7 @@ const CreateOrderButton = ({
   return (
     <>
       {hasOrders && (
-        <Link href="/orders/create">
+        <Link href="/orders/create" className='ml-auto'>
           <ThemedButton className="h-fit">
             <PlusIcon className="h-4 w-4" />
             {t('orders:create')}

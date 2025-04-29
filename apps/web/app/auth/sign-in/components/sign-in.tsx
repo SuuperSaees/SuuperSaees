@@ -23,7 +23,7 @@ const SignIn = ({
     host = window.location.host;
   }
   const { authDetails, isLoading } = useAuthDetails(host);
-
+  
   return (
     <AuthLayout
       authDetails={authDetails}
