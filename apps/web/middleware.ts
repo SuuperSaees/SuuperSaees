@@ -281,9 +281,16 @@ function getPatterns() {
         }
 
         // check if the user has deleted_on in the metadata
-        const domain = new URL(req.nextUrl.href).host;
+        let domain = '';
 
-        console.log('domain in middleware', domain, req.nextUrl.href, req.nextUrl.origin, req.nextUrl.pathname);
+        for (const [key, cookie] of req.cookies) {
+          if (key.startsWith('authDetails')) {
+            domain = cookie.name.split('_')[1] ?? '';
+          }
+        }
+
+        console.log('domain in middleware', domain);
+
         const userMetadata = user.app_metadata;
         const hasDeletedOn = userMetadata?.[domain]?.deleted_on;
         const supabase = createMiddlewareClient(req, res);
