@@ -289,8 +289,6 @@ function getPatterns() {
           }
         }
 
-        console.log('domain in middleware', domain);
-
         const userMetadata = user.app_metadata;
         const hasDeletedOn = userMetadata?.[domain]?.deleted_on;
         const supabase = createMiddlewareClient(req, res);
