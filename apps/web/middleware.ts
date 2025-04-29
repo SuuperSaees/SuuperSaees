@@ -281,8 +281,9 @@ function getPatterns() {
         }
 
         // check if the user has deleted_on in the metadata
-        const domain = new URL(req.nextUrl.origin).host;
-        console.log('domain in middleware', domain);
+        const domain = new URL(req.nextUrl.href).host;
+
+        console.log('domain in middleware', domain, req.nextUrl.href, req.nextUrl.origin, req.nextUrl.pathname);
         const userMetadata = user.app_metadata;
         const hasDeletedOn = userMetadata?.[domain]?.deleted_on;
         const supabase = createMiddlewareClient(req, res);
@@ -293,12 +294,8 @@ function getPatterns() {
 
         let userRoleWithId = req.cookies.get('user_role')?.value;
 
-        console.log('userRoleWithId', userRoleWithId);
-        
         if (!userRoleWithId || `${userRoleWithId.split('-')[0]}-${user.id}` !== userRoleWithId) {
-          const { data: currentUserRole, error: currentUserRoleError } = await supabase.rpc('get_current_role');
-          console.log('currentUserRole', currentUserRole);
-          console.log('currentUserRoleError', currentUserRoleError);
+          const { data: currentUserRole } = await supabase.rpc('get_current_role');
           userRoleWithId = `${currentUserRole}-${user.id}`;
           res.cookies.set('user_role', userRoleWithId, {
             maxAge: 60 * 60 * 24, // 1 day
