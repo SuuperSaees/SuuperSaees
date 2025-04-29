@@ -106,7 +106,7 @@ export function PasswordResetRequestContainer(params: {
                       type="email"
                       placeholder={t('forgotPassword.form.email.placeholder')}
                       {...field}
-                      className="focus-visible:ring-brand placeholder:text-inherit"
+                      className="focus-visible:ring-brand placeholder:text-inherit py-3 h-fit"
                     />
                   </FormControl>
 

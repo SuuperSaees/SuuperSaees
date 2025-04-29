@@ -79,8 +79,8 @@ const CreateClientDialog = ({
         <DialogTrigger asChild>
           {customTrigger ?? (
             <ThemedButton>
-              {t('createClient')}
               <PlusIcon className="h-4 w-4" />
+              {t('createClient')}
             </ThemedButton>
           )}
         </DialogTrigger>

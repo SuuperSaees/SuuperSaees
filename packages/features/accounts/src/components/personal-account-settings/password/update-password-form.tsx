@@ -49,7 +49,7 @@ const PasswordField = ({
           required
           type={showPassword ? "text" : "password"}
           placeholder={placeholder}
-          className="focus-visible:ring-brand placeholder:text-inherit pr-10"
+          className="focus-visible:ring-brand placeholder:text-inherit pr-10 h-fit py-3"
           {...field}
         />
         <button
