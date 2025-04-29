@@ -32,6 +32,8 @@ END;
 $function$
 ;
 
+grant execute on function get_current_role() to authenticated, service_role;
+
 -- Function for the trigger
 CREATE OR REPLACE FUNCTION update_user_metadata_on_client_delete()
 RETURNS TRIGGER AS $$
