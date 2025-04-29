@@ -33,10 +33,10 @@ function setCachedLanguage(
   });
 }
 
-const getUser = (request: NextRequest, response: NextResponse) => {
+const getUser = async (request: NextRequest, response: NextResponse) => {
   const supabase = createMiddlewareClient(request, response);
 
-  return supabase.auth.getUser();
+  return await supabase.auth.getUser();
 };
 
 export async function middleware(request: NextRequest) {
@@ -282,6 +282,7 @@ function getPatterns() {
 
         // check if the user has deleted_on in the metadata
         const domain = new URL(req.nextUrl.origin).host;
+        console.log('domain in middleware', domain);
         const userMetadata = user.app_metadata;
         const hasDeletedOn = userMetadata?.[domain]?.deleted_on;
         const supabase = createMiddlewareClient(req, res);
@@ -295,8 +296,9 @@ function getPatterns() {
         console.log('userRoleWithId', userRoleWithId);
         
         if (!userRoleWithId || `${userRoleWithId.split('-')[0]}-${user.id}` !== userRoleWithId) {
-          const { data: currentUserRole } = await supabase.rpc('get_current_role');
+          const { data: currentUserRole, error: currentUserRoleError } = await supabase.rpc('get_current_role');
           console.log('currentUserRole', currentUserRole);
+          console.log('currentUserRoleError', currentUserRoleError);
           userRoleWithId = `${currentUserRole}-${user.id}`;
           res.cookies.set('user_role', userRoleWithId, {
             maxAge: 60 * 60 * 24, // 1 day
@@ -316,7 +318,7 @@ function getPatterns() {
             );
           }
         }
-
+ 
         if (userRole === 'agency_owner') {
           const hasPhoneNumber = user.phone;
           if (
