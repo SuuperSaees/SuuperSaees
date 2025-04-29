@@ -3454,6 +3454,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_current_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_session: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["CompositeTypes"]["session_info"]
