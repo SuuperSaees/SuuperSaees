@@ -112,10 +112,10 @@ export async function middleware(request: NextRequest) {
       }
 
       let userRoleWithId = request.cookies.get('user_role')?.value;
-      if (!userRoleWithId || `${userRoleWithId}-${user.id}` !== userRoleWithId) {
+      if (!userRoleWithId || `${userRoleWithId.split('-')[0]}-${user.id}` !== userRoleWithId) {
         const { data: currentUserRole } = await supabase.rpc('get_current_role');
         userRoleWithId = currentUserRole ?? '';
-        csrfResponse.cookies.set('user_role', `${userRoleWithId}-${user.id}`, {
+        csrfResponse.cookies.set('user_role', `${currentUserRole}-${user.id}`, {
           maxAge: 60 * 60 * 24, // 1 día
         });
       }
@@ -291,9 +291,12 @@ function getPatterns() {
         }
 
         let userRoleWithId = req.cookies.get('user_role')?.value;
+
+        console.log('userRoleWithId', userRoleWithId);
         
-        if (!userRoleWithId || `${userRoleWithId}-${user.id}` !== userRoleWithId) {
+        if (!userRoleWithId || `${userRoleWithId.split('-')[0]}-${user.id}` !== userRoleWithId) {
           const { data: currentUserRole } = await supabase.rpc('get_current_role');
+          console.log('currentUserRole', currentUserRole);
           userRoleWithId = `${currentUserRole}-${user.id}`;
           res.cookies.set('user_role', userRoleWithId, {
             maxAge: 60 * 60 * 24, // 1 day
