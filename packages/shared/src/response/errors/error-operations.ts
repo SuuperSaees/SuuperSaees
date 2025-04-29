@@ -148,3 +148,8 @@ export enum ErrorChatOperations {
   FAILED_TO_GET_MESSAGES = 'failedToGetMessages',
   FAILED_TO_GET_MEMBER_SETTINGS = 'failedToGetMemberSettings',
 }
+
+export enum ErrorBriefOperations {
+  FAILED_TO_LIST_BRIEFS = 'failedToListBriefs',
+  BRIEF_NOT_FOUND_API = 'briefNotFound',
+} 
