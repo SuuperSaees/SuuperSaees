@@ -3,6 +3,7 @@ import { useCallback, useEffect } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { useRealtime } from './use-realtime';
+import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 // Define query keys as constants for consistency
 const UNREAD_COUNTS_QUERY_KEY = ['unread-message-counts'];
@@ -36,11 +37,11 @@ const SoundManager = (() => {
   } | null = null;
   
   return {
-    getInstance: () => {
+    getInstance: (soundSrc = NOTIFICATION_SOUND_PATH) => {
       if (!instance) {
         // Create audio element
         const audio = typeof window !== 'undefined' 
-          ? new Audio(NOTIFICATION_SOUND_PATH) 
+          ? new Audio(soundSrc) 
           : null;
           
         // Set volume to 10%
@@ -83,12 +84,17 @@ const SoundManager = (() => {
   };
 })();
 
-export function useUnreadMessageCounts({userId}: {userId: string}) {
+
+export interface UseUnreadMessageCountsProps {
+  userId: string;
+
+}
+export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) {
   const supabase = useSupabase();
   const queryClient = useQueryClient();
-  
+  const { notification_sound } = useOrganizationSettings()
   // Get the singleton sound manager
-  const soundManager = SoundManager.getInstance();
+  const soundManager = SoundManager.getInstance(notification_sound);
   
   // Function to fetch unread counts
   const fetchUnreadCounts = useCallback(async (): Promise<UnreadMessageCount[]> => {

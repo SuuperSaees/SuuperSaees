@@ -215,6 +215,7 @@ export function SidebarGroup({
         'font-normal': isRouteActive(pathname, path, true),
       })}
       onClick={collapsible ? (e) => e.stopPropagation() : undefined}
+      prefetch={true}
     >
       {labelContent}
     </Link>
@@ -482,10 +483,10 @@ export function SidebarItem({
         </TooltipProvider>
       ) : (
         <>
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center" >
             {Icon}
           </span>
-          <span className="line-clamp-1 w-full font-normal text-left">{children}</span>
+          <span className={cn("line-clamp-1 w-full font-normal text-left", className)}>{children}</span>
         </>
       )}
     </>
@@ -529,6 +530,7 @@ export function SidebarItem({
         <Link
           key={path}
           href={path}
+          prefetch={true}
           className="flex w-full  items-center gap-2 font-normal line-clamp-1"
           prefetch={true}
         >

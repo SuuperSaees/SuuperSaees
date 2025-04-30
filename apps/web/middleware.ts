@@ -88,7 +88,13 @@ export async function middleware(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const host = new URL(request.nextUrl.origin).host;
+    let domain = '';
+
+    for (const [key, cookie] of request.cookies) {
+      if (key.startsWith('authDetails')) {
+        domain = cookie.name.split('_')[1] ?? '';
+      }
+    }
     if (user) {
       // Always check for the latest language preferences on each request
       // This ensures changes to organization settings are immediately reflected
@@ -114,10 +120,15 @@ export async function middleware(request: NextRequest) {
         language = String(userSettings.preferences.user.language);
       } else {
         // If no user preference, fall back to organization setting
-        const domainData = await getFullDomainBySubdomain(host, true, ['language']);
-        language = domainData?.settings?.find(
-          (setting) => setting.key === 'language'
-        )?.value ?? 'en';
+        const currentLanguage = request.cookies.get('lang')?.value;
+        if (currentLanguage) {
+          language = currentLanguage;
+        } else {
+          const domainData = await getFullDomainBySubdomain(domain, true, ['language']);
+          language = domainData?.settings?.find(
+            (setting) => setting.key === 'language'
+          )?.value ?? 'en';
+        }
       }
 
       // Get current language from cookie

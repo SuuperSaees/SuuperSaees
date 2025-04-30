@@ -125,7 +125,7 @@ function SiteSettings({
                   identifier: 'darkLogo',
                 }}
                 defaultImageURL={logo_dark_url ?? ''}
-                className="aspect-square h-20 w-20"
+                className="aspect-square h-20 w-20 bg-black"
                 onUpdate={async (value: string) => {
                   await updateOrganizationSetting.mutateAsync({
                     key: 'logo_dark_url',
