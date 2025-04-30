@@ -14,6 +14,7 @@ export class OrderController extends BaseController {
     const requestId = crypto.randomUUID();
 
     try {
+
       const body = await this.parseBody<CreateOrderDTO>(req);
 
       if (!body.title) {
@@ -75,5 +76,25 @@ export class OrderController extends BaseController {
     } catch (error) {
       return this.handleError(error, requestId);
     }
+  }
+
+  async update(): Promise<Response> {
+     await Promise.resolve();
+
+    const requestId = crypto.randomUUID();
+
+    return this.ok({
+      message: 'Order updated successfully',
+    }, requestId);
+  }
+
+  async delete(): Promise<Response> {
+    const requestId = crypto.randomUUID();
+
+    await Promise.resolve();
+
+    return this.ok({
+      message: 'Order deleted successfully',
+    }, requestId);
   }
 } 

@@ -7,7 +7,7 @@ import { Order } from '~/lib/order.types';
 import { ApiError } from '~/lib/api/api-error';
 import { Database } from '~/lib/database.types';
 import { Brief } from '~/lib/brief.types';
-import { textFormat } from '~/app/utils/text-format';
+import { textFormat } from '~/utils/text-format';
 
 import { OrderRepository } from '../repositories/order.repository';
 import { CreateOrderDTO } from '../dtos/order.dto';

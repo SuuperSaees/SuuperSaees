@@ -58,8 +58,15 @@ export abstract class BaseController {
   }
 
   protected async parseBody<T>(req: NextRequest): Promise<T> {
-    const body = await req.clone().json();
-    return body as T;
+    try {
+      const body = await req.clone().json();
+      return body as T;
+    } catch (error) {
+      throw ApiError.badRequest(
+        'Data is required',
+        'failedToParseBody',
+      );
+    }
   }
 
   /**

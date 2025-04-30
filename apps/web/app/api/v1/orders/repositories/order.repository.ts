@@ -27,7 +27,6 @@ export class OrderRepository {
     if (error) {
       if (error.code === '42501') {
         throw ApiError.unauthorized(
-          error.message,
           ErrorOrderOperations.INSUFFICIENT_PERMISSIONS,
         );
       } else {
