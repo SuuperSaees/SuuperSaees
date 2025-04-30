@@ -55,7 +55,7 @@ export class OrderRepository {
   }> {
     // Obtener órdenes con paginación
     const { data: orders, error } = await this.client
-      .from('orders')
+      .from('orders_v2')
       .select(`
         id, uuid, title, description, customer_id, 
         priority, due_date, created_at, brief_id, 
@@ -66,13 +66,16 @@ export class OrderRepository {
       .range(offset, offset + limit - 1);
 
     if (error) {
+      console.log('error', error);
       throw new Error(`Error fetching orders: ${error.message}`);
     }
 
     // Obtener el total de órdenes
     const { count, error: countError } = await this.client
-      .from('orders')
-      .select('*', { count: 'exact', head: true });
+      .from('orders_v2')
+      .select('*', { count: 'exact', head: true })
+      .eq('client_organization_id', organizationId)
+      .eq('agency_id', agencyId);
 
     if (countError) {
       throw new Error(`Error counting orders: ${countError.message}`);
@@ -86,7 +89,7 @@ export class OrderRepository {
 
   async getOrderById(orderId: string, organizationId: string, agencyId: string): Promise<Pick<Order.Type, 'id' | 'uuid' | 'title' | 'description' | 'customer_id' | 'priority' | 'due_date' | 'created_at' | 'brief_id' | 'status' | 'client_organization_id' | 'visibility'> | null> {
     const { data, error } = await this.client
-      .from('orders')
+      .from('orders_v2')
       .select(`
         id, uuid, title, description, customer_id, 
         priority, due_date, created_at, brief_id, 
