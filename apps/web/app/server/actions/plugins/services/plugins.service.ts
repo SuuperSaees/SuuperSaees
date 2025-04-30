@@ -21,7 +21,7 @@ export class PluginsService implements IPluginsService {
         return await this.pluginsRepository.get(id);
     }
 
-    async list(): Promise<Plugin[]> {
-        return await this.pluginsRepository.list();
+    async list(userId?: string): Promise<Plugin[]> {
+        return await this.pluginsRepository.list(userId);
     }
 }

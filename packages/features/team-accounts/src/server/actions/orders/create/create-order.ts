@@ -56,6 +56,9 @@ export const createOrder = async (
         _brief_responses: processedBriefResponses ?? [],
         _order_followers: orderFollowers ?? [],
         _order_file_ids: [],
+        _organization_id: undefined,
+        _user_id: undefined,
+        _user_role: undefined,
       },
     );
 

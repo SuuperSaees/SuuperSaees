@@ -1470,12 +1470,22 @@ GRANT EXECUTE ON FUNCTION public.set_session(text) TO authenticated, service_rol
 
 set check_function_bodies = off;
 
-CREATE OR REPLACE FUNCTION public.create_order(_order jsonb, _brief_responses jsonb[], _order_followers text[], _order_file_ids uuid[])
- RETURNS orders_v2
- LANGUAGE plpgsql
+drop function if exists public.create_order(jsonb, jsonb[], text[], uuid[], uuid, uuid, text) cascade;
+
+CREATE OR REPLACE FUNCTION public.create_order(
+    _order jsonb,
+    _brief_responses jsonb[],
+    _order_followers text[],
+    _order_file_ids uuid[],
+    _organization_id uuid DEFAULT NULL,
+    _user_id uuid DEFAULT NULL,
+    _user_role text DEFAULT NULL
+)
+RETURNS orders_v2
+LANGUAGE plpgsql
 AS $function$DECLARE
   new_order public.orders_v2;  -- Declare new_order as a record of type orders_v2
-  current_user_id uuid := auth.uid();  -- Get the authenticated user's ID
+  current_user_id uuid := COALESCE(_user_id, auth.uid());  -- Get the authenticated user's ID
   user_role text;  -- To store the current user's role
   subdomain_id uuid;  -- To store the subdomain ID
   org_id uuid;  -- To store the organization ID from subdomain
@@ -1496,14 +1506,14 @@ BEGIN
   END IF;
   
   -- Step 0.1: Verify organization_id is not empty
-  SELECT (get_session()).organization.id::uuid INTO org_id;
+  SELECT COALESCE(_organization_id, get_current_organization_id()) INTO org_id;
   
   IF org_id IS NULL THEN
     RAISE EXCEPTION 'Organization not found for subdomain';
   END IF;
   
   -- Step 0.4: Get user role for this organization
-  SELECT am.account_role INTO user_role
+  SELECT COALESCE(_user_role, am.account_role) INTO user_role
   FROM public.accounts_memberships am
   WHERE am.user_id = current_user_id
   AND am.organization_id = org_id
@@ -1696,7 +1706,7 @@ BEGIN
 END;$function$
 ;
 
-grant execute on function public.create_order(jsonb, jsonb[], text[], uuid[]) to authenticated, service_role;
+grant execute on function public.create_order(jsonb, jsonb[], text[], uuid[], uuid, uuid, text) to authenticated, service_role;
 -- 20. get_account_members
 
 DROP FUNCTION IF EXISTS public.get_account_members(text) CASCADE;

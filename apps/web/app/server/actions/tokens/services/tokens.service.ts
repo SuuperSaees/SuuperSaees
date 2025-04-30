@@ -1,5 +1,5 @@
 import { TokensRepository } from "../repositories/tokens.repository";
-import { Token, PayToken, TokenRecoveryType, TokenIdPayload, DefaultToken } from "../tokens.interface";
+import { Token, PayToken, TokenRecoveryType, TokenIdPayload, DefaultToken, SuuperApiKeyToken } from "../tokens.interface";
 import { ITokensService } from "./tokens.service.interface";
 import { v4 as uuidv4 } from 'uuid';
 import { createHmac } from 'crypto';
@@ -11,7 +11,7 @@ export class TokensService implements ITokensService {
         this.tokensRepository = tokensRepository;
     }
 
-    async createToken(payload: Token | PayToken | TokenRecoveryType | DefaultToken, tokenId?: string) {
+    async createToken(payload: Token | PayToken | TokenRecoveryType | DefaultToken | SuuperApiKeyToken, tokenId?: string) {
         const header = {
             alg: 'HS256',
             typ: 'JWT',
@@ -33,7 +33,7 @@ export class TokensService implements ITokensService {
         const response = { accessToken, tokenId: idTokenProvider };
 
         const tokenData: Tokens.Insert = {
-         id: payload.id ?? '',
+         id: payload.id ?? uuidv4(),
          access_token: accessToken,
          created_at: now.toISOString(),
          expires_at: expiresAt.toISOString(),
@@ -42,8 +42,8 @@ export class TokensService implements ITokensService {
          refresh_token: refreshToken,
          updated_at: now.toISOString(),
         };
-        console.log('tokenData', tokenData);
-        await this.tokensRepository.createToken(tokenData);
+        const token = await this.tokensRepository.createToken(tokenData);
+        console.log('token', token?.data);
         return response;
     }
 

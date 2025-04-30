@@ -10,8 +10,8 @@ class PluginsAction extends BaseAction implements IPluginsAction {
         this.controller = new PluginsController(this.baseUrl, this.client, this.adminClient);
     }
 
-    async list(): Promise<Plugin[]> {
-        return await this.controller.list();
+    async list(userId?: string): Promise<Plugin[]> {
+        return await this.controller.list(userId);
     }
 
     async create(payload: PluginInsert, image: File | null): Promise<Plugin> {

@@ -74,5 +74,11 @@ export namespace Brief {
     export type FormField = {
       form_fields: FormFieldType;
     };
+
+    export namespace FormFields {
+      export type Response = Brief.Type & {
+        form_fields: FormFieldType[];
+      };
+    }
   }
 }
