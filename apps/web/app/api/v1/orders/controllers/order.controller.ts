@@ -58,6 +58,9 @@ export class OrderController extends BaseController {
     const requestId = crypto.randomUUID();
 
     try {
+      const organizationId = req.headers.get('organization_id') ?? '';
+      const agencyId = req.headers.get('agency_id') ?? '';
+
       const { searchParams } = new URL(req.url);
       const limit = parseInt(searchParams.get('limit') ?? '10', 10);
       const offset = parseInt(searchParams.get('offset') ?? '0', 10);
@@ -65,7 +68,7 @@ export class OrderController extends BaseController {
       const client = getSupabaseServerComponentClient({ admin: true });
       const orderService = await createOrderService(client);
 
-      const result = await orderService.listOrders(limit, offset);
+      const result = await orderService.listOrders(limit, offset, organizationId, agencyId);
       return this.ok(result, requestId);
     } catch (error) {
       return this.handleError(error, requestId);
@@ -73,12 +76,14 @@ export class OrderController extends BaseController {
   }
 
   async get(
-    _: NextRequest,
+    req: NextRequest,
     { params }: { params: { id: string } },
   ): Promise<Response> {
     const requestId = crypto.randomUUID();
 
     try {
+      const organizationId = req.headers.get('organization_id') ?? '';
+      const agencyId = req.headers.get('agency_id') ?? '';
       const orderId = params.id;
 
       if (!orderId) {
@@ -91,7 +96,7 @@ export class OrderController extends BaseController {
       const client = getSupabaseServerComponentClient({ admin: true });
       const orderService = await createOrderService(client);
 
-      const order = await orderService.getOrderById(orderId);
+      const order = await orderService.getOrderById(orderId, organizationId, agencyId);
       return this.ok(order, requestId);
     } catch (error) {
       return this.handleError(error, requestId);

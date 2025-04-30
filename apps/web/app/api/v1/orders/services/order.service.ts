@@ -100,36 +100,34 @@ export class OrderService {
     }
   }
 
-  async listOrders(limit: number, offset: number): Promise<{
-    orders: {
-      id: string;
+  async listOrders(limit: number, offset: number, organizationId: string, agencyId: string): Promise<{
+    orders: Array<{
+      id: number;
       title: string;
       status: string;
-      priority: string;
+      priority: "low" | "medium" | "high";
       created_at: string;
-    }[];
+      description: string | null;
+      due_date: string | null;
+      brief_id: string | null;
+      client_organization_id: string;
+      customer_id: string;
+      uuid: string;
+    }>;
     total: number;
     limit: number;
     offset: number;
   }> {
     try {
-      const { orders, total } = await this.orderRepository.getOrders(limit, offset);
+      const { orders, total } = await this.orderRepository.getOrders(limit, offset, organizationId, agencyId);
       
-      // Filtrar solo la información necesaria para la API externa
       const filteredOrders = orders.map(order => ({
-        id: order.id,
-        title: order.title,
-        status: order.status,
-        priority: order.priority,
-        created_at: order.created_at,
+        ...order,
+        status: order.status ?? 'pending',
+        priority: order.priority ?? 'low'
       }));
 
-      return {
-        orders: filteredOrders,
-        total,
-        limit,
-        offset,
-      };
+      return { orders: filteredOrders, total, limit, offset };
     } catch (error) {
       throw ApiError.internalError(
         ErrorOrderOperations.FAILED_TO_LIST_ORDERS,
@@ -137,17 +135,22 @@ export class OrderService {
     }
   }
 
-  async getOrderById(orderId: string): Promise<{
-    id: string;
+  async getOrderById(orderId: string, organizationId: string, agencyId: string): Promise<{
+    id: number;
     title: string;
     description: string | null;
     status: string;
     priority: string;
     due_date: string | null;
     created_at: string;
+    client_organization_id: string;
+    customer_id: string;
+    uuid: string;
+    brief_id: string | null;
+    visibility: string;
   }> {
     try {
-      const order = await this.orderRepository.getOrderById(orderId);
+      const order = await this.orderRepository.getOrderById(orderId, organizationId, agencyId);
       
       if (!order) {
         throw ApiError.notFound(
@@ -158,13 +161,10 @@ export class OrderService {
       
       // Devolver solo la información necesaria
       return {
-        id: order.id,
-        title: order.title,
-        description: order.description,
-        status: order.status,
-        priority: order.priority,
-        due_date: order.due_date,
-        created_at: order.created_at,
+        ...order,
+        status: order.status ?? 'pending',
+        priority: order.priority ?? 'low',
+        visibility: order.visibility ?? 'public'
       };
     } catch (error) {
       this.logger.error({ error, orderId }, 'Failed to get order');

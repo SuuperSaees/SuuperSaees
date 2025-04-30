@@ -49,14 +49,20 @@ export class OrderRepository {
     return data as Order.Type;
   }
 
-  async getOrders(limit: number, offset: number): Promise<{
-    orders: Order.Type[];
+  async getOrders(limit: number, offset: number, organizationId: string, agencyId: string): Promise<{
+    orders: Pick<Order.Type, 'id' | 'uuid' | 'title' | 'description' | 'customer_id' | 'priority' | 'due_date' | 'created_at' | 'brief_id' | 'status' | 'client_organization_id'>[];
     total: number;
   }> {
     // Obtener órdenes con paginación
     const { data: orders, error } = await this.client
       .from('orders')
-      .select('*')
+      .select(`
+        id, uuid, title, description, customer_id, 
+        priority, due_date, created_at, brief_id, 
+        status, client_organization_id
+      `)
+      .eq('client_organization_id', organizationId)
+      .eq('agency_id', agencyId)
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -73,16 +79,22 @@ export class OrderRepository {
     }
 
     return {
-      orders: orders as Order.Type[],
+      orders: orders as unknown as Pick<Order.Type, 'id' | 'uuid' | 'title' | 'description' | 'customer_id' | 'priority' | 'due_date' | 'created_at' | 'brief_id' | 'status' | 'client_organization_id'>[],
       total: count ?? 0,
     };
   }
 
-  async getOrderById(orderId: string): Promise<Order.Type | null> {
+  async getOrderById(orderId: string, organizationId: string, agencyId: string): Promise<Pick<Order.Type, 'id' | 'uuid' | 'title' | 'description' | 'customer_id' | 'priority' | 'due_date' | 'created_at' | 'brief_id' | 'status' | 'client_organization_id' | 'visibility'> | null> {
     const { data, error } = await this.client
       .from('orders')
-      .select('*')
+      .select(`
+        id, uuid, title, description, customer_id, 
+        priority, due_date, created_at, brief_id, 
+        status, client_organization_id, visibility
+      `)
       .eq('id', orderId)
+      .eq('client_organization_id', organizationId)
+      .eq('agency_id', agencyId)
       .single();
 
     if (error) {
@@ -92,6 +104,6 @@ export class OrderRepository {
       throw new Error(`Error fetching order: ${error.message}`);
     }
 
-    return data as Order.Type;
+    return data as unknown as Pick<Order.Type, 'id' | 'uuid' | 'title' | 'description' | 'customer_id' | 'priority' | 'due_date' | 'created_at' | 'brief_id' | 'status' | 'client_organization_id' | 'visibility'>;
   }
 } 
