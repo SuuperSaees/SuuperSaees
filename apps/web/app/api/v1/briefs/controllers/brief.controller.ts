@@ -17,11 +17,12 @@ export class BriefController extends BaseController {
       const limit = parseInt(searchParams.get('limit') ?? '10', 10);
       const offset = parseInt(searchParams.get('offset') ?? '0', 10);
       const organizationId = searchParams.get('organization_id') ?? undefined;
+      const agencyId = searchParams.get('agency_id') ?? undefined;
 
       const client = getSupabaseServerComponentClient({ admin: true });
       const briefService = await createBriefService(client);
 
-      const result = await briefService.listBriefs(limit, offset, organizationId);
+      const result = await briefService.listBriefs(limit, offset, organizationId, agencyId);
       return this.ok(result, requestId);
     } catch (error) {
       return this.handleError(error, requestId);

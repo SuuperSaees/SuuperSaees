@@ -14,7 +14,7 @@ export class BriefService {
     private readonly briefRepository: BriefRepository,
   ) {}
 
-  async listBriefs(limit: number, offset: number, organizationId?: string): Promise<{
+  async listBriefs(limit: number, offset: number, organizationId?: string, agencyId?: string): Promise<{
     briefs: {
       id: string;
       name: string;
@@ -27,7 +27,7 @@ export class BriefService {
     offset: number;
   }> {
     try {
-      const { briefs, total } = await this.briefRepository.getBriefs(limit, offset, organizationId);
+      const { briefs, total } = await this.briefRepository.getBriefs(limit, offset, organizationId, agencyId);
       
       // Filtrar solo la información necesaria para la API externa
       const filteredBriefs = briefs.map(brief => ({
