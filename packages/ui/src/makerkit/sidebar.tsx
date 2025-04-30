@@ -9,7 +9,6 @@ import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 
-import pathsConfig from '../../../../apps/web/config/paths.config';
 import {
   Tooltip,
   TooltipContent,
@@ -216,6 +215,7 @@ export function SidebarGroup({
         'font-normal': isRouteActive(pathname, path, true),
       })}
       onClick={collapsible ? (e) => e.stopPropagation() : undefined}
+      prefetch={true}
     >
       {labelContent}
     </Link>
@@ -348,6 +348,7 @@ export function SidebarSection({
           <Link
             href={path}
             className="h-fit w-fit w-full rounded-md"
+            prefetch={true}
           >
             <h3
               className={cn(
@@ -529,6 +530,7 @@ export function SidebarItem({
         <Link
           key={path}
           href={path}
+          prefetch={true}
           className="flex w-full  items-center gap-2 font-normal line-clamp-1"
         >
           {buttonContent}
