@@ -16,11 +16,11 @@ export class PluginsController {
         this.adminClient = adminClient;
     }
 
-    async list(): Promise<Plugin[]> {
+    async list(userId?: string): Promise<Plugin[]> {
         try {
             const pluginRepository = new PluginsRepository(this.client, this.adminClient);
             const pluginService = new PluginsService(pluginRepository);
-            return await pluginService.list();
+            return await pluginService.list(userId);
         } catch (error) {
             console.log(error);
             throw error;

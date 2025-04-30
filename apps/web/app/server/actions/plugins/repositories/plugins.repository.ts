@@ -142,13 +142,19 @@ export class PluginsRepository {
    * @throws {Error} If the fetch operation fails.
    */
 
-    async list(): Promise<Plugin[]> {
+    async list(userId?: string): Promise<Plugin[]> {
         const { data: pluginData, error: pluginError } = await this.client
             .from('plugins')
             .select('*')
             .is('deleted_on', null);
 
         if (pluginError) throw pluginError;
-        return pluginData as Plugin[];
+
+        return pluginData.filter((plugin) => {
+            if (userId && plugin.type === 'internal') {
+                return (plugin.metadata as { users: string[] }).users.includes(userId);
+            }
+            return true;
+        }) as Plugin[];
     }
 }
