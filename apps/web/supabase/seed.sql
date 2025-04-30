@@ -103,4 +103,4 @@ INSERT INTO "public"."plugins" ("id", "deleted_on", "created_at", "updated_at", 
 INSERT INTO "public"."plugins" 
 ("id", "deleted_on", "created_at", "updated_at", "type", "description", "metadata", "name", "icon_url") 
 VALUES 
-('a71f7291-2bd6-4ee7-9718-ae08414f7bc6', null, '2025-04-23 22:28:38.765124+00', '2025-04-23 22:28:38.765124+00', 'internal', 'Integrate your platform with the powerful Suuuper API to unlock enhanced features and seamless data exchange.', '{"version": "1.0.0", "documentation_url": "https://suuper.co/docs", "users": []}', 'suuper api', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//suuper.png');
+('a71f7291-2bd6-4ee7-9718-ae08414f7bc6', null, '2025-04-23 22:28:38.765124+00', '2025-04-23 22:28:38.765124+00', 'internal', 'Integrate your platform with the powerful Suuuper API to unlock enhanced features and seamless data exchange.', '{"version": "1.0.0", "documentation_url": "https://suuper.co/docs", "users": []}', 'suuperApi', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//suuper.png');
