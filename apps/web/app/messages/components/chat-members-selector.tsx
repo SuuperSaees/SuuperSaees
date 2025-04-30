@@ -36,7 +36,6 @@ export default function ChatMembersSelector({
   const agencyMembers = agencyTeam.members ?? [];
   const { workspace: userWorkspace } = useUserWorkspace();
   const currentRole = userWorkspace?.role;
-
   const validAgencyRoles = ['agency_owner', 'agency_project_manager'];
   const isValidAgencyRole = validAgencyRoles.includes(currentRole ?? '');
 
@@ -67,22 +66,25 @@ export default function ChatMembersSelector({
   });
 
   const clientOrganizationMembers = clientMembersQuery.data;
-
   const clientMembers = Object.values(clientOrganizationMembers ?? {}).flatMap(
     (team) => team?.members ?? [],
   );
 
   const selectedAgencyMembers =
     agencyMembers.filter((member) =>
-      selectedMembers.map((m) => m.id).includes(member.id),
+      selectedMembers.map((m) => m.id).includes(member.id) &&
+      // Only include if the member exists in the agency members list and is not deleted
+      agencyMembers.some((agencyMember) => agencyMember.id === member.id)
     ) ?? [];
 
   const selectedClientOrganizationMembers =
     selectedMembers.filter(
       (member) =>
-        member.organization_id && member.organization_id !== agencyTeam.id,
+        member.organization_id && 
+        member.organization_id !== agencyTeam.id &&
+        // Only include if the member exists in the client members list
+        clientMembers.some((clientMember) => clientMember.id === member.id)
     ) ?? [];
-
 
   const agencyMembersAvatars = selectedAgencyMembers.map((user) => ({
     id: user.id,
