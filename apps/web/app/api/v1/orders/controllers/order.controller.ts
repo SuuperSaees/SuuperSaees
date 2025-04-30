@@ -24,6 +24,13 @@ export class OrderController extends BaseController {
         );
       }
 
+      if (!body.brief_responses?.length) {
+        throw ApiError.badRequest(
+          'Brief responses are required',
+          ErrorOrderOperations.FAILED_TO_CREATE_ORDER,
+        );
+      }
+
       const client = getSupabaseServerComponentClient({ admin: true });
       const orderService = await createOrderService(client);
 

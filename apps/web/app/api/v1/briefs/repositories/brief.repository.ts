@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '~/lib/database.types';
+import { BriefFormFields } from '~/lib/api/briefs.types';
 
 export class BriefRepository {
   constructor(private client: SupabaseClient<Database>) {}
@@ -49,6 +50,47 @@ export class BriefRepository {
     return {
       briefs: briefs as Database['public']['Tables']['briefs']['Row'][],
       total: count ?? 0,
+    };
+  }
+
+  async getBriefById(briefId: string): Promise<BriefFormFields | null> {
+    const { data, error } = await this.client
+      .from('briefs')
+      .select(
+        `id, created_at, name, propietary_organization_id, description, isDraft, number, image_url, deleted_on, brief_form_fields 
+        ( field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))`,
+      )
+      .eq('id', briefId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw new Error(`Error fetching brief: ${error.message}`);
+    }
+
+    return {
+      id: data?.id,
+      created_at: data?.created_at,
+      name: data?.name,
+      propietary_organization_id: data?.propietary_organization_id,
+      description: data?.description,
+      image_url: data?.image_url,
+      form_fields: data?.brief_form_fields?.map((field) => ({
+        id: field?.field?.id ?? '',
+        type: field?.field?.type ?? 'text',
+        description: field?.field?.description ?? '',
+        position: field?.field?.position ?? 0,
+        required: field?.field?.required ?? false,
+        options: field?.field?.options ?? [],
+        label: field?.field?.label ?? '',
+        placeholder: field?.field?.placeholder ?? '',
+        alert_message: field?.field?.alert_message ?? '',
+      })),
+      deleted_on: data?.deleted_on,
+      isDraft: data?.isDraft ?? null,
+      number: data?.number ?? null
     };
   }
 } 
