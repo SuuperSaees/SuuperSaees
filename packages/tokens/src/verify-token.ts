@@ -6,7 +6,17 @@ import { PayToken, TokenRecoveryType, DefaultToken } from './domain/token-type';
 
 const { sha256 } = Tokens.EXTRA_TOKENS_KEYS;
 
-// Función auxiliar para usar Web Crypto API
+// Cache for storing recently verified tokens
+const tokenCache = new Map<string, {
+  isValidToken: boolean;
+  payload?: PayToken | TokenRecoveryType | DefaultToken;
+  timestamp: number;
+}>();
+
+// Cache expiration time in ms (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
+
+// Helper function to use Web Crypto API
 async function createHmacSignature(message: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
   const keyData = encoder.encode(secret);
@@ -32,20 +42,49 @@ export async function verifyToken(
   isValidToken: boolean;
   payload?: PayToken | TokenRecoveryType | DefaultToken;
 }> {
+  // Create a unique cache key
+  const cacheKey = `${accessToken}-${idTokenProvider}-${validateExpired}`;
+  
+  // Check if the token is in cache and has not expired
+  const cachedResult = tokenCache.get(cacheKey);
+  if (cachedResult && (Date.now() - cachedResult.timestamp) < CACHE_EXPIRATION) {
+    return {
+      isValidToken: cachedResult.isValidToken,
+      payload: cachedResult.payload
+    };
+  }
+  
   const client = getSupabaseServerComponentClient({
     admin: true,
   });
+  
   try {
-    // Verify the token is in the database
-    const { data, error } = await client
+    // Optimize: Build the query more efficiently
+    const query = client
       .from('tokens')
-      .select('access_token,expires_at')
-      .or(
-        `access_token.eq.${accessToken},id_token_provider.eq.${idTokenProvider}`,
-      )
-      .single();
+      .select('access_token,expires_at');
+    
+    // Add conditions only if parameters are present
+    if (accessToken) {
+      query.eq('access_token', accessToken);
+    } else if (idTokenProvider) {
+      query.eq('id_token_provider', idTokenProvider);
+    } else {
+      // If there are no parameters, return quickly
+      return { isValidToken: false };
+    }
+    
+    const { data, error } = await query.single();
+    
     if (error || !data) {
       console.error('Token not found in database');
+      
+      // Cache the negative result
+      tokenCache.set(cacheKey, {
+        isValidToken: false,
+        timestamp: Date.now()
+      });
+      
       return {
         isValidToken: false,
       };
@@ -56,37 +95,59 @@ export async function verifyToken(
     const [base64Header, base64Payload, signature] =
       accessToken?.split('.') ?? [];
 
-    // Decode the header and payload
-    // const payload = JSON.parse(Buffer.from(base64Payload ?? "", 'base64').toString('utf-8'));
+    // Decodificar el payload una sola vez
+    const payload = JSON.parse(
+      Buffer.from(base64Payload ?? '', 'base64').toString('utf-8'),
+    );
 
-    // Verify the signature
+    // Verificar la firma
     const expectedSignature = await createHmacSignature(
       `${base64Header}.${base64Payload}`,
       process.env.JWT_SECRET!
     );
 
-    const payload = JSON.parse(
-      Buffer.from(base64Payload ?? '', 'base64').toString('utf-8'),
-    );
-
     if (signature !== expectedSignature) {
       console.error('Invalid token signature');
+      
+      // Guardar en caché el resultado negativo
+      tokenCache.set(cacheKey, {
+        isValidToken: false,
+        timestamp: Date.now()
+      });
+      
       return {
         isValidToken: false,
       };
     }
 
-    // Verify the token has not expired
-    const now = new Date();
-    const expiresAt = new Date(data.expires_at ?? '');
+    // Verificar la expiración del token
+    if (validateExpired) {
+      const now = new Date();
+      const expiresAt = new Date(data.expires_at ?? '');
 
-    if (validateExpired && now >= expiresAt) {
-      console.error('Token has expired');
-      return {
-        isValidToken: false,
-        payload,
-      };
+      if (now >= expiresAt) {
+        console.error('Token has expired');
+        
+        // Guardar en caché el resultado negativo con el payload
+        tokenCache.set(cacheKey, {
+          isValidToken: false,
+          payload,
+          timestamp: Date.now()
+        });
+        
+        return {
+          isValidToken: false,
+          payload,
+        };
+      }
     }
+
+    // Guardar en caché el resultado positivo
+    tokenCache.set(cacheKey, {
+      isValidToken: true,
+      payload,
+      timestamp: Date.now()
+    });
 
     return {
       isValidToken: true,

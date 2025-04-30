@@ -64,9 +64,6 @@ async function validateApiKey(request: NextRequest, apiKey: string): Promise<boo
     
     // Decode the ID token provider from base64
     const idTokenProvider = Buffer.from(encodedIdPart, 'base64').toString('utf-8');
-
-    console.log('tokenPart', tokenPart);
-    console.log('idTokenProvider', idTokenProvider);
     
     // Verify the token using the verifyToken function
     const { isValidToken, payload } = await verifyToken(tokenPart, idTokenProvider, false);
