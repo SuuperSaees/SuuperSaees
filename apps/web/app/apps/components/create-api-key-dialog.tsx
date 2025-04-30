@@ -67,7 +67,7 @@ export default function CreateApiKeyDialog({
       name: '',
       organization_id: '',
       user_id: '',
-      role: 'ssssssss',
+      role: 'client_owner',
     },
   });
 
