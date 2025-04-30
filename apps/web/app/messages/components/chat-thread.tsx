@@ -169,7 +169,7 @@ export default function ChatThread({
           <ChatMembersSelector
             agencyTeam={agencyTeam}
             selectedMembers={
-              chatById?.members?.filter((member) => member.visibility) ?? []
+              chatById?.members?.filter((member) => member.visibility && !member.deleted_on) ?? []
             }
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}
