@@ -1,16 +1,33 @@
 'use server';
 
-import { createHmac } from 'crypto';
-
 import { Tokens } from '../../../apps/web/lib/tokens.types';
 import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
 import { PayToken, TokenRecoveryType, DefaultToken } from './domain/token-type';
 
 const { sha256 } = Tokens.EXTRA_TOKENS_KEYS;
 
+// Función auxiliar para usar Web Crypto API
+async function createHmacSignature(message: string, secret: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(message);
+  
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  
+  const signature = await crypto.subtle.sign('HMAC', key, messageData);
+  return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
 export async function verifyToken(
   accessToken?: string,
   idTokenProvider?: string,
+  validateExpired = true,
 ): Promise<{
   isValidToken: boolean;
   payload?: PayToken | TokenRecoveryType | DefaultToken;
@@ -43,9 +60,10 @@ export async function verifyToken(
     // const payload = JSON.parse(Buffer.from(base64Payload ?? "", 'base64').toString('utf-8'));
 
     // Verify the signature
-    const expectedSignature = createHmac(sha256, process.env.JWT_SECRET!)
-      .update(`${base64Header}.${base64Payload}`)
-      .digest('base64');
+    const expectedSignature = await createHmacSignature(
+      `${base64Header}.${base64Payload}`,
+      process.env.JWT_SECRET!
+    );
 
     const payload = JSON.parse(
       Buffer.from(base64Payload ?? '', 'base64').toString('utf-8'),
@@ -62,7 +80,7 @@ export async function verifyToken(
     const now = new Date();
     const expiresAt = new Date(data.expires_at ?? '');
 
-    if (now >= expiresAt) {
+    if (validateExpired && now >= expiresAt) {
       console.error('Token has expired');
       return {
         isValidToken: false,

@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // API Authentication
-  const apiAuthResult = handleApiAuth(request);
+  const apiAuthResult = await handleApiAuth(request);
   if (apiAuthResult) return apiAuthResult;
 
   response.headers.set('x-current-path', request.nextUrl.pathname);

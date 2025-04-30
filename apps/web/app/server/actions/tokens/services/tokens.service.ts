@@ -33,7 +33,7 @@ export class TokensService implements ITokensService {
         const response = { accessToken, tokenId: idTokenProvider };
 
         const tokenData: Tokens.Insert = {
-         id: payload.id ?? '',
+         id: payload.id ?? uuidv4(),
          access_token: accessToken,
          created_at: now.toISOString(),
          expires_at: expiresAt.toISOString(),
@@ -42,8 +42,8 @@ export class TokensService implements ITokensService {
          refresh_token: refreshToken,
          updated_at: now.toISOString(),
         };
-        console.log('tokenData', tokenData);
-        await this.tokensRepository.createToken(tokenData);
+        const token = await this.tokensRepository.createToken(tokenData);
+        console.log('token', token?.data);
         return response;
     }
 
