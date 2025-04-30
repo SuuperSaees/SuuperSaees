@@ -106,7 +106,8 @@ export class TeamRepository {
         const { data: membersData, error: membersDataError } = await client
         .from('accounts')
         .select('id, email, name, picture_url, user_settings(name, picture_url)')
-        .in('id', membersIds);
+        .in('id', membersIds)
+        .is('deleted_on', null);
 
         if (membersDataError) throw membersDataError;
 
