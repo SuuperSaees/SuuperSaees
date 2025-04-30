@@ -6,20 +6,44 @@ import { BriefFormFields } from '~/lib/api/briefs.types';
 export class BriefRepository {
   constructor(private client: SupabaseClient<Database>) {}
 
-  async getBriefs(limit: number, offset: number, organizationId?: string): Promise<{
+  async getBriefs(limit: number, offset: number, organizationId?: string, agencyId?: string): Promise<{
     briefs: Database['public']['Tables']['briefs']['Row'][];
     total: number;
   }> {
     // Construir la consulta base
+
+    const { data: clientServicesData, error: clientServicesError } = await this.client
+      .from('client_services')
+      .select('service_id')
+      .eq('client_organization_id', organizationId ?? '')
+      .eq('agency_id', agencyId ?? '');
+
+    if (clientServicesError && clientServicesError.code !== 'PGRST116') {
+      throw new Error(`Error fetching client services: ${clientServicesError.message}`);
+    } else if (clientServicesError) {
+      throw new Error('Client services not found');
+    }
+
+    const clientServices = clientServicesData?.map((service) => service.service_id) ?? [];
+
+    const { data: serviceBriefsData, error: serviceBriefsError } = await this.client
+      .from('service_briefs')
+      .select('brief_id')
+      .in('service_id', clientServices);
+
+    if (serviceBriefsError && serviceBriefsError.code !== 'PGRST116') {
+      throw new Error(`Error fetching service briefs: ${serviceBriefsError.message}`);
+    } else if (serviceBriefsError) {
+      throw new Error('Service briefs not found');
+    }
+
+    const serviceBriefs = serviceBriefsData?.map((service) => service.brief_id) ?? [];
+
     let query = this.client
       .from('briefs')
       .select('*')
-      .is('deleted_on', null);
-    
-    // Filtrar por organización si se proporciona un ID
-    if (organizationId) {
-      query = query.eq('propietary_organization_id', organizationId);
-    }
+      .is('deleted_on', null)
+      .in('id', serviceBriefs);
     
     // Aplicar paginación
     query = query.range(offset, offset + limit - 1);
