@@ -1,13 +1,15 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 
-import { Copy, Eye, EyeOff, Info, Trash2 } from 'lucide-react';
-import { CopyDomain } from 'node_modules/@kit/accounts/src/components/personal-account-settings/copy-domain';
+import { Copy, Trash2 } from 'lucide-react';
+// import { CopyDomain } from 'node_modules/@kit/accounts/src/components/personal-account-settings/copy-domain';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
+// import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
 import { Spinner } from '@kit/ui/spinner';
 import { 
   AlertDialog,
@@ -26,6 +28,8 @@ import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugi
 import { updateAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 import EmptyStateSuuperApi from './empty-state-suuper-api';
 import CreateApiKeyDialog from './create-api-key-dialog';
+import { createToken } from '~/server/actions/tokens/tokens.action';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 function SuuperApiContentStatic({
   pluginId,
@@ -34,6 +38,7 @@ function SuuperApiContentStatic({
   pluginId: string;
   userId?: string;
 }) {
+  const { organization } = useUserWorkspace();
   const [credentials, setCredentials] = useState<{api_keys: {
     api_key: string;
     user_id: string;
@@ -112,7 +117,16 @@ function SuuperApiContentStatic({
   }) => {
     try {
       // Generate a random API key
-      const apiKey = `sk_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      // 1. Generate access token with the data
+      const domain = typeof window !== 'undefined' ? window.location.host : '';
+
+      const accessToken = await createToken({
+        ...data,
+        domain: domain,
+        agency_id: organization?.id ?? '',
+      });
+      // 2. Generate API key with the access token
+      const apiKey = `suuper_${accessToken?.accessToken}_${btoa(accessToken?.tokenId ?? '')}`;
       
       const newApiKey = {
         api_key: apiKey,
@@ -208,13 +222,16 @@ function SuuperApiContentStatic({
             <label className="col-span-1 text-sm font-medium text-gray-700">
                 {t('suuperApiKeys')}
               </label>
-              <ThemedButton
-                variant="outline"
-                size="sm"
+              {/* Add a tooltip to the button */}
+              <Tooltip content={t('generateNewApiKeyTooltip')}>
+                <ThemedButton
+                  variant="outline"
+                  size="sm"
                 onClick={() => setOpenDialog(true)}
               >
                 {t('generateNewApiKey')}
               </ThemedButton>
+              </Tooltip>
            </div>
             <div className="relative col-span-2">
               {credentials.api_keys?.map((currentApiKey) => (  

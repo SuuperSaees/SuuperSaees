@@ -80,5 +80,6 @@
   "copy": "Copiar",
   "created": "Creada",
   "organization": "Organización",
-  "user": "Usuario"
+  "user": "Usuario",
+  "generateNewApiKeyTooltip": "Genera una nueva clave de API para acceder a la API de Suuper"
 }

@@ -125,7 +125,6 @@ export default function CreateApiKeyDialog({
     setIsSubmitting(true);
     try {
       data.role = members.find(member => member.id === data.user_id)?.role ?? 'client_owner';
-      console.log('data', data);
       const success = await onCreateApiKey(data);
       if (success) {
         form.reset();
