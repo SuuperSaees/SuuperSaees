@@ -24,7 +24,7 @@ export class OrderService {
     agencyId: string,
     role: string,
     domain: string,
-  ): Promise<Order.Type> {
+  ): Promise<Pick<Order.Type, 'id' | 'uuid' | 'title' | 'description' | 'customer_id' | 'priority' | 'due_date' | 'created_at' | 'brief_id' | 'status' | 'client_organization_id' | 'visibility'>> {
     try {
       this.logger.info({ title: data.title }, 'Creating order');
 
@@ -76,7 +76,20 @@ export class OrderService {
         'Order created successfully',
       );
 
-      return order;
+      return {
+        id: order.id,
+        uuid: order.uuid,
+        title: order.title,
+        description: order.description,
+        customer_id: order.customer_id,
+        priority: order.priority,
+        due_date: order.due_date,
+        created_at: order.created_at,
+        brief_id: order.brief_id,
+        status: order.status,
+        client_organization_id: order.client_organization_id,
+        visibility: order.visibility,
+      };
     } catch (error) {
       this.logger.error({ error, data }, 'Failed to create order');
       throw error instanceof ApiError

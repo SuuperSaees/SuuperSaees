@@ -34,8 +34,6 @@ export class OrderRepository {
       },
     );
 
-    console.log('error', error);
-
     if (error) {
       if (error.code === '42501') {
         throw ApiError.unauthorized(
