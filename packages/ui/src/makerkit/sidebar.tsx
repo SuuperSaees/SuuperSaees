@@ -9,7 +9,6 @@ import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 
-import pathsConfig from '../../../../apps/web/config/paths.config';
 import {
   Tooltip,
   TooltipContent,
@@ -348,6 +347,7 @@ export function SidebarSection({
           <Link
             href={path}
             className="h-fit w-fit w-full rounded-md"
+            prefetch={true}
           >
             <h3
               className={cn(
@@ -530,6 +530,7 @@ export function SidebarItem({
           key={path}
           href={path}
           className="flex w-full  items-center gap-2 font-normal line-clamp-1"
+          prefetch={true}
         >
           {buttonContent}
         </Link>
