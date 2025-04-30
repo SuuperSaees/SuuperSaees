@@ -10,11 +10,14 @@ export const CreateOrderSchema = z
       .array(
         z.object({
           brief_id: z.string().uuid(),
-          response: z.union([z.string(), z.record(z.any())]),
+          form_fields: z.array(z.object({
+            form_field_id: z.string().uuid(),
+            type: z.string(),
+            response: z.string()
+          })),
         })
       )
       .optional(),
-    order_followers: z.array(z.string().uuid()).optional(),
   })
   .strict();
 
