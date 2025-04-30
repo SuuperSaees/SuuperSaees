@@ -1,41 +1,56 @@
 import React, { useEffect, useState } from 'react';
 
-import { Copy, Eye, EyeOff, Info } from 'lucide-react';
+import { Copy, Eye, EyeOff, Info, Trash2 } from 'lucide-react';
 import { CopyDomain } from 'node_modules/@kit/accounts/src/components/personal-account-settings/copy-domain';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@kit/ui/dialog';
 import { Spinner } from '@kit/ui/spinner';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@kit/ui/alert-dialog';
 
 import Tooltip from '~/components/ui/tooltip';
 
 import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 import { updateAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import EmptyStateSuuperApi from './empty-state-suuper-api';
+import CreateApiKeyDialog from './create-api-key-dialog';
 
-function TreliContentStatic({
+function SuuperApiContentStatic({
   pluginId,
   userId,
 }: {
   pluginId: string;
-  userId: string;
+  userId?: string;
 }) {
-  const [credentials, setCredentials] = useState<{
-    treli_user: string;
-    treli_password: string;
-    webhook_url: string;
-  }>({
-    treli_user: '',
-    treli_password: '',
-    webhook_url: '',
+  const [credentials, setCredentials] = useState<{api_keys: {
+    api_key: string;
+    user_id: string;
+    name: string;
+    role: string;
+    created_at: string;
+    updated_at: string;
+    organization_id: string;
+  }[]}>({
+    api_keys: [],
   });
 
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const webhookUrl =
-    process.env.NODE_ENV === 'production'
-      ? 'app.suuper.co/api/v1/webhook'
-      : 'app.dev.suuper.co/api/v1/webhook';
+  const [openDialog, setOpenDialog] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [apiKeyToDelete, setApiKeyToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { t } = useTranslation('plugins');
 
@@ -51,16 +66,22 @@ function TreliContentStatic({
           const fetchedCredentials = response.credentials as Record<string, unknown>;
 
           setCredentials({
-            treli_user: (fetchedCredentials?.treli_user as string) || '',
-            treli_password:
-              (fetchedCredentials?.treli_password as string) || '',
-            webhook_url: (fetchedCredentials?.webhook_url as string) || '',
+            api_keys: (fetchedCredentials?.api_keys as {
+              api_key: string;
+              user_id: string;
+              name: string;
+              role: string;
+              created_at: string;
+              updated_at: string;
+              organization_id: string;
+            }[]
+            ) || [],
           });
         } else {
-          throw new Error(t('errorFetchingTreliCredentials'));
+          throw new Error(t('errorFetchingSuuperApiCredentials'));
         }
       } catch (error) {
-        console.error(t('errorFetchingTreliCredentials'), error);
+        console.error(t('errorFetchingSuuperApiCredentials'), error);
       } finally {
         setIsLoading(false);
       }
@@ -83,36 +104,96 @@ function TreliContentStatic({
     }
   };
 
-  const handleUpdate = async (field: string, value: string) => {
+  const handleCreateApiKey = async (data: {
+    name: string;
+    organization_id: string;
+    user_id: string;
+    role: string;
+  }) => {
     try {
-      const updatedCredentials = { ...credentials, [field]: value };
-
-      const providerId = crypto.randomUUID();
-
+      // Generate a random API key
+      const apiKey = `sk_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+      
+      const newApiKey = {
+        api_key: apiKey,
+        user_id: data.user_id,
+        name: data.name,
+        role: data.role,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        organization_id: data.organization_id,
+      };
+      
+      // Update the plugin credentials with the new API key
+      const updatedApiKeys = [...credentials.api_keys, newApiKey];
+      
       await updateAccountPlugin(
         pluginId,
         {
-          credentials: updatedCredentials,
-          provider: 'treli',
-          account_id: userId,
-          provider_id: providerId,
+          credentials: { api_keys: updatedApiKeys },
+          provider: 'suuper',
+          account_id: userId ?? '',
+          provider_id: crypto.randomUUID(),
         },
       );
-
-      setCredentials(updatedCredentials);
+      
+      setCredentials({ api_keys: updatedApiKeys });
+      setOpenDialog(false);
+      
       toast.success(t('successMessage'), {
-        description: t('fieldUpdated'),
+        description: t('apiKeyCreatedSuccess'),
       });
+      
+      return true;
     } catch (error) {
-      console.error(t('updateError', { field }), error);
+      console.error('Error creating API key:', error);
       toast.error(t('errorMessage'), {
-        description: t('updateError'),
+        description: t('failedToCreateApiKey'),
       });
+      return false;
     }
   };
 
-  const handleChange = (field: string, value: string) => {
-    setCredentials((prev) => ({ ...prev, [field]: value }));
+  const handleDeleteApiKey = async () => {
+    if (!apiKeyToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      // Filter out the API key to delete
+      const updatedApiKeys = credentials.api_keys.filter(
+        key => key.api_key !== apiKeyToDelete
+      );
+      
+      // Update the plugin credentials
+      await updateAccountPlugin(
+        pluginId,
+        {
+          credentials: { api_keys: updatedApiKeys },
+          provider: 'suuper',
+          account_id: userId ?? '',
+          provider_id: crypto.randomUUID(),
+        },
+      );
+      
+      setCredentials({ api_keys: updatedApiKeys });
+      toast.success(t('successMessage'), {
+        description: t('apiKeyDeletedSuccess'),
+      });
+    } catch (error) {
+      console.error('Error deleting API key:', error);
+      toast.error(t('errorMessage'), {
+        description: t('failedToDeleteApiKey'),
+      });
+    } finally {
+      setIsDeleting(false);
+      setApiKeyToDelete(null);
+      setDeleteDialogOpen(false);
+    }
+  };
+
+  const openDeleteDialog = (apiKey: string) => {
+    setApiKeyToDelete(apiKey);
+    setDeleteDialogOpen(true);
   };
 
   return (
@@ -121,109 +202,102 @@ function TreliContentStatic({
         <Spinner className="h-5" />
       ) : (
         <>
-          {/* Usuario Treli */}
-          <div className="mb-6 grid grid-cols-3 items-center gap-4">
+          {/* API Keys Section */}
+          <div className="mb-6 flex flex-col gap-4">
+           <div className="flex items-center justify-between w-full">
             <label className="col-span-1 text-sm font-medium text-gray-700">
-              {t('treliUser')} *
-            </label>
-            <div className="relative col-span-2">
-              <ThemedInput
-                className="w-full"
-                value={credentials.treli_user}
-                placeholder={t('treliUserPlaceholder')}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange('treli_user', e.target.value)
-                }
-                onBlur={() =>
-                  handleUpdate('treli_user', credentials.treli_user)
-                }
-              />
-              <button
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                type="button"
-                onClick={() => handleCopyToClipboard(credentials.treli_user)}
-              >
-                <Copy className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Contraseña Treli */}
-          <div className="grid grid-cols-3 items-center gap-4">
-            <label className="col-span-1 text-sm font-medium text-gray-700">
-              {t('treliPassword')} *
-            </label>
-            <div className="relative col-span-2">
-              <ThemedInput
-                className="w-full"
-                type={showPassword ? 'text' : 'password'}
-                value={credentials.treli_password}
-                placeholder={t('treliPasswordPlaceholder')}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  handleChange('treli_password', e.target.value)
-                }
-                onBlur={() =>
-                  handleUpdate('treli_password', credentials.treli_password)
-                }
-              />
-              <button
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Webhook Section */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-gray-800">
-              {t('connectTreliWebhook')}
-            </h3>
-            <p className="mt-1 flex items-center text-sm text-gray-500">
-              {t('tooltipWebhookDescription')}
-              <Tooltip
-                content={
-                  <div className="max-w-xs text-xs">
-                    {t('tooltipWebhookDescription')} <br />
-                    <span className="font-semibold">{t('tooltipSteps')}</span>
-                    <ol className="ml-4 mt-1 list-decimal">
-                      <li>{t('step1')}</li>
-                      <li>{t('step2')}</li>
-                      <li>{t('step3')}</li>
-                      <li>{t('step4')}</li>
-                    </ol>
-                  </div>
-                }
-                delayDuration={300}
-              >
-                <button
-                  type="button"
-                  className="ml-2 text-gray-500 hover:text-gray-700"
-                  aria-label={t('tooltipMoreInfo')}
-                >
-                  <Info className="h-4 w-4" />
-                </button>
-              </Tooltip>
-            </p>
-            <div className="mt-4 grid grid-cols-3 items-center gap-4">
-              <label className="col-span-1 text-sm font-medium text-gray-700">
-                {t('webhookUrl')}
+                {t('suuperApiKeys')}
               </label>
-              <div className="relative col-span-2">
-                <CopyDomain value={webhookUrl} className="mt-4" label={''} />
-              </div>
+              <ThemedButton
+                variant="outline"
+                size="sm"
+                onClick={() => setOpenDialog(true)}
+              >
+                {t('generateNewApiKey')}
+              </ThemedButton>
+           </div>
+            <div className="relative col-span-2">
+              {credentials.api_keys?.map((currentApiKey) => (  
+                <div key={currentApiKey.api_key} className="mb-2 p-3 border rounded-md">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-medium">{currentApiKey.name}</span>
+                    <span className="text-xs text-gray-500">
+                      {t('created')}: {new Date(currentApiKey.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <ThemedInput
+                    className="w-full mb-1"
+                    value={currentApiKey.api_key}
+                    disabled={true}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>{t('organization')}: {currentApiKey.organization_id}</span>
+                    <span>{t('user')}: {currentApiKey.user_id}</span>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        className="text-gray-500 hover:text-gray-700 flex items-center"
+                        type="button"
+                        onClick={() => handleCopyToClipboard(currentApiKey.api_key)}
+                      >
+                        <Copy className="h-4 w-4 mr-1" /> {t('copy')}
+                      </button>
+                      <button
+                        className="text-red-500 hover:text-red-700 flex items-center"
+                        type="button"
+                        onClick={() => openDeleteDialog(currentApiKey.api_key)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" /> {t('deleteApiKey')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
+
+          {
+            !credentials.api_keys?.length && (
+                <EmptyStateSuuperApi />
+            )
+          }
+
+          <CreateApiKeyDialog 
+            isOpen={openDialog}
+            setIsOpen={setOpenDialog}
+            onCreateApiKey={handleCreateApiKey}
+          />
+
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('deleteApiKey')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('deleteApiKeyConfirmation')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>{t('cancel')}</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={handleDeleteApiKey}
+                  disabled={isDeleting}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Spinner className="mr-2 h-4 w-4" />
+                      {t('deleting')}
+                    </>
+                  ) : (
+                    t('delete')
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </>
       )}
     </div>
   );
 }
 
-export default TreliContentStatic;
+export default SuuperApiContentStatic;
