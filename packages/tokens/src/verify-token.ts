@@ -47,6 +47,7 @@ export async function verifyToken(
   
   // Check if the token is in cache and has not expired
   const cachedResult = tokenCache.get(cacheKey);
+  console.log('cachedResult', cachedResult);
   if (cachedResult && (Date.now() - cachedResult.timestamp) < CACHE_EXPIRATION) {
     return {
       isValidToken: cachedResult.isValidToken,
@@ -65,9 +66,11 @@ export async function verifyToken(
       .select('access_token,expires_at');
     
     // Add conditions only if parameters are present
-    if (accessToken) {
+    if (accessToken && idTokenProvider) {
+      query.eq('access_token', accessToken).eq('id_token_provider', idTokenProvider);
+    } else if (accessToken && !idTokenProvider) {
       query.eq('access_token', accessToken);
-    } else if (idTokenProvider) {
+    } else if (!accessToken && idTokenProvider) {
       query.eq('id_token_provider', idTokenProvider);
     } else {
       // If there are no parameters, return quickly
