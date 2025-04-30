@@ -18,6 +18,7 @@ export async function handleApiAuth(request: NextRequest) {
     
     // First try to validate as API key
     if (authorizationHeader?.startsWith('suuper_')) {
+      if (request.nextUrl.pathname.startsWith('/api/v1/briefs') || request.nextUrl.pathname.startsWith('/api/v1/orders')) {
       const apiKey = authorizationHeader;
       const { isValid, headers } = await validateApiKey(apiKey ?? '');
 
@@ -32,6 +33,7 @@ export async function handleApiAuth(request: NextRequest) {
         
         return response;
       }
+    }
       
       return NextResponse.json({ 
         error: 'Unauthorized', 
