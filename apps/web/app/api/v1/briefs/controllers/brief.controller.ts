@@ -16,8 +16,11 @@ export class BriefController extends BaseController {
       const { searchParams } = new URL(req.url);
       const limit = parseInt(searchParams.get('limit') ?? '10', 10);
       const offset = parseInt(searchParams.get('offset') ?? '0', 10);
-      const organizationId = searchParams.get('organization_id') ?? undefined;
-      const agencyId = searchParams.get('agency_id') ?? undefined;
+      const organizationId = req.headers.get('organization_id') ?? undefined;
+      const agencyId = req.headers.get('agency_id') ?? undefined;
+
+      console.log('organizationId', organizationId);
+      console.log('agencyId', agencyId);
 
       const client = getSupabaseServerComponentClient({ admin: true });
       const briefService = await createBriefService(client);
