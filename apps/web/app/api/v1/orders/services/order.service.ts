@@ -1,12 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Logger as LoggerInstance, createLogger } from '@kit/shared/logger';
-import { CustomResponse, ErrorOrderOperations } from '@kit/shared/response';
+import { ErrorOrderOperations } from '@kit/shared/response';
 
 import { Order } from '~/lib/order.types';
 import { ApiError } from '~/lib/api/api-error';
 import { Database } from '~/lib/database.types';
-import { Brief } from '~/lib/brief.types';
 import { textFormat } from '~/utils/text-format';
 
 import { OrderRepository } from '../repositories/order.repository';
@@ -20,6 +19,11 @@ export class OrderService {
 
   async createOrder(
     data: CreateOrderDTO,
+    organizationId: string,
+    userId: string,
+    agencyId: string,
+    role: string,
+    domain: string,
   ): Promise<Order.Type> {
     try {
       this.logger.info({ title: data.title }, 'Creating order');
@@ -28,6 +32,7 @@ export class OrderService {
       const briefIds = data.brief_responses?.map((response) => response.brief_id) ?? [];
       
       const orderToInsert = {
+        uuid: crypto.randomUUID(),
         title: data.title,
         description: data.description,
         priority: data.priority,
@@ -38,16 +43,32 @@ export class OrderService {
       // Process brief responses if they exist
       const processedBriefResponses = data.brief_responses?.map(response => ({
         ...response,
-        response: typeof response.response === 'string' 
-          ? textFormat.encode(response.response) 
-          : response.response
+        form_fields: response.form_fields.map(field => ({
+          ...field,
+          response: typeof field.response === 'string'
+            ? textFormat.encode(field.response)
+            : field.response
+        }))
       }));
+
 
       // Create the order using the RPC function
       const order = await this.orderRepository.createOrder(
         orderToInsert,
-        processedBriefResponses ?? [],
-        data.order_followers ?? [],
+        processedBriefResponses ? processedBriefResponses.flatMap(response => 
+          response.form_fields.map(field => ({
+            brief_id: response.brief_id,
+            form_field_id: field.form_field_id,
+            response: field.response,
+            order_id: orderToInsert.uuid // This will be filled by the repository
+          }))
+        ) : [],
+        [],
+        organizationId,
+        userId,
+        agencyId,
+        role,
+        domain,
       );
 
       this.logger.info(

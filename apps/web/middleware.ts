@@ -47,7 +47,24 @@ export async function middleware(request: NextRequest) {
 
   // API Authentication
   const apiAuthResult = await handleApiAuth(request);
-  if (apiAuthResult) return apiAuthResult;
+  
+  if (apiAuthResult) {
+    // If apiAuthResult is a response, transfer the custom headers
+    if (apiAuthResult.headers) {
+      apiAuthResult.headers.forEach((value, key) => {
+        if (key.startsWith('x-suuper-')) {
+          // Extract the original header name without the prefix
+          const originalKey = key.replace('x-suuper-', '');
+          // Set the header in the request for later use
+          request.headers.set(originalKey, value);
+          // Also set it in the response for debugging if needed
+          response.headers.set(originalKey, value);
+          apiAuthResult.headers.set(originalKey, value);
+        }
+      });
+    }
+    return apiAuthResult;
+  }
 
   response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);

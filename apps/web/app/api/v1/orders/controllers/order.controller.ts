@@ -15,6 +15,19 @@ export class OrderController extends BaseController {
 
     try {
 
+      const organizationId = req.headers.get('organization_id');
+      const userId = req.headers.get('user_id');
+      const agencyId = req.headers.get('agency_id');
+      const role = req.headers.get('role');
+      const domain = req.headers.get('domain');
+
+      if (!organizationId || !userId || !agencyId || !role || !domain) {
+        throw ApiError.badRequest(
+          'Missing required headers',
+          ErrorOrderOperations.FAILED_TO_CREATE_ORDER,
+        );
+      }
+
       const body = await this.parseBody<CreateOrderDTO>(req);
 
       if (!body.title) {
@@ -34,7 +47,7 @@ export class OrderController extends BaseController {
       const client = getSupabaseServerComponentClient({ admin: true });
       const orderService = await createOrderService(client);
 
-      const order = await orderService.createOrder(body);
+      const order = await orderService.createOrder(body, organizationId, userId, agencyId, role, domain);
       return this.created(order, requestId);
     } catch (error) {
       return this.handleError(error, requestId);

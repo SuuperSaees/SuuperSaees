@@ -2,7 +2,7 @@
 
 import { Tokens } from '../../../apps/web/lib/tokens.types';
 import { getSupabaseServerComponentClient } from '../../../packages/supabase/src/clients/server-component.client';
-import { PayToken, TokenRecoveryType, DefaultToken } from './domain/token-type';
+import { PayToken, TokenRecoveryType, DefaultToken, SuuperApiKeyToken } from './domain/token-type';
 
 const { sha256 } = Tokens.EXTRA_TOKENS_KEYS;
 
@@ -40,7 +40,7 @@ export async function verifyToken(
   validateExpired = true,
 ): Promise<{
   isValidToken: boolean;
-  payload?: PayToken | TokenRecoveryType | DefaultToken;
+  payload?: PayToken | TokenRecoveryType | DefaultToken | SuuperApiKeyToken;
 }> {
   // Create a unique cache key
   const cacheKey = `${accessToken}-${idTokenProvider}-${validateExpired}`;

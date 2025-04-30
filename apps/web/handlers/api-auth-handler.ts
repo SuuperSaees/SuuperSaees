@@ -8,7 +8,6 @@ const CLIENT_SECRET =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkwMjk0ZmM2LWJlODItNGE5Zi04ZDIyLTNjZDc0ZDAwODJjZSIsIm5hbWUiOiJzYW11ZWwiLCJlbWFpbCI6InNhbXVlbEBzdXVwZXIuY28iLCJkb21haW4iOiJzdXVwZXIuY28ifQ.Q3rEzb3evSkVZgJeIYtJtRn_5f2xUG1HHxRnVoACDV0';
 
 export async function handleApiAuth(request: NextRequest) {
-
   if (request.nextUrl.pathname === '/api/v1/webhook') {
     return NextResponse.next();
   }
@@ -20,10 +19,18 @@ export async function handleApiAuth(request: NextRequest) {
     // First try to validate as API key
     if (authorizationHeader?.startsWith('suuper_')) {
       const apiKey = authorizationHeader;
-      const isValidApiKey = await validateApiKey(request, apiKey ?? '');
+      const { isValid, headers } = await validateApiKey(apiKey ?? '');
 
-      if (isValidApiKey) {
-        return NextResponse.next();
+      if (isValid) {
+        // Crear una nueva respuesta con los headers modificados
+        const response = NextResponse.next();
+        
+        // Añadir los headers de autenticación a la respuesta
+        Object.entries(headers).forEach(([key, value]) => {
+          response.headers.set(`x-suuper-${key}`, value);
+        });
+        
+        return response;
       }
       
       return NextResponse.json({ 
@@ -46,12 +53,12 @@ export async function handleApiAuth(request: NextRequest) {
   return null;
 }
 
-async function validateApiKey(request: NextRequest, apiKey: string): Promise<boolean> {
+async function validateApiKey(apiKey: string): Promise<{isValid: boolean, headers: Record<string, string>}> {
   try {
     // Check if the API key starts with "suuper_"
     if (!apiKey.startsWith('suuper_')) {
       console.error('Invalid API key format: missing suuper_ prefix');
-      return false;
+      return { isValid: false, headers: {} };
     }
     
     // Split the API key by underscore
@@ -59,7 +66,7 @@ async function validateApiKey(request: NextRequest, apiKey: string): Promise<boo
     
     if (!tokenPart || !encodedIdPart) {
       console.error('Invalid API key format: missing parts');
-      return false;
+      return { isValid: false, headers: {} };
     }
     
     // Decode the ID token provider from base64
@@ -68,20 +75,34 @@ async function validateApiKey(request: NextRequest, apiKey: string): Promise<boo
     // Verify the token using the verifyToken function
     const { isValidToken, payload } = await verifyToken(tokenPart, idTokenProvider, false);
     
-    if (!isValidToken) {
+    if (!isValidToken || !payload) {
       console.error('API key verification failed');
-      return false;
+      return { isValid: false, headers: {} };
     }
 
-    request.headers.set('user_id', payload?.user_id ?? '');
-    request.headers.set('organization_id', payload?.organization_id ?? '');
-    request.headers.set('role', payload?.role ?? '');
-    request.headers.set('domain', payload?.domain ?? '');
-    request.headers.set('agency_id', payload?.agency_id ?? '');
-    return true;
+    // Crear un objeto para almacenar los headers
+    const headers: Record<string, string> = {};
+    
+    if ('user_id' in payload) {
+      headers.user_id = payload.user_id as string;
+    }
+    if ('organization_id' in payload) {
+      headers.organization_id = payload.organization_id;
+    }
+    if ('role' in payload) {
+      headers.role = payload.role as string;
+    }
+    if ('domain' in payload) {
+      headers.domain = payload.domain as string;
+    }
+    if ('agency_id' in payload) {
+      headers.agency_id = payload.agency_id;
+    }
+    
+    return { isValid: true, headers };
   } catch (error) {
     console.error('Error validating API key:', error);
-    return false;
+    return { isValid: false, headers: {} };
   }
 }
 

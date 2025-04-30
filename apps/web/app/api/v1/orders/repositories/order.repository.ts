@@ -13,7 +13,14 @@ export class OrderRepository {
     order: Partial<Order.Insert>,
     briefResponses: Brief.Relationships.FormFieldResponses[],
     orderFollowers: string[],
+    organizationId: string,
+    userId: string,
+    agencyId: string,
+    role: string,
+    domain: string,
   ): Promise<Order.Type> {
+    console.log('agencyId', agencyId);
+    console.log('domain', domain);
     const { data, error } = await this.client.rpc(
       'create_order',
       {
@@ -21,8 +28,13 @@ export class OrderRepository {
         _brief_responses: briefResponses,
         _order_followers: orderFollowers,
         _order_file_ids: [],
+        _organization_id: organizationId,
+        _user_id: userId,
+        _user_role: role,
       },
     );
+
+    console.log('error', error);
 
     if (error) {
       if (error.code === '42501') {
