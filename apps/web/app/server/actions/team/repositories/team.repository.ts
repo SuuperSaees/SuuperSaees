@@ -112,17 +112,18 @@ export class TeamRepository {
         if (membersDataError) throw membersDataError;
 
         const membersDataMap = new Map(membersData.map((member) => [member.id, member]));
-        
-        resultMembers[organizationId].members = members.map((member) => ({
-          id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.user_settings?.[0]?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
-          email: membersDataMap.get(member.user_id)?.email ?? '',
-          organization_id: organizationId,
-          role: member.account_role,
-          picture_url: membersDataMap.get(member.user_id)?.user_settings?.[0]?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
-          // visibility: true,
-        }
-      ));
+        resultMembers[organizationId].members = members
+          .filter((member) => membersDataMap.has(member.user_id))
+          .map((member) => ({
+            id: member.user_id,
+            name: membersDataMap.get(member.user_id)?.user_settings?.[0]?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
+            email: membersDataMap.get(member.user_id)?.email ?? '',
+            organization_id: organizationId,
+            role: member.account_role,
+            picture_url: membersDataMap.get(member.user_id)?.user_settings?.[0]?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
+            // visibility: true,
+          }));
+
       }
       
 
