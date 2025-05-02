@@ -46,6 +46,7 @@ export const getOrganizationSettings = async () => {
         .eq('organization_id', organizationId ?? '');
 
       if (settingsError) {
+        console.error(`Error fetching organization settings get-organizations file ${organizationId}. ${!organizationId ? 'No organization id' : ''}`, settingsError);
         throw settingsError.message;
       }
 
@@ -55,7 +56,7 @@ export const getOrganizationSettings = async () => {
       }
     }
   } catch (error) {
-    console.error('Error fetching organization settings:', error);
+    console.error(`Error fetching organization settings get-organizations file`, error);
     throw error;
   }
 };
