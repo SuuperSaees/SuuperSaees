@@ -19,6 +19,7 @@ import { UnreadMessageIndicator } from '../../../components/ui/unread-message-in
 import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
 import { OverdueIndicator } from '../../../components/ui/overdue-indicator';
 import { ColumnConfigs, EntityData } from '../types';
+import PrefetcherLink from '../../../components/shared/prefetcher-link';
 
 const truncateText = (text: string | undefined, maxLength = 50) => {
   if (!text) return '';
@@ -40,7 +41,7 @@ export const ordersColumns = (
       header: t('orders.title'),
       cell: ({ row }) => {
         return (
-          <Link
+          <PrefetcherLink
             href={`/orders/${row.original.id}`}
             className="flex w-full min-w-[100px] gap-2"
           >
@@ -65,7 +66,7 @@ export const ordersColumns = (
                 {truncateText(row.original?.brief?.name ?? '')}
               </span>
             </div>
-          </Link>
+          </PrefetcherLink>
         );
       },
     },

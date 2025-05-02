@@ -23,6 +23,7 @@ import { TimerContainer } from '../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { PlusIcon } from 'lucide-react';
+import PrefetcherLink from '../../components/shared/prefetcher-link';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -83,12 +84,12 @@ export function ServicesPageClient() {
       button={
         (accountRole === 'agency_owner' ||
           accountRole === 'agency_project_manager') && (
-          <Link href="/services/create">
+          <PrefetcherLink href="/services/create">
             <ThemedButton>
               <PlusIcon className="h-4 w-4" />
               {t('createService')}
             </ThemedButton>
-          </Link>
+          </PrefetcherLink>
         )
       }
     />
@@ -116,12 +117,12 @@ export function ServicesPageClient() {
           {filteredData.length > 0 &&
             (accountRole === 'agency_owner' ||
               accountRole === 'agency_project_manager') && (
-              <Link href="/services/create">
+              <PrefetcherLink href="/services/create">
                 <ThemedButton>
                   <PlusIcon className="h-4 w-4" />
                   {t('createService')}
                 </ThemedButton>
-              </Link>
+              </PrefetcherLink>
             )}
         </div>
       </div>

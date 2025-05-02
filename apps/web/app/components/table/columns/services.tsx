@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Link2, Pen, Check } from 'lucide-react';
@@ -14,6 +13,7 @@ import DeleteServiceDialog from '~/services/delete/delete-component';
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { ColumnConfigs } from '../types';
+import PrefetcherLink from '../../../components/shared/prefetcher-link';
 
 export const servicesColumns = (
   t: TFunction,
@@ -24,12 +24,12 @@ export const servicesColumns = (
       accessorKey: 'name',
       header: t('services:name'),
       cell: ({ row }) => (
-        <Link
+        <PrefetcherLink
           href={`/services/update?id=${row.original.id}`}
           className="flex w-full gap-2 font-semibold"
         >
           <div className="">{row.getValue('name')}</div>
-        </Link>
+        </PrefetcherLink>
       ),
     },
     {
@@ -178,12 +178,12 @@ const handleCopyCheckoutUrl = () => {
       {/* {accountRole === "agency_owner" && <UpdateServiceDialog valuesOfServiceStripe={service} />} */}
       {hasPermission && hasPermission('edit') && (
         <Tooltip content={t('services:edit')}>
-          <Link
+          <PrefetcherLink
             href={`/services/update?id=${service.id}`}
             className="rounded-md p-2 hover:bg-accent"
           >
             <Pen className="h-4 w-4 cursor-pointer text-gray-600" />
-          </Link>
+          </PrefetcherLink>
         </Tooltip>
       )}
       {hasPermission && hasPermission('delete') && (
