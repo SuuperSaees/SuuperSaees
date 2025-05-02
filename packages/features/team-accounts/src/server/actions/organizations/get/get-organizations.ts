@@ -21,6 +21,7 @@ export const getOrganizationSettings = async () => {
     const agencyId = sessionData?.agency?.id;
 
     if (
+      role &&
       role !== 'agency_member' &&
       role !== 'agency_owner' &&
       role !== 'agency_project_manager' &&
