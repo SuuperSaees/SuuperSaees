@@ -78,7 +78,6 @@ const BriefServices = ({
   services: Brief.Relationships.Services.Response['services'];
   
 }) => {
-  console.log(services)
   const tagColors = [
     {
       bgColor: 'bg-blue-100',
