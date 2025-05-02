@@ -39,7 +39,7 @@ export const getOrganizationSettings = async () => {
       return organizationSettings;
     } else {
 
-      if (organizationId) {
+      if (organizationId && organizationId !== '') {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
