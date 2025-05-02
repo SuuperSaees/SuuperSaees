@@ -38,6 +38,8 @@ export const getOrganizationSettings = async () => {
       }
       return organizationSettings;
     } else {
+
+      if (organizationId) {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
@@ -48,6 +50,9 @@ export const getOrganizationSettings = async () => {
       }
 
       return organizationSettings;
+      } else {
+        return [];
+      }
     }
   } catch (error) {
     console.error('Error fetching organization settings:', error);
