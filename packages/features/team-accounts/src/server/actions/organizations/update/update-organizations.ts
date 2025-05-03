@@ -25,7 +25,7 @@ export const upsertOrganizationSettings = async (
 
   try {
     // Fetch the organization account for the current user
-   const organizationId = (await client.rpc('get_session')).data?.organization?.id ?? '';
+   const organizationId = (await client.rpc('get_current_organization_id')).data ?? '';
 
     // Validate hex color if key is 'theme_color'
     if (
