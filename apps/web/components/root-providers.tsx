@@ -56,7 +56,7 @@ export function RootProviders({
   lang: string;
   theme?: string;
   organizationSettings: {
-    organization_id: string;
+    account_id: string;
     created_at: string;
     id: string;
     key: Database['public']['Enums']['organization_setting_key'];
