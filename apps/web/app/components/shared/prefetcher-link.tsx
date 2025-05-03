@@ -18,7 +18,7 @@ const PrefetcherLink = (props: ComponentPropsWithRef<typeof Link>) => {
   return (
     <Link
       {...props}
-      prefetch={false}
+      prefetch={true}
       onMouseEnter={(e) => {
         conditionalPrefetch();
         return props.onMouseEnter?.(e);
