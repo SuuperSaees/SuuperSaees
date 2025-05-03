@@ -49,7 +49,7 @@ export async function fetchCurrentUserAccount(
         `Error fetching current user account data: ${currentUserError.message}`,
       );
     }
-    const organizationId = (await client.rpc('get_session')).data?.organization?.id;
+    const organizationId = (await client.rpc('get_current_organization_id')).data;
 
     return {
       ...currentUserAccount,
@@ -144,7 +144,7 @@ export async function getUserById(userId: string) {
 export async function getUserRole() {
   try {
     const client = getSupabaseServerComponentClient();
-    return (await client.rpc('get_session')).data?.organization?.role;
+    return (await client.rpc('get_current_role')).data;
   } catch (error) {
     console.error('Error fetching user role:', error);
     throw error;
@@ -156,7 +156,7 @@ export async function getUserRoleById(userId: string, adminActivated = false, cl
    
     client = client ?? getSupabaseServerComponentClient({ admin: adminActivated });
     if(!adminActivated) {
-      return (await client.rpc('get_session')).data?.organization?.role;
+      return (await client.rpc('get_current_role')).data;
     }
 
     const { error: userAccountError, data: userAccountData } = await client
