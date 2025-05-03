@@ -3,7 +3,6 @@
 import {
   type Dispatch,
   type SetStateAction,
-  cache,
   createContext,
   useCallback,
   useContext,
@@ -39,7 +38,7 @@ export const OrdersProvider = ({
   agencyMembers,
   agencyId,
   queryKey = ['orders'],
-  queryFn = cache(() => getOrders(true)),
+  queryFn = () => getOrders(true),
   initialOrders,
 }: OrdersProviderProps) => {
   // const [orders, setOrders] = useState<Order.Response[]>(initialOrders);
