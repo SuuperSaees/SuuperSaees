@@ -57,7 +57,7 @@ export function PersonalAccountSettingsContainer(
       .single();
 
     if (userAccountError) console.error(userAccountError.message);
-    const organizationId = (await client.rpc('get_session')).data?.organization?.id;
+    const organizationId = (await client.rpc('get_current_organization_id')).data;
     return {
       ...user,
       organization_id: organizationId ?? '',

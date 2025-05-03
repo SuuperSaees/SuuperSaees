@@ -10,7 +10,7 @@ export const hasPermissionToViewOrganization = async (
   const client = getSupabaseServerComponentClient();
   try {
     // Step 1: Fetch current user data
-    const currentOrganizationId = (await client.rpc('get_session')).data?.organization?.id ?? '';
+    const currentOrganizationId = (await client.rpc('get_current_organization_id')).data ?? '';
 
     // Step 2: Check the user role
     //   const validRoles = ['agency_owner', 'client_owner'];
