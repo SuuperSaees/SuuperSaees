@@ -1,3 +1,6 @@
+import { AgencyStatus } from "./agency-statuses.types";
+import { Tags } from "./tags.types";
+
 export namespace Members {
   export type Type = {
     organizations: Organization[];
@@ -32,6 +35,9 @@ export namespace Members {
     picture_url: string;
     members?: Member[];
     is_agency?: boolean;
+    slug: string;
+    statuses?: AgencyStatus.Type[];
+    tags?: Tags.Type[];
   }>
 
 
