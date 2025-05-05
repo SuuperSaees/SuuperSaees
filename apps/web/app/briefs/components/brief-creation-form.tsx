@@ -24,11 +24,11 @@ import { Brief } from '../types/brief.types';
 import BriefServicesAssignation from './brief-services-assignation';
 import FieldsetFields from './fieldset-fields';
 import FieldsetInformation from './fieldset-information';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 type FormFieldType = FormFieldType.Response;
 
 type CreateBriefDialogProps = {
-  userRole: string;
   showFormFields?: boolean;
   showInfo?: boolean;
   defaultFormFields?: FormFieldType[];
@@ -38,7 +38,6 @@ type CreateBriefDialogProps = {
 export type BriefCreationForm = z.infer<typeof briefCreationFormSchema>;
 
 const BriefCreationForm = ({
-  userRole,
   showFormFields = true,
   showInfo = false,
   defaultFormFields = [],
@@ -49,6 +48,9 @@ const BriefCreationForm = ({
     services: [],
   },
 }: CreateBriefDialogProps) => {
+  console.log('defaultBriefInfo', defaultBriefInfo , 'defaultFormFields', defaultFormFields);
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const userRole = userWorkspace.role ?? '';
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
   const isUpdate = defaultFormFields.length > 0; // Check if the form is for updating an existing brief
   const renderNumber = useRef(1);
@@ -71,7 +73,7 @@ const BriefCreationForm = ({
   };
 
   useEffect(() => {
-    if (defaultBriefInfo.name && !formFields.length && renderNumber.current === 1) {
+    if (defaultBriefInfo.name && renderNumber.current === 1) {
       const { 
         defaultFormFields: formattedDefaultFormFields,
         defaultInitialFormField,
