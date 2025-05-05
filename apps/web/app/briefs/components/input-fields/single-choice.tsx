@@ -18,7 +18,8 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
   form,
   handleQuestionChange,
   handleQuestionFocus,
-  handleQuestionBlur
+  handleQuestionBlur,
+  ...props
 }) => {
   // const [selectedOption, setSelectedOption] = useState<string | null>(
   //   question.options?.[0]?.value ?? null,
@@ -37,6 +38,7 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
       handleQuestionChange={handleQuestionChange}
       handleQuestionFocus={handleQuestionFocus}
       handleQuestionBlur={handleQuestionBlur}
+      {...props}
     >
       <div className="mt-4 flex w-full flex-col gap-3">
         {question.options?.map(
@@ -63,7 +65,6 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
                       newOptions[optIndex] = {
                         ...question?.options?.[optIndex] as Option,
                         label: value,
-                        value: value,
                       };
 
                       handleQuestionChange(question.id, `options`, newOptions);
