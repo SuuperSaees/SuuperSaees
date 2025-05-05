@@ -4,10 +4,10 @@ import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/butto
 import PrefetcherLink from '../../components/shared/prefetcher-link';
 
 const CreateOrderButton = ({
-  text,
+  t,
   hasOrders,
 }: {
-  text: string | React.ReactNode;
+  t: (key: string) => string;
   hasOrders: boolean;
 }) => {
   return (
@@ -16,7 +16,7 @@ const CreateOrderButton = ({
         <PrefetcherLink href="/orders/create" className='ml-auto'>
           <ThemedButton className="h-fit">
             <PlusIcon className="h-4 w-4" />
-            {text}
+            {t('orders:create')}
           </ThemedButton>
         </PrefetcherLink>
       )}

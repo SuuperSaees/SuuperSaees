@@ -1,20 +1,15 @@
-import { Suspense } from 'react';
-
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
-import { Trans } from '@kit/ui/trans';
 
 import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-import { PageHeader } from '../components/page-header';
-import { TimerContainer } from '../components/timer-container';
+
 // import { PageHeader } from '../components/page-header';
 // import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
-import CreateOrderButton from './components/create-order-button';
 import ProjectsBoard from './components/projects-board';
 
 export const generateMetadata = async () => {
@@ -29,11 +24,7 @@ async function OrdersPage() {
     admin: false,
   });
 
-  const {
-    workspace: userWorkspace,
-    agency,
-    organization,
-  } = await loadUserWorkspace();
+  const { workspace: userWorkspace, agency, organization } = await loadUserWorkspace();
 
   const agencyRoles = [
     'agency_owner',
@@ -43,7 +34,7 @@ async function OrdersPage() {
 
   const userAgency = agencyRoles.includes(userWorkspace.role ?? '')
     ? organization
-    : agency;
+    : agency
   const agencyId = userAgency?.id ?? '';
 
   const { data, error: membersError } = await client.rpc(
@@ -68,6 +59,7 @@ async function OrdersPage() {
       },
     })) ?? [];
 
+
   const tags = userAgency?.tags ?? [];
 
   return (
@@ -79,22 +71,28 @@ async function OrdersPage() {
         initialStatuses={agencyStatuses ?? []}
         agencyMembers={agencyMembers ?? []}
       >
-        <PageBody className="flex h-screen max-h-full min-h-0 flex-1 flex-col">
-          <PageHeader
-            title="orders:title"
-            rightContent={<TimerContainer />}
-            className="flex w-full"
-          >
-            <h2 className="text-xl font-medium leading-4">
-              <Trans i18nKey="orders:title" />
-            </h2>
-            <CreateOrderButton
-              text={<Trans i18nKey="orders:create" />}
-              hasOrders={true}
-            />
-          </PageHeader>
-
-          <Suspense fallback={<div>Loading boar...</div>}>
+        <PageBody className="h-screen flex max-h-full min-h-0 flex-1 flex-col">
+{/*  
+            <PageHeader
+              title="orders:title"
+              rightContent={<TimerContainer />}
+            /> */}
+            {/* {agencyRoles.includes(userWorkspace.role ?? '') ? (
+              <PageHeader
+                title="orders:title"
+                rightContent={<TimerContainer />}
+              />
+            ) : (
+              <Header
+                name={userOrganization.name ?? ''}
+                logo={userOrganization.picture_url ?? ''}
+                id={userOrganization.id ?? ''}
+                currentUserRole={userWorkspace.role ?? ''}
+                className="mb-6 flex items-center gap-2"
+                imageClassName="aspect-square h-8 w-8 flex-shrink-0"
+                contentClassName="flex flex-col justify-center"
+              />
+            )} */}
             <ProjectsBoard
               agencyMembers={agencyMembers.map((member) => ({
                 id: member.id,
@@ -104,7 +102,24 @@ async function OrdersPage() {
               }))}
               tags={tags}
             />
-          </Suspense>
+            {/* {
+              agencyRoles.includes(userWorkspace.role ?? '') ? (
+                <ProjectsBoard agencyMembers={agencyMembers.map(member => ({
+                  organization_id: member.account_id,
+                  settings: member.user_settings,
+                  role: member.role
+                }))} tags={tags} />
+              ) : (
+                <SectionView 
+                  clientOrganizationId={userOrganization.id ?? ''} 
+                  currentUserRole={userWorkspace.role ?? ''} 
+                  agencyId={agencyId ?? ''} 
+                  sections={['orders']}
+                  showCardStats={false}
+                />
+              )
+            } */}
+   
         </PageBody>
       </AgencyStatusesProvider>
     </OrdersProvider>
