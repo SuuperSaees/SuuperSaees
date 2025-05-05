@@ -15,10 +15,7 @@ import { TimerContainer } from '../components/timer-container';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
 import CreateOrderButton from './components/create-order-button';
-import dynamic from 'next/dynamic';
-const ProjectsBoard = dynamic(() => import('./components/projects-board'), {
-  ssr: false, // <- Importante para que no se incluya en SSR
-});
+import ProjectsBoard from './components/projects-board';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
