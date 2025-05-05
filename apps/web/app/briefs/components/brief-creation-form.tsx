@@ -48,7 +48,6 @@ const BriefCreationForm = ({
     services: [],
   },
 }: CreateBriefDialogProps) => {
-  console.log('defaultBriefInfo', defaultBriefInfo , 'defaultFormFields', defaultFormFields);
   const { workspace: userWorkspace } = useUserWorkspace();
   const userRole = userWorkspace.role ?? '';
   const { t } = useTranslation('briefs'); // Translation hook for internationalization
