@@ -83,7 +83,17 @@ export default function FieldsetFields({
 
     // Use the custom deep equality check
     if (!deepEqual(initialFormState.current, currentFormState)) {
-      await updateBriefFormFields(currentFormState);
+      // Update value if it's an option to be equal to label
+      const updatedFormState = [...currentFormState];
+      updatedFormState.forEach(question => {
+        if (question.type === 'select' || question.type === 'multiple_choice') {
+          question.options?.forEach(opt => {
+            opt.value = opt.label;
+          }); 
+        }
+      });
+      
+      await updateBriefFormFields(updatedFormState);
       initialFormState.current = formFields;
     }
   };

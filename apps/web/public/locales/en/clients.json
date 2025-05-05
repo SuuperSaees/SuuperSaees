@@ -2,7 +2,7 @@
   "title": "Clients",
   "client": "Clients",
   "yourTeams": "Your teams ({{teamsCount}})",
-  "createClient": "New",
+  "createClient": "New client",
   "personalAccount": "Personal account",
   "searchAccount": "Search account...",
   "teamsTabLabel": "Team",

@@ -57,6 +57,7 @@ export type ComponentProps = {
   inSidebar?: boolean;
   handleQuestionFocus?: (id: string, field: keyof FormFieldType) => void;
   handleQuestionBlur?: () => Promise<void>
+  [key: string]: unknown;
 };
 
 export type InputTypes =

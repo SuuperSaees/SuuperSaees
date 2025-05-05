@@ -7,7 +7,7 @@
   "status": "Estado",
   "createdAt": "Creado en",
   "actions": "Acciones",
-  "createService": "Nuevo",
+  "createService": "Nuevo servicio",
   "addService": "Agregar servicio",
   "serviceNameLabel": "Ingresa el nombre del servicio",
   "serviceName": "Nombre",

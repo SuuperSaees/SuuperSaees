@@ -54,6 +54,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ), // Custom component
       },
@@ -82,6 +83,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ), // Custom component
       },
@@ -110,6 +112,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ), // Custom component
       },
@@ -152,6 +155,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ), // Custom component
       },
@@ -194,6 +198,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ), // Custom component
       },
@@ -236,6 +241,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ),
       },
@@ -264,6 +270,7 @@ export const useGenerateInputs = (
             handleRemoveQuestion={props.handleRemoveQuestion}
             handleQuestionFocus={props.handleQuestionFocus}
             handleQuestionBlur={props.handleQuestionBlur}
+            key={props.question.id}
           />
         ), // Custom component
       },
