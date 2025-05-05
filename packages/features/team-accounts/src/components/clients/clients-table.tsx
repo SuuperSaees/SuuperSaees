@@ -32,6 +32,7 @@ import CreateClientDialog from '../../../../../../packages/features/team-account
 import { ClientsWithOrganization } from '../../server/actions/clients/get/get-clients';
 import AgencyClientCrudMenu from './agency-client-crud-menu';
 import { OrganizationOptionsDropdown } from './organization-options-dropdown';
+import PrefetcherLink from '../../../../../../apps/web/app/components/shared/prefetcher-link';
 
 const getUniqueOrganizations = (
   clients: ClientsWithOrganization[],
@@ -288,7 +289,7 @@ const useClientColumns = (
         accessorKey: 'name',
         header: t('clientName'),
         cell: ({ row }) => (
-          <Link
+          <PrefetcherLink
             href={`clients/organizations/${row.original.organization.id}`}
             className={'flex items-center space-x-4 text-left'}
           >
@@ -312,19 +313,19 @@ const useClientColumns = (
                 {row.original.email}
               </span>
             </div>
-          </Link>
+          </PrefetcherLink>
         ),
       },
       {
         accessorKey: 'client_organization',
         header: t('organization'),
         cell: ({ row }) => (
-          <Link
+          <PrefetcherLink
             href={`clients/organizations/${row.original.organization.id}`}
             className="capitalize text-gray-600"
           >
             {row.original.organization.name}
-          </Link>
+          </PrefetcherLink>
         ),
       },
       {
@@ -391,7 +392,7 @@ const useOrganizationColumns = (
         accessorKey: 'client_organization',
         header: t('organizationName'),
         cell: ({ row }) => (
-          <Link
+          <PrefetcherLink
             href={`clients/organizations/${row.original.id}`}
             className={'flex items-center space-x-4 text-left'}
           >
@@ -409,7 +410,7 @@ const useOrganizationColumns = (
                 {t('leader')}: {row.original.primary_owner}
               </span>
             </div>
-          </Link>
+          </PrefetcherLink>
         ),
       },
       {

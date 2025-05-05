@@ -50,7 +50,7 @@ export const createClient = async (clientData: CreateClient) => {
       .eq('email', clientData.client.email)
       .single();
 
-      const agencyIdForReactivation = !clientData.adminActivated ? (await supabase.rpc('get_session')).data?.organization?.id : clientData.agencyId;
+      const agencyIdForReactivation = !clientData.adminActivated ? (await supabase.rpc('get_current_organization_id')).data : clientData.agencyId;
 
       if (accountData?.id) {
         // Now check if this account was a deleted client

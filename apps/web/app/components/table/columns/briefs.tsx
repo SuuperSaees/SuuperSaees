@@ -1,8 +1,6 @@
 // apps/web/app/components/table/columns/briefs.tsx
 'use client';
 
-import Link from 'next/link';
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ColumnDef } from '@tanstack/react-table';
 import { Copy, Pen } from 'lucide-react';
@@ -18,6 +16,7 @@ import DeleteBriefDialog from '~/team-accounts/src/server/actions/briefs/delete/
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { ColumnConfigs } from '../types';
+import PrefetcherLink from '../../../components/shared/prefetcher-link';
 
 
 export const briefsColumns = (
@@ -29,11 +28,11 @@ export const briefsColumns = (
       accessorKey: 'name',
       header: t('briefs:name'),
       cell: ({ row }) => (
-        <Link href={`/briefs/${row.original.id}`} className="flex w-full gap-2">
+        <PrefetcherLink href={`/briefs/${row.original.id}`} className="flex w-full gap-2">
           <span className="line-clamp-3 font-semibold">
             {row.getValue('name')}
           </span>
-        </Link>
+        </PrefetcherLink>
       ),
     },
     {
@@ -78,7 +77,6 @@ const BriefServices = ({
   services: Brief.Relationships.Services.Response['services'];
   
 }) => {
-  console.log(services)
   const tagColors = [
     {
       bgColor: 'bg-blue-100',
@@ -159,12 +157,12 @@ function BriefActions({
   return (
     <div className="flex items-center gap-4">
       <Tooltip content={t('briefs:editBrief')}>
-        <Link
+        <PrefetcherLink
           href={`/briefs/${brief.id}`}
           className="rounded-md p-2 hover:bg-accent"
         >
           <Pen className="h-4 w-4 text-gray-600 hover:text-gray-900" />
-        </Link>
+        </PrefetcherLink>
       </Tooltip>
 
       <Tooltip content={t('briefs:duplicateBrief')}>

@@ -3,7 +3,6 @@
 import {
   useMemo, //  useState
 } from 'react';
-import Link from 'next/link';
 
 import { ColumnDef } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +18,7 @@ import AgencyClientCrudMenu from '../clients/agency-client-crud-menu';
 import { RoleBadge } from './role-badge';
 import { Spinner } from '@kit/ui/spinner';
 import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';
+import PrefetcherLink from '../../../../../../apps/web/app/components/shared/prefetcher-link';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
@@ -124,7 +124,7 @@ function useGetColumns(
           const isSelf = member.user_id === params.currentUserId;
 
           return (
-            <Link
+            <PrefetcherLink
               className={'flex items-center space-x-4 text-left font-semibold'}
               href={`/team/${member.id}`}
             >
@@ -140,7 +140,7 @@ function useGetColumns(
               <If condition={isSelf}>
                 <Badge variant={'outline'}>{t('youLabel')}</Badge>
               </If>
-            </Link>
+            </PrefetcherLink>
           );
         },
       },

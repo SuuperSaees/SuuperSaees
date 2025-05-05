@@ -21,6 +21,7 @@ export const getOrganizationSettings = async () => {
     const agencyId = sessionData?.agency?.id;
 
     if (
+      role &&
       role !== 'agency_member' &&
       role !== 'agency_owner' &&
       role !== 'agency_project_manager' &&
@@ -38,19 +39,25 @@ export const getOrganizationSettings = async () => {
       }
       return organizationSettings;
     } else {
+
+      if (organizationId && organizationId !== '') {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
         .eq('organization_id', organizationId ?? '');
 
       if (settingsError) {
+        console.error(`Error fetching organization settings get-organizations file ${organizationId}. ${!organizationId ? 'No organization id' : ''}`, settingsError);
         throw settingsError.message;
       }
 
       return organizationSettings;
+      } else {
+        return [];
+      }
     }
   } catch (error) {
-    console.error('Error fetching organization settings:', error);
+    console.error(`Error fetching organization settings get-organizations file`, error);
     throw error;
   }
 };
