@@ -7,7 +7,7 @@
   "status": "Status",
   "createdAt": "Created At",
   "actions": "Actions",
-  "createService": "New",
+  "createService": "New service",
   "addService": "Add service",
   "serviceNameLabel": "Enter the service name",
   "serviceName": "Name",
