@@ -5,11 +5,11 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Embeds } from '~/lib/embeds.types';
 import { Order } from '~/lib/order.types';
 
-import { PageHeader } from '../../components/page-header';
-import { TimerContainer } from '../../components/timer-container';
+// import { PageHeader } from '../../components/page-header';
+// import { TimerContainer } from '../../components/timer-container';
 import { ValueFormatters } from '../hooks/use-csv-export-formatters';
 import { ViewOption } from '../hooks/use-orders-view-configs';
-import CreateOrderButton from './create-order-button';
+// import CreateOrderButton from './create-order-button';
 import Filters, { FilterGroup } from './filters';
 import Search from './search';
 import SettingsDropdown from './settings-dropdown';
@@ -59,13 +59,13 @@ export function BoardHeader({
   // ];
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="orders:title" rightContent={<TimerContainer />} className="w-full flex">
+      {/* <PageHeader title="orders:title" rightContent={<TimerContainer />} className="w-full flex">
         <h2 className='text-xl font-medium leading-4'>{t('title')}</h2>
         <CreateOrderButton
           t={t}
           hasOrders={orders.length > 0 || ordersAreLoading}
         />
-      </PageHeader>
+      </PageHeader> */}
       <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="mr-auto flex items-center gap-4">
           {/* Status filters */}
