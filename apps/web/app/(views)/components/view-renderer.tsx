@@ -12,14 +12,10 @@ import { ViewTypeEnum } from '../views.types';
 // Dynamically import the views => this allows us to lazy load the components
 const KanbanView = dynamic(() => import('./kanban/kanban-view'), {
   loading: () => <KanbanSkeleton columns={5} />,
-  ssr: false,
 });
-const CalendarView = dynamic(() => import('./calendar/calendar-view'), {
-  ssr: false,
-});
+const CalendarView = dynamic(() => import('./calendar/calendar-view'));
 const TableView = dynamic(() => import('./table/table-view'), {
   loading: () => <TableSkeleton columns={9} rows={7} />,
-  ssr: false,
 });
 // interface ViewRendererProps<T extends ViewType> {
 //   type: T; // The type can be 'kanban' or 'calendar'
