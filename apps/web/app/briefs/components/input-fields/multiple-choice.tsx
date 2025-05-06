@@ -58,7 +58,6 @@ const FormFieldMultipleChoice: React.FC<ComponentProps> = ({
                       newOptions[optIndex] = {
                         ...question?.options?.[optIndex] as Option,
                         label: value,
-                        value: value,
                       };
 
                       handleQuestionChange(question.id, `options`, newOptions);
