@@ -16,7 +16,7 @@ export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLay
   const defaultBackgroundURL =
     process.env.NEXT_PUBLIC_SUPABASE_URL +
     '/storage/v1/object/public/suuper/auth_sign_in_background.webp';
-  const customBackgroundURL = authDetails?.auth_sign_in_background_url;
+  const customBackgroundURL = authDetails?.auth_background_url;
 
   if (isLoading) {
     return null;
