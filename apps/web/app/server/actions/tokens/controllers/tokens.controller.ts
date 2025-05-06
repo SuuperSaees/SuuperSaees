@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "~/lib/database.types";
 import { TokensRepository } from "../repositories/tokens.repository";
 import { TokensService } from "../services/tokens.service";
-import { Token, PayToken, TokenRecoveryType, TokenIdPayload, DefaultToken } from "../tokens.interface";
+import { Token, PayToken, TokenRecoveryType, TokenIdPayload, DefaultToken, SuuperApiKeyToken } from "../tokens.interface";
 
 export class TokensController {
     private baseUrl: string;
@@ -15,7 +15,7 @@ export class TokensController {
         this.adminClient = adminClient;
     }
 
-    async createToken(payload: Token | PayToken | TokenRecoveryType | DefaultToken, tokenId?: string) {
+    async createToken(payload: Token | PayToken | TokenRecoveryType | DefaultToken | SuuperApiKeyToken, tokenId?: string) {
         try {
             const repository = new TokensRepository(this.baseUrl, this.client, this.adminClient);
             const service = new TokensService(repository);

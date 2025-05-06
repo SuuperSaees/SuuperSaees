@@ -42,6 +42,8 @@ export enum ErrorOrderOperations {
   FAILED_TO_ADD_FOLLOWERS = 'failedToAddFollowers',
   FAILED_TO_DELETE_ORDER = 'failedToDeleteOrder',
   FAILED_TO_UPDATE_ORDER_STATUS = 'failedToUpdateOrderStatus',
+  FAILED_TO_GET_ORDER = 'failedToGetOrder',
+  FAILED_TO_LIST_ORDERS = 'failedToListOrders',
 }
 
 export enum ErrorServiceOperations {
@@ -148,3 +150,8 @@ export enum ErrorChatOperations {
   FAILED_TO_GET_MESSAGES = 'failedToGetMessages',
   FAILED_TO_GET_MEMBER_SETTINGS = 'failedToGetMemberSettings',
 }
+
+export enum ErrorBriefOperations {
+  FAILED_TO_LIST_BRIEFS = 'failedToListBriefs',
+  BRIEF_NOT_FOUND_API = 'briefNotFound',
+} 

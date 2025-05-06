@@ -3358,6 +3358,9 @@ export type Database = {
           _brief_responses: Json[]
           _order_followers: string[]
           _order_file_ids: string[]
+          _organization_id?: string
+          _user_id?: string
+          _user_role?: string
         }
         Returns: {
           agency_id: string

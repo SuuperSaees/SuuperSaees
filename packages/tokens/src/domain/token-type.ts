@@ -21,6 +21,15 @@ organization_id: string;
 payment_methods: BillingAccounts.PaymentMethod[];
 primary_owner_id: string;
 }
+
+export interface SuuperApiKeyToken {
+  id?: string;
+  domain: string;
+  user_id: string;
+  organization_id: string;
+  role: string;
+  agency_id: string;
+}
 export interface TokenRecoveryType {
   id?: string;
   email: string;

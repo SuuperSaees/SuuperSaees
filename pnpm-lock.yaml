@@ -131,7 +131,7 @@ importers:
         version: link:../../packages/monitoring/api
       '@kit/next':
         specifier: workspace:^
-        version: link:../../packages/next
+        version: link:../../packages/tokens
       '@kit/notifications':
         specifier: workspace:^
         version: link:../../packages/features/notifications
@@ -658,7 +658,7 @@ importers:
         version: link:../../monitoring/api
       '@kit/next':
         specifier: workspace:^
-        version: link:../../next
+        version: link:../../tokens
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -730,7 +730,7 @@ importers:
         version: link:../../../tooling/eslint
       '@kit/next':
         specifier: workspace:^
-        version: link:../../next
+        version: link:../../tokens
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -917,7 +917,7 @@ importers:
         version: link:../../monitoring/api
       '@kit/next':
         specifier: workspace:^
-        version: link:../../next
+        version: link:../../tokens
       '@kit/prettier-config':
         specifier: workspace:*
         version: link:../../../tooling/prettier
@@ -1280,6 +1280,43 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.23.8
+
+  packages/tokens:
+    dependencies:
+      crypto:
+        specifier: ^1.0.1
+        version: 1.0.1
+    devDependencies:
+      '@kit/auth':
+        specifier: workspace:^
+        version: link:../features/auth
+      '@kit/eslint-config':
+        specifier: workspace:*
+        version: link:../../tooling/eslint
+      '@kit/monitoring':
+        specifier: workspace:*
+        version: link:../monitoring/api
+      '@kit/prettier-config':
+        specifier: workspace:*
+        version: link:../../tooling/prettier
+      '@kit/supabase':
+        specifier: workspace:^
+        version: link:../supabase
+      '@kit/tailwind-config':
+        specifier: workspace:*
+        version: link:../../tooling/tailwind
+      '@kit/tsconfig':
+        specifier: workspace:*
+        version: link:../../tooling/typescript
+      '@supabase/supabase-js':
+        specifier: ^2.44.4
+        version: 2.47.8
+      next:
+        specifier: 14.2.25
+        version: 14.2.25(@opentelemetry/api@1.9.0)(@playwright/test@1.45.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      zod:
+        specifier: ^3.23.8
+        version: 3.24.1
 
   packages/ui:
     dependencies:
@@ -4724,6 +4761,10 @@ packages:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
     engines: {node: '>= 8'}
 
+  crypto@1.0.1:
+    resolution: {integrity: sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==}
+    deprecated: This package is no longer supported. It's now a built-in Node module. If you've depended on crypto, you should switch to the one that's built-in.
+
   css-select@5.1.0:
     resolution: {integrity: sha512-nwoRF1rvRRnnCqqY7updORDsuqKzqYJ28+oSMaJMMgOauh3fvwHqMS7EZpIPqK8GL+g9mKxF1vP/ZjSeNjEVHg==}
 
@@ -5913,6 +5954,7 @@ packages:
 
   lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==}
+    deprecated: This package is deprecated. Use the optional chaining (?.) operator instead.
 
   lodash.memoize@4.1.2:
     resolution: {integrity: sha512-t7j+NzmgnQzTAYXcsHYLgimltOV1MXHtlOWf6GjL9Kj8GK5FInw5JotxvbOs+IvV1/Dzo04/fCGfLVs7aXb4Ag==}
@@ -8011,7 +8053,7 @@ snapshots:
       '@babel/helper-validator-identifier': 7.24.7
       chalk: 2.4.2
       js-tokens: 4.0.0
-      picocolors: 1.0.1
+      picocolors: 1.1.1
 
   '@babel/parser@7.24.8':
     dependencies:
@@ -11505,6 +11547,8 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
+
+  crypto@1.0.1: {}
 
   css-select@5.1.0:
     dependencies:

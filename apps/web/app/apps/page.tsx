@@ -43,7 +43,7 @@ async function PluginsPage() {
     redirect('/orders');
   }
 
-  const allPlugins = await getPlugins().catch((error) => {
+  const allPlugins = await getPlugins(userId).catch((error) => {
     console.error('Error fetching all plugins:', error);
     return [];
   });

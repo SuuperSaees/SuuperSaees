@@ -1,10 +1,10 @@
 'use server';
 import { createTokensAction } from "./tokens";
-import { Token, PayToken, TokenRecoveryType, DefaultToken } from "./tokens.interface";
+import { Token, PayToken, TokenRecoveryType, DefaultToken, SuuperApiKeyToken } from "./tokens.interface";
 
 const tokensAction = createTokensAction("");
 
-export async function createToken(payload: Token | PayToken | TokenRecoveryType | DefaultToken, tokenId?: string) {
+export async function createToken(payload: Token | PayToken | TokenRecoveryType | DefaultToken | SuuperApiKeyToken, tokenId?: string) {
     if(!tokensAction) return;
     return await tokensAction.createToken(payload, tokenId);
 }
