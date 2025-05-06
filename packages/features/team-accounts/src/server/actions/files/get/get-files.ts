@@ -262,7 +262,7 @@ export async function getFolderFiles(folderId: string) {
     const { data: files, error: fileDataError } = await client
       .from('files')
       .select(
-        'id, url, name, type, size, created_at, folder_files!inner(folder_id), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))',
+        'id, url, name, type, size, created_at, message_id, folder_files!inner(folder_id), user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))',
       )
       .eq('folder_files.folder_id', folderId);
 
