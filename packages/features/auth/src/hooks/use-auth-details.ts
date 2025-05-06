@@ -101,6 +101,10 @@ export const useAuthDetails = (hostname: string) => {
             domainFullData.settings.find(
               (setting) => setting.key === 'sidebar_background_color',
             )?.value ?? '#f2f2f2',
+          auth_background_url:
+            domainFullData.settings.find(
+              (setting) => setting.key === 'auth_background_url',
+            )?.value ?? '',
         };
 
         // Compare the fetched data with the cached data
