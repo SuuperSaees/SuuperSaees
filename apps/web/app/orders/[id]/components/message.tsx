@@ -87,7 +87,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
           {message.files && message.files.length > 0 && (
             <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom">
               {message.files.map((file) => (
-                <UserFile key={file.id} file={file} files={allFiles} />
+                <UserFile key={file.id} file={file} files={allFiles.filter((f) => f.message_id !== null)} />
               ))}
             </div>
           )}
