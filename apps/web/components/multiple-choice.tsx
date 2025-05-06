@@ -62,9 +62,7 @@ export function MultipleChoice({
                     line-height: 18px;
                 }
             `}</style>
-            <div className="mb-4">
-                <p className="text-base">{question}</p>
-            </div>
+ 
             {items.map((item) => (
                 <div
                     key={item.value}
@@ -80,7 +78,7 @@ export function MultipleChoice({
                             className="custom-checkbox h-5 w-5"
                         />
                     </div>
-                    {/* <p className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{item.label}</p> */}
+                    <p className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{item.label}</p>
                 </div>
             ))}
         </div>
