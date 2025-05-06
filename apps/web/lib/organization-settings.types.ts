@@ -35,6 +35,13 @@ export namespace OrganizationSettings {
     tool_copy_list_url: 'tool_copy_list_url',
     pinned_organizations: 'pinned_organizations',
     auth_background_url: 'auth_background_url',
+    parteners_url: 'parteners_url',
+    catalog_product_wholesale_url: 'catalog_product_wholesale_url',
+    catalog_product_private_label_url: 'catalog_product_private_label_url',
+    training_url: 'training_url',
+    catalog_sourcing_china_url: 'catalog_sourcing_china_url',
+    calendar_url: 'calendar_url',
+    notification_sound: 'notification_sound',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 

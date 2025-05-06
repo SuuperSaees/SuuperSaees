@@ -62,9 +62,7 @@ export function MultipleChoice({
                     line-height: 18px;
                 }
             `}</style>
-            <div className="mb-4">
-                <p className="text-base">{question}</p>
-            </div>
+ 
             {items.map((item) => (
                 <div
                     key={item.value}

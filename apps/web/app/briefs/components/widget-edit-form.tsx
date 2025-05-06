@@ -130,6 +130,7 @@ export function WidgetEditForm() {
       newOptions[optionIndex] = {
         ...(currentFormField?.options?.[optionIndex] as Option),
         label: value,
+        value: value,
       };
       updateFormField(currentFormField.id, {
         ...form.getValues(),

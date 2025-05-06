@@ -112,7 +112,7 @@ export function EmailPasswordSignUpContainer({
       <AuthErrorAlert
         title={t('signUp2.error.title')}
         description={t('signUp2.error.description')}
-        visible={!error}
+        visible={error}
         onClose={() => setError(false)}
       />
 

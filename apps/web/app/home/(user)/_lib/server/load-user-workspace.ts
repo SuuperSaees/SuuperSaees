@@ -38,7 +38,7 @@ async function workspaceLoader() {
     accountsPromise(),
     workspacePromise,
     requireUserInServerComponent(),
-    getTeams({ organizationIds: [], includeMembers: false, includeAgency: true }),
+    getTeams({ organizationIds: [], includeMembers: true, includeAgency: true }),
   ]);
 
   const agency = Object.values(teams)[0] ?? null;
@@ -48,6 +48,8 @@ async function workspaceLoader() {
     name: '',
     slug: '',
     picture_url: '',
+    statuses: [],
+    tags: [],
   } : accounts;
 
   // Get pinned organizations with only necessary fields

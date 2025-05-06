@@ -2,6 +2,7 @@
 
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import { Editor } from '@tiptap/react';
 import { EllipsisVertical, Trash2 } from 'lucide-react';
 
@@ -10,17 +11,20 @@ import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
 
 import { File } from '~/lib/file.types';
 import { Members } from '~/lib/members.types';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 import LoomRecordButton from '../../apps/components/loom-record-button';
+import {
+  InternalMessagesToggle,
+  useInternalMessaging,
+} from '../../components/messages';
 import RichTextEditor from '../../components/messages/rich-text-editor';
 import { FileUpload } from '../../components/messages/types';
+import { TimerContainer } from '../../components/timer-container';
 import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';
 import MessageList from './message-list';
-import { useQuery } from '@tanstack/react-query';
-import { InternalMessagesToggle, useInternalMessaging } from '../../components/messages';
-import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 export default function ChatThread({
   agencyTeam,
@@ -86,8 +90,8 @@ export default function ChatThread({
         user_id: userId,
         temp_id: messageId,
         visibility: getInternalMessagingEnabled()
-          ? 'internal_agency' as const
-          : 'public' as const,
+          ? ('internal_agency' as const)
+          : ('public' as const),
       };
       if (setUploads) {
         // Since we're going to add the files to the bd, we need to update the current upload to be pending
@@ -108,12 +112,13 @@ export default function ChatThread({
     }
   };
 
-  const { data: accountPluginData, isLoading: isAccountPluginLoading } = useQuery({
-    queryKey: ['account-plugins', user.id],
-    queryFn: async () => await getAccountPlugin(undefined, 'loom'),
-    enabled: !!user.id,
-    retry: 1,
-  });
+  const { data: accountPluginData, isLoading: isAccountPluginLoading } =
+    useQuery({
+      queryKey: ['account-plugins', user.id],
+      queryFn: async () => await getAccountPlugin(undefined, 'loom'),
+      enabled: !!user.id,
+      retry: 1,
+    });
   // Set the loom app id to the state
   // members
   useEffect(() => {
@@ -133,10 +138,10 @@ export default function ChatThread({
   const canEditName =
     isOwner || chatById?.members?.some((member) => member.id === user.id);
   return (
-    <div className="flex h-full min-w-0 flex-col">
+    <div className="relative flex h-full min-w-0 flex-col">
       {/* Header */}
 
-      <div className="flex min-h-20 items-center justify-between border-b p-4">
+      <div className="flex min-h-9 items-center justify-between border-b px-6.5 py-3">
         <div className="min-w-0 flex-1">
           {canEditName ? (
             <input
@@ -160,10 +165,11 @@ export default function ChatThread({
           )}
         </div>
         <div className="flex items-center gap-2">
+          <TimerContainer />
           <ChatMembersSelector
             agencyTeam={agencyTeam}
             selectedMembers={
-              chatById?.members?.filter((member) => member.visibility) ?? []
+              chatById?.members?.filter((member) => member.visibility && !member.deleted_on) ?? []
             }
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}
@@ -212,9 +218,13 @@ export default function ChatThread({
               />
             ),
             () => (
-              <InternalMessagesToggle 
-                userRole={user.role} 
-                allowedRoles={['agency_member', 'agency_project_manager', 'agency_owner']}
+              <InternalMessagesToggle
+                userRole={user.role}
+                allowedRoles={[
+                  'agency_member',
+                  'agency_project_manager',
+                  'agency_owner',
+                ]}
                 className="ml-2"
               />
             ),

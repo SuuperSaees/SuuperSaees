@@ -3,6 +3,7 @@
 import React from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
@@ -41,7 +42,11 @@ interface CreateClientDialogProps {
   open?: boolean;
 }
 
-const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientDialogProps) => {
+const CreateClientDialog = ({
+  customTrigger,
+  onOpenChange,
+  open,
+}: CreateClientDialogProps) => {
   const { t } = useTranslation('responses');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,11 +58,17 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
   });
 
   let host = 'localhost:3000';
-  host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
+  host =
+    typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const newClient = { ...values };
-    const res = await createClient({ client: newClient, role: values.role, adminActivated: false, baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}` });
+    const res = await createClient({
+      client: newClient,
+      role: values.role,
+      adminActivated: false,
+      baseUrl: `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}`,
+    });
     await handleResponse(res, 'clients', t).catch(() => null);
     window.location.reload();
   }
@@ -66,11 +77,16 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
     <>
       <Dialog open={open} onOpenChange={(newOpen) => onOpenChange?.(newOpen)}>
         <DialogTrigger asChild>
-          {customTrigger ?? <ThemedButton>{t('createClient')}</ThemedButton>}
+          {customTrigger ?? (
+            <ThemedButton>
+              <PlusIcon className="h-4 w-4" />
+              {t('createClient')}
+            </ThemedButton>
+          )}
         </DialogTrigger>
         <DialogContent>
           <div className="flex w-full items-center justify-between">
-            <DialogTitle>{t('createClient')}</DialogTitle>
+            <DialogTitle>{t('clients:creation.title')}</DialogTitle>
           </div>
           <div className="mt-4">
             <Form {...form}>
@@ -123,7 +139,7 @@ const CreateClientDialog = ({ customTrigger, onOpenChange, open }: CreateClientD
 
                 <Separator />
                 <ThemedButton type="submit" className="w-full">
-                  {t('clients:createClient')}
+                  {t('clients:creation.form.submitMessage')}
                 </ThemedButton>
               </form>
             </Form>

@@ -36,7 +36,6 @@ export default function ChatMembersSelector({
   const agencyMembers = agencyTeam.members ?? [];
   const { workspace: userWorkspace } = useUserWorkspace();
   const currentRole = userWorkspace?.role;
-
   const validAgencyRoles = ['agency_owner', 'agency_project_manager'];
   const isValidAgencyRole = validAgencyRoles.includes(currentRole ?? '');
 
@@ -67,22 +66,25 @@ export default function ChatMembersSelector({
   });
 
   const clientOrganizationMembers = clientMembersQuery.data;
-
   const clientMembers = Object.values(clientOrganizationMembers ?? {}).flatMap(
     (team) => team?.members ?? [],
   );
 
   const selectedAgencyMembers =
     agencyMembers.filter((member) =>
-      selectedMembers.map((m) => m.id).includes(member.id),
+      selectedMembers.map((m) => m.id).includes(member.id) &&
+      // Only include if the member exists in the agency members list and is not deleted
+      agencyMembers.some((agencyMember) => agencyMember.id === member.id)
     ) ?? [];
 
   const selectedClientOrganizationMembers =
     selectedMembers.filter(
       (member) =>
-        member.organization_id && member.organization_id !== agencyTeam.id,
+        member.organization_id && 
+        member.organization_id !== agencyTeam.id &&
+        // Only include if the member exists in the client members list
+        clientMembers.some((clientMember) => clientMember.id === member.id)
     ) ?? [];
-
 
   const agencyMembersAvatars = selectedAgencyMembers.map((user) => ({
     id: user.id,
@@ -169,8 +171,8 @@ export default function ChatMembersSelector({
 const TriggerButton = ({ avatars }: { avatars: AvatarType[] }) => {
   return (
     <div className="flex items-center gap-2">
-      <MultiAvatarDisplayer avatars={avatars} className="w-fit" />
-      <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-gray-200">
+      <MultiAvatarDisplayer avatars={avatars} className="w-fit" avatarClassName="h-6 w-6"/>
+      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-gray-200">
         <PlusIcon className="h-4 w-4 text-gray-500" />
       </div>
     </div>
@@ -184,6 +186,7 @@ interface OrganizationMembersSelectorProps {
   onMembersUpdate: (userIds: string[]) => Promise<void>;
   isLoading?: boolean;
   canAddMembers?: boolean;
+  avatarClassName?: string;
 }
 
 const OrganizationMembersSelector = ({
@@ -193,6 +196,7 @@ const OrganizationMembersSelector = ({
   onMembersUpdate,
   isLoading,
   canAddMembers = true,
+  avatarClassName = ' h-8 w-8',
 }: OrganizationMembersSelectorProps) => {
   return (
     <div className="flex flex-col gap-2">
@@ -206,6 +210,7 @@ const OrganizationMembersSelector = ({
           updateOrderUsersFn={onMembersUpdate}
           isLoading={isLoading}
           canAddMembers={canAddMembers}
+          avatarClassName={avatarClassName}
         />
       )}
     </div>

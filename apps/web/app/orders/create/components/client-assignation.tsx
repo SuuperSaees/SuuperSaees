@@ -25,7 +25,9 @@ import {
 interface ClientAssignationProps {
   onSelectOrganization: (organizationId: string) => void;
 }
-export default function ClientAssignation({ onSelectOrganization }: ClientAssignationProps) {
+export default function ClientAssignation({
+  onSelectOrganization,
+}: ClientAssignationProps) {
   const { form } = useMultiStepFormContext();
 
   const [selectedOrganization, setSelectedOrganization] =
@@ -97,10 +99,16 @@ export default function ClientAssignation({ onSelectOrganization }: ClientAssign
 
   const organizationOptions = useMemo(() => {
     return (
-      clientsOrganizationsQuery.data?.map((organization) => ({
-        value: organization.id,
-        label: organization.name ?? '',
-      })) ?? []
+      clientsOrganizationsQuery.data
+        ?.map((organization) => ({
+          value: organization.id,
+          label: organization.name ?? '',
+        }))
+        .filter(
+          (organization) =>
+            !organization.label?.includes('guest') &&
+            !organization.label?.includes('@suuper.co'),
+        ) ?? []
     );
   }, [clientsOrganizationsQuery.data]);
 

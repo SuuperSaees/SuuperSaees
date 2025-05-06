@@ -21,6 +21,7 @@ export const getOrganizationSettings = async () => {
     const agencyId = sessionData?.agency?.id;
 
     if (
+      role &&
       role !== 'agency_member' &&
       role !== 'agency_owner' &&
       role !== 'agency_project_manager' &&
@@ -38,19 +39,25 @@ export const getOrganizationSettings = async () => {
       }
       return organizationSettings;
     } else {
+
+      if (organizationId && organizationId !== '') {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
         .eq('organization_id', organizationId ?? '');
 
       if (settingsError) {
+        console.error(`Error fetching organization settings get-organizations file ${organizationId}. ${!organizationId ? 'No organization id' : ''}`, settingsError);
         throw settingsError.message;
       }
 
       return organizationSettings;
+      } else {
+        return [];
+      }
     }
   } catch (error) {
-    console.error('Error fetching organization settings:', error);
+    console.error(`Error fetching organization settings get-organizations file`, error);
     throw error;
   }
 };
@@ -70,6 +77,13 @@ export const getOrganizationSettingsByOrganizationId = async (
     'auth_card_background_color',
     'auth_section_background_color',
     'dashboard_url',
+    'parteners_url',
+    'catalog_product_wholesale_url',
+    'catalog_product_private_label_url',
+    'training_url',
+    'catalog_sourcing_china_url',
+    'calendar_url',
+    'auth_background_url',
   ],
   client?: SupabaseClient<Database>,
 ): Promise<{ key: string; value: string }[]> => {

@@ -1,20 +1,15 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse, URLPattern } from 'next/server';
 
-import { SupabaseClient } from '@supabase/supabase-js';
-
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 import pathsConfig from '~/config/paths.config';
 import {
   getFullDomainBySubdomain,
 } from '~/multitenancy/utils/get/get-domain';
-import { fetchDeletedClients } from '~/team-accounts/src/server/actions/clients/get/get-clients';
-import { getUserRoleById } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 // import { handleCors } from './handlers/cors-handler';
-import { Database } from './lib/database.types';
 
 export const config = {
   matcher: [
@@ -22,24 +17,6 @@ export const config = {
     '/api/v1/:path*',
   ],
 };
-
-// function getCachedDomain(request: NextRequest, userId: string): string | null {
-//   const domainCookie = request.cookies.get(`domain_${userId}`);
-//   return domainCookie ? domainCookie.value : null;
-// }
-
-// function setCachedDomain(
-//   response: NextResponse,
-//   userId: string,
-//   domain: string,
-//   isProd: boolean,
-// ) {
-//   // Cache the domain for 1 hour (you can adjust this time as needed)
-//   response.cookies.set(`domain_${userId}`, domain, {
-//     maxAge: 60 * 60,
-//     secure: isProd,
-//   });
-// }
 
 function getCachedLanguage(request: NextRequest): string | null {
   const langCookie = request.cookies.get('lang');
@@ -56,10 +33,10 @@ function setCachedLanguage(
   });
 }
 
-const getUser = (request: NextRequest, response: NextResponse) => {
+const getUser = async (request: NextRequest, response: NextResponse) => {
   const supabase = createMiddlewareClient(request, response);
 
-  return supabase.auth.getUser();
+  return await supabase.auth.getUser();
 };
 
 export async function middleware(request: NextRequest) {
@@ -71,77 +48,6 @@ export async function middleware(request: NextRequest) {
   // API Authentication
   const apiAuthResult = handleApiAuth(request);
   if (apiAuthResult) return apiAuthResult;
-
-  // Domain Check
-  // const domainCheckResult = await handleDomainCheck(request, response);
-  // if (domainCheckResult) return domainCheckResult;
-
-  // const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
-  // const ignorePath = new Set([
-  //   'auth',
-  //   '/auth/confirm',
-  //   '/auth/onboarding',
-  //   'set-password',
-  //   'add-organization',
-  //   'api',
-  //   'join',
-  //   'join?invite_token=',
-  //   '/join?invite_token=',
-  //   '/join',
-  //   'home',
-  //   'checkout',
-  //   'orders',
-  //   'buy-success',
-  //   '/__nextjs_original-stack-frame',
-  // ]);
-  // const shouldIgnorePath = (pathname: string) =>
-  //   Array.from(ignorePath).some((path) => pathname.includes(path));
-
-  // if (
-  //   IS_PROD &&
-  //   !shouldIgnorePath(request.nextUrl.pathname) &&
-  //   new URL(request.nextUrl.origin).host !== process.env.HOST_C4C7US
-  // ) {
-  //   try {
-  //     const supabase = createMiddlewareClient(request, response);
-  //     const {
-  //       data: { user },
-  //     } = await supabase.auth.getUser();
-  //     const userId = user?.id ?? '';
-  //     // Try to get the domain from cache (cookie)
-  //     let domain = getCachedDomain(request, userId) ?? '';
-
-  //     if (!domain) {
-  //       // If not in cache, fetch the domain
-  //       try {
-  //         const { domain: domainByUserId } = await getDomainByUserId(
-  //           userId,
-  //           false,
-  //         );
-  //         domain = domainByUserId;
-  //       } catch (error) {
-  //         console.error('Error in middleware', error);
-  //       }
-  //       // Cache the domain in a cookie
-  //       setCachedDomain(response, userId, domain, IS_PROD);
-  //     }
-
-  //     const corsResult = handleCors(request, response, domain);
-  //     if (corsResult) return corsResult;
-  //     const host = new URL(request.nextUrl.origin).host;
-  //     if (host !== domain) {
-  //       throw new Error('Unauthorized: Invalid Origin');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error in middleware', error);
-  //     const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
-  //     const supabase = createMiddlewareClient(request, response);
-  //     await supabase.auth.signOut();
-  //     return NextResponse.redirect(
-  //       new URL(landingPage, request.nextUrl.origin).href,
-  //     );
-  //   }
-  // }
 
   response.headers.set('x-current-path', request.nextUrl.pathname);
   setRequestId(request);
@@ -165,7 +71,13 @@ export async function middleware(request: NextRequest) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const host = new URL(request.nextUrl.origin).host;
+    let domain = '';
+
+    for (const [key, cookie] of request.cookies) {
+      if (key.startsWith('authDetails')) {
+        domain = cookie.name.split('_')[1] ?? '';
+      }
+    }
     if (user) {
       // Always check for the latest language preferences on each request
       // This ensures changes to organization settings are immediately reflected
@@ -191,10 +103,15 @@ export async function middleware(request: NextRequest) {
         language = String(userSettings.preferences.user.language);
       } else {
         // If no user preference, fall back to organization setting
-        const domainData = await getFullDomainBySubdomain(host, true, ['language']);
-        language = domainData?.settings?.find(
-          (setting) => setting.key === 'language'
-        )?.value ?? 'en';
+        const currentLanguage = request.cookies.get('lang')?.value;
+        if (currentLanguage) {
+          language = currentLanguage;
+        } else {
+          const domainData = await getFullDomainBySubdomain(domain, true, ['language']);
+          language = domainData?.settings?.find(
+            (setting) => setting.key === 'language'
+          )?.value ?? 'en';
+        }
       }
 
       // Get current language from cookie
@@ -204,9 +121,20 @@ export async function middleware(request: NextRequest) {
       if (!currentLang || currentLang !== language) {
         setCachedLanguage(csrfResponse, language);
       }
+
+      let userRoleWithId = request.cookies.get('user_role')?.value;
+      if (!userRoleWithId || `${userRoleWithId.split('-')[0]}-${user.id}` !== userRoleWithId) {
+        const { data: currentUserRole } = await supabase.rpc('get_current_role');
+        userRoleWithId = currentUserRole ?? '';
+        csrfResponse.cookies.set('user_role', `${currentUserRole}-${user.id}`, {
+          maxAge: 60 * 60 * 24, // 1 día
+        });
+      }
     } else {
       // Clear all localStorage when no session is present
       csrfResponse.headers.set('Clear-Site-Data', '"storage"');
+      // Borrar cookie user_role si no hay usuario
+      csrfResponse.cookies.set('user_role', '', { maxAge: 0 });
     }
   } catch (error) {
     console.error('Error setting language in middleware:', error);
@@ -349,7 +277,6 @@ function getPatterns() {
         if (isOrdersPath) {
           const publicTokenId = req.nextUrl.searchParams.get('public_token_id');
           const originalPath = req.nextUrl.href;
-          console.log('originalPath', originalPath, publicTokenId, req.nextUrl);
           const confirmPath = `/auth/confirm?next=${originalPath}&public_token_id=${publicTokenId}`;
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }
@@ -364,8 +291,34 @@ function getPatterns() {
           return NextResponse.redirect(new URL(redirectPath, origin).href);
         }
 
-        // Obtain the user role
-        const userRole = await getUserRoleById(user.id);
+        // check if the user has deleted_on in the metadata
+        let domain = '';
+
+        for (const [key, cookie] of req.cookies) {
+          if (key.startsWith('authDetails')) {
+            domain = cookie.name.split('_')[1] ?? '';
+          }
+        }
+
+        const userMetadata = user.app_metadata;
+        const hasDeletedOn = userMetadata?.[domain]?.deleted_on;
+        const supabase = createMiddlewareClient(req, res);
+        if (hasDeletedOn) {
+          await supabase.auth.signOut();
+          return NextResponse.redirect(new URL(pathsConfig.auth.signIn, origin).href);
+        }
+
+        let userRoleWithId = req.cookies.get('user_role')?.value;
+
+        if (!userRoleWithId || `${userRoleWithId.split('-')[0]}-${user.id}` !== userRoleWithId) {
+          const { data: currentUserRole } = await supabase.rpc('get_current_role');
+          userRoleWithId = `${currentUserRole}-${user.id}`;
+          res.cookies.set('user_role', userRoleWithId, {
+            maxAge: 60 * 60 * 24, // 1 day
+          });
+        }
+        const userRole = userRoleWithId.split('-')[0];
+
         if (userRole === 'client_guest') {
           const allowedPaths = ['/orders', '/auth'];
           const currentPath = req.nextUrl.pathname;
@@ -378,10 +331,9 @@ function getPatterns() {
             );
           }
         }
-        const supabase = createMiddlewareClient(req, res);
-
+ 
         if (userRole === 'agency_owner') {
-          const hasPhoneNumber = await checkPhoneNumber(supabase, user.id);
+          const hasPhoneNumber = user.phone;
           if (
             !hasPhoneNumber &&
             !req.nextUrl.pathname.includes('auth/onboarding')
@@ -391,50 +343,6 @@ function getPatterns() {
             );
           }
         }
-      },
-    },
-    {
-      pattern: new URLPattern({ pathname: '/api/v1' }),
-    },
-    {
-      // Verify if the client is eliminated from the agency
-      pattern: new URLPattern({ pathname: '/*' }),
-      handler: async (req: NextRequest, res: NextResponse) => {
-        const supabase = createMiddlewareClient(req, res);
-        const {
-          data: { user },
-        } = await getUser(req, res);
-        if (req.nextUrl.pathname === '/add-organization') {
-          return;
-        }
-        // the user is logged out, so we don't need to do anything
-        if (!user) {
-          return;
-        }
-        const userId = user.id;
-
-        // Step 2: Get the organization id fetching the domain/subdomain data
-        const client = createMiddlewareClient(req, res);
-        const { data: organizationData } = await client.rpc('get_session');
-        const organizationId = organizationData?.organization?.id;
-
-        // Step 3: Get the client data (user_client_id) from db where the agency_id is the organization id of the domain/subdomain
-        const clientDeleted = await fetchDeletedClients(
-          supabase,
-          organizationId ?? '',
-          userId,
-        ).catch((error) =>
-          console.error('Error fetching deleted from middleware:', error),
-        );
-
-        // Step 4: If the client is deleted, sign out the user
-        if (clientDeleted) {
-          await supabase.auth.signOut();
-          return NextResponse.redirect(
-            new URL(pathsConfig.auth.signIn, req.url).href,
-          );
-        }
-        return;
       },
     },
   ];
@@ -482,23 +390,4 @@ function setCORSHeaders(response: NextResponse) {
     'X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version',
     // X-CSRF-Token, // put it back later
   );
-}
-
-// This function is to verify the phone number
-async function checkPhoneNumber(
-  supabase: SupabaseClient<Database>,
-  userId: string,
-) {
-  const { data, error } = await supabase
-    .from('user_settings')
-    .select('phone_number')
-    .eq('user_id', userId)
-    .single();
-
-  if (error) {
-    console.error('Error checking phone number:', error);
-    return false;
-  }
-
-  return data?.phone_number !== null;
 }

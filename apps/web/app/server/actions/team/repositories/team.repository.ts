@@ -50,7 +50,7 @@ export class TeamRepository {
       
       const { data: getAgencyInfo, error: getAgencyInfoError } = await this.client
       .from('organizations')
-      .select('id, name, organization_settings(value)')
+      .select('id, name, organization_settings(value), slug, statuses:agency_statuses(*), tags(*)')
       .eq('id', getClientInfo.agency_id)
       .eq('organization_settings.key', 'logo_url')
       .single();
@@ -64,6 +64,9 @@ export class TeamRepository {
         name: getAgencyInfo.name ?? '',
         picture_url: getAgencyInfo.organization_settings?.[0]?.value ?? '',
         is_agency: true,
+        slug: getAgencyInfo.slug ?? '',
+        statuses: getAgencyInfo.statuses ?? [],
+        tags: getAgencyInfo.tags ?? [],
       }
     }
 
@@ -80,7 +83,7 @@ export class TeamRepository {
 
       const { data: organization, error: organizationError } = await client
       .from('organizations')
-      .select('id, name, picture_url, accounts_memberships(account_role)')
+      .select('id, name, picture_url, accounts_memberships(account_role), slug, statuses:agency_statuses(*), tags(*)')
       .eq('id', organizationId)
       .single();
 
@@ -91,6 +94,9 @@ export class TeamRepository {
         name: organization.name ?? '',
         picture_url: organizationSettings?.value ?? organization.picture_url ?? '',
         is_agency: agencyRoles.has(organization.accounts_memberships[0]?.account_role ?? ''),
+        slug: organization.slug ?? '',
+        statuses: organization.statuses ?? [],
+        tags: organization.tags ?? [],
       }
 
       if (includeMembers) {
@@ -106,22 +112,24 @@ export class TeamRepository {
         const { data: membersData, error: membersDataError } = await client
         .from('accounts')
         .select('id, email, name, picture_url, user_settings(name, picture_url)')
-        .in('id', membersIds);
+        .in('id', membersIds)
+        .is('deleted_on', null);
 
         if (membersDataError) throw membersDataError;
 
         const membersDataMap = new Map(membersData.map((member) => [member.id, member]));
-        
-        resultMembers[organizationId].members = members.map((member) => ({
-          id: member.user_id,
-          name: membersDataMap.get(member.user_id)?.user_settings?.[0]?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
-          email: membersDataMap.get(member.user_id)?.email ?? '',
-          organization_id: organizationId,
-          role: member.account_role,
-          picture_url: membersDataMap.get(member.user_id)?.user_settings?.[0]?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
-          // visibility: true,
-        }
-      ));
+        resultMembers[organizationId].members = members
+          .filter((member) => membersDataMap.has(member.user_id))
+          .map((member) => ({
+            id: member.user_id,
+            name: membersDataMap.get(member.user_id)?.user_settings?.[0]?.name ?? membersDataMap.get(member.user_id)?.name ??  '',
+            email: membersDataMap.get(member.user_id)?.email ?? '',
+            organization_id: organizationId,
+            role: member.account_role,
+            picture_url: membersDataMap.get(member.user_id)?.user_settings?.[0]?.picture_url ?? membersDataMap.get(member.user_id)?.picture_url ??  '',
+            // visibility: true,
+          }));
+
       }
       
 

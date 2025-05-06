@@ -9,7 +9,6 @@ import { cva } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 
-import pathsConfig from '../../../../apps/web/config/paths.config';
 import {
   Tooltip,
   TooltipContent,
@@ -151,7 +150,9 @@ export function SidebarGroup({
   }, [collapsed, collapsible, id, setOpenGroupId]);
 
   // Toggle group open/closed
-  const toggleGroup = () => {
+  const toggleGroup = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setOpenGroupId(isGroupOpen ? null : id);
   };
 
@@ -165,7 +166,7 @@ export function SidebarGroup({
 
   // Common wrapper class names
   const wrapperClassName = cn(
-    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center  ',
+    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center',
     {
       'w-full px-3': !sidebarCollapsed,
     },
@@ -196,7 +197,7 @@ export function SidebarGroup({
       aria-expanded={isGroupOpen}
       aria-controls={id}
       onClick={toggleGroup}
-      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent yo"
+      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent"
     >
       <ChevronDown
         className={cn('block h-3 w-3', {
@@ -210,10 +211,11 @@ export function SidebarGroup({
   const labelElement = path ? (
     <Link
       href={path}
-      className={cn('line-clamp-1 w-full font-normal ', {
+      className={cn('line-clamp-1 w-full font-normal', {
         'font-normal': isRouteActive(pathname, path, true),
       })}
       onClick={collapsible ? (e) => e.stopPropagation() : undefined}
+      prefetch={true}
     >
       {labelContent}
     </Link>
@@ -222,10 +224,13 @@ export function SidebarGroup({
   );
 
   return (
-    <div className={cn('flex flex-col rounded-md gap-0.5', className)}>
+    <div 
+      className={cn('flex flex-col rounded-md gap-0.5', className)}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         className={wrapperClassName}
-        onClick={collapsible && !path ? toggleGroup : undefined}
+        onClick={collapsible && !path ? (e) => toggleGroup(e) : undefined}
         style={active && itemActiveStyle ? itemActiveStyle : undefined}
         onMouseEnter={(e) => {
           if (itemHoverStyle) {
@@ -257,7 +262,11 @@ export function SidebarGroup({
 
       {/* Render children if not collapsible or if group is open */}
       {(!collapsible || isGroupOpen) && (
-        <div id={id} className="flex flex-col overflow-y-auto pl-3">
+        <div 
+          id={id} 
+          className="flex flex-col overflow-y-auto pl-3"
+          onClick={(e) => e.stopPropagation()}
+        >
           {children}
         </div>
       )}
@@ -339,6 +348,7 @@ export function SidebarSection({
           <Link
             href={path}
             className="h-fit w-fit w-full rounded-md"
+            prefetch={true}
           >
             <h3
               className={cn(
@@ -473,10 +483,10 @@ export function SidebarItem({
         </TooltipProvider>
       ) : (
         <>
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center" >
             {Icon}
           </span>
-          <span className="line-clamp-1 w-full font-normal text-left">{children}</span>
+          <span className={cn("line-clamp-1 w-full font-normal text-left", className)}>{children}</span>
         </>
       )}
     </>
@@ -520,6 +530,7 @@ export function SidebarItem({
         <Link
           key={path}
           href={path}
+          prefetch={true}
           className="flex w-full  items-center gap-2 font-normal line-clamp-1"
         >
           {buttonContent}
@@ -551,124 +562,224 @@ function getClassNameBuilder(className: string) {
     },
   );
 }
-export function SidebarNavigation({
-  config,
-  showDashboardUrl,
-  catalogProviderUrl,
-  catalogProductUrl,
-  toolCopyListUrl,
-}: React.PropsWithChildren<{
-  config: SidebarConfig;
-  showDashboardUrl?: boolean;
-  catalogProviderUrl?: boolean;
-  catalogProductUrl?: boolean;
-  toolCopyListUrl?: boolean;
-}>) {
-  return (
-    <>
-      {config.routes.map((item, index) => {
-        if ('divider' in item) {
-          return <SidebarDivider key={index} />;
-        }
 
-        if ('section' in item) {
-          return (
-            <SidebarSection
-              key={`section-${index}`}
-              label={
-                <Trans
-                  i18nKey={typeof item.label === 'string' ? item.label : ''}
-                  defaults={typeof item.label === 'string' ? item.label : ''}
-                  key={
-                    typeof item.label === 'string'
-                      ? item.label + index
-                      : index + ''
-                  }
-                />
-              }
-              path={item.path}
-              className={item.className}
-              menu={item.menu}
-              groups={item.groups}
-            />
-          );
-        }
+export function SidebarGroups({
+  label,
+  path,
+  collapsible = true,
+  collapsed = false,
+  Icon,
+  groups,
+  className,
+  menu,
+  showFilters = {},
+  showCatalogProviderUrl,
+  showCatalogProductUrl,
+  showCatalogProductWholesaleUrl,
+  showCatalogProductPrivateLabelUrl,
+  showCatalogSourcingChinaUrl,
+}: {
+  label: string;
+  Icon?: React.ReactNode;
+  path?: string;
+  collapsible?: boolean;
+  collapsed?: boolean;
+  groups: Array<{
+    type: 'group' | 'route';
+    label: string;
+    path?: string;
+    Icon?: React.ReactNode;
+    collapsible?: boolean;
+    collapsed?: boolean;
+    className?: string;
+    menu?: React.ReactNode;
+    end?: boolean | ((path: string) => boolean);
+    children?: Array<{
+      label: string;
+      path: string;
+      Icon?: React.ReactNode;
+      end?: boolean | ((path: string) => boolean);
+      className?: string;
+      menu?: React.ReactNode;
+      filterKey?: string;
+    }>;
+    filterKey?: string;
+  }>;
+  className?: string;
+  menu?: React.ReactNode;
+  showFilters?: Record<string, boolean>;
+  showCatalogProviderUrl?: boolean;
+  showCatalogProductUrl?: boolean;
+  showCatalogProductWholesaleUrl?: boolean;
+  showCatalogProductPrivateLabelUrl?: boolean;
+  showCatalogSourcingChinaUrl?: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(!collapsed);
+  const { collapsed: sidebarCollapsed, itemActiveStyle, itemHoverStyle } = useContext(SidebarContext);
+  const pathname = usePathname();
+  const active = isRouteActive(pathname, path ?? '', true);
 
-        if (
-          item.label === 'common:catalogName' &&
-          !catalogProviderUrl &&
-          !catalogProductUrl
-        ) {
-          return null;
-        } else if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
-          return null;
-        } else if ('children' in item) {
-          return (
-            <SidebarGroup
-              key={typeof item.label === 'string' ? item.label : ''}
-              label={
-                <Trans
-                  i18nKey={typeof item.label === 'string' ? item.label : ''}
-                  defaults={typeof item.label === 'string' ? item.label : ''}
-                  key={
-                    typeof item.label === 'string'
-                      ? item.label + index
-                      : index + ''
-                  }
-                />
-              }
-              collapsible={item.collapsible}
-              collapsed={item.collapsed}
-              Icon={item.Icon}
-              className={item.className}
-              path={item.path}
-              menu={item.menu}
-            >
-              {item.children.map((child) => {
-                if (
-                  (child.label === 'common:catalogProviderName' &&
-                    !catalogProviderUrl) ||
-                  (child.label === 'common:catalogProductName' &&
-                    !catalogProductUrl) ||
-                  (child.label === 'common:toolCopyListName' &&
-                    !toolCopyListUrl)
-                ) {
-                  return null;
-                }
-                return (
-                  <SidebarItem
-                    key={child.path}
-                    end={child.end}
-                    path={child.path}
-                    Icon={child.Icon}
-                    className={child.className}
-                    menu={child.menu}
-                  >
-                    <Trans i18nKey={child.label} defaults={child.label} />
-                  </SidebarItem>
-                );
-              })}
-            </SidebarGroup>
-          );
-        }
+  const toggleMainGroup = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+  
+  const shouldShowItem = (filterKey?: string) => {
+    if (!filterKey || !showFilters) return true;
+    return showFilters[filterKey] !== false; 
+  };
 
-        if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
-          return null;
-        }
+  const labelContent = typeof label === 'string' ? 
+    <Trans i18nKey={label} defaults={label} /> : label;
 
-        return (
-          <SidebarItem
-            key={item.path}
-            end={item.end}
-            path={item.path}
-            Icon={item.Icon}
-            className={item.className}
-            menu={item.menu}
-          >
-            <Trans i18nKey={item.label} defaults={item.label} />
-          </SidebarItem>
-        );
+  const wrapperClassName = cn(
+    'flex w-full text-md shadow-none group/sidebar-group relative gap-2 rounded-md py-1 items-center',
+    {
+      'w-full px-3': !sidebarCollapsed,
+    },
+    className,
+  );
+
+  const iconElement = Icon && (
+    <div
+      className={cn('block flex h-5 w-5 shrink-0 items-center justify-center', {
+        'group-hover/sidebar-group:hidden': collapsible,
       })}
-    </>
+    >
+      {Icon}
+    </div>
+  );
+
+  const menuElement = menu && (
+    <div className="w-0 opacity-0 flex shrink-0 items-center justify-center ml-auto group-hover/sidebar-group:w-auto group-hover/sidebar-group:opacity-100">
+      {menu}
+    </div>
+  );
+
+  const chevronElement = collapsible && (
+    <button
+      aria-expanded={isOpen}
+      onClick={toggleMainGroup}
+      className="hidden h-5 w-5 shrink-0 items-center justify-center p-0 group-hover/sidebar-group:flex bg-transparent hover:bg-transparent"
+    >
+      <ChevronDown
+        className={cn('block h-3 w-3', {
+          'rotate-180': isOpen,
+        })}
+      />
+    </button>
+  );
+
+  const labelElement = <span className="line-clamp-1">{labelContent}</span>;
+
+  return (
+    <div className={cn("flex flex-col", className)}> 
+      <div
+        className={wrapperClassName}
+        onClick={collapsible ? toggleMainGroup : undefined}
+        style={active && itemActiveStyle ? itemActiveStyle : undefined}
+        onMouseEnter={(e) => {
+          if (itemHoverStyle) {
+            e.currentTarget.style.backgroundColor = itemHoverStyle.backgroundColor as string;
+            e.currentTarget.style.color = itemHoverStyle.color as string;
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (itemHoverStyle) {
+            if (active && itemActiveStyle) {
+              e.currentTarget.style.backgroundColor = itemActiveStyle.backgroundColor as string;
+              e.currentTarget.style.color = itemActiveStyle.color as string;
+            } else {
+              e.currentTarget.style.backgroundColor = '';
+              e.currentTarget.style.color = '';
+            }
+          }
+        }}
+      >
+        {chevronElement}
+        {iconElement}
+        {labelElement}
+        {menuElement}
+      </div>
+      
+      {collapsible && isOpen && (
+        <div className={cn("flex flex-col", { "pl-4": !sidebarCollapsed })}>
+          {groups.filter(group => shouldShowItem(group.filterKey)).map((group, index) => {
+            if (group.type === 'group') {
+              const filteredChildren = group.children?.filter(
+                child => shouldShowItem(child.filterKey)
+              ) ?? [];
+              
+              if (filteredChildren.length === 0) {
+                return null;
+              }
+
+              if((group.label === 'common:catalogProductName' && !showCatalogProductUrl)) {
+                return null;
+              }
+
+              return (
+                <SidebarGroup
+                  key={`group-${index}-${group.label}`}
+                  label={group.label}
+                  collapsible={group.collapsible}
+                  collapsed={group.collapsed}
+                  Icon={group.Icon}
+                  path={group.path}
+                  className={group.className}
+                  menu={group.menu}
+                >
+                  {filteredChildren.filter(child => {
+                    if((child.label === 'common:catalogWholesaleName' && !showCatalogProductWholesaleUrl)) {
+                      return null;
+                    }
+                    if((child.label === 'common:catalogPrivateLabelName' && !showCatalogProductPrivateLabelUrl)) {
+                      return null;
+                    }
+                    return child;
+                  }).map((child, childIndex) => (
+                    
+                    <SidebarItem
+                      key={`${child.path}-${childIndex}`}
+                      path={child.path}
+                      Icon={child.Icon ?? <span />}
+                      className={child.className}
+                      menu={child.menu}
+                      end={child.end}
+                    >
+                      <Trans i18nKey={child.label} defaults={child.label} />
+                    </SidebarItem>
+                  ))}
+                </SidebarGroup>
+              );
+            } else if (group.type === 'route') {
+              if((group.label === 'common:catalogSourcingChinaName' && !showCatalogSourcingChinaUrl)) {
+                return null;
+              }
+              if((group.label === 'common:catalogProviderName' && !showCatalogProviderUrl)) {
+                return null;
+              }
+
+
+
+              return (
+                <SidebarItem
+                  key={`route-${index}-${group.path}`}
+                  path={group.path ?? ''}
+                  Icon={group.Icon ?? <span />}
+                  className={group.className}
+                  menu={group.menu}
+                  end={group.end}
+                >
+                  <Trans i18nKey={group.label} defaults={group.label} />
+                </SidebarItem>
+              );
+            }
+            return null;
+          })}
+        </div>
+      )}
+    </div>
   );
 }

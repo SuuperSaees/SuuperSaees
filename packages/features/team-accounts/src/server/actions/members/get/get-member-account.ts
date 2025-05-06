@@ -49,7 +49,7 @@ export async function fetchCurrentUserAccount(
         `Error fetching current user account data: ${currentUserError.message}`,
       );
     }
-    const organizationId = (await client.rpc('get_session')).data?.organization?.id;
+    const organizationId = (await client.rpc('get_current_organization_id')).data;
 
     return {
       ...currentUserAccount,
@@ -144,7 +144,7 @@ export async function getUserById(userId: string) {
 export async function getUserRole() {
   try {
     const client = getSupabaseServerComponentClient();
-    return (await client.rpc('get_session')).data?.organization?.role;
+    return (await client.rpc('get_current_role')).data;
   } catch (error) {
     console.error('Error fetching user role:', error);
     throw error;
@@ -156,7 +156,7 @@ export async function getUserRoleById(userId: string, adminActivated = false, cl
    
     client = client ?? getSupabaseServerComponentClient({ admin: adminActivated });
     if(!adminActivated) {
-      return (await client.rpc('get_session')).data?.organization?.role;
+      return (await client.rpc('get_current_role')).data;
     }
 
     const { error: userAccountError, data: userAccountData } = await client
@@ -238,14 +238,20 @@ export async function getUserAccountById(
     const organizationId = organizationData?.id ?? null;
     const primaryOwnerId = organizationData?.owner_id ?? null;
 
-    const { data: userSettings, error: userSettingsError } = await databaseClient
+    let userSettings = null;
+    const { data: settingsData, error: userSettingsError } = await databaseClient
       .from('user_settings')
       .select('name')
       .eq('user_id', userId)
       .eq('organization_id', organizationId ?? '')
       .single();
 
-    if (userSettingsError) throw userSettingsError;
+    if (userSettingsError) {
+      console.error('Error fetching user settings:', userSettingsError);
+      userSettings = null;
+    } else {
+      userSettings = settingsData;
+    };
 
     return {
       organization_id: organizationId ?? '',
