@@ -13,7 +13,7 @@ export interface AuthDetails {
   auth_section_background_color: string;
   logo_dark_url: string;
   sidebar_background_color: string;
-  auth_sign_in_background_url?: string;
+  auth_background_url?: string;
 }
 
 export const useAuthDetails = (hostname: string) => {
@@ -58,6 +58,7 @@ export const useAuthDetails = (hostname: string) => {
             'auth_card_background_color',
             'auth_section_background_color',
             'logo_dark_url',
+            'auth_background_url',
           ]));
       } catch (error) {
         console.error('Error fetching auth details', error);
@@ -100,6 +101,10 @@ export const useAuthDetails = (hostname: string) => {
             domainFullData.settings.find(
               (setting) => setting.key === 'sidebar_background_color',
             )?.value ?? '#f2f2f2',
+          auth_background_url:
+            domainFullData.settings.find(
+              (setting) => setting.key === 'auth_background_url',
+            )?.value ?? '',
         };
 
         // Compare the fetched data with the cached data

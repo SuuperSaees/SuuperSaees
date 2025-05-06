@@ -16,12 +16,11 @@ export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLay
   const defaultBackgroundURL =
     process.env.NEXT_PUBLIC_SUPABASE_URL +
     '/storage/v1/object/public/suuper/auth_sign_in_background.webp';
-  const customBackgroundURL = authDetails?.auth_sign_in_background_url;
+  const customBackgroundURL = authDetails?.auth_background_url;
 
   if (isLoading) {
     return null;
   }
-
   return (
     <div className="flex h-full w-full justify-between">
       {/* Left Content Container */}
@@ -37,10 +36,14 @@ export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLay
       <div
         className="relative hidden h-full w-full max-w-2xl border-[16px] border-white sm:block"
         style={{
-          background: authDetails?.theme_color
-            ? `linear-gradient(0deg, ${authDetails.theme_color} 0%, ${authDetails.theme_color} 100%), url(${customBackgroundURL ?? defaultBackgroundURL}) lightgray 50% / cover no-repeat`
-            : `url(${customBackgroundURL ?? defaultBackgroundURL}) lightgray 50% / cover no-repeat`,
-          backgroundBlendMode: authDetails?.theme_color
+          background: customBackgroundURL
+            ? `url(${customBackgroundURL}) lightgray 50% / cover no-repeat`
+            : authDetails?.theme_color
+            ? `linear-gradient(0deg, ${authDetails.theme_color} 0%, ${authDetails.theme_color} 100%), url(${defaultBackgroundURL}) lightgray 50% / cover no-repeat`
+            : `url(${defaultBackgroundURL}) lightgray 50% / cover no-repeat`,
+          backgroundBlendMode: customBackgroundURL
+            ? 'normal'
+            : authDetails?.theme_color
             ? 'overlay, normal'
             : 'normal',
           borderRadius: '28px',
