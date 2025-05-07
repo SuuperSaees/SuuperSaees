@@ -9,7 +9,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 
-import { Brief } from '../../../../../../../../apps/web/lib/brief.types';
+import { Brief, BriefResponse } from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { fetchCurrentUser, fetchCurrentUserAccount, getPrimaryOwnerId, getUserRole } from '../../members/get/get-member-account';
@@ -91,16 +91,15 @@ export const getBriefs = async (
 
 export const fetchFormfieldsWithResponses = async (
   orderId: Order.Type['uuid'],
-): Promise<Brief.Relationships.FormFieldResponse.Response[]> => {
+): Promise<BriefResponse.Response[]> => {
   try {
     const client = getSupabaseServerComponentClient();
     const { data: briefFormFields, error: errorBriefFormFields } = await client
       .from('brief_responses')
       .select(
-        `field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required),
-        response,
-        brief:briefs(name),
-        order_data:orders_v2(id, customer_id)
+        `id, created_at, response,
+        field:form_fields(*),
+        brief:briefs(id, name)
         `,
       )
       .eq('order_id', orderId);
@@ -109,31 +108,11 @@ export const fetchFormfieldsWithResponses = async (
       throw new Error(`Failed to get brief responses for order (${orderId}), ${errorBriefFormFields.message}`);
     }
 
-    const customerId = briefFormFields?.[0]?.order_data?.customer_id;
+    return briefFormFields;
 
-    if (!customerId) {
-      throw new Error('Customer ID not found.');
-    }
-
-    const { data: userSettings, error: errorUserSettings } = await client
-      .from('user_settings')
-      .select('name')
-      .eq('user_id', customerId)
-      .single();
-
-    if (errorUserSettings && errorUserSettings.code !== 'PGRST116') {
-      // 'PGRST116' indicates no rows were found; any other error should be thrown
-      throw new Error(`Error obtaining user settings at briefs: ${errorUserSettings.message}`);
-    }
-
-    return briefFormFields.map((field) => ({
-      ...field,
-      userSettings: userSettings ?? null,
-    }));
-    
   } catch (error) {
     console.error('Error obtaining brief fields', error);
-    // throw error;
+    throw error;
   }
 };
 

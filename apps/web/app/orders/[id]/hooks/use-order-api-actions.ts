@@ -110,7 +110,7 @@ export const useOrderApiActions = ({
       };
 
       setInteractions((oldInteractions) => {
-        console.log('setting messages', optimisticMessage);
+        // console.log('setting messages', optimisticMessage);
         const newPages = [...(oldInteractions?.pages ?? [])];
         const newInitialPageMessages = [
           ...(newPages[0]?.messages ?? []),
@@ -121,6 +121,8 @@ export const useOrderApiActions = ({
           messages: newInitialPageMessages,
           activities: newPages[0]?.activities ?? [],
           reviews: newPages[0]?.reviews ?? [],
+          // briefResponses: newPages[0]?.briefResponses ?? [],
+          nextCursor: newPages[0]?.nextCursor ?? null,
         };
         return {
           pages: newPages,
@@ -206,6 +208,8 @@ export const useOrderApiActions = ({
           messages: messagesToUpdate,
           activities: newPages[pageIndex]?.activities ?? [],
           reviews: newPages[pageIndex]?.reviews ?? [],
+            // briefResponses: newPages[pageIndex]?.briefResponses ?? [],
+          nextCursor: newPages[pageIndex]?.nextCursor ?? null,
         };
         return {
           pages: newPages,

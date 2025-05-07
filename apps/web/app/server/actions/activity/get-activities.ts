@@ -1,6 +1,7 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { cache } from 'react';
 import { Activity } from '~/lib/activity.types';
 interface Config {
   pagination?: {
@@ -10,9 +11,9 @@ interface Config {
   };
 }
 
-export async function getActivities(orderId?: number, config?: Config): Promise<Activity.Response[]> {
+export const getActivities = cache(async (orderId?: number, config?: Config): Promise<Activity.Response> => {
   const client = getSupabaseServerComponentClient();
-
+  const limit = config?.pagination?.limit ?? 10;
   try {
     let baseQuery = client
       .from('activities')
@@ -20,7 +21,7 @@ export async function getActivities(orderId?: number, config?: Config): Promise<
         '*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))',
       )
       .order('created_at', { ascending: false })
-      .limit(config?.pagination?.limit ?? 10);
+      .limit(limit + 1);
 
     if (orderId) {
       baseQuery = baseQuery.eq('order_id', orderId);
@@ -40,9 +41,14 @@ export async function getActivities(orderId?: number, config?: Config): Promise<
       throw new Error(`Error fetching activities: ${activitiesError.message}`);
     }
 
-    return activities;
+    return {
+      data: activities.slice(0, limit),
+      nextCursor: activities[limit]?.created_at ?? null
+    };
   } catch (error) {
     console.error(error);
     throw error;
   }
-}
+});
+
+

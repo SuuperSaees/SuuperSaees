@@ -7,8 +7,11 @@ export namespace Review {
   export type Insert = Database['public']['Tables']['reviews']['Insert'];
   export type Update = Database['public']['Tables']['reviews']['Update'];
 
-  export type Response = Review.Type & {
-    order?: Pick<Order.Type, 'title' | 'id'> | null;
-    user?: User.Response | null;
+  export type Response = {
+    data: (Review.Type & {
+      order?: Pick<Order.Type, 'title' | 'id'> | null;
+      user?: User.Response | null;
+    })[];
+    nextCursor: string | null;
   };
 }

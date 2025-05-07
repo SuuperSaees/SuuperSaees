@@ -9,8 +9,9 @@ interface Config {
     endCursor?: string | number;
   };
 }
-export async function getReviews(orderId?: number, config?: Config): Promise<Review.Response[]> {
+export async function getReviews(orderId?: number, config?: Config): Promise<Review.Response> {
   try {
+    const limit = config?.pagination?.limit ?? 10;
     const client = getSupabaseServerComponentClient();
 
     let baseQuery = client
@@ -19,7 +20,7 @@ export async function getReviews(orderId?: number, config?: Config): Promise<Rev
         '*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))',
       )
       .order('created_at', { ascending: false })
-      .limit(config?.pagination?.limit ?? 10);
+      .limit(limit + 1);
 
     if (orderId) {
       baseQuery = baseQuery.eq('order_id', orderId);
@@ -38,7 +39,10 @@ export async function getReviews(orderId?: number, config?: Config): Promise<Rev
     if (reviewsError)
       throw new Error(`Error fetching reviews: ${reviewsError.message}`);
 
-    return reviews;
+    return {
+      data: reviews.slice(0, limit),
+      nextCursor: reviews[limit]?.created_at ?? null,
+    };
   } catch (error) {
     console.error(error);
     throw error;

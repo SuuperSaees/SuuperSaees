@@ -45,7 +45,7 @@ export class ChatMessagesController {
   }
 
   // * GET CONTROLLERS
-  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response[]> {
+  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response> {
     try {
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatMessageService = new ChatMessagesService(chatMessagesRepository);

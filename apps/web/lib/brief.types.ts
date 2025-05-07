@@ -29,18 +29,20 @@ export namespace Brief {
     | 'image_url'
     | 'propietary_organization_id'
     | 'deleted_on'
-  > ;
+  >;
 
   // This represent the request from the client to the server
   export namespace Request {
-    export type Create = Omit<Brief.Insert, 'propietary_organization_id' | 'name'> & {
+    export type Create = Omit<
+      Brief.Insert,
+      'propietary_organization_id' | 'name'
+    > & {
       name?: string;
     };
     export type Update = Omit<Brief.Update, 'propietary_organization_id'> & {
       id: Brief.Type['id'];
-    }
+    };
   }
-  
 
   export namespace Relationships {
     export namespace Services {
@@ -75,4 +77,28 @@ export namespace Brief {
       form_fields: FormFieldType;
     };
   }
+}
+
+export namespace FormField {
+  export type Type = Database['public']['Tables']['form_fields']['Row'];
+  export type Insert = Database['public']['Tables']['form_fields']['Insert'];
+  export type Update = Database['public']['Tables']['form_fields']['Update'];
+
+  export type Response = FormField.Type;
+}
+
+export namespace BriefResponse {
+  export type Type = Database['public']['Tables']['brief_responses']['Row'];
+  export type Insert =
+    Database['public']['Tables']['brief_responses']['Insert'];
+  export type Update =
+    Database['public']['Tables']['brief_responses']['Update'];
+
+  export type Response = Pick<Type, 'id' | 'response' | 'created_at'> & {
+    brief?:
+      | (Omit<Partial<Brief.Response>, 'id' | 'name'> &
+          Pick<Brief.Response, 'id' | 'name'>)
+      | null;
+    field?: FormField.Response | null;
+  };
 }

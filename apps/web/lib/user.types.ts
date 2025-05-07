@@ -10,8 +10,7 @@ export namespace User {
     Type,
     'email' | 'id' | 'name' | 'picture_url'
   > & {
-    organization_id?: string | null;
-    settings?: UserSettings.Response | null;
+    settings?: UserSettings.Response[] | null;
     role?: string | null;
   } ;
 }

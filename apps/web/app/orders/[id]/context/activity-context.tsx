@@ -5,10 +5,8 @@ import { ReactNode, createContext, useContext, useEffect } from 'react';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
-import { Activity } from '~/lib/activity.types';
-import { Brief } from '~/lib/brief.types';
-import { Message } from '~/lib/message.types';
-import { Review } from '~/lib/review.types';
+import { File } from '~/lib/file.types';
+import { InteractionResponse } from '~/server/actions/interactions/get-interactions';
 
 import { useOrderApiActions } from '../hooks/use-order-api-actions';
 import { useOrderState } from '../hooks/use-order-state';
@@ -30,12 +28,10 @@ export const ActivityContext = createContext<ActivityContextType | undefined>(
 
 interface ActivityProviderProps {
   children: ReactNode;
-  initialMessages?: Message.Response[];
-  initialActivities?: Activity.Response[];
-  initialReviews?: Review.Response[];
+  initialInteractions?: InteractionResponse;
+  initialFiles?: File.Response[];
   initialOrder: DataResult.Order;
   userRole: string;
-  briefResponses: Brief.Relationships.FormFieldResponse.Response[];
   clientOrganizationId: string;
   agencyId: string;
 }
@@ -50,16 +46,13 @@ interface ActivityProviderProps {
  */
 export const ActivityProvider = ({
   children,
-  initialMessages,
-  initialActivities,
-  initialReviews,
+  initialInteractions,
   initialOrder,
-  briefResponses: serverBriefResponses,
+  initialFiles,
   userRole,
   clientOrganizationId,
   agencyId,
 }: ActivityProviderProps) => {
-
   // Manage order state and related interactions
   const {
     order,
@@ -71,7 +64,10 @@ export const ActivityProvider = ({
     setInteractions,
     interactionsQuery,
     interactionsGroups,
-  } = useOrderState({ initialOrder, initialMessages, initialActivities, initialReviews });
+  } = useOrderState({
+    initialOrder,
+    initialInteractions,
+  });
 
   // Get current user workspace information
   const { workspace: currentUser } = useUserWorkspace();
@@ -102,9 +98,10 @@ export const ActivityProvider = ({
   );
 
   // Mark order as read when it changes
-  const { markOrderAsRead, getUnreadCountForOrder, unreadCounts } = useUnreadMessageCounts({
-    userId: currentUser.id ?? '',
-  });
+  const { markOrderAsRead, getUnreadCountForOrder, unreadCounts } =
+    useUnreadMessageCounts({
+      userId: currentUser.id ?? '',
+    });
 
   useEffect(() => {
     if (order.id) {
@@ -119,7 +116,7 @@ export const ActivityProvider = ({
         messages: messages.filter((msg) => !msg.deleted_on),
         reviews,
         order,
-        briefResponses: serverBriefResponses,
+        briefResponses: order.brief_responses,
         userRole,
         addMessageMutation,
         userWorkspace: currentUser,
@@ -129,6 +126,7 @@ export const ActivityProvider = ({
         markOrderAsRead,
         orderId: order.id,
         unreadCounts,
+        allFiles: initialFiles,
       }}
     >
       {children}

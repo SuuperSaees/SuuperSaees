@@ -3,9 +3,9 @@ import { UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query
 import { JSONCustomResponse } from '@kit/shared/response';
 
 import { Activity as ServerActivity } from '~/lib/activity.types';
-import { Brief } from '~/lib/brief.types';
+import { BriefResponse } from '~/lib/brief.types';
 import { Database, Tables } from '~/lib/database.types';
-import { File as ServerFile } from '~/lib/file.types';
+import { File, File as ServerFile } from '~/lib/file.types';
 import { Message as ServerMessage } from '~/lib/message.types';
 import { Order as ServerOrder } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
@@ -41,7 +41,7 @@ export enum TableName {
   ORDER = 'orders_v2',
 }
 
-export type ActivityExtended = Omit<ServerActivity.Response, 'user'> & {
+export type ActivityExtended = Omit<ServerActivity.Response['data'][0], 'user'> & {
   user?: UserExtended | null;
 };
 
@@ -59,7 +59,7 @@ export type UserExtended = Pick<
   settings?: {
     name: string | null;
     picture_url: string | null;
-  } | null;
+  }[] | null;
 };
 
 export type FileExtended = ServerFile.Response & {
@@ -67,14 +67,14 @@ export type FileExtended = ServerFile.Response & {
   isLoading?: boolean;
 };
 
-export type MessageExtended = Omit<ServerMessage.Response, 'user' | 'files'> & {
+export type MessageExtended = Omit<ServerMessage.Response['data'][0], 'user' | 'files'> & {
   user?: UserExtended | null;
   files?: FileExtended[] | null;
   // reactions?: ReactionExtended[];
   pending?: boolean;
 };
 
-export type ReviewExtended = Omit<ServerReview.Response, 'user'> & {
+export type ReviewExtended = Omit<ServerReview.Response['data'][0], 'user'> & {
   user?: UserExtended | null;
 };
 
@@ -127,6 +127,8 @@ export namespace DataResult {
     messages: MessageExtended[];
     activities: ActivityExtended[];
     reviews: ReviewExtended[];
+    // briefResponses: BriefResponse.Response[];
+    nextCursor: string | null;
   }
   export type InteractionPages = {
     pages: Interaction[];
@@ -151,7 +153,7 @@ export interface ActivityContextType {
   // allFiles: DataResult.File[];
   order: DataResult.Order;
   orderId: number;
-  briefResponses: Brief.Relationships.FormFieldResponse.Response[];
+  briefResponses: BriefResponse.Response[];
   userRole: string;
   addMessageMutation: UseMutationResult<
     { message: ServerMessage.Insert; files: ServerFile.Insert[] },
@@ -179,6 +181,7 @@ export interface ActivityContextType {
       previousInteractions: DataResult.InteractionPages;
     }
   >;
+  allFiles?: File.Response[];
   interactionsQuery: UseInfiniteQueryResult<DataResult.InteractionPages, Error>;
   getUnreadCountForOrder: (orderId: number) => number;
   markOrderAsRead: (orderId: number) => Promise<void>;

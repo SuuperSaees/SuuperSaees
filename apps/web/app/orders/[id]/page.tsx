@@ -8,8 +8,8 @@ import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { Order } from '~/lib/order.types';
-import { getAgencyStatuses } from '~/server/actions/statuses/statuses.action';
-import { getTags } from '~/server/actions/tags/tags.action';
+import { getInteractions } from '~/server/actions/interactions/get-interactions';
+import { getFolderFiles } from '~/team-accounts/src/server/actions/files/get/get-files';
 
 import { getOrderById } from '../../../../../packages/features/team-accounts/src/server/actions/orders/get/get-order';
 import AsideOrderInformation from './components/aside-order-information';
@@ -56,11 +56,17 @@ async function OrderDetailsPage({
   if (workspace?.role === 'client_guest' && order?.visibility !== 'public') {
     return redirect('/orders');
   }
+  const agencyRoles = [
+    'agency_owner',
+    'agency_member',
+    'agency_project_manager',
+  ];
 
-  const [agencyStatuses, agencyTags] = await Promise.all([
-    getAgencyStatuses(order?.agency_id ?? ''),
-    getTags(order?.agency_id ?? ''),
-  ]);
+  const userAgency = agencyRoles.includes(workspace?.role ?? '')
+    ? organization
+    : agency;
+  const agencyStatuses = userAgency?.statuses;
+  const agencyTags = userAgency?.tags;
 
   const organizationId = order?.client_organization_id;
   const organizationName = order.client_organization?.name ?? '';
@@ -73,20 +79,38 @@ async function OrderDetailsPage({
     { title: order?.title ?? '', id: order?.uuid ?? '' },
   ];
 
+  const initialInteractions = await getInteractions(order?.id, {
+    pagination: {
+      cursor: new Date().toISOString(),
+      limit: 10,
+    },
+  }).catch((err) => {
+    console.error('Error fetching interactions:', err);
+    return {
+      messages: [],
+      activities: [],
+      reviews: [],
+      nextCursor: null,
+    };
+  });
+
+  const initialFiles = await getFolderFiles(order?.uuid ?? '').catch((err) => {
+    console.error('Error fetching files:', err);
+    return [];
+  });
+
   const role = workspace?.role;
 
   if (role === 'client_guest' && order?.visibility !== 'public') {
     return redirect('/orders');
   }
 
-  console.log('order', order);
   return (
     <ActivityProvider
-      initialMessages={order?.messages ?? []}
-      initialActivities={order?.activities ?? []}
-      initialReviews={order?.reviews ?? []}
+      initialInteractions={initialInteractions}
       initialOrder={order}
-      briefResponses={order?.brief_responses ?? []}
+      initialFiles={initialFiles ?? []}
+      // briefResponses={order?.brief_responses ?? []}
       userRole={role ?? ''}
       clientOrganizationId={order.client_organization_id}
       agencyId={order?.agency_id ?? ''}

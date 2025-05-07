@@ -1,6 +1,7 @@
 import { format } from 'date-fns';
 
 import { Activity } from '~/lib/activity.types';
+import { BriefResponse } from '~/lib/brief.types';
 import { Message } from '~/lib/message.types';
 import { Review } from '~/lib/review.types';
 
@@ -9,12 +10,22 @@ export enum ChatInteractionType {
   MESSAGE = 'message',
   ACTIVITY = 'activity',
   REVIEW = 'review',
+  BRIEF_RESPONSE = 'brief_response',
+}
+
+export type MergedBriefResponses = {
+  id: string;
+  briefResponses: BriefResponse.Response[];
+  class: ChatInteractionType.BRIEF_RESPONSE 
+  created_at: string;
 }
 
 // Union type representing either a Message or an Activity with a class identifier
-export type ChatInteraction = (Message.Type | Activity.Type | Review.Type) & {
-  class: ChatInteractionType;
-};
+export type ChatInteraction = 
+  | (Message.Type & { class: ChatInteractionType.MESSAGE })
+  | (Activity.Type & { class: ChatInteractionType.ACTIVITY })
+  | (Review.Type & { class: ChatInteractionType.REVIEW })
+  | MergedBriefResponses
 
 
 /**
@@ -27,20 +38,29 @@ export const combineChatInteractions = (
   messages: Message.Type[],
   activities: Activity.Type[],
   reviews?: Review.Type[],
+  briefResponses?: BriefResponse.Response[],
 ): ChatInteraction[] => {
   return [
     ...messages.map((message) => ({
       ...message,
-      class: ChatInteractionType.MESSAGE,
+      class: ChatInteractionType.MESSAGE as const,
     })),
     ...(activities?.map((activity) => ({
       ...activity,
-      class: ChatInteractionType.ACTIVITY,
+      class: ChatInteractionType.ACTIVITY as const,
     })) ?? []),
     ...(reviews?.map((review) => ({
       ...review,
-      class: ChatInteractionType.REVIEW,
+      class: ChatInteractionType.REVIEW as const,
     })) ?? []),
+    ...(briefResponses ? [
+      {
+        id: crypto.randomUUID(),
+        briefResponses: briefResponses ?? [],
+        class: ChatInteractionType.BRIEF_RESPONSE as const,
+        created_at: briefResponses?.[0]?.created_at ?? '',
+      }
+    ] : []),
   ];
 };
 

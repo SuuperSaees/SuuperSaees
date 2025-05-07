@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Check } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 import { Spinner } from '@kit/ui/spinner';
 
 import useInfiniteScroll from '~/hooks/use-infinite-scroll';
-import { Activity } from '~/lib/activity.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
-import { Review } from '~/lib/review.types';
 import {
+  ChatInteractionType,
   combineChatInteractions,
   groupChatInteractionsByDay,
   sortChatInteractions,
@@ -38,21 +37,25 @@ const Interactions = ({
     orderId,
     markOrderAsRead,
     unreadCounts,
+    order
   } = useActivityContext();
+  const briefResponses = order?.brief_responses;
+  const orderOwner = order.client
   const interactionsContainerRef = useRef<HTMLDivElement>(null);
   const [isFirstRender, setIsFirstRender] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const groupedInteractions = useMemo(() => {
     const combinedInteractions = combineChatInteractions(
       messages,
-      activities as Activity.Type[],
-      reviews as Review.Type[],
+      activities,
+      reviews,
+      !interactionsQuery.hasNextPage ? briefResponses : undefined,
     );
     const sortedInteractions = sortChatInteractions(combinedInteractions);
     return groupChatInteractionsByDay(sortedInteractions);
-  }, [messages, activities, reviews]);
+  }, [messages, activities, reviews, briefResponses, interactionsQuery.hasNextPage]);
 
-  const { t } = useTranslation('orders');
+  // const { t } = useTranslation('orders');
 
   const { loadMoreRef } = useInfiniteScroll({
     hasNextPage: interactionsQuery.hasNextPage,
@@ -149,7 +152,7 @@ const Interactions = ({
   }, [isFirstRender, interactionsQuery.isLoading, scrollToBottom]);
 
   const unreadCount = getUnreadCountForOrder(orderId);
-  console.log('unreadCount', unreadCount);
+
   return (
     <div
       className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8"
@@ -184,7 +187,8 @@ const Interactions = ({
                   'data-message-id': interaction.id,
                 };
 
-                return interaction.class === 'brief-field' ? (
+                return interaction.class ===
+                  ChatInteractionType.BRIEF_RESPONSE ? (
                   <div
                     className="flex w-full"
                     key={interaction.id}
@@ -193,22 +197,26 @@ const Interactions = ({
                     <div className="mr-2 flex h-7 w-7 items-center justify-center rounded-full bg-green-200 p-1">
                       <Check className="text-green-700" />
                     </div>
-                    <UserFirstMessage interaction={interaction} />
+                    <UserFirstMessage interaction={interaction} user={{
+                      ...orderOwner,
+                      name: orderOwner.settings?.[0]?.name ?? orderOwner.name,
+                      picture_url: orderOwner.settings?.[0]?.picture_url ?? orderOwner.picture_url
+                    }}/>
                   </div>
-                ) : interaction.class === 'message' ? (
+                ) : interaction.class === ChatInteractionType.MESSAGE ? (
                   <UserMessage
                     message={interaction as DataSource.Message}
                     key={interaction.id}
                     {...dataProps}
                   />
-                ) : interaction.class === 'activity' ? (
+                ) : interaction.class === ChatInteractionType.ACTIVITY ? (
                   <ActivityAction
                     activity={interaction as DataSource.Activity}
                     key={interaction.id}
                     agencyStatuses={agencyStatuses}
                     {...dataProps}
                   />
-                ) : interaction.class === 'review' ? (
+                ) : interaction.class === ChatInteractionType.REVIEW ? (
                   <UserReviewMessage
                     review={interaction as DataSource.Review}
                     key={interaction.id}
@@ -222,12 +230,13 @@ const Interactions = ({
       )}
       {showScrollButton && (
         <ScrollToBottomButton
-          content={
-            unreadCount > 0 ? unreadCount === 1
-              ? t('message.newMessages.singular')
-              : t('message.newMessages.plural')
-            : t('message.scrollToBottom')
-          }
+          // content={
+          //   unreadCount > 0
+          //     ? unreadCount === 1
+          //       ? t('message.newMessages.singular')
+          //       : t('message.newMessages.plural')
+          //     : t('message.scrollToBottom')
+          // }
           unreadMessages={unreadCount}
           onClick={scrollToReadMessages}
         />

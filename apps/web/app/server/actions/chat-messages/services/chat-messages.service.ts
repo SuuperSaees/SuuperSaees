@@ -40,7 +40,7 @@ export class ChatMessagesService {
 
 
   // * GET SERVICES
-  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response[]> {
+  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response> {
     return await this.chatMessagesRepository.list(chatId, config);
   }
 

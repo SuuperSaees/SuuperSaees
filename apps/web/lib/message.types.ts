@@ -5,10 +5,13 @@ import { User } from './user.types';
 export namespace Message {
   export type Type = Database['public']['Tables']['messages']['Row']
 
-  export type Response = Message.Type & {
-    user?: User.Response | null;
-    files?: File.Response[] | null;
-  };
+  export type Response = {
+    data: (Message.Type & {
+      user?: User.Response | null;
+      files?: File.Response[] | null;
+    })[];
+    nextCursor: string | null;
+  }
   export type Insert = Database['public']['Tables']['messages']['Insert'];
   export type Update = Database['public']['Tables']['messages']['Update'];
   export type TypeOnly = Database['public']['Tables']['messages']['Row'];

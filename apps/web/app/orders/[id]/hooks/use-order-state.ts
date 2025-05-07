@@ -5,9 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
-import { Activity } from '~/lib/activity.types';
-import { Message } from '~/lib/message.types';
-import { Review } from '~/lib/review.types';
 import {
   InteractionResponse,
   getInteractions,
@@ -17,9 +14,7 @@ import { DataResult } from '../context/activity.types';
 
 interface UseOrderStateProps {
   initialOrder: DataResult.Order;
-  initialMessages?: Message.Response[];
-  initialActivities?: Activity.Response[];
-  initialReviews?: Review.Response[];
+  initialInteractions?: InteractionResponse;
 }
 
 /**
@@ -27,9 +22,7 @@ interface UseOrderStateProps {
  */
 export const useOrderState = ({
   initialOrder,
-  // initialMessages,
-  // initialActivities,
-  // initialReviews,
+  initialInteractions,
 }: UseOrderStateProps) => {
   // State management for various data types
   const { workspace: userWorkspace } = useUserWorkspace();
@@ -52,19 +45,13 @@ export const useOrderState = ({
    */
   const interactionsQuery = useInfiniteQuery({
     queryKey: ['interactions', order.id],
-    // initialData:
-    //   initialMessages && initialActivities && initialReviews
-    //     ? {
-    //         pages: [
-    //           {
-    //             messages: initialMessages,
-    //             activities: initialActivities,
-    //             reviews: initialReviews,
-    //           },
-    //         ],
-    //         pageParams: [],
-    //       }
-    //     : undefined,
+    initialData:
+      initialInteractions
+        ? {
+            pages: [initialInteractions],
+            pageParams: [],
+          }
+        : undefined,
     initialPageParam: new Date().toISOString(), // works because descending
     queryFn: async ({ pageParam }) =>
       await getInteractions(order.id, {
@@ -79,6 +66,7 @@ export const useOrderState = ({
         ...lastPage.messages,
         ...lastPage.activities,
         ...lastPage.reviews,
+        // ...lastPage.briefResponses,
       ];
       const orderedInteractions = mergedInteractions.sort(
         (a, b) =>
@@ -90,7 +78,6 @@ export const useOrderState = ({
       return lastInteractionDate; // this becomes the new cursor
     },
   });
-  console.log('interactionsQuery', interactionsQuery.data);
   /**
    * Memoized interaction data with fallback for empty state
    */
@@ -126,7 +113,7 @@ export const useOrderState = ({
     (page) => page.activities,
   );
   const reviews = interactionsGroups.pages.flatMap((page) => page.reviews);
-
+  // const briefResponses = interactionsGroups.pages.flatMap((page) => page.briefResponses);
   /**
    * Memoized query key for interactions data
    */
@@ -168,6 +155,7 @@ export const useOrderState = ({
     messages,
     activities,
     reviews,
+    // briefResponses,
     interactionsQuery,
     setInteractions,
     interactionsGroups,
