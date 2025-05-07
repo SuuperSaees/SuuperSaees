@@ -2,6 +2,7 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { Review } from '~/lib/review.types';
+import { transformDataArray } from '../utils/transformers';
 interface Config {
   pagination?: {
     cursor?: string | number;
@@ -39,9 +40,10 @@ export async function getReviews(orderId?: number, config?: Config): Promise<Rev
     if (reviewsError)
       throw new Error(`Error fetching reviews: ${reviewsError.message}`);
 
+    const transformedReviews = transformDataArray(reviews);
     return {
-      data: reviews.slice(0, limit),
-      nextCursor: reviews[limit]?.created_at ?? null,
+      data: transformedReviews.slice(0, limit),
+      nextCursor: transformedReviews[limit]?.created_at ?? null,
     };
   } catch (error) {
     console.error(error);
