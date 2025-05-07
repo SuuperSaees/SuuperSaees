@@ -73,9 +73,9 @@ const Interactions = ({
       ) ?? 0
     ]?.id ?? '';
 
-  const lastMessageIsRead = unreadCounts.find((count) =>
-    count.message_ids.includes(lastMessageForReadId),
-  )?.message_ids.length;
+  const lastMessageIsRead = unreadCounts?.find((count) =>
+    count?.message_ids?.includes(lastMessageForReadId),
+  )?.message_ids.length ?? 0;
 
   const handleContainerScroll = () => {
     if (!interactionsContainerRef.current) return;

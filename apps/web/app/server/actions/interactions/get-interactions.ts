@@ -1,5 +1,4 @@
 'use server';
-import { cache } from 'react';
 import { Activity } from '~/lib/activity.types';
 // import { BriefResponse } from '~/lib/brief.types';
 import { Message } from '~/lib/message.types';
@@ -26,7 +25,7 @@ export type InteractionResponse = {
   nextCursor: string | null;
 };
 
-export const getInteractions = cache(async (
+export const getInteractions = async (
   orderId: number,
   // orderUUID: string,
   config?: Config,
@@ -50,7 +49,7 @@ export const getInteractions = cache(async (
         pagination: {
           cursor: messages.data[0]?.created_at,
           limit: 10,
-          endCursor: messages.data[messages.data.length - 1]?.created_at,
+          endCursor: messages.nextCursor ?? messages.data[messages.data.length - 1]?.created_at,
         },
       };
     }
@@ -87,4 +86,4 @@ export const getInteractions = cache(async (
     console.error('Error fetching interactions:', error);
     throw error;
   }
-});
+}
