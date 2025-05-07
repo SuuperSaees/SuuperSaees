@@ -2,19 +2,16 @@
 
 import React from 'react';
 
-import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 
+import { FileActionButtons } from '~/components/organization/files/file-action-buttons';
 import { Brief } from '~/lib/brief.types';
 import { File as ServerFile } from '~/lib/file.types';
-import { fetchFormfieldsWithResponses } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import { useActivityContext } from '../context/activity-context';
+import ImageWithOptions from '../hoc/with-image-options';
 import PreviewPDF from './file-types/preview-pdf';
 import PreviewVideo from './file-types/preview-video';
-import { SkeletonBox } from '~/components/ui/skeleton';
-import ImageWithOptions from '../hoc/with-image-options';
-import { FileActionButtons } from '~/components/organization/files/file-action-buttons';
 
 const formatFileSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
@@ -67,7 +64,7 @@ const getFilePreviewComponent = (file: ServerFile.Type) => {
 };
 
 const DetailsPage = () => {
-  const { order, files } = useActivityContext();
+  const { briefResponses, allFiles } = useActivityContext();
 
   const convertLinks = (text: string) => {
     const urlRegex =
@@ -79,13 +76,7 @@ const DetailsPage = () => {
     );
   };
 
-  const briefsWithResponsesQuery = useQuery({
-    queryKey: ['briefsWithResponses', order.brief_ids],
-    queryFn: async () =>
-      await fetchFormfieldsWithResponses(order.uuid),
-  });
-  
-  const briefsWithResponses = briefsWithResponsesQuery.data ?? [];
+  const briefsWithResponses = briefResponses ?? [];
   const notValidFormTypes = new Set([
     'h1',
     'h2',
@@ -127,7 +118,7 @@ const DetailsPage = () => {
   };
 
   return (
-    <div className="h-[76vh] overflow-hidden overflow-y-auto no-scrollbar flex flex-col gap-6">
+    <div className="no-scrollbar flex h-[76vh] flex-col gap-6 overflow-hidden overflow-y-auto">
       {/* <div className="flex w-full min-w-full gap-2">
         <div className="w-full rounded-lg border border-gray-300 px-[12px] py-[8px]">
           <span className="font-inter text-md overflow-hidden text-ellipsis leading-6 text-gray-500">
@@ -135,11 +126,7 @@ const DetailsPage = () => {
           </span>
         </div>
       </div> */}
-      {briefsWithResponsesQuery.isLoading ? (
-        Array.from({ length: 5 }, (_, i) => 
-          <SkeletonBox className='h-20 w-full' key={i} />
-        )
-      ) : (
+
         <div className="flex flex-col gap-8">
           {/* <div className="mb-[6px] flex">
           <span className="font-inter text-sm font-medium leading-5 text-gray-700">
@@ -151,27 +138,28 @@ const DetailsPage = () => {
           dangerouslySetInnerHTML={{ __html: convertLinks(order.description) }}
         /> */}
           {briefsWithResponses
-            .filter(a => a?.field?.position !== undefined)
+            .filter((a) => a?.field?.position !== undefined)
             .sort((a, b) => (a.field?.position ?? 0) - (b.field?.position ?? 0))
             .map((formField) => {
               if (notValidFormTypes.has(formField.field?.type ?? '')) {
                 return null;
-              }
-              else if (formField.field?.type !== 'file') {
-                return <Field key={formField.field?.id} formField={formField} />;
+              } else if (formField.field?.type !== 'file') {
+                return (
+                  <Field key={formField.field?.id} formField={formField} />
+                );
               }
               return null;
-          })}
+            })}
         </div>
-      )}
+      
 
       <div className="flex flex-wrap gap-8 pb-8">
-        {files?.map((file) => (
+        {allFiles?.map((file) => (
           <div
             key={file.id}
             className="flex h-[209px] w-[220px] flex-col items-start gap-2 rounded-md border border-gray-200 bg-white p-[10px] px-[14px]"
           >
-            <div className="h-[137px] w-[192px] overflow-y-auto overflow-x-hidden flex items-center justify-center">
+            <div className="flex h-[137px] w-[192px] items-center justify-center overflow-y-auto overflow-x-hidden">
               {getFilePreviewComponent(file)}
             </div>
             <span className="line-clamp-1 w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium text-gray-700">
