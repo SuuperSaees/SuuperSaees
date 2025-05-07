@@ -68,10 +68,9 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
               ...follower,
               client_follower: {
                 id: follower.client_follower?.id,
-                name: follower.client_follower?.name,
+                name: follower.client_follower?.settings?.[0]?.name ?? follower.client_follower?.name,
                 email: follower.client_follower?.email,
-                picture_url: follower.client_follower?.picture_url,
-                settings: follower.client_follower?.settings?.[0],
+                picture_url: follower.client_follower?.settings?.[0]?.picture_url ?? follower.client_follower?.picture_url,
                 role: userRole
               }
             };
@@ -107,7 +106,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       ...orderData,
       client: {
         ...orderData.client,
-        settings: orderData.client?.settings?.[0],
+        name: orderData.client?.settings?.[0]?.name ?? orderData.client?.name,
+        picture_url: orderData.client?.settings?.[0]?.picture_url ?? orderData.client?.picture_url,
       },
       tags: Array.isArray(orderData.order_tags) 
         ? orderData.order_tags.map(tagItem => tagItem.tag) 
@@ -115,9 +115,17 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       assigned_to: orderData.assigned_to.filter(assignment => 
         !assignment.agency_member?.deleted_on && true
         // assignment.agency_member?.organization_id === orderData.agency_id
-      ),
+      ).map(assignment => ({
+        ...assignment,
+        agency_member: {
+          ...assignment.agency_member,
+          name: assignment.agency_member?.settings?.[0]?.name ?? assignment.agency_member?.name,
+          picture_url: assignment.agency_member?.settings?.[0]?.picture_url ?? assignment.agency_member?.picture_url,
+        }
+      } )),
       client_organization: clientOrganizationData,
       brief_responses: briefResponses,
+      
     };
 
     return proccesedData as unknown as Order.Relational;

@@ -54,13 +54,6 @@ const enrichWithUser = async (
         name: fetchedUser.name,
         email: fetchedUser.email,
         picture_url: fetchedUser.picture_url,
-        settings:
-          fetchedUser.settings && Array.isArray(fetchedUser.settings)
-            ? {
-                name: fetchedUser.settings[0]?.name ?? null,
-                picture_url: fetchedUser.settings[0]?.picture_url ?? null,
-              }
-            : null,
       };
     } catch (err) {
       console.error('Error fetching user:', err);
@@ -119,7 +112,8 @@ const updateInteractionPage = (
           messages: updatedData.messages ?? [],
           activities: updatedData.activities ?? [],
           reviews: updatedData.reviews ?? [],
-        },
+          
+        }
       ],
       pageParams: [],
     };
@@ -182,7 +176,7 @@ export const useOrderSubscriptionsHandlers = () => {
           )),
           pending: false,
         } as DataResult.Message;
-
+        
         const updatedMessages = updateArrayData(
           interactions?.pages[0]?.messages ?? [],
           enrichedMessage,

@@ -23,18 +23,13 @@ const UserMessage = forwardRef(({ message, ...props }: UserMessageProps, ref: Re
       {...props}
     >
       <AvatarDisplayer
-        displayName={
-          message?.user?.settings?.[0]?.picture_url ?? message?.user?.picture_url ?? isClientGuest
-            ? null
-            : message?.user?.name
-        }
+        displayName={ isClientGuest ? null : message?.user?.name }
+        
         pictureUrl={
-          message?.user?.settings?.[0]?.picture_url ?? message?.user?.picture_url
+          message?.user?.picture_url
         }
         text={
-          message?.user?.settings?.[0]?.name ?? message?.user?.name
-            ? (message?.user?.settings?.[0]?.name ?? message?.user?.name)
-            : undefined
+          isClientGuest ? undefined : message?.user?.name
         }
         isClientGuest={isClientGuest}
       />

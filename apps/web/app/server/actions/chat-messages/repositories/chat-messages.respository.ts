@@ -3,6 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { ChatMessages } from '~/lib/chat-messages.types';
 import { Database } from '~/lib/database.types';
 import { Message } from '~/lib/message.types';
+import { transformDataArray } from '../../utils/transformers';
 
 export class ChatMessagesRepository {
   private client: SupabaseClient<Database>;
@@ -72,11 +73,12 @@ export class ChatMessagesRepository {
       );
     }
 
+    const transformedData = transformDataArray(data);
     return {
-      data: data.slice(0, limit),
+      data: transformedData.slice(0, limit),
       nextCursor:
-        data.length > limit
-          ? (data.slice(limit)[0]?.created_at ?? null)
+        transformedData.length > limit
+          ? (transformedData.slice(limit)[0]?.created_at ?? null)
           : null,
     };
   }
