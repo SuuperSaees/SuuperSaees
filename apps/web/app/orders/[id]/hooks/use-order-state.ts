@@ -44,6 +44,8 @@ export const useOrderState = ({
    * Fetch paginated interactions for the current order
    */
   const interactionsQuery = useInfiniteQuery({
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     queryKey: ['interactions', order.id],
     initialData:
       initialInteractions
