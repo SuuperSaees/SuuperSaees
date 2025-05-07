@@ -6,6 +6,8 @@ import { Send, XIcon } from 'lucide-react';
 import { Input } from '@kit/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar";
 import { MarkerIcon } from '~/orders/[id]/components/file-icons';
+import { Annotation } from '~/lib/annotations.types';
+import { Message } from '~/lib/message.types';
 
 interface AnnotationMarkerProps {
   x: number;
@@ -61,14 +63,9 @@ interface AnnotationChatProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (content: string, is_first_message: boolean) => Promise<void>;
-  messages: Array<{
-    id: string;
-    content: string;
-    user_id: string;
-    created_at: string;
-  }>;
+  messages: Message.Type[];
   isLoading?: boolean;
-  annotation: any;
+  annotation: Annotation.Type;
   isInitialMessageOpen: boolean;
 }
 

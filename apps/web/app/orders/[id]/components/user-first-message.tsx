@@ -1,11 +1,16 @@
-import { Brief } from '~/lib/brief.types';
+import { BriefResponse } from '~/lib/brief.types';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import UserFile from './user-file';
 import { useActivityContext } from '../context/activity-context';
 import { textFormat } from '~/utils/text-format';
+import { MergedBriefResponses } from '~/messages/utils/messages/transform';
+import { User } from '~/lib/user.types';
 
-const UserFirstMessage = ({ interaction }) => {
+const UserFirstMessage = ({ interaction, user }: {
+  interaction: MergedBriefResponses
+  user: User.Response
+}) => {
   const { t } = useTranslation('orders');
   const { allFiles } = useActivityContext();
   const convertLinks = (text: string) => {
@@ -26,13 +31,13 @@ const UserFirstMessage = ({ interaction }) => {
   };
 
   const formatResponse = (
-    formField: Brief.Relationships.FormFieldResponse.Response,
+    formField: BriefResponse.Response,
   ) => {
     if (formField.field?.type === "date") {
       return format(new Date(formField.response), "PPPP");
     }
     if (formField.field?.type === "rich-text") {
-      return textUtils.decode(formField.response);
+      return ''
     }
     if (formField.field?.type === "file") {
       return formField.response.split(",").map((url) => url.trim());
@@ -56,26 +61,26 @@ const UserFirstMessage = ({ interaction }) => {
     <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
     <div className="flex justify-between w-full">
       <div className="flex gap-2">
-        <span className="font-semibold text-sm">{interaction?.userSettings.name} {t("createdNewProject")}</span>
+        <span className="font-semibold text-sm">{user.name} {t("createdNewProject")}</span>
       </div>
       <small className="">{`${date}`}</small>
     </div>
-    {interaction?.fields.length > 0 && 
+    {interaction?.briefResponses.length > 0 && 
    (
     <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">
-    {interaction.fields.map((field) => (
-      field.response && (
-        <div key={field.id} className="flex w-full flex-col gap-2.5 rounded-lg">
-          {field.response !== "" && (
+    {interaction.briefResponses.map((br) => (
+      br.response && (
+        <div key={br.id} className="flex w-full flex-col gap-2.5 rounded-lg">
+          {br.response !== "" && (
             <span className="text-gray-900 text-sm text-4 font-semibold">
-              {field.field?.label}
+              {br.field?.label}
             </span>
           )}
           
-          {field.field?.type === "file" ? (
-            field.response !== "" && (
+          {br.field?.type === "file" ? (
+            br.response !== "" && (
               <div className="flex max-w-full gap-4 overflow-x-auto [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500">
-                {formatResponse(field).map((fileUrl, index) => (
+                {formatResponse(br).map((fileUrl, index) => (
                   <UserFile key={index} file={{
                     url: fileUrl,
                     name: getFileName(fileUrl),
@@ -85,11 +90,11 @@ const UserFirstMessage = ({ interaction }) => {
               </div>
             )
           ) : (
-            field.response !== "" && (
+            br.response !== "" && (
               <span
                 className="text-gray-900 text-4 text-sm font-normal whitespace-pre-wrap"
                 dangerouslySetInnerHTML={{
-                  __html: formatResponse(field),
+                  __html: formatResponse(br),
                 }}
               />
             )

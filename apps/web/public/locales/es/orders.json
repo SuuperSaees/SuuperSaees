@@ -167,7 +167,12 @@
     "messageSentError": "El mensaje no se pudo enviar.",
     "messageDeleted": "Mensaje eliminado",
     "messageDeletedSuccess": "El mensaje ha sido eliminado.",
-    "messageDeletedError": "El mensaje no se pudo eliminar."
+    "messageDeletedError": "El mensaje no se pudo eliminar.",
+    "newMessages": {
+      "singular": "nuevo mensaje",
+      "plural": "nuevos mensajes"
+    },
+    "scrollToBottom": "Desplazarse al inicio"
   },
   "dragAndDropDictionary": {
     "dropHere": "Suelta aquí para subir archivos",
@@ -179,7 +184,8 @@
       "move": "Moverte sobre la imagen:",
       "zoom": "Hacer zoom:",
       "spacebar": "Mantén presionada la tecla Espacio y haz clic mientras arrastras.",
-      "mouseWheel": "Usa la rueda del ratón para acercar o alejar."
+      "mouseWheel": "Usa la rueda del ratón para acercar o alejar.",
+      "open": "Abrir búsqueda:"
     },
     "page": "Página",
     "chat": {

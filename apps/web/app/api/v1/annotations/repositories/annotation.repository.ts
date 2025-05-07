@@ -2,7 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { randomUUID } from 'crypto';
 
-import { Annotations } from '~/lib/annotations.types';
+import { Annotation } from '~/lib/annotations.types';
 import { Database } from '~/lib/database.types';
 
 export interface IAnnotationRepository {
@@ -11,10 +11,10 @@ export interface IAnnotationRepository {
     userId: string,
     parentId: string,
   ): Promise<{ id: string; content: string }>;
-  createAnnotation(data: Annotations.Insert): Promise<Annotations.Type>;
+  createAnnotation(data: Annotation.Insert): Promise<Annotation.Type>;
   getAnnotationsByFile(fileId: string): Promise<{
-    currentFile: Annotations.Type[];
-    otherFiles: Annotations.Type[];
+    currentFile: Annotation.Type[];
+    otherFiles: Annotation.Type[];
   }>;
   getChildMessages(
     parentMessageId: string,
@@ -30,8 +30,8 @@ export interface IAnnotationRepository {
   >;
   updateStatus(
     annotationId: string,
-    status: Annotations.AnnotationStatus,
-  ): Promise<Annotations.Type>;
+    status: Annotation.AnnotationStatus,
+  ): Promise<Annotation.Type>;
   softDelete(annotationId: string): Promise<void>;
 }
 
@@ -71,7 +71,7 @@ export class AnnotationRepository implements IAnnotationRepository {
     };
   }
 
-  async createAnnotation(data: Annotations.Insert): Promise<Annotations.Type> {
+  async createAnnotation(data: Annotation.Insert): Promise<Annotation.Type> {
     const {
       file_id,
       user_id,
@@ -99,7 +99,7 @@ export class AnnotationRepository implements IAnnotationRepository {
       nextNumber++;
     }
 
-    const annotationData: Annotations.Insert = {
+    const annotationData: Annotation.Insert = {
       id: randomUUID(),
       file_id,
       user_id,
@@ -126,12 +126,12 @@ export class AnnotationRepository implements IAnnotationRepository {
       );
     }
 
-    return createdAnnotation as Annotations.Type;
+    return createdAnnotation as Annotation.Type;
   }
 
   async getAnnotationsByFile(fileId: string, otherFileIds?: string[]): Promise<{
-    currentFile: Annotations.Type[];
-    otherFiles: Annotations.Type[];
+    currentFile: Annotation.Type[];
+    otherFiles: Annotation.Type[];
   }> {
     const allFileIds = [fileId, ...(otherFileIds ?? [])];
 
@@ -201,8 +201,8 @@ export class AnnotationRepository implements IAnnotationRepository {
     );
 
     return {
-      currentFile: formattedCurrentFileAnnotations as Annotations.Type[],
-      otherFiles: formattedOtherFileAnnotations as Annotations.Type[],
+      currentFile: formattedCurrentFileAnnotations as Annotation.Type[],
+      otherFiles: formattedOtherFileAnnotations as Annotation.Type[],
     };
   }
 
@@ -301,8 +301,8 @@ export class AnnotationRepository implements IAnnotationRepository {
 
   async updateStatus(
     annotationId: string,
-    status: Annotations.AnnotationStatus,
-  ): Promise<Annotations.Type> {
+    status: Annotation.AnnotationStatus,
+  ): Promise<Annotation.Type> {
     const { data: updatedAnnotation, error } = await this.client
       .from('annotations')
       .update({ status, updated_at: new Date().toISOString() })
@@ -316,7 +316,7 @@ export class AnnotationRepository implements IAnnotationRepository {
       );
     }
 
-    return updatedAnnotation as Annotations.Type;
+    return updatedAnnotation as Annotation.Type;
   }
 
   async softDelete(annotationId: string): Promise<void> {

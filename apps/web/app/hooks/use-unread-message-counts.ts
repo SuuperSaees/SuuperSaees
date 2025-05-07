@@ -10,19 +10,20 @@ const UNREAD_COUNTS_QUERY_KEY = ['unread-message-counts'];
 const NOTIFICATION_SOUND_PATH = '/sounds/pop-alert.mp3';
 
 // Define the type for the unread message counts returned from the database
-interface UnreadMessageCount {
+export interface UnreadMessageCount {
   chat_id: string | null;
   chat_unread_count: number;
   order_id: number | null;
   order_unread_count: number;
+  message_ids: string[];
 }
 
 // Define types for mutation parameters
-interface MarkChatAsReadParams {
+export interface MarkChatAsReadParams {
   chatId: string;
 }
 
-interface MarkOrderAsReadParams {
+export interface MarkOrderAsReadParams {
   orderId: number;
 }
 

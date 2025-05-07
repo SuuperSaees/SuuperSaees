@@ -2,11 +2,16 @@ import { Database } from './database.types';
 import { User } from './user.types';
 
 export namespace Activity {
-  export type Type = Database['public']['Tables']['activities']['Row'] & {
-    user?: User.Type;
-  };
+  export type Type = Database['public']['Tables']['activities']['Row'];
   export type Insert = Database['public']['Tables']['activities']['Insert'];
   export type Update = Database['public']['Tables']['activities']['Update'];
+
+  export type Response = {
+    data: (Activity.Type & {
+      user?: User.Response | null;
+    })[];
+    nextCursor: string | null;
+  }
   export type A = Database['public']['Enums']['action_type'];
   export type B = Database['public']['Enums']['activity_type'];
 

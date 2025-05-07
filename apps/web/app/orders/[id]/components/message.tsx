@@ -2,7 +2,6 @@ import { format } from 'date-fns';
 import { Message } from '~/lib/message.types';
 import { useActivityContext } from '../context/activity-context';
 import { ClockIcon, KeyIcon, Trash2, X } from 'lucide-react';
-import UserFile from './user-file';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -16,6 +15,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import UserFile from '~/messages/components/user-file';
 
 interface ChatMessageProps {
   message: Message.Type;
@@ -45,7 +45,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     message.visibility === "internal_agency";
 
   const handleDeleteMessage = async () => {
-    await deleteMessage(message.id, userRole === 'agency_owner');
+    await deleteMessage.mutateAsync({ messageId: message.id, adminActived: userRole === 'agency_owner' });
     setIsOpen(false);
   };
 
@@ -87,7 +87,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
           {message.files && message.files.length > 0 && (
             <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom">
               {message.files.map((file) => (
-                <UserFile key={file.id} file={file} files={allFiles.filter((f) => f.message_id !== null)} />
+                <UserFile key={file.id} file={file} files={allFiles} />
               ))}
             </div>
           )}

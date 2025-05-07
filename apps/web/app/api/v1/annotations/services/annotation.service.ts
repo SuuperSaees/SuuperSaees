@@ -3,7 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Logger as LoggerInstance, createLogger } from '@kit/shared/logger';
 import { ErrorAnnotationOperations } from '@kit/shared/response';
 
-import { Annotations } from '~/lib/annotations.types';
+import { Annotation } from '~/lib/annotations.types';
 import { ApiError } from '~/lib/api/api-error';
 import { Database } from '~/lib/database.types';
 
@@ -18,7 +18,7 @@ export class AnnotationService {
 
   async createAnnotation(
     data: CreateAnnotationDTO,
-  ): Promise<Annotations.Type & { message: string }> {
+  ): Promise<Annotation.Type & { message: string }> {
     try {
       this.logger.info({ fileId: data.file_id }, 'Creating annotation');
 
@@ -58,8 +58,8 @@ export class AnnotationService {
   }
 
   async listAnnotations(fileId: string, otherFileIds?: string[]): Promise<{
-    currentFile: Annotations.Type[];
-    otherFiles: Annotations.Type[];
+    currentFile: Annotation.Type[];
+    otherFiles: Annotation.Type[];
   }> {
     try {
       const annotations =
@@ -144,8 +144,8 @@ export class AnnotationService {
 
   async updateAnnotationStatus(
     annotationId: string,
-    status: Annotations.AnnotationStatus,
-  ): Promise<Annotations.Type> {
+    status: Annotation.AnnotationStatus,
+  ): Promise<Annotation.Type> {
     try {
       this.logger.info({ annotationId, status }, 'Updating annotation status');
 
