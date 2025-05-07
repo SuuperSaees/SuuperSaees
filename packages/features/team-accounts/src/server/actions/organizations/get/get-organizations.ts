@@ -32,7 +32,7 @@ export const getOrganizationSettings = async () => {
       const { data: organizationSettings, error: settingsError } = await client
         .from('organization_settings')
         .select()
-        .eq('organization_id', agencyId ?? '');
+        .eq('organization_id', agencyId ?? organizationId ?? '');
 
       if (settingsError) {
         throw settingsError.message;
