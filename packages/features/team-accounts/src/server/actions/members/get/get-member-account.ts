@@ -133,6 +133,8 @@ export async function getUserById(userId: string) {
 
     return {
       ...userData,
+      name: userData?.settings?.[0]?.name ?? userData?.name,
+      picture_url: userData?.settings?.[0]?.picture_url ?? userData?.picture_url,
       settings: userData?.settings?.[0],
     };
   } catch (error) {
