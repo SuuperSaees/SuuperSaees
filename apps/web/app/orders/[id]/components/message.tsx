@@ -36,8 +36,8 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     message.user?.email?.toLowerCase().includes('@suuper.co');
 
   const displayName = isClientGuest 
-    ? `${t('guest')} ${message.user?.settings?.name?.split(' ')[1] ?? message.user?.name?.split(' ')[1]}`
-    : message.user?.settings?.name ?? message.user?.name;
+    ? `${t('guest')} ${message.user?.settings?.[0]?.name?.split(' ')[1] ?? message.user?.name?.split(' ')[1]}`
+    : message.user?.settings?.[0]?.name ?? message.user?.name;
 
   const agencyRoles = new Set(["agency_owner", "agency_member", "agency_project_manager"]);
 
