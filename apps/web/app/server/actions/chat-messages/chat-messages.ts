@@ -2,6 +2,7 @@ import { BaseAction } from '../base-action';
 import { ChatMessagesController } from './controllers/chat-messages.controller';
 import { ChatMessages } from '~/lib/chat-messages.types';
 import { IChatMessagesActions } from './chat-messages.interface';
+import { Message } from '~/lib/message.types';
 
 export class ChatMessagesAction extends BaseAction implements IChatMessagesActions {
   private controller: ChatMessagesController;
@@ -21,8 +22,8 @@ export class ChatMessagesAction extends BaseAction implements IChatMessagesActio
     return await this.controller.create(payload);
   }
 
-  async list(chatId: string): Promise<ChatMessages.TypeWithRelations[]> {
-    return await this.controller.list(chatId);
+  async list(chatId: string | number, config?: ChatMessages.Configuration): Promise<Message.Response> {
+    return await this.controller.list(chatId, config);
   }
 
   async delete(

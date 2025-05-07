@@ -13,7 +13,7 @@ export function createSubscriptionHandler<T extends DataResponse>(options?: {
   idField?: keyof T;
   onBeforeUpdate?: (
     payload: RealtimePostgresChangesPayload<T>,
-  ) => Promise<void> | void | boolean;
+  ) => Promise<void | boolean> | void | boolean;
   onAfterUpdate?: (updatedData: T | T[]) => Promise<void> | void;
 }) {
   return async function handleSubscription(

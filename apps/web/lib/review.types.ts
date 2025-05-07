@@ -1,6 +1,5 @@
 import { Database } from './database.types';
 import { Order } from './order.types';
-import { UserSettings } from './user-settings.types';
 import { User } from './user.types';
 
 export namespace Review {
@@ -8,10 +7,11 @@ export namespace Review {
   export type Insert = Database['public']['Tables']['reviews']['Insert'];
   export type Update = Database['public']['Tables']['reviews']['Update'];
 
-  export type Response = Review.Type & {
-    order: Pick<Order.Type, 'title' | 'id'> | null;
-    user: User.Response & {
-      settings: Pick<UserSettings.Type, 'picture_url' | 'name'> | null
-    } | null;
+  export type Response = {
+    data: (Review.Type & {
+      order?: Pick<Order.Type, 'title' | 'id'> | null;
+      user?: User.Response | null;
+    })[];
+    nextCursor: string | null;
   };
 }

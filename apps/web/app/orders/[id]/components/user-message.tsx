@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { Message } from '~/lib/message.types'
+import { useState, forwardRef, Ref } from 'react';
 import ChatMessage from './message';
 import AvatarDisplayer from './ui/avatar-displayer';
+import { DataResult } from '../context/activity.types';
 
 interface UserMessageProps {
-  message: Message.Type;
+  message: DataResult.Message;
 }
 
-const UserMessage = ({ message }: UserMessageProps) => {
+const UserMessage = forwardRef(({ message, ...props }: UserMessageProps, ref: Ref<HTMLDivElement>) => {
   const [isHovered, setIsHovered] = useState(false);
   
   const isClientGuest = message?.user?.name?.toLowerCase().includes('guest') &&
@@ -19,6 +19,8 @@ const UserMessage = ({ message }: UserMessageProps) => {
       className="flex w-full items-start gap-4 rounded-lg p-2 transition duration-300 hover:bg-grayTrue-100"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      ref={ref}
+      {...props}
     >
       <AvatarDisplayer
         displayName={
@@ -40,6 +42,8 @@ const UserMessage = ({ message }: UserMessageProps) => {
       <ChatMessage key={message?.id} message={message} isHovered={isHovered} />
     </div>
   );
-};
+});
+
+UserMessage.displayName = 'UserMessage';
 
 export default UserMessage;

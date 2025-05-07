@@ -1,11 +1,16 @@
+import { UseInfiniteQueryResult, UseMutationResult } from '@tanstack/react-query';
+
+import { JSONCustomResponse } from '@kit/shared/response';
+
 import { Activity as ServerActivity } from '~/lib/activity.types';
-import { Brief } from '~/lib/brief.types';
+import { BriefResponse } from '~/lib/brief.types';
 import { Database, Tables } from '~/lib/database.types';
-import { File as ServerFile } from '~/lib/file.types';
+import { File, File as ServerFile } from '~/lib/file.types';
 import { Message as ServerMessage } from '~/lib/message.types';
 import { Order as ServerOrder } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
+import { UnreadMessageCount } from '~/hooks/use-unread-message-counts';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -36,8 +41,8 @@ export enum TableName {
   ORDER = 'orders_v2',
 }
 
-export type ActivityExtended = ServerActivity.Type & {
-  user: UserExtended;
+export type ActivityExtended = Omit<ServerActivity.Response['data'][0], 'user'> & {
+  user?: UserExtended | null;
 };
 
 export type ReactionExtended = {
@@ -48,28 +53,29 @@ export type ReactionExtended = {
 };
 
 export type UserExtended = Pick<
-  ServerUser.Type,
+  ServerUser.Response,
   'id' | 'name' | 'email' | 'picture_url'
 > & {
   settings?: {
     name: string | null;
     picture_url: string | null;
-  } | null;
+  }[] | null;
 };
 
-export type FileExtended = ServerFile.Type & {
-  user: UserExtended;
+export type FileExtended = ServerFile.Response & {
+  user?: UserExtended | null;
+  isLoading?: boolean;
 };
 
-export type MessageExtended = Omit<ServerMessage.Type, 'user' | 'files'> & {
-  user: UserExtended;
-  files?: FileExtended[];
-  reactions?: ReactionExtended[];
+export type MessageExtended = Omit<ServerMessage.Response['data'][0], 'user' | 'files'> & {
+  user?: UserExtended | null;
+  files?: FileExtended[] | null;
+  // reactions?: ReactionExtended[];
   pending?: boolean;
 };
 
-export type ReviewExtended = ServerReview.Type & {
-  user: UserExtended;
+export type ReviewExtended = Omit<ServerReview.Response['data'][0], 'user'> & {
+  user?: UserExtended | null;
 };
 
 export type OrderExtended = ServerOrder.Relational;
@@ -108,7 +114,7 @@ export namespace DataSource {
     | ServerActivity.Type;
   export type ObjectTarget = ServerOrder.Type;
 
-  export type All = ArrayTarget | ObjectTarget; 
+  export type All = ArrayTarget | ObjectTarget;
 }
 
 export namespace DataResult {
@@ -117,7 +123,17 @@ export namespace DataResult {
   export type Review = ReviewExtended;
   export type Activity = ActivityExtended;
   export type Order = OrderExtended;
-
+  export type Interaction = {
+    messages: MessageExtended[];
+    activities: ActivityExtended[];
+    reviews: ReviewExtended[];
+    // briefResponses: BriefResponse.Response[];
+    nextCursor: string | null;
+  }
+  export type InteractionPages = {
+    pages: Interaction[];
+    pageParams: unknown[];
+  } | undefined;
   export type ArrayTarget =
     | FileExtended
     | MessageExtended
@@ -133,24 +149,41 @@ export interface ActivityContextType {
   activities: DataResult.Activity[];
   messages: DataResult.Message[];
   reviews: DataResult.Review[];
-  files: DataResult.File[];
-  allFiles: DataResult.File[];
+  // files: DataResult.File[];
+  // allFiles: DataResult.File[];
   order: DataResult.Order;
-  briefResponses: Brief.Relationships.FormFieldResponse.Response[];
+  orderId: number;
+  briefResponses: BriefResponse.Response[];
   userRole: string;
-  addMessage: ({
-    message,
-    fileIdsList,
-  }: {
-    message: string;
-    fileIdsList?: string[];
-  }) => Promise<ServerMessage.Type>;
+  addMessageMutation: UseMutationResult<
+    { message: ServerMessage.Insert; files: ServerFile.Insert[] },
+    Error,
+    {
+      message: ServerMessage.Insert;
+      files: ServerFile.Insert[];
+      tempId: string;
+    }
+  >;
   userWorkspace: {
     id: string | null;
     name: string | null;
     picture_url: string | null;
     subscription_status: Tables<'subscriptions'>['status'] | null;
   };
-  loadingMessages: boolean;
-  deleteMessage: (messageId: string, adminActived?: boolean) => Promise<void>;
+  deleteMessage: UseMutationResult<
+    JSONCustomResponse<null>,
+    Error,
+    {
+      messageId: string;
+      adminActived?: boolean;
+    },
+    {
+      previousInteractions: DataResult.InteractionPages;
+    }
+  >;
+  allFiles?: File.Response[];
+  interactionsQuery: UseInfiniteQueryResult<DataResult.InteractionPages, Error>;
+  getUnreadCountForOrder: (orderId: number) => number;
+  markOrderAsRead: (orderId: number) => Promise<void>;
+  unreadCounts: UnreadMessageCount[];
 }

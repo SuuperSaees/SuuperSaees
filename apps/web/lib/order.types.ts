@@ -1,7 +1,7 @@
 import { Account } from './account.types';
 import { Activity } from './activity.types';
 import { AgencyStatus } from './agency-statuses.types';
-import { Brief } from './brief.types';
+import { Brief, BriefResponse } from './brief.types';
 import { Database } from './database.types';
 import { File } from './file.types';
 import { Message } from './message.types';
@@ -34,7 +34,7 @@ export namespace Order {
     reviews?: Review.Response[];
   };
   export type Relational = Order.Relationships.All & {
-    brief_responses: Brief.Relationships.FormFieldResponse.Response[]
+    brief_responses: BriefResponse.Response[]
     messages: (Message.Type & { user: User.Response; files: File.Type[] })[];
     files: (File.Type & { user: User.Response })[];
     tasks: Task.Type[];

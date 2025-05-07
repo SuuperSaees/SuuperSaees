@@ -98,6 +98,7 @@ function createFilterString(filter: Record<string, unknown>): string {
   try {
     // Convert each key-value pair to a filter string with proper type checking
     return Object.entries(filter)
+      .filter(([_, value]) => value) // Skip undefined values
       .map(([key, value]) => {
         const formattedValue = formatFilterValue(value);
         return `${key}=${formattedValue}`;
