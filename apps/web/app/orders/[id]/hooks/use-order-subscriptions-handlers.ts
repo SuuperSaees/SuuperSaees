@@ -12,6 +12,7 @@ import { getUserById } from '~/team-accounts/src/server/actions/members/get/get-
 import { updateArrayData } from '~/utils/data-transform';
 
 import type { DataResult, UserExtended } from '../context/activity.types';
+import { Review } from '~/lib/review.types';
 
 type UpdaterFunction = (
   updater:
@@ -33,13 +34,14 @@ type InteractionItem =
  * Helper function to enrich data with user information
  */
 const enrichWithUser = async (
-  data: Message.Type | Activity.Type | File.Type,
+  data: Message.Type | Activity.Type | File.Type | Review.Type,
   existingItems:
     | DataResult.Message[]
     | DataResult.Activity[]
-    | DataResult.File[],
+    | DataResult.File[]
+    | DataResult.Review[],
   members?: UserExtended[],
-): Promise<DataResult.Message | DataResult.Activity | DataResult.File> => {
+): Promise<DataResult.Message | DataResult.Activity | DataResult.File | DataResult.Review> => {
   // Try to find existing user data or fetch from API
   let user =
     members?.find((member) => member.id === data.user_id) ??
@@ -327,10 +329,51 @@ export const useOrderSubscriptionsHandlers = () => {
     return false;
   };
 
+  /**
+   * Handles new review events from Supabase Realtime
+   * Enrich reviews with user
+   */
+  const handleReviewChanges = async (
+    payload: RealtimePostgresChangesPayload<Review.Type>,
+    reviews: DataResult.InteractionPages,
+    setReviews: UpdaterFunction,
+    members?: UserExtended[],
+  ) => {
+    const { eventType, new: newData } = payload;
+
+    if (eventType === 'INSERT') {
+      try {
+        const enrichedReview = (await enrichWithUser(
+          newData,
+          reviews?.pages[0]?.reviews ?? [],
+          members,
+        )) as DataResult.Review;
+
+        const updatedReviews = updateArrayData(
+          reviews?.pages[0]?.reviews ?? [],
+          enrichedReview,
+          'id',
+          true,
+      );
+
+      setReviews((prevInteractions) =>
+        updateInteractionPage(prevInteractions, 0, {
+          reviews: updatedReviews,
+        }),
+      );
+      return true;
+      } catch (err) {
+        return false;
+      }
+    }
+    return false;
+  };
+
   return {
     handleOrderChanges,
     handleMessageChanges,
     handleFileChanges,
     handleActivityChanges,
+    handleReviewChanges,
   };
 };
