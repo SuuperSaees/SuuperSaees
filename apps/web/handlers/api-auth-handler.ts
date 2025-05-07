@@ -21,7 +21,8 @@ export function handleApiAuth(request: NextRequest) {
 }
 
 function isValidBasicAuth(request: NextRequest): boolean {
-  const authorizationHeader = request.headers.get('authorization');
+  // Buscar el header de autorización en ambos formatos (mayúscula y minúscula)
+  const authorizationHeader = request.headers.get('authorization') ?? request.headers.get('Authorization');
   if (!authorizationHeader?.startsWith('Basic ')) {
     return false;
   }

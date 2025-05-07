@@ -9,7 +9,8 @@ import { addActivityAction } from '~/team-accounts/src/server/actions/activity/c
 import { useActivityContext } from '../context/activity-context';
 import { Annotation } from '~/lib/annotations.types';
 
-
+const NEXT_PUBLIC_SUUPER_CLIENT_ID = process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID;
+const NEXT_PUBLIC_SUUPER_CLIENT_SECRET = process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET;
 
 interface Message {
   id: string;
@@ -39,10 +40,14 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
   const { data: annotations = [], isLoading: isLoadingAnnotations } = useQuery({
     queryKey: ['annotations', fileId],
     queryFn: async () => {
-      const response = await fetch(`/api/v1/annotations?file_id=${fileId}&other_file_ids=${otherFileIds?.join(',')}`);
+      const response = await fetch(`/api/v1/annotations?file_id=${fileId}&other_file_ids=${otherFileIds?.join(',')}`, {
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${NEXT_PUBLIC_SUUPER_CLIENT_ID}:${NEXT_PUBLIC_SUUPER_CLIENT_SECRET}`)}`,
+        }),
+      });
       const data = await response.json();
-      const currentAnnotations = data.data.current_file.filter((annotation: Annotation) => annotation.deleted_on === null);
-      const allAnnotations = data.data.other_files.filter((annotation: Annotation) => annotation.deleted_on === null);
+      const currentAnnotations = data.data.current_file.filter((annotation: Annotation.Type) => annotation.deleted_on === null);
+      const allAnnotations = data.data.other_files.filter((annotation: Annotation.Type) => annotation.deleted_on === null);
       return [...currentAnnotations, ...allAnnotations] ?? [];
     },
     enabled: isDialogOpen,
@@ -52,7 +57,11 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
   const { data: messages = [], isLoading: isLoadingMessages } = useQuery({
     queryKey: ['messages', selectedAnnotation?.id],
     queryFn: async () => {
-      const response = await fetch(`/api/v1/annotations/${selectedAnnotation?.id}`);
+      const response = await fetch(`/api/v1/annotations/${selectedAnnotation?.id}`, {
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${NEXT_PUBLIC_SUUPER_CLIENT_ID}:${NEXT_PUBLIC_SUUPER_CLIENT_SECRET}`)}`,
+        }),
+      });
       const data = await response.json();
       return data.data.children ?? [];
     },
@@ -78,7 +87,10 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
     }) => {
       const response = await fetch('/api/v1/annotations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${NEXT_PUBLIC_SUUPER_CLIENT_ID}:${NEXT_PUBLIC_SUUPER_CLIENT_SECRET}`)}`,
+        }),
         body: JSON.stringify({
           file_id,
           user_id,
@@ -126,7 +138,10 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
     }) => {
       const response = await fetch('/api/v1/annotations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${NEXT_PUBLIC_SUUPER_CLIENT_ID}:${NEXT_PUBLIC_SUUPER_CLIENT_SECRET}`)}`,
+        }),
         body: JSON.stringify({ parent_id, content, user_id }),
       });
       return response.json();
@@ -141,7 +156,10 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
     mutationFn: async (annotationId: string) => {
       const response = await fetch(`/api/v1/annotations/${annotationId}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${NEXT_PUBLIC_SUUPER_CLIENT_ID}:${NEXT_PUBLIC_SUUPER_CLIENT_SECRET}`)}`,
+        }),
       });
       return response.json();
     },
@@ -164,7 +182,10 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
     }) => {
       const response = await fetch(`/api/v1/annotations/${annotationId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          Authorization: `Basic ${btoa(`${NEXT_PUBLIC_SUUPER_CLIENT_ID}:${NEXT_PUBLIC_SUUPER_CLIENT_SECRET}`)}`,
+        }),
         body: JSON.stringify({
           status,
           first_message,
@@ -185,8 +206,8 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
   const handleDatabaseChange = useCallback(
     (payload: { 
       eventType: string; 
-      new: Annotation | Message; 
-      old: Annotation | Message;
+      new: Annotation.Type | Message; 
+      old: Annotation.Type | Message;
       table: string;
     }) => {
       const { eventType, new: newRecord, old: oldRecord, table } = payload;
@@ -194,15 +215,15 @@ export const useAnnotations = ({ fileId, fileName, isDialogOpen, isInitialMessag
       if (table === 'annotations') {
         queryClient.setQueryData(
           ['annotations', fileId],
-          (oldAnnotations: Annotation[] | undefined) => {
+          (oldAnnotations: Annotation.Type[] | undefined) => {
             if (!oldAnnotations) return [];
 
             switch (eventType) {
               case 'INSERT':
-                return [...oldAnnotations, newRecord as Annotation];
+                return [...oldAnnotations, newRecord as Annotation.Type];
               case 'UPDATE':
                 return oldAnnotations.map((annotation) =>
-                  annotation.id === newRecord.id ? (newRecord as Annotation) : annotation
+                  annotation.id === newRecord.id ? (newRecord as Annotation.Type) : annotation
                 );
               case 'DELETE':
                 return oldAnnotations.filter(
