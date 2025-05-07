@@ -49,7 +49,7 @@ export const getInteractions = async (
         pagination: {
           cursor: messages.data[0]?.created_at,
           limit: 10,
-          endCursor: messages.data[messages.data.length - 1]?.created_at,
+          endCursor: messages.nextCursor ?? messages.data[messages.data.length - 1]?.created_at,
         },
       };
     }
