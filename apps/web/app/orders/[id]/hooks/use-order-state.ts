@@ -62,20 +62,20 @@ export const useOrderState = ({
       }),
     getNextPageParam: (lastPage) => {
       // get last message from the *last page* (remember, descending order)
-      const mergedInteractions = [
-        ...lastPage.messages,
-        ...lastPage.activities,
-        ...lastPage.reviews,
-        // ...lastPage.briefResponses,
-      ];
-      const orderedInteractions = mergedInteractions.sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-      );
-      const lastInteraction =
-        orderedInteractions[orderedInteractions.length - 1];
-      const lastInteractionDate = lastInteraction?.created_at ?? undefined;
-      return lastInteractionDate; // this becomes the new cursor
+      // const mergedInteractions = [
+      //   ...lastPage.messages,
+      //   ...lastPage.activities,
+      //   ...lastPage.reviews,
+      //   // ...lastPage.briefResponses,
+      // ];
+      // const orderedInteractions = mergedInteractions.sort(
+      //   (a, b) =>
+      //     new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      // );
+      // const lastInteraction =
+      //   orderedInteractions[orderedInteractions.length - 1];
+      // const lastInteractionDate = lastInteraction?.created_at ?? undefined;
+      return lastPage.nextCursor; // this becomes the new cursor
     },
   });
   /**

@@ -1,7 +1,6 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-import { cache } from 'react';
 import { Activity } from '~/lib/activity.types';
 interface Config {
   pagination?: {
@@ -11,7 +10,7 @@ interface Config {
   };
 }
 
-export const getActivities = cache(async (orderId?: number, config?: Config): Promise<Activity.Response> => {
+export const getActivities = async (orderId?: number, config?: Config): Promise<Activity.Response> => {
   const client = getSupabaseServerComponentClient();
   const limit = config?.pagination?.limit ?? 10;
   try {
@@ -49,6 +48,6 @@ export const getActivities = cache(async (orderId?: number, config?: Config): Pr
     console.error(error);
     throw error;
   }
-});
+}
 
 
