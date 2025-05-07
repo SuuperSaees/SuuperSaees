@@ -16,7 +16,7 @@ const ScrollToBottomButton = ({
     <Button
       variant="static"
       size="sm"
-      className="sticky bottom-0 z-50 ml-auto flex w-fit items-center gap-2 rounded-full border border-gray-200 bg-gray-200 px-3 py-2 text-xs font-semibold text-gray-700
+      className="sticky bottom-0 z-50 ml-auto flex w-fit items-center gap-2 rounded-full border border-gray-200 bg-gray-200 py-3 px-2 text-xs font-semibold text-gray-700
       hover:bg-gray-100"
       {...props}
     >
