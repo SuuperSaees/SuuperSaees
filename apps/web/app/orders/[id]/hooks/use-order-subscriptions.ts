@@ -9,6 +9,7 @@ import { Order } from '~/lib/order.types';
 
 import { DataResult, UserExtended } from '../context/activity.types';
 import { useOrderSubscriptionsHandlers } from './use-order-subscriptions-handlers';
+import { Review } from '~/lib/review.types';
 
 type DataUnion =
   | DataResult.Message
@@ -40,6 +41,7 @@ export const useOrderSubscriptions = (
     handleFileChanges,
     handleMessageChanges,
     handleActivityChanges,
+    handleReviewChanges,
   } = useOrderSubscriptionsHandlers();
 
   // Real-time subscription handler
@@ -68,11 +70,20 @@ export const useOrderSubscriptions = (
             order,
             setOrder,
           );
+        // Handle activity updates
         case 'activities':
           return handleActivityChanges(
             payload as RealtimePostgresChangesPayload<Activity.Type>,
             activities,
             setActivities,
+            members,
+          );
+        // Handle review updates
+        case 'reviews':
+          return handleReviewChanges(
+            payload as RealtimePostgresChangesPayload<Review.Type>,
+            reviews,
+            setReviews,
             members,
           );
       }
