@@ -47,7 +47,7 @@ export const getInteractions = async (
       newConfig = {
         ...config,
         pagination: {
-          cursor: messages.data[0]?.created_at,
+          cursor: config?.pagination?.cursor ?? messages.data[0]?.created_at,
           limit: 10,
           endCursor: messages.nextCursor ?? messages.data[messages.data.length - 1]?.created_at,
         },
