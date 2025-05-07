@@ -78,7 +78,7 @@ const FileOptions = ({
   const {
     isLinkCopied,
     isMenuOpen,
-    canPreview,
+    // canPreview,
     handleCopyLink,
     handleDownload,
     handleToggleMenu,
@@ -125,7 +125,7 @@ const FileOptions = ({
         </Tooltip>
 
         {/* Visualization of the file */}
-        {canPreview && viewerMode === FileViewerMode.ANNOTATIONS ? (
+        { viewerMode === FileViewerMode.ANNOTATIONS ? (
           <AnnotationsDialog
             triggerComponent={<TriggerComponent />}
             fileName={fileName}
