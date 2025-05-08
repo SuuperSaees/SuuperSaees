@@ -1,44 +1,31 @@
-import React from 'react';
-
-import { File } from '~/lib/file.types';
-
-import FilePreview from '../../../components/file-preview/file-preview';
-import { FileViewerMode, withFileOptions } from '../../../hocs/with-file-options';
-import { getFileType } from '../../../lib/file-types';
+import { File } from '../context/activity-context';
+import FileWithOptions from '../hoc/with-file-options';
 
 interface UserFileProps {
-  file: File.Response & {
-    isLoading?: boolean;
-  };
-  files: File.Type[];
+  file: File;
+  files: File[];
 }
 
-const FilePreviewComponent = withFileOptions(FilePreview);
-
-const filesToDisplayAsCard = [
-  'video',
-  'pdf',
-  'document',
-  'spreadsheet',
-  'presentation',
-  'other',
-];
 const UserFile = ({ file, files }: UserFileProps) => {
+  const renderFilePreview = (file: File) => {
+    return <div className='flex flex-col'>
+      <div className='h-[150px] w-[150px] flex item-center justify-center rounded-lg'>
+        <FileWithOptions
+          src={file.url}
+          fileName={file.name}
+          fileType={file.type}
+          files={files}
+          
+        />
+      </div>
+      <p className="text-sm font-medium text-gray-400 truncate w-[150px]">{file.name ?? 'fileName'}</p>
+    </div>
+  };
+
   return (
-    <FilePreviewComponent
-      src={file.url}
-      fileName={file.name}
-      fileType={file.type}
-      className="min-w-40"
-      isLoading={file.isLoading}
-      viewerMode={FileViewerMode.DEFAULT}
-      files={files}
-      renderAs={
-        filesToDisplayAsCard.includes(getFileType(file.type))
-          ? 'card'
-          : 'inline'
-      }
-    />
+    <div className="flex">
+      {renderFilePreview(file)}
+    </div>
   );
 };
 
