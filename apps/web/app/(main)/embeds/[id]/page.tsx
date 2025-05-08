@@ -1,5 +1,5 @@
 import { PageBody } from "@kit/ui/page";
-import { loadUserWorkspace } from "~/home/(user)/_lib/server/load-user-workspace";
+import { loadUserWorkspace } from "./_lib/server/load-user-workspace";
 import { EmbedPreview } from "../components/embed-preview";
 
 async function EmbedPage({ params }: { params: { id: string } }) {

@@ -3,17 +3,17 @@ import { redirect } from 'next/navigation';
 import { PageBody } from '@kit/ui/page';
 import { Separator } from '@kit/ui/separator';
 
-import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
 import { AccountRoles } from '~/lib/account.types';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getAccountPlugins } from '~/server/actions/account-plugins/account-plugins.action';
 import { getPlugins } from '~/server/actions/plugins/plugins.actions';
 
-import { PageHeader } from '../components/page-header';
+import { PageHeader } from '../../components/page-header';
 import PluginCard from './components/plugin-card';
 import PluginsHeaderCard from './components/plugins-header-card';
-import { TimerContainer } from '../components/timer-container';
+import { TimerContainer } from '../../components/timer-container';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();

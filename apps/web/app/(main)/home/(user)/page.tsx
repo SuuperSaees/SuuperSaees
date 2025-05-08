@@ -6,7 +6,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 
 import { HomeAccountMetrics } from './_components/home-account-metrics';
 import { HomeLayoutPageHeader } from './_components/home-page-header';
-import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { loadUserWorkspace } from './_lib/server/load-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -42,9 +42,9 @@ export default async function UserHomePage() {
     }
   }
 
-  if (!workspace.organization_id) {
-    return redirect('/add-organization');
-  }
+  // if (!workspace.organization_id) {
+  //   return redirect('/add-organization');
+  // }
   return redirect('/orders')
   return (
     <>

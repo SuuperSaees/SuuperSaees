@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 
-import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { loadUserWorkspace } from './_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { Members } from '~/lib/members.types';

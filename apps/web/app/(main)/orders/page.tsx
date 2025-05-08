@@ -1,7 +1,7 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
-import { loadUserWorkspace } from '~/home/(user)/_lib/server/load-user-workspace';
+import { loadUserWorkspace } from './_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
