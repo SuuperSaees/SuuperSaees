@@ -2,17 +2,12 @@
 
 import { useMemo } from 'react';
 
-
-
 import dynamic from 'next/dynamic';
-
-
 
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental';
 import { ThemeProvider } from 'next-themes';
 import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
-// import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { CaptchaProvider } from '@kit/auth/captcha/client';
 import { I18nProvider } from '@kit/i18n/provider';
 import { MonitoringProvider } from '@kit/monitoring/components';
@@ -56,7 +51,7 @@ export function RootProviders({
   lang: string;
   theme?: string;
   organizationSettings: {
-    account_id: string;
+    organization_id: string;
     created_at: string;
     id: string;
     key: Database['public']['Enums']['organization_setting_key'];

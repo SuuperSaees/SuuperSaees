@@ -66,7 +66,7 @@ const isValidHexColor = (color: string) => /^#([0-9A-F]{3}){1,2}$/i.test(color);
 // Function to map initialSettings (fetched data) to key-value format
 const mapInitialSettingsToKeyValue = (
   initialSettings: {
-    account_id: string;
+    organization_id: string;
     created_at: string;
     id: string;
     key: OrganizationSettingKeys;
@@ -89,7 +89,7 @@ const OrganizationSettingsProvider = ({
 }: {
   children: React.ReactNode;
   initialSettings: {
-    account_id: string;
+    organization_id: string;
     created_at: string;
     id: string;
     key: OrganizationSettingKeys;
