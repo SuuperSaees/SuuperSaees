@@ -9,7 +9,7 @@ import { useElements, useStripe } from '@stripe/react-stripe-js';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
-import { updateTeamAccountStripeId } from '../../../../../packages/features/team-accounts/src/server/actions/team-details-server-actions';
+import { updateTeamAccountStripeId } from '~/team-accounts/src/server/actions/team-details-server-actions';
 
 
 type AccountSchema = {
