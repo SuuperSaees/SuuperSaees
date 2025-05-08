@@ -24,7 +24,7 @@ import { cn } from '@kit/ui/utils';
 
 import Tooltip from '~/components/ui/tooltip';
 
-import { useImageActions } from '../hooks/use-image-actions';
+import { useImageActions } from '../../hooks/use-image-actions';
 
 interface ImageProps {
   src: string;

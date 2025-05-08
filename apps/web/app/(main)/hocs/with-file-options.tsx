@@ -7,7 +7,7 @@ import { Check, Copy, Download, Eye, MoreVertical } from 'lucide-react';
 import Tooltip from '~/components/ui/tooltip';
 import { File } from '~/lib/file.types';
 
-import { useFileActions } from '../hooks/use-file-actions';
+import { useFileActions } from '../../hooks/use-file-actions';
 
 const AnnotationsDialog = dynamic(
   () => import('~/(annotations)/components/dialog'),
@@ -17,7 +17,7 @@ const AnnotationsDialog = dynamic(
 );
 
 const FileDialogView = dynamic(
-  () => import('../components/file-preview/file-dialog-view'),
+  () => import('../../components/file-preview/file-dialog-view'),
   {
     ssr: false,
   },
