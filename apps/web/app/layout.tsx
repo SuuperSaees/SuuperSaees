@@ -1,20 +1,18 @@
 import { Inter } from 'next/font/google';
-import { cookies, type UnsafeUnwrappedCookies } from 'next/headers';
+import { cookies } from 'next/headers';
 
 import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 
-import { Toaster } from '@kit/ui/sonner';
 import { cn } from '@kit/ui/utils';
 
+import '~/../styles/globals.css';
 import { RootProviders } from '~/components/root-providers';
 import { heading, sans } from '~/lib/fonts';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { generateRootMetadata } from '~/lib/root-metdata';
 
-import '../styles/globals.css';
-import { TimeTrackerProvider } from './orders/[id]/context/time-tracker-context';
+const inter = Inter({ subsets: ['latin'] }); // Changed to 'Inter'
 
-const inter = Inter({ subsets: ['latin'] }); // Cambiado a 'Inter'
 export default async function RootLayout({
   children,
 }: {
@@ -23,9 +21,8 @@ export default async function RootLayout({
   const { language } = await createI18nServerInstance();
   const theme = getTheme();
   const className = getClassName(theme);
-
-  const organizationSettings = await getOrganizationSettings().catch(() => ([]));
-
+  const organizationSettings = await loadOrganizationSettings();
+  // const className = getClassName(theme);
   return (
     <html lang={language} className={`${className} ${inter.className}`}>
       <body>
@@ -34,12 +31,8 @@ export default async function RootLayout({
           lang={language}
           organizationSettings={organizationSettings}
         >
-          <TimeTrackerProvider>
-            {children}
-          </TimeTrackerProvider>
+          {children}
         </RootProviders>
-
-        <Toaster richColors={false} />
       </body>
     </html>
   );
@@ -64,8 +57,20 @@ function getClassName(theme?: string) {
   });
 }
 
+async function loadOrganizationSettings() {
+  try {
+    return await getOrganizationSettings();
+  } catch (error) {
+    console.error('Error loading organization settings', error);
+    return [];
+  }
+}
+
 function getTheme() {
-  return (cookies() as unknown as UnsafeUnwrappedCookies).get('theme')?.value;
+  const cookieValue = (
+    cookies() as { get(name: string): { value: string } | undefined }
+  ).get('theme')?.value;
+  return cookieValue ?? 'light';
 }
 
 export const generateMetadata = generateRootMetadata;

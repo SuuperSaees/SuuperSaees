@@ -1,0 +1,105 @@
+import OrganizationSettingsProvider from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { withI18n } from '~/lib/i18n/with-i18n';
+import { Service } from '~/lib/services.types';
+import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
+
+import { decodeTokenData } from '~/team-accounts/src/server/actions/tokens/decode/decode-token';
+import { PayToken } from '../../../../../packages/tokens/src/domain/token-type';
+import DetailsSide from './components/details';
+import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/actions/services/get/get-services';
+import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
+import EmptyPaymentMethods from './components/empty-payment-methods';
+import ErrorDecodedToken from './components/error-decoded-token';
+
+export const generateMetadata = async () => {
+  const i18n = await createI18nServerInstance();
+  return {
+    title: i18n.t('services:serviceCheckout'),
+  };
+};
+
+async function ServiceCheckoutPage({
+  searchParams: { tokenId },
+}: {
+  searchParams: { tokenId: string };
+}) {
+  const suuperLogo = process.env.NEXT_PUBLIC_SUUPER_LOGO_IMAGE;
+
+  const tokendecoded = await decodeTokenData<PayToken>(tokenId).catch((error) => {
+    console.error('Error decoding token:', error);
+    return null
+  });
+  
+
+  if(!tokendecoded) {
+    return <ErrorDecodedToken />
+  }
+
+  const organizationSettings = await getOrganizationSettingsByOrganizationId(
+    tokendecoded?.organization_id ?? '',
+    true,
+  );
+
+  const logoUrl = organizationSettings.find(
+    (setting) => setting.key === 'logo_url',
+  )?.value;
+  const sidebarBackgroundColor = organizationSettings.find(
+    (setting) => setting.key === 'sidebar_background_color',
+  )?.value;
+
+  const paymentMethods = await getPaymentsMethods(tokendecoded?.primary_owner_id ?? '', undefined, true).catch((error) => {
+    console.error('Error fetching payment methods:', error);
+    return {
+      paymentMethods: [],
+      primaryOwnerId: tokendecoded?.primary_owner_id ?? '',
+    };
+  });
+
+  const service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
+    console.error('Error fetching service:', error);
+    return null;
+  });
+
+  let accountId = tokendecoded?.account_id ?? '';
+
+  if(!accountId) {
+    const { stripeId } = await getStripeAccountID(tokendecoded?.primary_owner_id ?? '', true).catch((err) => {
+      console.error(`Error client, getting stripe account id: ${err}`)
+      return { stripeId: '' }
+    });
+
+    accountId = stripeId;
+  }
+
+  return (
+    <OrganizationSettingsProvider initialSettings={organizationSettings}>
+      <div
+        className="flex min-h-screen w-full flex-grow flex-col items-center"
+        style={{ backgroundColor: sidebarBackgroundColor }}
+      >
+        <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
+          {
+            !paymentMethods.paymentMethods.length ? (
+              <EmptyPaymentMethods logoUrl={logoUrl ?? suuperLogo ?? ''} />
+            ) : (
+              <DetailsSide
+                service={
+                  service as Service.Relationships.Billing.BillingService
+                }
+                stripeId={accountId}
+                organizationId={tokendecoded?.organization_id ?? ''}
+                logoUrl={logoUrl ?? suuperLogo ?? ''}
+                sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
+                paymentMethods={paymentMethods.paymentMethods ?? []}
+          />
+            )
+          }
+        </div>
+      </div>
+    </OrganizationSettingsProvider>
+  );
+}
+
+export default withI18n(ServiceCheckoutPage);

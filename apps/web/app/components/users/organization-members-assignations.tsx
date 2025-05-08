@@ -16,7 +16,7 @@ import CheckboxCombobox, {
 } from '~/components/ui/checkbox-combobox';
 import SelectAction from '~/components/ui/select';
 import { Account } from '~/lib/account.types';
-import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
+import AvatarDisplayer from '~/(main)/orders/[id]/components/ui/avatar-displayer';
 
 interface OrganizationMemberAssignationProps<T extends z.ZodSchema<unknown>> {
   form: UseFormReturn<z.infer<T> & FieldValues>;

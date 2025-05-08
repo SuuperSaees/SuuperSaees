@@ -9,7 +9,7 @@ import { Button } from '@kit/ui/button';
 
 import Tooltip from '~/components/ui/tooltip';
 import { Service } from '~/lib/services.types';
-import DeleteServiceDialog from '~/services/delete/delete-component';
+import DeleteServiceDialog from '~/(main)/services/delete/delete-component';
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { ColumnConfigs } from '../types';

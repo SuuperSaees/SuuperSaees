@@ -9,10 +9,10 @@ import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
 import { User } from '~/lib/user.types';
-import { AgencyStatusesProvider } from '~/orders/components/context/agency-statuses-context';
-import { OrdersProvider } from '~/orders/components/context/orders-context';
-import ProjectsBoard from '~/orders/components/projects-board';
-import { useOrderStats } from '~/orders/hooks/use-order-stats';
+import { AgencyStatusesProvider } from '~/(main)/orders/components/context/agency-statuses-context';
+import { OrdersProvider } from '~/(main)/orders/components/context/orders-context';
+import ProjectsBoard from '~/(main)/orders/components/projects-board';
+import { useOrderStats } from '~/(main)/orders/hooks/use-order-stats';
 import { getTags } from '~/server/actions/tags/tags.action';
 import { getOrdersByOrganizationId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';

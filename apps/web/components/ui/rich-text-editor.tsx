@@ -23,10 +23,10 @@ import { Spinner } from '@kit/ui/spinner';
 import { Switch } from '@kit/ui/switch';
 import { Trans } from '@kit/ui/trans';
 
-import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
+import useInternalMessaging from '~/(main)/orders/[id]/hooks/use-messages';
 import FileUploader from './files-input-chat';
 import styles from './styles.module.css';
-import LoomRecordButton from '~/orders/[id]/components/loom-record-button';
+import LoomRecordButton from '~/(main)/orders/[id]/components/loom-record-button';
 import { useTranslation } from 'react-i18next';
 import { ThemedDragDrop } from 'node_modules/@kit/accounts/src/components/ui/drag-and-drop-themed-with-settings';
 

@@ -2,7 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef, useEffect, useState } f
 import { StickyNote, X } from 'lucide-react';
 import { Spinner } from '@kit/ui/spinner';
 import { useFileUpload } from '~/team-accounts/src/server/actions/files/upload/file-chat-uploads';
-import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon, MPEGIcon, MKVIcon, AVIIcon, MP3Icon, MP4Icon, CLIPIcon, WAVIcon } from '~/orders/[id]/components/file-icons';
+import { PDFIcon, DOCIcon, DOCXIcon, TXTIcon, CSVIcon, XLSIcon, XLSXIcon, PPTIcon, PPTXIcon, FIGIcon, AIIcon, PSDIcon, INDDIcon, AEPIcon, HTMLIcon, CSSIcon, RSSIcon, SQLIcon, JSIcon, JSONIcon, JAVAIcon, XMLIcon, EXEIcon, DMGIcon, ZIPIcon, RARIcon, MPEGIcon, MKVIcon, AVIIcon, MP3Icon, MP4Icon, CLIPIcon, WAVIcon } from '~/(main)/orders/[id]/components/file-icons';
 import Image from 'next/image';
 
 const fileTypeIcons: Record<string, JSX.Element> = {

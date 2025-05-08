@@ -41,7 +41,7 @@ import {
 } from '~/team-accounts/src/server/actions/files/create/create-file';
 import { generateUUID } from '~/utils/generate-uuid';
 
-import useInternalMessaging from '../../app/orders/[id]/hooks/use-messages';
+import useInternalMessaging from '~/(main)/orders/[id]/hooks/use-messages';
 import styles from './styles.module.css';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 

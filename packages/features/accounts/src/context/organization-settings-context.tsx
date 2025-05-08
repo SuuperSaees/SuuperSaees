@@ -16,26 +16,8 @@ import { useTranslation } from 'react-i18next';
 import { handleResponse } from '../../../../../apps/web/lib/response/handle-response';
 
 export type OrganizationSettingKeys =
-  | 'theme_color'
-  | 'background_color'
-  | 'logo_url'
-  | 'timezone'
-  | 'language'
-  | 'date_format'
-  | 'sidebar_background_color'
-  | 'portal_name'
-  | 'favicon_url'
-  | 'dashboard_url'
-  | 'catalog_provider_url'
-  | 'catalog_product_url'
-  | 'tool_copy_list_url'
-  | 'pinned_organizations'
-  | 'parteners_url'
-  | 'catalog_product_wholesale_url'
-  | 'catalog_product_private_label_url'
-  | 'training_url'
-  | 'catalog_sourcing_china_url'
   | Database['public']['Enums']['organization_setting_key'];
+  
 
 export type OrganizationSettingValue =
   Database['public']['Tables']['organization_settings']['Row']['value'];
@@ -112,8 +94,8 @@ const OrganizationSettingsProvider = ({
     }) =>  {
       const rest = await upsertOrganizationSettings(organizationSetting)
       await handleResponse(rest, 'organizations', t);
-      if(rest.ok){
-        const { key, value } = rest.success?.data;
+      if(rest.ok && rest.success?.data){
+        const { key, value } = rest.success.data;
         // Update only if valid color when it's the theme color
         const newValue =
           key === 'theme_color' && !isValidHexColor(value) ? '' : value;
@@ -122,7 +104,9 @@ const OrganizationSettingsProvider = ({
           ...prev,
           [key]: newValue,
         }));
+        return rest.success.data;
       }
+      throw new Error('Failed to update organization setting');
     },
 
     // onSuccess: (updatedSetting) => {

@@ -5,7 +5,7 @@ import { Calendar } from 'lucide-react';
 import { Button } from '@kit/ui/button';
 
 import { KanbanItem } from '~/(views)/kanban.types';
-import { getPriorityClassName } from '~/orders/[id]/utils/generate-options-and-classnames';
+import { getPriorityClassName } from '~/(main)/orders/[id]/utils/generate-options-and-classnames';
 
 import MultiAvatarDisplayer from '../../../components/ui/multiavatar-displayer';
 

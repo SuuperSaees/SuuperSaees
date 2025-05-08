@@ -11,7 +11,7 @@ import type { Database } from '../../../../../../apps/web/lib/database.types';
 import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
 import { ThemedTabTrigger } from '../ui/tab-themed-with-settings';
 import BillingContainerConfig from './billing/billing-container';
-import { useBilling } from '../../../../../../apps/web/app/home/[account]/hooks/use-billing';
+import { useBilling } from '../../../../../../apps/web/app/(main)/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'

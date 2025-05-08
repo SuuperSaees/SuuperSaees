@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import SelectAction, { Option } from '~/components/ui/select';
-import { getPriorityClassName } from '~/orders/[id]/utils/generate-options-and-classnames';
+import { getPriorityClassName } from '~/(main)/orders/[id]/utils/generate-options-and-classnames';
 
 import PriorityChip from './priority-chip';
 

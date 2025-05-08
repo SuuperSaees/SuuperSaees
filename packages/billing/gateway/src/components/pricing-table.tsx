@@ -19,7 +19,7 @@ import { Separator } from '@kit/ui/separator';
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
-import { useBilling } from '../../../../../apps/web/app/home/[account]/hooks/use-billing';
+import { useBilling } from '../../../../../apps/web/app/(main)/home/[account]/hooks/use-billing';
 import { ThemedButton } from '../../../../features/accounts/src/components/ui/button-themed-with-settings';
 import OrganizationSettingsProvider from '../../../../features/accounts/src/context/organization-settings-context';
 import { useOrganizationSettings } from '../../../../features/accounts/src/context/organization-settings-context';
