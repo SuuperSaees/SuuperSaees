@@ -239,6 +239,7 @@ export const useOrderSubscriptionsHandlers = () => {
   const handleFileChanges = (
     payload: RealtimePostgresChangesPayload<File.Type>,
     setInteractions: UpdaterFunction,
+    setAllFiles?: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
   ): void | boolean => {
     const { eventType, new: newData } = payload;
 
@@ -281,6 +282,11 @@ export const useOrderSubscriptionsHandlers = () => {
           messages: updatedMessages,
         });
       });
+
+      // Insert allFiles local array so it can be used for the annotations context with requires the ids of the files
+      if (setAllFiles) {
+        setAllFiles((prevAllFiles) => [...prevAllFiles, newData]);
+      }
 
       return true;
     }

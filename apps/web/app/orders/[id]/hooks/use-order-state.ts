@@ -15,6 +15,7 @@ import { DataResult } from '../context/activity.types';
 interface UseOrderStateProps {
   initialOrder: DataResult.Order;
   initialInteractions?: InteractionResponse;
+  initialFiles?: DataResult.File[]
 }
 
 /**
@@ -23,13 +24,14 @@ interface UseOrderStateProps {
 export const useOrderState = ({
   initialOrder,
   initialInteractions,
+  initialFiles
 }: UseOrderStateProps) => {
   // State management for various data types
   const { workspace: userWorkspace } = useUserWorkspace();
   const userRole = userWorkspace?.role ?? '';
 
   const [order, setOrder] = useState<DataResult.Order>(initialOrder);
-
+  const [allFiles, setAllFiles] = useState<DataResult.File[]>(initialFiles ?? []);
   /**
    * Combined list of assigned members and followers
    */
@@ -148,5 +150,7 @@ export const useOrderState = ({
     interactionsQuery,
     setInteractions,
     interactionsGroups,
+    allFiles,
+    setAllFiles,
   };
 };

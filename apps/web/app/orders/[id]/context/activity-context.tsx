@@ -64,9 +64,12 @@ export const ActivityProvider = ({
     setInteractions,
     interactionsQuery,
     interactionsGroups,
+    allFiles,
+    setAllFiles,
   } = useOrderState({
     initialOrder,
     initialInteractions,
+    initialFiles
   });
 
   // Get current user workspace information
@@ -95,6 +98,7 @@ export const ActivityProvider = ({
     interactionsGroups,
     setInteractions,
     members,
+    setAllFiles,
   );
 
   // Mark order as read when it changes
@@ -126,7 +130,7 @@ export const ActivityProvider = ({
         markOrderAsRead,
         orderId: order.id,
         unreadCounts,
-        allFiles: initialFiles,
+        allFiles,
       }}
     >
       {children}

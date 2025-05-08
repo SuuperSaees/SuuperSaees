@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { EditorContent } from '@tiptap/react';
 import { SendHorizontal } from 'lucide-react';
@@ -30,6 +30,9 @@ const RichTextEditor = ({
   ...rest
 }: RichTextEditorProps) => {
   const [uploads, setUploads] = useState<FileUpload[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { editor, insertedImages } = useRichTextEditor({
     content,
     onChange,
@@ -77,7 +80,6 @@ const RichTextEditor = ({
     for (const upload of newUploads) {
       try {
         if (!onFileUpload) continue;
-
         await onFileUpload(upload.file, upload.id, setUploads);
       } catch (error) {
         console.error('Error uploading file:', error);
@@ -97,13 +99,62 @@ const RichTextEditor = ({
       return prev.filter((u) => u.id !== id);
     });
   };
-
-  // console.log('UPLOADS', uploads);
+  
+  const dragCounter = useRef(0);
+  
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current += 1;
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current -= 1;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current = 0;
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files?.length > 0) {
+      void handleFileSelect(files);
+    }
+  };
   return (
     <div
-      className={`relative flex h-fit w-full flex-col gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 ${className}`}
+      onDragEnter={handleDragEnter}
+      onDragOver={(e) => e.preventDefault()}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`relative flex h-fit w-full flex-col gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-4 ${
+        isDragging ? 'border-blue-500 bg-blue-50' : ''
+      } ${className}`}
       {...rest}
     >
+      {isDragging && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-blue-100 bg-opacity-75">
+          <p className="text-blue-700 font-semibold">Drop files here to upload</p>
+        </div>
+      )}
+
+      <input
+        type="file"
+        multiple
+        accept="*/*"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) {
+            void handleFileSelect(e.target.files);
+          }
+        }}
+      />
+
       <div
         onClick={() => editor?.commands.focus()}
         className={`${styles['scrollbar-thin']} relative h-fit w-full overflow-y-hidden border-none bg-transparent pb-0 outline-none placeholder:pb-4 placeholder:pl-4 placeholder:text-gray-400`}
@@ -136,7 +187,9 @@ const RichTextEditor = ({
             <Toolbar
               editor={editor}
               customActionButtons={customActionButtons}
-              onFileSelect={handleFileSelect}
+              onFileSelect={(files) => {
+                if (files) void handleFileSelect(files);
+              }}
             />
           )}
 
