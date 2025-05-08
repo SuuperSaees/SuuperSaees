@@ -4,7 +4,7 @@ import { SignInMethodsContainer } from '@kit/auth/sign-in';
 
 import authConfig from '~/config/auth.config';
 
-import { useAuthDetails } from '../../../../../../packages/features/auth/src/hooks/use-auth-details';
+import { useAuthDetails } from '@kit/auth/sign-in';
 import { AuthLayout } from '../../components/auth-layout';
 
 const SignIn = ({

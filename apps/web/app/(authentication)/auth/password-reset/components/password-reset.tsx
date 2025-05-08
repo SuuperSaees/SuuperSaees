@@ -4,7 +4,7 @@ import { PasswordResetRequestContainer } from '@kit/auth/password-reset';
 
 import pathsConfig from '~/config/paths.config';
 
-import { useAuthDetails } from '../../../../../../packages/features/auth/src/hooks/use-auth-details';
+import { useAuthDetails } from '@kit/auth/sign-in';
 import { AuthLayout } from '../../components/auth-layout';
 
 export function PasswordReset() {
