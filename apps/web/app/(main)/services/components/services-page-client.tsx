@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 
-import Link from 'next/link';
 
 import type { ColumnDefBase } from '@tanstack/react-table';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -17,13 +16,13 @@ import SearchInput from '~/components/ui/search-input';
 import { useColumns } from '~/hooks/use-columns';
 import type { Service } from '~/lib/services.types';
 
-import { PageHeader } from '../../components/page-header';
-import Table from '../../components/table/table';
-import { TimerContainer } from '../../components/timer-container';
+import { PageHeader } from '../../../components/page-header';
+import Table from '../../../components/table/table';
+import { TimerContainer } from '../../../components/timer-container';
 import { useStripeActions } from '../hooks/use-stripe-actions';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { PlusIcon } from 'lucide-react';
-import PrefetcherLink from '../../components/shared/prefetcher-link';
+import PrefetcherLink from '../../../components/shared/prefetcher-link';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;

@@ -1,6 +1,5 @@
 'use client';
 
-// Asegúrate de ajustar la importación según tu configuración
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
@@ -20,7 +19,7 @@ import {
 
 import { handleResponse } from '~/lib/response/handle-response';
 import Tooltip from '~/components/ui/tooltip';
-import { deleteService } from '../../../../../packages/features/team-accounts/src/server/actions/services/delete/delete-service-server';
+import { deleteService } from '~/team-accounts/src/server/actions/services/delete/delete-service-server';
 
 const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
   const { t } = useTranslation(['services', 'responses']);

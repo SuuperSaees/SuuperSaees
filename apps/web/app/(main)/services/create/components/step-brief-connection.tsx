@@ -8,7 +8,6 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addServiceBriefs } from 'node_modules/@kit/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { getPrimaryOwnerId } from 'node_modules/@kit/team-accounts/src/server/actions/members/get/get-member-account';
-// import { createService } from 'node_modules/@kit/team-accounts/src/server/actions/services/create/create-service-server';
 import { useTranslation } from 'react-i18next';
 import { Service } from '~/lib/services.types';
 
