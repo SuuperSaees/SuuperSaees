@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 
 import { File } from '~/lib/file.types';
-import { FilePreview } from '~/orders/[id]/components/files/file-preview';
+import { FilePreview } from '~/(main)/orders/[id]/components/files/file-preview';
 
 interface AnnotationsThumbnailsSidebarProps {
   files: File.Type[];

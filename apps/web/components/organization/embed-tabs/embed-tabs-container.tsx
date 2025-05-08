@@ -4,8 +4,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-import { EmbedSection } from '~/embeds/components/embed-section';
-import { FormValues } from '~/embeds/schema';
+import { EmbedSection } from '~/(main)/embeds/components/embed-section';
+import { FormValues } from '~/(main)/embeds/schema';
 import { Embeds } from '~/lib/embeds.types';
 
 import { AddIntegrationTab, EmbedTab, StandardTab } from './embed-tab';

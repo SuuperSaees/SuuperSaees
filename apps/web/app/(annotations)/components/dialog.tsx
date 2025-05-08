@@ -23,12 +23,12 @@ import { Spinner } from '@kit/ui/spinner';
 import Tooltip from '~/components/ui/tooltip';
 import { Annotation } from '~/lib/annotations.types';
 import { File } from '~/lib/file.types';
-import ActiveChats from '~/orders/[id]/components/files/active-chats';
-import FileViewer from '~/orders/[id]/components/files/file-viewer';
-import ResolvedChat from '~/orders/[id]/components/files/resolved-chat';
-import { useFileHandlers } from '~/orders/[id]/hooks/files/use-file-handlres';
-import { useAnnotations } from '~/orders/[id]/hooks/use-annotations';
-import { handleFileDownload } from '~/orders/[id]/utils/file-utils';
+import ActiveChats from '~/(main)/orders/[id]/components/files/active-chats';
+import FileViewer from '~/(main)/orders/[id]/components/files/file-viewer';
+import ResolvedChat from '~/(main)/orders/[id]/components/files/resolved-chat';
+import { useFileHandlers } from '~/(main)/orders/[id]/hooks/files/use-file-handlres';
+import { useAnnotations } from '~/(main)/orders/[id]/hooks/use-annotations';
+import { handleFileDownload } from '~/(main)/orders/[id]/utils/file-utils';
 
 import AnnotationsHelpTooltip from './help-tooltip';
 import AnnotationsThumbnailsSidebar from './thumbnails-sidebar';

@@ -15,8 +15,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
-import UserFile from '~/messages/components/user-file';
-import { FileViewerMode } from '~/hocs/with-file-options';
+import UserFile from '~/(main)/orders/[id]/components/user-file';
+import { FileViewerMode } from '../../../hocs/with-file-options';
 
 interface ChatMessageProps {
   message: Message.Type;

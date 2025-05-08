@@ -3,8 +3,8 @@ import CheckoutPage from "./checkout-page";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { PricingTable } from '@kit/billing-gateway/marketing';
-import pathsConfig from '../../../../../apps/web/config/paths.config';
-import useBilling from "~/home/[account]/hooks/use-billing";
+import pathsConfig from '../../../../../../apps/web/config/paths.config';
+import useBilling from "../../../../../../apps/web/app/(main)/home/[account]/hooks/use-billing";
 import { SkeletonCardPlans } from "../components/skeleton-card-plans";
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
