@@ -11,6 +11,7 @@ interface UserFileProps {
     isLoading?: boolean;
   };
   files: File.Type[];
+  viewerMode?: FileViewerMode;
 }
 
 const FilePreviewComponent = withFileOptions(FilePreview);
@@ -23,7 +24,7 @@ const filesToDisplayAsCard = [
   'presentation',
   'other',
 ];
-const UserFile = ({ file, files }: UserFileProps) => {
+const UserFile = ({ file, files, viewerMode = FileViewerMode.DEFAULT }: UserFileProps) => {
   return (
     <FilePreviewComponent
       src={file.url}
@@ -31,7 +32,7 @@ const UserFile = ({ file, files }: UserFileProps) => {
       fileType={file.type}
       className="min-w-40"
       isLoading={file.isLoading}
-      viewerMode={FileViewerMode.ANNOTATIONS}
+      viewerMode={viewerMode}
       files={files}
       renderAs={
         filesToDisplayAsCard.includes(getFileType(file.type))

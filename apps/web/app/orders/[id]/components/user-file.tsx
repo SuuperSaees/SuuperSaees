@@ -15,6 +15,7 @@ const UserFile = ({ file, files }: UserFileProps) => {
           fileName={file.name}
           fileType={file.type}
           files={files}
+          
         />
       </div>
       <p className="text-sm font-medium text-gray-400 truncate w-[150px]">{file.name ?? 'fileName'}</p>

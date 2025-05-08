@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import UserFile from '~/messages/components/user-file';
+import { FileViewerMode } from '~/hocs/with-file-options';
 
 interface ChatMessageProps {
   message: Message.Type;
@@ -87,7 +88,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
           {message.files && message.files.length > 0 && (
             <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom">
               {message.files.map((file) => (
-                <UserFile key={file.id} file={file} files={allFiles} />
+                <UserFile key={file.id} file={file} files={allFiles} viewerMode={FileViewerMode.ANNOTATIONS} />
               ))}
             </div>
           )}
