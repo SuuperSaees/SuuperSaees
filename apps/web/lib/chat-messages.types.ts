@@ -14,4 +14,11 @@ export namespace ChatMessages {
   export type TypeWithRelationsForChat = Database['public']['Tables']['chat_messages']['Row'] & {
     messages: Message.Type[];
   };
+
+  export interface Configuration {
+    pagination?: {
+      cursor?: string | number;
+      limit?: number;
+    };
+  }
 }

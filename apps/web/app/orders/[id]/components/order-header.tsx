@@ -9,18 +9,18 @@ import EditableHeader from '../../../../components/editable-header';
 import { ReviewDialog } from './review-dialog';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import type { User } from '@supabase/supabase-js';
+import { useActivityContext } from '../context/activity-context';
 
 export const OrderHeader = ({
-  order,
   agencyStatuses,
   user,
   userRole,
 }: {
-  order: Order.Relational;
   agencyStatuses: AgencyStatus.Type[];
   user: User;
   userRole: string;
 }) => {
+  const { order } = useActivityContext();
   const { t } = useTranslation('responses');
   const rolesThatCanEdit = new Set([
     'agency_member',

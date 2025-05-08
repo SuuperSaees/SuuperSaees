@@ -425,10 +425,8 @@ export const logOrderActivities = async (
   }
 };
 export const addOrderMessage = async (
-  userId: User.Response['id'],
   orderId: Order.Type['id'],
-  message: Omit<Message.Insert, Message.Insert['user_id']>,
-  visibility: Message.Type['visibility'],
+  message: Message.Insert ,
 ) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -436,9 +434,7 @@ export const addOrderMessage = async (
       .from('messages')
       .insert({
         ...message,
-        user_id: userId,
         order_id: orderId,
-        visibility,
       })
       .select()
       .single();
@@ -446,7 +442,7 @@ export const addOrderMessage = async (
     if (messageError)
       throw new Error(`Error adding message, ${messageError.message}`);
 
-    // revalidatePath(`/orders/${orderId}`);
+    revalidatePath(`/orders/${orderId}`);
     return messageData;
   } catch (error) {
     console.error('Error adding message:', error);

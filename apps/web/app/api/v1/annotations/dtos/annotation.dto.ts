@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { Annotations } from '~/lib/annotations.types';
+import { Annotation } from '~/lib/annotations.types';
 
 export const CreateAnnotationSchema = z
   .object({
@@ -13,9 +13,9 @@ export const CreateAnnotationSchema = z
     number: z.number().optional(),
     status: z
       .enum([
-        Annotations.AnnotationStatusKeys.ACTIVE,
-        Annotations.AnnotationStatusKeys.COMPLETED,
-        Annotations.AnnotationStatusKeys.DRAFT,
+        Annotation.AnnotationStatusKeys.ACTIVE,
+        Annotation.AnnotationStatusKeys.COMPLETED,
+        Annotation.AnnotationStatusKeys.DRAFT,
       ])
       .default('active'),
     parent_id: z
@@ -29,9 +29,9 @@ export const UpdateAnnotationSchema = z
   .object({
     status: z.enum(
       [
-        Annotations.AnnotationStatusKeys.ACTIVE,
-        Annotations.AnnotationStatusKeys.COMPLETED,
-        Annotations.AnnotationStatusKeys.DRAFT,
+        Annotation.AnnotationStatusKeys.ACTIVE,
+        Annotation.AnnotationStatusKeys.COMPLETED,
+        Annotation.AnnotationStatusKeys.DRAFT,
       ],
       { message: 'Invalid status value' },
     ),

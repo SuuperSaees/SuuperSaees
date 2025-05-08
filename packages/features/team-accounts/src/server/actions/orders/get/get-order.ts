@@ -35,17 +35,13 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       .from('orders_v2')
       .select(
         `*, client:accounts!customer_id(id, name, email, picture_url, created_at, settings:user_settings(name, picture_url)), 
-        messages(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)), files(*)), 
-        activities(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
-          reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))), 
-          files(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          order_tags(tag:tags(id, name, color, organization_id))
         `,
       )
       .eq('id', orderId)
-      .single();
+      .single()
 
       if (orderData?.followers?.length) {
         const adminClient = getSupabaseServerComponentClient({
@@ -73,10 +69,9 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
               ...follower,
               client_follower: {
                 id: follower.client_follower?.id,
-                name: follower.client_follower?.name,
+                name: follower.client_follower?.settings?.[0]?.name ?? follower.client_follower?.name,
                 email: follower.client_follower?.email,
-                picture_url: follower.client_follower?.picture_url,
-                settings: follower.client_follower?.settings?.[0],
+                picture_url: follower.client_follower?.settings?.[0]?.picture_url ?? follower.client_follower?.picture_url,
                 role: userRole
               }
             };
@@ -112,35 +107,26 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       ...orderData,
       client: {
         ...orderData.client,
-        settings: orderData.client?.settings?.[0],
+        name: orderData.client?.settings?.[0]?.name ?? orderData.client?.name,
+        picture_url: orderData.client?.settings?.[0]?.picture_url ?? orderData.client?.picture_url,
       },
       tags: Array.isArray(orderData.order_tags) 
         ? orderData.order_tags.map(tagItem => tagItem.tag) 
         : orderData.order_tags ? [orderData.order_tags?.tag as Tags.Type] : [],
-      messages: orderData.messages.map((message) => {
-        return {
-          ...message,
-          user: {
-            ...message.user,
-            settings: message.user?.settings?.[0],
-          },
-        };
-      }),
-      activities: orderData.activities.map((activity) => {
-        return {
-          ...activity,
-          user: {
-            ...activity.user,
-            settings: activity.user?.settings?.[0],
-          },
-        };
-      }),
       assigned_to: orderData.assigned_to.filter(assignment => 
         !assignment.agency_member?.deleted_on && true
         // assignment.agency_member?.organization_id === orderData.agency_id
-      ),
+      ).map(assignment => ({
+        ...assignment,
+        agency_member: {
+          ...assignment.agency_member,
+          name: assignment.agency_member?.settings?.[0]?.name ?? assignment.agency_member?.name,
+          picture_url: assignment.agency_member?.settings?.[0]?.picture_url ?? assignment.agency_member?.picture_url,
+        }
+      } )),
       client_organization: clientOrganizationData,
       brief_responses: briefResponses,
+      
     };
 
     return proccesedData as unknown as Order.Relational;

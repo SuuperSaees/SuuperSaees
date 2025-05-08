@@ -1,11 +1,11 @@
 import { randomUUID } from 'crypto';
 
-import { Annotations } from '~/lib/annotations.types';
+import { Annotation } from '~/lib/annotations.types';
 
 import { CreateAnnotationDTO } from '../dtos/annotation.dto';
 
 export class AnnotationBuilder {
-  private annotationInsert: Annotations.Insert = {
+  private annotationInsert: Annotation.Insert = {
     id: randomUUID(),
     file_id: '',
     user_id: '',
@@ -20,7 +20,7 @@ export class AnnotationBuilder {
     updated_at: new Date().toISOString(),
   };
 
-  private updateData: Partial<Annotations.Update> = {};
+  private updateData: Partial<Annotation.Update> = {};
 
   setFileId(fileId: string) {
     this.annotationInsert.file_id = fileId;
@@ -32,7 +32,7 @@ export class AnnotationBuilder {
     return this;
   }
 
-  setStatus(status: Annotations.AnnotationStatus) {
+  setStatus(status: Annotation.AnnotationStatus) {
     this.annotationInsert.status = status;
     return this;
   }
@@ -58,7 +58,7 @@ export class AnnotationBuilder {
     return this;
   }
 
-  buildAnnotationInsert(): Annotations.Insert {
+  buildAnnotationInsert(): Annotation.Insert {
     return {
       ...this.annotationInsert,
       created_at: new Date().toISOString(),
@@ -66,12 +66,12 @@ export class AnnotationBuilder {
     };
   }
 
-  setUpdateData(updateData: Partial<Annotations.Update>) {
+  setUpdateData(updateData: Partial<Annotation.Update>) {
     this.updateData = { ...this.updateData, ...updateData };
     return this;
   }
 
-  buildUpdate(): Partial<Annotations.Update> {
+  buildUpdate(): Partial<Annotation.Update> {
     return {
       ...this.updateData,
       updated_at: new Date().toISOString(),
@@ -82,7 +82,7 @@ export class AnnotationBuilder {
     dto: CreateAnnotationDTO,
     messageId: string,
     number: number,
-  ): Annotations.Insert {
+  ): Annotation.Insert {
     const builder = new AnnotationBuilder();
     return builder
       .setFileId(dto.file_id)
@@ -97,7 +97,7 @@ export class AnnotationBuilder {
 
   static buildDeletedAnnotation(
     annotationId: string,
-  ): Partial<Annotations.Update> {
+  ): Partial<Annotation.Update> {
     const builder = new AnnotationBuilder();
     return builder
       .setUpdateData({ deleted_on: new Date().toISOString() })
