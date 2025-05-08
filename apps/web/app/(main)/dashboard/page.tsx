@@ -1,4 +1,4 @@
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '~/(main)/home/(user)/_lib/server/load-user-workspace';
 import { getOrganizationSettingsByOrganizationId } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { OrganizationSettings } from '~/lib/organization-settings.types';
 import { redirect } from 'next/navigation';
