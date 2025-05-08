@@ -25,7 +25,7 @@ export const useAuthDetails = (hostname: string) => {
       const isCustomDomain = () => {
         const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
         const currentAppOrigin = window.location.origin + '/';
-        return true;
+        return originalAppOrigin !== currentAppOrigin;
       };
       
       if (!isCustomDomain()) {

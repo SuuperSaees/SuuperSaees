@@ -2,13 +2,13 @@
 
 import { ReactNode } from 'react';
 
-import { useAuthDetails } from '@kit/auth/sign-in';
 import { usePathname } from 'next/navigation';
+
+import { useAuthDetails } from '@kit/auth/sign-in';
 
 import { AuthLayout as AuthLayoutWrapper } from './auth/components/auth-layout';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
-
   const pathname = usePathname();
   let host = 'localhost:3000';
   if (typeof window !== 'undefined') {
@@ -16,16 +16,18 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   }
 
   const { authDetails, isLoading } = useAuthDetails(host);
-
+  const exlusionPaths = ['/auth/sign-up', '/auth/onboarding'];
+  
+  if (exlusionPaths.includes(pathname)) {
+    return <>{children}</>;
+  }
   return (
-    <>
-      {pathname === '/auth/sign-up' ? (
-        children
-      ) : (
-        <AuthLayoutWrapper authDetails={authDetails} isLoading={isLoading} className="h-screen w-screen">
-          {children}
-        </AuthLayoutWrapper>
-      )}
-    </>
+    <AuthLayoutWrapper
+      authDetails={authDetails}
+      isLoading={isLoading}
+      className="h-screen w-screen"
+    >
+      {children}
+    </AuthLayoutWrapper>
   );
 }
