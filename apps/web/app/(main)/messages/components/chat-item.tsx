@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@kit/ui/avatar';
 
 import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 import { Chats } from '~/lib/chats.types';
-import { UnreadMessageIndicator } from '../../components/ui/unread-message-indicator';
+import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
 
 import { useChat } from './context/chat-context';
 

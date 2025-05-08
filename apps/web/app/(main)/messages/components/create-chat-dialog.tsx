@@ -38,7 +38,7 @@ import {
   getClientsOrganizations,
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
-import OrganizationMemberAssignation from '../../components/users/organization-members-assignations';
+import OrganizationMemberAssignation from '../../../components/users/organization-members-assignations';
 import { useChat } from './context/chat-context';
 
 

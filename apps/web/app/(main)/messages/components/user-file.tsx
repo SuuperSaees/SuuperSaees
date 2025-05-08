@@ -2,9 +2,9 @@ import React from 'react';
 
 import { File } from '~/lib/file.types';
 
-import FilePreview from '../../components/file-preview/file-preview';
+import FilePreview from '../../../components/file-preview/file-preview';
 import { FileViewerMode, withFileOptions } from '../../hocs/with-file-options';
-import { getFileType } from '../../lib/file-types';
+import { getFileType } from '../../../lib/file-types';
 
 interface UserFileProps {
   file: File.Response & {

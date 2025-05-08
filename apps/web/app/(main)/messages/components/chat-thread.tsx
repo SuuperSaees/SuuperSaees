@@ -17,10 +17,10 @@ import LoomRecordButton from '../../apps/components/loom-record-button';
 import {
   InternalMessagesToggle,
   useInternalMessaging,
-} from '../../components/messages';
-import RichTextEditor from '../../components/messages/rich-text-editor';
-import { FileUpload } from '../../components/messages/types';
-import { TimerContainer } from '../../components/timer-container';
+} from '../../../components/messages';
+import RichTextEditor from '../../../components/messages/rich-text-editor';
+import { FileUpload } from '../../../components/messages/types';
+import { TimerContainer } from '../../../components/timer-container';
 import ChatEmptyState from './chat-empty-state';
 import ChatMembersSelector from './chat-members-selector';
 import { useChat } from './context/chat-context';

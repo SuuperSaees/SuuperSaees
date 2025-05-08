@@ -18,7 +18,6 @@ export default function ChatSearchHeader({
   agencyTeam: Members.Organization;
   clientOrganization?: Account.Type;
 }) {
-  // const router = useRouter();
   const { t } = useTranslation('chats');
 
   const {

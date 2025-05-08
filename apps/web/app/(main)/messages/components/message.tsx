@@ -21,7 +21,7 @@ import { Message as MessageType } from '~/lib/message.types';
 
 import { useChat } from './context/chat-context';
 import UserFile from './user-file';
-import { FileViewerMode } from '~/hocs/with-file-options';
+import { FileViewerMode } from '~/(main)/hocs/with-file-options';
 
 interface MessageProps {
   message: MessageType.Type & {

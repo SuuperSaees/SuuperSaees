@@ -14,11 +14,9 @@ import { Members } from '~/lib/members.types';
 import { User } from '~/lib/user.types';
 import { getTeams } from '~/server/actions/team/team.action';
 
-import { AvatarType } from '../../components/ui/multiavatar-displayer';
-import MultiAvatarDisplayer from '../../components/ui/multiavatar-displayer';
-import MembersAssignations from '../../components/users/member-assignations';
-
-// import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { AvatarType } from '../../../components/ui/multiavatar-displayer';
+import MultiAvatarDisplayer from '../../../components/ui/multiavatar-displayer';
+import MembersAssignations from '../../../components/users/member-assignations';
 
 interface ChatMembersSelectorProps {
   agencyTeam: Members.Organization;

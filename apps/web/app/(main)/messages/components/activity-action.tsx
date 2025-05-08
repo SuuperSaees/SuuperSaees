@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 
 import { Activity } from '~/lib/activity.types';
 
-import Avatar from '../../components/ui/avatar';
+import Avatar from '../../../components/ui/avatar';
 
 interface ActivityActionProps {
   activity: Activity.Type;

@@ -1,6 +1,6 @@
 import { Message as MessageType } from '~/lib/message.types';
 
-import Avatar from '../../components/ui/avatar';
+import Avatar from '../../../components/ui/avatar';
 import Message from './message';
 
 interface UserMessageProps {

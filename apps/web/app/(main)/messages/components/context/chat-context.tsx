@@ -9,14 +9,14 @@ import { TableConfig, useRealtime } from '~/hooks/use-realtime';
 import { Chats } from '~/lib/chats.types';
 import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
-import { useChatManagement } from '~/messages/hooks/use-chat-management-actions';
-import { useChatMessageActions } from '~/messages/hooks/use-chat-message-actions';
-import { useChatState } from '~/messages/hooks/use-chat-state';
+import { useChatManagement } from '~/(main)/messages/hooks/use-chat-management-actions';
+import { useChatMessageActions } from '~/(main)/messages/hooks/use-chat-message-actions';
+import { useChatState } from '~/(main)/messages/hooks/use-chat-state';
 import {
   ActiveChatState,
   ChatContextType,
   ChatProviderProps,
-} from '~/messages/types/chat-context.types';
+} from '~/(main)/messages/types/chat-context.types';
 import { updateArrayData } from '~/utils/data-transform';
 import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 
