@@ -1,6 +1,6 @@
 import { PageBody } from '@kit/ui/page';
 
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '~/(main)/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getEmbeds } from '~/server/actions/embeds/embeds.action';

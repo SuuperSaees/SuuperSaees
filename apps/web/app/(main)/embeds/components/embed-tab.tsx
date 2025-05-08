@@ -9,7 +9,7 @@ import { TabsTrigger } from '@kit/ui/tabs';
 import Dropdown from '~/components/ui/dropdown';
 import { Embeds } from '~/lib/embeds.types';
 
-import { DynamicEmoji } from '../../components/shared/dynamic-emoji';
+import { DynamicEmoji } from '../../../components/shared/dynamic-emoji';
 
 interface EmbedTabProps {
   embed: Embeds.Type;

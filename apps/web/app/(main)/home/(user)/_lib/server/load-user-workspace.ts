@@ -50,6 +50,7 @@ async function workspaceLoader() {
     picture_url: '',
     statuses: [],
     tags: [],
+    embeds: [],
   } : accounts;
 
   // Get pinned organizations with only necessary fields

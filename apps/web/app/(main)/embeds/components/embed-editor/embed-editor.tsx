@@ -19,8 +19,6 @@ import { TypeField } from './fields/type-field';
 import { ValueField } from './fields/value-field';
 import { VisibilityField } from './fields/visibility-field';
 
-// import { EmbedSelector } from './fields/embed-selector';
-
 interface EmbedEditorProps {
   onAction: (values: FormValues) => void | Promise<void>;
   onValueChange?: (value: string) => void;
