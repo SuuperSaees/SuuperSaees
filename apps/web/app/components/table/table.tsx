@@ -8,7 +8,7 @@ import { ListFilter, Search } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
-import { convertToTitleCase } from '~/orders/[id]/utils/format-agency-names';
+import { convertToTitleCase } from '~/(main)/orders/[id]/utils/format-agency-names';
 
 import { Button } from '@kit/ui/button';
 import { CustomConfigs, DataTable } from '@kit/ui/data-table';

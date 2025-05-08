@@ -1,6 +1,6 @@
 'use client';
 
-import { useTimeTracker } from '../orders/[id]/context/time-tracker-context';
+import { useTimeTracker } from '~/(main)/orders/[id]/context/time-tracker-context';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, CirclePause, X} from 'lucide-react';
@@ -15,7 +15,7 @@ import { Input } from '@kit/ui/input';
 import { TimerUpdate } from '~/lib/timer.types';
 import { formatTimeToAMPM, formatTime, formatTimeInHours } from '~/utils/format-time';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import AvatarDisplayer from '~/orders/[id]/components/ui/avatar-displayer';
+import AvatarDisplayer from '~/(main)/orders/[id]/components/ui/avatar-displayer';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 import { Spinner } from '@kit/ui/spinner';
 import { handleEndTimeChange, handlePauseConfirm, handleStartTimeChange } from '~/utils/timer-utils';

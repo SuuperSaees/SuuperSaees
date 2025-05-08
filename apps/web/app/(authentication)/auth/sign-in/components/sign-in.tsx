@@ -5,7 +5,6 @@ import { SignInMethodsContainer } from '@kit/auth/sign-in';
 import authConfig from '~/config/auth.config';
 
 import { useAuthDetails } from '@kit/auth/sign-in';
-import { AuthLayout } from '../../components/auth-layout';
 
 const SignIn = ({
   inviteToken,
@@ -22,13 +21,10 @@ const SignIn = ({
   if (typeof window !== 'undefined') {
     host = window.location.host;
   }
-  const { authDetails, isLoading } = useAuthDetails(host);
+  const { authDetails } = useAuthDetails(host);
   
   return (
-    <AuthLayout
-      authDetails={authDetails}
-      isLoading={isLoading}
-    >
+
       <SignInMethodsContainer
         providers={authConfig.providers}
         inviteToken={inviteToken}
@@ -36,7 +32,7 @@ const SignIn = ({
         themeColor={authDetails?.theme_color}
         className="w-full"
       />
-    </AuthLayout>
+
   );
 };
 

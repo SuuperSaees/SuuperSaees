@@ -6,7 +6,7 @@ import { useUser } from '@kit/supabase/hooks/use-user';
 import { Alert } from '@kit/ui/alert';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 
-import { AuthLayout } from '../../../../../../../apps/web/app/auth/components/auth-layout';
+import { AuthLayout } from '../../../../../../../apps/web/app/(authentication)/auth/components/auth-layout';
 import { useAuthDetails } from '../../../../../auth/src/hooks/use-auth-details';
 import { UpdatePasswordForm } from './update-password-form';
 

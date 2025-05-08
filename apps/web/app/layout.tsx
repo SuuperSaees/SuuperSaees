@@ -1,11 +1,15 @@
-import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { Inter } from 'next/font/google';
-import { generateRootMetadata } from '~/lib/root-metdata';
-import { RootProviders } from '~/components/root-providers';
-import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { cookies } from 'next/headers';
-import { heading, sans } from '~/lib/fonts';
+
+import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
+
 import { cn } from '@kit/ui/utils';
+
+import '~/../styles/globals.css';
+import { RootProviders } from '~/components/root-providers';
+import { heading, sans } from '~/lib/fonts';
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
+import { generateRootMetadata } from '~/lib/root-metdata';
 
 const inter = Inter({ subsets: ['latin'] }); // Changed to 'Inter'
 
@@ -22,12 +26,12 @@ export default async function RootLayout({
   return (
     <html lang={language} className={`${className} ${inter.className}`}>
       <body>
-      <RootProviders
+        <RootProviders
           theme={theme}
           lang={language}
           organizationSettings={organizationSettings}
         >
-        {children}
+          {children}
         </RootProviders>
       </body>
     </html>
@@ -58,12 +62,14 @@ async function loadOrganizationSettings() {
     return await getOrganizationSettings();
   } catch (error) {
     console.error('Error loading organization settings', error);
-    return []; 
+    return [];
   }
 }
 
 function getTheme() {
-  const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('theme')?.value;
+  const cookieValue = (
+    cookies() as { get(name: string): { value: string } | undefined }
+  ).get('theme')?.value;
   return cookieValue ?? 'light';
 }
 

@@ -5,14 +5,21 @@ import { ReactNode } from 'react';
 import { AuthDetails } from '@kit/auth/sign-in';
 
 import { AppLogo } from '~/components/app-logo';
+import { cn } from '@kit/ui/utils';
 
 interface AuthLayoutProps {
   children: ReactNode;
   authDetails: AuthDetails | null;
   isLoading: boolean;
+  className?: string;
 }
 
-export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLayoutProps) => {
+export const AuthLayout = ({
+  children,
+  authDetails,
+  isLoading = false,
+  className,
+}: AuthLayoutProps) => {
   const defaultBackgroundURL =
     process.env.NEXT_PUBLIC_SUPABASE_URL +
     '/storage/v1/object/public/suuper/auth_sign_in_background.webp';
@@ -22,7 +29,7 @@ export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLay
     return null;
   }
   return (
-    <div className="flex h-full w-full justify-between">
+    <div className={cn('flex h-full w-full justify-between text-center', className)}>
       {/* Left Content Container */}
       <div className="flex w-full flex-col items-start justify-start p-10">
         <AppLogo
@@ -39,13 +46,13 @@ export const AuthLayout = ({ children, authDetails, isLoading = false }: AuthLay
           background: customBackgroundURL
             ? `url(${customBackgroundURL}) lightgray 50% / cover no-repeat`
             : authDetails?.theme_color
-            ? `linear-gradient(0deg, ${authDetails.theme_color} 0%, ${authDetails.theme_color} 100%), url(${defaultBackgroundURL}) lightgray 50% / cover no-repeat`
-            : `url(${defaultBackgroundURL}) lightgray 50% / cover no-repeat`,
+              ? `linear-gradient(0deg, ${authDetails.theme_color} 0%, ${authDetails.theme_color} 100%), url(${defaultBackgroundURL}) lightgray 50% / cover no-repeat`
+              : `url(${defaultBackgroundURL}) lightgray 50% / cover no-repeat`,
           backgroundBlendMode: customBackgroundURL
             ? 'normal'
             : authDetails?.theme_color
-            ? 'overlay, normal'
-            : 'normal',
+              ? 'overlay, normal'
+              : 'normal',
           borderRadius: '28px',
           backgroundSize: 'cover',
         }}

@@ -1,7 +1,6 @@
 import { cookies, headers } from 'next/headers';
 
 // import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
-
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
 import {
@@ -11,14 +10,13 @@ import {
   PageNavigation,
 } from '@kit/ui/page';
 import { Toaster } from '@kit/ui/sonner';
-// import { cn } from '@kit/ui/utils';
 
+// import { cn } from '@kit/ui/utils';
 import { AppLogo } from '~/components/app-logo';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 // import { heading, sans } from '~/lib/fonts';
 import { generateRootMetadata } from '~/lib/root-metdata';
 
-import '../styles/globals.css';
 import { HomeMenuNavigation } from './home/(user)/_components/home-menu-navigation';
 import { HomeMobileNavigation } from './home/(user)/_components/home-mobile-navigation';
 import { HomeSidebar } from './home/(user)/_components/home-sidebar';
@@ -32,45 +30,41 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   const style = getLayoutStyle();
   const workspace = await loadUserWorkspace();
-  
-  const currentPath = headers().get('x-current-path') ?? '';
-  const excludePaths = ['/set-password', '/checkout'];
-  const shouldShowNavigation = !excludePaths.includes(currentPath);
+
+  const pathname = headers().get('x-current-path') ?? '/';
+  const exlusionPaths = ['/set-password'];
+
+  if (exlusionPaths.includes(pathname)) {
+    return <div className="h-screen w-screen">{children}</div>;
+  }
 
   return (
-   <>          
-   <Page style={style}>
-   {shouldShowNavigation && (
-     <PageNavigation>
-       <If condition={style === 'header'}>
-         <HomeMenuNavigation workspace={workspace} />
-       </If>
+    <>
+      <Page style={style}>
+        <PageNavigation>
+          <If condition={style === 'header'}>
+            <HomeMenuNavigation workspace={workspace} />
+          </If>
 
-       <If condition={style === 'sidebar'}>
-         <HomeSidebar workspace={workspace} />
-       </If>
-     </PageNavigation>
-   )}
+          <If condition={style === 'sidebar'}>
+            <HomeSidebar workspace={workspace} />
+          </If>
+        </PageNavigation>
 
-   {shouldShowNavigation && (
-     <PageMobileNavigation
-       className={'flex items-center justify-between'}
-     >
-       <AppLogo />
-       <HomeMobileNavigation workspace={workspace} />
-     </PageMobileNavigation>
-   )}
+        <PageMobileNavigation className={'flex items-center justify-between'}>
+          <AppLogo />
+          <HomeMobileNavigation workspace={workspace} />
+        </PageMobileNavigation>
 
-   <UserWorkspaceContextProvider value={workspace}>
-     <TimeTrackerProvider>{children}</TimeTrackerProvider>
-   </UserWorkspaceContextProvider>
- </Page>
+        <UserWorkspaceContextProvider value={workspace}>
+          <TimeTrackerProvider>{children}</TimeTrackerProvider>
+        </UserWorkspaceContextProvider>
+      </Page>
 
- <Toaster richColors={false} />
-   </>
+      <Toaster richColors={false} />
+    </>
   );
 }
 
@@ -110,7 +104,7 @@ function getLayoutStyle() {
 //     return await getOrganizationSettings();
 //   } catch (error) {
 //     console.error('Error cargando los organizationSettings', error);
-//     return []; 
+//     return [];
 //   }
 // }
 
