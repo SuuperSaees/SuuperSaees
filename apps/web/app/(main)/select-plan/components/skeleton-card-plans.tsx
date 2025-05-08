@@ -1,7 +1,7 @@
 import {
     SkeletonBox,
     SkeletonCards
-  } from '../../../../../apps/web/components/ui/skeleton';
+  } from '~/components/ui/skeleton';
   
   export const SkeletonCardPlans = ({className, classNameBox,}: {className?: string, classNameBox?: string}) => {
     return (
