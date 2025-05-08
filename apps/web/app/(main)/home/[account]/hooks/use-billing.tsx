@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getSubscriptionByOrganizationId } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscription';
-import { updateSubscription } from '../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/update/update-subscription';
-// import { BillingProviderSchema } from '@kit/billing';
+import { getSubscriptionByOrganizationId } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/get/get-subscription';
+import { updateSubscription } from '../../../../../../../packages/features/team-accounts/src/server/actions/subscriptions/update/update-subscription';
 export const useBilling = () => {
   const [subscription, setSubscription] = useState<{
     billing_customer_id: string;

@@ -7,11 +7,11 @@ import { PageBody } from '@kit/ui/page';
 
 import featureFlagsConfig from '~/config/feature-flags.config';
 import pathsConfig from '~/config/paths.config';
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '../_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { PageHeader } from '../../../components/page-header';
-import { TimerContainer } from '../../../components/timer-container';
+import { PageHeader } from '../../../../components/page-header';
+import { TimerContainer } from '../../../../components/timer-container';
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,

@@ -6,8 +6,8 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Button } from '@kit/ui/button';
 import { Sidebar, SidebarContent } from '@kit/ui/sidebar';
 
-import { SidebarItems } from '~/home/[account]/chat/_components/sidebar-items';
-import { createChatMessagesService } from '~/home/[account]/chat/_lib/server/chat-messages.service';
+import { SidebarItems } from '~/(main)/home/[account]/chat/_components/sidebar-items';
+import { createChatMessagesService } from '~/(main)/home/[account]/chat/_lib/server/chat-messages.service';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 async function ChatLayout({

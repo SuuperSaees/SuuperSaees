@@ -3,7 +3,7 @@ import { User } from '@supabase/supabase-js';
 import { Sidebar, SidebarContent } from '@kit/ui/sidebar';
 
 import { ProfileAccountDropdownContainer } from '~/components//personal-account-dropdown-container';
-import { TeamAccountNotifications } from '~/home/[account]/_components/team-account-notifications';
+import { TeamAccountNotifications } from '~/(main)/home/[account]/_components/team-account-notifications';
 
 import { TeamAccountAccountsSelector } from '../_components/team-account-accounts-selector';
 import { TeamAccountLayoutSidebarNavigation } from './team-account-layout-sidebar-navigation';

@@ -1,56 +1,28 @@
 'use client';
 
-// import { PaginationDefaultOptions } from "@tanstack/react-table"
-// import { cn } from "@kit/ui/utils"
-// import { date } from "zod"
 import React, { useState } from 'react';
 
 import Image from 'next/image';
 
 import { ChevronDownIcon } from '@radix-ui/react-icons';
-// import Link from "next/link"
 import {
-  // File,
-  // Home,
-  // LineChart,
-  // ListFilter,
-  // MoreHorizontal,
-  // Package,
-  // Package2,
-  // PanelLeft,
-  // PlusCircle,
-  Search, // Settings,
-  // ShoppingCart,
-  // Users2,
+  Search,
 } from 'lucide-react';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { useTranslation } from 'react-i18next';
 
-// import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar"
-// import { Button } from "@kit/ui/button"
 import {
   Card,
-  CardContent, // CardDescription,
-  CardFooter, // CardHeader,
-  // CardTitle,
+  CardContent,
+  CardFooter,
 } from '@kit/ui/card';
-// import { format, setDate } from "date-fns"
-// import { Calendar } from "@kit/ui/calendar"
-// import {
-//   Popover,
-//   PopoverContent,
-//   PopoverTrigger,
-// } from "@kit/ui/popover"
 import {
-  DropdownMenu, // DropdownMenuCheckboxItem,
+  DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem, // DropdownMenuLabel,
-  // DropdownMenuSeparator,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
-// import { Input } from "@kit/ui/input";
 import { Separator } from '@kit/ui/separator';
-// import { Sheet, SheetContent, SheetTrigger } from "@kit/ui/sheet"
 import {
   Table,
   TableBody,
@@ -61,11 +33,10 @@ import {
 } from '@kit/ui/table';
 import {
   Tabs,
-  TabsContent, // TabsList,
-  // TabsTrigger,
+  TabsContent,
 } from '@kit/ui/tabs';
 
-import DatePicker from '../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
+import DatePicker from '../../../../../../packages/features/team-accounts/src/server/actions/orders/pick-date/pick-date';
 import {
   Pagination,
   PaginationContent,
@@ -74,7 +45,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '../../../../../packages/ui/src/shadcn/pagination';
+} from '../../../../../../packages/ui/src/shadcn/pagination';
 
 type OrdersTableProps = {
   invoices: {

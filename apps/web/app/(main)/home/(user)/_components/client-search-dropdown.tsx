@@ -7,7 +7,7 @@ import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/
 import MultiSelect, { MultiSelectOption } from '~/components/ui/multi-select';
 import { getClientsOrganizations } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 
-import Avatar from '../../../components/ui/avatar';
+import Avatar from '../../../../components/ui/avatar';
 
 // Custom item component to display client with avatar
 const ClientItem = ({ option }: { option: MultiSelectOption }) => {

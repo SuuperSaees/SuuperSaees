@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 
 import { getClientsOrganizations } from '~/team-accounts/src/server/actions/clients/get/get-clients';
-import Avatar from '../../../components/ui/avatar';
+import Avatar from '../../../../components/ui/avatar';
 
 import {
   Dialog,

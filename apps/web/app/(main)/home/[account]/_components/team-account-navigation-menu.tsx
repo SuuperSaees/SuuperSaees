@@ -6,7 +6,7 @@ import {
 import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
 import { getTeamAccountSidebarConfig } from '~/config/team-account-navigation.config';
-import { TeamAccountAccountsSelector } from '~/home/[account]/_components/team-account-accounts-selector';
+import { TeamAccountAccountsSelector } from '~/(main)/home/[account]/_components/team-account-accounts-selector';
 
 // local imports
 import { TeamAccountWorkspace } from '../_lib/server/team-account-workspace.loader';

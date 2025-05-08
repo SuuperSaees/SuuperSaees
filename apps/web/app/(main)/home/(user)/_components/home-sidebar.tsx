@@ -5,8 +5,8 @@ import { ThemedSidebar } from 'node_modules/@kit/accounts/src/components/ui/side
 import { SidebarContent } from '@kit/ui/sidebar';
 import { AppLogo } from '~/components/app-logo';
 import { ProfileAccountDropdownContainer } from '~/components/personal-account-dropdown-container';
-import { useOrganizationSettings } from '../../../../../../packages/features/accounts/src/context/organization-settings-context';
-import Avatar from '../../../components/ui/avatar';
+import { useOrganizationSettings } from '../../../../../../../packages/features/accounts/src/context/organization-settings-context';
+import Avatar from '../../../../components/ui/avatar';
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 import { CustomSidebarNavigation } from './custom-sidebar-navigation';
 import { GuestContent } from './guest-content';

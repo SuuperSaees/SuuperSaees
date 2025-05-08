@@ -5,7 +5,6 @@ import { notFound, redirect } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 
 import { AuthLayoutShell } from '@kit/auth/shared';
-// import { requireUser } from '@kit/supabase/require-user';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { createTeamAccountsApi } from '@kit/team-accounts/api';
 import { AcceptInvitationContainer } from '@kit/team-accounts/components';
@@ -15,7 +14,6 @@ import { Trans } from '@kit/ui/trans';
 import { AppLogo } from '~/components/app-logo';
 import pathsConfig from '~/config/paths.config';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
-// import { withI18n } from '~/lib/i18n/with-i18n';
 
 interface Context {
   searchParams: Promise<{

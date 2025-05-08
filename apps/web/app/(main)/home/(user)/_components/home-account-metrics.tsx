@@ -1,22 +1,7 @@
-import { use } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@kit/ui/card';
 import { DollarSign } from 'lucide-react';
-import Link from 'next/link';
-
-import {
-  CardButton,
-  CardButtonHeader,
-  CardButtonTitle,
-} from '@kit/ui/card-button';
-import { Heading } from '@kit/ui/heading';
-import { Trans } from '@kit/ui/trans';
-
-import { loadUserWorkspace } from '../_lib/server/load-user-workspace';
-import { HomeAddAccountButton } from './home-add-account-button';
 
 export function HomeAccountMetrics() {
-  const { accounts } = use(loadUserWorkspace());
-
 
   return (
     <div className="flex flex-col">

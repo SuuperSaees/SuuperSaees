@@ -10,18 +10,14 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
-import { If } from '@kit/ui/if';
 import { Trans } from '@kit/ui/trans';
 
-import featuresFlagConfig from '~/config/feature-flags.config';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 
 // home imports
-import { HomeAccountSelector } from '../_components/home-account-selector';
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 
 export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {

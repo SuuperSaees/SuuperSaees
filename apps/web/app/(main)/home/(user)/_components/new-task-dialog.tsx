@@ -17,7 +17,7 @@ import {
 import { Trans } from '@kit/ui/trans';
 
 import { TaskForm } from '../_components/task-form';
-import { addTaskAction, updateTaskAction } from '../_lib/server/server-actions';
+import { addTaskAction } from '../_lib/server/server-actions';
 
 export function NewTaskDialog() {
   const [pending, startTransition] = useTransition();

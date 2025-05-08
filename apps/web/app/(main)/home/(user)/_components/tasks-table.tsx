@@ -21,7 +21,7 @@ import { Button } from '@kit/ui/button';
 import { DataTable } from '@kit/ui/enhanced-data-table';
 import { Trans } from '@kit/ui/trans';
 
-import { deleteTaskAction } from '~/home/(user)/_lib/server/server-actions';
+import { deleteTaskAction } from '~/(main)/home/(user)/_lib/server/server-actions';
 import { Database } from '~/lib/database.types';
 
 type Task = Database['public']['Tables']['tasks']['Row'];

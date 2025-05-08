@@ -33,9 +33,9 @@ import {
 import { Trans } from '@kit/ui/trans';
 import { cn } from '@kit/ui/utils';
 
-import { ChatgptLogo } from '~/home/[account]/chat/_components/chatgpt-logo';
-import { LoadingBubble } from '~/home/[account]/chat/_components/loading-bubble';
-import { createChatAction } from '~/home/[account]/chat/_lib/server/server-actions';
+import { ChatgptLogo } from '~/(main)/home/[account]/chat/_components/chatgpt-logo';
+import { LoadingBubble } from '~/(main)/home/[account]/chat/_components/loading-bubble';
+import { createChatAction } from '~/(main)/home/[account]/chat/_lib/server/server-actions';
 
 import { ChatSettingsDialog } from './chat-settings-dialog';
 import { DeleteChatDialog } from './delete-chat-dialog';

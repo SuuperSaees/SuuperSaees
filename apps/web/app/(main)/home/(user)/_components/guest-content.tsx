@@ -8,8 +8,6 @@ import { deleteToken } from '~/team-accounts/src/server/actions/tokens/delete/de
 import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 
-
-
 export function GuestContent() {
     const supabase = useSupabase();
     const signOut = useSignOut();
