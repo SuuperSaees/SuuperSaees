@@ -2,8 +2,6 @@
 
 import { useMemo } from 'react';
 
-import Link from 'next/link';
-
 import { ColumnDef } from '@tanstack/react-table';
 import { formatDate } from 'date-fns';
 import { z } from 'zod';
