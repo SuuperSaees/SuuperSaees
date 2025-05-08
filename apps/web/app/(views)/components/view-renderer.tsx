@@ -17,15 +17,6 @@ const CalendarView = dynamic(() => import('./calendar/calendar-view'));
 const TableView = dynamic(() => import('./table/table-view'), {
   loading: () => <TableSkeleton columns={9} rows={7} />,
 });
-// interface ViewRendererProps<T extends ViewType> {
-//   type: T; // The type can be 'kanban' or 'calendar'
-//   // Define the props type based on the view type
-//   props: T extends 'kanban'
-//     ? KanbanViewProps<KanbanViewItem>
-//     : T extends 'calendar'
-//       ? CalendarViewProps<CalendarViewItem>
-//       : never;
-// }
 
 const ViewRenderer = () => {
   const { viewType } = useViewContext();

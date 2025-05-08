@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@kit/ui/dropdown-menu';
 
-import ImageWithOptions from '~/orders/[id]/hoc/with-image-options';
+import ImageWithOptions from '~/(main)/orders/[id]/hoc/with-image-options';
 import { FileActionButtons } from './file-action-buttons';
 import { FolderItem } from './hooks/use-folder-manager';
 

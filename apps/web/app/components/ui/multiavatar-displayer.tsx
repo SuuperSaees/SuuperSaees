@@ -1,4 +1,4 @@
-import { withDropdown } from '~/hocs/with-dropdown';
+import { withDropdown } from '~/(main)/hocs/with-dropdown';
 import type { JSX } from "react";
 import Avatar from './avatar';
 import { z } from 'zod';

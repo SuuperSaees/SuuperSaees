@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { NavigationConfigSchema } from '@kit/ui/navigation-schema';
 
 import { DynamicEmoji } from '../app/components/shared/dynamic-emoji';
-import { ClientOptionsDropdown } from '../app/home/(user)/_components/client-options-dropdown';
+import { ClientOptionsDropdown } from '../app/(main)/home/(user)/_components/client-options-dropdown';
 import {
   clientAccountGuestNavigationConfig,
   clientAccountNavigationConfig,
@@ -14,9 +14,9 @@ import {
 import { teamMemberAccountNavigationConfig } from './member-team-account-navigation.config';
 import pathsConfig from './paths.config';
 import { personalAccountNavigationConfig } from './personal-account-navigation.config';
-import { EmbedOptionsDropdown } from '~/home/(user)/_components/embed-options-dropdown';
-import { AddPinnedClientButton } from '~/home/(user)/_components/add-pinned-client-button';
-import { AddClientButton } from '~/home/(user)/_components/add-client-button';
+import { EmbedOptionsDropdown } from '~/(main)/home/(user)/_components/embed-options-dropdown';
+import { AddPinnedClientButton } from '~/(main)/home/(user)/_components/add-pinned-client-button';
+import { AddClientButton } from '~/(main)/home/(user)/_components/add-client-button';
 
 // Types
 export type NavigationConfig = z.infer<typeof NavigationConfigSchema>;

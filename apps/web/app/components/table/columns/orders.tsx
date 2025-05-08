@@ -2,15 +2,13 @@
 
 import { useMemo } from 'react';
 
-import Link from 'next/link';
-
 import { ColumnDef } from '@tanstack/react-table';
 import { formatDate } from 'date-fns';
 import { z } from 'zod';
 
 import { Option } from '~/components/ui/checkbox-combobox';
-import { PriorityCombobox } from '~/orders/[id]/components/priority-combobox';
-import StatusCombobox from '~/orders/[id]/components/status-combobox';
+import { PriorityCombobox } from '~/(main)/orders/[id]/components/priority-combobox';
+import StatusCombobox from '~/(main)/orders/[id]/components/status-combobox';
 import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick-date';
 
 import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
