@@ -9,7 +9,7 @@ import {
 
 import RichTextEditor from '~/components/ui/rich-text-editor';
 
-import { BriefsProvider} from '../../contexts/briefs-context';
+import { BriefsProvider } from '../../contexts/briefs-context';
 import { ComponentProps } from '../../types/brief.types';
 
 const FormRichTextComponent: React.FC<ComponentProps> = ({

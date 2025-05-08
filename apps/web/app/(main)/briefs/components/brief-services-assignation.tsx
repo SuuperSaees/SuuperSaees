@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import CheckboxCombobox from '~/components/ui/checkbox-combobox';
-import ServiceTags from '~/orders/create/components/service-tags';
+import ServiceTags from '~/(main)/orders/create/components/service-tags';
 import { getServices } from '~/team-accounts/src/server/actions/services/get/get-services';
 
 import { useBriefsContext } from '../contexts/briefs-context';

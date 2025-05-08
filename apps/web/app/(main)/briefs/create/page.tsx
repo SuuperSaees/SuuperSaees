@@ -5,7 +5,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import BriefCreationForm from '../components/brief-creation-form';
-import { PageHeader } from '../../components/page-header';
+import { PageHeader } from '../../../components/page-header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();

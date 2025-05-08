@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { FormControl, FormField, FormItem, FormMessage } from '@kit/ui/form';
 
-import { ComponentProps } from '~/briefs/types/brief.types';
+import { ComponentProps } from '~/(main)/briefs/types/brief.types';
 
 import { BriefsProvider } from '../../contexts/briefs-context';
 

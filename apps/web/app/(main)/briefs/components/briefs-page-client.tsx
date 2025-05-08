@@ -20,9 +20,9 @@ import { handleResponse } from '~/lib/response/handle-response';
 import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
-import { PageHeader } from '../../components/page-header';
-import Table from '../../components/table/table';
-import { TimerContainer } from '../../components/timer-container';
+import { PageHeader } from '../../../components/page-header';
+import Table from '../../../components/table/table';
+import { TimerContainer } from '../../../components/timer-container';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { PlusIcon } from 'lucide-react';
 

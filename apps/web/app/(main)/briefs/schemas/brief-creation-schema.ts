@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { TFunction } from '../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 
 export const briefCreationFormSchema = z.object({
     name: z

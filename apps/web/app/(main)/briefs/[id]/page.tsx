@@ -6,8 +6,8 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { getBriefById } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import BriefCreationForm from '../components/brief-creation-form';
-import { TimerContainer } from '../../components/timer-container';
-import { PageHeader } from '../../components/page-header';
+import { TimerContainer } from '../../../components/timer-container';
+import { PageHeader } from '../../../components/page-header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();

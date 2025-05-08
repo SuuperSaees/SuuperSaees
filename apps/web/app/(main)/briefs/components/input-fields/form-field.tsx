@@ -11,8 +11,8 @@ import {
 
 import {
   BriefsProvider,
-} from '~/briefs/contexts/briefs-context';
-import { ComponentProps } from '~/briefs/types/brief.types';
+} from '~/(main)/briefs/contexts/briefs-context';
+import { ComponentProps } from '~/(main)/briefs/types/brief.types';
 
 interface FormFieldProps extends ComponentProps {
   children: React.ReactNode;

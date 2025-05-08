@@ -11,7 +11,7 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
-import { ThemedCheckbox } from '../../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
+import { ThemedCheckbox } from '../../../../../../../packages/features/accounts/src/components/ui/checkbox-themed-with-settings';
 import { ComponentProps, Option } from '../../types/brief.types';
 import FormField from './form-field';
 const FormFieldMultipleChoice: React.FC<ComponentProps> = ({

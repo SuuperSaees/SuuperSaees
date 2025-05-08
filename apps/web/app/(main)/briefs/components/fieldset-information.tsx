@@ -13,8 +13,6 @@ import {
   FormMessage,
 } from '@kit/ui/form';
 
-// import RichTextEditor from '~/components/ui/rich-text-editor';
-
 import { useBriefsContext } from '../contexts/briefs-context';
 import { BriefCreationForm } from './brief-creation-form';
 import UploadImage from './upload-image-dropzone';
