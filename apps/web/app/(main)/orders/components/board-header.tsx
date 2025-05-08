@@ -5,8 +5,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Embeds } from '~/lib/embeds.types';
 import { Order } from '~/lib/order.types';
 
-import { PageHeader } from '../../components/page-header';
-import { TimerContainer } from '../../components/timer-container';
+import { PageHeader } from '../../../components/page-header';
+import { TimerContainer } from '../../../components/timer-container';
 import { ValueFormatters } from '../hooks/use-csv-export-formatters';
 import { ViewOption } from '../hooks/use-orders-view-configs';
 import CreateOrderButton from './create-order-button';

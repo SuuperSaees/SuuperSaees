@@ -13,11 +13,11 @@ import { Input } from '@kit/ui/input';
 
 import { darkenColor, hexToRgba } from '~/utils/generate-colors';
 
-import Avatar from '../../components/ui/avatar';
+import Avatar from '../../../components/ui/avatar';
 import {
   CustomDropdownMenu,
   MenuItem,
-} from '../../components/ui/dropdown-menu';
+} from '../../../components/ui/dropdown-menu';
 
 export type FilterOption = {
   label: string;

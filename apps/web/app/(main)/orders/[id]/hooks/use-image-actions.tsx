@@ -39,68 +39,6 @@ export const useImageActions = ({ src }: UseImageActionsProps) => {
     }
   };
 
-  // const handleDelete = async () => {
-  //   if (props.bucketName) {
-  //     const url = props.src;
-
-  //     // Find the index of the bucket name in the URL
-  //     const bucketIndex = url.indexOf(props.bucketName);
-
-  //     if (bucketIndex === -1) {
-  //       console.error('Bucket name not found in the URL.');
-  //       return;
-  //     }
-
-  //     // Extract the path after the bucket name
-  //     const filePath = url.substring(
-  //       bucketIndex + props.bucketName.length + 1,
-  //     ); // Adding 1 to skip the trailing "/"
-
-  //     if (!filePath) {
-  //       console.error('File path is not found in the URL.');
-  //       return;
-  //     }
-
-  //     try {
-  //       // Attempt to remove the file using the correct path
-  //       const { data, error } = await client.storage
-  //         .from(props.bucketName)
-  //         .remove([filePath]);
-
-  //       if (error) {
-  //         console.error('Error removing file:', error.message);
-  //         throw new Error('Error removing file');
-  //       } else {
-  //         console.log('File removed successfully.', data);
-  //       }
-  //     } catch (error) {
-  //       console.error('An error occurred while deleting the file:', error);
-  //       throw new Error('An error occurred while deleting the file');
-  //     }
-  //   } else {
-  //     console.error('Bucket name is not provided.');
-  //   }
-
-  //   return;
-  // };
-
-  // const deleteImage = useMutation({
-  //   mutationFn: handleDelete,
-  //   onSuccess: () => {
-  //     toast.success('Success!', {
-  //       description: 'Image deleted successfully.',
-  //     });
-  //   },
-  //   onError: () => {
-  //     toast.error('Error!', {
-  //       description: 'Failed to delete image.',
-  //     });
-  //   },
-  // });
-
-  // const handleView = () => {
-  //   // window.open(props.src, '_blank');
-  // };
   const handleToggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };

@@ -4,14 +4,14 @@ import { Metadata } from 'next';
 
 import { redirect } from 'next/navigation';
 
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '~/(main)/home/(user)/_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { Order } from '~/lib/order.types';
 import { getInteractions } from '~/server/actions/interactions/get-interactions';
 import { getFolderFiles } from '~/team-accounts/src/server/actions/files/get/get-files';
 
-import { getOrderById } from '../../../../../packages/features/team-accounts/src/server/actions/orders/get/get-order';
+import { getOrderById } from '~/team-accounts/src/server/actions/orders/get/get-order';
 import AsideOrderInformation from './components/aside-order-information';
 import { OrderHeader } from './components/order-header';
 import { OrderTabs } from './components/order-tabs';

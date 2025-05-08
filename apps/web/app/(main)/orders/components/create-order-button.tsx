@@ -1,7 +1,7 @@
 
 import { PlusIcon } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
-import PrefetcherLink from '../../components/shared/prefetcher-link';
+import PrefetcherLink from '../../../components/shared/prefetcher-link';
 
 const CreateOrderButton = ({
   t,

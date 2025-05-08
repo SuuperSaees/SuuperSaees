@@ -4,7 +4,7 @@ import { Trans } from '@kit/ui/trans';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
-import { getBriefs } from '../../../../../packages/features/team-accounts/src/server/actions/briefs/get/get-brief';
+import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import OrderCreationForm from './components/order-creation-form';
 import { getUserRole } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 

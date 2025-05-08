@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { darkenColor } from '~/utils/generate-colors'
 import { Order } from '~/lib/order.types';
 
-import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+import type { TFunction } from '../../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { priorityColors } from '../utils/get-color-class-styles';
 import AvatarDisplayer from './ui/avatar-displayer';
 import { convertToTitleCase } from '../utils/format-agency-names';

@@ -4,7 +4,7 @@ import { Button } from 'node_modules/@kit/ui/src/shadcn/button-shadcn';
 
 import { Embeds } from '~/lib/embeds.types';
 import { hexToRgba } from '~/utils/generate-colors';
-import { DynamicIcon } from '../../components/shared/dynamic-icon';
+import { DynamicIcon } from '../../../components/shared/dynamic-icon';
 
 interface EmbedTabsProps {
   embeds: Embeds.TypeWithRelations[];

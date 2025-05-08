@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import UserFile from './user-file';
 import { useActivityContext } from '../context/activity-context';
 import { textFormat } from '~/utils/text-format';
-import { MergedBriefResponses } from '~/messages/utils/messages/transform';
+import { MergedBriefResponses } from '~/(main)/messages/utils/messages/transform';
 import { User } from '~/lib/user.types';
 
 const UserFirstMessage = ({ interaction, user }: {

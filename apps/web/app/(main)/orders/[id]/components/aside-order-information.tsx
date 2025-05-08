@@ -20,7 +20,7 @@ import {
   updateOrderAssigns,
   updateOrderFollowers,
   logOrderActivities,
-} from '../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
+} from '../../../../../../../packages/features/team-accounts/src/server/actions/orders/update/update-order';
 import { AgencyStatusesProvider } from '../../components/context/agency-statuses-context';
 import { useActivityContext } from '../context/activity-context';
 import ActivityAssignations from './activity-assignations';

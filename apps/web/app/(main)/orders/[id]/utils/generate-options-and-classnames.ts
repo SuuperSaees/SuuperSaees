@@ -1,4 +1,4 @@
-import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+import { TFunction } from '../../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 import { priorityColors, statusColors } from './get-color-class-styles';
 
 type DropdownOption = {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import React from 'react';
 
 import { UseMutationResult, useQueryClient } from '@tanstack/react-query';
-import { CalendarIcon, FlagIcon, Loader, PanelLeftOpen, PanelRightOpen, TrashIcon, X } from 'lucide-react';
+import { CalendarIcon, FlagIcon, Loader, PanelRightOpen, TrashIcon, X } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { DateRange } from '@kit/ui/calendar';

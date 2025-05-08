@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 
 // import RichTextEditor from '~/components/ui/rich-text-editor';
-import RichTextEditor from '../../../components/messages/rich-text-editor';
+import RichTextEditor from '../../../../components/messages/rich-text-editor';
 import { sendEmailsOfOrderMessages } from '~/team-accounts/src/server/actions/orders/update/update-order';
 import { useActivityContext } from '../context/activity-context';
 import Interactions from './interactions';
@@ -13,8 +13,8 @@ import { getEmails } from '~/team-accounts/src/server/actions/orders/get/get-mai
 import useInternalMessaging from '../hooks/use-messages';
 import { Editor } from '@tiptap/react';
 import { useQuery } from '@tanstack/react-query';
-import { LoomRecordButton } from '~/apps/components';
-import InternalMessagesToggle from '../../../components/messages/internal-messages-toggle';
+import { LoomRecordButton } from '~/(main)/apps/components';
+import InternalMessagesToggle from '../../../../components/messages/internal-messages-toggle';
 import { FileUploadState, useFileUpload } from '~/hooks/use-file-upload';
 import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';

@@ -2,8 +2,8 @@ import Link from 'next/link';
 
 import { Order } from '~/lib/order.types';
 
-import PrioritySelect from '../../components/ui/priority-select';
-import MembersAssignations from '../../components/users/member-assignations';
+import PrioritySelect from '../../../components/ui/priority-select';
+import MembersAssignations from '../../../components/users/member-assignations';
 import { useUserOrderActions } from '../hooks/user-order-actions';
 import { transformUserData } from '../utils/transform-orders-data';
 import { useOrdersContext } from './context/orders-context';

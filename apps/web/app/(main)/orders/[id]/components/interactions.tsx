@@ -12,7 +12,7 @@ import {
   combineChatInteractions,
   groupChatInteractionsByDay,
   sortChatInteractions,
-} from '~/messages/utils/messages/transform';
+} from '~/(main)/messages/utils/messages/transform';
 
 import { useActivityContext } from '../context/activity-context';
 import { DataSource } from '../context/activity.types';

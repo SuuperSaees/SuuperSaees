@@ -2,13 +2,13 @@ import { z } from 'zod';
 
 import { FormField } from '~/lib/form-field.types';
 
-import type { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
+// import type { TFunction } from '../../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
 
-type ValidationMessages = never;
+// type ValidationMessages = never;
 
 export const generateOrderCreationSchema = (
   hasBriefs: boolean,
-  t: TFunction<'orders', ValidationMessages>,
+  t: (key: string) => string,
   formFields: FormField.Type[] = [],
 ) => {
   

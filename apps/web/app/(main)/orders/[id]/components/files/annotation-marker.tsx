@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@kit/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Spinner } from '@kit/ui/spinner';
 import { Send, XIcon } from 'lucide-react';
 import { Input } from '@kit/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from "@kit/ui/avatar";
-import { MarkerIcon } from '~/orders/[id]/components/file-icons';
+import { MarkerIcon } from '~/(main)/orders/[id]/components/file-icons';
 import { Annotation } from '~/lib/annotations.types';
 import { Message } from '~/lib/message.types';
 

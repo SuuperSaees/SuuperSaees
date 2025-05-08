@@ -20,7 +20,7 @@ import { Spinner } from '@kit/ui/spinner';
 import { Brief } from '~/lib/brief.types';
 import { File } from '~/lib/file.types';
 
-import FilesUploader from '../../../components/file-preview/files-uploader';
+import FilesUploader from '../../../../components/file-preview/files-uploader';
 import BriefCard from './brief-card';
 import ClientAssignation from './client-assignation';
 import { OrderBriefs } from './order-briefs';

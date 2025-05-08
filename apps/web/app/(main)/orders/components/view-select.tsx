@@ -1,6 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 
-import SelectAction, { Option } from '../../../components/ui/select';
+import SelectAction, { Option } from '../../../../components/ui/select';
 
 interface IconOption extends Option {
   icon: LucideIcon;

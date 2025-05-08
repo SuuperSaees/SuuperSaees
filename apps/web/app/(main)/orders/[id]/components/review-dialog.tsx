@@ -23,7 +23,7 @@ import {
 import { Form, FormField } from '@kit/ui/form';
 import { Label } from '@kit/ui/label';
 
-import { createReview } from '../../../../../../packages/features/team-accounts/src/server/actions/review/create/create.review';
+import { createReview } from '../../../../../../../packages/features/team-accounts/src/server/actions/review/create/create.review';
 import { handleResponse } from '~/lib/response/handle-response';
 
 const reviewSchema = z.object({

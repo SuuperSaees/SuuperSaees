@@ -5,9 +5,9 @@ import { Download, SlidersVertical } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 
-import { CustomDropdownMenu } from '../../components/ui/dropdown-menu';
-import ExportCSVButton from '../../components/shared/export-csv-button/index';
-import { ExportableData } from '../../components/shared/export-csv-button/types';
+import { CustomDropdownMenu } from '../../../components/ui/dropdown-menu';
+import ExportCSVButton from '../../../components/shared/export-csv-button/index';
+import { ExportableData } from '../../../components/shared/export-csv-button/types';
 
 interface SettingsDropdownProps<T extends ExportableData> {
   data: T[];

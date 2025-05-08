@@ -1,7 +1,7 @@
 import Board from '~/(views)/components/board';
 import KanbanSkeleton from '~/(views)/components/kanban/kanban-skeleton';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
-import { EmbedPreview } from '~/embeds/components/embed-preview';
+import { EmbedPreview } from '~/(main)/embeds/components/embed-preview';
 import { Embeds } from '~/lib/embeds.types';
 
 interface BoardContentProps {

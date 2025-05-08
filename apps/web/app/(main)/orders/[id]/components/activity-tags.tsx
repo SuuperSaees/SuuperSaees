@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Tags } from '~/lib/tags.types';
 import { TagList } from './tags/tag-list';
 import { useTagMutations } from '../hooks/tags/use-tags-mutations';
-import { useAgencyStatuses } from '~/orders/components/context/agency-statuses-context';
+import { useAgencyStatuses } from '~/(main)/orders/components/context/agency-statuses-context';
 
 interface ActivityTagsProps {
     organizationId: string;

@@ -25,7 +25,7 @@ import { FormField as FormFieldType } from '~/lib/form-field.types';
 import { containsVideo } from '~/utils/contains-video';
 import { isYouTubeUrl } from '~/utils/upload-video';
 
-import FilesUploader from '../../../components/file-preview/files-uploader';
+import FilesUploader from '../../../../components/file-preview/files-uploader';
 import { getYouTubeEmbedUrl } from '../utils/video-format';
 import VideoDescriptionRenderer from './video-description-renderer';
 
