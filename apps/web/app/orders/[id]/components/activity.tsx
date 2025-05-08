@@ -12,14 +12,13 @@ import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { getEmails } from '~/team-accounts/src/server/actions/orders/get/get-mail-info';
 import useInternalMessaging from '../hooks/use-messages';
 import { Editor } from '@tiptap/react';
-import { getOrganization } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { useQuery } from '@tanstack/react-query';
-import { getAgencyForClientByUserId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { LoomRecordButton } from '~/apps/components';
 import InternalMessagesToggle from '../../../components/messages/internal-messages-toggle';
 import { FileUploadState, useFileUpload } from '~/hooks/use-file-upload';
 import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
+import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
 
 
 const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agencyStatuses: AgencyStatus.Type[] }) => {
@@ -92,14 +91,13 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
     }
   };
 
-  // const organizationData  = useQuery({
-  //   queryKey: ['account-plugins', userWorkspace],
-  //   queryFn: userRole === 'client_member' || userRole === 'client_owner' ? 
-  //     async () => await getAgencyForClientByUserId  (userWorkspace.id ?? '') : 
-  //     async () => await getOrganization(),
-  //   enabled: !!userWorkspace.id,
-  //   retry: 1,
-  // });
+  const { data: accountPluginData, isLoading: isAccountPluginLoading } =
+    useQuery({
+      queryKey: ['account-plugins', userWorkspace.id],
+      queryFn: async () => await getAccountPlugin(undefined, 'loom'),
+      enabled: !!userWorkspace.id,
+      retry: 1,
+    });
 
  /**
    * Handles file uploads for the current chat
@@ -179,13 +177,13 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
           isEditable={true}
           onFileUpload={handleFileUpload}
           customActionButtons={[
-            // (editor: Editor) => (
-            //   <LoomRecordButton
-            //     onAction={(text: string) => editor.commands.setContent(text)}
-            //     loomAppId={organizationData.data?.loom_app_id ?? ''}
-            //     isLoading={organizationData.isLoading}
-            //   />
-            // ),
+            (editor: Editor) => (
+              <LoomRecordButton
+                onAction={(text: string) => editor.commands.setContent(text)}
+                loomAppId={accountPluginData?.credentials?.loom_app_id ?? ''}
+                isLoading={isAccountPluginLoading}
+              />
+            ),
             () => (
               <InternalMessagesToggle 
                 userRole={userRole} 
