@@ -35,6 +35,7 @@ export const useOrderSubscriptions = (
   files: DataResult.InteractionPages,
   setFiles: UpdaterFunction,
   members: UserExtended[],
+  setAllFiles: React.Dispatch<React.SetStateAction<DataResult.File[]>>,
 ) => {
   const {
     handleOrderChanges,
@@ -62,6 +63,7 @@ export const useOrderSubscriptions = (
           return handleFileChanges(
             payload as RealtimePostgresChangesPayload<File.Type>,
             setFiles,
+            setAllFiles,
           );
         // Handle order status updates
         case 'orders_v2':
