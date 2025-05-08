@@ -8,6 +8,7 @@ interface ToolbarProps {
   disabled?: boolean;
   onFileSelect?: (files: FileList) => void;
   customActionButtons?: ((editor: Editor) => React.ReactNode)[];
+  openFileDialog?: () => void;
 }
 
 export const Toolbar = ({ editor, disabled, onFileSelect, customActionButtons }: ToolbarProps) => {
@@ -38,7 +39,6 @@ export const Toolbar = ({ editor, disabled, onFileSelect, customActionButtons }:
         multiple
         className="hidden"
         onChange={handleFileChange}
-        accept="image/*,.pdf,.doc,.docx,.txt"
       />
       <button
         onClick={handleUploadClick}
