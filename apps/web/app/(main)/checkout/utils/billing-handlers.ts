@@ -5,13 +5,10 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 
 import { Service } from '~/lib/services.types';
-import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency';
+import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
 import { createSession } from '~/team-accounts/src/server/actions/sessions/create/create-sessions';
-
-
-
-import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '../../../../../apps/web/app/utils/credentials-crypto';
+import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '~/utils/credentials-crypto';
 
 
 type ValuesProps = {

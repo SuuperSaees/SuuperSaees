@@ -5,8 +5,8 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { Service } from '~/lib/services.types';
 import { getOrganizationSettingsByOrganizationId } from '~/team-accounts/src/server/actions/organizations/get/get-organizations';
 
-import { decodeTokenData } from '../../../../packages/features/team-accounts/src/server/actions/tokens/decode/decode-token';
-import { PayToken } from '../../../../packages/tokens/src/domain/token-type';
+import { decodeTokenData } from '~/team-accounts/src/server/actions/tokens/decode/decode-token';
+import { PayToken } from '../../../../../packages/tokens/src/domain/token-type';
 import DetailsSide from './components/details';
 import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/actions/services/get/get-services';
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';

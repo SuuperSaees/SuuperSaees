@@ -5,7 +5,7 @@ import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 
 import { Service } from '~/lib/services.types';
-import convertToSubcurrency from '~/select-plan/components/convertToSubcurrency';
+import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import BillingForm from './billing_form';
 
