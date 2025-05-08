@@ -13,9 +13,16 @@ export const getOrganizationSettings = async () => {
   try {
     const client = getSupabaseServerComponentClient();
 
-    const sessionData = (await getSession());
-    const role = sessionData?.role;
-    const organizationId = sessionData?.id;
+    const { error: userError } = await client.auth.getUser();
+
+    if (userError) {
+      console.error('Error fetching user:', userError);
+      return [];
+    }
+
+    const sessionData = (await client.rpc('get_session')).data;
+    const role = sessionData?.organization?.role;
+    const organizationId = sessionData?.organization?.id;
     const agencyId = sessionData?.agency?.id;
 
     if (
