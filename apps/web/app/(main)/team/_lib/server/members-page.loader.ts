@@ -4,7 +4,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 
 import { hasPermissionToAddTeamMembers } from 'node_modules/@kit/team-accounts/src/server/actions/permissions/permissions';
 
-import { loadTeamWorkspace } from '~/home/[account]/_lib/server/team-account-workspace.loader';
+import { loadTeamWorkspace } from '~/(main)/home/[account]/_lib/server/team-account-workspace.loader';
 import { Database } from '~/lib/database.types';
 
 /**

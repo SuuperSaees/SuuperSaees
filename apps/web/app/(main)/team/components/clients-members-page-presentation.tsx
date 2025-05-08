@@ -13,8 +13,8 @@ import { If } from '@kit/ui/if';
 import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
-import { PageHeader } from '../../components/page-header';
-import { TimerContainer } from '../../components/timer-container';
+import { PageHeader } from '../../../components/page-header';
+import { TimerContainer } from '../../../components/timer-container';
 
 const ClientsMembersPagePresentation = ({
   account,

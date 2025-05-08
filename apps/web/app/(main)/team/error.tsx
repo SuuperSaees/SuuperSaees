@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { ArrowLeft, MessageCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 import { useCaptureException } from '@kit/monitoring/hooks';
 import { Button } from '@kit/ui/button';

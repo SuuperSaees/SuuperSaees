@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { usePagination } from '~/hooks/usePagination';
 import { getOrdersReviewsForUser } from '~/team-accounts/src/server/actions/review/get/get-review';
 
-import CardReview from '../../../components/ui/card-review';
-import Pagination from '../../../components/ui/pagination';
-import ReviewRating from '../../../components/ui/review-rating';
+import CardReview from '../../../../components/ui/card-review';
+import Pagination from '../../../../components/ui/pagination';
+import ReviewRating from '../../../../components/ui/review-rating';
 import SkeletonReviewsSection from './skeleton';
 import EmptyState from '~/components/ui/empty-state';
 

@@ -9,13 +9,13 @@ import { useTranslation } from 'react-i18next';
 
 import { SkeletonOrdersSection } from '~/components/organization/skeleton-orders-section';
 import { UserWithSettings } from '~/lib/account.types';
-import { OrdersProvider } from '~/orders/components/context/orders-context';
-import ProjectsBoard from '~/orders/components/projects-board';
-import { useOrderStats } from '~/orders/hooks/use-order-stats';
+import { OrdersProvider } from '~/(main)/orders/components/context/orders-context';
+import ProjectsBoard from '~/(main)/orders/components/projects-board';
+import { useOrderStats } from '~/(main)/orders/hooks/use-order-stats';
 import { getTags } from '~/server/actions/tags/tags.action';
 import { getOrdersByUserId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
-import CardStats from '../../../components/ui/card-stats';
+import CardStats from '../../../../components/ui/card-stats';
 
 interface HomeSectionProps {
   agencyMembers: UserWithSettings[];

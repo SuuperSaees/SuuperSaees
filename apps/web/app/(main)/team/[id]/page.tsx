@@ -1,7 +1,7 @@
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { PageBody } from '@kit/ui/page';
 
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '~/(main)/home/(user)/_lib/server/load-user-workspace';
 import {
   getUserById, // getUserRole,
 } from '~/team-accounts/src/server/actions/members/get/get-member-account';

@@ -7,7 +7,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { loadMembersPageData } from './_lib/server/members-page.loader';
 import ClientsMembersPagePresentation from './components/clients-members-page-presentation';
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();

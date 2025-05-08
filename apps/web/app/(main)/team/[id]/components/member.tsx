@@ -13,7 +13,7 @@ import { ViewsMap } from '~/contexts/types/section.types';
 import { UserWithSettings } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import { Order } from '~/lib/order.types';
-import { AgencyStatusesProvider } from '~/orders/components/context/agency-statuses-context';
+import { AgencyStatusesProvider } from '~/(main)/orders/components/context/agency-statuses-context';
 import { updateUserSettings } from '~/team-accounts/src/server/actions/members/update/update-account';
 
 // import Header from '../../../components/accounts/header';

@@ -16,10 +16,10 @@ import { personalAccountNavigationConfig } from '~/config/personal-account-navig
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 // home imports
-import { HomeMenuNavigation } from '~/home/(user)/_components/home-menu-navigation';
-import { HomeMobileNavigation } from '~/home/(user)/_components/home-mobile-navigation';
-import { HomeSidebar } from '~/home/(user)/_components/home-sidebar';
-import { loadUserWorkspace } from './_lib/server/load-user-workspace';
+import { HomeMenuNavigation } from '~/(main)/home/(user)/_components/home-menu-navigation';
+import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
+import { HomeSidebar } from '~/(main)/home/(user)/_components/home-sidebar';
+import { loadUserWorkspace } from '~/(main)/home/(user)/_lib/server/load-user-workspace';
 
 function UserHomeLayout({ children }: React.PropsWithChildren) {
   const workspace = use(loadUserWorkspace());
