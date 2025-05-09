@@ -28,6 +28,7 @@ const UserFile = ({ file, files, viewerMode = FileViewerMode.DEFAULT }: UserFile
   return (
     <FilePreviewComponent
       src={file.url}
+      fileId={file.id}
       fileName={file.name}
       fileType={file.type}
       className="min-w-40"
