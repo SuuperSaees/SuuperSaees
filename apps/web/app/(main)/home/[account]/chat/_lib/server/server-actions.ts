@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { enhanceAction } from '@kit/next/actions';
 import { getSupabaseServerActionClient } from '@kit/supabase/server-actions-client';
 
-import { createChatLLMService } from '~/home/[account]/chat/_lib/server/chat-llm.service';
+import { createChatLLMService } from '~/(main)/home/[account]/chat/_lib/server/chat-llm.service';
 
 import { ReferenceIdSchema } from '../schema/reference-id.schema';
 import { RenameChatSchema } from '../schema/rename-chat.schema';
