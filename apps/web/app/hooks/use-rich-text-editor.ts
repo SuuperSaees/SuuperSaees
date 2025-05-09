@@ -90,7 +90,7 @@ export const useRichTextEditor = ({
   });
 
   const editor = useEditor({
-    // immediatelyRender: false,
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bulletList: {
