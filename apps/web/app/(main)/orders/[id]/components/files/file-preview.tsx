@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+
 import Image from 'next/image';
-import { getFileTypeIcon } from '../../components/files/file-types';
-import { FileIcon } from 'lucide-react';
+
 import { useTranslation } from 'react-i18next';
+
 import { Spinner } from '@kit/ui/spinner';
+
+import {
+  FileIcon,
+  getFileExtension,
+} from '../../../../../components/shared/file-icons';
 
 interface FilePreviewProps {
   src: string;
@@ -17,6 +23,12 @@ interface FilePreviewProps {
   zoomLevel?: number;
 }
 
+type ErrorState = {
+  title: string;
+  description: string;
+  type: 'image' | 'video' | 'application/pdf';
+} | null;
+
 export const FilePreview: React.FC<FilePreviewProps> = ({
   src,
   fileName,
@@ -26,19 +38,22 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   isDialog,
   actualPage = 1,
   onLoadPDF,
-  zoomLevel = 1
+  zoomLevel = 1,
 }) => {
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [pageImage, setPageImage] = useState<string | null>(null);
-  const { t } = useTranslation('orders');
+  const [error, setError] = useState<ErrorState>(null);
+  const { t } = useTranslation(['orders', 'files']);
 
   useEffect(() => {
     if (fileType.startsWith('application/pdf') && isDialog) {
       if (!(window as any).pdfjsLib) {
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+        script.src =
+          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
         script.onload = () => {
-          (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+          (window as any).pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
           loadPDF();
         };
         document.head.appendChild(script);
@@ -52,13 +67,20 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     try {
       const response = await fetch(src);
       const arrayBuffer = await response.arrayBuffer();
-      const pdf = await (window as any).pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdf = await (window as any).pdfjsLib.getDocument({
+        data: arrayBuffer,
+      }).promise;
       setPdfDoc(pdf);
       onLoadPDF?.(pdf.numPages);
       renderPage(actualPage, pdf);
     } catch (error) {
       console.error('Error loading PDF:', error);
       onLoadPDF?.(0);
+      setError({
+        title: t('preview.error.title'),
+        description: t('preview.error.description'),
+        type: 'application/pdf',
+      });
     }
   };
 
@@ -72,7 +94,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     try {
       const page = await pdf.getPage(pageNum);
       const viewport = page.getViewport({ scale: 1.5 * zoomLevel });
-      
+
       // Create an off-screen canvas
       const canvas = document.createElement('canvas');
       canvas.height = viewport.height;
@@ -80,7 +102,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
 
       const renderContext = {
         canvasContext: canvas.getContext('2d'),
-        viewport: viewport
+        viewport: viewport,
       };
 
       await page.render(renderContext).promise;
@@ -93,23 +115,65 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     }
   };
 
+  // Clean the error state on mount
+  useEffect(() => {
+    setError(null);
+  }, [src]);
+
   const renderPreview = () => {
-    if (fileType.startsWith('image/') || (fileType.startsWith('application/pdf') && pageImage)) {
+    if (error && isDialog) {
+      return (
+        <div className="flex h-full w-full flex-col items-center justify-center">
+          <div className="animate-fade-in flex max-w-xs flex-col items-center space-y-3 p-6">
+            <FileIcon
+              extension={getFileExtension(fileName)}
+              className="h-10 w-10 text-red-500"
+              error
+            />
+
+            <span className="max-w-xs break-all rounded bg-red-50 px-2 py-0.5 text-center text-xs font-semibold text-red-500">
+              {fileName}
+            </span>
+            <h2 className="text-center text-base font-semibold text-red-500">
+              {error.title}
+            </h2>
+            <p className="text-center text-xs text-gray-500 ">
+              {error.description}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    if (
+      fileType.startsWith('image/') ||
+      (fileType.startsWith('application/pdf') && pageImage)
+    ) {
       return isDialog ? (
         <img
           src={fileType.startsWith('application/pdf') ? pageImage! : src}
           alt={alt}
-          className={`w-full h-[calc(100vh-100px)] object-contain ${className}`}
+          className={`h-[calc(100vh-100px)] w-full object-contain ${className}`}
+          onError={() => {
+            console.error('Error loading image:', src);
+            setError({
+              title: t('preview.error.title'),
+              description: t('preview.error.description'),
+              type: 'image',
+            });
+          }}
         />
       ) : (
         <>
-         {
-          fileType.startsWith('application/pdf') ? (
-            <div className="w-full h-full flex items-center justify-center">
-              {getFileTypeIcon(fileName)}
+          {fileType.startsWith('application/pdf') ? (
+            <div className="flex h-full w-full items-center justify-center">
+              <FileIcon
+                extension={getFileExtension(fileName)}
+                size='md'
+              />
             </div>
-          ) : (
-            <Image 
+          ) : !error ? (
+            <Image
               src={src}
               alt={alt ?? 'image'}
               className={`aspect-square object-contain ${className}`}
@@ -117,41 +181,58 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
               height={150}
               quality={100}
               priority
+              onError={() => {
+                console.error('Error loading image:', src);
+                setError({
+                  title: t('preview.error.title'),
+                  description: t('preview.error.description'),
+                  type: 'image',
+                });
+              }}
             />
-          )
-         }
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <FileIcon
+                extension={getFileExtension(fileName)}
+                size='md'
+                error
+              />
+            </div>
+          )}
         </>
       );
     }
-    
+
     if (fileType.startsWith('video/')) {
       return (
-        <div className={`w-full h-full ${className}`}>
+        <div className={`h-full w-full ${className}`}>
           {isDialog ? (
-            <video 
-              src={src}
-              controls
-              className="w-full h-[70vh]"
-            />
+            <video src={src} controls className="h-[70vh] w-full" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              {getFileTypeIcon(fileName)}
+            <div className="flex h-full w-full items-center justify-center">
+              <FileIcon
+                extension={getFileExtension(fileName)}
+                size='md'
+              />
             </div>
           )}
         </div>
       );
     }
 
-    if (fileType.startsWith('application/pdf')) {              
+    if (fileType.startsWith('application/pdf')) {
       return (
-        <div className={`w-full h-[60vh] ${className}`}>
+        <div className={`h-[60vh] w-full ${className}`}>
           {isDialog ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <Spinner className="w-6 h-6" />
+            <div className="flex h-full w-full items-center justify-center">
+              <Spinner className="h-6 w-6" />
             </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              {getFileTypeIcon(fileName)}
+            <div className="flex h-full w-full items-center justify-center">
+              <FileIcon
+                extension={getFileExtension(fileName)}
+                size='md'
+              />
             </div>
           )}
         </div>
@@ -159,20 +240,23 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
     }
 
     return (
-      <div className={`w-full h-[60vh] flex flex-col items-center justify-center ${className}`}>
-        <FileIcon className="w-12 h-12 text-gray-400" />
+      <div
+        className={`flex h-[60vh] w-full flex-col items-center justify-center ${className}`}
+      >
+        <FileIcon
+          extension={getFileExtension(fileName)}
+          size='md'
+        />
         {isDialog ? (
           <>
             <p className="text-gray-400">{fileName}</p>
-            <div className="flex flex-col items-center justify-center my-4">
+            <div className="my-4 flex flex-col items-center justify-center">
               <p className="text-gray-400">{t('files.noPreview')}</p>
               <p className="text-gray-400">{t('files.download')}</p>
             </div>
           </>
         ) : (
-          <div>
-          </div>
-
+          <div></div>
         )}
       </div>
     );
