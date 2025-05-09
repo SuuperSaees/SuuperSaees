@@ -3,7 +3,7 @@ import { use } from 'react';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { createTeamAccountsApi } from '@kit/team-accounts/api';
 
-import { createChatMessagesService } from '~/home/[account]/chat/_lib/server/chat-messages.service';
+import { createChatMessagesService } from '~/(main)/home/[account]/chat/_lib/server/chat-messages.service';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import { ChatContainer } from '../_components/chat-container';
