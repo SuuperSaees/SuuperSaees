@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import type { FileRendererProps } from './index';
 import { cn } from '@kit/ui/utils';
 
@@ -6,6 +7,7 @@ export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, clas
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [imageError, setImageError] = useState(false);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (containerRef.current) {
@@ -42,11 +44,15 @@ export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, clas
 
   if (!isDialog) {
     return (
-      <img
-        src={src}
-        alt={fileName}
-        className={cn('aspect-square object-contain bg-gray-200 rounded-lg w-[150px] h-[150px]', className)}
-      />
+        <Image
+          priority
+          src={imageError ? '/images/fallbacks/image-fallback.webp' : src}
+          alt={fileName}
+          width={150}
+          height={150}
+          className={cn('aspect-square object-contain bg-gray-200 rounded-lg w-[150px] h-[150px]',)}
+          onError={() => setImageError(true)}
+        />
     );
   }
 
@@ -59,16 +65,16 @@ export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, clas
       style={{ cursor: isZoomedIn ? 'zoom-out' : 'zoom-in' }}
     >
       <img
-        src={src}
-        alt={fileName}
+          src={src}
+          alt={fileName}
         className={'w-full h-full transition-transform duration-200'}
-        style={{
-          transform: isZoomedIn ? `scale(2)` : 'scale(1)',
-          transformOrigin: isZoomedIn
-            ? `${mousePosition.x}% ${mousePosition.y}%`
-            : 'center',
-        }}
-      />
+          style={{
+            transform: isZoomedIn ? `scale(2)` : 'scale(1)',
+            transformOrigin: isZoomedIn
+              ? `${mousePosition.x}% ${mousePosition.y}%`
+              : 'center',
+          }}
+        />
     </div>
   );
 }; 
