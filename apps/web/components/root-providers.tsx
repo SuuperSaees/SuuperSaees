@@ -22,11 +22,7 @@ import featuresFlagConfig from '~/config/feature-flags.config';
 import { Database } from '~/lib/database.types';
 import { i18nResolver } from '~/lib/i18n/i18n.resolver';
 import { getI18nSettings } from '~/lib/i18n/i18n.settings';
-
-
-
 import { ReactQueryProvider } from './react-query-provider';
-
 
 const captchaSiteKey = authConfig.captchaTokenSiteKey;
 

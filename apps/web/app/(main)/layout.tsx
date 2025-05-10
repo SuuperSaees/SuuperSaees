@@ -1,6 +1,6 @@
 import { cookies, headers } from 'next/headers';
 
-// import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
 import {
@@ -15,6 +15,7 @@ import { Toaster } from '@kit/ui/sonner';
 import { AppLogo } from '~/components/app-logo';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 // import { heading, sans } from '~/lib/fonts';
+import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { generateRootMetadata } from '~/lib/root-metdata';
 
 import { HomeMenuNavigation } from './home/(user)/_components/home-menu-navigation';
@@ -22,6 +23,7 @@ import { HomeMobileNavigation } from './home/(user)/_components/home-mobile-navi
 import { HomeSidebar } from './home/(user)/_components/home-sidebar';
 import { loadUserWorkspace } from './home/(user)/_lib/server/load-user-workspace';
 import { TimeTrackerProvider } from './orders/[id]/context/time-tracker-context';
+import { RootProviders } from '~/components/root-providers';
 
 // WARNING: Thse use of functions like headers and cookies that are dynamic functions could lead to cache inconsistencies,
 // since using them can opt out the Full route cache and the route will be rendered on each request (dynamically rendered).
@@ -35,6 +37,9 @@ export default async function RootLayout({
 
   const pathname = headers().get('x-current-path') ?? '/';
   const exlusionPaths = ['/set-password'];
+  const theme = getTheme();
+  const { language } = await createI18nServerInstance();
+  const organizationSettings = await loadOrganizationSettings();
 
   if (exlusionPaths.includes(pathname)) {
     return <div className="h-screen w-screen">{children}</div>;
@@ -42,6 +47,11 @@ export default async function RootLayout({
 
   return (
     <>
+      <RootProviders
+          theme={theme}
+          lang={language}
+          organizationSettings={organizationSettings}
+        >
       <Page style={style}>
         <PageNavigation>
           <If condition={style === 'header'}>
@@ -64,6 +74,7 @@ export default async function RootLayout({
       </Page>
 
       <Toaster richColors={false} />
+      </RootProviders>
     </>
   );
 }
@@ -87,10 +98,10 @@ export default async function RootLayout({
 //   });
 // }
 
-// function getTheme() {
-//   const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('theme')?.value;
-//   return cookieValue ?? 'light';
-// }
+function getTheme() {
+  const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('theme')?.value;
+  return cookieValue ?? 'light';
+}
 
 function getLayoutStyle() {
   const cookieValue = (
@@ -99,13 +110,13 @@ function getLayoutStyle() {
   return cookieValue ?? personalAccountNavigationConfig.style;
 }
 
-// async function loadOrganizationSettings() {
-//   try {
-//     return await getOrganizationSettings();
-//   } catch (error) {
-//     console.error('Error cargando los organizationSettings', error);
-//     return [];
-//   }
-// }
+async function loadOrganizationSettings() {
+  try {
+    return await getOrganizationSettings();
+  } catch (error) {
+    console.error('Error cargando los organizationSettings', error);
+    return [];
+  }
+}
 
 export const generateMetadata = generateRootMetadata;
