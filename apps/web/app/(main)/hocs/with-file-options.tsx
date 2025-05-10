@@ -28,6 +28,7 @@ export enum FileViewerMode {
   ANNOTATIONS = 'annotations',
 }
 interface FileProps {
+  fileId: string;
   src: string;
   fileName: string;
   fileType: string;
@@ -51,6 +52,7 @@ export const withFileOptions = <P extends FileProps>(
       <div className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center overflow-hidden">
         <WrappedComponent {...props} />
         <FileOptions
+          fileId={props.fileId}
           viewerMode={viewerMode}
           fileName={props.fileName}
           fileType={props.fileType}
@@ -68,6 +70,7 @@ export const withFileOptions = <P extends FileProps>(
 type FileOptionsProps = Omit<FileProps, 'dialogClassName' | 'className'>;
 
 const FileOptions = ({
+  fileId,
   viewerMode,
   fileName,
   fileType,
@@ -127,6 +130,7 @@ const FileOptions = ({
         {/* Visualization of the file */}
         { viewerMode === FileViewerMode.ANNOTATIONS ? (
           <AnnotationsDialog
+            fileId={fileId}
             triggerComponent={<TriggerComponent />}
             fileName={fileName}
             fileType={fileType}

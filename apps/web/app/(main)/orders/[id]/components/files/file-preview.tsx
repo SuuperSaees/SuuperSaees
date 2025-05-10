@@ -243,16 +243,30 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       <div
         className={`flex h-[60vh] w-full flex-col items-center justify-center ${className}`}
       >
-        <FileIcon
-          extension={getFileExtension(fileName)}
-          size='md'
-        />
+        {!isDialog && (
+          <FileIcon
+            extension={getFileExtension(fileName)}
+            size='md'
+          />
+        )}
+        
         {isDialog ? (
           <>
-            <p className="text-gray-400">{fileName}</p>
-            <div className="my-4 flex flex-col items-center justify-center">
-              <p className="text-gray-400">{t('files.noPreview')}</p>
-              <p className="text-gray-400">{t('files.download')}</p>
+            <div className="animate-fade-in flex max-w-xs flex-col items-center space-y-3 p-6">
+              <FileIcon
+                extension={getFileExtension(fileName)}
+                className="h-10 w-10 text-gray-400"
+              />
+
+              <span className="max-w-xs break-all rounded bg-gray-50 px-2 py-0.5 text-center text-xs font-semibold text-gray-500">
+                {fileName}
+              </span>
+              <h2 className="text-center text-base font-semibold text-gray-500">
+                {t('files.noPreview')}
+              </h2>
+              <p className="text-center text-xs text-gray-500">
+                {t('files.download')}
+              </p>
             </div>
           </>
         ) : (
