@@ -313,7 +313,7 @@ const AnnotationsDialog = ({
   const renderAnnotationsContent = () => {
     if (isLoadingAnnotations) {
       return (
-        <div className="flex h-full w-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center p-4">
           <Spinner className="h-6 w-6" />
         </div>
       );
