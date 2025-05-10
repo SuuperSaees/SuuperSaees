@@ -72,12 +72,14 @@ interface FileIconProps {
   extension: string;
   size?: 'sm' | 'md' | 'lg' | 'xs';
   className?: string;
+  error?: boolean;
 }
 
 export const FileIcon: React.FC<FileIconProps> = ({ 
   extension, 
   size = 'md',
-  className = ''
+  className = '',
+  error = false
 }) => {
   const ext = extension.toLowerCase();
   const color = FILE_EXTENSION_COLORS[ext] ?? '#535862';
@@ -90,20 +92,24 @@ export const FileIcon: React.FC<FileIconProps> = ({
   };
 
   if (!ext) {
-    return <StickyNote className={cn(`text-gray-500 ${sizeClasses[size]} ${className}`)} />;
+    return <StickyNote className={cn(`text-gray-500 ${sizeClasses[size]} ${className}`, {
+      'text-red-500': error
+    })} />;
   }
+
+  const borderColor = error ? '#DC2626' : '#D5D7DA';
 
   return (
     <div className={`relative ${sizeClasses[size]} ${className}`}>
       <svg width="100%" height="100%" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path 
           d="M7.75 4C7.75 2.20508 9.20508 0.75 11 0.75H27C27.1212 0.75 27.2375 0.798159 27.3232 0.883885L38.1161 11.6768C38.2018 11.7625 38.25 11.8788 38.25 12V36C38.25 37.7949 36.7949 39.25 35 39.25H11C9.20507 39.25 7.75 37.7949 7.75 36V4Z" 
-          stroke="#D5D7DA" 
+          stroke={borderColor}
           strokeWidth="1.5"
         />
         <path 
           d="M27 0.5V8C27 10.2091 28.7909 12 31 12H38.5" 
-          stroke="#D5D7DA" 
+          stroke={borderColor}
           strokeWidth="1.5"
         />
         <rect x="1" y="18" width="27" height="16" rx="2" fill={color} />
@@ -119,6 +125,29 @@ export const FileIcon: React.FC<FileIconProps> = ({
           {ext.toUpperCase()}
         </text>
       </svg>
+      {error && (
+        <span
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 22,
+            height: 22,
+            background: '#FEE4E2',
+            borderRadius: '50%',
+            border: '2.5px solid #DC2626',
+            zIndex: 10,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <text x="7" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#DC2626">!</text>
+          </svg>
+        </span>
+      )}
     </div>
   );
 };

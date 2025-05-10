@@ -128,7 +128,7 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
               ),
             }}
           >
-            <FileIcon extension={extension} size={size} />
+            <FileIcon extension={extension} size={size} error={upload?.status === 'error'}/>
           </div>
         )}
 

@@ -125,12 +125,13 @@ export function useFileUpload() {
         },
         chunkSize: options.chunkSize ?? 6 * 1024 * 1024, // 6MB default
         onError: (error) => {
+          console.error('Error uploading file:', error);
           setUploads((prev) => {
             const errorUpload = {
               ...prev[fileId],
               progress: prev[fileId]?.progress ?? 0,
               status: 'error' as const,
-              url: prev[fileId]?.url ?? null,
+              url: null,
               file: prev[fileId]?.file ?? file,
               id: prev[fileId]?.id ?? fileId,
             }

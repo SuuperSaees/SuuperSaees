@@ -5,5 +5,11 @@
     "uploading": "Subiendo...",
     "error": "Carga fallida",
     "success": "Carga completada"
+  },
+  "preview": {
+    "error": {
+      "title": "No se pudo mostrar este archivo",
+      "description": "Puede que esté incompleto o dañado. Por favor, inténtalo de nuevo."
+    }
   }
 }

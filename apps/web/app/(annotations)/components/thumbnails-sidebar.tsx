@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { forwardRef } from 'react';
 
 import { File } from '~/lib/file.types';
 import { FilePreview } from '~/(main)/orders/[id]/components/files/file-preview';
@@ -11,19 +11,19 @@ interface AnnotationsThumbnailsSidebarProps {
   resetZoom: () => void;
   setCurrentPage: (page: number) => void;
 }
-const AnnotationsThumbnailsSidebar = ({
+const AnnotationsThumbnailsSidebar = forwardRef<HTMLDivElement, AnnotationsThumbnailsSidebarProps>(({
   files,
   selectedFile,
   setSelectedFile,
   setCurrentFileType,
   resetZoom,
   setCurrentPage,
-}: AnnotationsThumbnailsSidebarProps) => {
-  const filesContainerRef = useRef<HTMLDivElement>(null);
+}: AnnotationsThumbnailsSidebarProps, ref) => {
+
   return (
     <div
-      ref={filesContainerRef}
-      className="flex w-52 flex-col items-center gap-4 overflow-y-auto py-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2"
+      ref={ref}
+      className="flex w-52 h-full flex-col items-center gap-4 overflow-y-auto py-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2"
     >
       {files
         ?.filter(
@@ -32,7 +32,7 @@ const AnnotationsThumbnailsSidebar = ({
         )
         .map((file, index) => (
           <div
-            data-file-name={file.name}
+            data-file-id={file.id}
             className="flex cursor-pointer flex-col hover:opacity-80"
             key={index}
             onClick={() => {
@@ -44,7 +44,7 @@ const AnnotationsThumbnailsSidebar = ({
           >
             <div
               className={`item-center flex h-[150px] w-[150px] justify-center rounded-lg border ${
-                selectedFile?.name === file.name
+                selectedFile?.id === file.id
                   ? 'border-2 border-blue-500'
                   : 'bg-gray-100'
               }`}
@@ -63,6 +63,8 @@ const AnnotationsThumbnailsSidebar = ({
         ))}
     </div>
   );
-};
+});
+
+AnnotationsThumbnailsSidebar.displayName = 'AnnotationsThumbnailsSidebar';
 
 export default AnnotationsThumbnailsSidebar;
