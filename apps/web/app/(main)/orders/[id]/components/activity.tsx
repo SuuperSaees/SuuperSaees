@@ -44,6 +44,7 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
       let filesToAdd: File.Insert[] | undefined = [];
       if (fileUploads) {
         filesToAdd = [...fileUploads].map((upload) => {
+          if(upload.status === 'error') return null;
           const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/orders/uploads/${order.uuid}/${upload.id}`;
           const tempId = crypto.randomUUID();
           return {
@@ -56,7 +57,7 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
             message_id: messageId,
             reference_id: order.id.toString(),
           };
-        })
+        }).filter(f => f !== null)
       }
       const newMessage: Message.Insert = {
         id: messageId,
@@ -135,6 +136,16 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
             );
           });
         },
+        onError:(_, errorUpload) => {
+       
+          setUploads?.((prevFiles) => {
+            const fileExists = prevFiles.some((f) => f.id === fileId);
+            if (!fileExists) {
+              return [...prevFiles, errorUpload];
+            }
+            return prevFiles.map((f) => (f.id === fileId ? errorUpload : f));
+          });
+        }
       });
 
       return filePath;

@@ -5,5 +5,11 @@
     "uploading": "Uploading...",
     "error": "Upload failed",
     "success": "Upload completed"
+  },
+  "preview": {
+    "error": {
+      "title": "We couldn't preview this file",
+      "description": "It might be incomplete or corrupted. Please try uploading it again."
+    }
   }
 }

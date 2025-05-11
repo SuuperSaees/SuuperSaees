@@ -36,12 +36,14 @@ import AnnotationsCommentsPanel from './comments-panel';
 
 export interface AnnotationsProps {
   triggerComponent: React.ReactNode;
+  fileId: string;
   fileName: string;
   fileType: string;
   files: File.Type[];
 }
 
 const AnnotationsDialog = ({
+  fileId,
   triggerComponent,
   fileName,
   fileType,
@@ -61,6 +63,7 @@ const AnnotationsDialog = ({
   const [isInitialMessageOpen, setIsInitialMessageOpen] = useState(false);
   const filesContainerRef = useRef<HTMLDivElement>(null);
   const [isDialogMounted, setIsDialogMounted] = useState(false);
+
   const {
     zoomLevel,
     isDragging,
@@ -99,12 +102,12 @@ const AnnotationsDialog = ({
 
   useEffect(() => {
     if (files?.length) {
-      const currentFile = files.find((f) => f.name === fileName);
+      const currentFile = files.find((f) => f.id === fileId);
       setSelectedFile(currentFile ?? null);
       setCurrentFileType(currentFile?.type ?? fileType);
       resetZoom();
     }
-  }, [files, fileName, fileType, resetZoom]);
+  }, [files, fileId, fileType, resetZoom]);
 
   useEffect(() => {
     if (isLoadingAnnotations) {
@@ -129,7 +132,7 @@ const AnnotationsDialog = ({
   useEffect(() => {
     if (isDialogOpen) {
       // Set initial file when dialog opens
-      const currentFile = files?.find((f) => f.name === fileName);
+      const currentFile = files?.find((f) => f.id === fileId);
       setSelectedFile(currentFile ?? null);
       setCurrentFileType(currentFile?.type ?? fileType);
 
@@ -142,13 +145,13 @@ const AnnotationsDialog = ({
     } else {
       setIsDialogMounted(false);
     }
-  }, [isDialogOpen, files, fileName, fileType]);
+  }, [isDialogOpen, files, fileId, fileType]);
 
   useEffect(() => {
     if (selectedFile && filesContainerRef.current && isDialogMounted) {
       const container = filesContainerRef.current;
       const selectedElement = container.querySelector(
-        `[data-file-name="${selectedFile.name}"]`,
+        `[data-file-id="${selectedFile.id}"]`,
       );
 
       if (selectedElement) {
@@ -310,7 +313,7 @@ const AnnotationsDialog = ({
   const renderAnnotationsContent = () => {
     if (isLoadingAnnotations) {
       return (
-        <div className="flex h-full w-full items-center justify-center">
+        <div className="flex h-full w-full items-center justify-center p-4">
           <Spinner className="h-6 w-6" />
         </div>
       );
@@ -334,6 +337,7 @@ const AnnotationsDialog = ({
       <DialogContent
         className="flex h-[90vh] w-[90vw] max-w-[90vw] flex-col gap-0 p-0"
         showCloseIcon={false}
+
       >
         <DialogHeader className="flex flex-row justify-between p-4">
           <DialogTitle>{selectedFile?.name ?? fileName}</DialogTitle>
@@ -364,6 +368,7 @@ const AnnotationsDialog = ({
         <Separator />
         <div className="flex min-h-0 flex-1">
           <AnnotationsThumbnailsSidebar
+            ref={filesContainerRef}
             files={files}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
