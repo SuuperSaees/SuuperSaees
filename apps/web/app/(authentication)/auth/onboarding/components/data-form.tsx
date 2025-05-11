@@ -14,6 +14,7 @@ import { useState } from "react";
 import { createIngress } from '~/multitenancy/aws-cluster-ingress/src/actions/create';
 import { updateTokenData } from "~/team-accounts/src/server/actions/tokens/update/update-token";
 import { updateAccountData } from "~/team-accounts/src/server/actions/accounts/update/update-account";
+import { getSession } from "~/server/actions/accounts/accounts.action";
 import { createSubscription } from '~/team-accounts/src/server/actions/subscriptions/create/create-subscription';
 import { addUserToAirtable } from "~/team-accounts/src/server/utils/airtable";
 import { useSupabase } from "@kit/supabase/hooks/use-supabase";
@@ -57,7 +58,7 @@ export function UserDataForm(
         user_id: userId,
       });
 
-      const organizationData = (await client.rpc('get_session')).data?.organization;
+      const organizationData = (await getSession())?.organization;
 
       if (userData) {
         try {

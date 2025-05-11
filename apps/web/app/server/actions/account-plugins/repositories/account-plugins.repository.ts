@@ -1,6 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { AccountPlugin, AccountPluginInsert, BillingAccountInsert } from '~/lib/plugins.types'; 
+import { getSession } from '../../accounts/accounts.action';
+
 export class AccountPluginsRepository {
     private client: SupabaseClient<Database>
     private adminClient?: SupabaseClient<Database>
@@ -128,7 +130,7 @@ export class AccountPluginsRepository {
         .is('deleted_on', null);
 
       if (name) {
-        const sessionData = (await this.client.rpc('get_session')).data;
+        const sessionData = await getSession();
         const accountId = sessionData?.agency?.owner_id ?? sessionData?.organization?.owner_id ?? '';
 
         const { data: dataPlugin, error: errorPlugin } = await this.client

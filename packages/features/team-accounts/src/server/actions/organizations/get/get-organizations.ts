@@ -2,14 +2,12 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
 import { OrganizationSettings } from '../../../../../../../../apps/web/lib/organization-settings.types';
 import { hasPermissionToViewOrganization } from '../../permissions/organization';
-
+import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
 export const getOrganizationSettings = async () => {
   try {
@@ -22,7 +20,7 @@ export const getOrganizationSettings = async () => {
       return [];
     }
 
-    const sessionData = (await client.rpc('get_session')).data;
+    const sessionData = await getSession();
     const role = sessionData?.organization?.role;
     const organizationId = sessionData?.organization?.id;
     const agencyId = sessionData?.agency?.id;
@@ -117,7 +115,7 @@ export async function getOrganization(): Promise<{
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const organizationData = (await client.rpc('get_session')).data?.organization;
+    const organizationData = (await getSession())?.organization;
     const organizationId = organizationData?.id ?? '';
 
     const { data: organizationsData, error: organizationError } = await client
@@ -153,7 +151,7 @@ export async function getOrganizationByUserId(
 }> {
   try {
     const client = getSupabaseServerComponentClient();
-    const sessionData = (await client.rpc('get_session')).data;
+    const sessionData = (await getSession());
 
     if(!userId) {
       const organizationData = sessionData?.organization;
@@ -267,7 +265,7 @@ export async function getAgencyForClient() {
   try {
     const client = getSupabaseServerComponentClient();
     
-    const sessionData = (await client.rpc('get_session')).data;
+    const sessionData = await getSession();
     const { data: agencyData, error: agencyError } = await client
       .from('organizations')
       .select('id, name, picture_url, slug')
@@ -293,8 +291,7 @@ export async function getAgencyForClientByUserId(): Promise<{
   loom_app_id: string | null;
 }> {
   try {
-    const client = getSupabaseServerComponentClient();
-    const agencyData = (await client.rpc('get_session')).data?.agency
+    const agencyData = (await getSession())?.agency
 
     return {
       id: agencyData?.id ?? '',

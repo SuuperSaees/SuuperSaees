@@ -10,6 +10,7 @@ import {
   getAgencyForClient, // getOrganizationById,
 } from '../../organizations/get/get-organizations';
 import { hasPermissionToDeleteClient } from '../../permissions/clients';
+import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
 // Define la función handleDelete
 export const deleteClient = async (
@@ -26,7 +27,7 @@ export const deleteClient = async (
     let clientOrganizationId = organizationId;
     if (clientId && !organizationId) {
       // Fetch the organization ID for the specific client if not provided
-      const sessionData = (await client.rpc('get_session')).data;
+      const sessionData = (await getSession());
 
       const agencyId = sessionData?.agency?.id;
       const sessionOrganizationId = sessionData?.organization?.id;

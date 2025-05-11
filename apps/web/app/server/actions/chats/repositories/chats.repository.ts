@@ -3,6 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { Chats } from '~/lib/chats.types';
 import { AccountRoles } from '~/lib/account.types';
+import { getSession } from '../../accounts/accounts.action';
 
 export class ChatRepository {
   private client: SupabaseClient<Database>;
@@ -44,8 +45,8 @@ export class ChatRepository {
 
   // * GET REPOSITORIES
   async list(userId: string, chatIds?: string[]): Promise<Chats.TypeWithRelations[]> {
-    const sessionData = (await this.client.rpc('get_session')).data;
-
+    const sessionData = await getSession();
+    
     const isClient = AccountRoles.clientRoles.has(sessionData?.organization?.role ?? '');
 
     const client = this.adminClient ?? this.client;
