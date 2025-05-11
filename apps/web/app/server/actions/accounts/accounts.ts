@@ -1,9 +1,9 @@
 // import { BaseAction } from '../base-action';
 import { AccountsController } from './controllers/accounts.controller';
 import { IAccountsAction } from './accounts.interface';
-import { Session } from '~/lib/account.types';
+import { Session } from '../../../../lib/account.types';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '~/lib/database.types';
+import { Database } from '../../../../lib/database.types';
 
 export class AccountsAction implements IAccountsAction {
     private controller: AccountsController;

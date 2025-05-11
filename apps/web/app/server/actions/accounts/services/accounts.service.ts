@@ -1,6 +1,6 @@
 import { IAccountsService } from "./accounts.service.interface";
 import { AccountsRepository } from "../repositories/accounts.repository";
-import { Session } from "~/lib/account.types";
+import { Session } from "../../../../../lib/account.types";
 
 export class AccountsService implements IAccountsService {
     constructor(private readonly accountsRepository: AccountsRepository) {

@@ -3,9 +3,7 @@
 import { Organization } from '../../../../apps/web/lib/organization.types';
 import { OrganizationSettings } from '../../../../apps/web/lib/organization-settings.types';
 import { getUserAccountById, getUserRoleById } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
-import { getAgencyForClientByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
-import { getOrganizationByUserId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
-import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { getAgencyForClientByUserId, getOrganizationByUserId, getOrganizationSettingsByOrganizationId} from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { getSupabaseServerComponentClient } from '../../../supabase/src/clients/server-component.client';
 
 

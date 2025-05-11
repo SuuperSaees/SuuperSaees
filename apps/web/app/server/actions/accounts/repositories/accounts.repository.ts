@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '~/lib/database.types';
-import { Session } from '~/lib/account.types';
+import { Database } from '../../../../../lib/database.types';
+import { Session } from '../../../../../lib/account.types';
 
 export class AccountsRepository {
     private client: SupabaseClient<Database>
