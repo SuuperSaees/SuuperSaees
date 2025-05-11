@@ -20,7 +20,7 @@ export const getOrganizationSettings = async () => {
       return [];
     }
 
-    const sessionData = (await client.rpc('get_session')).data;
+    const sessionData = await getSession();
     const role = sessionData?.organization?.role;
     const organizationId = sessionData?.organization?.id;
     const agencyId = sessionData?.agency?.id;
@@ -265,7 +265,7 @@ export async function getAgencyForClient() {
   try {
     const client = getSupabaseServerComponentClient();
     
-    const sessionData = (await getSession());
+    const sessionData = await getSession();
     const { data: agencyData, error: agencyError } = await client
       .from('organizations')
       .select('id, name, picture_url, slug')

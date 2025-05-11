@@ -1,13 +1,14 @@
-import { BaseAction } from '../base-action';
+// import { BaseAction } from '../base-action';
 import { AccountsController } from './controllers/accounts.controller';
 import { IAccountsAction } from './accounts.interface';
 import { Session } from '~/lib/account.types';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { Database } from '~/lib/database.types';
 
-export class AccountsAction extends BaseAction implements IAccountsAction {
+export class AccountsAction implements IAccountsAction {
     private controller: AccountsController;
-    constructor(baseUrl: string) {
-        super(baseUrl);
-        this.controller = new AccountsController(this.baseUrl, this.client, this.adminClient);
+    constructor(baseUrl: string, client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) {
+        this.controller = new AccountsController(baseUrl, client, adminClient);
     }
 
     async getSession(): Promise<Session.Type> {
@@ -15,6 +16,6 @@ export class AccountsAction extends BaseAction implements IAccountsAction {
     }
 }
 
-export function createAccountsAction(baseUrl: string) {
-    return new AccountsAction(baseUrl);
+export function createAccountsAction(baseUrl: string, client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) {
+    return new AccountsAction(baseUrl, client, adminClient);
 }
