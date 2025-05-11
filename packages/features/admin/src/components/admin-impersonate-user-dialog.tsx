@@ -151,10 +151,10 @@ function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
         })
 
         await revalidateSession();
-        window.location.reload();
-
+        
         //Push to /home page and then use refresh to reload the page with updated user data
         router.push('/home');
+        window.location.reload();
         router.refresh()
         return tokenId
 

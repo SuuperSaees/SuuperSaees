@@ -123,11 +123,11 @@ export function PersonalAccountDropdown({
         domain,
       });
       await revalidateSession();
-      window.location.reload();
       localStorage.clear();
-
+      
       //Push to /home page and then use refresh to reload the page with updated user data
       router.push('/home');
+      window.location.reload();
       router.refresh()
     }
   };
