@@ -3,6 +3,7 @@
 import { createAccountsAction } from "./accounts";
 import { unstable_cache } from "next/cache";
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { revalidateTag } from 'next/cache';
 
 // function getAccountsAction(host?: string) {
 //     return createAccountsAction(host ?? process.env.NEXT_PUBLIC_SITE_URL as string);
@@ -31,4 +32,11 @@ const getSessionWithClients = unstable_cache(
         revalidate: 18000
     }
 );
+
+export async function revalidateSession() {
+    await Promise.resolve();
+    revalidateTag('session-cache');
+    return { success: true };
+}
+
 

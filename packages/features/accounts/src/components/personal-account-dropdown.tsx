@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
-
+import { revalidateSession } from '../../../../../apps/web/app/server/actions/accounts/accounts.action';
 import type { User } from '@supabase/supabase-js';
 
 import {
@@ -122,6 +122,8 @@ export function PersonalAccountDropdown({
       await supabase.rpc('set_session', {
         domain,
       });
+      await revalidateSession();
+      window.location.reload();
       localStorage.clear();
 
       //Push to /home page and then use refresh to reload the page with updated user data

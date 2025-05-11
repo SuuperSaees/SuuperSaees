@@ -30,6 +30,7 @@ import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { impersonateUserAction } from '../lib/server/admin-server-actions';
 import { ImpersonateUserSchema } from '../lib/server/schema/admin-actions.schema';
 import { useRouter } from 'next/navigation';
+import { revalidateSession } from '../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
 export function AdminImpersonateUserDialog(
   props: React.PropsWithChildren<{
@@ -148,6 +149,9 @@ function useSetSession(tokens: { accessToken: string; refreshToken: string }) {
         await supabase.rpc('set_session', {
           domain,
         })
+
+        await revalidateSession();
+        window.location.reload();
 
         //Push to /home page and then use refresh to reload the page with updated user data
         router.push('/home');
