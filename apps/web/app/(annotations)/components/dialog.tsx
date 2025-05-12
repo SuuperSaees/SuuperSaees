@@ -92,6 +92,12 @@ const AnnotationsDialog = ({
     otherFileIds,
   });
 
+  useEffect(()=> {
+    setSelectedFile(file);
+    setCurrentFileType(file.type); //NWWFSR
+    
+  }, [file, setSelectedFile, setCurrentFileType])
+
   useEffect(() => {
     if (!isChatOpen) {
       // Remove all annotations with empty content
