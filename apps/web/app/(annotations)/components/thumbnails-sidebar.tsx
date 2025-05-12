@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 
 import { File } from '~/lib/file.types';
 import { FilePreview } from '~/(main)/orders/[id]/components/files/file-preview';
@@ -11,14 +11,32 @@ interface AnnotationsThumbnailsSidebarProps {
   resetZoom: () => void;
   setCurrentPage: (page: number) => void;
 }
-const AnnotationsThumbnailsSidebar = forwardRef<HTMLDivElement, AnnotationsThumbnailsSidebarProps>(({
+
+const AnnotationsThumbnailsSidebar = ({
   files,
   selectedFile,
   setSelectedFile,
   setCurrentFileType,
   resetZoom,
   setCurrentPage,
-}: AnnotationsThumbnailsSidebarProps, ref) => {
+}: AnnotationsThumbnailsSidebarProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (selectedFile && ref && 'current' in ref && ref.current) {
+      const container = ref.current;
+      const selectedElement = container.querySelector(
+        `[data-file-id="${selectedFile.id}"]`,
+      );
+
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }
+  }, [selectedFile, ref]);
 
   return (
     <div
@@ -63,8 +81,7 @@ const AnnotationsThumbnailsSidebar = forwardRef<HTMLDivElement, AnnotationsThumb
         ))}
     </div>
   );
-});
+}
 
-AnnotationsThumbnailsSidebar.displayName = 'AnnotationsThumbnailsSidebar';
 
 export default AnnotationsThumbnailsSidebar;

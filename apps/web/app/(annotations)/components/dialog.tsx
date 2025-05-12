@@ -36,21 +36,19 @@ import AnnotationsCommentsPanel from './comments-panel';
 
 export interface AnnotationsProps {
   triggerComponent: React.ReactNode;
-  fileId: string;
+  file: File.Type;
   fileName: string;
-  fileType: string;
   files: File.Type[];
 }
 
 const AnnotationsDialog = ({
-  fileId,
+  file,
   triggerComponent,
   fileName,
-  fileType,
   files,
 }: AnnotationsProps) => {
-  const [selectedFile, setSelectedFile] = useState<File.Type | null>(null);
-  const [currentFileType, setCurrentFileType] = useState(fileType);
+  const [selectedFile, setSelectedFile] = useState<File.Type | null>(file);
+  const [currentFileType, setCurrentFileType] = useState(file.type);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,8 +59,6 @@ const AnnotationsDialog = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isInitialMessageOpen, setIsInitialMessageOpen] = useState(false);
-  const filesContainerRef = useRef<HTMLDivElement>(null);
-  const [isDialogMounted, setIsDialogMounted] = useState(false);
 
   const {
     zoomLevel,
@@ -100,14 +96,15 @@ const AnnotationsDialog = ({
     otherFileIds,
   });
 
-  useEffect(() => {
-    if (files?.length) {
-      const currentFile = files.find((f) => f.id === fileId);
-      setSelectedFile(currentFile ?? null);
-      setCurrentFileType(currentFile?.type ?? fileType);
-      resetZoom();
-    }
-  }, [files, fileId, fileType, resetZoom]);
+  // resetZoom();
+  // useEffect(() => {
+  //   if (files?.length) {
+  //     const currentFile = files.find((f) => f.id === fileId);
+  //     setSelectedFile(currentFile ?? null);
+  //     setCurrentFileType(currentFile?.type ?? fileType);
+     
+  //   }
+  // }, [files, fileId, fileType, resetZoom]);
 
   useEffect(() => {
     if (isLoadingAnnotations) {
@@ -129,39 +126,23 @@ const AnnotationsDialog = ({
     }
   }, [isChatOpen, annotations, setIsInitialMessageOpen, setSelectedAnnotation]);
 
-  useEffect(() => {
-    if (isDialogOpen) {
-      // Set initial file when dialog opens
-      const currentFile = files?.find((f) => f.id === fileId);
-      setSelectedFile(currentFile ?? null);
-      setCurrentFileType(currentFile?.type ?? fileType);
+  // useEffect(() => {
+  //   if (isDialogOpen) {
+  //     // Set initial file when dialog opens
+  //     const currentFile = files?.find((f) => f.id === fileId);
+  //     setSelectedFile(currentFile ?? null);
+  //     setCurrentFileType(currentFile?.type ?? fileType);
 
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        setIsDialogMounted(true);
-      }, 100);
+  //     // Small delay to ensure DOM is ready
+  //     const timer = setTimeout(() => {
+  //       setIsDialogMounted(true);
+  //     }, 100);
 
-      return () => clearTimeout(timer);
-    } else {
-      setIsDialogMounted(false);
-    }
-  }, [isDialogOpen, files, fileId, fileType]);
-
-  useEffect(() => {
-    if (selectedFile && filesContainerRef.current && isDialogMounted) {
-      const container = filesContainerRef.current;
-      const selectedElement = container.querySelector(
-        `[data-file-id="${selectedFile.id}"]`,
-      );
-
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }
-    }
-  }, [selectedFile, isDialogMounted]);
+  //     return () => clearTimeout(timer);
+  //   } else {
+  //     setIsDialogMounted(false);
+  //   }
+  // }, [isDialogOpen, files, fileId, fileType]);
 
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
@@ -368,7 +349,6 @@ const AnnotationsDialog = ({
         <Separator />
         <div className="flex min-h-0 flex-1">
           <AnnotationsThumbnailsSidebar
-            ref={filesContainerRef}
             files={files}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
