@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useState } from 'react';
 
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
-import { ArrowDownToLine, MessageCircle, X } from 'lucide-react';
+import { ArrowDownToLine, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -18,14 +18,11 @@ import {
   DialogTrigger,
 } from '@kit/ui/dialog';
 import { Separator } from '@kit/ui/separator';
-import { Spinner } from '@kit/ui/spinner';
 
 import Tooltip from '~/components/ui/tooltip';
 import { Annotation } from '~/lib/annotations.types';
 import { File } from '~/lib/file.types';
-import ActiveChats from '~/(main)/orders/[id]/components/files/active-chats';
 import FileViewer from '~/(main)/orders/[id]/components/files/file-viewer';
-import ResolvedChat from '~/(main)/orders/[id]/components/files/resolved-chat';
 import { useFileHandlers } from '~/(main)/orders/[id]/hooks/files/use-file-handlres';
 import { useAnnotations } from '~/(main)/orders/[id]/hooks/use-annotations';
 import { handleFileDownload } from '~/(main)/orders/[id]/utils/file-utils';
@@ -36,21 +33,19 @@ import AnnotationsCommentsPanel from './comments-panel';
 
 export interface AnnotationsProps {
   triggerComponent: React.ReactNode;
-  fileId: string;
+  file: File.Type;
   fileName: string;
-  fileType: string;
   files: File.Type[];
 }
 
 const AnnotationsDialog = ({
-  fileId,
+  file,
   triggerComponent,
   fileName,
-  fileType,
   files,
 }: AnnotationsProps) => {
-  const [selectedFile, setSelectedFile] = useState<File.Type | null>(null);
-  const [currentFileType, setCurrentFileType] = useState(fileType);
+  const [selectedFile, setSelectedFile] = useState<File.Type | null>(file);
+  const [currentFileType, setCurrentFileType] = useState(file.type);
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,8 +56,6 @@ const AnnotationsDialog = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isInitialMessageOpen, setIsInitialMessageOpen] = useState(false);
-  const filesContainerRef = useRef<HTMLDivElement>(null);
-  const [isDialogMounted, setIsDialogMounted] = useState(false);
 
   const {
     zoomLevel,
@@ -87,7 +80,6 @@ const AnnotationsDialog = ({
     createAnnotation,
     addMessage,
     isCreatingAnnotation,
-    setIsCreatingAnnotation,
     selectedAnnotation,
     setSelectedAnnotation,
     deleteAnnotation,
@@ -100,22 +92,11 @@ const AnnotationsDialog = ({
     otherFileIds,
   });
 
-  useEffect(() => {
-    if (files?.length) {
-      const currentFile = files.find((f) => f.id === fileId);
-      setSelectedFile(currentFile ?? null);
-      setCurrentFileType(currentFile?.type ?? fileType);
-      resetZoom();
-    }
-  }, [files, fileId, fileType, resetZoom]);
-
-  useEffect(() => {
-    if (isLoadingAnnotations) {
-      setIsCreatingAnnotation(false);
-    } else {
-      setIsCreatingAnnotation(true);
-    }
-  }, [isCreatingAnnotation, isLoadingAnnotations, setIsCreatingAnnotation]);
+  useEffect(()=> {
+    setSelectedFile(file);
+    setCurrentFileType(file.type); //NWWFSR
+    
+  }, [file, setSelectedFile, setCurrentFileType])
 
   useEffect(() => {
     if (!isChatOpen) {
@@ -129,40 +110,6 @@ const AnnotationsDialog = ({
     }
   }, [isChatOpen, annotations, setIsInitialMessageOpen, setSelectedAnnotation]);
 
-  useEffect(() => {
-    if (isDialogOpen) {
-      // Set initial file when dialog opens
-      const currentFile = files?.find((f) => f.id === fileId);
-      setSelectedFile(currentFile ?? null);
-      setCurrentFileType(currentFile?.type ?? fileType);
-
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        setIsDialogMounted(true);
-      }, 100);
-
-      return () => clearTimeout(timer);
-    } else {
-      setIsDialogMounted(false);
-    }
-  }, [isDialogOpen, files, fileId, fileType]);
-
-  useEffect(() => {
-    if (selectedFile && filesContainerRef.current && isDialogMounted) {
-      const container = filesContainerRef.current;
-      const selectedElement = container.querySelector(
-        `[data-file-id="${selectedFile.id}"]`,
-      );
-
-      if (selectedElement) {
-        selectedElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }
-    }
-  }, [selectedFile, isDialogMounted]);
-
   const handleImageClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (
       !isCreatingAnnotation ||
@@ -175,8 +122,12 @@ const AnnotationsDialog = ({
       return;
 
     const rect = imageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    const cursorHotspotX = 23.5; // px
+    const cursorHotspotY = 40; // px (SVG height)
+
+    const x = ((e.clientX - rect.left + cursorHotspotX) / rect.width) * 100;
+    const y = ((e.clientY - rect.top - cursorHotspotY) / rect.height) * 100;
 
     try {
       const annotation = {
@@ -269,68 +220,6 @@ const AnnotationsDialog = ({
     }
   };
 
-  const renderAnnotationsList = (filteredAnnotations: Annotation.Type[]) => {
-    if (filteredAnnotations.length === 0) {
-      return (
-        <div className="flex items-start gap-5 p-4">
-          <div className="h-4 w-4">
-            <MessageCircle className="h-4 w-4 text-gray-900" />
-          </div>
-          <p className="font-inter text-xs font-normal leading-none text-gray-900">
-            {t('annotations.chat.noChats')}
-          </p>
-        </div>
-      );
-    }
-
-    return filteredAnnotations
-      .sort((a, b) => a.created_at?.localeCompare(b.created_at ?? '') ?? 0)
-      .map((annotation) => (
-        <div key={annotation.id} className="">
-          {activeTab === 'active' ? (
-            <>
-              <ActiveChats
-                chat={annotation}
-                onUpdate={handleUpdateAnnotation}
-                onDelete={handleDeleteAnnotation}
-                onChatClick={handleChatClick}
-                t={t}
-              />
-            </>
-          ) : (
-            <>
-              <ResolvedChat
-                chat={annotation}
-                onDelete={handleDeleteAnnotation}
-                t={t}
-              />
-            </>
-          )}
-        </div>
-      ));
-  };
-
-  const renderAnnotationsContent = () => {
-    if (isLoadingAnnotations) {
-      return (
-        <div className="flex h-full w-full items-center justify-center p-4">
-          <Spinner className="h-6 w-6" />
-        </div>
-      );
-    }
-
-    const filteredAnnotations = annotations.filter(
-      (annotation) =>
-        annotation.status === (activeTab === 'active' ? 'active' : 'completed'),
-    );
-
-    return (
-      <div className="space-y-4">
-        {renderAnnotationsList(filteredAnnotations)}
-      </div>
-    );
-  };
-
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>{triggerComponent}</DialogTrigger>
@@ -368,7 +257,6 @@ const AnnotationsDialog = ({
         <Separator />
         <div className="flex min-h-0 flex-1">
           <AnnotationsThumbnailsSidebar
-            ref={filesContainerRef}
             files={files}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
@@ -409,14 +297,20 @@ const AnnotationsDialog = ({
             setIsInitialMessageOpen={setIsInitialMessageOpen}
             setCurrentPage={setCurrentPage}
           />
-
-          <AnnotationsCommentsPanel
-            currentFileType={currentFileType}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            annotations={annotations}
-            renderAnnotationsContent={renderAnnotationsContent}
-          />
+          {
+            !currentFileType.startsWith('video/') && (
+              <AnnotationsCommentsPanel
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                annotations={annotations}
+                isLoadingAnnotations={isLoadingAnnotations}
+                handleUpdateAnnotation={handleUpdateAnnotation}
+                handleDeleteAnnotation={handleDeleteAnnotation}
+                handleChatClick={handleChatClick}
+              />
+            )
+          }
+          
         </div>
       </DialogContent>
     </Dialog>

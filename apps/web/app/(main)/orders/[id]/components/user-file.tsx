@@ -27,10 +27,8 @@ const filesToDisplayAsCard = [
 const UserFile = ({ file, files, viewerMode = FileViewerMode.DEFAULT }: UserFileProps) => {
   return (
     <FilePreviewComponent
-      fileId={file.id}
+      file={file}
       src={file.url}
-      fileName={file.name}
-      fileType={file.type}
       className="min-w-40"
       isLoading={file.isLoading}
       viewerMode={viewerMode}

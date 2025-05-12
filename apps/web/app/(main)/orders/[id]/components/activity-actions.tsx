@@ -15,6 +15,7 @@ import { ActivityType, DataResult } from '../context/activity.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
 import FileWithOptions from '../hoc/with-file-options';
 import { useActivityContext } from '../context/activity-context';
+import AnnotationsDialog from '~/(annotations)/components/dialog';
 4
 const translateActivity = (
   activity: DataResult.Activity,
@@ -237,13 +238,13 @@ export const DefaultAction = ({
           <span>{formattedActivity.preposition}</span>
           {isFileValue ? (
             <span className="flex items-center">
-              <FileWithOptions
-                src={file?.url ?? ''}
-                fileName={fileName ?? ''}
-                fileType={file?.type ?? ''}
-                isDialog={false}
-                noPreview={true}
-                files={allFiles}
+              <AnnotationsDialog
+                file={file}
+                triggerComponent={<button className="text-blue-500 hover:underline">
+                  {file?.name}
+                </button>}
+                fileName={file?.name ?? ''}
+                files={allFiles ?? []}
               />
             </span>
           ) : (

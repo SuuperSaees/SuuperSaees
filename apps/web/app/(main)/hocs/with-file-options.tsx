@@ -28,10 +28,8 @@ export enum FileViewerMode {
   ANNOTATIONS = 'annotations',
 }
 interface FileProps {
-  fileId: string;
+  file: File.Type;
   src: string;
-  fileName: string;
-  fileType: string;
   files: File.Type[];
   className?: string;
   dialogClassName?: string;
@@ -42,20 +40,19 @@ interface FileProps {
 }
 
 export const withFileOptions = <P extends FileProps>(
-  WrappedComponent: ComponentType<Omit<P, 'viewerMode'>>,
+  WrappedComponent: ComponentType<Omit<P, 'viewerMode'> & {
+    fileName: string;
+    fileType: string;
+  }>,
 ) => {
-  const WithFileOptions: React.FC<P> = ({
-    viewerMode = FileViewerMode.DEFAULT,
-    ...props
-  }) => {
+  const WithFileOptions: React.FC<P> = (props) => {
+    const { viewerMode = FileViewerMode.DEFAULT, ...rest } = props;
     return (
       <div className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center overflow-hidden">
-        <WrappedComponent {...props} />
+        <WrappedComponent {...rest} fileName={props.file.name} fileType={props.file.type} />
         <FileOptions
-          fileId={props.fileId}
+          file={props.file}
           viewerMode={viewerMode}
-          fileName={props.fileName}
-          fileType={props.fileType}
           files={props.files}
           src={props.src}
           bucketName={props.bucketName}
@@ -70,10 +67,8 @@ export const withFileOptions = <P extends FileProps>(
 type FileOptionsProps = Omit<FileProps, 'dialogClassName' | 'className'>;
 
 const FileOptions = ({
-  fileId,
+  file,
   viewerMode,
-  fileName,
-  fileType,
   files,
   src,
   bucketName,
@@ -87,8 +82,8 @@ const FileOptions = ({
     handleToggleMenu,
   } = useFileActions({
     src,
-    fileName,
-    fileType,
+    fileName: file.name,
+    fileType: file.type,
     bucketName,
   });
   return (
@@ -130,17 +125,16 @@ const FileOptions = ({
         {/* Visualization of the file */}
         { viewerMode === FileViewerMode.ANNOTATIONS ? (
           <AnnotationsDialog
-            fileId={fileId}
+            file={file}
             triggerComponent={<TriggerComponent />}
-            fileName={fileName}
-            fileType={fileType}
+            fileName={file.name}
             files={files}
           />
         ) : (
           <FileDialogView
             triggerComponent={<TriggerComponent />}
-            fileName={fileName}
-            fileType={fileType}
+            fileName={file.name}
+            fileType={file.type}
             src={src}
             onDownload={handleDownload}
           />
