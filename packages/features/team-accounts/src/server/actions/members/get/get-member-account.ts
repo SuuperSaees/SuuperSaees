@@ -10,7 +10,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-
+import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -94,10 +94,9 @@ export async function getPrimaryOwnerId(
   client?: SupabaseClient<Database>,
 ): Promise<string | undefined> {
   try {
-    client = client ?? getSupabaseServerComponentClient();
      // don't change this line
-    const ownerId = (await client.rpc('get_session')).data?.organization?.owner_id;
-    return ownerId ?? '';
+    const ownerId = (await getSession())?.organization?.owner_id;
+    return ownerId as string;
   } catch (error) {
     console.error('Error fetching primary owner:', error);
     // throw error;
@@ -106,9 +105,9 @@ export async function getPrimaryOwnerId(
 
 export async function getUserIdOfAgencyOwner() {
   try {
-    const client = getSupabaseServerComponentClient();
+    // const client = getSupabaseServerComponentClient();
 
-    return (await client.rpc('get_session')).data?.organization?.owner_id;
+    return (await getSession())?.organization?.owner_id as string;
   } catch (error) {
     console.error('Error fetching Agency Owner User Id:', error);
   }
@@ -236,7 +235,7 @@ export async function getUserAccountById(
     if (userAccountError) {
       throw new Error(userAccountError.message);
     }
-    const organizationData = (await databaseClient.rpc('get_session')).data?.organization;
+    const organizationData = (await getSession())?.organization;
     const organizationId = organizationData?.id ?? null;
     const primaryOwnerId = organizationData?.owner_id ?? null;
 

@@ -25,6 +25,7 @@ import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
 import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
 import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
 import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
+import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -392,7 +393,7 @@ export async function getAgencyClients(
 
     const userId = userData?.user?.id ?? '';
 
-    const organizationData = (await client.rpc('get_session'))?.data?.organization;
+    const organizationData = (await getSession())?.organization;
     const role = organizationData?.role ?? '';
     const organizationId = organizationData?.id ?? '';
 

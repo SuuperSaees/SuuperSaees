@@ -33,3 +33,8 @@ export const AccountRoles = {
   agencyRoles: new Set(['agency_member', 'agency_owner', 'agency_project_manager']),
   allRoles: new Set(['client_member', 'client_owner', 'agency_member', 'agency_owner', 'agency_project_manager', 'client_guest']),
 }
+
+export namespace Session {
+  export type Type = Database['public']['CompositeTypes']['session_info'];
+}
+
