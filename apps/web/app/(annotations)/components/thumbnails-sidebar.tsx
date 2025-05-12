@@ -41,7 +41,7 @@ const AnnotationsThumbnailsSidebar = ({
   return (
     <div
       ref={ref}
-      className="flex w-52 h-full flex-col items-center gap-4 overflow-y-auto py-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2"
+      className="flex px-6 w-fit shrink-0 h-full flex-col items-center gap-4 overflow-y-auto py-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2"
     >
       {files
         ?.filter(
@@ -64,7 +64,7 @@ const AnnotationsThumbnailsSidebar = ({
               className={`item-center flex h-[150px] w-[150px] justify-center rounded-lg border ${
                 selectedFile?.id === file.id
                   ? 'border-2 border-blue-500'
-                  : 'bg-gray-100'
+                  : 'bg-gray-100 border-transparent'
               }`}
             >
               <FilePreview
