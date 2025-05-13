@@ -40,3 +40,24 @@ export async function revalidateSession() {
 }
 
 
+export async function getUserRole() {
+    const client = getSupabaseServerComponentClient();
+    const adminClient = getSupabaseServerComponentClient({ admin: true });
+    return getUserRoleWithClients(client, adminClient);
+}
+
+const getUserRoleWithClients = unstable_cache(
+    async (client, adminClient) => {
+        const accountsAction = createAccountsAction(
+            process.env.NEXT_PUBLIC_SITE_URL as string, 
+            client, 
+            adminClient
+        );
+        return await accountsAction.getUserRole();
+    }, 
+    ['user-role-cache-key'], 
+    {
+        tags: ['user-role-cache'],
+        revalidate: 86400
+    }
+);

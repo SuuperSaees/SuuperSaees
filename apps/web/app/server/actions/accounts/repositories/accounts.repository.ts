@@ -17,4 +17,10 @@ export class AccountsRepository {
         if (error) throw error;
         return data;
     }
+
+    async getUserRole(): Promise<string> {
+        const { data, error } = await this.client.rpc('get_current_role');
+        if (error) throw error;
+        return data;
+    }
 } 

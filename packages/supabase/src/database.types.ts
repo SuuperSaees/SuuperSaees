@@ -3538,9 +3538,9 @@ export type Database = {
         Returns: Database["public"]["CompositeTypes"]["session_info"]
       }
       get_unread_message_counts: {
-        Args: {
-          p_user_id: string
-        }
+        Args:
+          | { p_user_id: string }
+          | { p_user_id: string; p_is_agency_role: boolean }
         Returns: {
           chat_id: string
           chat_unread_count: number
