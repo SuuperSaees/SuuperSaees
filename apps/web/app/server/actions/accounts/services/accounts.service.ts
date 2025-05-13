@@ -10,4 +10,8 @@ export class AccountsService implements IAccountsService {
     async getSession(): Promise<Session.Type> {
         return await this.accountsRepository.getSession();
     }
+
+    async getUserRole(): Promise<string> {
+        return await this.accountsRepository.getUserRole();
+    }
 } 
