@@ -25,5 +25,17 @@ export class AccountsController {
             throw error;
         }
     }
+
+    async getUserRole(): Promise<string> {
+        try {
+            const accountsRepository = new AccountsRepository(this.client, this.adminClient);
+            const accountsService = new AccountsService(accountsRepository);
+            return await accountsService.getUserRole();
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+    
 }
 

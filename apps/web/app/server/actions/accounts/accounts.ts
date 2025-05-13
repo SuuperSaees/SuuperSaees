@@ -14,6 +14,10 @@ export class AccountsAction implements IAccountsAction {
     async getSession(): Promise<Session.Type> {
         return await this.controller.getSession();
     }
+
+    async getUserRole(): Promise<string> {
+        return await this.controller.getUserRole();
+    }
 }
 
 export function createAccountsAction(baseUrl: string, client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) {
