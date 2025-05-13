@@ -107,16 +107,16 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
     const userRole = await getUserRole();
     const isAgencyRole = AccountRoles.agencyRoles.has(userRole);
     
-    const { data, error } = await supabase
-      .rpc('get_unread_order_message_counts', { 
-        p_user_id: userId,
-        p_is_agency_role: isAgencyRole
-      });
+    // const { data, error } = await supabase
+    //   .rpc('get_unread_order_message_counts', { 
+    //     p_user_id: userId,
+    //     p_is_agency_role: isAgencyRole
+    //   });
     
-    if (error) {
-      console.error('Error fetching unread counts:', error);
-      throw error;
-    }
+    // if (error) {
+    //   console.error('Error fetching unread counts:', error);
+    //   throw error;
+    // }
 
     const { data: chatData, error: chatError } = await supabase
       .rpc('get_unread_chat_message_counts', {
@@ -129,12 +129,13 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
       throw chatError;
     }
     
-    if (error) {
-      console.error('Error fetching unread counts:', error);
-      throw error;
-    }
+    // if (error) {
+    //   console.error('Error fetching unread counts:', error);
+    //   throw error;
+    // }
     
-    return [...(data || []), ...(chatData || [])];
+    // return [...(data || []), ...(chatData || [])];
+    return [...(chatData || [])];
   }, [userId, supabase]);
 
   // Use React Query to fetch and cache unread counts
