@@ -25,6 +25,20 @@ export interface UserWorkspace {
     slug: string | null;
     picture_url: string | null;
     id: string | null;
+    statuses: {
+      agency_id: string | null;
+      created_at: string | null;
+      deleted_on: string | null;
+      id: number | null;
+      position: number | null;
+    }[]
+    tags: {
+      color: string | null;
+      created_at: string | null;
+      deleted_on: string | null;
+      id: string | null;
+      name: string | null;
+    }[]
   };
 
   agency: {
@@ -32,6 +46,24 @@ export interface UserWorkspace {
     slug: string | null;
     picture_url: string | null;
     id: string | null;
+    statuses: {
+      agency_id: string | null;
+      created_at: string | null;
+      deleted_on: string | null;
+      id: number | null;
+      position: number | null;
+      status_color: string | null;
+      status_name: string | null;
+    }[]
+    tags: {
+      color: string | null;
+      created_at: string | null;
+      deleted_on: string | null;
+      id: string | null;
+      name: string | null;
+      organization_id: string | null;
+      updated_at: string | null;
+    }[]
   };
   pinnedOrganizations: {
     id: string | null;
