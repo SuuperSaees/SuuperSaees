@@ -17,7 +17,7 @@ interface ServiceButtonTriggersProps {
   isPending: boolean;
   currentUserRole: string;
 }
-export function ServiceButtonTriggers({
+export default function ServiceButtonTriggers({
   serviceOptions,
   clientOrganizationId,
   isPending,

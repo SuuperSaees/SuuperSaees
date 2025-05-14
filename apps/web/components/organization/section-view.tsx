@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
 import { useTranslation } from 'react-i18next';
+import dynamic from 'next/dynamic';
 
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
 
@@ -15,12 +16,20 @@ import { EmbedTabsContainer } from './embed-tabs';
 
 import ButtonPinOrganization from './button-pin-organization';
 import FileSection from './files';
-import MemberButtonTriggers from './member-button-triggers';
-import MemberSection from './members';
 import OrdersSection from './orders';
-import { ServiceButtonTriggers } from './service-button-triggers';
 import ServiceSection from './services';
 import { Spinner } from '@kit/ui/spinner';
+
+// Dynamically import button components
+const MemberButtonTriggers = dynamic(() => import('./member-button-triggers'), {
+  loading: () => <Spinner className="w-4 h-4" />,
+  ssr: false
+});
+
+const ServiceButtonTriggers = dynamic(() => import('./service-button-triggers'), {
+  loading: () => <Spinner className="w-4 h-4" />,
+  ssr: false
+});
 
 /**
  * @description This component is used to display the navigation tabs for the account settings page.
@@ -80,23 +89,27 @@ function SectionView({
     ['orders', null],
     [
       'members',
-      <MemberButtonTriggers
-        clientOrganizationId={clientOrganizationId}
-        currentUserRole={currentUserRole}
-        key={'members'}
-        search={search}
-        setSearch={setSearch}
-      />,
+      activeTab === 'members' ? (
+        <MemberButtonTriggers
+          clientOrganizationId={clientOrganizationId}
+          currentUserRole={currentUserRole}
+          key={'members'}
+          search={search}
+          setSearch={setSearch}
+        />
+      ) : null,
     ],
     [
       'services',
-      <ServiceButtonTriggers
-        key={'services'}
-        serviceOptions={serviceOptions}
-        clientOrganizationId={clientOrganizationId}
-        isPending={services.isPending}
-        currentUserRole={currentUserRole}
-      />,
+      activeTab === 'services' ? (
+        <ServiceButtonTriggers
+          key={'services'}
+          serviceOptions={serviceOptions}
+          clientOrganizationId={clientOrganizationId}
+          isPending={services.isPending}
+          currentUserRole={currentUserRole}
+        />
+      ) : null,
     ],
     ['files', null],
     ['reviews', null],
@@ -169,7 +182,7 @@ function SectionView({
     ],
     [
       'members',
-      <MemberSection
+      <MemberButtonTriggers
         currentUserRole={currentUserRole}
         key={'members'}
         search={search}
