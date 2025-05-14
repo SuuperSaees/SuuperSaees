@@ -63,7 +63,7 @@ function SectionView({
     queryKey: ['organization-embeds', clientOrganizationId],
     queryFn: async () => await getEmbeds(clientOrganizationId),
     // Always fetch embeds to check if we need to show embed tabs
-    enabled: true,
+    // enabled: true,
   });
 
   const embeds = (embedsQuery.data ?? []).filter(embed => embed.location === 'tab')

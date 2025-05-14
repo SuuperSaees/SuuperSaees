@@ -13,9 +13,7 @@ import { AgencyStatusesProvider } from '~/(main)/orders/components/context/agenc
 import { OrdersProvider } from '~/(main)/orders/components/context/orders-context';
 import ProjectsBoard from '~/(main)/orders/components/projects-board';
 import { useOrderStats } from '~/(main)/orders/hooks/use-order-stats';
-import { getTags } from '~/server/actions/tags/tags.action';
 import { getOrdersByOrganizationId } from '~/team-accounts/src/server/actions/orders/get/get-order';
-import { getAgencyStatuses } from '~/team-accounts/src/server/actions/statuses/get/get-agency-statuses';
 
 import CardStats from '../../app/components/ui/card-stats';
 import { SkeletonOrdersSection } from './skeleton-orders-section';
@@ -33,7 +31,7 @@ export default function OrdersSection({
   const client = useSupabase();
   const { t } = useTranslation('statistics');
 
-  const { workspace, organization } = useUserWorkspace();
+  const { workspace, organization, agency } = useUserWorkspace();
   const agencySlug = organization?.slug;
 
   const queryKey = ['orders', organizationId];
@@ -56,12 +54,8 @@ export default function OrdersSection({
     'agency_member',
   ]);
 
-  const agencyStatusesQuery = useQuery({
-    queryKey: ['statuses'],
-    queryFn: async () => await getAgencyStatuses(agencyId),
-  });
 
-  const agencyStatuses = agencyStatusesQuery?.data ?? [];
+  const agencyStatuses = validAgencyRoles.has(workspace?.role ?? '') ? organization?.statuses : agency?.statuses
 
   const agencyMembersQuery = useQuery({
     queryKey: ['agencyMembers', agencySlug],
@@ -74,13 +68,9 @@ export default function OrdersSection({
 
   const agencyMembers = agencyMembersQuery?.data?.data ?? [];
 
-  const tagsQuery = useQuery({
-    queryKey: ['tags'],
-    queryFn: async () =>
-      await getTags(agencyId),
-  });
 
-  const tags = tagsQuery?.data ?? [];
+
+  const tags = (validAgencyRoles.has(workspace?.role ?? '') ? organization?.tags : agency?.tags) ?? []
 
   // Transform agencyMembers to match the expected User.Response type
 
@@ -102,9 +92,7 @@ export default function OrdersSection({
 
   if (
     organizationOrdersQuery.isLoading ||
-    agencyStatusesQuery.isLoading ||
-    agencyMembersQuery.isLoading ||
-    tagsQuery.isLoading
+    agencyMembersQuery.isLoading
   ) {
     return <SkeletonOrdersSection />;
   }
