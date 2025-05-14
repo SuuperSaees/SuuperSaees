@@ -45,7 +45,6 @@ export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, clas
   if (!isDialog) {
     return (
         <Image
-          priority
           src={imageError ? '/images/fallbacks/image-fallback.webp' : src}
           alt={fileName}
           width={150}
