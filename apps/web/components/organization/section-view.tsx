@@ -19,6 +19,7 @@ import FileSection from './files';
 import OrdersSection from './orders';
 import ServiceSection from './services';
 import { Spinner } from '@kit/ui/spinner';
+import MemberSection from './members';
 
 // Dynamically import button components
 const MemberButtonTriggers = dynamic(() => import('./member-button-triggers'), {
@@ -182,7 +183,7 @@ function SectionView({
     ],
     [
       'members',
-      <MemberButtonTriggers
+      <MemberSection
         currentUserRole={currentUserRole}
         key={'members'}
         search={search}
