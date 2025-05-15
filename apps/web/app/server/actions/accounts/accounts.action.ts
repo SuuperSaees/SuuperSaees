@@ -4,6 +4,7 @@ import { createAccountsAction } from "./accounts";
 import { unstable_cache } from "next/cache";
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { revalidateTag } from 'next/cache';
+import { getLogger } from "@kit/shared/logger";
 
 // function getAccountsAction(host?: string) {
 //     return createAccountsAction(host ?? process.env.NEXT_PUBLIC_SITE_URL as string);
@@ -11,25 +12,30 @@ import { revalidateTag } from 'next/cache';
 
 // Function not cacheable that obtains the Supabase client
 export async function getSession() {
+    const logger = await getLogger();
     const client = getSupabaseServerComponentClient();
     const adminClient = getSupabaseServerComponentClient({ admin: true });
-    return getSessionWithClients(client, adminClient);
+    const accountSession = await getSessionWithClients(client, adminClient);
+    logger.info(accountSession, 'new session obtained...');
+    return accountSession;
 }
 
 // Function cacheable that receives the clients as arguments
 const getSessionWithClients = unstable_cache(
     async (client, adminClient) => {
+
         const accountsAction = createAccountsAction(
             process.env.NEXT_PUBLIC_SITE_URL as string, 
             client, 
             adminClient
         );
-        return await accountsAction.getSession();
+        const accountSession = await accountsAction.getSession();
+        return accountSession;
     }, 
     ['session-cache-key'], 
     {
         tags: ['session-cache'],
-        revalidate: 18000
+        revalidate: process.env.NEXT_PUBLIC_IS_PROD ? 18000: 10
     }
 );
 
