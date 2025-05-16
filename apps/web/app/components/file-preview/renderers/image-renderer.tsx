@@ -45,13 +45,13 @@ export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, clas
   if (!isDialog) {
     return (
         <Image
-          priority
           src={imageError ? '/images/fallbacks/image-fallback.webp' : src}
           alt={fileName}
           width={150}
           height={150}
           className={cn('aspect-square object-contain bg-gray-200 rounded-lg w-[150px] h-[150px]',)}
           onError={() => setImageError(true)}
+          unoptimized
         />
     );
   }
