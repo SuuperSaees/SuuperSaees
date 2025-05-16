@@ -13,12 +13,14 @@ export const SetPasswordForm = () => {
   const callbackPath = `${isProd ? 'https://' : 'http://'}${baseUrl}`;
   return (
     <AuthLayout authDetails={authDetails} isLoading={isLoading}>
-        <span className="text-3xl font-bold text-black">
+      <div className='flex flex-col w-full gap-6 mb-6'>
+      <span className="text-3xl font-bold text-black">
           {t('updatePassword.title')}
         </span>
 
         <span>{t('updatePassword.description')}</span>
-        <UpdatePasswordFormContainer callbackPath={`${callbackPath}home`} className={'w-full self-center'} />
+      </div>
+        <UpdatePasswordFormContainer callbackPath={`${callbackPath}/home`} className={'w-full self-center'} />
                 {/* Or sign-up */}
                 <div className="flex w-full flex-col items-center gap-3 text-sm">
           <div className="flex w-full items-center justify-center gap-8">
@@ -30,7 +32,7 @@ export const SetPasswordForm = () => {
           </div>
           <div className="flex items-center gap-2">
             <span>{t('updatePassword.or.question')}</span>
-            <a href={`${callbackPath}home`} className="underline">
+            <a href={`${callbackPath}/home`} className="underline">
               {t('updatePassword.or.link')}
             </a>
           </div>
