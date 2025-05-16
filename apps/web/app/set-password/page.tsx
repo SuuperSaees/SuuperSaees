@@ -2,8 +2,8 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 
-import { UpdatePasswordFormContainer } from '../../../../../packages/features/accounts/src/components/personal-account-settings/password/update-password-container';
-import { getDomainByUserId } from '../../../../../packages/multitenancy/utils/get/get-domain';
+import { UpdatePasswordFormContainer } from '../../../../packages/features/accounts/src/components/personal-account-settings/password/update-password-container';
+import { getDomainByUserId } from '../../../../packages/multitenancy/utils/get/get-domain';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
