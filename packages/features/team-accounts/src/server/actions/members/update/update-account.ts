@@ -282,6 +282,7 @@ export const updateUserPassword = async(
   password: string,
   databaseClient?: SupabaseClient<Database>,
   adminActivated = false,
+  domain: string,
 ) => {
   databaseClient =
     databaseClient ??
@@ -299,6 +300,12 @@ export const updateUserPassword = async(
       userId,
       {password: password}
     )
+
+    await databaseClient.rpc('update_user_credentials', {
+      p_email: data?.user?.email ?? '',
+      p_domain: domain,
+      p_password:  '',
+    });
 
     if (error){
       throw new Error(
