@@ -4,6 +4,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { useRealtime } from './use-realtime';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
+
 // import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 // import { AccountRoles } from '~/lib/account.types';
 
@@ -104,6 +105,7 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
   const fetchUnreadCounts = useCallback( (): Promise<UnreadMessageCount[]> => {
     // if (!userId) return [];
     
+
     // const isAgencyRole = AccountRoles.agencyRoles.has(workspace?.role ?? '');
       
     // const { data, error } = await supabase
@@ -112,19 +114,22 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
     //     p_is_agency_role: isAgencyRole
     //   });
     
+
     // if (error) {
     //   console.error('Error fetching unread counts:', error);
     //   throw error;
     // }
+
     
     return Promise.resolve([]);
   }, []);
+
 
   // Use React Query to fetch and cache unread counts
   const { data: unreadCounts = [] } = useQuery<UnreadMessageCount[]>({
     queryKey: UNREAD_COUNTS_QUERY_KEY,
     queryFn: fetchUnreadCounts,
-    enabled: !!userId,
+    enabled: false,
     staleTime: 30 * 1000, // Consider data fresh for 30 seconds
   });
 
