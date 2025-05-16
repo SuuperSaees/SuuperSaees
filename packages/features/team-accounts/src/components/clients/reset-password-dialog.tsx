@@ -35,10 +35,8 @@ function ResetPasswordDialog({ userId, setIsOpen, isOpen }: ResetPasswordDialogP
   });
   
   const domain = (typeof window !== 'undefined' 
-    ? window.location.hostname
+    ? window.location.host
     : '');
-
-  console.log('domain', domain);
 
   const mutateUser = useMutation({
     mutationFn: async () => {
