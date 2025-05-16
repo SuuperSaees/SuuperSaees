@@ -1,6 +1,7 @@
 import { cookies, headers } from 'next/headers';
 
 import { getOrganizationSettings } from 'node_modules/@kit/team-accounts/src/server/actions/organizations/get/get-organizations';
+
 import { UserWorkspaceContextProvider } from '@kit/accounts/components';
 import { If } from '@kit/ui/if';
 import {
@@ -13,6 +14,7 @@ import { Toaster } from '@kit/ui/sonner';
 
 // import { cn } from '@kit/ui/utils';
 import { AppLogo } from '~/components/app-logo';
+import { RootProviders } from '~/components/root-providers';
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
 // import { heading, sans } from '~/lib/fonts';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
@@ -23,7 +25,6 @@ import { HomeMobileNavigation } from './home/(user)/_components/home-mobile-navi
 import { HomeSidebar } from './home/(user)/_components/home-sidebar';
 import { loadUserWorkspace } from './home/(user)/_lib/server/load-user-workspace';
 import { TimeTrackerProvider } from './orders/[id]/context/time-tracker-context';
-import { RootProviders } from '~/components/root-providers';
 
 // WARNING: Thse use of functions like headers and cookies that are dynamic functions could lead to cache inconsistencies,
 // since using them can opt out the Full route cache and the route will be rendered on each request (dynamically rendered).
@@ -32,48 +33,57 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const style = getLayoutStyle();
-  const workspace = await loadUserWorkspace();
 
+  
   const pathname = headers().get('x-current-path') ?? '/';
   const exlusionPaths = ['/set-password', '/checkout'];
+  const style = getLayoutStyle();
+  const workspace = exlusionPaths.includes(pathname) ? null : await loadUserWorkspace();
   const theme = getTheme();
   const { language } = await createI18nServerInstance();
   const organizationSettings = await loadOrganizationSettings();
 
   if (exlusionPaths.includes(pathname)) {
-    return <div className="h-screen w-screen">{children}</div>;
+    return (
+      <RootProviders
+        theme={theme}
+        lang={language}
+        organizationSettings={organizationSettings}
+      >
+        <div className="h-screen w-screen">{children}</div>
+      </RootProviders>
+    );
   }
 
   return (
     <>
       <RootProviders
-          theme={theme}
-          lang={language}
-          organizationSettings={organizationSettings}
-        >
-      <Page style={style}>
-        <PageNavigation>
-          <If condition={style === 'header'}>
-            <HomeMenuNavigation workspace={workspace} />
-          </If>
+        theme={theme}
+        lang={language}
+        organizationSettings={organizationSettings}
+      >
+        <Page style={style}>
+          <PageNavigation>
+            <If condition={style === 'header'}>
+              <HomeMenuNavigation workspace={workspace} />
+            </If>
 
-          <If condition={style === 'sidebar'}>
-            <HomeSidebar workspace={workspace} />
-          </If>
-        </PageNavigation>
+            <If condition={style === 'sidebar'}>
+              <HomeSidebar workspace={workspace} />
+            </If>
+          </PageNavigation>
 
-        <PageMobileNavigation className={'flex items-center justify-between'}>
-          <AppLogo />
-          <HomeMobileNavigation workspace={workspace} />
-        </PageMobileNavigation>
+          <PageMobileNavigation className={'flex items-center justify-between'}>
+            <AppLogo />
+            <HomeMobileNavigation workspace={workspace} />
+          </PageMobileNavigation>
 
-        <UserWorkspaceContextProvider value={workspace}>
-          <TimeTrackerProvider>{children}</TimeTrackerProvider>
-        </UserWorkspaceContextProvider>
-      </Page>
+          <UserWorkspaceContextProvider value={workspace}>
+            <TimeTrackerProvider>{children}</TimeTrackerProvider>
+          </UserWorkspaceContextProvider>
+        </Page>
 
-      <Toaster richColors={false} />
+        <Toaster richColors={false} />
       </RootProviders>
     </>
   );
@@ -99,7 +109,9 @@ export default async function RootLayout({
 // }
 
 function getTheme() {
-  const cookieValue = (cookies() as { get(name: string): { value: string } | undefined }).get('theme')?.value;
+  const cookieValue = (
+    cookies() as { get(name: string): { value: string } | undefined }
+  ).get('theme')?.value;
   return cookieValue ?? 'light';
 }
 
