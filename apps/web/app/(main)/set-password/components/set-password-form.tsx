@@ -1,6 +1,6 @@
 'use client';
 
-import { UpdatePasswordFormContainer } from '../../../../../../packages/features/accounts/src/components/personal-account-settings/password/update-password-container';
+import { UpdatePasswordFormContainer } from './update-password-form';
 import { AuthLayout } from '~/(authentication)/auth/components/auth-layout';
 import { useAuthDetails } from '@kit/auth/sign-in';
 import { useTranslation } from 'react-i18next';
