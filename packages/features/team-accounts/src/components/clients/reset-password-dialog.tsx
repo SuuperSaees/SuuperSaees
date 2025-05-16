@@ -33,10 +33,16 @@ function ResetPasswordDialog({ userId, setIsOpen, isOpen }: ResetPasswordDialogP
     message: t('editUser.passwordsNotEqual'),
     path: ['confirmPassword'],
   });
+  
+  const domain = (typeof window !== 'undefined' 
+    ? window.location.hostname
+    : '');
+
+  console.log('domain', domain);
 
   const mutateUser = useMutation({
     mutationFn: async () => {
-      await updateUserPassword(userId, newPassword, undefined, true);
+      await updateUserPassword(userId, newPassword, undefined, true, domain);
     },
     onSuccess: () => {
       toast.success(t('success'), {
