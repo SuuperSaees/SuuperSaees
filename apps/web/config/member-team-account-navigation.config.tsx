@@ -50,29 +50,30 @@ const routes = [
     Icon: <Layers className={iconClasses} />,
   },
   {
-    type: 'groups',
+    type: 'group',
     label: 'common:catalogName',
     Icon: <Package className={iconClasses} />,
     path: pathsConfig.app.catalog,
     collapsible: true,
     collapsed: true,
-    groups: [
+    children: [
       {
-        type: 'group',
+        type: 'route',
         label: 'common:catalogProductName',
+        path: pathsConfig.app.catalogProduct,
         collapsible: true,
         collapsed: true,
-        Icon: <Package className={'text-transparent'} />,
-        children: [
-          {
-            label: 'common:catalogWholesaleName',
-            path: pathsConfig.app.catalogWholesale,
-          },
-          {
-            label: 'common:catalogPrivateLabelName',
-            path: pathsConfig.app.catalogPrivateLabel,
-          },
-        ],
+        // Icon: <Package className={'text-transparent'} />,
+        // children: [
+        //   // {
+        //   //   label: 'common:catalogWholesaleName',
+        //   //   path: pathsConfig.app.catalogWholesale,
+        //   // },
+        //   // {
+        //   //   label: 'common:catalogPrivateLabelName',
+        //   //   path: pathsConfig.app.catalogPrivateLabel,
+        //   // },
+        // ],
       },
       {
         type: 'route',

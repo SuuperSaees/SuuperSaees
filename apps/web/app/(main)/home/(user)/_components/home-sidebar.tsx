@@ -51,8 +51,8 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
 
   // Get additional settings with type assertion for the UI
   const catalogProviderUrl = Boolean(settings.catalog_provider_url);
-  // const catalogProductUrl = Boolean(settings.catalog_product_url);
-  
+  const catalogProductUrl = Boolean(settings.catalog_product_url);
+
   const toolCopyListUrl = Boolean(settings.tool_copy_list_url);
   const partenersUrl = Boolean(settings.parteners_url);
   const wholesaleUrl = Boolean(settings.catalog_product_wholesale_url);
@@ -60,7 +60,7 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
   const trainingUrl = Boolean(settings.training_url);
   const sourcingChinaUrl = Boolean(settings.catalog_sourcing_china_url);
   const calendarUrl = Boolean(settings.calendar_url);
-  const catalogProductUrl = wholesaleUrl || privateLabelUrl;
+  // const catalogProductUrl = wholesaleUrl || privateLabelUrl;
 
   return (
     <ThemedSidebar className="text-sm scrollbar-on-hover">
