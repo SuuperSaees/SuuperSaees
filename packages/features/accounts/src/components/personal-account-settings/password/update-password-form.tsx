@@ -72,9 +72,11 @@ const PasswordField = ({
 export const UpdatePasswordForm = ({
   user,
   callbackPath,
+  className,
 }: {
   user: User;
   callbackPath: string;
+  className?: string;
 }) => {
   const { t } = useTranslation('account');
   const updateUserMutation = useUpdateUser();
@@ -132,11 +134,7 @@ export const UpdatePasswordForm = ({
         onSubmit={form.handleSubmit(updatePasswordCallback)}
         className="flex w-full flex-col items-center gap-6 text-center text-gray-900"
       >
-        <span className="text-3xl font-bold text-black">
-          {t('updatePassword.title')}
-        </span>
 
-        <span>{t('updatePassword.description')}</span>
         <If condition={passwordUpdated}>
           <AuthSuccessAlert
             title={t('updatePassword.success.title')}
@@ -190,32 +188,19 @@ export const UpdatePasswordForm = ({
                 );
               }}
             />
+            <div className='flex flex-col w-full'>
             <ThemedButton
               disabled={updateUserMutation.isPending}
-              className="w-full transition-all duration-300 hover:-translate-y-0.5"
+              className={`w-64 self-start transition-all duration-300 hover:-translate-y-0.5 ${className}`} 
             >
               {updateUserMutation.isPending && <Spinner className="h-4 w-4" />}
               {t('updatePasswordSubmitLabel')}
             </ThemedButton>
+            </div>
           </>
         )}
 
-        {/* Or sign-up */}
-        <div className="flex w-full flex-col items-center gap-3 text-sm">
-          <div className="flex w-full items-center justify-center gap-8">
-            <div className="h-[1px] w-full bg-gray-200"></div>
-            <span className="text-gray-500">
-              {t('updatePassword.or.title')}
-            </span>
-            <div className="h-[1px] w-full bg-gray-200"></div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>{t('updatePassword.or.question')}</span>
-            <a href={callbackPath} className="underline">
-              {t('updatePassword.or.link')}
-            </a>
-          </div>
-        </div>
+
       </form>
     </Form>
   );

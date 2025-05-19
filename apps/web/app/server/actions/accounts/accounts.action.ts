@@ -5,6 +5,8 @@ import { unstable_cache } from "next/cache";
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { revalidateTag } from 'next/cache';
 import { getLogger } from "@kit/shared/logger";
+import { SupabaseClient } from '@supabase/supabase-js';
+import { Database } from '../../../../lib/database.types';
 
 // function getAccountsAction(host?: string) {
 //     return createAccountsAction(host ?? process.env.NEXT_PUBLIC_SITE_URL as string);
@@ -21,9 +23,24 @@ export async function getSession() {
 }
 
 // Function cacheable that receives the clients as arguments
-const getSessionWithClients = unstable_cache(
-    async (client, adminClient) => {
-
+const getSessionWithClients = process.env.NEXT_PUBLIC_IS_PROD === 'true'
+    ? unstable_cache(
+        async (client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) => {
+            const accountsAction = createAccountsAction(
+                process.env.NEXT_PUBLIC_SITE_URL as string, 
+                client, 
+                adminClient
+            );
+            const accountSession = await accountsAction.getSession();
+            return accountSession;
+        }, 
+        ['session-cache-key'], 
+        {
+            tags: ['session-cache'],
+            revalidate: 18000
+        }
+    )
+    : async (client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) => {
         const accountsAction = createAccountsAction(
             process.env.NEXT_PUBLIC_SITE_URL as string, 
             client, 
@@ -31,13 +48,7 @@ const getSessionWithClients = unstable_cache(
         );
         const accountSession = await accountsAction.getSession();
         return accountSession;
-    }, 
-    ['session-cache-key'], 
-    {
-        tags: ['session-cache'],
-        revalidate: process.env.NEXT_PUBLIC_IS_PROD ? 18000: 10
-    }
-);
+    };
 
 export async function revalidateSession() {
     await Promise.resolve();
@@ -52,18 +63,27 @@ export async function getUserRole() {
     return getUserRoleWithClients(client, adminClient);
 }
 
-const getUserRoleWithClients = unstable_cache(
-    async (client, adminClient) => {
+const getUserRoleWithClients = process.env.NEXT_PUBLIC_IS_PROD === 'true'
+    ? unstable_cache(
+        async (client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) => {
+            const accountsAction = createAccountsAction(
+                process.env.NEXT_PUBLIC_SITE_URL as string, 
+                client, 
+                adminClient
+            );
+            return await accountsAction.getUserRole();
+        }, 
+        ['user-role-cache-key'], 
+        {
+            tags: ['user-role-cache'],
+            revalidate: 86400
+        }
+    )
+    : async (client: SupabaseClient<Database>, adminClient: SupabaseClient<Database>) => {
         const accountsAction = createAccountsAction(
             process.env.NEXT_PUBLIC_SITE_URL as string, 
             client, 
             adminClient
         );
         return await accountsAction.getUserRole();
-    }, 
-    ['user-role-cache-key'], 
-    {
-        tags: ['user-role-cache'],
-        revalidate: 86400
-    }
-);
+    };

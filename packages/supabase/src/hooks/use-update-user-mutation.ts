@@ -39,15 +39,38 @@ export function useUpdateUser() {
       throw responseUpdateUserCredentials.error;
     }
 
-    const response = await client.auth.updateUser(params, {
-      emailRedirectTo: redirectTo,
+    const verifyUserCredentials = await client.rpc('verify_user_credentials', {
+      p_domain: domain,
+      p_email: email,
+      p_password: params.password ?? '',
     });
 
-    if (response.error) {
-      throw response.error;
+    if (verifyUserCredentials.error) {
+      throw verifyUserCredentials.error;
     }
 
-    return response.data;
+    if (verifyUserCredentials.data.is_primary) {
+      const response = await client.auth.updateUser(params, {
+        emailRedirectTo: redirectTo,
+      });
+      if (response.error) {
+        throw response.error;
+      }
+      return response.data;
+    } else if(email !== params.email) {
+      const response = await client.auth.updateUser({
+        email: params.email,
+      }, {
+        emailRedirectTo: redirectTo,
+      });
+      if (response.error) {
+        throw response.error;
+      }
+      return response.data;
+    }
+
+    return verifyUserCredentials.data;
+
   };
 
   return useMutation({

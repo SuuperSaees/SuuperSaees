@@ -6,7 +6,7 @@ import { useUser } from '@kit/supabase/hooks/use-user';
 import { Alert } from '@kit/ui/alert';
 import { LoadingOverlay } from '@kit/ui/loading-overlay';
 
-import { UpdatePasswordForm } from './update-password-form';
+import { UpdatePasswordForm } from 'node_modules/@kit/accounts/src/components/personal-account-settings/password/update-password-form';
 
 export function UpdatePasswordFormContainer(
   props: React.PropsWithChildren<{
