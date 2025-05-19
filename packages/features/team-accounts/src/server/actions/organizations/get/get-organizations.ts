@@ -87,6 +87,7 @@ export const getOrganizationSettingsByOrganizationId = async (
     'catalog_product_private_label_url',
     'training_url',
     'catalog_sourcing_china_url',
+    'catalog_product_url',
     'calendar_url',
     'auth_background_url',
   ],
