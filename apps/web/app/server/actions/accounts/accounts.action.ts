@@ -6,7 +6,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { revalidateTag } from 'next/cache';
 import { getLogger } from "@kit/shared/logger";
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '~/lib/database.types';
+import { Database } from '../../../../lib/database.types';
 
 // function getAccountsAction(host?: string) {
 //     return createAccountsAction(host ?? process.env.NEXT_PUBLIC_SITE_URL as string);
