@@ -1859,7 +1859,7 @@ begin
     set
         email = new.email
     where
-        id = new.id
+        id = new.id;
     return new;
 
 end;
