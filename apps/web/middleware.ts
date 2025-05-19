@@ -265,6 +265,18 @@ function getPatterns() {
       },
     },
     {
+      pattern: new URLPattern({ pathname: '/success/*?' }),
+      handler: () => {
+        return NextResponse.next();
+      },
+    },
+    {
+      pattern: new URLPattern({ pathname: '/cancel/*?' }),
+      handler: () => {
+        return NextResponse.next();
+      },
+    },
+    {
       pattern: new URLPattern({ pathname: '/*?' }),
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
