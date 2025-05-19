@@ -89,8 +89,7 @@ export function CustomSidebarNavigation({
 
         if (
           item.label === 'common:catalogName' &&
-          !catalogProviderUrl &&
-          !catalogProductUrl
+          (!catalogProviderUrl && !catalogProductUrl)
         ) {
           return null;
         } else if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
@@ -116,7 +115,7 @@ export function CustomSidebarNavigation({
               collapsed={item.collapsed}
               Icon={item.Icon}
               className={item.className}
-              path={item.path}
+              path={item.path ?? ''}
               menu={item.menu}
             >
               {item.children?.map((child) => {
@@ -132,7 +131,9 @@ export function CustomSidebarNavigation({
                   (child.label === 'common:catalogWholesaleName' &&
                     !catalogProductWholesaleUrl) ||
                   (child.label === 'common:catalogPrivateLabelName' &&
-                    !catalogProductPrivateLabelUrl)
+                    !catalogProductPrivateLabelUrl) ||
+                  (child.label === 'common:catalogSourcingChinaName' &&
+                    !catalogSourcingChinaUrl)
                 ) {
                   return null;
                 }

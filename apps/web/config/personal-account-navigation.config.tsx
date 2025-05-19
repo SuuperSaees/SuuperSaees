@@ -56,7 +56,6 @@ const routes = [
     type: 'group',
     label: 'common:catalogName',
     Icon: <Package className={iconClasses} />,
-    path: pathsConfig.app.catalog,
     collapsible: true,
     collapsed: true,
     children: [
@@ -65,7 +64,7 @@ const routes = [
         label: 'common:catalogProductName',
         collapsible: true,
         collapsed: true,
-        Icon: <Package className={'text-transparent'} />,
+        // Icon: <Package className={'text-transparent'} />,
         path: pathsConfig.app.catalogProduct,
         // children: [
         //   // {

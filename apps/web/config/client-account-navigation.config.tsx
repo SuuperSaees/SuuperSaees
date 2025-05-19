@@ -76,7 +76,7 @@ const routes = [
         path: pathsConfig.app.catalogProduct,
         collapsible: true,
         collapsed: true,
-        Icon: <Package className={'text-transparent'} />,
+        // Icon: <Package className={'text-transparent'} />,
         // children: [
         //   // {
         //   //   label: 'common:catalogWholesaleName',
