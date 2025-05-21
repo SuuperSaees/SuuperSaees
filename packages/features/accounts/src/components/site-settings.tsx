@@ -1,10 +1,7 @@
-
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
-import { Trans } from '@kit/ui/trans';
 
 import UpdateImage from '../../../../../apps/web/app/components/ui/update-image';
-import { Account } from '../../../../../apps/web/lib/account.types';
 import { useOrganizationSettings } from '../context/organization-settings-context';
 import UpdateAccountColorBrand from './personal-account-settings/update-account-color-brand';
 import { UpdateAccountOrganizationName } from './personal-account-settings/update-account-organization-name';
@@ -12,29 +9,31 @@ import { UpdateAccountOrganizationSenderEmailAndSenderDomain } from './personal-
 import { UpdateAccountOrganizationSenderName } from './personal-account-settings/update-account-organization-sender-name';
 import UpdateAccountOrganizationSidebar from './personal-account-settings/update-account-organization-sidebar';
 import { UpdateAccountOrganizationDomain } from './personal-account-settings/update-account-organization-domain';
-
+import { useUserWorkspace } from '../hooks/use-user-workspace';
+import { useTranslation } from 'react-i18next';
 interface SiteSettingsProps {
   role: string;
   handleChangeLanguage: (locale: string) => void;
-  user: Account.Type & { organization_id: string };
-  accountStripe: AccountStripe;
+  user: {
+    id: string;
+    email?: string | null;
+    picture_url?: string | null;
+    // Add only the fields you actually use in SiteSettings
+  };
 }
-
-type AccountStripe = {
-  id: string;
-  charges_enabled: boolean;
-};
 
 function SiteSettings({
   role,
   handleChangeLanguage,
-  user,
 }: SiteSettingsProps) {
   const { logo_url, logo_dark_url, updateOrganizationSetting, favicon_url, language } =
     useOrganizationSettings();
+  const { organization } = useUserWorkspace();
+
+  const {t} = useTranslation('account');
 
   const bucketStorage = {
-    id: user?.organization_id ?? '',
+    id: organization?.id ?? '',
     name: 'organization',
     identifier: '',
   };
@@ -46,7 +45,7 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandName'} />
+                {t('brandName')}
               </p>
             </div>
 
@@ -55,7 +54,7 @@ function SiteSettings({
           <Separator />
           <div className="flex justify-between">
             <p className="mr-7 w-[45%] whitespace-nowrap font-bold text-gray-700">
-              <Trans i18nKey={'accounts:language'} />
+              {t('language')}
             </p>
             <LanguageSelector onChange={handleChangeLanguage} defaultLanguage={language}/>
           </div>
@@ -63,7 +62,7 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandColor'} />
+                {t('brandColor')}
               </p>
             </div>
             <div className="w-[100%]">
@@ -73,7 +72,7 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandSidebar'} />
+                {t('brandSidebar')}
               </p>
             </div>
             <div className="w-[100%]">
@@ -84,15 +83,15 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandLogo'} />
+                {t('brandLogo')}
               </p>
               <p className="text-wrap max-w-[300px]">
-                <Trans i18nKey={'accounts:brandLogoDescription'} />
+                {t('brandLogoDescription')}
               </p>
             </div>
             <div className="w-[100%] flex flex-col gap-2">
               <p className="font-bold text-gray-700">
-                <Trans i18nKey={'accounts:lightVersion'} />
+                {t('lightVersion')}
               </p>
 
               <UpdateImage
@@ -116,7 +115,7 @@ function SiteSettings({
             <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700"></div>
             <div className="w-[100%] flex flex-col gap-2">
               <p className="font-bold text-gray-700">
-                <Trans i18nKey={'accounts:darkVersion'} />
+                {t('darkVersion')}
               </p>
 
               <UpdateImage
@@ -139,10 +138,10 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandFavicon'} />
+                {t('brandFavicon')}
               </p>
               <p className="text-wrap max-w-[300px]">
-                <Trans i18nKey={'accounts:brandFaviconDescription'} />
+                {t('brandFaviconDescription')}
               </p>
             </div>
             <div className="w-[100%] flex flex-col">
@@ -166,16 +165,16 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'account:brandDomain'} />
+                {t('brandDomain')}
               </p>
             </div>
-            <UpdateAccountOrganizationDomain organizationId={user?.organization_id ?? ''} />
+            <UpdateAccountOrganizationDomain organizationId={organization?.id ?? ''} />
           </div>
           <Separator />
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
-                <Trans i18nKey={'accounts:brandSenderName'} />
+                {t('brandSenderName')}
               </p>
             </div>
             <UpdateAccountOrganizationSenderName />
@@ -184,7 +183,7 @@ function SiteSettings({
           <div className="flex justify-between">
             <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="text-wrap font-bold">
-                <Trans i18nKey={'accounts:brandSenderEmailAndDomain'} />
+                {t('brandSenderEmailAndDomain')}
               </p>
             </div>
             <UpdateAccountOrganizationSenderEmailAndSenderDomain />

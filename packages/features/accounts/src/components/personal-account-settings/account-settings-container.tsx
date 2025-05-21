@@ -1,31 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSupabase } from '@kit/supabase/hooks/use-supabase';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { LoadingOverlay } from '@kit/ui/loading-overlay';
 import { Tabs, TabsContent, TabsList } from '@kit/ui/tabs';
-import { Trans } from '@kit/ui/trans';
-import type { Account } from '../../../../../../apps/web/lib/account.types';
-import type { Database } from '../../../../../../apps/web/lib/database.types';
-import { getUserRole } from '../../../../team-accounts/src/server/actions/members/get/get-member-account';
 import { ThemedTabTrigger } from '../ui/tab-themed-with-settings';
 import BillingContainerConfig from './billing/billing-container';
 import { useBilling } from '../../../../../../apps/web/app/(main)/home/[account]/hooks/use-billing';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { getDomainByUserId } from '../../../../../multitenancy/utils/get/get-domain';
 import { useOrganizationSettings } from '../../context/organization-settings-context'
 import { Separator } from '@kit/ui/separator';
 import ProfileSettings from '../profile-settings';
 import SiteSettings from '../site-settings';
 import { useQuery } from '@tanstack/react-query';
 import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
+import { useUserWorkspace } from '../../hooks/use-user-workspace';
 
-
-type AccountStripe = {
-  id: string;
-  charges_enabled: boolean;
-};
 
 export function PersonalAccountSettingsContainer(
   props: React.PropsWithChildren<{
@@ -43,26 +32,10 @@ export function PersonalAccountSettingsContainer(
   const { t } = useTranslation('account');
   const tab = searchParams.get('tab');
   const checkoutResult = searchParams.get('checkout');
-  const [user, setUser] = useState<Account.Type & { organization_id: string } | null>();
   const {accountBillingTab, setAccountBillingTab, upgradeSubscription } = useBilling();
-  const [role, setRole] =
-    useState<Database['public']['Tables']['roles']['Row']['name']>();
-  const client = useSupabase();
-  
-  const fetchUserAccount = async () => {
-    const { data: user, error: userAccountError } = await client
-      .from('accounts')
-      .select('*')
-      .eq('id', props.userId)
-      .single();
+  const { workspace, user } = useUserWorkspace();
+  const role = workspace.role;
 
-    if (userAccountError) console.error(userAccountError.message);
-    const organizationId = (await client.rpc('get_current_organization_id')).data;
-    return {
-      ...user,
-      organization_id: organizationId ?? '',
-    };
-  };
 
   const fetchSettings = async () => {
     const response = await getAccountSettings(props.userId);
@@ -75,58 +48,13 @@ export function PersonalAccountSettingsContainer(
     staleTime: 1000 * 60 * 5,
   });
 
-  const [accountStripe, setAccountStripe] = useState<AccountStripe>({
-    id: '',
-    charges_enabled: false,
-  });
-
-  useEffect(() => {
-    let user: Account.Type & { organization_id: string } | null;
-    void fetchUserAccount()
-      .then((data) => {
-        const typedData = data as Account.Type & { organization_id: string };
-        setUser(typedData);
-        user = typedData;
-      })
-      .then(() => {
-        const fetchAccountStripe = async () => {
-          const stripeId = user?.stripe_id as string;
-          if (stripeId) {
-            try {
-              const { domain: baseUrl } = await getDomainByUserId(user?.id ?? '', true);
-              const response = await fetch(
-                `${baseUrl}/api/stripe/get-account?accountId=${encodeURIComponent(stripeId)}`,
-                {
-                  method: 'GET',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                },
-              );
-              if (!response.ok) {
-                throw new Error('Failed to fetch account data from Stripe');
-              }
-              const data: AccountStripe = await response.clone().json();
-              setAccountStripe(data);
-            } catch (error) {
-              console.error('Error fetching account data:', error);
-            }
-          }
-        };
-
-        void fetchAccountStripe();
-      });
-  }, []);
-
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const role = await getUserRole() as string; 
         if (checkoutResult === 'success') {
           await upgradeSubscription();
           router.push('/home/settings')
         }
-        setRole(role);
         if(role !== 'agency_owner'){
           setAccountBillingTab('profile');
         }
@@ -148,10 +76,6 @@ export function PersonalAccountSettingsContainer(
       key: 'language',
       value: locale,
     });
-  }
-  //////////////////////////////////////
-  if (!user || !role) {
-    return <LoadingOverlay fullPage />;
   }
 
   return (
@@ -185,7 +109,7 @@ export function PersonalAccountSettingsContainer(
               option="subscription"
               activeTab={accountBillingTab}
             >
-              <Trans i18nKey={'account:subscription'} />
+              {t('subscriptionTab')}
             </ThemedTabTrigger>
           </TabsList>
           </div>
@@ -194,13 +118,19 @@ export function PersonalAccountSettingsContainer(
         {
           role === 'agency_owner' && (
             <TabsContent value="site">
-              <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user} accountStripe={accountStripe}/>
+              <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user}/>
             </TabsContent>
           )
         }
         
         <TabsContent value="profile">
-          <ProfileSettings user={user} userSettings={userSettings} callback={props.paths.callback} userRole={role} />
+          <ProfileSettings userId={user.id} userSettings={{
+            ...userSettings,
+            name: userSettings?.name ?? workspace?.name ?? '',
+            picture_url: userSettings?.picture_url ?? workspace?.picture_url ?? '',
+            calendar: userSettings?.calendar ?? '',
+            preferences: userSettings?.preferences ?? {},
+          }} callback={props.paths.callback} userRole={role ?? ''	} />
         </TabsContent>
         <TabsContent value="subscription">
           <BillingContainerConfig tab={tab ?? ''} />
