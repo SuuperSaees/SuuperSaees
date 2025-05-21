@@ -1,3 +1,5 @@
+'use client';
+	
 import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
 
