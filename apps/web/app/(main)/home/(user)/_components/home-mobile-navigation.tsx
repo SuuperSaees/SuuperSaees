@@ -16,16 +16,72 @@ import {
 import { Trans } from '@kit/ui/trans';
 
 import { personalAccountNavigationConfig } from '~/config/personal-account-navigation.config';
+import { useOrganizationSettings } from '../../../../../../../packages/features/accounts/src/context/organization-settings-context';
+import pathsConfig from '~/config/paths.config';
+import { shouldShowDashboardUrl } from '~/config/navigation-utils';
 
 // home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
 
 export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
+  const { workspace } = props;
   const signOut = useSignOut();
+  const userId = workspace.id;
+  const userRole = workspace.role;
+  const organizationSettings = useOrganizationSettings();
+
+  const catalogProductUrl = Boolean(organizationSettings.catalog_product_url);
+
+  const toolCopyListUrl = Boolean(organizationSettings.tool_copy_list_url);
+  const partenersUrl = Boolean(organizationSettings.parteners_url);
+  // const wholesaleUrl = Boolean(organizationSettings.catalog_product_wholesale_url);
+  // const privateLabelUrl = Boolean(organizationSettings.catalog_product_private_label_url);
+  const trainingUrl = Boolean(organizationSettings.training_url);
+  const catalogSourcingChinaUrl = Boolean(organizationSettings.catalog_sourcing_china_url);
+  const calendarUrl = Boolean(organizationSettings.calendar_url);
+  const catalogProviderUrl = Boolean(organizationSettings.catalog_provider_url);
+
+  const showDashboardUrl = shouldShowDashboardUrl(
+    organizationSettings.dashboard_url, 
+    userRole, 
+    userId
+  );
 
   const Links = personalAccountNavigationConfig.routes.map((item, index) => {
+    if (!showDashboardUrl && item.path === pathsConfig.app.dashboard) {
+      return null;
+    }
+
+    if (item.label === 'common:aiToolsName' && !toolCopyListUrl) {
+      return null;
+    } else if (item.label === 'common:partnersName' && !partenersUrl) {
+      return null;
+    } else if(item.label === 'common:trainingName' && !trainingUrl){
+      return null;
+    } else if (item.label === 'common:calendarName' && !calendarUrl) {
+      return null;
+    }
+
     if ('children' in item) {
       return item.children.map((child) => {
+        if (
+          (child.label === 'common:catalogProviderName' &&
+            !catalogProviderUrl) ||
+          (child.label === 'common:catalogProductName' &&
+            !catalogProductUrl) ||
+          (child.label === 'common:toolCopyListName' &&
+            !toolCopyListUrl) ||
+          (child.label === 'common:partnersName' &&
+            !partenersUrl) ||
+          (child.label === 'common:catalogWholesaleName' &&
+            !catalogProductWholesaleUrl) ||
+          (child.label === 'common:catalogPrivateLabelName' &&
+            !catalogProductPrivateLabelUrl) ||
+          (child.label === 'common:catalogSourcingChinaName' &&
+            !catalogSourcingChinaUrl)
+        ) {
+          return null;
+        }
         return (
           <DropdownLink
             key={child.path}
@@ -40,6 +96,8 @@ export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
     if ('divider' in item) {
       return <DropdownMenuSeparator key={index} />;
     }
+
+    
 
     return (
       <DropdownLink

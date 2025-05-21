@@ -1,6 +1,6 @@
 'use client';
 
-import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection, SidebarGroups } from '@kit/ui/sidebar';
+import { SidebarDivider, SidebarGroup, SidebarItem, SidebarSection } from '@kit/ui/sidebar';
 import { Trans } from '@kit/ui/trans';
 
 import { MessageBadge } from './message-badge';

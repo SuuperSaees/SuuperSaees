@@ -9,7 +9,6 @@ import { LanguageSelector } from '@kit/ui/language-selector';
 import { Separator } from '@kit/ui/separator';
 
 import UpdateImage from '../../../../../apps/web/app/components/ui/update-image';
-import { Account } from '../../../../../apps/web/lib/account.types';
 import { UserSettings } from '../../../../../apps/web/lib/user-settings.types';
 import { updateUserSettings } from '../../../../../packages/features/team-accounts/src/server/actions/members/update/update-account';
 import { useRevalidatePersonalAccountDataQuery } from '../hooks/use-personal-account-data';
@@ -18,14 +17,14 @@ import { UpdatePasswordFormContainer } from './personal-account-settings/passwor
 import { UpdateAccountDetailsFormContainer } from './personal-account-settings/update-account-details-form-container';
 
 interface ProfileSettingsProps {
-  user: Account.Type;
-  userSettings: UserSettings.Type;
+  userId: string;
+  userSettings: Pick<UserSettings.Type, 'name' | 'picture_url' | 'calendar' | 'preferences'> | null | undefined;
   callback: string;
   userRole: string;
 }
 
 function ProfileSettings({
-  user,
+  userId,
   callback,
   userSettings,
   userRole,
@@ -60,8 +59,8 @@ function ProfileSettings({
 
   const updateAccountCalendar = useMutation({
     mutationFn: async (calendar: UserSettings.Type['calendar']) => {
-      if (user?.id) {
-        await updateUserSettings(user.id, { calendar: calendar ?? '' });
+      if (userId) {
+        await updateUserSettings(userId, { calendar: calendar ?? '' });
       } else {
         throw new Error('User ID is undefined');
       }
@@ -79,10 +78,10 @@ function ProfileSettings({
   });
   
   const handleLanguageChange = useCallback(async (locale: string) => {
-    if (user?.id) {
+    if (userId) {
       try {
         // Update the user's language preference in the database
-        await updateUserSettings(user.id, { 
+        await updateUserSettings(userId, { 
           preferences: {
             user: {
               language: locale
@@ -103,7 +102,7 @@ function ProfileSettings({
         console.error('Error updating language preference:', error);
       }
     }
-  }, [user?.id, t]);
+  }, [userId, t]);
 
   const handleCalendarChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,18 +116,18 @@ function ProfileSettings({
   const clientRoles = new Set(['client_owner', 'client_member']);
 
   const bucketStorage = {
-    id: user?.id ?? '',
+    id: userId ?? '',
     name: 'account_image',
     identifier: 'profilePicture',
   };
 
   const updateProfileImage = async (value: string) => {
     try {
-      await updateUserSettings(user?.id ?? '', { picture_url: value });
+      await updateUserSettings(userId ?? '', { picture_url: value });
       toast.success(t('updateSuccess'), {
         description: t('updateProfileSuccess'),
       });
-      await revalidateAccount(user?.id ?? '');
+      await revalidateAccount(userId ?? '');
     } catch (error) {
       toast.error('Error', {
         description: t('updateProfileError'),
@@ -149,7 +148,7 @@ function ProfileSettings({
             <UpdateImage
               bucketStorage={bucketStorage}
               defaultImageURL={
-                userSettings?.picture_url ?? user?.picture_url ?? ''
+                userSettings?.picture_url ?? ''
               }
               className="aspect-square h-20 w-20 [&>img]:object-cover"
               onUpdate={updateProfileImage}
@@ -165,11 +164,12 @@ function ProfileSettings({
           </div>
 
           <UpdateAccountDetailsFormContainer user={{
-            ...user, 
+            id: userId, 
+            name: userSettings?.name ?? '',
             settings: {
               ...userSettings,
-              name: userSettings?.name ?? user?.name ?? '',
-              picture_url: userSettings?.picture_url ?? user?.picture_url ?? '',
+              name: userSettings?.name ?? '',
+              picture_url: userSettings?.picture_url ?? '',
             }
           }} />
         </div>
