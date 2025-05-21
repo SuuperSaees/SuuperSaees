@@ -235,5 +235,6 @@
   "updateLanguageSuccess": "Idioma actualizado con éxito",
   "invalidLoomAppIdFormat": "Formato de ID de aplicación de Loom inválido",
   "domainUpdatedSuccessfully": "Dominio actualizado con éxito",
-  "domainUpdateError": "Error al actualizar el dominio"
+  "domainUpdateError": "Error al actualizar el dominio",
+  "subscriptionTab": "Suscripción"
 }
