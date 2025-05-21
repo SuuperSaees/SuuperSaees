@@ -47,7 +47,7 @@ export const getAccountSettings = async (accountId: string) => {
 
     const { data: userData, error: userDataError } = await client
       .from('user_settings')
-      .select(`phone_number, picture_url, calendar, name`)
+      .select(`phone_number, picture_url, calendar, name, preferences`)
       .eq('user_id', accountId)
       .single();
 
