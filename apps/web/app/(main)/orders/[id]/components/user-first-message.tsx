@@ -68,7 +68,10 @@ const UserFirstMessage = ({ interaction, user }: {
     {interaction?.briefResponses.length > 0 && 
    (
     <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">
-    {interaction.briefResponses.map((br) => (
+    {interaction.briefResponses
+    .filter((a) => a?.field?.position !== undefined)
+    .sort((a, b) => (a.field?.position ?? 0) - (b.field?.position ?? 0))
+    .map((br) => (
       br.response && (
         <div key={br.id} className="flex w-full flex-col gap-2.5 rounded-lg">
           {br.response !== "" && (
