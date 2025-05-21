@@ -34,7 +34,7 @@ const AccountOrganizationSenderEmailAndSenderDomainSchema = z.object({
 });
 export function UpdateAccountOrganizationSenderEmailAndSenderDomain() {
   const { updateOrganizationSetting, sender_email, sender_domain } = useOrganizationSettings();
-  const currentHost = typeof window !== 'undefined' ? window.location.host : '';
+  const currentHost = typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
   const shouldShowDomainSelect = !(
     currentHost === new URL(process.env.NEXT_PUBLIC_SITE_URL ?? '').hostname || currentHost.includes('suuper.co') || currentHost.includes('localhost')
   );
