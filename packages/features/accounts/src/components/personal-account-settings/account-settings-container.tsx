@@ -79,7 +79,7 @@ export function PersonalAccountSettingsContainer(
   }
 
   return (
-    <div className="">
+    <div>
       <Tabs defaultValue={"site"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
         {role !== 'client_member' && role !== 'client_owner' && (
           <div className="flex items-center justify-between pb-[24px]">
