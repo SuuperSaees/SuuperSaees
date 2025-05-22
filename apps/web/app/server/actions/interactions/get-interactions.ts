@@ -1,4 +1,5 @@
 'use server';
+
 import { Activity } from '~/lib/activity.types';
 // import { BriefResponse } from '~/lib/brief.types';
 import { Message } from '~/lib/message.types';
@@ -25,65 +26,157 @@ export type InteractionResponse = {
   nextCursor: string | null;
 };
 
+// Common interface for all interaction types
+type MessageInteraction = {
+  created_at: string;
+  type: 'message';
+  data: Message.Response['data'][0];
+};
+
+type ActivityInteraction = {
+  created_at: string;
+  type: 'activity';
+  data: Activity.Response['data'][0];
+};
+
+type ReviewInteraction = {
+  created_at: string;
+  type: 'review';
+  data: Review.Response['data'][0];
+};
+
+type InteractionItem =
+  | MessageInteraction
+  | ActivityInteraction
+  | ReviewInteraction;
+
 export const getInteractions = async (
   orderId: number,
   // orderUUID: string,
   config?: Config,
 ): Promise<InteractionResponse> => {
   try {
-    const messages = await getMessages(orderId, config);
+    const limit = config?.pagination?.limit ?? 10;
+    const cursor = config?.pagination?.cursor;
 
-    // let briefResponses: BriefResponse.Response[] = [];
+    // Fetch with a small buffer to account for uneven distribution across data sources
+    // This ensures we have enough data to properly paginate without over-fetching
+    const bufferSize = Math.min(20, Math.ceil(limit * 0.5)); // 50% buffer, max 20 items
+    const fetchConfig = {
+      pagination: {
+        cursor,
+        limit: limit + bufferSize,
+      },
+    };
 
-    // To avoid inconsistencies, we'll fetch activities and reviews separately by generating a new config
-    // The new config is going to have activities and reviews within the same time range as the messages
-    // This way, we can be sure that the activities and reviews are consistent with the messages
-    // And when the user fetches the activities and reviews, they will be in the same order as the messages
+    // Fetch all three types of data in parallel
+    const [messagesResult, activitiesResult, reviewsResult] =
+      await Promise.allSettled([
+        getMessages(orderId, fetchConfig),
+        getActivities(orderId, fetchConfig),
+        getReviews(orderId, fetchConfig),
+      ]);
 
-    let newConfig = { ...config };
-    let nextCursor: string | null = null;
-    // Only set up cursor range if we have messages
-    if (messages.data.length > 0) {
-      newConfig = {
-        ...config,
-        pagination: {
-          cursor: config?.pagination?.cursor ?? messages.data[0]?.created_at,
-          limit: 10,
-          endCursor: messages.nextCursor ?? messages.data[messages.data.length - 1]?.created_at,
-        },
-      };
+    // Handle potential errors gracefully
+    const messages =
+      messagesResult.status === 'fulfilled' ? messagesResult.value.data : [];
+    const activities =
+      activitiesResult.status === 'fulfilled'
+        ? activitiesResult.value.data
+        : [];
+    const reviews =
+      reviewsResult.status === 'fulfilled' ? reviewsResult.value.data : [];
+
+    // Log any errors for debugging
+    if (messagesResult.status === 'rejected') {
+      console.error('Error fetching messages:', messagesResult.reason);
+    }
+    if (activitiesResult.status === 'rejected') {
+      console.error('Error fetching activities:', activitiesResult.reason);
+    }
+    if (reviewsResult.status === 'rejected') {
+      console.error('Error fetching reviews:', reviewsResult.reason);
     }
 
-    const activities = await getActivities(orderId, newConfig).catch(
-      (error) => {
-        console.error('Error fetching activities:', error);
-        return { data: [], nextCursor: null };
-      },
+    // Convert all interactions to a common format for sorting
+    const allInteractions: InteractionItem[] = [
+      ...messages.map(
+        (msg): MessageInteraction => ({
+          created_at: msg.created_at,
+          type: 'message',
+          data: msg,
+        }),
+      ),
+      ...activities.map(
+        (act): ActivityInteraction => ({
+          created_at: act.created_at,
+          type: 'activity',
+          data: act,
+        }),
+      ),
+      ...reviews.map(
+        (rev): ReviewInteraction => ({
+          created_at: rev.created_at,
+          type: 'review',
+          data: rev,
+        }),
+      ),
+    ];
+
+    // Sort all interactions by created_at in descending order (newest first)
+    allInteractions.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-    const reviews = await getReviews(orderId, newConfig).catch((error) => {
-      console.error('Error fetching reviews:', error);
-      return { data: [], nextCursor: null };
-    });
+    // Apply pagination to the merged and sorted result
+    const paginatedInteractions = allInteractions.slice(0, limit);
 
-    // only fetch brief responses if there's next cursor for non of all
-    // if (!messages.nextCursor && !activities.nextCursor && !reviews.nextCursor) {
+    // Determine if there's more data available
+    // We have more data if any of the sources returned their full fetch amount (indicating they might have more)
+    // OR if our merged result has more items than requested
+    const sourcesHaveMore =
+      (messagesResult.status === 'fulfilled' &&
+        messagesResult.value.nextCursor !== null) ||
+      (activitiesResult.status === 'fulfilled' &&
+        activitiesResult.value.nextCursor !== null) ||
+      (reviewsResult.status === 'fulfilled' &&
+        reviewsResult.value.nextCursor !== null);
+
+    const hasMoreData = allInteractions.length > limit || sourcesHaveMore;
+    const nextCursor =
+      hasMoreData && paginatedInteractions.length > 0
+        ? (paginatedInteractions[paginatedInteractions.length - 1]
+            ?.created_at ?? null)
+        : null;
+
+    // Separate back into original types
+    const paginatedMessages = paginatedInteractions
+      .filter((item): item is MessageInteraction => item.type === 'message')
+      .map((item) => item.data);
+
+    const paginatedActivities = paginatedInteractions
+      .filter((item): item is ActivityInteraction => item.type === 'activity')
+      .map((item) => item.data);
+
+    const paginatedReviews = paginatedInteractions
+      .filter((item): item is ReviewInteraction => item.type === 'review')
+      .map((item) => item.data);
+
+    // only fetch brief responses if there's no more data
+    // if (!hasMoreData) {
     //   briefResponses = await getBriefResponses(orderUUID);
     // }
 
-    nextCursor = messages.nextCursor;
-
-    // nextCursor is the last from all combined and sorted by created_at in ascending order
-
     return {
       // briefResponses,
-      messages: messages.data,
-      activities: activities.data,
-      reviews: reviews.data,
+      messages: paginatedMessages,
+      activities: paginatedActivities,
+      reviews: paginatedReviews,
       nextCursor,
     };
   } catch (error: unknown) {
     console.error('Error fetching interactions:', error);
     throw error;
   }
-}
+};

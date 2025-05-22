@@ -43,7 +43,7 @@ export async function getReviews(orderId?: number, config?: Config): Promise<Rev
     const transformedReviews = transformDataArray(reviews);
     return {
       data: transformedReviews.slice(0, limit),
-      nextCursor: transformedReviews[limit]?.created_at ?? null,
+      nextCursor: transformedReviews.length > limit ? transformedReviews[limit]?.created_at ?? null : null,
     };
   } catch (error) {
     console.error(error);

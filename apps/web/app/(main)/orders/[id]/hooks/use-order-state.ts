@@ -61,7 +61,7 @@ export const useOrderState = ({
       await getInteractions(order.id, {
         pagination: {
           cursor: pageParam, // strict less than this
-          limit: 10,
+          limit: 20,
         },
       }),
     getNextPageParam: (lastPage) => {

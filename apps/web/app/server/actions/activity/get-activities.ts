@@ -42,7 +42,7 @@ export const getActivities = async (orderId?: number, config?: Config): Promise<
 
     return {
       data: activities.slice(0, limit),
-      nextCursor: activities[limit]?.created_at ?? null
+      nextCursor: activities.length > limit ? activities[limit]?.created_at ?? null : null
     };
   } catch (error) {
     console.error(error);
