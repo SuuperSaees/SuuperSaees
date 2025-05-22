@@ -228,13 +228,13 @@ export const useOrderApiActions = ({
         description: t('message.messageDeletedError'),
       });
     },
-    onSuccess: async () => {
+    onSuccess: () => {
       toast.success(t('message.messageDeleted'), {
         description: t('message.messageDeletedSuccess'),
       });
-      await queryClient.invalidateQueries({
-        queryKey: ['interactions', orderId],
-      });
+      // await queryClient.invalidateQueries({
+      //   queryKey: ['interactions', orderId],
+      // });
     },
   });
 
