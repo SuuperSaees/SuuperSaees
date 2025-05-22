@@ -84,6 +84,8 @@ export function HomeSidebar(props: { workspace: UserWorkspace }) {
           catalogSourcingChinaUrl={sourcingChinaUrl}
           calendarUrl={calendarUrl}
           userId={user?.id ?? ''}
+          userRole={userRole ?? ''}
+          userOrganizationId={organization?.id ?? ''}
         />
         {userRole === 'client_guest' && (
           <SidebarContent>

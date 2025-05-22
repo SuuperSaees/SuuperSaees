@@ -58,7 +58,7 @@ export function ChatProvider({
   initialMembers = [],
 }: ChatProviderProps) {
   // User state
-  const { workspace: currentUser, user } = useUserWorkspace();
+  const { workspace: currentUser, user, organization } = useUserWorkspace();
   const currentUserInfo = {
     id: currentUser?.id ?? '',
     name: currentUser?.name ?? '',
@@ -270,7 +270,7 @@ export function ChatProvider({
     handleSubscriptions,
   );
 
-  const { markChatAsRead } = useUnreadMessageCounts({userId: user.id});
+  const { markChatAsRead } = useUnreadMessageCounts({userId: user.id, userRole: currentUser?.role ?? '', userOrganizationId: organization?.id ?? ''});
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
     setMessages: setMessages,
