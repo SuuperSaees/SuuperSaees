@@ -19,6 +19,7 @@ export namespace ChatMessages {
     pagination?: {
       cursor?: string | number;
       limit?: number;
+      endCursor?: string | number;
     };
   }
 }

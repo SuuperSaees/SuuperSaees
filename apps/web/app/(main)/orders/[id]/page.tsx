@@ -82,7 +82,7 @@ async function OrderDetailsPage({
   const initialInteractions = await getInteractions(order?.id, {
     pagination: {
       cursor: new Date().toISOString(),
-      limit: 10,
+      limit: 20,
     },
   }).catch((err) => {
     console.error('Error fetching interactions:', err);
