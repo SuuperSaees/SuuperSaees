@@ -228,14 +228,14 @@ export const useOrderApiActions = ({
         description: t('message.messageDeletedError'),
       });
     },
-    onSuccess: async () => {
-      toast.success(t('message.messageDeleted'), {
-        description: t('message.messageDeletedSuccess'),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ['interactions', orderId],
-      });
-    },
+    // onSuccess: async () => {
+    //   toast.success(t('message.messageDeleted'), {
+    //     description: t('message.messageDeletedSuccess'),
+    //   });
+    //   await queryClient.invalidateQueries({
+    //     queryKey: ['interactions', orderId],
+    //   });
+    // },
   });
 
   return { addMessageMutation, deleteMessageMutation };
