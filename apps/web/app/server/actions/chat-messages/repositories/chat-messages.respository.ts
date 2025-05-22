@@ -65,6 +65,10 @@ export class ChatMessagesRepository {
       baseQuery = baseQuery.lt('created_at', config.pagination.cursor);
     }
 
+    if (config?.pagination?.endCursor) {
+      baseQuery = baseQuery.gte('created_at', config.pagination.endCursor);
+    }
+
     const { data, error } = await baseQuery;
 
     if (error) {
