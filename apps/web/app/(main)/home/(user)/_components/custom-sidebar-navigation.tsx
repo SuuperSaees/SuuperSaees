@@ -17,6 +17,8 @@ export function CustomSidebarNavigation({
   catalogProductUrl,
   toolCopyListUrl,
   userId,
+  userRole,
+  userOrganizationId,
   partenersUrl,
   catalogProductWholesaleUrl,
   catalogProductPrivateLabelUrl,
@@ -30,6 +32,8 @@ export function CustomSidebarNavigation({
   catalogProductUrl?: boolean;
   toolCopyListUrl?: boolean;
   userId?: string;
+  userRole?: string;
+  userOrganizationId?: string;
   partenersUrl?: boolean;
   catalogProductWholesaleUrl?: boolean;
   catalogProductPrivateLabelUrl?: boolean;
@@ -170,7 +174,7 @@ export function CustomSidebarNavigation({
               menu={item.menu}
             >
               <Trans i18nKey={item.label} defaults={item.label} />
-              <MessageBadge userId={userId ?? ''} />
+              <MessageBadge userId={userId ?? ''} userRole={userRole ?? ''} userOrganizationId={userOrganizationId ?? ''} />
             </SidebarItem>
           );
         }

@@ -15,193 +15,6 @@ drop function if exists "public"."get_unread_order_message_counts"(p_user_id uui
 
 drop function if exists "public"."mark_order_messages_as_read"(p_user_id uuid, p_order_id integer);
 
--- First migration create an entrance for each user member in the chat or order
--- Ensure one row per chat_id per user
-ALTER TABLE message_reads
-ADD CONSTRAINT unique_user_chat UNIQUE (user_id, chat_id);
-
--- Ensure one row per order_id per user
-ALTER TABLE message_reads
-ADD CONSTRAINT unique_user_order UNIQUE (user_id, order_id);
-
--- DO $$
--- DECLARE
---   cutoff_date timestamp with time zone := NOW() - INTERVAL '2 months';
--- BEGIN
---   -- Step 1: Prepopulate for chat members
---   WITH recent_chats AS (
---     SELECT * FROM chats WHERE created_at >= cutoff_date
---   ),
---   latest_chat_messages AS (
---     SELECT DISTINCT ON (m.chat_id) m.chat_id, m.id AS message_id
---     FROM messages m
---     WHERE m.chat_id IS NOT NULL
---     ORDER BY m.chat_id, m.created_at DESC
---   ),
---   chat_data AS (
---     SELECT
---       cm.user_id,
---       rc.id AS chat_id,
---       lcm.message_id,
---       am.account_role,
---       am.organization_id
---     FROM recent_chats rc
---     JOIN chat_members cm ON cm.chat_id = rc.id
---     LEFT JOIN latest_chat_messages lcm ON lcm.chat_id = rc.id
---     JOIN accounts_memberships am ON am.user_id = cm.user_id
---   )
---   INSERT INTO message_reads (
---     user_id,
---     chat_id,
---     agency_id,
---     client_organization_id,
---     message_id,
---     unread_count
---   )
---   SELECT
---     cd.user_id,
---     cd.chat_id,
---     CASE WHEN cd.account_role LIKE 'agency_%' THEN cd.organization_id ELSE NULL END,
---     CASE WHEN cd.account_role LIKE 'client_%' THEN cd.organization_id ELSE NULL END,
---     cd.message_id,
---     0
---   FROM chat_data cd
---   WHERE cd.message_id IS NOT NULL
---   ON CONFLICT (user_id, chat_id) DO NOTHING;
-
---   -- Step 2: Prepopulate for order followers and assignees
---   WITH recent_orders AS (
---     SELECT * FROM orders_v2 WHERE created_at >= cutoff_date
---   ),
---   latest_order_messages AS (
---     SELECT DISTINCT ON (m.order_id) m.order_id, m.id AS message_id
---     FROM messages m
---     WHERE m.order_id IS NOT NULL
---     ORDER BY m.order_id, m.created_at DESC
---   ),
---   order_users AS (
---     SELECT client_member_id AS user_id, order_id FROM order_followers
---     UNION
---     SELECT agency_member_id AS user_id, order_id FROM order_assignations
---   ),
---   order_data AS (
---     SELECT
---       ou.user_id,
---       ro.id AS order_id,
---       lom.message_id,
---       am.account_role,
---       am.organization_id
---     FROM recent_orders ro
---     JOIN order_users ou ON ou.order_id = ro.id
---     LEFT JOIN latest_order_messages lom ON lom.order_id = ro.id
---     JOIN accounts_memberships am ON am.user_id = ou.user_id
---   )
---   INSERT INTO message_reads (
---     user_id,
---     order_id,
---     agency_id,
---     client_organization_id,
---     message_id,
---     unread_count
---   )
---   SELECT
---     od.user_id,
---     od.order_id,
---     CASE WHEN od.account_role LIKE 'agency_%' THEN od.organization_id ELSE NULL END,
---     CASE WHEN od.account_role LIKE 'client_%' THEN od.organization_id ELSE NULL END,
---     od.message_id,
---     0
---   FROM order_data od
---   WHERE od.message_id IS NOT NULL
---   ON CONFLICT (user_id, order_id) DO NOTHING;
--- END;
--- $$;
-
-
-
--- -- Second migration: Backfill from orders_v2
--- BEGIN;
-
--- -- Step 1: Backfill from orders_v2
--- UPDATE message_reads AS mr
--- SET
---   agency_id = CASE
---     WHEN am.account_role IN ('agency_owner', 'agency_project_manager', 'agency_member')
---       THEN o.agency_id
---     ELSE NULL
---   END,
---   client_organization_id = CASE
---     WHEN am.account_role IN ('client_owner', 'client_member')
---       THEN o.client_organization_id
---     ELSE NULL
---   END
--- FROM orders_v2 o,
---      accounts_memberships am
--- WHERE mr.order_id IS NOT NULL
---   AND o.id = mr.order_id
---   AND am.user_id = mr.user_id
---   AND am.organization_id IN (o.agency_id, o.client_organization_id);
-
--- -- Step 2: Backfill from chats
--- UPDATE message_reads AS mr
--- SET
---   agency_id = CASE
---     WHEN am.account_role IN ('agency_owner', 'agency_project_manager', 'agency_member')
---       THEN c.agency_id
---     ELSE NULL
---   END,
---   client_organization_id = CASE
---     WHEN am.account_role IN ('client_owner', 'client_member')
---       THEN c.client_organization_id
---     ELSE NULL
---   END
--- FROM chats c,
---      accounts_memberships am
--- WHERE mr.order_id IS NULL
---   AND mr.chat_id IS NOT NULL
---   AND c.id = mr.chat_id
---   AND am.user_id = mr.user_id
---   AND am.organization_id IN (c.agency_id, c.client_organization_id);
-
--- COMMIT;
-
-
--- -- Third migration: Update unread_count
-
--- DO $$
--- DECLARE
---   mr_user RECORD;
---   is_agency BOOLEAN;
---   unread_row RECORD;
--- BEGIN
---   FOR mr_user IN 
---     SELECT DISTINCT user_id, agency_id, client_organization_id 
---     FROM message_reads
---   LOOP
---     -- Determine role type from message_reads
---     is_agency := mr_user.agency_id IS NOT NULL AND mr_user.client_organization_id IS NULL;
-
---     -- Get unread counts using existing function
---     FOR unread_row IN 
---       SELECT * FROM get_unread_message_counts(mr_user.user_id, is_agency)
---     LOOP
---       IF unread_row.chat_id IS NOT NULL THEN
---         UPDATE message_reads
---         SET unread_count = unread_row.chat_unread_count
---         WHERE user_id = mr_user.user_id
---           AND chat_id = unread_row.chat_id;
-
---       ELSIF unread_row.order_id IS NOT NULL THEN
---         UPDATE message_reads
---         SET unread_count = unread_row.order_unread_count
---         WHERE user_id = mr_user.user_id
---           AND order_id = unread_row.order_id;
---       END IF;
---     END LOOP;
---   END LOOP;
--- END;
--- $$;
-
 
 DROP FUNCTION IF EXISTS public.get_unread_message_counts(uuid, boolean);
 
@@ -229,6 +42,7 @@ BEGIN
   FROM message_reads mr
   WHERE
     mr.user_id = p_user_id
+    AND mr.unread_count > 0
     AND (
       (p_role LIKE 'agency_%' AND mr.agency_id = p_organization_id)
       OR
@@ -239,6 +53,7 @@ BEGIN
       (p_target = 'orders' AND mr.order_id IS NOT NULL) OR
       (p_target = 'chats' AND mr.chat_id IS NOT NULL)
     );
+    
 END;
 $function$;
 
@@ -325,6 +140,8 @@ DECLARE
   v_agency_id uuid;
   v_client_org_id uuid;
   v_user_id uuid;
+  v_old_is_special boolean;
+  v_new_is_special boolean;
 BEGIN
   -- === INSERT ===
   IF TG_OP = 'INSERT' THEN
@@ -376,23 +193,26 @@ BEGIN
       END LOOP;
     END IF;
 
-    IF TG_TABLE_NAME = 'chat_members' AND NEW.deleted_on IS NULL THEN
-      SELECT c.agency_id, c.client_organization_id INTO v_agency_id, v_client_org_id
-      FROM chats c WHERE c.id = NEW.chat_id;
+    IF TG_TABLE_NAME = 'chat_members' THEN
+      -- Only check deleted_on for chat_members since other tables don't have this field
+      IF NEW.deleted_on IS NULL THEN
+        SELECT c.agency_id, c.client_organization_id INTO v_agency_id, v_client_org_id
+        FROM chats c WHERE c.id = NEW.chat_id;
 
-      SELECT am.account_role, am.organization_id INTO v_role, v_org_id
-      FROM accounts_memberships am
-      WHERE am.user_id = NEW.user_id
-      LIMIT 1;
+        SELECT am.account_role, am.organization_id INTO v_role, v_org_id
+        FROM accounts_memberships am
+        WHERE am.user_id = NEW.user_id
+        LIMIT 1;
 
-      IF v_role LIKE 'agency_%' AND v_org_id = v_agency_id THEN
-        INSERT INTO message_reads (user_id, chat_id, agency_id, unread_count)
-        VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
-        ON CONFLICT DO NOTHING;
-      ELSIF v_role LIKE 'client_%' AND v_org_id = v_client_org_id THEN
-        INSERT INTO message_reads (user_id, chat_id, client_organization_id, unread_count)
-        VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
-        ON CONFLICT DO NOTHING;
+        IF v_role LIKE 'agency_%' AND v_org_id = v_agency_id THEN
+          INSERT INTO message_reads (user_id, chat_id, agency_id, unread_count)
+          VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
+          ON CONFLICT DO NOTHING;
+        ELSIF v_role LIKE 'client_%' AND v_org_id = v_client_org_id THEN
+          INSERT INTO message_reads (user_id, chat_id, client_organization_id, unread_count)
+          VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
+          ON CONFLICT DO NOTHING;
+        END IF;
       END IF;
     END IF;
   END IF;
@@ -400,45 +220,131 @@ BEGIN
   -- === DELETE ===
   IF TG_OP = 'DELETE' THEN
     IF TG_TABLE_NAME = 'order_followers' THEN
-      DELETE FROM message_reads
-      WHERE user_id = OLD.client_member_id
-        AND order_id = OLD.order_id;
+      -- Only delete if user is NOT a client_owner for this order's client organization
+      DELETE FROM message_reads mr
+      WHERE mr.user_id = OLD.client_member_id
+        AND mr.order_id = OLD.order_id
+        AND NOT EXISTS (
+          SELECT 1 FROM accounts_memberships am
+          WHERE am.user_id = OLD.client_member_id
+            AND am.organization_id = mr.client_organization_id
+            AND am.account_role = 'client_owner'
+        );
     ELSIF TG_TABLE_NAME = 'order_assignations' THEN
-      DELETE FROM message_reads
-      WHERE user_id = OLD.agency_member_id
-        AND order_id = OLD.order_id;
+      -- Only delete if user is NOT agency_owner or agency_project_manager for this order's agency
+      DELETE FROM message_reads mr
+      WHERE mr.user_id = OLD.agency_member_id
+        AND mr.order_id = OLD.order_id
+        AND NOT EXISTS (
+          SELECT 1 FROM accounts_memberships am
+          WHERE am.user_id = OLD.agency_member_id
+            AND am.organization_id = mr.agency_id
+            AND am.account_role IN ('agency_owner', 'agency_project_manager')
+        );
     ELSIF TG_TABLE_NAME = 'chat_members' THEN
-      DELETE FROM message_reads
-      WHERE user_id = OLD.user_id
-        AND chat_id = OLD.chat_id;
+      -- Only delete if user is NOT a special role for this chat's organizations
+      DELETE FROM message_reads mr
+      WHERE mr.user_id = OLD.user_id
+        AND mr.chat_id = OLD.chat_id
+        AND NOT EXISTS (
+          SELECT 1 FROM accounts_memberships am
+          WHERE am.user_id = OLD.user_id
+            AND (
+              (mr.agency_id IS NOT NULL AND am.organization_id = mr.agency_id AND am.account_role IN ('agency_owner', 'agency_project_manager')) OR
+              (mr.client_organization_id IS NOT NULL AND am.organization_id = mr.client_organization_id AND am.account_role = 'client_owner')
+            )
+        );
     END IF;
   END IF;
 
-  -- === UPDATE === (only needed for chat_members for deleted_on changes)
-  IF TG_OP = 'UPDATE' AND TG_TABLE_NAME = 'chat_members' THEN
-    IF OLD.deleted_on IS NULL AND NEW.deleted_on IS NOT NULL THEN
-      -- Soft delete: remove
-      DELETE FROM message_reads
-      WHERE user_id = OLD.user_id
-        AND chat_id = OLD.chat_id;
-    ELSIF OLD.deleted_on IS NOT NULL AND NEW.deleted_on IS NULL THEN
-      -- Restore: insert
-      SELECT c.agency_id, c.client_organization_id INTO v_agency_id, v_client_org_id
-      FROM chats c WHERE c.id = NEW.chat_id;
+  -- === UPDATE === 
+  IF TG_OP = 'UPDATE' THEN
+    IF TG_TABLE_NAME = 'chat_members' THEN
+      -- Handle soft delete/restore for chat_members
+      IF OLD.deleted_on IS NULL AND NEW.deleted_on IS NOT NULL THEN
+        -- Soft delete: remove
+        DELETE FROM message_reads
+        WHERE user_id = OLD.user_id
+          AND chat_id = OLD.chat_id;
+      ELSIF OLD.deleted_on IS NOT NULL AND NEW.deleted_on IS NULL THEN
+        -- Restore: insert
+        SELECT c.agency_id, c.client_organization_id INTO v_agency_id, v_client_org_id
+        FROM chats c WHERE c.id = NEW.chat_id;
 
-      SELECT am.account_role, am.organization_id INTO v_role, v_org_id
-      FROM accounts_memberships am
-      WHERE am.user_id = NEW.user_id
-      LIMIT 1;
+        SELECT am.account_role, am.organization_id INTO v_role, v_org_id
+        FROM accounts_memberships am
+        WHERE am.user_id = NEW.user_id
+        LIMIT 1;
 
-      IF v_role LIKE 'agency_%' AND v_org_id = v_agency_id THEN
-        INSERT INTO message_reads (user_id, chat_id, agency_id, unread_count)
-        VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
-        ON CONFLICT DO NOTHING;
-      ELSIF v_role LIKE 'client_%' AND v_org_id = v_client_org_id THEN
-        INSERT INTO message_reads (user_id, chat_id, client_organization_id, unread_count)
-        VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
-        ON CONFLICT DO NOTHING;
+        IF v_role LIKE 'agency_%' AND v_org_id = v_agency_id THEN
+          INSERT INTO message_reads (user_id, chat_id, agency_id, unread_count)
+          VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
+          ON CONFLICT DO NOTHING;
+        ELSIF v_role LIKE 'client_%' AND v_org_id = v_client_org_id THEN
+          INSERT INTO message_reads (user_id, chat_id, client_organization_id, unread_count)
+          VALUES (NEW.user_id, NEW.chat_id, v_org_id, 0)
+          ON CONFLICT DO NOTHING;
+        END IF;
+      END IF;
+    ELSIF TG_TABLE_NAME = 'accounts_memberships' THEN
+      -- Handle role changes
+      IF OLD.account_role != NEW.account_role THEN
+        -- Check if roles are special
+        v_old_is_special := OLD.account_role IN ('agency_owner', 'agency_project_manager', 'client_owner');
+        v_new_is_special := NEW.account_role IN ('agency_owner', 'agency_project_manager', 'client_owner');
+
+        -- Case 1: FROM special role TO regular role - cleanup
+        IF v_old_is_special AND NOT v_new_is_special THEN
+          -- Remove entries where user doesn't have explicit membership
+          DELETE FROM message_reads mr
+          WHERE mr.user_id = NEW.user_id
+            AND (
+              -- For orders: keep only if user is in order_followers or order_assignations
+              (mr.order_id IS NOT NULL AND NOT EXISTS (
+                SELECT 1 FROM order_followers of WHERE of.client_member_id = NEW.user_id AND of.order_id = mr.order_id
+                UNION
+                SELECT 1 FROM order_assignations oa WHERE oa.agency_member_id = NEW.user_id AND oa.order_id = mr.order_id
+              )) OR
+              -- For chats: keep only if user is in chat_members
+              (mr.chat_id IS NOT NULL AND NOT EXISTS (
+                SELECT 1 FROM chat_members cm WHERE cm.user_id = NEW.user_id AND cm.chat_id = mr.chat_id AND cm.deleted_on IS NULL
+              ))
+            );
+
+        -- Case 2: FROM regular role TO special role - add all relevant
+        ELSIF NOT v_old_is_special AND v_new_is_special THEN
+          -- Add to all orders for the organization
+          IF NEW.account_role IN ('agency_owner', 'agency_project_manager') THEN
+            -- Add to all orders where this organization is the agency
+            INSERT INTO message_reads (user_id, order_id, agency_id, unread_count)
+            SELECT NEW.user_id, o.id, NEW.organization_id, 0
+            FROM orders_v2 o
+            WHERE o.agency_id = NEW.organization_id
+            ON CONFLICT DO NOTHING;
+
+            -- Add to all chats where this organization is the agency
+            INSERT INTO message_reads (user_id, chat_id, agency_id, unread_count)
+            SELECT NEW.user_id, c.id, NEW.organization_id, 0
+            FROM chats c
+            WHERE c.agency_id = NEW.organization_id
+            ON CONFLICT DO NOTHING;
+
+          ELSIF NEW.account_role = 'client_owner' THEN
+            -- Add to all orders where this organization is the client
+            INSERT INTO message_reads (user_id, order_id, client_organization_id, unread_count)
+            SELECT NEW.user_id, o.id, NEW.organization_id, 0
+            FROM orders_v2 o
+            WHERE o.client_organization_id = NEW.organization_id
+            ON CONFLICT DO NOTHING;
+
+            -- Add to all chats where this organization is the client
+            INSERT INTO message_reads (user_id, chat_id, client_organization_id, unread_count)
+            SELECT NEW.user_id, c.id, NEW.organization_id, 0
+            FROM chats c
+            WHERE c.client_organization_id = NEW.organization_id
+            ON CONFLICT DO NOTHING;
+          END IF;
+        END IF;
       END IF;
     END IF;
   END IF;
@@ -471,3 +377,52 @@ EXECUTE FUNCTION public.upsert_message_reads();
 
 
 
+-- Remaining: role swap and delete notifications. One options is add message_reads to all users when assignation ocurrs or like im
+-- doing right now, but that might be a lot of rows to insert in the case of a role swap.
+
+-- Other case to handle is read-add users to message_reads when a new message is created.
+-- This applies on cases where the users not belong anymore due to they not exist because the last message was too long ago.
+
+
+-- Current Flow Solution:
+-- Multiple triggers ensure only certain users are added to message_reads in assignations, followers, and chat_members cases.
+-- This ensures only relevant users are added and reduces unnecessary rows.
+-- Problem:
+-- This add complexity to the code and might not be scalable.
+-- The complexity comes from the need to handle different cases and ensure only the correct users are added.
+-- Example 1: 
+-- - When the role is changed u need ensure the user is only added to message_reads for the orders they might have access to.
+-- Roles like agency_owner, agency_project_manager, client_owner, are assigned to all the orders and chats. 
+-- This means that the user will be added to message_reads for all the orders and chats they might not have access to.
+-- And for the removal is the same.
+-- Example 2:
+-- There might be cases where users have been removed from the message_reads table because the last message was too long ago. Or, 
+-- simply for other reason not exist anymore.
+-- In this case, the user should be added to message_reads again when a new message is created.
+
+-- Conclusion:
+-- The current flow solution is a good solution because it handles multiple cases and ensures only the correct users are added.
+-- The problem is its complexity and the need to handle different cases, which can introduce bugs and make the code harder to maintain.
+-- Also, this solution needs to be complemented with a cleanup process to remove users from message_reads.
+
+-- Alternative Flow Solution:
+-- Just one trigger for chats and orders. That adds all the users of an organization (client and agency) to message_reads for the orders and chats.
+-- Also on the remove of a chat or order, the users are removed from message_reads.
+-- This solution offers:
+-- Benefit: Less complex code and easier to maintain and simpler, since we don't need to handle different cases and don't care about removal or role changes.
+-- Problem:
+-- The problem is that we are adding a lot of unnecessary users to message_reads.
+-- This is because we are adding all the users of an organization to message_reads for the orders and chats.
+-- This means that we are adding users that might not have access to the orders and chats.
+-- This is a problem because it can cause performance issues and it can cause unnecessary rows in the message_reads table. 
+-- So, this table (message_reads) will grow a lot and eventually will need to be cleaned up.
+
+-- Conclusion: This alternative is a good solution only if we complement it with a cleanup process.
+-- Plan for this: use supabase cron jobs or scheduled triggers to clean up the message_reads when the last message was too long ago. 
+-- In that solution we have to check chats and orders and its messages.
+-- Other complementary proccess is for real-time updates when need to add RLS to the message_reads table.
+-- This ensures that despite all users are added to the message_reads table, only the users with access to the orders and chats are able to be notified.
+
+-- Resources:
+-- https://supabase.com/docs/guides/functions/schedule-functions
+-- https://supabase.com/modules/cron

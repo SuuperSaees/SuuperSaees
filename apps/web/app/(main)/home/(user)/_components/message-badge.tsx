@@ -2,8 +2,8 @@
 
 import { useUnreadMessageCounts } from '~/hooks/use-unread-message-counts';
 
-export function MessageBadge({userId}: {userId: string}) {
-  const { openChats } = useUnreadMessageCounts({userId});
+export function MessageBadge({userId, userRole, userOrganizationId}: {userId: string, userRole: string, userOrganizationId: string}) {
+  const { openChats } = useUnreadMessageCounts({userId, userRole, userOrganizationId});
   if (openChats.length <= 0 ) {
     return null;
   }

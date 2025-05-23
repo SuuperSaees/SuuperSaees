@@ -11,6 +11,7 @@ import { Chats } from '~/lib/chats.types';
 import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
 
 import { useChat } from './context/chat-context';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 export default function ChatItem({
   chat,
@@ -21,6 +22,10 @@ export default function ChatItem({
 }) {
   const { setActiveChat } = useChat();
   const { t, i18n } = useTranslation('chats');
+
+  const { workspace: userWorkspace, organization } = useUserWorkspace();
+  const userRole = userWorkspace?.role ?? '';
+  const userOrganizationId = organization?.id ?? '';
 
   const handleChatSelect = () => {
     setActiveChat(chat);
@@ -51,7 +56,7 @@ export default function ChatItem({
       })()
     : '';
 
-  const { getUnreadCountForChat } = useUnreadMessageCounts({ userId: chat.user_id });
+  const { getUnreadCountForChat } = useUnreadMessageCounts({ userId: chat.user_id, userRole: userRole, userOrganizationId: userOrganizationId });
   const totalChatUnread = getUnreadCountForChat(chat.id);
   return (
     <button
