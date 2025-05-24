@@ -34,6 +34,7 @@ import CalendarCardMonth from '../components/calendar-card-month';
 // Custom Components and Actions
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
+import { useOrdersContext } from '../components/context/orders-context';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -75,6 +76,19 @@ const useOrdersViewConfigs = ({
   agencyMembers,
 }: UseOrdersViewConfigsProps) => {
   const { theme_color } = useOrganizationSettings();
+  const { 
+    count, 
+    hasNextPage,
+    currentPage,
+    totalPages,
+    isOffsetBased, 
+    loadNextPage, 
+    goToPage,
+    updateLimit,
+    limit,
+    isLoadingMore 
+  } = useOrdersContext();
+  
   // Destructure and use hooks
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
   const { t } = useTranslation('orders');
@@ -209,11 +223,28 @@ const useOrdersViewConfigs = ({
         emptyState: <EmptyStateComponent />,
         configs: {
           rowsPerPage: {
-            onUpdate: (value: string) => updateConfig('table', {
-              ...configs.table,
-              rowsPerPage: Number(value),
-            }),
+            onUpdate: (value: string) => {
+              console.log('🔍 rowsPerPage.onUpdate called with:', value);
+              const newLimit = Number(value);
+              console.log('🔍 Updating limit from', limit, 'to', newLimit);
+              updateLimit(newLimit); // Update the query limit
+              updateConfig('table', {
+                ...configs.table,
+                rowsPerPage: newLimit,
+              });
+              console.log('🔍 Updated configs:', { ...configs.table, rowsPerPage: newLimit });
+            },
             value: configs.table?.rowsPerPage ?? 10,
+          },
+          pagination: {
+            totalCount: count,
+            hasNextPage: hasNextPage,
+            currentPage: currentPage,
+            totalPages: totalPages,
+            isOffsetBased: isOffsetBased,
+            onLoadMore: loadNextPage,
+            goToPage: goToPage,
+            isLoadingMore: isLoadingMore,
           },
         },
       },

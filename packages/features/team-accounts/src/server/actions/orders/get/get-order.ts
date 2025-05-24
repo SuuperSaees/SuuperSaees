@@ -27,6 +27,21 @@ import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
 import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
+interface Config {
+  pagination?: {
+    // Cursor-based pagination (for infinite scrolling)
+    cursor?: string | number;
+    endCursor?: string | number;
+    
+    // Offset-based pagination (for page navigation)
+    page?: number;        // Current page number (1-indexed)
+    offset?: number;      // Direct offset override
+    
+    // Common
+    limit?: number;
+  };
+}
+
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
     const client = getSupabaseServerComponentClient();
@@ -239,14 +254,39 @@ export async function getOrderAgencyMembers(
   }
 }
 
+/**
+ * Retrieves orders with flexible pagination support
+ * @param includeBrief - Whether to include brief information in the response
+ * @param config - Configuration object containing pagination options
+ * @param config.pagination.page - Page number for offset-based pagination (1-indexed)
+ * @param config.pagination.offset - Direct offset override for offset-based pagination
+ * @param config.pagination.cursor - created_at timestamp for cursor-based pagination (infinite scroll)
+ * @param config.pagination.endCursor - created_at timestamp to start from (cursor-based)
+ * @param config.pagination.limit - Maximum number of orders to return (default: 10)
+ * @returns Object containing data array, pagination metadata, and cursors
+ * 
+ * @example
+ * // Offset-based pagination (for page navigation)
+ * const page2 = await getOrders(false, { pagination: { page: 2, limit: 20 } });
+ * 
+ * // Cursor-based pagination (for infinite scroll)
+ * const nextBatch = await getOrders(false, { 
+ *   pagination: { 
+ *     cursor: lastOrderTimestamp, 
+ *     limit: 20 
+ *   } 
+ * });
+ */
 export const getOrders = async (
   includeBrief?: boolean,
-): Promise<Order.Response[]> => {
+  config?: Config,
+): Promise<{ data: Order.Response[]; nextCursor: string | null; count: number | null; pagination: { limit: number; hasNextPage: boolean; totalPages: number | null; currentPage: number | null; isOffsetBased: boolean } }> => {
   try {
     const client = getSupabaseServerComponentClient();
     const userData = await fetchCurrentUser(client);
     const userAccount = await fetchCurrentUserAccount(client, userData.id);
     const userId = userData.id;
+    const limit = config?.pagination?.limit ?? 10;
 
     if (!userAccount.organization_id)
       throw new Error('User account not found (no organization_id)');
@@ -281,7 +321,30 @@ export const getOrders = async (
       )
       .is('deleted_on', null)
       .order('created_at', { ascending: false })
-   
+      .limit(limit + 1);
+
+    // Apply pagination (offset-based takes priority over cursor-based)
+    if (config?.pagination?.page || config?.pagination?.offset !== undefined) {
+      // Offset-based pagination for page navigation
+      const offset = config.pagination.offset ?? 
+        ((config.pagination.page ?? 1) - 1) * limit;
+      query = query.range(offset, offset + limit - 1);
+    } else if (config?.pagination?.cursor || config?.pagination?.endCursor) {
+      // Cursor-based pagination for infinite scrolling
+      if (config.pagination.cursor) {
+        query = query.lt('created_at', config.pagination.cursor);
+      }
+      
+      if (config.pagination.endCursor) {
+        query = query.gte('created_at', config.pagination.endCursor);
+      }
+      
+      query = query.limit(limit + 1);
+    } else {
+      // Default behavior - just limit
+      query = query.limit(limit + 1);
+    }
+
     let orders: Order.Response[] = [];
 
     if (isClient) {
@@ -315,7 +378,7 @@ export const getOrders = async (
     }
 
     // Step 3: Fetch orders
-    const { data: ordersData, error: ordersError } = await query;
+    const { data: ordersData, error: ordersError, count } = await query;
 
     if (ordersError) {
       console.error(ordersError.message);
@@ -373,7 +436,37 @@ export const getOrders = async (
       order.statusData = statusMap.get(order.status_id) ?? null;
     });
 
-    return orders;
+    // Calculate pagination based on type
+    const isOffsetBased = config?.pagination?.page || config?.pagination?.offset !== undefined;
+    const currentPage = config?.pagination?.page ?? 1;
+    
+    let hasNextPage: boolean;
+    let nextCursor: string | null = null;
+    let paginatedOrders: Order.Response[];
+
+    if (isOffsetBased) {
+      // Offset-based: return exact page data
+      paginatedOrders = orders;
+      hasNextPage = count ? (currentPage * limit) < count : false;
+    } else {
+      // Cursor-based: handle extra item for hasNextPage detection
+      hasNextPage = orders.length > limit;
+      paginatedOrders = orders.slice(0, limit);
+      nextCursor = hasNextPage ? paginatedOrders[paginatedOrders.length - 1]?.created_at ?? null : null;
+    }
+
+    return { 
+      data: paginatedOrders, 
+      nextCursor, 
+      count, 
+      pagination: { 
+        limit, 
+        hasNextPage, 
+        totalPages: count ? Math.ceil(count / limit) : null,
+        currentPage: isOffsetBased ? currentPage : null,
+        isOffsetBased,
+      } 
+    };
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;

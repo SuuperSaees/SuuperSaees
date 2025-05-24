@@ -11,6 +11,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
+import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -60,10 +61,17 @@ async function OrdersPage() {
     })) ?? [];
 
 
+  const orders = await getOrders(true, {
+    pagination: {
+      page: 1,
+      limit: 20,
+    },
+  });
   const tags = userAgency?.tags ?? [];
 
   return (
     <OrdersProvider
+      initialOrders={orders}
       agencyMembers={agencyMembers ?? []}
       agencyId={agencyId ?? ''}
     >
