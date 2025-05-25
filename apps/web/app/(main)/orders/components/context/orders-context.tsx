@@ -51,14 +51,15 @@ export const OrdersProvider = ({
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(20);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { organization, workspace: userWorkspace } = useUserWorkspace();
   const target = userWorkspace.role?.includes('agency') ? 'agency' : 'client';
-  // Stable query key that includes pagination parameters
+  // Stable query key that includes pagination parameters and search
   const queryKey = useMemo(() => {
-    const key = ['orders', { page: currentPage, limit }];
+    const key = ['orders', { page: currentPage, limit, search: searchTerm }];
     return key;
-  }, [currentPage, limit]);
+  }, [currentPage, limit, searchTerm]);
 
   // Stable query function
   const queryFn = useCallback(() => {
@@ -67,15 +68,16 @@ export const OrdersProvider = ({
         page: currentPage,
         limit: limit,
       },
+      search: searchTerm ? { term: searchTerm } : undefined,
     });
 
     return promise;
-  }, [currentPage, limit, organization.id, target]);
+  }, [currentPage, limit, searchTerm, organization.id, target]);
 
   const ordersQuery = useQuery({
     queryKey: queryKey,
     queryFn: queryFn,
-    initialData: currentPage === 1 && limit === 20 ? initialOrders : undefined,
+    initialData: currentPage === 1 && limit === 20 && !searchTerm ? initialOrders : undefined,
     placeholderData: keepPreviousData, // This is the key for smooth pagination!
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
@@ -139,6 +141,12 @@ export const OrdersProvider = ({
     setCurrentPage(1); // Reset to first page when changing page size
   }, []);
 
+  // Function to handle search
+  const handleSearch = useCallback((term: string) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset to first page when searching
+  }, []);
+
   // Function to load the next page (cursor-based)
   const loadNextPage = useCallback(async () => {
     if (!hasNextPage || !nextCursor) return;
@@ -154,6 +162,7 @@ export const OrdersProvider = ({
             cursor: nextCursor,
             limit: limit,
           },
+          search: searchTerm ? { term: searchTerm } : undefined,
         },
       );
 
@@ -184,6 +193,7 @@ export const OrdersProvider = ({
     queryKey,
     organization.id,
     target,
+    searchTerm,
   ]);
 
   const { handleAssigneesChange } = useOrdersSubscriptionsHandlers(
@@ -260,6 +270,10 @@ export const OrdersProvider = ({
     loadNextPage,
     updateLimit,
     isLoadingMore,
+
+    // Search function and state
+    handleSearch,
+    searchTerm,
   };
 
   return (

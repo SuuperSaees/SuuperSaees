@@ -40,6 +40,10 @@ interface Config {
     // Common
     limit?: number;
   };
+  search?: {
+    term?: string;
+    fields?: string[]; // Optional: specify which fields to search in
+  };
 }
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
@@ -337,6 +341,23 @@ export const getOrders = async (
       )
       .order('created_at', { ascending: false })
       .limit(limit + 1);
+
+    // Apply search if provided
+    if (config?.search?.term && config.search.term.trim()) {
+      const searchTerm = config.search.term.trim();
+      
+      // Use individual filters for better compatibility
+      // Check if it's a numeric search (for ID)
+      const isNumericSearch = /^\d+$/.test(searchTerm.replace('#', ''));
+      
+      if (isNumericSearch) {
+        // If it's numeric, search by ID
+        query = query.eq('id', parseInt(searchTerm.replace('#', '')));
+      } else {
+        // For text search, use textSearch or ilike on title and description
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      }
+    }
 
     // Apply pagination (offset-based takes priority over cursor-based)
     const isOffsetBased =

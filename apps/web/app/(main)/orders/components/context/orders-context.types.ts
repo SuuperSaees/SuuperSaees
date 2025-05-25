@@ -22,7 +22,7 @@ export interface OrdersContextType {
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
   ordersAreLoading: boolean;
-  queryKey: (string | { page: number; limit: number })[];
+  queryKey: (string | { page: number; limit: number; search: string })[];
   
   // Pagination properties
   nextCursor: string | null;
@@ -38,6 +38,10 @@ export interface OrdersContextType {
   goToPage: (page: number) => void;            // For offset-based page navigation (now synchronous!)
   updateLimit: (newLimit: number) => void;     // For updating rows per page
   isLoadingMore: boolean;
+
+  // Search function
+  handleSearch: (term: string) => void;        // For handling search
+  searchTerm: string;                          // Current search term
 }
 
 
