@@ -21,6 +21,12 @@ interface Priority {
   color?: string;
 }
 
+interface Status {
+  id: string;
+  name: string;
+  color?: string;
+}
+
 interface FilterHandler {
   key: string;
   filterFn: (order: Order.Response, selectedValues: string[]) => boolean;
@@ -30,7 +36,7 @@ interface FilterHandler {
 interface UseOrdersFilterConfigsProps {
   orders: Order.Response[];
   tags: Tags.Type[];
-  statuses: AgencyStatus.Type[];
+  statuses: Status[];
   agencyMembers: User.Response[];
   clientMembers: User.Response[];
   clientOrganizations: Account.Response[];
@@ -41,8 +47,8 @@ interface UseOrdersFilterConfigsProps {
 // Constants
 const STATUS_FILTERS = {
   OPEN: (order: Order.Response) =>
-    order.status !== 'completed' && order.status !== 'anulled',
-  COMPLETED: (order: Order.Response) => order.status === 'completed',
+    order.status?.status_name !== 'completed' && order.status?.status_name !== 'anulled',
+  COMPLETED: (order: Order.Response) => order.status?.status_name === 'completed',
 };
 
 const normalizeString = (str: string | undefined | null) => {
@@ -73,11 +79,11 @@ const getSearchableFields = (order: Order.Response) => {
     order.client_organization?.name,
     order.customer?.name,
     order.customer?.email,
-    order.status?.toLowerCase(),
+    order.status?.status_name?.toLowerCase(),
     order.priority?.toLowerCase(),
-    ...order.assigned_to?.flatMap(assignee => [
-      assignee.agency_member?.name,
-      assignee.agency_member?.email
+    ...order.assignations?.flatMap(assignee => [
+      assignee?.name,
+      assignee?.email
     ]) ?? []
   ];
 
@@ -134,7 +140,7 @@ const useOrdersFilterConfigs = ({
     {
       key: 'status',
       filterFn: (order, selectedValues) =>
-        selectedValues.includes(order.status ?? ''),
+        selectedValues.includes(order.status?.status_name ?? ''),
     },
     {
       key: 'tags',
@@ -152,8 +158,8 @@ const useOrdersFilterConfigs = ({
       key: 'assigned_to',
       filterFn: (order, selectedValues) =>
         selectedValues.some((assigneeId) =>
-          order.assigned_to
-            ?.map((assignee) => assignee.agency_member?.id)
+          order.assignations
+            ?.map((assignee) => assignee?.id)
             .includes(assigneeId),
         ),
     },
@@ -208,15 +214,15 @@ const useOrdersFilterConfigs = ({
     statuses: AgencyStatus.Type[],
   ): FilterOption[] =>
     statuses.map((status) => ({
-      label: formatString(status.status_name ?? '', 'capitalize') ?? '',
-      value: status.status_name ?? '',
-      color: status.status_color ?? '',
+      label: formatString(status?.status_name ?? '', 'capitalize') ?? '',
+      value: status?.status_name ?? '',
+      color: status?.status_color ?? '',
       onFilter: () =>
         updateFilter(
           'status',
           'toggle',
-          (order) => order.status === status.status_name,
-          status.status_name ?? '',
+          (order) => order.status?.status_name === status?.status_name,
+          status?.status_name ?? '',
         ),
     }));
 
@@ -257,8 +263,8 @@ const useOrdersFilterConfigs = ({
           'assigned_to',
           'toggle',
           (order) =>
-            order.assigned_to
-            ?.map((assignee) => assignee.agency_member?.id)
+            order.assignations
+            ?.map((assignee) => assignee?.id)
               .includes(member.id) ?? false,
           member.id,
         ),

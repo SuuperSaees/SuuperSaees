@@ -6,25 +6,31 @@ import {
   createContext,
   useCallback,
   useContext,
-  useState,
   useMemo,
+  useState,
 } from 'react';
 
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
-import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { useOrdersSubscriptionsHandlers } from '~/hooks/use-orders-subscriptions-handlers';
 import { useRealtime } from '~/hooks/use-realtime';
 import { type Order } from '~/lib/order.types';
+import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 import {
   type OrdersContextType,
   type OrdersProviderProps,
   type PaginatedOrdersResponse,
 } from './orders-context.types';
-import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 /**
  * Context for managing orders state and realtime updates
@@ -46,35 +52,33 @@ export const OrdersProvider = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [limit, setLimit] = useState(20);
 
+  const { organization, workspace: userWorkspace } = useUserWorkspace();
+  const target = userWorkspace.role?.includes('agency') ? 'agency' : 'client';
   // Stable query key that includes pagination parameters
   const queryKey = useMemo(() => {
     const key = ['orders', { page: currentPage, limit }];
-    console.log('🔑 Query key created:', key);
-    console.log('🔑 Current page:', currentPage, 'Current limit:', limit);
     return key;
   }, [currentPage, limit]);
 
   // Stable query function
   const queryFn = useCallback(() => {
-    console.log('🚀 Query function called with page:', currentPage, 'limit:', limit);
-    console.log('🚀 Making request to getOrders...');
-    const promise = getOrders(true, {
+    const promise = getOrders(organization.id ?? '', target, true, {
       pagination: {
         page: currentPage,
         limit: limit,
       },
     });
-    console.log('🚀 Request promise:', promise);
+
     return promise;
-  }, [currentPage, limit]);
+  }, [currentPage, limit, organization.id, target]);
 
   const ordersQuery = useQuery({
     queryKey: queryKey,
     queryFn: queryFn,
-    initialData: (currentPage === 1 && limit === 20) ? initialOrders : undefined,
+    initialData: currentPage === 1 && limit === 20 ? initialOrders : undefined,
     placeholderData: keepPreviousData, // This is the key for smooth pagination!
     staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000,   // 10 minutes (was cacheTime)
+    gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
   });
 
   // Extract pagination data from the response
@@ -96,8 +100,10 @@ export const OrdersProvider = ({
         | ((prev: Order.Response[]) => Order.Response[]),
     ) => {
       // Get the current data from the query cache
-      const currentData = queryClient.getQueryData(queryKey) as PaginatedOrdersResponse;
-      
+      const currentData = queryClient.getQueryData(
+        queryKey,
+      ) as PaginatedOrdersResponse;
+
       if (!currentData) return;
 
       // If updater is a function, call it with current orders
@@ -117,39 +123,45 @@ export const OrdersProvider = ({
   );
 
   // Function to go to a specific page (offset-based) - MUCH SIMPLER!
-  const goToPage = useCallback((page: number) => {
-    if (page < 1 || (totalPages && page > totalPages)) return;
-    
-    // Just change the page state - React Query handles the rest!
-    setCurrentPage(page);
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (page: number) => {
+      if (page < 1 || (totalPages && page > totalPages)) return;
+
+      // Just change the page state - React Query handles the rest!
+      setCurrentPage(page);
+    },
+    [totalPages],
+  );
 
   // Function to update rows per page
   const updateLimit = useCallback((newLimit: number) => {
-    console.log('🔥 updateLimit called with:', newLimit);
-    console.log('🔥 Current limit:', limit);
-    console.log('🔥 Current page:', currentPage);
     setLimit(newLimit);
     setCurrentPage(1); // Reset to first page when changing page size
-    console.log('🔥 After updateLimit: limit will be', newLimit, 'page will be 1');
-  }, [limit, currentPage]);
+  }, []);
 
   // Function to load the next page (cursor-based)
   const loadNextPage = useCallback(async () => {
     if (!hasNextPage || !nextCursor) return;
-    
+
     try {
       // For cursor-based, we need to append data, so we use manual fetching
-      const nextPageData = await getOrders(true, {
-        pagination: {
-          cursor: nextCursor,
-          limit: limit,
+      const nextPageData = await getOrders(
+        organization.id ?? '',
+        target,
+        true,
+        {
+          pagination: {
+            cursor: nextCursor,
+            limit: limit,
+          },
         },
-      });
+      );
 
       // Get current data
-      const currentData = queryClient.getQueryData(queryKey) as PaginatedOrdersResponse;
-      
+      const currentData = queryClient.getQueryData(
+        queryKey,
+      ) as PaginatedOrdersResponse;
+
       if (currentData && nextPageData.data.length > 0) {
         // Merge new data with existing data
         const mergedData: PaginatedOrdersResponse = {
@@ -164,14 +176,21 @@ export const OrdersProvider = ({
     } catch (error) {
       console.error('Error loading next page:', error);
     }
-  }, [hasNextPage, nextCursor, limit, queryClient, queryKey]);
+  }, [
+    hasNextPage,
+    nextCursor,
+    limit,
+    queryClient,
+    queryKey,
+    organization.id,
+    target,
+  ]);
 
   const { handleAssigneesChange } = useOrdersSubscriptionsHandlers(
     orders,
     setOrders,
     agencyMembers,
   );
-  console.log('orders', orders);
   // Create subscription handler for realtime updates
   const handleSubscriptions = createSubscriptionHandler<Order.Response>({
     onBeforeUpdate: (payload) => {
@@ -226,7 +245,7 @@ export const OrdersProvider = ({
     agencyId,
     queryKey,
     setOrders,
-    
+
     // Pagination properties
     nextCursor,
     count,
@@ -235,7 +254,7 @@ export const OrdersProvider = ({
     currentPage: serverCurrentPage ?? currentPage,
     isOffsetBased,
     limit,
-    
+
     // Pagination functions
     goToPage,
     loadNextPage,
