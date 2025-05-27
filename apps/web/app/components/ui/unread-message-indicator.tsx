@@ -29,11 +29,12 @@ export function UnreadMessageIndicator({
   color = 'red',
   seeConversationFn
 }: UnreadMessageIndicatorProps) {
-  const { user } = useUserWorkspace();
+  const { workspace: user, organization } = useUserWorkspace();
+
   const { 
     getUnreadCountForOrder, 
     getUnreadCountForChat,
-  } = useUnreadMessageCounts({ userId: user?.id ?? '' });
+  } = useUnreadMessageCounts({ userId: user?.id ?? '', userRole: user?.role ?? '', userOrganizationId: organization?.id ?? '' });
   const router = useRouter();
   
   // Determine unread count based on whether we're dealing with an order or chat

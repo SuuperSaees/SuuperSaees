@@ -73,7 +73,7 @@ export const ActivityProvider = ({
   });
 
   // Get current user workspace information
-  const { workspace: currentUser } = useUserWorkspace();
+  const { workspace: currentUser, organization } = useUserWorkspace();
 
   // Initialize API actions for messages
   const { addMessageMutation, deleteMessageMutation } = useOrderApiActions({
@@ -105,6 +105,8 @@ export const ActivityProvider = ({
   const { markOrderAsRead, getUnreadCountForOrder, unreadCounts } =
     useUnreadMessageCounts({
       userId: currentUser.id ?? '',
+      userRole: currentUser.role ?? '',
+      userOrganizationId: organization?.id ?? '',
     });
 
   useEffect(() => {
