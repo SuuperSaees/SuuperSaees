@@ -3564,10 +3564,19 @@ export type Database = {
         }
         Returns: boolean
       }
-      insert_service_brief_relation: {
-        Args:
-          | { service_id: string; brief_id: string }
-          | { service_id: number; brief_id: string }
+      insert_service_brief_relation:
+        | {
+            Args: {
+              service_id: number
+              brief_id: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              service_id: string
+              brief_id: string
+            }
         Returns: undefined
       }
       is_account_owner: {
@@ -4401,6 +4410,7 @@ export type Enums<
     schema: keyof Database
   }
     ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]

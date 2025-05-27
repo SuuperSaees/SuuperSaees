@@ -6,22 +6,38 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from 'react';
 
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+
+import { ViewTypeEnum } from '~/(views)/views.types';
 import { createSubscriptionHandler } from '~/hooks/create-subscription-handler';
 import { useOrdersSubscriptionsHandlers } from '~/hooks/use-orders-subscriptions-handlers';
 import { useRealtime } from '~/hooks/use-realtime';
+import useStorageConfigs from '~/hooks/use-storage-configs';
 import { type Order } from '~/lib/order.types';
+import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
+import { OrdersViewConfig } from '../../hooks/use-orders-view-configs';
 import {
   type OrdersContextType,
   type OrdersProviderProps,
+  type OrdersQueryResponse,
+  type PaginatedOrdersResponse,
 } from './orders-context.types';
-import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
+
+// Configuration type for orders view
 
 /**
  * Context for managing orders state and realtime updates
@@ -30,28 +46,312 @@ import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-ord
 const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
 /**
+ * Helper function to normalize response data
+ * Converts Order.Response[] to PaginatedOrdersResponse format with proper pagination
+ * Handles hybrid pagination: local for initial data, server for additional pages
+ */
+const normalizeOrdersResponse = (
+  response: OrdersQueryResponse,
+  currentPage: number,
+  frontendLimit: number,
+  isInitialData = false,
+): PaginatedOrdersResponse => {
+  // If it's already a paginated response from server, use it as-is
+  if (!Array.isArray(response)) {
+    return response;
+  }
+
+  // Handle array responses (initial data)
+  const totalCount = response.length;
+  const startIndex = (currentPage - 1) * frontendLimit;
+  const endIndex = startIndex + frontendLimit;
+  const paginatedData = response.slice(startIndex, endIndex);
+
+  // For initial data, we need to be smart about pagination
+  if (isInitialData) {
+    // If we have exactly the same amount as requested, there might be more on server
+    // If we have less, we know this is all the data
+    const serverMightHaveMore =
+      totalCount % frontendLimit === 0 && totalCount > 0;
+    const localTotalPages = Math.ceil(totalCount / frontendLimit);
+    const hasNextPageLocally = currentPage < localTotalPages;
+
+    // If we're on the last local page and server might have more, indicate hasNextPage
+    const hasNextPage =
+      hasNextPageLocally ||
+      (currentPage === localTotalPages && serverMightHaveMore);
+
+    return {
+      data: paginatedData,
+      nextCursor: null,
+      count: totalCount, // This is the count of initial data, not total server count
+      pagination: {
+        limit: frontendLimit,
+        hasNextPage,
+        totalPages: serverMightHaveMore ? null : localTotalPages, // null means unknown
+        currentPage,
+        isOffsetBased: true,
+      },
+    };
+  }
+
+  // For non-initial data (regular array responses), calculate normally
+  const totalPages = Math.ceil(totalCount / frontendLimit);
+  const hasNextPage = currentPage < totalPages;
+
+  return {
+    data: paginatedData,
+    nextCursor: null,
+    count: totalCount,
+    pagination: {
+      limit: frontendLimit,
+      hasNextPage,
+      totalPages,
+      currentPage,
+      isOffsetBased: true,
+    },
+  };
+};
+
+/**
  * Provider component for Orders context
- * Manages orders state and handles realtime updates
+ * Manages orders state and handles realtime updates with pagination support
  */
 export const OrdersProvider = ({
   children,
   agencyMembers,
   agencyId,
-  queryKey = ['orders'],
-  queryFn = () => getOrders(true),
   initialOrders,
+  customQueryFn,
+  customQueryKey,
+  currentView,
 }: OrdersProviderProps) => {
-  // const [orders, setOrders] = useState<Order.Response[]>(initialOrders);
   const queryClient = useQueryClient();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Use storage configs for rowsPerPage setting
+
+  const validator = (config: unknown): boolean => {
+    if (typeof config !== 'object' || config === null) return false;
+    const ordersConfig = config as Partial<OrdersViewConfig>;
+    return (
+      typeof ordersConfig.table?.rowsPerPage === 'number' &&
+      ordersConfig.table?.rowsPerPage > 0
+    );
+  };
+
+  // Default configuration
+  const defaultConfig: OrdersViewConfig = {
+    currentView: ViewTypeEnum.Table,
+    table: {
+      rowsPerPage: 10,
+    },
+  };
+
+  const { configs, updateConfig } = useStorageConfigs<OrdersViewConfig>(
+    'orders-config',
+    defaultConfig,
+    validator,
+  );
+
+  const limit = configs.table?.rowsPerPage ?? 10;
+
+  const { organization, workspace: userWorkspace } = useUserWorkspace();
+  const target = userWorkspace.role?.includes('agency') ? 'agency' : 'client';
+
+  // Get current view from storage if not provided as prop
+  const [activeView, setActiveView] = useState(() => {
+    if (currentView) return currentView;
+
+    try {
+      const stored = localStorage.getItem('orders-config');
+      if (stored) {
+        const parsed = JSON.parse(stored) as { currentView?: string };
+        return parsed.currentView ?? 'table';
+      }
+    } catch (error) {
+      console.error('Error reading view config from localStorage:', error);
+    }
+    return 'table';
+  });
+
+  // Listen for storage changes to sync view across components
+  useEffect(() => {
+    if (currentView) {
+      setActiveView(currentView);
+      return;
+    }
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'orders-config' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue) as { currentView?: string };
+          setActiveView(parsed.currentView ?? 'table');
+        } catch (error) {
+          console.error('Error parsing storage change:', error);
+        }
+      }
+    };
+
+    // Also listen for custom events for same-tab updates
+    const handleCustomStorageChange = () => {
+      try {
+        const stored = localStorage.getItem('orders-config');
+        if (stored) {
+          const parsed = JSON.parse(stored) as { currentView?: string };
+          setActiveView(parsed.currentView ?? 'table');
+        }
+      } catch (error) {
+        console.error('Error reading view config from localStorage:', error);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('orders-config-changed', handleCustomStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener(
+        'orders-config-changed',
+        handleCustomStorageChange,
+      );
+    };
+  }, [currentView]);
+
+  // Determine if pagination should be used based on view
+  const shouldUsePagination = activeView === 'table';
+  const effectiveLimit = shouldUsePagination ? limit : undefined;
+
+  // Stable query key that includes pagination parameters and search
+  const queryKey = useMemo(() => {
+    if (customQueryKey) {
+      return [
+        ...customQueryKey,
+        {
+          page: currentPage,
+          limit: effectiveLimit,
+          search: searchTerm,
+          view: activeView,
+        },
+      ];
+    }
+    const key = [
+      'orders',
+      {
+        page: currentPage,
+        limit: effectiveLimit,
+        search: searchTerm,
+        view: activeView,
+      },
+    ];
+    return key;
+  }, [customQueryKey, currentPage, effectiveLimit, searchTerm, activeView]);
+
+  // Stable query function
+  const queryFn = useCallback(async (): Promise<PaginatedOrdersResponse> => {
+    // If we have initial orders and no search term, check if we can use them
+    if (initialOrders && !searchTerm && Array.isArray(initialOrders)) {
+      const localLimit = shouldUsePagination ? limit : initialOrders.length;
+      const localTotalPages = Math.ceil(initialOrders.length / localLimit);
+
+      // If requesting a page within initial data range, use local pagination
+      if (currentPage <= localTotalPages) {
+        return normalizeOrdersResponse(
+          initialOrders,
+          currentPage,
+          localLimit,
+          true,
+        );
+      }
+
+      // If requesting beyond initial data, we need to fetch from server
+      // Fall through to server fetch logic below
+    }
+
+    if (customQueryFn) {
+      const response = await customQueryFn({
+        page: currentPage,
+        limit: effectiveLimit ?? limit,
+        searchTerm: searchTerm,
+        view: activeView,
+      });
+      return normalizeOrdersResponse(
+        response,
+        currentPage,
+        effectiveLimit ?? limit,
+        false,
+      );
+    }
+
+    const paginationConfig = shouldUsePagination
+      ? {
+          page: currentPage,
+          limit: limit,
+        }
+      : undefined;
+
+    const promise = getOrders(organization.id ?? '', target, true, {
+      pagination: paginationConfig,
+      search: searchTerm ? { term: searchTerm } : undefined,
+    });
+
+    return promise;
+  }, [
+    customQueryFn,
+    currentPage,
+    effectiveLimit,
+    limit,
+    searchTerm,
+    organization.id,
+    target,
+    initialOrders,
+    shouldUsePagination,
+    activeView,
+  ]);
 
   const ordersQuery = useQuery({
     queryKey: queryKey,
     queryFn: queryFn,
-    initialData: initialOrders,
+    initialData: (() => {
+      // Use initial orders only if we're on a page that can be served locally
+      if (initialOrders && !searchTerm && Array.isArray(initialOrders)) {
+        const localLimit = shouldUsePagination ? limit : initialOrders.length;
+        const localTotalPages = Math.ceil(initialOrders.length / localLimit);
+        if (currentPage <= localTotalPages) {
+          return normalizeOrdersResponse(
+            initialOrders,
+            currentPage,
+            localLimit,
+            true,
+          );
+        }
+      }
+      return undefined;
+    })(),
+    placeholderData: keepPreviousData, // This is the key for smooth pagination!
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
   });
 
-  const orders = ordersQuery.data ?? [];
+  // Extract pagination data from the response
+  const ordersData = ordersQuery.data;
+  const orders = ordersData?.data ?? [];
+  const nextCursor = ordersData?.nextCursor ?? null;
+  const count = ordersData?.count ?? null;
+  const serverHasNextPage = ordersData?.pagination?.hasNextPage ?? false;
+  const serverCurrentPage = ordersData?.pagination?.currentPage ?? null;
+  const isOffsetBased = ordersData?.pagination?.isOffsetBased ?? false;
   const ordersAreLoading = ordersQuery.isLoading || ordersQuery.isPending;
+  const isLoadingMore = ordersQuery.isFetching; // Use isFetching for loading indicator
+
+  // Calculate pagination immediately from count and limit
+  const totalPages =
+    shouldUsePagination && count ? Math.ceil(count / limit) : null;
+  const hasNextPage =
+    shouldUsePagination && count
+      ? currentPage < Math.ceil(count / limit)
+      : serverHasNextPage;
 
   const setOrders = useCallback(
     (
@@ -59,24 +359,118 @@ export const OrdersProvider = ({
         | Order.Response[]
         | ((prev: Order.Response[]) => Order.Response[]),
     ) => {
-      // Get the current orders from the query cache
-      const currentOrders = queryClient.getQueryData(
+      // Get the current data from the query cache
+      const currentData = queryClient.getQueryData(
         queryKey,
-      ) as Order.Response[];
+      ) as PaginatedOrdersResponse;
+
+      if (!currentData) return;
 
       // If updater is a function, call it with current orders
       // If it's a direct value, use it as is
       const newOrders =
-        typeof updater === 'function' ? updater(currentOrders) : updater;
+        typeof updater === 'function' ? updater(currentData.data) : updater;
 
-      // Update the query cache with new orders
-      queryClient.setQueryData(queryKey, newOrders);
+      // Update the query cache with new orders, preserving pagination metadata
+      const updatedData: PaginatedOrdersResponse = {
+        ...currentData,
+        data: newOrders,
+      };
+
+      queryClient.setQueryData(queryKey, updatedData);
     },
     [queryClient, queryKey],
   );
 
-  // Initialize query cache
-  // queryClient.setQueryData(['orders'], initialOrders);
+  // Function to go to a specific page (offset-based)
+  // Uses immediate pagination calculation for fast navigation
+  const goToPage = useCallback(
+    (page: number) => {
+      if (page < 1) return;
+
+      // Use immediate calculation - if we have totalPages, check against it
+      if (totalPages && page > totalPages) return;
+
+      setCurrentPage(page);
+    },
+    [totalPages],
+  );
+
+  // Function to handle search
+  // This will switch from local pagination to API calls when searching
+  const handleSearch = useCallback((term: string) => {
+    setSearchTerm(term);
+    setCurrentPage(1); // Reset to first page when searching
+  }, []);
+
+  // Function to update rows per page
+  // When working with initial orders, this will re-paginate locally
+  const updateLimit = useCallback(
+    (newLimit: number) => {
+      updateConfig('table', {
+        ...configs.table,
+        rowsPerPage: newLimit,
+      });
+      setCurrentPage(1); // Reset to first page when changing page size
+    },
+    [updateConfig, configs.table],
+  );
+
+  // Function to load the next page (cursor-based)
+  const loadNextPage = useCallback(async () => {
+    if (!hasNextPage || !nextCursor) return;
+
+    try {
+      let nextPageData: PaginatedOrdersResponse;
+
+      if (customQueryFn) {
+        // For custom query functions, we can't use cursor-based pagination
+        // This function might not be applicable for custom queries
+        console.warn(
+          'loadNextPage with cursor-based pagination is not supported for custom query functions',
+        );
+        return;
+      } else {
+        // For default query function, use cursor-based pagination
+        nextPageData = await getOrders(organization.id ?? '', target, true, {
+          pagination: {
+            cursor: nextCursor,
+            limit: limit,
+          },
+          search: searchTerm ? { term: searchTerm } : undefined,
+        });
+      }
+
+      // Get current data
+      const currentData = queryClient.getQueryData(
+        queryKey,
+      ) as PaginatedOrdersResponse;
+
+      if (currentData && nextPageData.data.length > 0) {
+        // Merge new data with existing data
+        const mergedData: PaginatedOrdersResponse = {
+          data: [...currentData.data, ...nextPageData.data],
+          nextCursor: nextPageData.nextCursor,
+          count: nextPageData.count,
+          pagination: nextPageData.pagination,
+        };
+
+        queryClient.setQueryData(queryKey, mergedData);
+      }
+    } catch (error) {
+      console.error('Error loading next page:', error);
+    }
+  }, [
+    hasNextPage,
+    nextCursor,
+    limit,
+    queryClient,
+    queryKey,
+    organization.id,
+    target,
+    searchTerm,
+    customQueryFn,
+  ]);
 
   const { handleAssigneesChange } = useOrdersSubscriptionsHandlers(
     orders,
@@ -137,6 +531,25 @@ export const OrdersProvider = ({
     agencyId,
     queryKey,
     setOrders,
+
+    // Pagination properties
+    nextCursor,
+    count,
+    hasNextPage,
+    totalPages,
+    currentPage: serverCurrentPage ?? currentPage,
+    isOffsetBased,
+    limit: effectiveLimit ?? limit,
+
+    // Pagination functions
+    goToPage,
+    loadNextPage,
+    handleSearch,
+    searchTerm,
+
+    // Additional functions
+    updateLimit,
+    isLoadingMore,
   };
 
   return (

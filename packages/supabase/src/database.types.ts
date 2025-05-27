@@ -132,22 +132,7 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "accounts_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "accounts_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       accounts_memberships: {
         Row: {
@@ -2067,7 +2052,6 @@ export type Database = {
         Row: {
           agency_id: string
           brief_id: string | null
-          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -2089,7 +2073,6 @@ export type Database = {
         Insert: {
           agency_id: string
           brief_id?: string | null
-          brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -2111,7 +2094,6 @@ export type Database = {
         Update: {
           agency_id?: string
           brief_id?: string | null
-          brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -3389,7 +3371,6 @@ export type Database = {
         Returns: {
           agency_id: string
           brief_id: string | null
-          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -3654,7 +3635,6 @@ export type Database = {
         Returns: {
           agency_id: string
           brief_id: string | null
-          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string

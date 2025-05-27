@@ -31,11 +31,11 @@ export function useOrderStats(orders: Order.Response[]) {
       active: ordersExists
         ? orders?.filter(
             (order) =>
-              order.status !== 'completed' && order.status !== 'annulled',
+              order?.status?.status_name !== 'completed' && order?.status?.status_name !== 'annulled',
           ).length
         : null,
       completed: ordersExists
-        ? orders?.filter((order) => order.status === 'completed').length
+        ? orders?.filter((order) => order?.status?.status_name === 'completed').length
         : null,
       total: filteredOrdersExists ? filteredOrders?.length : null,
       // Calculate the average rating of the reviews using filtered orders

@@ -10,22 +10,41 @@ import {
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-import { AgencyStatus } from '../../../../../../../../apps/web/lib/agency-statuses.types';
+import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
+import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
+import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
+import { fetchFormfieldsWithResponses } from '../../briefs/get/get-brief';
 import {
-  fetchFormfieldsWithResponses,
-} from '../../briefs/get/get-brief';
-import {
-  fetchCurrentUser,
   fetchCurrentUserAccount,
   getUserRole,
 } from '../../members/get/get-member-account';
 import { hasPermissionToReadOrderDetails } from '../../permissions/orders';
-import { getOrdersReviewsForUser, getOrdersReviewsById } from '../../review/get/get-review';
-import { Tags } from '../../../../../../../../apps/web/lib/tags.types';
-import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
-import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
+import {
+  getOrdersReviewsById,
+  getOrdersReviewsForUser,
+} from '../../review/get/get-review';
+import { User } from '../../../../../../../../apps/web/lib/user.types';
+
+interface Config {
+  pagination?: {
+    // Cursor-based pagination (for infinite scrolling)
+    cursor?: string | number;
+    endCursor?: string | number;
+
+    // Offset-based pagination (for page navigation)
+    page?: number; // Current page number (1-indexed)
+    offset?: number; // Direct offset override
+
+    // Common
+    limit?: number;
+  };
+  search?: {
+    term?: string;
+    fields?: string[]; // Optional: specify which fields to search in
+  };
+}
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
   try {
@@ -41,44 +60,46 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         `,
       )
       .eq('id', orderId)
-      .single()
+      .single();
 
-      if (orderData?.followers?.length) {
-        const adminClient = getSupabaseServerComponentClient({
-          admin: true
-        });
-        const followerIds = orderData.followers
-          .map(f => f.client_follower?.id)
+    if (orderData?.followers?.length) {
+      const adminClient = getSupabaseServerComponentClient({
+        admin: true,
+      });
+      const followerIds = orderData.followers.map((f) => f.client_follower?.id);
 
-        const { data: rolesData } = await adminClient
-          .from('accounts_memberships')
-          .select('user_id, account_role')
-          .in('user_id', followerIds);
+      const { data: rolesData } = await adminClient
+        .from('accounts_memberships')
+        .select('user_id, account_role')
+        .in('user_id', followerIds);
 
-        orderData.followers = orderData.followers
-          .map(follower => {
-            if (!follower.client_follower) return null;
-            
-            const userRole = rolesData?.find(r => 
-              r.user_id === follower.client_follower?.id
-            )?.account_role;
+      orderData.followers = orderData.followers
+        .map((follower) => {
+          if (!follower.client_follower) return null;
 
-            if (userRole === 'client_guest') return null;
-            
-            return {
-              ...follower,
-              client_follower: {
-                id: follower.client_follower?.id,
-                name: follower.client_follower?.settings?.[0]?.name ?? follower.client_follower?.name,
-                email: follower.client_follower?.email,
-                picture_url: follower.client_follower?.settings?.[0]?.picture_url ?? follower.client_follower?.picture_url,
-                role: userRole
-              }
-            };
-          })
-          .filter(Boolean); 
-      }
+          const userRole = rolesData?.find(
+            (r) => r.user_id === follower.client_follower?.id,
+          )?.account_role;
 
+          if (userRole === 'client_guest') return null;
+
+          return {
+            ...follower,
+            client_follower: {
+              id: follower.client_follower?.id,
+              name:
+                follower.client_follower?.settings?.[0]?.name ??
+                follower.client_follower?.name,
+              email: follower.client_follower?.email,
+              picture_url:
+                follower.client_follower?.settings?.[0]?.picture_url ??
+                follower.client_follower?.picture_url,
+              role: userRole,
+            },
+          };
+        })
+        .filter(Boolean);
+    }
 
     const userHasReadMessagePermission = await hasPermissionToReadOrderDetails(
       orderId,
@@ -108,25 +129,34 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
       client: {
         ...orderData.client,
         name: orderData.client?.settings?.[0]?.name ?? orderData.client?.name,
-        picture_url: orderData.client?.settings?.[0]?.picture_url ?? orderData.client?.picture_url,
+        picture_url:
+          orderData.client?.settings?.[0]?.picture_url ??
+          orderData.client?.picture_url,
       },
-      tags: Array.isArray(orderData.order_tags) 
-        ? orderData.order_tags.map(tagItem => tagItem.tag) 
-        : orderData.order_tags ? [orderData.order_tags?.tag as Tags.Type] : [],
-      assigned_to: orderData.assigned_to.filter(assignment => 
-        !assignment.agency_member?.deleted_on && true
-        // assignment.agency_member?.organization_id === orderData.agency_id
-      ).map(assignment => ({
-        ...assignment,
-        agency_member: {
-          ...assignment.agency_member,
-          name: assignment.agency_member?.settings?.[0]?.name ?? assignment.agency_member?.name,
-          picture_url: assignment.agency_member?.settings?.[0]?.picture_url ?? assignment.agency_member?.picture_url,
-        }
-      } )),
+      tags: Array.isArray(orderData.order_tags)
+        ? orderData.order_tags.map((tagItem) => tagItem.tag)
+        : orderData.order_tags
+          ? [orderData.order_tags?.tag as Tags.Type]
+          : [],
+      assigned_to: orderData.assigned_to
+        .filter(
+          (assignment) => !assignment.agency_member?.deleted_on && true,
+          // assignment.agency_member?.organization_id === orderData.agency_id
+        )
+        .map((assignment) => ({
+          ...assignment,
+          agency_member: {
+            ...assignment.agency_member,
+            name:
+              assignment.agency_member?.settings?.[0]?.name ??
+              assignment.agency_member?.name,
+            picture_url:
+              assignment.agency_member?.settings?.[0]?.picture_url ??
+              assignment.agency_member?.picture_url,
+          },
+        })),
       client_organization: clientOrganizationData,
       brief_responses: briefResponses,
-      
     };
 
     return proccesedData as unknown as Order.Relational;
@@ -177,26 +207,30 @@ export async function getOrderAgencyMembers(
     }
 
     if (orderData.propietary_organization_id === accountData.organization_id) {
-      const { data: agencyMemberIds, error: agencyMemberIdsError } = await client
-        .from('accounts_memberships')
-        .select('user_id')
-        .eq('organization_id', agencyId);
+      const { data: agencyMemberIds, error: agencyMemberIdsError } =
+        await client
+          .from('accounts_memberships')
+          .select('user_id')
+          .eq('organization_id', agencyId);
 
       if (agencyMemberIdsError) throw agencyMemberIdsError;
-      
+
       const { data: agencyMembersData, error: agencyMembersError } =
         await client
           .from('accounts')
           .select(
             'id, name, email, picture_url, user_settings(name, picture_url, calendar)',
           )
-          .in('id', agencyMemberIds.map(member => member.user_id))
+          .in(
+            'id',
+            agencyMemberIds.map((member) => member.user_id),
+          )
           .is('deleted_on', null);
 
       if (agencyMembersError) throw agencyMembersError;
-      return agencyMembersData.map(member => ({
+      return agencyMembersData.map((member) => ({
         ...member,
-        organization_id: accountData.organization_id
+        organization_id: accountData.organization_id,
       }));
     }
 
@@ -206,7 +240,6 @@ export async function getOrderAgencyMembers(
       .eq('organization_id', agencyId);
 
     if (agencyMemberIdsError) throw agencyMemberIdsError;
-    
 
     const { data: agencyMembersData, error: agencyMembersError } = await client
       .from('accounts')
@@ -224,156 +257,193 @@ export async function getOrderAgencyMembers(
         )
       `,
       )
-      .in('id', agencyMemberIds.map(member => member.user_id))
+      .in(
+        'id',
+        agencyMemberIds.map((member) => member.user_id),
+      )
       .is('deleted_on', null);
 
     if (agencyMembersError) throw agencyMembersError;
 
-    return agencyMembersData?.map(member => ({
-      ...member,
-      organization_id: accountData.organization_id
-    })) ?? [];
+    return (
+      agencyMembersData?.map((member) => ({
+        ...member,
+        organization_id: accountData.organization_id,
+      })) ?? []
+    );
   } catch (error) {
     console.error('Error fetching order agency members:', error);
     throw error;
   }
 }
 
+/**
+ * Retrieves orders with flexible pagination support
+ * @param includeBrief - Whether to include brief information in the response
+ * @param config - Configuration object containing pagination options
+ * @param config.pagination.page - Page number for offset-based pagination (1-indexed)
+ * @param config.pagination.offset - Direct offset override for offset-based pagination
+ * @param config.pagination.cursor - created_at timestamp for cursor-based pagination (infinite scroll)
+ * @param config.pagination.endCursor - created_at timestamp to start from (cursor-based)
+ * @param config.pagination.limit - Maximum number of orders to return (default: 10)
+ * @returns Object containing data array, pagination metadata, and cursors
+ *
+ * @example
+ * // Offset-based pagination (for page navigation)
+ * const page2 = await getOrders(false, { pagination: { page: 2, limit: 20 } });
+ *
+ * // Cursor-based pagination (for infinite scroll)
+ * const nextBatch = await getOrders(false, {
+ *   pagination: {
+ *     cursor: lastOrderTimestamp,
+ *     limit: 20
+ *   }
+ * });
+ */
 export const getOrders = async (
+  organizationId: string,
+  target: 'agency' | 'client',
   includeBrief?: boolean,
-): Promise<Order.Response[]> => {
+  config?: Config,
+): Promise<{
+  data: Order.Response[];
+  nextCursor: string | null;
+  count: number | null;
+  pagination: {
+    limit: number;
+    hasNextPage: boolean;
+    totalPages: number | null;
+    currentPage: number | null;
+    isOffsetBased: boolean;
+  };
+}> => {
   try {
     const client = getSupabaseServerComponentClient();
-    const userData = await fetchCurrentUser(client);
-    const userAccount = await fetchCurrentUserAccount(client, userData.id);
-    const userId = userData.id;
 
-    if (!userAccount.organization_id)
-      throw new Error('User account not found (no organization_id)');
-
-    // Step 1: Get and define the user's role
-    const role = await getUserRole() ?? '';
-    const clientRoles = new Set(['client_owner', 'client_member', 'client_guest']);
-    const agencyRoles = new Set([
-      'agency_owner',
-      'agency_project_manager',
-      'agency_member',
-    ]);
-
-    const isClient = clientRoles.has(role);
-    const isAgency = agencyRoles.has(role);
-    const isAgencyMember = isAgency && role === 'agency_member';
-
-    const isAgencyOwnerOrProjectManager =
-      (isAgency && role === 'agency_project_manager') ||
-      role === 'agency_owner';
-    // Step 2: Prerpare the query
+    const limit = config?.pagination?.limit;
+    const shouldPaginate = limit !== undefined;
+    const effectiveLimit = limit ?? 10; // Default limit for calculations
+    
     let query = client
       .from('orders_v2')
       .select(
-        `*, client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
-        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
-        assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
-        tags:order_tags(tag:tags(*))
+        `id, title, priority, due_date, created_at, updated_at, status_id, agency_id, 
+        client_organization_id, deleted_on, position, propietary_organization_id,
+        status:agency_statuses!status_id(*), 
+        assignations:order_assignations(member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
+        client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
+        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url))
         ${includeBrief ? ', brief:briefs(name)' : ''}
         `,
         { count: 'exact' },
       )
       .is('deleted_on', null)
-      .order('created_at', { ascending: false })
-   
-    let orders: Order.Response[] = [];
+      .eq(
+        target === 'agency' ? 'agency_id' : 'client_organization_id',
+        organizationId,
+      )
+      .order('created_at', { ascending: false });
 
-    if (isClient) {
-      const ordersAssignedToClient = await fetchAssignedOrdersForClient(
-        client,
-        userId,
-      );
+    // Only apply limit if pagination is requested
+    if (shouldPaginate) {
+      query = query.limit(effectiveLimit + 1);
+    }
 
-      const ordersIdsClientBelongsTo = ordersAssignedToClient.map(
-        (order) => order.order_id,
-      );
-      if(role === 'client_guest'){
-        query = query.eq('visibility', 'public');
-      }
+    // Apply search if provided
+    if (config?.search?.term && config.search.term.trim()) {
+      const searchTerm = config.search.term.trim();
       
-      query = query.in('id', ordersIdsClientBelongsTo);
-    } else if (isAgencyMember) {
-      const ordersAssignedToAgencyMember =
-        await fetchAssignedOrdersForAgencyMember(client, userId);
+      // Use individual filters for better compatibility
+      // Check if it's a numeric search (for ID)
+      const isNumericSearch = /^\d+$/.test(searchTerm.replace('#', ''));
+      
+      if (isNumericSearch) {
+        // If it's numeric, search by ID
+        query = query.eq('id', parseInt(searchTerm.replace('#', '')));
+      } else {
+        // For text search, use textSearch or ilike on title and description
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      }
+    }
 
-      const ordersIdsAgencyMemberBelongsTo = ordersAssignedToAgencyMember.map(
-        (order) => order.order_id,
-      );
-      query = query
-        .in('id', ordersIdsAgencyMemberBelongsTo)
-        .eq('agency_id', userAccount.organization_id);
-    } else if (isAgencyOwnerOrProjectManager) {
-      query = query.eq('agency_id', userAccount.organization_id);
-    } else {
-      throw new Error('Invalid user role');
+    // Apply pagination only if shouldPaginate is true
+    if (shouldPaginate) {
+      // Apply pagination (offset-based takes priority over cursor-based)
+      const isOffsetBased =
+        config?.pagination?.page !== undefined ||
+        config?.pagination?.offset !== undefined;
+
+      if (isOffsetBased) {
+        // Offset-based pagination for page navigation
+        const offset =
+          config?.pagination?.offset ??
+          ((config?.pagination?.page ?? 1) - 1) * effectiveLimit;
+        query = query.range(offset, offset + effectiveLimit - 1);
+      } else if (config?.pagination?.cursor ?? config?.pagination?.endCursor) {
+        // Cursor-based pagination for infinite scrolling
+        if (config?.pagination?.cursor) {
+          query = query.lt('created_at', config.pagination.cursor);
+        }
+
+        if (config?.pagination?.endCursor) {
+          query = query.gte('created_at', config.pagination.endCursor);
+        }
+
+        query = query.limit(effectiveLimit + 1);
+      } else {
+        // Default behavior - just limit
+        query = query.limit(effectiveLimit + 1);
+      }
     }
 
     // Step 3: Fetch orders
-    const { data: ordersData, error: ordersError } = await query;
+    const { data: orders, error: ordersError, count } = await query;
 
     if (ordersError) {
       console.error(ordersError.message);
       throw new Error(`Error fetching orders, ${ordersError.message}`);
     }
 
-    orders = ordersData.map(order => ({
-      ...order,
-      customer: {
-        ...order.customer,
-        name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
-        picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
-        settings: order.customer?.settings?.[0],
-      },
-      // assigned_to: order.assigned_to?.filter(assignment => 
-      //   !assignment.agency_member?.deleted_on && 
-      //   assignment.agency_member?.organization_id === order.agency_id
-      // ) ?? [],
-      assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on
-      ) ?? [],
-    }));
-
-    // Step 3: Collect all status_ids from orders
-    const statusIds = Array.from(
-      new Set(
-        orders
-          .map((order: Order.Type) => order.status_id as number)
-          .filter(Boolean),
-      ),
+    // Calculate pagination based on type
+    const currentPage = config?.pagination?.page ?? 1;
+    const isOffsetBased = shouldPaginate && (
+      config?.pagination?.page !== undefined ||
+      config?.pagination?.offset !== undefined
     );
 
-    // Step 4: Fetch all relevant statuses in one query
-    const { data: statuses, error: statusesError } = await client
-      .from('agency_statuses')
-      .select('*')
-      .in('id', statusIds);
+    let hasNextPage: boolean;
+    let nextCursor: string | null = null;
+    let paginatedOrders: Order.Response[];
 
-    if (statusesError) {
-      console.error(statusesError.message);
-      throw new Error('Error fetching statuses');
+    if (!shouldPaginate) {
+      // No pagination: return all orders
+      paginatedOrders = transformOrders(orders);
+      hasNextPage = false;
+    } else if (isOffsetBased) {
+      // Offset-based: return exact page data
+      paginatedOrders = transformOrders(orders);
+      hasNextPage = count ? currentPage * effectiveLimit < count : false;
+    } else {
+      // Cursor-based: handle extra item for hasNextPage detection
+      hasNextPage = orders.length > effectiveLimit;
+      paginatedOrders = orders.slice(0, effectiveLimit);
+      nextCursor = hasNextPage
+        ? (paginatedOrders[paginatedOrders.length - 1]?.created_at ?? null)
+        : null;
     }
 
-    // Step 5: Create a map of statuses for quick access
-    const statusMap = new Map<number, AgencyStatus.Type>();
-    statuses?.forEach((status) => {
-      statusMap.set(status.id, status);
-    });
-
-    // Step 6: Assign the status to each order and other transformations  
-    orders.forEach((order) => {
-      const clientOrganizationPictureURL = order.client_organization?.settings?.find(setting => setting.key === 'logo_url')?.value ?? '';
-      order.client_organization = { id: order.client_organization?.id, name: order.client_organization?.name, picture_url: clientOrganizationPictureURL };
-      if (!order.status_id) return;
-      order.statusData = statusMap.get(order.status_id) ?? null;
-    });
-
-    return orders;
+    return {
+      data: paginatedOrders,
+      nextCursor,
+      count,
+      pagination: {
+        limit: effectiveLimit,
+        hasNextPage,
+        totalPages: count ? Math.ceil(count / effectiveLimit) : null,
+        currentPage: isOffsetBased ? currentPage : null,
+        isOffsetBased,
+      },
+    };
   } catch (error) {
     console.error('Error fetching orders:', error);
     throw error;
@@ -415,10 +485,7 @@ export async function getAgencyClients(
 
     if (orderError) throw orderError;
 
-    if (
-      orderData.agency_id !== organizationId &&
-      role !== 'client_owner'
-    ) {
+    if (orderData.agency_id !== organizationId && role !== 'client_owner') {
       throw new Error('Unauthorized access to this order');
     }
 
@@ -434,7 +501,9 @@ export async function getAgencyClients(
     const clientDetailsPromises = clientsData.map(async (clientCurrent) => {
       const { data: accountData, error: accountError } = await client
         .from('accounts')
-        .select('id, name, email, picture_url, settings:user_settings(name, picture_url)')
+        .select(
+          'id, name, email, picture_url, settings:user_settings(name, picture_url)',
+        )
         .eq('id', clientCurrent.user_client_id)
         .single();
 
@@ -452,10 +521,13 @@ export async function getAgencyClients(
   }
 }
 
-export async function getPropietaryOrganizationIdOfOrder(orderId: string, adminActived= false) {
+export async function getPropietaryOrganizationIdOfOrder(
+  orderId: string,
+  adminActived = false,
+) {
   try {
     const client = getSupabaseServerComponentClient({
-      admin: adminActived
+      admin: adminActived,
     });
 
     const { data: clientOrganizationData, error: clientOrganizationDataError } =
@@ -484,7 +556,7 @@ export async function getOrdersByUserId(
 
     // Step 1: Fetch the user's account
     const currentUserAccount = await fetchCurrentUserAccount(client, userId);
-    const userRole = await getUserRole() ?? '';
+    const userRole = (await getUserRole()) ?? '';
 
     const agencyRoles = new Set([
       'agency_owner',
@@ -520,12 +592,15 @@ export async function getOrdersByUserId(
     let query = client
       .from('orders_v2')
       .select(
-        `*, client_organization:organizations!client_organization_id(id, name),
-      customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
-      reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
-      ${includeBrief ? ', brief:briefs(name)' : ''}
-      `,
+        `id, title, priority, due_date, created_at, updated_at, status_id, agency_id, 
+        client_organization_id, deleted_on, position, propietary_organization_id,
+        status:agency_statuses!status_id(*), 
+        assignations:order_assignations(member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
+        client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
+        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
+        reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+        ${includeBrief ? ', brief:briefs(name)' : ''}
+        `,
       )
       .order('created_at', { ascending: false })
       .or(
@@ -547,24 +622,8 @@ export async function getOrdersByUserId(
     // Step 4: Fetch the order where the currentUserAccount is the client_organization_id or the agency_id
     const { error: orderError, data: orderData } = await query;
 
-    orders = orderData?.map(order => ({
-      ...order,
-      customer: {
-        ...order.customer,
-        name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
-        picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
-        settings: order.customer?.settings?.[0],
-      },
-      // assigned_to: order.assigned_to?.filter(assignment => 
-      //   !assignment.agency_member?.deleted_on && 
-      //   assignment.agency_member?.organization_id === order.agency_id
-      // ) ?? [],
-      assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on
-      ) ?? [],
-    }));
+    orders = transformOrders(orderData);
 
-    
     if (includeReviews) {
       const reviews = await getOrdersReviewsForUser(userId);
       orders = orders?.map((order) => {
@@ -689,21 +748,25 @@ export async function getOrdersByOrganizationId(
       );
     }
 
-    let orders = orderData.map(order => ({
+    let orders = orderData.map((order) => ({
       ...order,
       customer: {
         ...order.customer,
         name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
-        picture_url: order.customer?.settings?.[0]?.picture_url ?? order.customer?.picture_url ?? '',
+        picture_url:
+          order.customer?.settings?.[0]?.picture_url ??
+          order.customer?.picture_url ??
+          '',
         settings: order.customer?.settings?.[0],
       },
-      // assigned_to: order.assigned_to?.filter(assignment => 
-      //   !assignment.agency_member?.deleted_on && 
+      // assigned_to: order.assigned_to?.filter(assignment =>
+      //   !assignment.agency_member?.deleted_on &&
       //   assignment.agency_member?.organization_id === order.agency_id
       // ) ?? [],
-      assigned_to: order.assigned_to?.filter(assignment => 
-        !assignment.agency_member?.deleted_on
-      ) ?? [],
+      assigned_to:
+        order.assigned_to?.filter(
+          (assignment) => !assignment.agency_member?.deleted_on,
+        ) ?? [],
     }));
 
     // Step 4: Fetch the reviews for the orders and add them to the orders (if needed)
@@ -722,3 +785,331 @@ export async function getOrdersByOrganizationId(
     return CustomResponse.error(error).toJSON();
   }
 }
+
+// Add this optimized version as an alternative function
+export const getOrdersOptimized = async (
+  organizationId: string,
+  target: 'agency' | 'client',
+  includeBrief?: boolean,
+  config?: Config,
+): Promise<{
+  data: Order.Response[];
+  nextCursor: string | null;
+  count: number | null;
+  pagination: {
+    limit: number;
+    hasNextPage: boolean;
+    totalPages: number | null;
+    currentPage: number | null;
+    isOffsetBased: boolean;
+  };
+}> => {
+  try {
+    const client = getSupabaseServerComponentClient();
+    const limit = config?.pagination?.limit ?? 10;
+
+    // Build base query with minimal joins first
+    let baseQuery = client
+      .from('orders_v2')
+      .select(
+        `id, title, priority, due_date, created_at, updated_at, 
+        description, visibility, position,
+        status_id, client_organization_id, customer_id, brief_id,
+        agency_id, deleted_on, propietary_organization_id, stripe_account_id, uuid, brief_ids `,
+        { count: 'exact' },
+      )
+      .eq(
+        target === 'agency' ? 'agency_id' : 'client_organization_id',
+        organizationId,
+      )
+      .is('deleted_on', null)
+      .order('created_at', { ascending: false });
+
+    // Apply pagination
+    const isOffsetBased =
+      config?.pagination?.page !== undefined ||
+      config?.pagination?.offset !== undefined;
+    const currentPage = config?.pagination?.page ?? 1;
+
+    if (isOffsetBased) {
+      const offset = config?.pagination?.offset ?? (currentPage - 1) * limit;
+      baseQuery = baseQuery.range(offset, offset + limit - 1);
+    } else if (config?.pagination?.cursor ?? config?.pagination?.endCursor) {
+      if (config?.pagination?.cursor) {
+        baseQuery = baseQuery.lt('created_at', config.pagination.cursor);
+      }
+      if (config?.pagination?.endCursor) {
+        baseQuery = baseQuery.gte('created_at', config.pagination.endCursor);
+      }
+      baseQuery = baseQuery.limit(limit + 1);
+    } else {
+      baseQuery = baseQuery.limit(limit + 1);
+    }
+
+    // Execute base query
+    const { data: orders, error: ordersError, count } = await baseQuery;
+
+    if (ordersError) {
+      throw new Error(`Error fetching orders: ${ordersError.message}`);
+    }
+
+    if (!orders?.length) {
+      return {
+        data: [],
+        nextCursor: null,
+        count: count ?? 0,
+        pagination: {
+          limit,
+          hasNextPage: false,
+          totalPages: count ? Math.ceil(count / limit) : 0,
+          currentPage: isOffsetBased ? currentPage : null,
+          isOffsetBased,
+        },
+      };
+    }
+
+    // Get related data in parallel
+    const orderIds = orders.map((order) => order.id);
+    const customerIds = [...new Set(orders.map((order) => order.customer_id))];
+    const statusIds = [
+      ...new Set(orders.map((order) => order.status_id).filter(Boolean)),
+    ];
+    const orgIds = [
+      ...new Set(orders.map((order) => order.client_organization_id)),
+    ];
+
+    const [
+      assignationsData,
+      customersData,
+      statusesData,
+      organizationsData,
+      briefsData,
+    ] = await Promise.all([
+      // Fetch assignations
+      client
+        .from('order_assignations')
+        .select(
+          'order_id, agency_member_id, accounts!agency_member_id(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))',
+        )
+        .in('order_id', orderIds),
+
+      // Fetch customers
+      client
+        .from('accounts')
+        .select(
+          'id, name, email, picture_url, settings:user_settings(name, picture_url)',
+        )
+        .in('id', customerIds),
+
+      // Fetch statuses
+      client
+        .from('agency_statuses')
+        .select('id, status_name, status_color')
+        .in('id', statusIds),
+
+      // Fetch organizations
+      client
+        .from('organizations')
+        .select(
+          'id, name, slug, picture_url, settings:organization_settings!organization_id(key, value)',
+        )
+        .in('id', orgIds),
+
+      // Fetch briefs if needed
+      includeBrief
+        ? client
+            .from('briefs')
+            .select('id, name')
+            .in('id', orders.map((o) => o.brief_id).filter(Boolean))
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    // Create lookup maps for faster assembly
+    const assignationsMap = new Map<number, Order.Response['assignations']>();
+    assignationsData.data?.forEach((assignment) => {
+      if (!assignationsMap.has(assignment.order_id)) {
+        assignationsMap.set(assignment.order_id, []);
+      }
+      if (assignment.accounts) {
+        const accounts = Array.isArray(assignment.accounts)
+          ? assignment.accounts
+          : [assignment.accounts];
+        accounts.forEach((account) => {
+          assignationsMap.get(assignment.order_id)?.push({
+            id: account.id,
+            name: account.settings?.[0]?.name ?? account.name,
+            email: account.email,
+            picture_url:
+              account.settings?.[0]?.picture_url ?? account.picture_url,
+          });
+        });
+      }
+    });
+
+    const customersMap = new Map(
+      customersData.data?.map((customer) => [
+        customer.id,
+        {
+          id: customer.id,
+          name: customer.settings?.[0]?.name ?? customer.name,
+          email: customer.email,
+          picture_url:
+            customer.settings?.[0]?.picture_url ?? customer.picture_url,
+        },
+      ]) ?? [],
+    );
+    const statusesMap = new Map(
+      statusesData.data?.map((status) => [status.id, status]) ?? [],
+    );
+    const organizationsMap = new Map(
+      organizationsData.data?.map((org) => [
+        org.id,
+        {
+          id: org.id,
+          name: org.name,
+          slug: org.slug,
+          picture_url:
+            org.settings?.find((setting) => setting.key === 'logo_url')
+              ?.value ?? org.picture_url,
+        },
+      ]) ?? [],
+    );
+    const briefsMap = new Map(
+      briefsData.data?.map((brief) => [brief.id, brief]) ?? [],
+    );
+
+    // Assemble final data
+    let paginatedOrders: Order.Response[];
+    let hasNextPage: boolean;
+    let nextCursor: string | null = null;
+
+    if (isOffsetBased) {
+      paginatedOrders = orders.map((order) =>
+        assembleOrder(
+          order,
+          assignationsMap,
+          customersMap,
+          statusesMap,
+          organizationsMap,
+          briefsMap,
+        ),
+      );
+      hasNextPage = count ? currentPage * limit < count : false;
+    } else {
+      hasNextPage = orders.length > limit;
+      const ordersToReturn = orders.slice(0, limit);
+      paginatedOrders = ordersToReturn.map((order) =>
+        assembleOrder(
+          order,
+          assignationsMap,
+          customersMap,
+          statusesMap,
+          organizationsMap,
+          briefsMap,
+        ),
+      );
+      nextCursor = hasNextPage
+        ? (paginatedOrders[paginatedOrders.length - 1]?.created_at ?? null)
+        : null;
+    }
+
+    return {
+      data: paginatedOrders,
+      nextCursor,
+      count,
+      pagination: {
+        limit,
+        hasNextPage,
+        totalPages: count ? Math.ceil(count / limit) : null,
+        currentPage: isOffsetBased ? currentPage : null,
+        isOffsetBased,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+};
+
+// Helper function to assemble order data
+function assembleOrder(
+  order: Omit<
+    Order.Response,
+    'assignations' | 'customer' | 'status' | 'client_organization' | 'brief'
+  >,
+  assignationsMap: Map<number, Order.Response['assignations']>,
+  customersMap: Map<string, Order.Response['customer']>,
+  statusesMap: Map<number, Order.Response['status']>,
+  organizationsMap: Map<string, Order.Response['client_organization']>,
+  briefsMap: Map<string, Order.Response['brief']>,
+): Order.Response {
+  const customer = customersMap.get(order.customer_id);
+  const status = statusesMap.get(order.status_id ?? 0);
+  const organization = organizationsMap.get(order.client_organization_id);
+  const assignments = assignationsMap.get(order.id ?? 0) ?? [];
+  const brief = order.brief_id ? briefsMap.get(order.brief_id) : null;
+
+  return {
+    ...order,
+    customer: customer
+      ? {
+          ...customer,
+          name: customer?.settings?.[0]?.name ?? customer?.name ?? '',
+          picture_url:
+            customer?.settings?.[0]?.picture_url ?? customer?.picture_url ?? '',
+        }
+      : null,
+    status: status ?? null,
+    client_organization: organization,
+    assignations: assignments.map((assignment) => ({
+      ...assignment,
+      id: assignment?.id ?? '',
+      name: assignment?.settings?.[0]?.name ?? assignment?.name ?? '',
+      picture_url:
+        assignment?.settings?.[0]?.picture_url ?? assignment?.picture_url ?? '',
+      email: assignment?.email ?? null,
+    })),
+    brief,
+  };
+}
+
+type Order = Omit<Order.Response, 'assignations'> & {
+  assignations: {
+    member: User.Response
+  }[]
+}
+const transformOrders = (orders: Order[]) => {
+  return orders.map((order) => ({
+    ...order,
+    customer: order.customer
+      ? {
+          ...order.customer,
+          name:
+            order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
+          picture_url:
+            order.customer?.settings?.[0]?.picture_url ??
+            order.customer?.picture_url ??
+            '',
+        }
+      : null,
+    client_organization: order.client_organization
+      ? {
+          ...order.client_organization,
+          picture_url:
+            order.client_organization?.settings?.find(
+              (setting) => setting.key === 'logo_url',
+            )?.value ??
+            order.client_organization?.picture_url ??
+            '',
+        }
+      : null,
+    assignations: order.assignations?.map(assignment => {
+      return {
+        id: assignment?.member?.id ?? '',
+        name: assignment?.member?.settings?.[0]?.name ?? assignment?.member?.name ?? '',
+        picture_url:
+          assignment?.member?.settings?.[0]?.picture_url ?? assignment?.member?.picture_url ?? '',
+      }
+    }),
+  }));
+};

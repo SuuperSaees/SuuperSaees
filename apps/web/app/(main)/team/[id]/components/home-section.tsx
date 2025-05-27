@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 
 import { SkeletonOrdersSection } from '~/components/organization/skeleton-orders-section';
 import { UserWithSettings } from '~/lib/account.types';
+import { Order } from '~/lib/order.types';
+import { User } from '~/lib/user.types';
 import { OrdersProvider } from '~/(main)/orders/components/context/orders-context';
 import ProjectsBoard from '~/(main)/orders/components/projects-board';
 import { useOrderStats } from '~/(main)/orders/hooks/use-order-stats';
@@ -25,17 +27,24 @@ export default function HomeSection({ agencyMembers }: HomeSectionProps) {
   const { t } = useTranslation('statistics');
 
   const { id } = useParams();
-  // Transform agencyMembers to match the expected User.Response type
+  
+  // Convert UserWithSettings to User.Response format
+  const convertedAgencyMembers: User.Response[] = agencyMembers.map((member) => ({
+    id: member.id,
+    name: member.name,
+    email: member.email,
+    picture_url: member.user_settings.picture_url,
+  }));
 
   const queryKey = ['orders', id as string];
-  const queryFn = useCallback(async () => {
+  const queryFn = useCallback(async (): Promise<Order.Response[]> => {
     const orders = await getOrdersByUserId(
       (id as string) ?? '',
       true,
       60,
       true,
     );
-    return orders.success?.data ?? [];
+    return (orders.success?.data ?? []) as Order.Response[];
   }, [id]);
 
   const memberOrdersQuery = useQuery({
@@ -99,14 +108,14 @@ export default function HomeSection({ agencyMembers }: HomeSectionProps) {
         />
       </div>
       <OrdersProvider
-        agencyMembers={agencyMembers}
+        agencyMembers={convertedAgencyMembers}
         agencyId={memberOrders[0]?.agency_id ?? ''}
-        queryKey={queryKey}
-        queryFn={queryFn}
+        customQueryKey={queryKey}
+        customQueryFn={queryFn}
         initialOrders={memberOrders}
       >
         <ProjectsBoard
-          agencyMembers={agencyMembers}
+          agencyMembers={convertedAgencyMembers}
           tags={tags}
           className="min-h-[800px]"
         />

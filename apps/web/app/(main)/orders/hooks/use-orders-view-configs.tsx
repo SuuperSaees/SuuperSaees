@@ -34,6 +34,7 @@ import CalendarCardMonth from '../components/calendar-card-month';
 // Custom Components and Actions
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
+import { useOrdersContext } from '../components/context/orders-context';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -59,7 +60,7 @@ const VIEW_AVAILABLE_PROPERTIES = [
 ] as const;
 
 // Type definition with index signature
-interface OrdersViewConfig extends Record<string, unknown> {
+export interface OrdersViewConfig extends Record<string, unknown> {
   // Required specific properties
   currentView: string;
   table?: {
@@ -75,6 +76,19 @@ const useOrdersViewConfigs = ({
   agencyMembers,
 }: UseOrdersViewConfigsProps) => {
   const { theme_color } = useOrganizationSettings();
+  const { 
+    count, 
+    hasNextPage,
+    currentPage,
+    totalPages,
+    isOffsetBased, 
+    loadNextPage, 
+    goToPage,
+    updateLimit,
+    limit,
+    isLoadingMore 
+  } = useOrdersContext();
+  
   // Destructure and use hooks
   const { orderDateMutation, orderAssignsMutation } = useUserOrderActions();
   const { t } = useTranslation('orders');
@@ -142,6 +156,9 @@ const useOrdersViewConfigs = ({
   const updateCurrentView = useCallback((view: string | number) => {
     const viewString = String(view);
     updateConfig('currentView', viewString);
+    
+    // Dispatch custom event for same-tab synchronization
+    window.dispatchEvent(new CustomEvent('orders-config-changed'));
   }, [updateConfig]);
 
   // Configure view options with the update function
@@ -209,11 +226,21 @@ const useOrdersViewConfigs = ({
         emptyState: <EmptyStateComponent />,
         configs: {
           rowsPerPage: {
-            onUpdate: (value: string) => updateConfig('table', {
-              ...configs.table,
-              rowsPerPage: Number(value),
-            }),
-            value: configs.table?.rowsPerPage ?? 10,
+            onUpdate: (value: string) => {
+              const newLimit = Number(value);
+              updateLimit(newLimit); // Update the query limit via context
+            },
+            value: limit, // Use limit from context instead of configs.table?.rowsPerPage
+          },
+          pagination: {
+            totalCount: count,
+            hasNextPage: hasNextPage,
+            currentPage: currentPage,
+            totalPages: totalPages,
+            isOffsetBased: isOffsetBased,
+            onLoadMore: loadNextPage,
+            goToPage: goToPage,
+            isLoadingMore: isLoadingMore,
           },
         },
       },

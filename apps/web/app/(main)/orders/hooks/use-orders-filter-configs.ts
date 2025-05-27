@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo, useCallback } from 'react';
 import { Flag, SquareKanban, Tag, Users2 } from 'lucide-react';
 
 import useFilters from '~/hooks/use-filters';
@@ -21,6 +20,12 @@ interface Priority {
   color?: string;
 }
 
+interface Status {
+  id: string;
+  name: string;
+  color?: string;
+}
+
 interface FilterHandler {
   key: string;
   filterFn: (order: Order.Response, selectedValues: string[]) => boolean;
@@ -30,7 +35,7 @@ interface FilterHandler {
 interface UseOrdersFilterConfigsProps {
   orders: Order.Response[];
   tags: Tags.Type[];
-  statuses: AgencyStatus.Type[];
+  statuses: Status[];
   agencyMembers: User.Response[];
   clientMembers: User.Response[];
   clientOrganizations: Account.Response[];
@@ -41,60 +46,8 @@ interface UseOrdersFilterConfigsProps {
 // Constants
 const STATUS_FILTERS = {
   OPEN: (order: Order.Response) =>
-    order.status !== 'completed' && order.status !== 'anulled',
-  COMPLETED: (order: Order.Response) => order.status === 'completed',
-};
-
-const normalizeString = (str: string | undefined | null) => {
-  if (!str) return '';
-  return str
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, '');
-};
-
-const getDateFormats = (date: Date) => [
-  date.toLocaleDateString(),
-  date.toLocaleDateString('es-ES'),
-  date.toLocaleString('default', { month: 'short' }),
-  date.toLocaleString('en-US', { month: 'short' }), 
-  date.toLocaleString('default', { month: 'long' }),
-  date.toLocaleString('en-US', { month: 'long' }), 
-  date.getFullYear().toString()
-].map(d => normalizeString(d));
-
-const getSearchableFields = (order: Order.Response) => {
-  const fields = [
-    order.id?.toString().replace('#', ''),
-    order.title,
-    order.description,
-    order.brief?.name,
-    order.client_organization?.name,
-    order.customer?.name,
-    order.customer?.email,
-    order.status?.toLowerCase(),
-    order.priority?.toLowerCase(),
-    ...order.assigned_to?.flatMap(assignee => [
-      assignee.agency_member?.name,
-      assignee.agency_member?.email
-    ]) ?? []
-  ];
-
-  // Add date formats
-  const dates = [
-    order.created_at,
-    order.updated_at,
-    order.due_date
-  ].filter(Boolean);
-
-  const dateFormats = dates.flatMap(date => 
-    date ? getDateFormats(new Date(date)) : []
-  );
-
-  return [...fields, ...dateFormats]
-    .filter(Boolean)
-    .map(normalizeString);
+    order.status?.status_name !== 'completed' && order.status?.status_name !== 'anulled',
+  COMPLETED: (order: Order.Response) => order.status?.status_name === 'completed',
 };
 
 const useOrdersFilterConfigs = ({
@@ -107,34 +60,11 @@ const useOrdersFilterConfigs = ({
   clientOrganizations,
   storageKey = 'orders-filters',
 }: UseOrdersFilterConfigsProps) => {
-  // Create a more efficient search index using a Map for faster lookups
-  const ordersSearchIndex = useMemo(() => {
-    // Skip rebuilding the index if orders haven't changed
-    if (orders.length === 0) {
-      return new Map<string, string[]>();
-    }
-    
-    // console.time('Building search index');
-    const searchIndex = new Map<string, string[]>();
-    
-    orders.forEach(order => {
-      // Only compute searchable fields if not already in the index or if order has changed
-      const orderId = order.id?.toString() ?? '';
-      if (!searchIndex.has(orderId)) {
-        const searchableFields = getSearchableFields(order);
-        searchIndex.set(orderId, searchableFields);
-      }
-    });
-    
-    // console.timeEnd('Building search index');
-    return searchIndex;
-  }, [orders]);
-
   const initialFiltersHandlers: FilterHandler[] = [
     {
       key: 'status',
       filterFn: (order, selectedValues) =>
-        selectedValues.includes(order.status ?? ''),
+        selectedValues.includes(order.status?.status_name ?? ''),
     },
     {
       key: 'tags',
@@ -152,8 +82,8 @@ const useOrdersFilterConfigs = ({
       key: 'assigned_to',
       filterFn: (order, selectedValues) =>
         selectedValues.some((assigneeId) =>
-          order.assigned_to
-            ?.map((assignee) => assignee.agency_member?.id)
+          order.assignations
+            ?.map((assignee) => assignee?.id)
             .includes(assigneeId),
         ),
     },
@@ -169,18 +99,6 @@ const useOrdersFilterConfigs = ({
       key: 'customer',
       filterFn: (order, selectedValues) =>
         selectedValues.some((customerId) => order.customer?.id === customerId),
-    },
-    {
-      key: 'search',
-      filterFn: (order, selectedValues) =>
-        selectedValues.some((searchTerm) => {
-          if (!searchTerm) return true;
-          const searchTermNormalized = normalizeString(searchTerm);
-          // Use the search index for faster lookups
-          const orderFields = ordersSearchIndex.get(order.id?.toString() ?? '') ?? [];
-          return orderFields.some(field => field.includes(searchTermNormalized));
-        }),
-      persistent: false,
     },
   ];
 
@@ -208,15 +126,15 @@ const useOrdersFilterConfigs = ({
     statuses: AgencyStatus.Type[],
   ): FilterOption[] =>
     statuses.map((status) => ({
-      label: formatString(status.status_name ?? '', 'capitalize') ?? '',
-      value: status.status_name ?? '',
-      color: status.status_color ?? '',
+      label: formatString(status?.status_name ?? '', 'capitalize') ?? '',
+      value: status?.status_name ?? '',
+      color: status?.status_color ?? '',
       onFilter: () =>
         updateFilter(
           'status',
           'toggle',
-          (order) => order.status === status.status_name,
-          status.status_name ?? '',
+          (order) => order.status?.status_name === status?.status_name,
+          status?.status_name ?? '',
         ),
     }));
 
@@ -257,8 +175,8 @@ const useOrdersFilterConfigs = ({
           'assigned_to',
           'toggle',
           (order) =>
-            order.assigned_to
-            ?.map((assignee) => assignee.agency_member?.id)
+            order.assignations
+            ?.map((assignee) => assignee?.id)
               .includes(member.id) ?? false,
           member.id,
         ),
@@ -364,50 +282,11 @@ const useOrdersFilterConfigs = ({
     },
   ];
 
-  const searchConfig = {
-    key: 'search',
-    label: 'search',
-    filter: useCallback((searchTerm: string) => {
-      // Normalize the search term once outside the filter function
-      const normalizedSearchTerm = normalizeString(searchTerm.trim());
-      
-      // Get current search filter value
-      const currentSearchValue = getFilterValues('search')?.[0] ?? '';
-      
-      // Only update if the search term has actually changed
-      if (normalizedSearchTerm === normalizeString(currentSearchValue.trim())) {
-        return; // Skip update if the normalized search terms are the same
-      }
-      
-      if (!normalizedSearchTerm) {
-        // If search is empty, remove the filter entirely
-        removeFilter('search');
-        return;
-      }
-      
-      // Create a stable filter function that doesn't recreate on each render
-      const searchFilterFn = (order: Order.Response) => {
-        // Use the search index for faster lookups
-        const orderFields = ordersSearchIndex.get(order.id?.toString() ?? '') ?? [];
-        return orderFields.some(field => field.includes(normalizedSearchTerm));
-      };
-      
-      updateFilter(
-        'search',
-        'replace',
-        searchFilterFn,
-        searchTerm,
-        false
-      );
-    }, [ordersSearchIndex, getFilterValues, removeFilter, updateFilter]),
-  };
-
   return {
     filters,
     filtersConfig,
     tabsConfig,
     filteredOrders,
-    searchConfig,
     updateFilter,
     resetFilters,
     getFilterValues,
