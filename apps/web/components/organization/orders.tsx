@@ -11,20 +11,21 @@ import { useSupabase } from '@kit/supabase/hooks/use-supabase';
 import { User } from '~/lib/user.types';
 import { AgencyStatusesProvider } from '~/(main)/orders/components/context/agency-statuses-context';
 import { OrdersProvider } from '~/(main)/orders/components/context/orders-context';
-import { type CustomQueryFn } from '~/(main)/orders/components/context/orders-context.types';
 import ProjectsBoard from '~/(main)/orders/components/projects-board';
 import { useOrderStats } from '~/(main)/orders/hooks/use-order-stats';
+import { getOrdersByOrganizationId } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 import CardStats from '../../app/components/ui/card-stats';
 import { SkeletonOrdersSection } from './skeleton-orders-section';
-import { getOrders } from '~/team-accounts/src/server/actions/orders/get/get-order';
 
 interface OrdersSectionProps {
   organizationId: string;
+  agencyId: string;
   showCardStats?: boolean;
 }
 export default function OrdersSection({
   organizationId,
+  agencyId,
   showCardStats = true,
 }: OrdersSectionProps) {
   const client = useSupabase();
@@ -33,34 +34,26 @@ export default function OrdersSection({
   const { workspace, organization, agency } = useUserWorkspace();
   const agencySlug = organization?.slug;
 
-  // Custom query function for this specific organization
-  const customQueryFn: CustomQueryFn = useCallback(async ({ page, limit, searchTerm }) => {
-    const orders = await getOrders(organizationId, 'client', true, {
-      pagination: {
-        page,
-        limit,
-      },
-      search: searchTerm ? { term: searchTerm } : undefined,
-    });
-    return orders;
+  const queryKey = ['orders', organizationId];
+
+  const queryFn = useCallback(async () => {
+    const orders = await getOrdersByOrganizationId(organizationId);
+    return orders.success?.data ?? [];
   }, [organizationId]);
 
-  // Custom query key for this organization
-  const customQueryKey = ['organization-orders', organizationId];
-
-  // Initial data query for the first page
-  const initialDataQuery = useQuery({
-    queryKey: [...customQueryKey, { page: 1, limit: 20, search: '' }],
-    queryFn: () => customQueryFn({ page: 1, limit: 20, searchTerm: '' }),
+  const organizationOrdersQuery = useQuery({
+    queryKey,
+    queryFn,
   });
 
-  const organizationOrders = initialDataQuery.data?.data ?? [];
-  
+  const organizationOrders = organizationOrdersQuery.data ?? [];
+
   const validAgencyRoles = new Set([
     'agency_owner',
     'agency_project_manager',
     'agency_member',
   ]);
+
 
   const agencyStatuses = validAgencyRoles.has(workspace?.role ?? '') ? organization?.statuses : agency?.statuses
 
@@ -75,9 +68,12 @@ export default function OrdersSection({
 
   const agencyMembers = agencyMembersQuery?.data?.data ?? [];
 
+
+
   const tags = (validAgencyRoles.has(workspace?.role ?? '') ? organization?.tags : agency?.tags) ?? []
 
   // Transform agencyMembers to match the expected User.Response type
+
   const transformedAgencyMembers = agencyMembers?.map((member) => ({
     ...member,
     organization_id: organizationOrders[0]?.agency_id ?? '',
@@ -90,12 +86,12 @@ export default function OrdersSection({
       picture_url: member.picture_url ?? null,
       user_id: member.user_id,
     },
-  })) as unknown as User.Response[];
+  })) as User.Response[];
 
   const { currentStats, previousStats } = useOrderStats(organizationOrders);
 
   if (
-    initialDataQuery.isLoading ||
+    organizationOrdersQuery.isLoading ||
     agencyMembersQuery.isLoading
   ) {
     return <SkeletonOrdersSection />;
@@ -146,17 +142,17 @@ export default function OrdersSection({
       <OrdersProvider
         agencyMembers={transformedAgencyMembers}
         agencyId={organizationOrders[0]?.agency_id ?? ''}
-        customQueryFn={customQueryFn}
-        customQueryKey={customQueryKey}
-        initialOrders={initialDataQuery.data}
+        queryKey={queryKey}
+        queryFn={queryFn}
+        initialOrders={organizationOrders}
       >
         <AgencyStatusesProvider
-          initialStatuses={agencyStatuses as typeof agencyStatuses}
+          initialStatuses={agencyStatuses}
           agencyMembers={transformedAgencyMembers}
         >
           <ProjectsBoard
             agencyMembers={transformedAgencyMembers}
-            tags={tags as typeof tags}
+            tags={tags}
             className="min-h-[800px]"
           />
         </AgencyStatusesProvider>
