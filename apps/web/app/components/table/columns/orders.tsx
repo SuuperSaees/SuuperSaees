@@ -53,7 +53,7 @@ export const ordersColumns = (
                     withPermissionsActive && hasPermission() && (
                       <OverdueIndicator 
                         dueDate={row.original.due_date} 
-                        isCompleted={row.original.status === 'completed'} 
+                        isCompleted={row.original.status?.status_name === 'completed'} 
                       />
                     )
                   }
@@ -94,7 +94,7 @@ export const ordersColumns = (
               {truncateText(row.original.customer?.name)}
             </span>
             <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
-              {truncateText(row.original.client_organization?.name)}
+              {truncateText(row.original.client_organization?.name ?? '')}
             </span>
           </span>
         );
@@ -202,8 +202,8 @@ const RowAssignedTo = ({
   
 
   const defaultValues = {
-    members: row?.assigned_to
-      ? row?.assigned_to.map((option) => option?.agency_member?.id)
+    members: row?.assignations
+      ? row?.assignations.map((option) => option?.id)
       : [],
   };
 
@@ -217,36 +217,21 @@ const RowAssignedTo = ({
   const searchUserOptions = useMemo(
     () =>
       orderAgencyMembers?.map((user) => ({
-        picture_url: user.settings?.picture_url ?? user?.picture_url ?? '',
-        value: user?.id,
-        label: user?.settings?.name ?? user?.name ?? '',
+        picture_url: user.picture_url,
+        value: user.id,
+        label: user.name,
       })) ?? [],
     [orderAgencyMembers],
   );
 
   const avatars = useMemo(
-    () =>
-      row?.assigned_to?.map((assignee) => ({
-        name:
-          Array.isArray(assignee.agency_member?.settings)
-            ? assignee.agency_member?.settings[0]?.name ??
-              assignee?.agency_member?.name ??
-              ''
-            : assignee.agency_member?.settings?.name ??
-              assignee?.agency_member?.name ??
-              '',
-        email: assignee.agency_member?.email ?? '',
-        picture_url:
-          Array.isArray(assignee.agency_member?.settings)
-            ? assignee.agency_member?.settings[0]?.picture_url ??
-              assignee?.agency_member?.picture_url ??
-              ''
-            : assignee.agency_member?.settings?.picture_url ??
-              assignee?.agency_member?.picture_url ??
-              '',
-      })) ?? [],
-    [row?.assigned_to],
-  );
+    () => row?.assignations?.map((assignee) => ({
+      name: assignee?.name ?? '',
+      email: assignee?.email ?? '',
+      picture_url: assignee?.picture_url ?? '',
+    })) ?? [],
+    [row?.assignations],
+  ) ?? [];
 
   const CustomUserItem = ({
     option,

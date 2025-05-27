@@ -23,7 +23,7 @@ interface BoardHeaderProps {
   tabsConfig: TabConfig[];
   embeds: Embeds.TypeWithRelations[];
   theme_color?: string;
-  getFilterValues: (key: string) => string[] | null;
+  searchTerm: string;
   handleSearch: (searchTerm: string) => void;
   filtersConfig: FilterGroup[];
   filters: Record<string, string[]>;
@@ -40,7 +40,7 @@ export function BoardHeader({
   activeTab,
   handleTabChange,
   tabsConfig,
-  getFilterValues,
+  searchTerm,
   handleSearch,
   filtersConfig,
   filters,
@@ -82,7 +82,7 @@ export function BoardHeader({
         </div>
 
         <Search
-          defaultSearch={getFilterValues('search')?.[0] ?? ''}
+          defaultSearch={searchTerm}
           t={t}
           handleSearch={handleSearch}
         />
