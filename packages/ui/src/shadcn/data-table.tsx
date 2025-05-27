@@ -51,6 +51,17 @@ export interface CustomConfigs {
     onUpdate: (value: string) => void;
     value: number;
   };
+  pagination?: {
+    totalCount?: number | null;
+    hasNextPage?: boolean;
+    currentPage?: number | null;
+    totalPages?: number | null;
+    isOffsetBased?: boolean;
+    // Functions
+    onLoadMore?: () => void;        // For cursor-based infinite scroll
+    goToPage?: (page: number) => void; // For offset-based page navigation
+    isLoadingMore?: boolean;
+  };
 }
 
 export function DataTable<TData, TValue>({
@@ -186,13 +197,20 @@ export function DataTable<TData, TValue>({
                 <PaginationPrevious
                   href="#"
                   className={`flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 ${
-                    pageIndex === 0
+                    (configs?.pagination?.isOffsetBased ? 
+                      (configs.pagination.currentPage ?? 1) <= 1 : 
+                      pageIndex === 0)
                       ? 'pointer-events-none opacity-50'
                       : 'hover:bg-gray-100'
                   }`}
                   onClick={(e) => {
                     e.preventDefault();
-                    if (table.getCanPreviousPage()) {
+                    if (configs?.pagination?.isOffsetBased && configs.pagination.goToPage) {
+                      const prevPage = (configs.pagination.currentPage ?? 1) - 1;
+                      if (prevPage >= 1) {
+                        configs.pagination.goToPage(prevPage);
+                      }
+                    } else if (table.getCanPreviousPage()) {
                       table.previousPage();
                     }
                   }}
@@ -205,32 +223,108 @@ export function DataTable<TData, TValue>({
             </div>
 
             <div className="flex flex-1 justify-center gap-2">
-              {renderPageNumbers().map((page, index) =>
-                page === 'ellipsis' ? (
-                  <PaginationItem key={`ellipsis-${index}`}>
-                    <PaginationEllipsis className="text-gray-400" />
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      className={`h-9 min-w-[2.25rem] rounded-md text-sm font-medium ${
-                        typeof page === 'number' && pageIndex === page - 1
-                          ? 'bg-gray-100 text-gray-900 border-none'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      } transition-all duration-200`}
-                      href="#"
-                      isActive={typeof page === 'number' && pageIndex === page - 1}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (typeof page === 'number') {
-                          table.setPageIndex(page - 1);
-                        }
-                      }}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ),
+              {configs?.pagination?.isOffsetBased && configs.pagination.totalPages ? (
+                // Offset-based pagination: show pages around current page
+                (() => {
+                  const totalPages = configs.pagination.totalPages;
+                  const currentPage = configs.pagination.currentPage ?? 1;
+                  const pages = [];
+                  const showPages = 4; // Show up to 4 pages around current
+                  
+                  // Always show page 1
+                  pages.push(1);
+                  
+                  // Add ellipsis if there's a gap
+                  if (currentPage > showPages) {
+                    pages.push('ellipsis');
+                  }
+                  
+                  // Calculate range around current page
+                  let rangeStart = Math.max(2, currentPage - 2);
+                  let rangeEnd = Math.min(totalPages - 1, currentPage + 2);
+                  
+                  // Adjust range if we're near the beginning
+                  if (currentPage <= showPages) {
+                    rangeEnd = Math.min(totalPages - 1, showPages + 2);
+                  }
+                  
+                  // Adjust range if we're near the end
+                  if (currentPage > totalPages - showPages) {
+                    rangeStart = Math.max(2, totalPages - showPages - 1);
+                  }
+                  
+                  // Add pages in range
+                  for (let i = rangeStart; i <= rangeEnd; i++) {
+                    pages.push(i);
+                  }
+                  
+                  // Add ellipsis if there's a gap before last page
+                  if (currentPage < totalPages - showPages) {
+                    pages.push('ellipsis');
+                  }
+                  
+                  // Always show last page if there's more than 1 page
+                  if (totalPages > 1) {
+                    pages.push(totalPages);
+                  }
+                  
+                  return pages.map((page, index) =>
+                    page === 'ellipsis' ? (
+                      <PaginationItem key={`ellipsis-${index}`}>
+                        <PaginationEllipsis className="text-gray-400" />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          className={`h-9 min-w-[2.25rem] rounded-md text-sm font-medium ${
+                            page === currentPage
+                              ? 'bg-gray-100 text-gray-900 border-none'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          } transition-all duration-200`}
+                          href="#"
+                          isActive={page === currentPage}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (configs.pagination?.goToPage && typeof page === 'number') {
+                              configs.pagination.goToPage(page);
+                            }
+                          }}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  );
+                })()
+              ) : (
+                // Cursor-based pagination: show traditional client-side pagination
+                renderPageNumbers().map((page, index) =>
+                  page === 'ellipsis' ? (
+                    <PaginationItem key={`ellipsis-${index}`}>
+                      <PaginationEllipsis className="text-gray-400" />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        className={`h-9 min-w-[2.25rem] rounded-md text-sm font-medium ${
+                          typeof page === 'number' && pageIndex === page - 1
+                            ? 'bg-gray-100 text-gray-900 border-none'
+                            : 'text-gray-700 hover:bg-gray-50'
+                        } transition-all duration-200`}
+                        href="#"
+                        isActive={typeof page === 'number' && pageIndex === page - 1}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (typeof page === 'number') {
+                            table.setPageIndex(page - 1);
+                          }
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ),
+                )
               )}
             </div>
 
@@ -242,7 +336,7 @@ export function DataTable<TData, TValue>({
                 />
                 <span className="text-sm text-gray-500">
                   <Trans i18nKey={'common:of'} />{' '}
-                  {table.getFilteredRowModel().rows.length}
+                  {configs?.pagination?.totalCount ?? table.getFilteredRowModel().rows.length}
                 </span>
               </div>
 
@@ -250,13 +344,18 @@ export function DataTable<TData, TValue>({
                 <PaginationNext
                   href="#"
                   className={`flex items-center gap-2 rounded-md px-3 py-2 transition-colors duration-200 ${
-                    pageIndex >= pageCount - 1
+                    (configs?.pagination?.isOffsetBased ? 
+                      !configs.pagination.hasNextPage : 
+                      pageIndex >= table.getPageCount() - 1)
                       ? 'pointer-events-none opacity-50'
                       : 'hover:bg-gray-100'
                   }`}
                   onClick={(e) => {
                     e.preventDefault();
-                    if (table.getCanNextPage()) {
+                    if (configs?.pagination?.isOffsetBased && configs.pagination.goToPage && configs.pagination.hasNextPage) {
+                      const nextPage = (configs.pagination.currentPage ?? 1) + 1;
+                      configs.pagination.goToPage(nextPage);
+                    } else if (table.getCanNextPage()) {
                       table.nextPage();
                     }
                   }}
@@ -269,6 +368,29 @@ export function DataTable<TData, TValue>({
             </div>
           </PaginationContent>
         </Pagination>
+      )}
+
+      {/* Load More Button for Cursor-based Infinite Scrolling */}
+      {!configs?.pagination?.isOffsetBased && configs?.pagination?.hasNextPage && (
+        <div className="border-t p-4 text-center">
+          <button
+            onClick={configs.pagination.onLoadMore}
+            disabled={configs.pagination.isLoadingMore}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {configs.pagination.isLoadingMore ? (
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <Trans i18nKey={'common:loading'} />
+              </span>
+            ) : (
+              <Trans i18nKey={'common:loadMore'} />
+            )}
+          </button>
+        </div>
       )}
     </div>
   );

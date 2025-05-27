@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import SearchInput from '~/components/ui/search-input';
 
@@ -14,37 +14,27 @@ const Search = ({
   t: (key: string) => string;
 }) => {
   const [searchTerm, setSearchTerm] = useState(defaultSearch ?? '');
-  const isInitialMount = useRef(true);
-  const previousSearchTerm = useRef(searchTerm);
 
-  // Apply the search only on initial mount if defaultSearch exists
+  // Update local state when defaultSearch changes
   useEffect(() => {
-    if (isInitialMount.current && defaultSearch) {
-      isInitialMount.current = false;
-      // Don't trigger search on mount as the parent already has this value
-    }
+    setSearchTerm(defaultSearch ?? '');
   }, [defaultSearch]);
 
-  // Debounce search and only trigger when the value actually changes
+  // Debounce search and trigger when the value changes
   useEffect(() => {
-    // Skip the first render and when the search term hasn't changed
-    if (isInitialMount.current || previousSearchTerm.current === searchTerm) {
-      isInitialMount.current = false;
-      return;
-    }
-
     const timer = setTimeout(() => {
+      // Always trigger search with whatever term the user has typed
       handleSearch(searchTerm);
-      previousSearchTerm.current = searchTerm;
-    }, 300);
+    }, 500); // 500ms debounce time
 
     return () => clearTimeout(timer);
   }, [searchTerm, handleSearch]);
 
-  // Handle input change without directly triggering search
+  // Handle input change
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
+      const newValue = e.target.value;
+      setSearchTerm(newValue);
     },
     [],
   );

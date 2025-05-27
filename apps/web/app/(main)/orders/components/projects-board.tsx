@@ -3,7 +3,6 @@
 import {
   type Dispatch,
   type SetStateAction,
-  useCallback,
   useMemo,
 } from 'react';
 
@@ -51,7 +50,7 @@ const ProjectsBoard = ({
   storageKey = 'orders-filters',
 }: ProjectsBoardProps) => {
   // Context and hooks
-  const { orders, setOrders, agencyId, ordersAreLoading, queryKey } =
+  const { orders, setOrders, agencyId, ordersAreLoading, queryKey, handleSearch, searchTerm } =
     useOrdersContext();
   const { statuses } = useAgencyStatuses();
   const { t } = useTranslation('orders');
@@ -69,7 +68,6 @@ const ProjectsBoard = ({
     tabsConfig,
     filtersConfig,
     filters,
-    searchConfig,
   } = useOrdersFilterConfigs({
     orders,
     tags,
@@ -130,17 +128,6 @@ const ProjectsBoard = ({
     return filteredOrders;
   }, [filteredOrders, currentView, statuses]);
 
-  // Handle search with a stable reference to prevent re-renders
-  const handleSearch = useCallback(
-    (searchTerm: string) => {
-      // Only update if the search term has actually changed
-      const currentSearchValue = getFilterValues('search')?.[0] ?? '';
-      if (searchTerm !== currentSearchValue) {
-        searchConfig.filter(searchTerm);
-      }
-    },
-    [searchConfig, getFilterValues],
-  );
 
   return (
     <ViewProvider
@@ -166,7 +153,7 @@ const ProjectsBoard = ({
           tabsConfig={tabsConfig}
           embeds={embeds}
           theme_color={theme_color}
-          getFilterValues={getFilterValues}
+          searchTerm={searchTerm}
           handleSearch={handleSearch}
           filtersConfig={filtersConfig}
           filters={filters}
