@@ -227,14 +227,10 @@ const useOrdersViewConfigs = ({
               console.log('🔍 rowsPerPage.onUpdate called with:', value);
               const newLimit = Number(value);
               console.log('🔍 Updating limit from', limit, 'to', newLimit);
-              updateLimit(newLimit); // Update the query limit
-              updateConfig('table', {
-                ...configs.table,
-                rowsPerPage: newLimit,
-              });
-              console.log('🔍 Updated configs:', { ...configs.table, rowsPerPage: newLimit });
+              updateLimit(newLimit); // Update the query limit via context
+              console.log('🔍 Updated limit to:', newLimit);
             },
-            value: configs.table?.rowsPerPage ?? 10,
+            value: limit, // Use limit from context instead of configs.table?.rowsPerPage
           },
           pagination: {
             totalCount: count,

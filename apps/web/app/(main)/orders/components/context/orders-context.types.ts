@@ -15,6 +15,9 @@ export interface PaginatedOrdersResponse {
   };
 }
 
+// Union type for query responses - can be either paginated or just an array
+export type OrdersQueryResponse = PaginatedOrdersResponse | Order.Response[];
+
 // Context
 export interface OrdersContextType {
   orders: Order.Response[];
@@ -44,11 +47,20 @@ export interface OrdersContextType {
   searchTerm: string;                          // Current search term
 }
 
+// Custom query function type - now supports both paginated and non-paginated responses
+export type CustomQueryFn = (params: {
+  page: number;
+  limit: number;
+  searchTerm: string;
+}) => Promise<OrdersQueryResponse>;
 
 // Provider
 export interface OrdersProviderProps {
   children: React.ReactNode;
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
-  initialOrders?: PaginatedOrdersResponse;
+  initialOrders?: OrdersQueryResponse;
+  // Optional custom query function and key
+  customQueryFn?: CustomQueryFn;
+  customQueryKey?: string[];
 }

@@ -574,12 +574,15 @@ export async function getOrdersByUserId(
     let query = client
       .from('orders_v2')
       .select(
-        `*, client_organization:organizations!client_organization_id(id, name),
-      customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
-      assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
-      reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
-      ${includeBrief ? ', brief:briefs(name)' : ''}
-      `,
+        `id, title, priority, due_date, created_at, updated_at, status_id, agency_id, 
+        client_organization_id, deleted_on, position, propietary_organization_id,
+        status:agency_statuses!status_id(*), 
+        assignations:order_assignations(member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
+        client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
+        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
+        reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
+        ${includeBrief ? ', brief:briefs(name)' : ''}
+        `,
       )
       .order('created_at', { ascending: false })
       .or(
@@ -601,26 +604,7 @@ export async function getOrdersByUserId(
     // Step 4: Fetch the order where the currentUserAccount is the client_organization_id or the agency_id
     const { error: orderError, data: orderData } = await query;
 
-    orders = orderData?.map((order) => ({
-      ...order,
-      customer: {
-        ...order.customer,
-        name: order.customer?.settings?.[0]?.name ?? order.customer?.name ?? '',
-        picture_url:
-          order.customer?.settings?.[0]?.picture_url ??
-          order.customer?.picture_url ??
-          '',
-        settings: order.customer?.settings?.[0],
-      },
-      // assigned_to: order.assigned_to?.filter(assignment =>
-      //   !assignment.agency_member?.deleted_on &&
-      //   assignment.agency_member?.organization_id === order.agency_id
-      // ) ?? [],
-      assigned_to:
-        order.assigned_to?.filter(
-          (assignment) => !assignment.agency_member?.deleted_on,
-        ) ?? [],
-    }));
+    orders = transformOrders(orderData);
 
     if (includeReviews) {
       const reviews = await getOrdersReviewsForUser(userId);
