@@ -1,6 +1,6 @@
 import { type RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { type Order } from '~/lib/order.types';
-import { OrdersProviderProps } from '~/orders/components/context/orders-context.types';
+import { OrdersProviderProps } from '~/(main)/orders/components/context/orders-context.types';
 
 /**
  * Custom hook that manages order-related event handlers and subscriptions
@@ -29,16 +29,16 @@ export const useOrdersSubscriptionsHandlers = (
     // Handle removal of assignees
     if (eventType === 'DELETE') {
       const currentOrder = orders.find((order) => order.id === oldAssignations.order_id);
-      if (!currentOrder?.assigned_to) return false;
+      if (!currentOrder?.assignations) return false;
 
-      const updatedAssignations = currentOrder.assigned_to.filter(
-        (assignation) => assignation.agency_member?.id !== oldAssignations.agency_member_id
+      const updatedAssignations = currentOrder.assignations?.filter(
+        (assignation) => assignation?.id !== oldAssignations.agency_member_id
       );
 
       setOrders((prevOrders) => 
         prevOrders.map((order) =>
           order.id === oldAssignations.order_id
-            ? { ...order, assigned_to: updatedAssignations }
+            ? { ...order, assignations: updatedAssignations }
             : order
         )
       );
@@ -48,19 +48,19 @@ export const useOrdersSubscriptionsHandlers = (
     // Handle addition of assignees
     if (eventType === 'INSERT') {
       const currentOrder = orders.find((order) => order.id === newAssignations.order_id);
-      if (!currentOrder?.assigned_to) return false;
+      if (!currentOrder?.assignations) return false;
 
       const newAssignee = agencyMembers.find(
         (member) => member.id === newAssignations.agency_member_id
       );
       if (!newAssignee) return false;
 
-      const updatedAssignations = [...currentOrder.assigned_to, { agency_member: newAssignee }];
+      const updatedAssignations = [...currentOrder.assignations, newAssignee];
 
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order.id === newAssignations.order_id
-            ? { ...order, assigned_to: updatedAssignations }
+            ? { ...order, assignations: updatedAssignations }
             : order
         )
       );
