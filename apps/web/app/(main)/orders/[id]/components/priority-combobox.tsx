@@ -32,7 +32,7 @@ import {
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 interface PriorityComboboxProps {
-  order?: Order.Response;
+  order?: Order.Type;
   mode: 'order' | 'subtask';
   subtask?: Subtask.Type;
   blocked?: boolean;
