@@ -60,7 +60,7 @@ const VIEW_AVAILABLE_PROPERTIES = [
 ] as const;
 
 // Type definition with index signature
-interface OrdersViewConfig extends Record<string, unknown> {
+export interface OrdersViewConfig extends Record<string, unknown> {
   // Required specific properties
   currentView: string;
   table?: {
@@ -155,7 +155,11 @@ const useOrdersViewConfigs = ({
   // Update current view in state and storage
   const updateCurrentView = useCallback((view: string | number) => {
     const viewString = String(view);
+    console.log('🔍 View Config - updating view to:', viewString);
     updateConfig('currentView', viewString);
+    
+    // Dispatch custom event for same-tab synchronization
+    window.dispatchEvent(new CustomEvent('orders-config-changed'));
   }, [updateConfig]);
 
   // Configure view options with the update function
