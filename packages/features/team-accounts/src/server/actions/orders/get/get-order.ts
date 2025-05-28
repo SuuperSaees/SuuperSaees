@@ -333,6 +333,7 @@ export const getOrders = async (
         assignations:order_assignations(member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
         client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
         customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url))
+        reviews(*, user:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url)))
         ${includeBrief ? ', brief:briefs(name)' : ''}
         `,
         { count: 'exact' },
