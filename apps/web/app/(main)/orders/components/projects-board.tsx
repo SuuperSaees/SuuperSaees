@@ -125,12 +125,6 @@ const ProjectsBoard = ({
           ?.status_color,
       }));
     }
-    if(currentView === 'kanban') {
-      return filteredOrders.map((order) => ({
-        ...order,
-        status: statuses.find((status) => status.id === order.status_id)?.status_name
-      }));
-    }
     return filteredOrders;
   }, [filteredOrders, currentView, statuses]);
 

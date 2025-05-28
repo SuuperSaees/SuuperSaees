@@ -60,7 +60,7 @@ const VIEW_AVAILABLE_PROPERTIES = [
 ] as const;
 
 // Type definition with index signature
-export interface OrdersViewConfig extends Record<string, unknown> {
+interface OrdersViewConfig extends Record<string, unknown> {
   // Required specific properties
   currentView: string;
   table?: {
@@ -156,9 +156,6 @@ const useOrdersViewConfigs = ({
   const updateCurrentView = useCallback((view: string | number) => {
     const viewString = String(view);
     updateConfig('currentView', viewString);
-    
-    // Dispatch custom event for same-tab synchronization
-    window.dispatchEvent(new CustomEvent('orders-config-changed'));
   }, [updateConfig]);
 
   // Configure view options with the update function
@@ -227,8 +224,11 @@ const useOrdersViewConfigs = ({
         configs: {
           rowsPerPage: {
             onUpdate: (value: string) => {
+              console.log('🔍 rowsPerPage.onUpdate called with:', value);
               const newLimit = Number(value);
+              console.log('🔍 Updating limit from', limit, 'to', newLimit);
               updateLimit(newLimit); // Update the query limit via context
+              console.log('🔍 Updated limit to:', newLimit);
             },
             value: limit, // Use limit from context instead of configs.table?.rowsPerPage
           },

@@ -320,10 +320,7 @@ export const getOrders = async (
   try {
     const client = getSupabaseServerComponentClient();
 
-    const limit = config?.pagination?.limit;
-    const shouldPaginate = limit !== undefined;
-    const effectiveLimit = limit ?? 10; // Default limit for calculations
-    
+    const limit = config?.pagination?.limit ?? 10;
     let query = client
       .from('orders_v2')
       .select(
@@ -343,12 +340,8 @@ export const getOrders = async (
         target === 'agency' ? 'agency_id' : 'client_organization_id',
         organizationId,
       )
-      .order('created_at', { ascending: false });
-
-    // Only apply limit if pagination is requested
-    if (shouldPaginate) {
-      query = query.limit(effectiveLimit + 1);
-    }
+      .order('created_at', { ascending: false })
+      .limit(limit + 1);
 
     // Apply search if provided
     if (config?.search?.term && config.search.term.trim()) {
@@ -367,34 +360,31 @@ export const getOrders = async (
       }
     }
 
-    // Apply pagination only if shouldPaginate is true
-    if (shouldPaginate) {
-      // Apply pagination (offset-based takes priority over cursor-based)
-      const isOffsetBased =
-        config?.pagination?.page !== undefined ||
-        config?.pagination?.offset !== undefined;
+    // Apply pagination (offset-based takes priority over cursor-based)
+    const isOffsetBased =
+      config?.pagination?.page !== undefined ||
+      config?.pagination?.offset !== undefined;
 
-      if (isOffsetBased) {
-        // Offset-based pagination for page navigation
-        const offset =
-          config?.pagination?.offset ??
-          ((config?.pagination?.page ?? 1) - 1) * effectiveLimit;
-        query = query.range(offset, offset + effectiveLimit - 1);
-      } else if (config?.pagination?.cursor ?? config?.pagination?.endCursor) {
-        // Cursor-based pagination for infinite scrolling
-        if (config?.pagination?.cursor) {
-          query = query.lt('created_at', config.pagination.cursor);
-        }
-
-        if (config?.pagination?.endCursor) {
-          query = query.gte('created_at', config.pagination.endCursor);
-        }
-
-        query = query.limit(effectiveLimit + 1);
-      } else {
-        // Default behavior - just limit
-        query = query.limit(effectiveLimit + 1);
+    if (isOffsetBased) {
+      // Offset-based pagination for page navigation
+      const offset =
+        config?.pagination?.offset ??
+        ((config?.pagination?.page ?? 1) - 1) * limit;
+      query = query.range(offset, offset + limit - 1);
+    } else if (config?.pagination?.cursor ?? config?.pagination?.endCursor) {
+      // Cursor-based pagination for infinite scrolling
+      if (config?.pagination?.cursor) {
+        query = query.lt('created_at', config.pagination.cursor);
       }
+
+      if (config?.pagination?.endCursor) {
+        query = query.gte('created_at', config.pagination.endCursor);
+      }
+
+      query = query.limit(limit + 1);
+    } else {
+      // Default behavior - just limit
+      query = query.limit(limit + 1);
     }
 
     // Step 3: Fetch orders
@@ -407,27 +397,19 @@ export const getOrders = async (
 
     // Calculate pagination based on type
     const currentPage = config?.pagination?.page ?? 1;
-    const isOffsetBased = shouldPaginate && (
-      config?.pagination?.page !== undefined ||
-      config?.pagination?.offset !== undefined
-    );
 
     let hasNextPage: boolean;
     let nextCursor: string | null = null;
     let paginatedOrders: Order.Response[];
 
-    if (!shouldPaginate) {
-      // No pagination: return all orders
-      paginatedOrders = transformOrders(orders);
-      hasNextPage = false;
-    } else if (isOffsetBased) {
+    if (isOffsetBased) {
       // Offset-based: return exact page data
       paginatedOrders = transformOrders(orders);
-      hasNextPage = count ? currentPage * effectiveLimit < count : false;
+      hasNextPage = count ? currentPage * limit < count : false;
     } else {
       // Cursor-based: handle extra item for hasNextPage detection
-      hasNextPage = orders.length > effectiveLimit;
-      paginatedOrders = orders.slice(0, effectiveLimit);
+      hasNextPage = orders.length > limit;
+      paginatedOrders = orders.slice(0, limit);
       nextCursor = hasNextPage
         ? (paginatedOrders[paginatedOrders.length - 1]?.created_at ?? null)
         : null;
@@ -438,9 +420,9 @@ export const getOrders = async (
       nextCursor,
       count,
       pagination: {
-        limit: effectiveLimit,
+        limit,
         hasNextPage,
-        totalPages: count ? Math.ceil(count / effectiveLimit) : null,
+        totalPages: count ? Math.ceil(count / limit) : null,
         currentPage: isOffsetBased ? currentPage : null,
         isOffsetBased,
       },
