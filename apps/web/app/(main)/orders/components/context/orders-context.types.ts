@@ -25,7 +25,7 @@ export interface OrdersContextType {
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
   ordersAreLoading: boolean;
-  queryKey: (string | { page: number; limit: number | undefined; search: string; view?: string })[];
+  queryKey: (string | { page: number; limit: number; search: string })[];
   
   // Pagination properties
   nextCursor: string | null;
@@ -52,7 +52,6 @@ export type CustomQueryFn = (params: {
   page: number;
   limit: number;
   searchTerm: string;
-  view?: string;
 }) => Promise<OrdersQueryResponse>;
 
 // Provider
@@ -64,6 +63,4 @@ export interface OrdersProviderProps {
   // Optional custom query function and key
   customQueryFn?: CustomQueryFn;
   customQueryKey?: string[];
-  // Optional view type for conditional pagination
-  currentView?: string;
 }
