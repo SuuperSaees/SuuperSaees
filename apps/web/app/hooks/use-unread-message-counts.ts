@@ -18,7 +18,7 @@ export interface UnreadMessageCount {
   chat_unread_count: number;
   order_id: number | null;
   order_unread_count: number;
-  message_ids: string[];
+  // message_ids: string[];
 }
 
 // Define types for mutation parameters
@@ -91,9 +91,11 @@ const SoundManager = (() => {
 
 export interface UseUnreadMessageCountsProps {
   userId: string;
+  userRole: string;
+  userOrganizationId: string;
 
 }
-export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) {
+export function useUnreadMessageCounts({ userId, userRole, userOrganizationId }: UseUnreadMessageCountsProps) {
   const supabase = useSupabase();
   const queryClient = useQueryClient();
   const { notification_sound } = useOrganizationSettings()
@@ -101,36 +103,33 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
   const soundManager = SoundManager.getInstance(notification_sound);
   
   // Function to fetch unread counts
-  // const { workspace } = useUserWorkspace();
-  const fetchUnreadCounts = useCallback( (): Promise<UnreadMessageCount[]> => {
+  const fetchUnreadCounts = useCallback( async (): Promise<UnreadMessageCount[]> => {
     // if (!userId) return [];
-    
-
-    // const isAgencyRole = AccountRoles.agencyRoles.has(workspace?.role ?? '');
       
-    // const { data, error } = await supabase
-    //   .rpc('get_unread_message_counts', { 
-    //     p_user_id: userId,
-    //     p_is_agency_role: isAgencyRole
-    //   });
+    const { data, error } = await supabase
+      .rpc('get_unread_message_counts', { 
+        p_user_id: userId,
+        p_organization_id: userOrganizationId,
+        p_role: userRole,
+      });
     
 
-    // if (error) {
-    //   console.error('Error fetching unread counts:', error);
-    //   throw error;
-    // }
+    if (error) {
+      console.error('Error fetching unread counts:', error);
+      throw error;
+    }
 
     
-    return Promise.resolve([]);
-  }, []);
+    return data;
+  }, [userOrganizationId, userRole, supabase, userId]);
 
 
   // Use React Query to fetch and cache unread counts
   const { data: unreadCounts = [] } = useQuery<UnreadMessageCount[]>({
     queryKey: UNREAD_COUNTS_QUERY_KEY,
     queryFn: fetchUnreadCounts,
-    enabled: false,
     staleTime: 30 * 1000, // Consider data fresh for 30 seconds
+    enabled: !!userId && !!userRole && !!userOrganizationId,
   });
 
   // Calculate total unread count for chats
@@ -179,13 +178,15 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
     Error,
     MarkChatAsReadParams
   >({
-    mutationFn: async ({ chatId }: MarkChatAsReadParams) => {
+    mutationFn: async ({ chatId,  }: MarkChatAsReadParams) => {
       if (!userId) return;
       
       const { error } = await supabase
         .rpc('mark_messages_as_read', { 
           p_user_id: userId, 
-          p_chat_id: chatId 
+          p_organization_id: userOrganizationId,
+          p_role: userRole,
+          p_chat_id: chatId
         });
       
       if (error) {
@@ -209,8 +210,10 @@ export function useUnreadMessageCounts({ userId }: UseUnreadMessageCountsProps) 
       if (!userId) return;
       
       const { error } = await supabase
-        .rpc('mark_order_messages_as_read', { 
+        .rpc('mark_messages_as_read', { 
           p_user_id: userId, 
+          p_organization_id: userOrganizationId,
+          p_role: userRole,
           p_order_id: orderId 
         });
       
