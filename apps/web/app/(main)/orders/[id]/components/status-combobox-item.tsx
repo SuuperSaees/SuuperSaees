@@ -16,7 +16,7 @@ interface StatusComboboxItemProps {
   currentStatusId: number
   onSelect: (value: string) => void
   onDelete: (id: number) => void
-  order?: Order.Response
+  order?: Order.Type
   subtask?: Subtask.Type
   agency_id: string
   mode: 'order' | 'subtask'
