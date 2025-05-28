@@ -41,7 +41,7 @@ type ExtendedOrderType = Order.Type & {
   customer_organization: string | null;
 };
 interface StatusComboboxProps {
-  order?: Order.Response;
+  order?: Order.Type;
   agencyStatuses?: AgencyStatus.Type[];
   subtask?: Subtask.Type;
   agency_id: string;
