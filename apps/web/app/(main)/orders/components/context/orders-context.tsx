@@ -129,6 +129,15 @@ export const OrdersProvider = ({
   const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState<Record<string, string[]>>(() => {
+    try {
+      const stored = localStorage.getItem('orders-filters-v2');
+      return stored ? (JSON.parse(stored) as Record<string, string[]>) : {};
+    } catch (error) {
+      console.error('Error reading filters from localStorage:', error);
+      return {};
+    }
+  });
 
   // Use storage configs for rowsPerPage setting
 
@@ -233,6 +242,7 @@ export const OrdersProvider = ({
           limit: effectiveLimit,
           search: searchTerm,
           view: activeView,
+          filters: filters,
         },
       ];
     }
@@ -243,32 +253,86 @@ export const OrdersProvider = ({
         limit: effectiveLimit,
         search: searchTerm,
         view: activeView,
+        filters: filters,
       },
     ];
     return key;
-  }, [customQueryKey, currentPage, effectiveLimit, searchTerm, activeView]);
+  }, [customQueryKey, currentPage, effectiveLimit, searchTerm, activeView, filters]);
 
   // Stable query function
   const queryFn = useCallback(async (): Promise<PaginatedOrdersResponse> => {
-    // If we have initial orders and no search term, check if we can use them
-    if (initialOrders && !searchTerm && Array.isArray(initialOrders)) {
-      const localLimit = shouldUsePagination ? limit : initialOrders.length;
-      const localTotalPages = Math.ceil(initialOrders.length / localLimit);
+    // If we have initial orders and no search term or filters, check if we can use them
+    if (initialOrders && !searchTerm && Object.keys(filters).length === 0) {
+      // Handle both array format (legacy) and PaginatedOrdersResponse format
+      const ordersArray = Array.isArray(initialOrders) 
+        ? initialOrders 
+        : initialOrders.data;
+      
+      if (ordersArray && Array.isArray(ordersArray)) {
+        // For non-table views (kanban, calendar), we need ALL data, not limited initial data
+        // Only use initial data if we're confident it contains all orders
+        if (!shouldUsePagination) {
+          // Check if initial data has all orders (no next page)
+          const hasAllData = Array.isArray(initialOrders) 
+            ? true // Legacy array format assumed to have all data
+            : !initialOrders.pagination?.hasNextPage; // Check if server says no more pages
+          
+          if (!hasAllData) {
+            // Initial data is limited but we need all data for kanban/calendar
+            // Fall through to make API call without pagination
+          } else {
+            // We have all the data, use it
+            return Array.isArray(initialOrders) 
+              ? normalizeOrdersResponse(ordersArray, 1, ordersArray.length, true)
+              : initialOrders;
+          }
+        } else {
+          // Table view with pagination - use initial data for local pagination
+          const localLimit = limit;
+          const localTotalPages = Math.ceil(ordersArray.length / localLimit);
 
-      // If requesting a page within initial data range, use local pagination
-      if (currentPage <= localTotalPages) {
-        return normalizeOrdersResponse(
-          initialOrders,
-          currentPage,
-          localLimit,
-          true,
-        );
+          // If requesting a page within initial data range, use local pagination
+          if (currentPage <= localTotalPages) {
+            // If initialOrders is already a PaginatedOrdersResponse and we're on page 1, use it directly
+            if (!Array.isArray(initialOrders) && currentPage === 1 && localLimit >= ordersArray.length) {
+              return initialOrders;
+            }
+            
+            // For local pagination, preserve the original server count if available
+            if (!Array.isArray(initialOrders)) {
+              // Use the original server metadata but with paginated local data
+              const startIndex = (currentPage - 1) * localLimit;
+              const endIndex = startIndex + localLimit;
+              const paginatedData = ordersArray.slice(startIndex, endIndex);
+              
+              return {
+                data: paginatedData,
+                nextCursor: initialOrders.nextCursor,
+                count: initialOrders.count, // Preserve original server count
+                pagination: {
+                  ...initialOrders.pagination,
+                  currentPage,
+                  hasNextPage: currentPage < localTotalPages || (initialOrders.pagination?.hasNextPage ?? false),
+                  totalPages: initialOrders.pagination?.totalPages ?? null,
+                },
+              };
+            }
+            
+            // Otherwise, normalize the array data (legacy array format)
+            return normalizeOrdersResponse(
+              ordersArray,
+              currentPage,
+              localLimit,
+              true,
+            );
+          }
+
+          // If requesting beyond initial data, we need to fetch from server
+          // Fall through to server fetch logic below
+        }
       }
-
-      // If requesting beyond initial data, we need to fetch from server
-      // Fall through to server fetch logic below
     }
-
+    
     if (customQueryFn) {
       const response = await customQueryFn({
         page: currentPage,
@@ -294,6 +358,7 @@ export const OrdersProvider = ({
     const promise = getOrders(organization.id ?? '', target, true, {
       pagination: paginationConfig,
       search: searchTerm ? { term: searchTerm } : undefined,
+      filters: Object.keys(filters).length > 0 ? filters : undefined,
     });
 
     return promise;
@@ -308,30 +373,70 @@ export const OrdersProvider = ({
     initialOrders,
     shouldUsePagination,
     activeView,
+    filters,
   ]);
+
+  // Memoize the initial data calculation to prevent unnecessary re-computation
+  const initialData = useMemo(() => {
+    // Use initial orders only if we're on page 1, have no search, and no filters
+    if (
+      initialOrders && 
+      currentPage === 1 && 
+      !searchTerm && 
+      Object.keys(filters).length === 0
+    ) {
+      // Handle both array format (legacy) and PaginatedOrdersResponse format
+      const ordersArray = Array.isArray(initialOrders) 
+        ? initialOrders 
+        : initialOrders.data;
+      
+      if (ordersArray && Array.isArray(ordersArray)) {
+        // For non-table views, only use initial data if it contains all orders
+        if (!shouldUsePagination) {
+          const hasAllData = Array.isArray(initialOrders) 
+            ? true // Legacy array format assumed to have all data
+            : !initialOrders.pagination?.hasNextPage; // Check if server says no more pages
+          
+          if (!hasAllData) {
+            // Don't use limited initial data for kanban/calendar views
+            return undefined;
+          }
+          
+          // We have all the data, use it
+          return Array.isArray(initialOrders) 
+            ? normalizeOrdersResponse(ordersArray, 1, ordersArray.length, true)
+            : initialOrders;
+        }
+        
+        // Table view - use initial data for pagination
+        if (!Array.isArray(initialOrders)) {
+          return initialOrders;
+        }
+        
+        // Otherwise, normalize the array data
+        const localLimit = shouldUsePagination ? limit : ordersArray.length;
+        return normalizeOrdersResponse(
+          ordersArray,
+          currentPage,
+          localLimit,
+          true,
+        );
+      }
+    }
+    
+    return undefined;
+  }, [initialOrders, currentPage, searchTerm, filters, shouldUsePagination, limit]);
 
   const ordersQuery = useQuery({
     queryKey: queryKey,
     queryFn: queryFn,
-    initialData: (() => {
-      // Use initial orders only if we're on a page that can be served locally
-      if (initialOrders && !searchTerm && Array.isArray(initialOrders)) {
-        const localLimit = shouldUsePagination ? limit : initialOrders.length;
-        const localTotalPages = Math.ceil(initialOrders.length / localLimit);
-        if (currentPage <= localTotalPages) {
-          return normalizeOrdersResponse(
-            initialOrders,
-            currentPage,
-            localLimit,
-            true,
-          );
-        }
-      }
-      return undefined;
-    })(),
+    initialData: initialData,
     placeholderData: keepPreviousData, // This is the key for smooth pagination!
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
+    // Only refetch when we don't have initial data or when explicitly needed
+    refetchOnMount: !initialData,
+    refetchOnWindowFocus: false, // Disable automatic refetch on focus
   });
 
   // Extract pagination data from the response
@@ -472,6 +577,37 @@ export const OrdersProvider = ({
     customQueryFn,
   ]);
 
+  // Function to update filters
+  const updateFilters = useCallback((newFilters: Record<string, string[]>) => {
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+    
+    // Persist filters to localStorage
+    try {
+      localStorage.setItem('orders-filters-v2', JSON.stringify(newFilters));
+    } catch (error) {
+      console.error('Error saving filters to localStorage:', error);
+    }
+  }, []);
+
+  // Function to reset filters
+  const resetFilters = useCallback(() => {
+    setFilters({});
+    setCurrentPage(1);
+    
+    // Clear filters from localStorage
+    try {
+      localStorage.removeItem('orders-filters-v2');
+    } catch (error) {
+      console.error('Error removing filters from localStorage:', error);
+    }
+  }, []);
+
+  // Function to get filter values
+  const getFilterValues = useCallback((key: string) => {
+    return filters[key] ?? [];
+  }, [filters]);
+
   const { handleAssigneesChange } = useOrdersSubscriptionsHandlers(
     orders,
     setOrders,
@@ -550,6 +686,11 @@ export const OrdersProvider = ({
     // Additional functions
     updateLimit,
     isLoadingMore,
+
+    // Filter functions
+    updateFilters,
+    resetFilters,
+    getFilterValues,
   };
 
   return (
