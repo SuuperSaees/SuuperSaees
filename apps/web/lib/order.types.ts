@@ -1,4 +1,3 @@
-import { Account } from './account.types';
 import { Activity } from './activity.types';
 import { AgencyStatus } from './agency-statuses.types';
 import { Brief, BriefResponse } from './brief.types';
@@ -7,31 +6,23 @@ import { File } from './file.types';
 import { Message } from './message.types';
 import { Review } from './review.types';
 import { Task } from './tasks.types';
-import { UserSettings } from './user-settings.types';
 import { User } from './user.types';
 import { Tags } from './tags.types';
+import { Organization } from './organization.types';
 
-type UserResponse = Pick<
-  User.Type,
-  'email' | 'id' | 'name' | 'picture_url' > & {
-    settings:UserSettings.Type;
-  }
+
 export namespace Order {
   export type Type = Database['public']['Tables']['orders_v2']['Row'];
 
-  export type Response = Order.Type & {
-    tags: {tag:  Tags.Type}[] | null;
-    customer: User.Response
-    assigned_to: {
-      agency_member: UserResponse | null;
-    }[] | null;
-    client_organization: Account.Response | null;
-    followers?: {
-      client_follower: User.Response;
-    }[] | null;
-    brief?: Partial<Pick<Brief.Response, 'name'>>;
+  export type Response = Omit <Order.Type, 'status'> & {
+    customer: User.Response | null;
+    assignations?:  (User.Response | null)[] | null
+    client_organization?: Organization.Response | null;
+    followers?: (User.Response | null)[];
+    brief?: Partial<Pick<Brief.Response, 'name'>> | null;
     statusData?: AgencyStatus.Type | null;
-    reviews?: Review.Response[];
+    reviews?: Review.Response[] | null;
+    status?: AgencyStatus.Insert | null;
   };
   export type Relational = Order.Relationships.All & {
     brief_responses: BriefResponse.Response[]
