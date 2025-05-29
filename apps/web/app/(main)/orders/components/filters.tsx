@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState, useEffect } from 'react';
 
 import {
   CheckSquare,
@@ -71,36 +71,25 @@ const FilterLabel = ({
 const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
   const { t } = useTranslation();
   const [filterKeyOpen, setFilterKeyOpen] = useState(filters[0]?.key);
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>(defaultFilters ?? {});
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Prevent hydration mismatch by only showing applied filters after hydration
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
 
   const handleReset = useCallback(() => {
-    setSelectedFilters({});
     onReset();
   }, [onReset]);
 
   const handleFilterChange = (groupKey: string, option: FilterOption) => {
-    const value = option.value;
-    
-    setSelectedFilters((prev) => {
-      const currentValues = prev[groupKey] ?? [];
-      const hasValue = currentValues.includes(value);
-
-      if (hasValue) {
-        // Remove the value
-        const updatedValues = currentValues.filter((v) => v !== value);
-        return updatedValues.length > 0
-          ? { ...prev, [groupKey]: updatedValues }
-          : Object.fromEntries(
-              Object.entries(prev).filter(([key]) => key !== groupKey),
-            );
-      } else {
-        // Add the value
-        return { ...prev, [groupKey]: [...currentValues, value] };
-      }
-    });
-
-    option.onFilter(value);
+    option.onFilter(option.value);
   };
+
+  // Only calculate applied filters after hydration to prevent mismatch
+  const appliedFiltersCount = isHydrated 
+    ? Object.values(defaultFilters ?? {}).reduce((sum, values) => sum + (Array.isArray(values) ? values.length : 0), 0)
+    : 0;
 
   const filtersConfig: MenuItem[] = useMemo(() => {
     const submenus: MenuItem[] = filters.map((filterGroup) => ({
@@ -110,9 +99,11 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
         <FilterLabel
           filterGroup={filterGroup}
           appliedFilters={
-            filterGroup.options.filter((option) =>
-              selectedFilters?.[filterGroup.key]?.includes(option.value),
-            ).length
+            isHydrated
+              ? filterGroup.options.filter((option) =>
+                  defaultFilters?.[filterGroup.key]?.includes(option.value),
+                ).length
+              : 0
           }
         />
       ),
@@ -123,7 +114,7 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
         <FiltersMenuContent
           type={filterGroup.type}
           filterGroup={filterGroup}
-          selectedFilters={selectedFilters}
+          selectedFilters={defaultFilters ?? {}}
           onFilterChange={handleFilterChange}
           setFilterKeyOpen={setFilterKeyOpen}
         />
@@ -137,7 +128,7 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
       },
     ];
     return [...headers, ...submenus];
-  }, [selectedFilters, filters, filterKeyOpen, t, handleReset]);
+  }, [defaultFilters, filters, filterKeyOpen, t, handleReset, isHydrated]);
 
   return (
     <CustomDropdownMenu
@@ -150,7 +141,7 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
           <ListFilter className="h-4 w-4" />
           <span>{t('common:filters.title')}</span>
           <FilterLabel
-            appliedFilters={Object.values(selectedFilters ?? {}).reduce((sum, values) => sum + values.length, 0)}
+            appliedFilters={appliedFiltersCount}
           />
         </Button>
       }

@@ -2,16 +2,15 @@
 
 import { Flag, SquareKanban, Tag, Users2 } from 'lucide-react';
 
-import useFilters from '~/hooks/use-filters';
 import { Account } from '~/lib/account.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
-import { Order } from '~/lib/order.types';
 import { Tags } from '~/lib/tags.types';
 import { User } from '~/lib/user.types';
 import { formatString } from '~/utils/text-formatter';
 
 import { FilterGroup, FilterOption } from '../components/filters';
 import { TabConfig } from '../components/status-filters';
+import { useOrdersContext } from '../components/context/orders-context';
 
 // Types
 interface Priority {
@@ -20,122 +19,133 @@ interface Priority {
   color?: string;
 }
 
-interface Status {
-  id: string;
-  name: string;
-  color?: string;
-}
-
-interface FilterHandler {
-  key: string;
-  filterFn: (order: Order.Response, selectedValues: string[]) => boolean;
-  persistent?: boolean;
-}
-
 interface UseOrdersFilterConfigsProps {
-  orders: Order.Response[];
   tags: Tags.Type[];
-  statuses: Status[];
+  statuses: AgencyStatus.Type[];
   agencyMembers: User.Response[];
   clientMembers: User.Response[];
   clientOrganizations: Account.Response[];
   priorities: Priority[];
-  storageKey: string;
 }
 
 // Constants
 const STATUS_FILTERS = {
-  OPEN: (order: Order.Response) =>
-    order.status?.status_name !== 'completed' && order.status?.status_name !== 'anulled',
-  COMPLETED: (order: Order.Response) => order.status?.status_name === 'completed',
+  OPEN: [] as string[], // Will be populated dynamically based on available statuses
+  COMPLETED: [] as string[], // Will be populated dynamically based on available statuses
 };
 
 const useOrdersFilterConfigs = ({
-  orders,
   tags,
   statuses,
   agencyMembers,
   priorities,
   clientMembers,
   clientOrganizations,
-  storageKey = 'orders-filters',
 }: UseOrdersFilterConfigsProps) => {
-  const initialFiltersHandlers: FilterHandler[] = [
-    {
-      key: 'status',
-      filterFn: (order, selectedValues) =>
-        selectedValues.includes(order.status?.status_name ?? ''),
-    },
-    {
-      key: 'tags',
-      filterFn: (order, selectedValues) =>
-        selectedValues.some((tagId) =>
-          order.tags?.map((tag) => tag.tag.id).includes(tagId),
-        ),
-    },
-    {
-      key: 'priority',
-      filterFn: (order, selectedValues) =>
-        selectedValues.includes(order.priority ?? ''),
-    },
-    {
-      key: 'assigned_to',
-      filterFn: (order, selectedValues) =>
-        selectedValues.some((assigneeId) =>
-          order.assignations
-            ?.map((assignee) => assignee?.id)
-            .includes(assigneeId),
-        ),
-    },
-    {
-      key: 'client_organization',
-      filterFn: (order, selectedValues) =>
-        selectedValues.some(
-          (clientOrganizationId) =>
-            order.client_organization?.id === clientOrganizationId,
-        ),
-    },
-    {
-      key: 'customer',
-      filterFn: (order, selectedValues) =>
-        selectedValues.some((customerId) => order.customer?.id === customerId),
-    },
-  ];
+  const { updateFilters, resetFilters, getFilterValues } = useOrdersContext();
 
-  const {
-    filteredData: filteredOrders,
-    filters,
-    updateFilter,
-    removeFilter,
-    resetFilters,
-    getFilterValues,
-  } = useFilters(orders, initialFiltersHandlers, storageKey);
+  // Populate STATUS_FILTERS dynamically based on available statuses
+  const openStatusIds = statuses
+    .filter(status => 
+      status.status_name && 
+      !['completed', 'anulled'].includes(status.status_name)
+    )
+    .map(status => status.id.toString());
+    
+  const completedStatusIds = statuses
+    .filter(status => status.status_name === 'completed')
+    .map(status => status.id.toString());
+
+  STATUS_FILTERS.OPEN = openStatusIds;
+  STATUS_FILTERS.COMPLETED = completedStatusIds;
+
+  // Get current filter values from context
+  const filters = {
+    status: getFilterValues('status'),
+    tags: getFilterValues('tags'),
+    priority: getFilterValues('priority'),
+    assigned_to: getFilterValues('assigned_to'),
+    client_organization: getFilterValues('client_organization'),
+    customer: getFilterValues('customer'),
+  };
+
+  // Helper function to toggle filter value
+  const toggleFilterValue = (filterKey: string, value: string) => {
+    const currentValues = getFilterValues(filterKey);
+    const hasValue = currentValues.includes(value);
+    
+    let newValues: string[];
+    if (hasValue) {
+      newValues = currentValues.filter(v => v !== value);
+    } else {
+      newValues = [...currentValues, value];
+    }
+    
+    // Update all filters with the new value for this key
+    const allFilters = {
+      status: getFilterValues('status'),
+      tags: getFilterValues('tags'),
+      priority: getFilterValues('priority'),
+      assigned_to: getFilterValues('assigned_to'),
+      client_organization: getFilterValues('client_organization'),
+      customer: getFilterValues('customer'),
+    };
+    
+    allFilters[filterKey as keyof typeof allFilters] = newValues;
+    
+    // Remove empty filter arrays
+    const cleanedFilters = Object.fromEntries(
+      Object.entries(allFilters).filter(([_, values]) => values.length > 0)
+    );
+    
+    updateFilters(cleanedFilters);
+  };
+
+  // Helper function to replace filter values
+  const replaceFilterValues = (filterKey: string, values: string[]) => {
+    const allFilters = {
+      status: getFilterValues('status'),
+      tags: getFilterValues('tags'),
+      priority: getFilterValues('priority'),
+      assigned_to: getFilterValues('assigned_to'),
+      client_organization: getFilterValues('client_organization'),
+      customer: getFilterValues('customer'),
+    };
+    
+    if (values.length > 0) {
+      allFilters[filterKey as keyof typeof allFilters] = values;
+    } else {
+      delete allFilters[filterKey as keyof typeof allFilters];
+    }
+    
+    // Remove empty filter arrays
+    const cleanedFilters = Object.fromEntries(
+      Object.entries(allFilters).filter(([_, filterValues]) => filterValues.length > 0)
+    );
+    
+    updateFilters(cleanedFilters);
+  };
 
   // Utility functions
-
   const account = {
-    stringify: (user: User.Response) =>
+    stringify: (user: User.Response | Account.Response) =>
       JSON.stringify({
         id: user?.id,
-        name: user.settings?.name ?? user?.name ?? '',
-        picture_url: user.settings?.picture_url ?? user?.picture_url ?? '',
+        name: user.name ?? '',
+        picture_url: user.picture_url ?? '',
       }),
   };
+
   // Filter Option Generators
   const generateStatusOptions = (
     statuses: AgencyStatus.Type[],
   ): FilterOption[] =>
     statuses.map((status) => ({
       label: formatString(status?.status_name ?? '', 'capitalize') ?? '',
-      value: status?.status_name ?? '',
+      value: status.id.toString(),
       color: status?.status_color ?? '',
       onFilter: () =>
-        updateFilter(
-          'status',
-          'toggle',
-          (order) => order.status?.status_name === status?.status_name,
-          status?.status_name ?? '',
-        ),
+        toggleFilterValue('status', status.id.toString()),
     }));
 
   const generateTagOptions = (tags: Tags.Type[]): FilterOption[] =>
@@ -144,12 +154,7 @@ const useOrdersFilterConfigs = ({
       value: tag.id,
       color: tag.color ?? '',
       onFilter: () =>
-        updateFilter(
-          'tags',
-          'toggle',
-          (order) => (order.tags?.map((t) => t.tag.id) ?? []).includes(tag.id),
-          tag.id,
-        ),
+        toggleFilterValue('tags', tag.id),
     }));
 
   const generatePriorityOptions = (priorities: Priority[]): FilterOption[] =>
@@ -158,12 +163,7 @@ const useOrdersFilterConfigs = ({
       value: priority.name,
       color: priority.color,
       onFilter: () =>
-        updateFilter(
-          'priority',
-          'toggle',
-          (order) => order.priority === priority.name,
-          priority.name ?? '',
-        ),
+        toggleFilterValue('priority', priority.name ?? ''),
     }));
 
   const generateUserOptions = (members: User.Response[]): FilterOption[] =>
@@ -171,15 +171,7 @@ const useOrdersFilterConfigs = ({
       label: account.stringify(member),
       value: member.id,
       onFilter: () =>
-        updateFilter(
-          'assigned_to',
-          'toggle',
-          (order) =>
-            order.assignations
-            ?.map((assignee) => assignee?.id)
-              .includes(member.id) ?? false,
-          member.id,
-        ),
+        toggleFilterValue('assigned_to', member.id),
     }));
 
   const generateClientOrganizationOptions = (
@@ -189,12 +181,7 @@ const useOrdersFilterConfigs = ({
       label: account.stringify(clientOrganization),
       value: clientOrganization.id,
       onFilter: () =>
-        updateFilter(
-          'client_organization',
-          'toggle',
-          (order) => order.client_organization?.id === clientOrganization.id,
-          clientOrganization.id,
-        ),
+        toggleFilterValue('client_organization', clientOrganization.id),
     }));
 
   const generateCustomerOptions = (
@@ -203,14 +190,8 @@ const useOrdersFilterConfigs = ({
     customers.map((customer) => ({
       label: account.stringify(customer),
       value: customer.id,
-
       onFilter: () =>
-        updateFilter(
-          'customer',
-          'toggle',
-          (order) => order.customer?.id === customer.id,
-          customer.id,
-        ),
+        toggleFilterValue('customer', customer.id),
     }));
 
   const filtersConfig: FilterGroup[] = [
@@ -262,23 +243,18 @@ const useOrdersFilterConfigs = ({
     {
       key: 'open',
       label: 'openOrders',
-      filter: () => updateFilter('status', 'replace', STATUS_FILTERS.OPEN),
+      filter: () => replaceFilterValues('status', STATUS_FILTERS.OPEN),
     },
     {
       key: 'completed',
       label: 'completedOrders',
       filter: ()  =>
-        updateFilter(
-          'status',
-          'replace',
-          STATUS_FILTERS.COMPLETED,
-          'completed',
-        ),
+        replaceFilterValues('status', STATUS_FILTERS.COMPLETED),
     },
     {
       key: 'all',
       label: 'allOrders',
-      filter: () => removeFilter('status'),
+      filter: () => resetFilters(),
     },
   ];
 
@@ -286,10 +262,9 @@ const useOrdersFilterConfigs = ({
     filters,
     filtersConfig,
     tabsConfig,
-    filteredOrders,
-    updateFilter,
-    resetFilters,
     getFilterValues,
+    resetFilters,
+    updateFilters,
   };
 };
 
