@@ -43,7 +43,7 @@ export const ViewProvider = <T extends ViewItem>({
     availableProperties,
   );
 
-  const [viewType, setViewType] = useState<ViewTypeEnum>(ViewTypeEnum.Kanban);
+  const [viewType, setViewType] = useState<ViewTypeEnum>(ViewTypeEnum.Table);
   // const [data, setData] = useState<T[]>(initialData);
   const [configurations, setConfigurations] = useState<
     ViewConfigurations<T> | undefined

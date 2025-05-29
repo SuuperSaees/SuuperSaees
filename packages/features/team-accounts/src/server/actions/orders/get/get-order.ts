@@ -44,6 +44,14 @@ interface Config {
     term?: string;
     fields?: string[]; // Optional: specify which fields to search in
   };
+  filters?: {
+    status?: string[];
+    tags?: string[];
+    priority?: string[];
+    assigned_to?: string[];
+    client_organization?: string[];
+    customer?: string[];
+  };
 }
 
 export const getOrderById = async (orderId: Order.Type['id']) => {
@@ -324,6 +332,13 @@ export const getOrders = async (
     const shouldPaginate = limit !== undefined;
     const effectiveLimit = limit ?? 10; // Default limit for calculations
     
+    // Calculate pagination variables early
+    const currentPage = config?.pagination?.page ?? 1;
+    const isOffsetBased = shouldPaginate && (
+      config?.pagination?.page !== undefined ||
+      config?.pagination?.offset !== undefined
+    );
+    
     let query = client
       .from('orders_v2')
       .select(
@@ -344,11 +359,6 @@ export const getOrders = async (
       )
       .order('created_at', { ascending: false });
 
-    // Only apply limit if pagination is requested
-    if (shouldPaginate) {
-      query = query.limit(effectiveLimit + 1);
-    }
-
     // Apply search if provided
     if (config?.search?.term && config.search.term.trim()) {
       const searchTerm = config.search.term.trim();
@@ -364,6 +374,88 @@ export const getOrders = async (
         // For text search, use textSearch or ilike on title and description
         query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
       }
+    }
+
+    // Apply filters if provided
+    if (config?.filters) {
+      const filters = config.filters;
+
+      // Status filter
+      if (filters.status && filters.status.length > 0) {
+        // Filter by status_id directly since it's more efficient
+        query = query.in('status_id', filters.status);
+      }
+
+      // Priority filter
+      if (filters.priority && filters.priority.length > 0) {
+        query = query.in('priority', filters.priority);
+      }
+
+      // Customer filter
+      if (filters.customer && filters.customer.length > 0) {
+        query = query.in('customer_id', filters.customer);
+      }
+
+      // Client organization filter
+      if (filters.client_organization && filters.client_organization.length > 0) {
+        query = query.in('client_organization_id', filters.client_organization);
+      }
+
+      // For assigned_to and tags filters, we need to handle them differently
+      // We'll need to fetch the filtered order IDs first and then filter the main query
+
+      let filteredOrderIds: number[] | null = null;
+
+      // Assigned to filter
+      if (filters.assigned_to && filters.assigned_to.length > 0) {
+        const { data: assignedOrders } = await client
+          .from('order_assignations')
+          .select('order_id')
+          .in('agency_member_id', filters.assigned_to);
+        
+        const assignedOrderIds = assignedOrders?.map((a: any) => a.order_id) ?? [];
+        filteredOrderIds = filteredOrderIds 
+          ? filteredOrderIds.filter((id: number) => assignedOrderIds.includes(id))
+          : assignedOrderIds;
+      }
+
+      // Tags filter
+      if (filters.tags && filters.tags.length > 0) {
+        const { data: taggedOrders } = await client
+          .from('order_tags')
+          .select('order_id')
+          .in('tag_id', filters.tags);
+        
+        const taggedOrderIds = taggedOrders?.map((t: any) => t.order_id) ?? [];
+        filteredOrderIds = filteredOrderIds 
+          ? filteredOrderIds.filter((id: number) => taggedOrderIds.includes(id))
+          : taggedOrderIds;
+      }
+
+      // Apply the filtered order IDs if any
+      if (filteredOrderIds !== null) {
+        if (filteredOrderIds.length === 0) {
+          // No orders match the filters, return empty result
+          return {
+            data: [],
+            nextCursor: null,
+            count: 0,
+            pagination: {
+              limit: effectiveLimit,
+              hasNextPage: false,
+              totalPages: 0,
+              currentPage: isOffsetBased ? currentPage : null,
+              isOffsetBased,
+            },
+          };
+        }
+        query = query.in('id', filteredOrderIds);
+      }
+    }
+
+    // Only apply limit if pagination is requested
+    if (shouldPaginate) {
+      query = query.limit(effectiveLimit + 1);
     }
 
     // Apply pagination only if shouldPaginate is true
@@ -403,13 +495,6 @@ export const getOrders = async (
       console.error(ordersError.message);
       throw new Error(`Error fetching orders, ${ordersError.message}`);
     }
-
-    // Calculate pagination based on type
-    const currentPage = config?.pagination?.page ?? 1;
-    const isOffsetBased = shouldPaginate && (
-      config?.pagination?.page !== undefined ||
-      config?.pagination?.offset !== undefined
-    );
 
     let hasNextPage: boolean;
     let nextCursor: string | null = null;

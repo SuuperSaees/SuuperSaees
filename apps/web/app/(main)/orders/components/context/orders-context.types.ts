@@ -25,7 +25,7 @@ export interface OrdersContextType {
   agencyMembers: User.Response[];
   agencyId: Order.Type['agency_id'];
   ordersAreLoading: boolean;
-  queryKey: (string | { page: number; limit: number | undefined; search: string; view?: string })[];
+  queryKey: (string | { page: number; limit: number | undefined; search: string; view?: string; filters?: Record<string, string[]> })[];
   
   // Pagination properties
   nextCursor: string | null;
@@ -45,6 +45,11 @@ export interface OrdersContextType {
   // Search function
   handleSearch: (term: string) => void;        // For handling search
   searchTerm: string;                          // Current search term
+
+  // Filter functions
+  updateFilters: (filters: Record<string, string[]>) => void;
+  resetFilters: () => void;
+  getFilterValues: (key: string) => string[];
 }
 
 // Custom query function type - now supports both paginated and non-paginated responses

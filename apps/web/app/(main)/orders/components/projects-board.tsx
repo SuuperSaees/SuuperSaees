@@ -40,14 +40,12 @@ interface ProjectsBoardProps {
   agencyMembers: User.Response[];
   tags: Tags.Type[];
   className?: string;
-  storageKey?: string;
 }
 
 const ProjectsBoard = ({
   agencyMembers,
   tags,
   className,
-  storageKey = 'orders-filters',
 }: ProjectsBoardProps) => {
   // Context and hooks
   const { orders, setOrders, agencyId, ordersAreLoading, queryKey, handleSearch, searchTerm } =
@@ -64,19 +62,16 @@ const ProjectsBoard = ({
   const {
     getFilterValues,
     resetFilters,
-    filteredOrders,
-    tabsConfig,
     filtersConfig,
     filters,
+    tabsConfig,
   } = useOrdersFilterConfigs({
-    orders,
     tags,
     statuses,
     agencyMembers,
     priorities: PRIORITIES,
     clientMembers: getClientUsers(orders),
     clientOrganizations: getClientOrganizations(orders),
-    storageKey,
   });
 
   // Get the view configurations from our enhanced hook
@@ -119,20 +114,20 @@ const ProjectsBoard = ({
 
   const mutedOrders = useMemo(() => {
     if (currentView === 'calendar') {
-      return filteredOrders.map((order) => ({
+      return orders.map((order) => ({
         ...order,
         color: statuses.find((status) => status.id === order.status_id)
           ?.status_color,
       }));
     }
     if(currentView === 'kanban') {
-      return filteredOrders.map((order) => ({
+      return orders.map((order) => ({
         ...order,
         status: statuses.find((status) => status.id === order.status_id)?.status_name
       }));
     }
-    return filteredOrders;
-  }, [filteredOrders, currentView, statuses]);
+    return orders;
+  }, [orders, currentView, statuses]);
 
 
   return (
