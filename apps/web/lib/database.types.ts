@@ -3344,10 +3344,7 @@ export type Database = {
         Returns: Database["public"]["Tables"]["invitations"]["Row"][]
       }
       can_action_account_member: {
-        Args: {
-          target_organization_id: string
-          target_user_id: string
-        }
+        Args: { target_organization_id: string; target_user_id: string }
         Returns: boolean
       }
       create_invitation: {
@@ -3580,8 +3577,8 @@ export type Database = {
               service_id: string
               brief_id: string
             }
-            Returns: undefined
-          }
+        Returns: undefined
+      }
       is_account_owner: {
         Args: { organization_id: string }
         Returns: boolean
@@ -4330,27 +4327,29 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
         Row: infer R
       }
       ? R
@@ -4358,20 +4357,22 @@ export type Tables<
     : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -4379,20 +4380,22 @@ export type TablesInsert<
     : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
     | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -4400,15 +4403,190 @@ export type TablesUpdate<
     : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
     | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+
     : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      action_type: ["create", "update", "delete", "complete"],
+      activity_type: [
+        "message",
+        "review",
+        "status",
+        "priority",
+        "assign",
+        "due_date",
+        "description",
+        "title",
+        "assigned_to",
+        "task",
+        "annotation",
+      ],
+      annotations_status: ["active", "completed", "draft"],
+      app_permissions: [
+        "roles.manage",
+        "billing.manage",
+        "settings.manage",
+        "members.manage",
+        "invites.manage",
+        "tasks.write",
+        "tasks.delete",
+        "messages.write",
+        "messages.read",
+        "orders.write",
+        "orders.read",
+        "orders.manage",
+        "orders.delete",
+        "services.write",
+        "services.read",
+        "services.manage",
+        "services.delete",
+        "billing.write",
+        "billing.read",
+        "billing.delete",
+        "timers.write",
+        "timers.read",
+        "timers.manage",
+        "timers.delete",
+        "embeds.write",
+        "embeds.read",
+        "embeds.manage",
+        "embeds.delete",
+      ],
+      billing_provider: [
+        "stripe",
+        "lemon-squeezy",
+        "paddle",
+        "treli",
+        "suuper",
+      ],
+      chat_role: ["user", "assistant"],
+      chat_role_type: ["project_manager", "assistant", "owner", "guest"],
+      embed_location: ["tab", "sidebar"],
+      embed_types: ["url", "iframe"],
+      field_types: [
+        "date",
+        "multiple_choice",
+        "select",
+        "text",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "text-short",
+        "text-large",
+        "number",
+        "file",
+        "dropdown",
+        "rich-text",
+        "image",
+        "video",
+      ],
+      file_types: ["image", "video", "pdf", "fig"],
+      message_category: ["chat_message", "annotation"],
+      messages_types: ["public", "internal_agency"],
+      notification_channel: ["in_app", "email"],
+      notification_type: ["info", "warning", "error"],
+      order_status_types: [
+        "in_progress",
+        "in_review",
+        "pending",
+        "completed",
+        "annulled",
+      ],
+      organization_setting_key: [
+        "theme_color",
+        "background_color",
+        "logo_url",
+        "timezone",
+        "language",
+        "date_format",
+        "sidebar_background_color",
+        "portal_name",
+        "favicon_url",
+        "sender_name",
+        "sender_email",
+        "sender_domain",
+        "logo_dark_url",
+        "auth_card_background_color",
+        "auth_section_background_color",
+        "dashboard_url",
+        "pinned_organizations",
+        "catalog_provider_url",
+        "catalog_product_url",
+        "tool_copy_list_url",
+        "auth_background_url",
+        "parteners_url",
+        "catalog_product_wholesale_url",
+        "catalog_product_private_label_url",
+        "training_url",
+        "catalog_sourcing_china_url",
+        "calendar_url",
+        "notification_sound",
+      ],
+      payment_status: ["pending", "succeeded", "failed"],
+      plugin_status: ["installed", "uninstalled", "failed", "in progress"],
+      plugin_type: ["tool", "internal", "external", "integration"],
+      priority_types: ["high", "medium", "low"],
+      reaction_types: ["like", "favorite"],
+      service_status: [
+        "active",
+        "inactive",
+        "draft",
+        "expired",
+        "paused",
+        "blocked",
+        "scheduled",
+        "pending",
+        "deleted",
+      ],
+      subscription_item_type: ["flat", "per_seat", "metered"],
+      subscription_status: [
+        "active",
+        "trialing",
+        "past_due",
+        "canceled",
+        "unpaid",
+        "incomplete",
+        "incomplete_expired",
+        "paused",
+      ],
+      visibility: ["public", "private"],
+    },
+  },
+  storage: {
+    Enums: {},
+  },
+} as const
 
