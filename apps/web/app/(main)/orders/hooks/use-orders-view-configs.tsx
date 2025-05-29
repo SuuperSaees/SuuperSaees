@@ -60,7 +60,7 @@ const VIEW_AVAILABLE_PROPERTIES = [
 ] as const;
 
 // Type definition with index signature
-interface OrdersViewConfig extends Record<string, unknown> {
+export interface OrdersViewConfig extends Record<string, unknown> {
   // Required specific properties
   currentView: string;
   table?: {
