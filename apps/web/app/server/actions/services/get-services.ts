@@ -1,29 +1,50 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+
 import { Pagination } from '~/lib/pagination';
 import { Service } from '~/lib/services.types';
 import { getPrimaryOwnerId } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
+import { QueryBuilder } from '../query.config';
+import { transformToPaginatedResponse } from '../utils/response-transformers';
 
-export const getServicesByOrganizationId = async (config?: Pagination.Request): Promise<Service.Relationships.Billing.BillingService[]> => {
+export const getServicesByOrganizationId = async (
+  config?: Pagination.Request,
+): Promise<
+  Pagination.Response<Service.Relationships.Billing.BillingService>
+> => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
-  
+
   try {
-    const { data: products, error } = await client
+    const initialQuery = client
       .from('services')
-      .select('*, billing_services!left(provider_id, provider).service_id(id)')
+      .select(
+        '*, billing_services!left(provider_id, provider).service_id(id)',
+        config ? { count: 'exact' } : undefined,
+      )
       .eq('propietary_organization_id', primary_owner_user_id ?? '')
       .is('deleted_on', null)
-      .order('created_at', { ascending: false })
-      .returns<Service.Relationships.Billing.BillingService[]>();
+      .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
-    
-    return products
+    const paginatedProducts = QueryBuilder.getInstance().enhance(initialQuery, {
+      pagination: config,
+    });
+    const response = await paginatedProducts;
+
+    const paginatedResponse =
+      transformToPaginatedResponse<Service.Relationships.Billing.BillingService>(
+        response,
+        config ?? {},
+      );
+    console.log('paginatedResponse', paginatedResponse);
+    return paginatedResponse;
   } catch (error) {
     console.error('Error fetching products or prices:', error);
-    return [];
+    return transformToPaginatedResponse<Service.Relationships.Billing.BillingService>(
+      [],
+      config ?? {},
+    );
   }
 };

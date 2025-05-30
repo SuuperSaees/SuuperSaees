@@ -8,13 +8,15 @@ import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Service } from '~/lib/services.types';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 import { createUrlForCheckout } from '~/team-accounts/src/server/actions/services/create/create-token-for-checkout';
-import { getServicesByOrganizationId } from '~/team-accounts/src/server/actions/services/get/get-services-by-organization-id';
+import { getServicesByOrganizationId } from '~/server/actions/services/get-services';
 
 
 export function useStripeActions() {
   const servicesQueryData = useQuery({
     queryKey: ['services'],
-    queryFn: async () => await getServicesByOrganizationId(),
+    queryFn: async () => await getServicesByOrganizationId({
+      limit: 1,
+    }),
   });
 
   const briefsQueryData = useQuery({
@@ -24,7 +26,7 @@ export function useStripeActions() {
     enabled: !!servicesQueryData.data,
   });
 
-  const services = servicesQueryData.data ?? [];
+  const services = servicesQueryData.data?.data ?? [];
   const briefs = briefsQueryData.data ?? [];
   const servicesAreLoading =
     servicesQueryData.isPending || servicesQueryData.isLoading;
