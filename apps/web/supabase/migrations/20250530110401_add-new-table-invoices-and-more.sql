@@ -384,7 +384,6 @@ grant truncate on table "public"."invoices" to "service_role";
 
 grant update on table "public"."invoices" to "service_role";
 
-BEGIN;
 
 INSERT INTO public.role_permissions (role, permission) VALUES 
     ('super_admin', 'invoices.write'),
@@ -398,10 +397,11 @@ INSERT INTO public.role_permissions (role, permission) VALUES
     ('agency_project_manager', 'invoices.write'),
     ('agency_project_manager', 'invoices.read'),
     ('agency_project_manager', 'invoices.manage'),
+    ('agency_project_manager', 'invoices.delete'),
+    ('agency_member', 'invoices.read'),
     ('client_owner', 'invoices.read'),
     ('client_member', 'invoices.read');
 
-COMMIT;
 
 create policy "client_subscriptions_all"
 on "public"."client_subscriptions"
