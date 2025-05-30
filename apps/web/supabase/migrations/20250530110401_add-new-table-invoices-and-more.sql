@@ -2,9 +2,30 @@ create type "public"."invoice_status" as enum ('draft', 'issued', 'paid', 'parti
 
 create type "public"."payment_methods" as enum ('stripe', 'manual', 'bank_transfer', 'cash');
 
-alter type "public"."app_permissions" rename to "app_permissions__old_version_to_be_dropped";
+DO $$
+BEGIN
+    -- Add 'services.write' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'invoices.write' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'invoices.write';
+    END IF;
 
-create type "public"."app_permissions" as enum ('roles.manage', 'billing.manage', 'settings.manage', 'members.manage', 'invites.manage', 'tasks.write', 'tasks.delete', 'messages.write', 'messages.read', 'orders.write', 'orders.read', 'orders.manage', 'orders.delete', 'services.write', 'services.read', 'services.manage', 'services.delete', 'billing.write', 'billing.read', 'billing.delete', 'timers.write', 'timers.read', 'timers.manage', 'timers.delete', 'embeds.write', 'embeds.read', 'embeds.manage', 'embeds.delete', 'invoices.write', 'invoices.read', 'invoices.manage', 'invoices.delete');
+    -- Add 'services.read' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'invoices.read' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'invoices.read';
+    END IF;
+
+    -- Add 'services.manage' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'invoices.manage' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'invoices.manage';
+    END IF;
+
+    -- Add 'services.delete' if not already present
+    IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'invoices.delete' AND enumtypid = 'public.app_permissions'::regtype) THEN
+        ALTER TYPE public.app_permissions ADD VALUE 'invoices.delete';
+    END IF;
+END $$;
+
+COMMIT;
 
 alter type "public"."payment_status" rename to "payment_status__old_version_to_be_dropped";
 
@@ -93,9 +114,7 @@ alter table "public"."orders" alter column status type "public"."payment_status"
 
 alter table "public"."role_permissions" alter column permission type "public"."app_permissions" using permission::text::"public"."app_permissions";
 
-drop type "public"."app_permissions__old_version_to_be_dropped";
-
-drop type "public"."payment_status__old_version_to_be_dropped";
+drop type "public"."payment_status__old_version_to_be_dropped" cascade;
 
 alter table "public"."activities" add column "invoice_id" uuid;
 
@@ -364,6 +383,25 @@ grant trigger on table "public"."invoices" to "service_role";
 grant truncate on table "public"."invoices" to "service_role";
 
 grant update on table "public"."invoices" to "service_role";
+
+BEGIN;
+
+INSERT INTO public.role_permissions (role, permission) VALUES 
+    ('super_admin', 'invoices.write'),
+    ('super_admin', 'invoices.read'),
+    ('super_admin', 'invoices.manage'),
+    ('super_admin', 'invoices.delete'),
+    ('agency_owner', 'invoices.write'),
+    ('agency_owner', 'invoices.read'),
+    ('agency_owner', 'invoices.manage'),
+    ('agency_owner', 'invoices.delete'),
+    ('agency_project_manager', 'invoices.write'),
+    ('agency_project_manager', 'invoices.read'),
+    ('agency_project_manager', 'invoices.manage'),
+    ('client_owner', 'invoices.read'),
+    ('client_member', 'invoices.read');
+
+COMMIT;
 
 create policy "client_subscriptions_all"
 on "public"."client_subscriptions"
