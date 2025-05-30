@@ -24,7 +24,7 @@ export function useStripeActions() {
     enabled: !!servicesQueryData.data,
   });
 
-  const services = servicesQueryData.data?.products ?? [];
+  const services = servicesQueryData.data ?? [];
   const briefs = briefsQueryData.data ?? [];
   const servicesAreLoading =
     servicesQueryData.isPending || servicesQueryData.isLoading;

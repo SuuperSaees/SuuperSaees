@@ -1,11 +1,12 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { Pagination } from '~/lib/pagination';
+import { Service } from '~/lib/services.types';
+import { getPrimaryOwnerId } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
-import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
-export const getServicesByOrganizationId = async (): Promise<Service.Relationships.Billing.BillingService[]> => {
+export const getServicesByOrganizationId = async (config?: Pagination.Request): Promise<Service.Relationships.Billing.BillingService[]> => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
   
