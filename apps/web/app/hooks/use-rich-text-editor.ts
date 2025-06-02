@@ -138,7 +138,7 @@ export const useRichTextEditor = ({
       Link.configure({
         autolink: true,
         HTMLAttributes: {
-          class: 'text-brand underline',
+          class: 'text-blue-500 underline',
         },
       }),
       Placeholder.configure({
