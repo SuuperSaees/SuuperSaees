@@ -16,6 +16,7 @@ import { hasPermissionToDeleteClientService } from '../../permissions/services';
 // import { getDomainByUserId } from '../../../../../../../multitenancy/utils/get/get-domain';
 import { CustomError, CustomResponse, ErrorServiceOperations } from '../../../../../../../shared/src/response';
 import { HttpStatus } from '../../../../../../../shared/src/response/http-status';
+import { revalidatePath } from 'next/cache';
 // const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const deleteService = async (serviceId: number) => {
@@ -75,6 +76,7 @@ export const deleteService = async (serviceId: number) => {
         );
       }
 
+    revalidatePath('/services');
     return CustomResponse.success(null, 'serviceDeleted').toJSON();
   } catch (error) {
     console.error('Error deleting the service:', error);
@@ -119,6 +121,7 @@ export async function deleteClientService(
       serviceSubscriptionId,
     );
 
+    revalidatePath('/services');
     return CustomResponse.success(deleteData, 'serviceCancelled').toJSON();
   } catch (error) {
     console.error('Error while deleting service from client', error);
