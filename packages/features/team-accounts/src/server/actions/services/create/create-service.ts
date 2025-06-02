@@ -22,6 +22,7 @@ import { getStripeAccountID } from '../../members/get/get-member-account';
 import { getOrganization } from '../../organizations/get/get-organizations';
 import { RetryOperationService } from '@kit/shared/utils';
 import { getDomainByOrganizationId } from '../../../../../../../multitenancy/utils/get/get-domain';
+import { revalidatePath } from 'next/cache';
 
 
 // import { updateTeamAccountStripeId } from '../../team-details-server-actions';
@@ -148,7 +149,7 @@ export const createService = async (clientData: ServiceData) => {
     generateCheckoutUrlPromise.execute().catch((error) => {
       console.error('Failed to generate checkout URL:', error);
     });
-
+    revalidatePath('/services');
     return CustomResponse.success(
       {
         supabase: dataResponseCreateService,
