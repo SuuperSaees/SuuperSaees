@@ -2,15 +2,13 @@ import { PageBody } from '@kit/ui/page';
 
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
+import { getServicesByOrganizationId } from '~/server/actions/services/get-services';
 
 import { PageHeader } from '../../components/page-header';
 import { TimerContainer } from '../../components/timer-container';
 import AddServiceButton from './components/add-button';
 import ServicesTable from './components/table';
 
-if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
-  throw new Error('Stripe public key is not defined in environment variables');
-}
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -21,7 +19,15 @@ export const generateMetadata = async () => {
   };
 };
 
-function ServicesPage() {
+
+async function ServicesPage() {
+
+  const initialServices = await getServicesByOrganizationId({
+    pagination: {
+      page: 1,
+      limit: 100,
+    },
+  });
   return (
     <PageBody>
       <PageHeader
@@ -33,7 +39,7 @@ function ServicesPage() {
         <AddServiceButton />
       </PageHeader>
 
-      <ServicesTable />
+      <ServicesTable initialData={initialServices} />
     </PageBody>
   );
 }

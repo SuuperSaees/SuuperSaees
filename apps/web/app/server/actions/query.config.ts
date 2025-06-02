@@ -9,7 +9,7 @@ export type QueryConfigurations<T> = {
   includes?: string[];
   filters?: Array<{
     field: keyof T | string;
-    operator: 'eq' | 'like' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'is';
+    operator: 'eq' | 'like' | 'ilike' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'is';
     value: unknown;
   }>;
   sorts?: Array<{
@@ -65,10 +65,18 @@ export class QueryBuilder {
 
     let enhancedQuery: QueryBuilderType = query;
 
-    enhancedQuery = this.applyIncludes(enhancedQuery, config);
-    enhancedQuery = this.applyFilters(enhancedQuery, config);
-    enhancedQuery = this.applySorts(enhancedQuery, config);
-    enhancedQuery = this.applyPagination(enhancedQuery, config);
+    if (config.includes) {
+      enhancedQuery = this.applyIncludes(enhancedQuery, config);
+    }
+    if (config.filters) {
+      enhancedQuery = this.applyFilters(enhancedQuery, config);
+    }
+    if (config.sorts) {
+      enhancedQuery = this.applySorts(enhancedQuery, config);
+    }
+    if (config.pagination) {
+      enhancedQuery = this.applyPagination(enhancedQuery, config);
+    }
 
     return enhancedQuery as TQuery;
   }
@@ -79,7 +87,6 @@ export class QueryBuilder {
   ): QueryBuilderType {
     const columns = config.includes?.length ? config.includes.join(', ') : '';
     const needsCount = config.pagination !== undefined;
-    console.log('needsCount', needsCount);
     if (needsCount) {
       return query.select(columns, { count: 'exact' });
     } else {
@@ -100,6 +107,12 @@ export class QueryBuilder {
           enhancedQuery = enhancedQuery.eq(field as string, value);
           break;
         case 'like':
+          enhancedQuery = enhancedQuery.ilike(
+            field as string,
+            `%${String(value)}%`,
+          );
+          break;
+        case 'ilike':
           enhancedQuery = enhancedQuery.ilike(
             field as string,
             `%${String(value)}%`,

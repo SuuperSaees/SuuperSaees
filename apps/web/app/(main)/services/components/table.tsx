@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { ColumnDefBase } from '@tanstack/react-table';
 import { PlusIcon } from 'lucide-react';
@@ -16,21 +16,52 @@ import Table from '~/../app/components/table/table';
 import EmptyState from '~/components/ui/empty-state';
 import SearchInput from '~/components/ui/search-input';
 import { useColumns } from '~/hooks/use-columns';
+import { Pagination } from '~/lib/pagination';
 import { Service } from '~/lib/services.types';
-
-import { useStripeActions } from '../hooks/use-stripe-actions';
+import { useDataPagination } from '~/hooks/use-data-pagination';
+import { getServicesByOrganizationId } from '~/server/actions/services/get-services';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
   header: string;
 }
 
-const ServicesTable = () => {
+const ServicesTable = ({
+  initialData,
+}: {
+  initialData: Pagination.Response<Service.Relationships.Billing.BillingService>;
+}) => {
   const { t } = useTranslation(['services']);
   const [searchTerm, setSearchTerm] = useState('');
   const { workspace } = useUserWorkspace();
   const accountRole = workspace?.role ?? '';
-  const { services, servicesAreLoading } = useStripeActions();
+  const { config } = useTableConfigs('table-config');
+  
+  const {
+    data: services,
+    isLoading: servicesAreLoading,
+    pagination,
+  } = useDataPagination<Service.Relationships.Billing.BillingService>({
+    queryKey: ['services'],
+    queryFn: ({ page, limit, filters }) => 
+      getServicesByOrganizationId({
+        pagination: { page, limit },
+        filters: filters?.searchTerm
+          ? [
+              {
+                field: 'name',
+                operator: 'ilike',
+                value: filters.searchTerm,
+              },
+            ]
+          : undefined,
+      }),
+    initialData,
+    config: {
+      limit: config.rowsPerPage.value,
+      filters: { searchTerm },
+    },
+  });
 
   const hasPermissionToActionServices = (type?: string) => {
     switch (type) {
@@ -48,28 +79,6 @@ const ServicesTable = () => {
   const servicesColumns = useColumns('services', {
     hasPermission: hasPermissionToActionServices,
   }) as ColumnDef<Service.Relationships.Billing.BillingService>[];
-
-  // Helper function to normalize strings
-  const normalizeString = (str: string | undefined | null) => {
-    if (!str) return '';
-    return str
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s]/g, '');
-  };
-
-  const filteredData = useMemo(() => {
-    const searchTermNormalized = normalizeString(searchTerm);
-    return services.filter((item) => {
-      if (normalizeString(item.name)?.includes(searchTermNormalized))
-        return true;
-      if (item.price?.toString().includes(searchTermNormalized)) return true;
-      if (normalizeString(item.status)?.includes(searchTermNormalized))
-        return true;
-      return false;
-    });
-  }, [services, searchTerm]);
 
   const renderEmptyState = () => (
     <EmptyState
@@ -90,7 +99,19 @@ const ServicesTable = () => {
     />
   );
 
-  const { config } = useTableConfigs('table-config');
+  const extendedConfig = {
+    ...config,
+    pagination: {
+      totalCount: pagination.total,
+      totalPages: pagination.totalPages,
+      currentPage: pagination.currentPage,
+      hasNextPage: pagination.hasNextPage,
+      isOffsetBased: true,
+      goToPage: pagination.goToPage,
+      isLoadingMore: servicesAreLoading,
+    },
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <SearchInput
@@ -106,14 +127,14 @@ const ServicesTable = () => {
         <TableSkeleton columns={6} rows={7} />
       ) : (
         <Table
-          data={filteredData}
+          data={services}
           columns={servicesColumns}
           filterKey="name"
           controllers={{
             search: { value: searchTerm, setValue: setSearchTerm },
           }}
           emptyStateComponent={renderEmptyState()}
-          configs={config}
+          configs={extendedConfig}
         />
       )}
     </div>

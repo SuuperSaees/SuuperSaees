@@ -27,7 +27,6 @@ export const transformToPaginatedResponse = <T extends Record<string, unknown>>(
   pagination: Pagination.Request,
 ): Pagination.Response<T> => {
   // Type guard to check if it's a PostgrestResponse
-
   const count = isPostgrestResponse(queryResult) ? queryResult.count : null;
   const data = isPostgrestResponse(queryResult)
     ? queryResult.data
@@ -43,14 +42,9 @@ export const transformToPaginatedResponse = <T extends Record<string, unknown>>(
 
   const prevCursor: string | null = null;
 
-  console.log('count', count);
   return {
     data,
-    total: count
-      ? !pagination.limit
-        ? count
-        : Math.ceil(count / pagination.limit)
-      : null,
+    total: count ?? null,
     limit: pagination.limit ?? null,
     page: pagination.page ?? null,
     nextCursor,

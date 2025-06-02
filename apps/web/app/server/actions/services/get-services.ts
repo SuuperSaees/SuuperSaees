@@ -6,11 +6,11 @@ import { Pagination } from '~/lib/pagination';
 import { Service } from '~/lib/services.types';
 import { getPrimaryOwnerId } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 
-import { QueryBuilder } from '../query.config';
+import { QueryBuilder, QueryConfigurations } from '../query.config';
 import { transformToPaginatedResponse } from '../utils/response-transformers';
 
 export const getServicesByOrganizationId = async (
-  config?: Pagination.Request,
+  config?: QueryConfigurations<Service.Relationships.Billing.BillingService>,
 ): Promise<
   Pagination.Response<Service.Relationships.Billing.BillingService>
 > => {
@@ -28,23 +28,20 @@ export const getServicesByOrganizationId = async (
       .is('deleted_on', null)
       .order('created_at', { ascending: false });
 
-    const paginatedProducts = QueryBuilder.getInstance().enhance(initialQuery, {
-      pagination: config,
-    });
+    const paginatedProducts = QueryBuilder.getInstance().enhance(initialQuery, config);
     const response = await paginatedProducts;
 
     const paginatedResponse =
       transformToPaginatedResponse<Service.Relationships.Billing.BillingService>(
         response,
-        config ?? {},
+        config?.pagination ?? {},
       );
-    console.log('paginatedResponse', paginatedResponse);
     return paginatedResponse;
   } catch (error) {
     console.error('Error fetching products or prices:', error);
     return transformToPaginatedResponse<Service.Relationships.Billing.BillingService>(
       [],
-      config ?? {},
+      {},
     );
   }
 };
