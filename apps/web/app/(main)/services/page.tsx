@@ -6,7 +6,7 @@ import { getServicesByOrganizationId } from '~/server/actions/services/get-servi
 
 import { PageHeader } from '../../components/page-header';
 import { TimerContainer } from '../../components/timer-container';
-import AddServiceButton from './components/add-button';
+// import AddServiceButton from './components/add-button';
 import ServicesTable from './components/table';
 
 
@@ -36,7 +36,7 @@ async function ServicesPage() {
         className="w-full"
       >
         <h2 className="text-xl font-medium">Services</h2>
-        <AddServiceButton />
+        {/* <AddServiceButton /> */}
       </PageHeader>
 
       <ServicesTable initialData={initialServices} />

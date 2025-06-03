@@ -16,10 +16,12 @@ import Table from '~/../app/components/table/table';
 import EmptyState from '~/components/ui/empty-state';
 import SearchInput from '~/components/ui/search-input';
 import { useColumns } from '~/hooks/use-columns';
+import { useDataPagination } from '~/hooks/use-data-pagination';
 import { Pagination } from '~/lib/pagination';
 import { Service } from '~/lib/services.types';
-import { useDataPagination } from '~/hooks/use-data-pagination';
 import { getServicesByOrganizationId } from '~/server/actions/services/get-services';
+
+import AddServiceButton from './add-button';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -36,14 +38,14 @@ const ServicesTable = ({
   const { workspace } = useUserWorkspace();
   const accountRole = workspace?.role ?? '';
   const { config } = useTableConfigs('table-config');
-  
+
   const {
     data: services,
     isLoading: servicesAreLoading,
     pagination,
   } = useDataPagination<Service.Relationships.Billing.BillingService>({
     queryKey: ['services'],
-    queryFn: ({ page, limit, filters }) => 
+    queryFn: ({ page, limit, filters }) =>
       getServicesByOrganizationId({
         pagination: { page, limit },
         filters: filters?.searchTerm
@@ -114,14 +116,17 @@ const ServicesTable = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <SearchInput
-        value={searchTerm}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setSearchTerm(e.target.value)
-        }
-        placeholder={t('searchServices')}
-        className="ml-auto"
-      />
+      <div className="flex flex-wrap gap-4 justify-end">
+        <SearchInput
+          value={searchTerm}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchTerm(e.target.value)
+          }
+          placeholder={t('searchServices')}
+          className="ml-auto"
+        />
+        <AddServiceButton />
+      </div>
 
       {servicesAreLoading ? (
         <TableSkeleton columns={6} rows={7} />
