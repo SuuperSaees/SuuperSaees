@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call */
 
-import { Database } from '~/lib/database.types';
 import { Pagination } from '~/lib/pagination';
 
 // WORK IN PROGRESS
@@ -52,14 +51,9 @@ export class QueryBuilder {
     return QueryBuilder.instance;
   }
 
-  public enhance<
-    TTableName extends keyof Database['public']['Tables'],
-    TQuery extends SupabaseQueryBuilder,
-  >(
+  public enhance<T extends Record<string, unknown>, TQuery extends SupabaseQueryBuilder>(
     query: TQuery,
-    config?: QueryConfigurations<
-      Database['public']['Tables'][TTableName]['Row']
-    >,
+    config?: QueryConfigurations<T>,
   ): TQuery {
     if (!config) return query;
 

@@ -1,14 +1,23 @@
-import React from 'react';
+
+
+import { PlusIcon } from 'lucide-react';
+import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
+import { AccountInvitationsTable } from 'node_modules/@kit/team-accounts/src/components/invitations/account-invitations-table';
+import { AccountMembersTable } from 'node_modules/@kit/team-accounts/src/components/members/account-members-table';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
+import { InviteMembersDialogContainer } from '@kit/team-accounts/components';
+import { PageBody } from '@kit/ui/page';
+import { Trans } from '@kit/ui/trans';
 
+import { PageHeader } from '~/(main)/../components/page-header';
+import { TimerContainer } from '~/(main)/../components/timer-container';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-
-import { loadMembersPageData } from './_lib/server/members-page.loader';
-import ClientsMembersPagePresentation from './components/clients-members-page-presentation';
 import { getSession } from '~/server/actions/accounts/accounts.action';
+
 import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
+import { loadMembersPageData } from './_lib/server/members-page.loader';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -32,7 +41,6 @@ async function ClientsMembersPage() {
     console.error('Error fetching account:', accountError.message);
   }
 
-  
   const { data: accountMembership, error: accountMembershipError } =
     await client
       .from('accounts_memberships')
@@ -76,32 +84,89 @@ async function ClientsMembersPage() {
 
   const slug = organization?.slug ?? '';
 
-  const [members, invitations, _, { user }] =
-    await loadMembersPageData(client, slug).catch((error) => {
-      console.error('Error loading members page data:', error);
-      return [];
-    });
+  const [members, invitations, _, { user }] = await loadMembersPageData(
+    client,
+    slug,
+    organization?.id ?? '',
+    {
+      pagination: {
+        page: 1,
+        limit: 5
+      },
+    },
+  ).catch((error) => {
+    console.error('Error loading members page data:', error);
+    return [];
+  });
 
   const canManageRoles =
     account?.permissions?.includes('roles.manage') ?? false;
 
-  const isPrimaryOwner = (await getSession())?.organization?.owner_id === user.id;
+  const isPrimaryOwner =
+    (await getSession())?.organization?.owner_id === user.id;
   const currentUserRoleHierarchy = account.role_hierarchy_level;
 
   return (
-    <ClientsMembersPagePresentation
-      account={{
-        id: account.id ?? '',
-        role_hierarchy_level: account.role_hierarchy_level ?? 0,
-      }}
-      currentUserRoleHierarchy={currentUserRoleHierarchy}
-      slug={slug}
-      members={members}
-      invitations={invitations}
-      user={user}
-      canManageRoles={canManageRoles}
-      isPrimaryOwner={isPrimaryOwner}
-    />
+    <PageBody>
+      <div className="flex items-center gap-2">
+        <PageHeader
+          title="team:team"
+          rightContent={<TimerContainer />}
+          className="w-full"
+        >
+          <div className="flex items-center gap-2">
+            <h2 className="font-inter text-xl font-medium leading-4">
+              <Trans i18nKey={'team:team'} />
+            </h2>
+
+            {members?.data && (
+              <div className="flex items-center rounded-full border border-gray-500 bg-gray-50 px-2 text-gray-500">
+                <span className="inline-flex gap-2 text-[12px]">
+                  <span>{members?.data.length}</span>
+                  {members?.data.length === 1 ? (
+                    <Trans i18nKey={'team:labelNumberOfUsers.singular'} />
+                  ) : (
+                    <Trans i18nKey={'team:labelNumberOfUsers.plural'} />
+                  )}
+                </span>
+              </div>
+            )}
+          </div>
+        </PageHeader>
+        <InviteMembersDialogContainer
+          userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+          accountSlug={slug}
+        >
+          <ThemedButton
+            data-test={'invite-members-form-trigger'}
+            className="ml-auto"
+          >
+            <PlusIcon className="h-4 w-4" />
+
+            <Trans i18nKey={'team:inviteMembersButton'} />
+          </ThemedButton>
+        </InviteMembersDialogContainer>
+      </div>
+
+      <AccountMembersTable
+        organizationId={organization?.id ?? ''}
+        userRoleHierarchy={currentUserRoleHierarchy ?? 0}
+        currentUserId={user.id}
+        currentAccountId={account.id ?? ''}
+        initialData={members}
+        isPrimaryOwner={isPrimaryOwner}
+        canManageRoles={canManageRoles}
+      />
+
+      <AccountInvitationsTable
+        permissions={{
+          canUpdateInvitation: canManageRoles,
+          canRemoveInvitation: canManageRoles,
+          currentUserRoleHierarchy: currentUserRoleHierarchy ?? 0,
+        }}
+        invitations={invitations}
+      />
+    </PageBody>
   );
 }
 
