@@ -1,7 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
-import { Invoice, InvoiceItem } from '~/lib/invoice.types';
-import { getSession } from '../../accounts/accounts.action';
+import { Invoice } from '~/lib/invoice.types';
 
 interface PaginationConfig {
   pagination?: {
@@ -40,21 +39,21 @@ export class InvoiceRepository {
   async create(payload: Invoice.Insert): Promise<Invoice.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
-      .from('invoices')
+      .from('invoices') 
       .insert({
-        invoice_number: payload.invoice_number,
-        customer_id: payload.customer_id,
-        organization_id: payload.organization_id,
+        number: payload.number,
+        client_organization_id: payload.client_organization_id,
+        agency_id: payload.agency_id,
         issue_date: payload.issue_date,
         due_date: payload.due_date,
         status: payload.status ?? 'draft',
-        subtotal: payload.subtotal,
+        subtotal_amount: payload.subtotal_amount,
         tax_amount: payload.tax_amount ?? 0,
         total_amount: payload.total_amount,
         currency: payload.currency ?? 'USD',
         notes: payload.notes,
-        payment_method: payload.payment_method,
-        payment_terms: payload.payment_terms,
+        checkout_url: payload.checkout_url, 
+        deleted_on: null,
       })
       .select()
       .single();
@@ -183,17 +182,17 @@ export class InvoiceRepository {
     let nextCursor: string | null = null;
 
     if (isOffsetBased) {
-      paginatedInvoices = invoices as Invoice.Response[];
+      paginatedInvoices = invoices as unknown as Invoice.Response[];
       hasNextPage = (invoices?.length ?? 0) === effectiveLimit && 
                    ((config?.pagination?.offset ?? ((currentPage - 1) * effectiveLimit)) + effectiveLimit) < (count ?? 0);
     } else {
       hasNextPage = (invoices?.length ?? 0) > effectiveLimit;
       paginatedInvoices = hasNextPage ? 
-        (invoices?.slice(0, effectiveLimit) as Invoice.Response[]) : 
-        (invoices as Invoice.Response[]);
+        (invoices?.slice(0, effectiveLimit) as unknown as Invoice.Response[]) : 
+        (invoices as unknown as Invoice.Response[]);
       
       if (hasNextPage && paginatedInvoices.length > 0) {
-        nextCursor = paginatedInvoices[paginatedInvoices.length - 1].created_at;
+        nextCursor = paginatedInvoices[paginatedInvoices.length - 1]?.created_at ?? null;
       }
     }
 
@@ -202,19 +201,17 @@ export class InvoiceRepository {
       ...invoice,
       customer: invoice.customer ? {
         ...invoice.customer,
-        name: Array.isArray(invoice.customer.user_settings) ? 
-          invoice.customer.user_settings[0]?.name ?? invoice.customer.name :
-          invoice.customer.user_settings?.name ?? invoice.customer.name,
-        picture_url: Array.isArray(invoice.customer.user_settings) ?
-          invoice.customer.user_settings[0]?.picture_url ?? invoice.customer.picture_url :
-          invoice.customer.user_settings?.picture_url ?? invoice.customer.picture_url,
+        name: Array.isArray(invoice.customer.settings) ? 
+          invoice.customer.settings[0]?.name : invoice.customer.name,
+        picture_url: Array.isArray(invoice.customer.settings) ?
+          invoice.customer.settings[0]?.picture_url : invoice.customer.picture_url,
       } : null,
       total_amount: invoice.invoice_items?.reduce((sum, item) => sum + (item.total_price ?? 0), 0) ?? invoice.total_amount,
       items_count: invoice.invoice_items?.length ?? 0,
     })) ?? [];
 
     return {
-      data: transformedInvoices,
+      data: transformedInvoices as Invoice.Response[],
       nextCursor,
       count: count ?? 0,
       pagination: {
@@ -273,15 +270,15 @@ export class InvoiceRepository {
       ...invoice,
       customer: {
         ...invoice.customer,
-        name: Array.isArray(invoice.customer.user_settings) ?
-          invoice.customer.user_settings[0]?.name ?? invoice.customer.name :
-          invoice.customer.user_settings?.name ?? invoice.customer.name,
-        picture_url: Array.isArray(invoice.customer.user_settings) ?
-          invoice.customer.user_settings[0]?.picture_url ?? invoice.customer.picture_url :
-          invoice.customer.user_settings?.picture_url ?? invoice.customer.picture_url,
+        // name: Array.isArray(invoice.customer.name) ?
+        //   invoice.customer.user_settings[0]?.name ?? invoice.customer.name :
+        //   invoice.customer.user_settings?.name ?? invoice.customer.name,
+        // picture_url: Array.isArray(invoice.customer.name) ?
+        //   invoice.customer.user_settings[0]?.picture_url ?? invoice.customer.picture_url :
+        //   invoice.customer.user_settings?.picture_url ?? invoice.customer.picture_url,
       },
       invoice_items: invoice.invoice_items ?? [],
-    } as Invoice.Relational;
+    } as unknown as Invoice.Relational;
   }
 
   // * DELETE REPOSITORIES
