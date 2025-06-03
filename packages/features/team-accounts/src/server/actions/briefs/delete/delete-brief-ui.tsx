@@ -31,8 +31,10 @@ const DeleteBriefDialog = ({ briefId }: { briefId: string }) => {
       await handleResponse(res, 'briefs', t);
     },
     onSuccess: async () => {
+      // Mark all briefs queries as invalidated
       await queryClient.invalidateQueries({
         queryKey: ['briefs'],
+        exact: false,
       });
     },
     onError: () => {

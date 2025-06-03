@@ -114,7 +114,7 @@ const BriefServices = ({
   return (
     <div className="flex flex-wrap gap-2">
       {services.slice(0, maxTags).map((service, index) => {
-        const tagColor = tagColors[index % tagColors.length];
+        const tagColor = tagColors[index % tagColors.length]!;
 
         return (
           <div
@@ -150,7 +150,11 @@ function BriefActions({
       await handleResponse(res, 'briefs', t);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['briefs'] });
+      // Mark all briefs queries as invalidated
+      await queryClient.invalidateQueries({
+        queryKey: ['briefs'],
+        exact: false,
+      });
     },
   });
 

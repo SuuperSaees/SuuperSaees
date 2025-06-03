@@ -16,13 +16,13 @@ const SearchInput = ({
   className,
 }: SearchInputProps) => {
   return (
-    <div className="relative">
+    <div className={cn('relative w-[280px]', className)}>
       <ThemedInput
         type="text"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={cn('w-[280px] px-4 py-2 pl-10', className)}
+        className="w-full px-4 py-2 pl-10"
       />
       <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
     </div>
