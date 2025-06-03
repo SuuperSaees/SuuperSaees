@@ -165,7 +165,15 @@ export function useDataPagination<T, F extends QueryFilters = QueryFilters>({
   const query = useQuery({
     queryKey: currentQueryKey,
     queryFn: async () => {
-      if (virtualPages?.[state.page]) return virtualPages[state.page];
+      // Check if the query has been invalidated by looking at stale status
+      const queryState = queryClient.getQueryState(currentQueryKey);
+      const isInvalidated = queryState?.isInvalidated ?? queryState?.status === 'error';
+      
+      // Only use virtual pages if query hasn't been invalidated and is fresh
+      if (virtualPages?.[state.page] && !isInvalidated) {
+        return virtualPages[state.page];
+      }
+      
       return queryFn({
         page: state.page,
         limit: state.limit,

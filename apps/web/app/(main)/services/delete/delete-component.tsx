@@ -32,9 +32,10 @@ const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
       await handleResponse(res, 'services', t);
     },
     onSuccess: async () => {
-      // invalidate the query
+      // Mark all services queries as invalidated
       await queryClient.invalidateQueries({
         queryKey: ['services'],
+        exact: false,
       });
     },
     onError: () => {
