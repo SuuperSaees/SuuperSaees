@@ -65,9 +65,9 @@ export class QueryBuilder {
 
     let enhancedQuery: QueryBuilderType = query;
 
-    if (config.includes) {
-      enhancedQuery = this.applyIncludes(enhancedQuery, config);
-    }
+    // if (config.includes) {
+    //   enhancedQuery = this.applyIncludes(enhancedQuery, config);
+    // }
     if (config.filters) {
       enhancedQuery = this.applyFilters(enhancedQuery, config);
     }
