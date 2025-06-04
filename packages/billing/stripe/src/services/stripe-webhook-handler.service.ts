@@ -18,6 +18,7 @@ type UpsertSubscriptionParams =
     line_items: Array<LineItem>;
   };
 
+  // Agregar estos eventos al tipo WebhookEventHandlers
   type WebhookEventHandlers = {
     'checkout.session.completed'?: (
       data: UpsertSubscriptionParams | UpsertOrderParams
@@ -25,11 +26,13 @@ type UpsertSubscriptionParams =
     'customer.subscription.updated'?: (
       data: UpsertSubscriptionParams
     ) => Promise<unknown>;
+    'customer.subscription.created'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
     'customer.subscription.deleted'?: (subscriptionId: string) => Promise<unknown>;
     'checkout.session.async_payment_failed'?: (sessionId: string) => Promise<unknown>;
     'checkout.session.async_payment_succeeded'?: (sessionId: string) => Promise<unknown>;
     'invoice.paid'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
-    'customer.subscription.created'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
+    'invoice.created'?: (invoice: any) => Promise<unknown>;
+    'invoice.updated'?: (invoice: any) => Promise<unknown>;
     'payment_intent.succeeded'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
   };
 
