@@ -5,14 +5,12 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
 import { getPrimaryOwnerId } from '../../members/get/get-member-account';
 
-export const getServicesByOrganizationId = async (): Promise<{
-  products: Service.Relationships.Billing.BillingService[];
-}> => {
+export const getServicesByOrganizationId = async (): Promise<Service.Relationships.Billing.BillingService[]> => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
   
   try {
-    const { data: fetchedProducts, error } = await client
+    const { data: products, error } = await client
       .from('services')
       .select('*, billing_services!left(provider_id, provider).service_id(id)')
       .eq('propietary_organization_id', primary_owner_user_id ?? '')
@@ -21,13 +19,10 @@ export const getServicesByOrganizationId = async (): Promise<{
       .returns<Service.Relationships.Billing.BillingService[]>();
 
     if (error) throw new Error(error.message);
-    return {
-      products: [...fetchedProducts],
-    };
+    
+    return products
   } catch (error) {
     console.error('Error fetching products or prices:', error);
-    return {
-      products: [],
-    };
+    return [];
   }
 };

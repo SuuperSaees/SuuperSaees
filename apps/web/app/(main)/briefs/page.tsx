@@ -1,8 +1,12 @@
 import { PageBody } from '@kit/ui/page';
 
+import { PageHeader } from '~/(main)/../components/page-header';
+import { TimerContainer } from '~/(main)/../components/timer-container';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
-import { BriefsPageClient } from './components/briefs-page-client';
+import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
+
+import BriefsTable from './components/table';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -13,10 +17,19 @@ export const generateMetadata = async () => {
   };
 };
 
-function BriefsPage() {
+async function BriefsPage() {
+  const initialData = await getBriefs({
+    includes: ['services'],
+    pagination: { limit: 100, page: 1 },
+  });
   return (
     <PageBody className="overflow-y-auto">
-      <BriefsPageClient  />
+      <PageHeader
+        title="briefs:briefs"
+        rightContent={<TimerContainer />}
+        className="w-full"
+      />
+      <BriefsTable initialData={initialData} />
     </PageBody>
   );
 }

@@ -2,17 +2,27 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 
-
-
 import { Database } from '@kit/supabase/database';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 
-
-
-import { Brief, BriefResponse } from '../../../../../../../../apps/web/lib/brief.types';
+import {
+  QueryBuilder,
+  QueryConfigurations,
+} from '../../../../../../../../apps/web/app/server/actions/query.config';
+import { transformToPaginatedResponse } from '../../../../../../../../apps/web/app/server/actions/utils/response-transformers';
+import {
+  Brief,
+  BriefResponse,
+} from '../../../../../../../../apps/web/lib/brief.types';
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
+import { Pagination } from '../../../../../../../../apps/web/lib/pagination';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import { fetchCurrentUser, fetchCurrentUserAccount, getPrimaryOwnerId, getUserRole } from '../../members/get/get-member-account';
+import {
+  fetchCurrentUser,
+  fetchCurrentUserAccount,
+  getPrimaryOwnerId,
+  getUserRole,
+} from '../../members/get/get-member-account';
 import { fetchClientServices } from '../../services/get/get-services';
 
 interface Configurations {
@@ -20,10 +30,8 @@ interface Configurations {
 }
 
 export const getBriefs = async (
-  configurations: Configurations = {},
-): Promise<
-  Brief.Relationships.Services.Response[]
-> => {
+  configurations?: QueryConfigurations<Brief.Relationships.Services.Response>,
+): Promise<Pagination.Response<Brief.Relationships.Services.Response>> => {
   try {
     const client = getSupabaseServerComponentClient<Database>();
 
@@ -45,15 +53,39 @@ export const getBriefs = async (
     if (validAgencyRoles.has(accountRole)) {
       // Step 4.1: get the propitary_organization_id
       const organizationOwnerId = await getPrimaryOwnerId();
-      
+
       // Step 4.2: get the briefs for the organization
-      const briefs = await fetchBriefsByOrgOwnerId(
-        client,
-        organizationOwnerId ?? '',
+      // const briefs = await fetchBriefsByOrgOwnerId(
+      //   client,
+      //   organizationOwnerId ?? '',
+      //   configurations,
+      // );
+      const query = client
+        .from('briefs')
+        .select(
+          'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))' +
+            (configurations?.includes?.includes('services')
+              ? ', services(id, name)'
+              : ''),
+          {
+            count: 'exact',
+          },
+        )
+        .is('deleted_on', null)
+        .eq('propietary_organization_id', organizationOwnerId ?? '')
+        .order('created_at', { ascending: false });
+
+      const paginatedBriefs = QueryBuilder.getInstance().enhance(
+        query,
         configurations,
       );
-
-      return briefs;
+      const response = await paginatedBriefs;
+      const paginatedResponse =
+        transformToPaginatedResponse<Brief.Relationships.Services.Response>(
+          response,
+          configurations?.pagination ?? {},
+        );
+      return paginatedResponse;
     } else if (validClientRoles.has(accountRole)) {
       // Step 4: get the briefs for client users
 
@@ -77,12 +109,42 @@ export const getBriefs = async (
       const briefIds = serviceBriefs?.map((brief) => brief.brief_id);
 
       // Step 4.5: get the briefs for the client
-      const briefs = await fetchClientBriefs(client, briefIds, serviceIds);
+      // const briefs = await fetchClientBriefs(client, briefIds, serviceIds);
 
-      return briefs;
+      let query = client
+        .from('briefs')
+        .select(
+          `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
+      form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
+      services!inner( id, name )`,
+          {
+            count: 'exact',
+          },
+        )
+        .is('deleted_on', null)
+        .in('id', briefIds);
+
+      if (serviceIds && serviceIds.length > 0) {
+        query = query.in('services.id', serviceIds);
+      }
+
+      const paginatedBriefs = QueryBuilder.getInstance().enhance(
+        query,
+        configurations,
+      );
+      const response = await paginatedBriefs;
+      const paginatedResponse =
+        transformToPaginatedResponse<Brief.Relationships.Services.Response>(
+          response,
+          configurations?.pagination ?? {},
+        );
+      return paginatedResponse;
     }
 
-    return [];
+    return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
+      [],
+      {},
+    );
   } catch (error) {
     console.error('Error obtaining briefs', error);
     throw error;
@@ -105,11 +167,12 @@ export const fetchFormfieldsWithResponses = async (
       .eq('order_id', orderId);
 
     if (errorBriefFormFields) {
-      throw new Error(`Failed to get brief responses for order (${orderId}), ${errorBriefFormFields.message}`);
+      throw new Error(
+        `Failed to get brief responses for order (${orderId}), ${errorBriefFormFields.message}`,
+      );
     }
 
     return briefFormFields;
-
   } catch (error) {
     console.error('Error obtaining brief fields', error);
     throw error;
@@ -143,19 +206,18 @@ export const fetchClientBriefs = async (
   briefIds: Brief.Type['id'][],
   serviceIds?: Service.Type['id'][],
 ): Promise<Brief.Relationships.Services.Response[]> => {
-
   let query = client
-  .from('briefs')
-  .select(
-    `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
+    .from('briefs')
+    .select(
+      `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
     form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
     services!inner( id, name )`,
-  )
-  .is('deleted_on', null)
-  .in('id', briefIds)
+    )
+    .is('deleted_on', null)
+    .in('id', briefIds);
 
   if (serviceIds && serviceIds.length > 0) {
-    query = query.in('services.id', serviceIds)
+    query = query.in('services.id', serviceIds);
   }
   try {
     const { data: briefsData, error: briefsError } = await query;
@@ -172,13 +234,15 @@ export const fetchClientBriefs = async (
 export const fetchBriefs = async (
   client: SupabaseClient<Database>,
   briefIds: Brief.Type['id'][],
-  columns?: (keyof Brief.Type)[]
+  columns?: (keyof Brief.Type)[],
 ): Promise<Brief.Response[]> => {
   try {
     // Start with the default query
-    let query = client.from('briefs').select(
-      'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, services (name)'
-    );
+    let query = client
+      .from('briefs')
+      .select(
+        'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, services (name)',
+      );
 
     // Modify the query if specific columns are provided
     if (columns && columns.length > 0) {
@@ -186,14 +250,13 @@ export const fetchBriefs = async (
     }
 
     // Filter by brief IDs
-    query = query.in('id', briefIds)
-    .is('deleted_on', null);
+    query = query.in('id', briefIds).is('deleted_on', null);
 
     const { data: briefsData, error: briefsError } = await query;
     if (briefsError) {
       throw new Error(`Error fetching the briefs: ${briefsError.message}`);
     }
-    
+
     return briefsData as Brief.Response[]; // Ensure the return type aligns with expected output
   } catch (error) {
     console.error(error);
@@ -211,7 +274,9 @@ export const fetchBriefsByOrgOwnerId = async (
       .from('briefs')
       .select(
         'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))' +
-        (configurations.includes?.includes('services') ? ', services(id, name)' : ''),
+          (configurations.includes?.includes('services')
+            ? ', services(id, name)'
+            : ''),
       )
       .is('deleted_on', null)
       .eq('propietary_organization_id', ownerId)
