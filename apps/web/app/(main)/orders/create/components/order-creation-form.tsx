@@ -178,7 +178,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
   };
 
   const selectedBrief =
-    briefs.find(
+    briefs?.find(
       (brief) => brief.id === form.getValues('briefSelection.selectedBriefId'),
     ) ?? null;
 
