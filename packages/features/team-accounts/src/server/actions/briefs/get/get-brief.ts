@@ -41,6 +41,11 @@ export const getBriefs = async (
     // Step 3: get the role and define the valid roles
     const accountRole = await getUserRole();
 
+    // Check if accountRole is null
+    if (!accountRole) {
+      throw new Error('User role not found');
+    }
+
     const validAgencyRoles = new Set([
       'agency_owner',
       'agency_project_manager',
@@ -55,11 +60,6 @@ export const getBriefs = async (
       const organizationOwnerId = await getPrimaryOwnerId();
 
       // Step 4.2: get the briefs for the organization
-      // const briefs = await fetchBriefsByOrgOwnerId(
-      //   client,
-      //   organizationOwnerId ?? '',
-      //   configurations,
-      // );
       const query = client
         .from('briefs')
         .select(
@@ -68,24 +68,39 @@ export const getBriefs = async (
               ? ', services(id, name)'
               : ''),
           {
-            count: 'exact',
+            count: configurations?.pagination ? 'exact' : undefined,
           },
         )
         .is('deleted_on', null)
         .eq('propietary_organization_id', organizationOwnerId ?? '')
         .order('created_at', { ascending: false });
 
-      const paginatedBriefs = QueryBuilder.getInstance().enhance(
-        query,
-        configurations,
-      );
-      const response = await paginatedBriefs;
-      const paginatedResponse =
-        transformToPaginatedResponse<Brief.Relationships.Services.Response>(
-          response,
-          configurations?.pagination ?? {},
+      // Apply pagination only if configurations and pagination are provided
+      if (configurations && configurations?.pagination) {
+        const paginatedBriefs = QueryBuilder.getInstance().enhance(
+          query,
+          configurations,
         );
-      return paginatedResponse;
+        const response = await paginatedBriefs;
+        
+        if (response.error) {
+          throw new Error(`Error fetching briefs: ${response.error.message}`);
+        }
+        
+        return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
+          response,
+          configurations.pagination,
+        );
+      } else {
+        // No pagination - get all results
+        const { data, error } = await query;
+        
+        if (error) {
+          throw new Error(`Error fetching briefs: ${error.message}`);
+        }
+
+        return data as unknown as Brief.Relationships.Services.Response[];
+      }
     } else if (validClientRoles.has(accountRole)) {
       // Step 4: get the briefs for client users
 
@@ -109,8 +124,6 @@ export const getBriefs = async (
       const briefIds = serviceBriefs?.map((brief) => brief.brief_id);
 
       // Step 4.5: get the briefs for the client
-      // const briefs = await fetchClientBriefs(client, briefIds, serviceIds);
-
       let query = client
         .from('briefs')
         .select(
@@ -118,33 +131,52 @@ export const getBriefs = async (
       form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
       services!inner( id, name )`,
           {
-            count: 'exact',
+            count: configurations?.pagination ? 'exact' : undefined,
           },
         )
         .is('deleted_on', null)
-        .in('id', briefIds);
+        .in('id', briefIds || []);
 
       if (serviceIds && serviceIds.length > 0) {
         query = query.in('services.id', serviceIds);
       }
 
-      const paginatedBriefs = QueryBuilder.getInstance().enhance(
-        query,
-        configurations,
-      );
-      const response = await paginatedBriefs;
-      const paginatedResponse =
-        transformToPaginatedResponse<Brief.Relationships.Services.Response>(
-          response,
-          configurations?.pagination ?? {},
+      // Apply pagination only if configurations and pagination are provided
+      if (configurations && configurations?.pagination) {
+        const paginatedBriefs = QueryBuilder.getInstance().enhance(
+          query,
+          configurations,
         );
-      return paginatedResponse;
+        const response = await paginatedBriefs;
+        
+        if (response.error) {
+          throw new Error(`Error fetching briefs: ${response.error.message}`);
+        }
+        
+        return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
+          response,
+          configurations.pagination,
+        );
+      } else {
+        // No pagination - get all results
+        const { data, error } = await query;
+        
+        if (error) {
+          throw new Error(`Error fetching briefs: ${error.message}`);
+        }
+
+        return data as unknown as Brief.Relationships.Services.Response[];
+      }
     }
 
-    return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
-      [],
-      {},
-    );
+    return {
+      data: [],
+      total: 0,
+      limit: null,
+      page: null,
+      nextCursor: null,
+      prevCursor: null,
+    };
   } catch (error) {
     console.error('Error obtaining briefs', error);
     throw error;
