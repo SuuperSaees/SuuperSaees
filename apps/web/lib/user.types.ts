@@ -12,5 +12,5 @@ export namespace User {
   > & {
     settings?: UserSettings.Response[] | null;
     role?: string | null;
-  } ;
+  } & Partial<User.Type>;
 }

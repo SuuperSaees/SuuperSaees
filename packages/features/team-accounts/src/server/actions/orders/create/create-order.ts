@@ -17,6 +17,7 @@ import {
 import { sendOrderCreationEmail } from '../send-mail/send-order-email';
 import { getOrganizationByUserId } from '../../organizations/get/get-organizations';
 import { textFormat } from '../../../../../../../../apps/web/app/utils/text-format';
+import { revalidatePath } from 'next/cache';
 
 type OrderInsert = Omit<
   Order.Insert,
@@ -103,6 +104,7 @@ export const createOrder = async (
       console.error('Error sending order creation email:', error);
     });
 
+    revalidatePath('/orders');
     return CustomResponse.success(orderData, 'orderCreated').toJSON();
   } catch (error) {
     console.error('Error creating order:', error);

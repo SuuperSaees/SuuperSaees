@@ -1,31 +1,40 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import { ColumnDef } from '@tanstack/react-table';
-import { MoreVertical, Search } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { ColumnDef } from "@tanstack/react-table";
+import { MoreVertical, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { Database } from '@kit/supabase/database';
-import { Badge } from '@kit/ui/badge';
-import { Button } from '@kit/ui/button';
-import { DataTable } from '@kit/ui/data-table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@kit/ui/dropdown-menu';
-import { If } from '@kit/ui/if';
-import { Input } from '@kit/ui/input';
-import { ProfileAvatar } from '@kit/ui/profile-avatar';
-import { Trans } from '@kit/ui/trans';
+import { Badge } from "@kit/ui/badge";
+import { Button } from "@kit/ui/button";
+import { DataTable } from "@kit/ui/data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@kit/ui/dropdown-menu";
+import { If } from "@kit/ui/if";
+import { Input } from "@kit/ui/input";
+import { ProfileAvatar } from "@kit/ui/profile-avatar";
+import { Trans } from "@kit/ui/trans";
 
-import { RoleBadge } from '../members/role-badge';
-import { DeleteInvitationDialog } from './delete-invitation-dialog';
-import { RenewInvitationDialog } from './renew-invitation-dialog';
-import { UpdateInvitationDialog } from './update-invitation-dialog';
-
-type Invitations =
-  Database['public']['Functions']['get_account_invitations']['Returns'];
+import { RoleBadge } from "../members/role-badge";
+import { DeleteInvitationDialog } from "./delete-invitation-dialog";
+import { RenewInvitationDialog } from "./renew-invitation-dialog";
+import { UpdateInvitationDialog } from "./update-invitation-dialog";
+import { Pagination } from "../../../../../../apps/web/lib/pagination";
+import { useDataPagination } from "../../../../../../apps/web/app/hooks/use-data-pagination";
+import {
+  Invitation,
+  loadPaginatedInvitations,
+} from "../../../../../../apps/web/app/(main)/team/_lib/server/members-page.loader";
+import { useTableConfigs } from "../../../../../../apps/web/app/(views)/hooks/use-table-configs";
 
 type AccountInvitationsTableProps = {
-  invitations: Invitations;
+  initialData: Pagination.Response<Invitation>;
+  organizationId: string;
 
   permissions: {
     canUpdateInvitation: boolean;
@@ -35,34 +44,69 @@ type AccountInvitationsTableProps = {
 };
 
 export function AccountInvitationsTable({
-  invitations,
+  organizationId,
+  initialData,
   permissions,
 }: AccountInvitationsTableProps) {
-  const { t } = useTranslation('team');
-  const [search, setSearch] = useState('');
+  const { t } = useTranslation("team");
+  const [search, setSearch] = useState("");
   const columns = useGetColumns(permissions);
 
-  const filteredInvitations = useMemo(() => invitations.filter((member) => {
-    const searchString = search.toLowerCase();
-    const email = member.email.split('@')[0]?.toLowerCase() ?? '';
+  const { config } = useTableConfigs("table-config");
 
-    return (
-      email.includes(searchString) ||
-      member.role.toLowerCase().includes(searchString)
-    );
-  }), [invitations, search]);
+  const {
+    data: invitations,
+    isLoading: invitationsAreLoading,
+    pagination,
+  } = useDataPagination<Invitation>({
+    queryKey: ["invitations"],
+    queryFn: ({ page, limit, filters }) =>
+      loadPaginatedInvitations(organizationId, {
+        pagination: { page, limit },
+        filters: filters?.searchTerm
+          ? [
+              {
+                field: "email",
+                operator: "ilike",
+                value: filters.searchTerm,
+              },
+            ]
+          : undefined,
+      }),
+    initialData,
+    config: {
+      limit: config.rowsPerPage.value,
+      filters: { searchTerm: search },
+    },
+  });
+
+  const filteredInvitations = invitations as Invitation[];
 
   const sortedInvitations = useMemo(() => {
-    return [...filteredInvitations].sort((a, b) => 
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    return [...filteredInvitations].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
   }, [filteredInvitations]);
 
+  const extendedConfig = {
+    ...config,
+    pagination: {
+      totalCount: pagination.total,
+      totalPages: pagination.totalPages,
+      currentPage: pagination.currentPage,
+      hasNextPage: pagination.hasNextPage,
+      isOffsetBased: true,
+      goToPage: pagination.goToPage,
+      isLoadingMore: invitationsAreLoading,
+    },
+  };
+
   return (
-    <div className={'flex flex-col space-y-5 pt-12'}>
+    <div className={"flex flex-col space-y-5 pt-12"}>
       <div className="flex items-center justify-between">
         <h3 className="font-inter text-xl font-medium leading-4">
-          <Trans i18nKey={'team:pendingInvitesHeading'} />
+          <Trans i18nKey={"team:pendingInvitesHeading"} />
         </h3>
         <div className="relative flex-1 md:grow-0">
           <Search className="bg-white text-muted-foreground absolute right-2.5 top-2.5 h-4 w-4" />
@@ -75,12 +119,13 @@ export function AccountInvitationsTable({
         </div>
       </div>
 
-      <div className='bg-white rounded-md'>
-      <DataTable
-        data-cy={'invitations-table'}
-        columns={columns}
-        data={sortedInvitations}
-      />
+      <div className="bg-white rounded-md">
+        <DataTable
+          data-cy={"invitations-table"}
+          columns={columns}
+          data={sortedInvitations}
+          configs={extendedConfig}
+        />
       </div>
     </div>
   );
@@ -90,13 +135,13 @@ function useGetColumns(permissions: {
   canUpdateInvitation: boolean;
   canRemoveInvitation: boolean;
   currentUserRoleHierarchy: number;
-}): ColumnDef<Invitations[0]>[] {
-  const { t } = useTranslation('team');
+}): ColumnDef<Invitation>[] {
+  const { t } = useTranslation("team");
 
   return useMemo(
     () => [
       {
-        header: t('emailLabel'),
+        header: t("emailLabel"),
         size: 200,
         cell: ({ row }) => {
           const member = row.original;
@@ -104,8 +149,8 @@ function useGetColumns(permissions: {
 
           return (
             <span
-              data-test={'invitation-email'}
-              className={'flex items-center space-x-4 text-left'}
+              data-test={"invitation-email"}
+              className={"flex items-center space-x-4 text-left"}
             >
               <span>
                 <ProfileAvatar text={email} />
@@ -117,7 +162,7 @@ function useGetColumns(permissions: {
         },
       },
       {
-        header: t('roleLabel'),
+        header: t("roleLabel"),
         cell: ({ row }) => {
           const { role } = row.original;
 
@@ -125,35 +170,35 @@ function useGetColumns(permissions: {
         },
       },
       {
-        header: t('invitedAtLabel'),
-        id: 'created_at',
-        sortingFn: 'datetime',
+        header: t("invitedAtLabel"),
+        id: "created_at",
+        sortingFn: "datetime",
         sortDescFirst: true,
         cell: ({ row }) => {
           return new Date(row.original.created_at).toLocaleDateString();
         },
       },
       {
-        header: t('expiresAtLabel'),
+        header: t("expiresAtLabel"),
         cell: ({ row }) => {
           return new Date(row.original.expires_at).toLocaleDateString();
         },
       },
       {
-        header: t('inviteStatus'),
+        header: t("inviteStatus"),
         cell: ({ row }) => {
           const isExpired = getIsInviteExpired(row.original.expires_at);
 
           if (isExpired) {
-            return <Badge variant={'warning'}>{t('expired')}</Badge>;
+            return <Badge variant={"warning"}>{t("expired")}</Badge>;
           }
 
-          return <Badge variant={'success'}>{t('active')}</Badge>;
+          return <Badge variant={"success"}>{t("active")}</Badge>;
         },
       },
       {
-        header: '',
-        id: 'actions',
+        header: "",
+        id: "actions",
         cell: ({ row }) => (
           <ActionsDropdown
             permissions={permissions}
@@ -170,8 +215,8 @@ function ActionsDropdown({
   permissions,
   invitation,
 }: {
-  permissions: AccountInvitationsTableProps['permissions'];
-  invitation: Invitations[0];
+  permissions: AccountInvitationsTableProps["permissions"];
+  invitation: Invitation;
 }) {
   const [isDeletingInvite, setIsDeletingInvite] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
@@ -185,36 +230,36 @@ function ActionsDropdown({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant={'ghost'} size={'icon'}>
-            <MoreVertical className={'h-4 w-4 text-gray-400'} />
+          <Button variant={"ghost"} size={"icon"}>
+            <MoreVertical className={"h-4 w-4 text-gray-400"} />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent>
           <If condition={permissions.canUpdateInvitation}>
             <DropdownMenuItem
-              data-test={'update-invitation-trigger'}
+              data-test={"update-invitation-trigger"}
               onClick={() => setIsUpdatingRole(true)}
             >
-              <Trans i18nKey={'team:updateInvitation'} />
+              <Trans i18nKey={"team:updateInvitation"} />
             </DropdownMenuItem>
 
             <If condition={getIsInviteExpired(invitation.expires_at)}>
               <DropdownMenuItem
-                data-test={'renew-invitation-trigger'}
+                data-test={"renew-invitation-trigger"}
                 onClick={() => setIsRenewingInvite(true)}
               >
-                <Trans i18nKey={'team:renewInvitation'} />
+                <Trans i18nKey={"team:renewInvitation"} />
               </DropdownMenuItem>
             </If>
           </If>
 
           <If condition={permissions.canRemoveInvitation}>
             <DropdownMenuItem
-              data-test={'remove-invitation-trigger'}
+              data-test={"remove-invitation-trigger"}
               onClick={() => setIsDeletingInvite(true)}
             >
-              <Trans i18nKey={'team:removeInvitation'} />
+              <Trans i18nKey={"team:removeInvitation"} />
             </DropdownMenuItem>
           </If>
         </DropdownMenuContent>
@@ -225,6 +270,7 @@ function ActionsDropdown({
           isOpen
           setIsOpen={setIsDeletingInvite}
           invitationId={invitation.id}
+          queryKey={"invitations"}
         />
       </If>
 
@@ -235,6 +281,7 @@ function ActionsDropdown({
           invitationId={invitation.id}
           userRole={invitation.role}
           userRoleHierarchy={permissions.currentUserRoleHierarchy}
+          queryKey={"invitations"}
         />
       </If>
 
@@ -244,6 +291,7 @@ function ActionsDropdown({
           setIsOpen={setIsRenewingInvite}
           invitationId={invitation.id}
           email={invitation.email}
+          queryKey={"invitations"}
         />
       </If>
     </>

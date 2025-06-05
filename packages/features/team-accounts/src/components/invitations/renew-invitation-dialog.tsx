@@ -1,5 +1,6 @@
 import { useState, useTransition } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import {
   AlertDialog,
@@ -21,11 +22,13 @@ export function RenewInvitationDialog({
   setIsOpen,
   invitationId,
   email,
+  queryKey,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   invitationId: number;
   email: string;
+  queryKey?: string;
 }) {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -46,6 +49,7 @@ export function RenewInvitationDialog({
         <RenewInvitationForm
           setIsOpen={setIsOpen}
           invitationId={invitationId}
+          queryKey={queryKey}
         />
       </AlertDialogContent>
     </AlertDialog>
@@ -55,27 +59,53 @@ export function RenewInvitationDialog({
 function RenewInvitationForm({
   invitationId,
   setIsOpen,
+  queryKey,
 }: {
   invitationId: number;
   setIsOpen: (isOpen: boolean) => void;
+  queryKey?: string;
 }) {
   const [isSubmitting, startTransition] = useTransition();
   const [error, setError] = useState<boolean>();
+  const queryClient = useQueryClient();
+
+  // Client-side mutation when queryKey is provided
+  const renewInvitationMutation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      return await renewInvitationAction({ invitationId });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [queryKey],
+      });
+      setIsOpen(false);
+    },
+    onError: () => {
+      setError(true);
+    },
+  });
 
   const inInvitationRenewed = () => {
-    startTransition(async () => {
-      try {
-        await renewInvitationAction({ invitationId });
-
-        setIsOpen(false);
-      } catch (e) {
-        setError(true);
-      }
-    });
+    if (!queryKey) {
+      // Server version (existing behavior)
+      startTransition(async () => {
+        try {
+          await renewInvitationAction({ invitationId });
+          setIsOpen(false);
+        } catch (e) {
+          setError(true);
+        }
+      });
+    } else {
+      // Client version with mutation
+      renewInvitationMutation.mutate(invitationId);
+    }
   };
 
+  const isLoading = queryKey ? renewInvitationMutation.isPending : isSubmitting;
+
   return (
-    <form action={inInvitationRenewed}>
+    <form>
       <div className={'flex flex-col space-y-6'}>
         <p className={'text-muted-foreground text-sm'}>
           <Trans i18nKey={'common:modalConfirmationQuestion'} />
@@ -91,8 +121,10 @@ function RenewInvitationForm({
           </AlertDialogCancel>
 
           <Button
+            type={'button'}
             data-test={'confirm-renew-invitation'}
-            disabled={isSubmitting}
+            disabled={isLoading}
+            onClick={inInvitationRenewed}
           >
             <Trans i18nKey={'team:renewInvitation'} />
           </Button>

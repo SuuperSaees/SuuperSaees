@@ -1,5 +1,6 @@
 import { useState, useTransition } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -38,12 +39,14 @@ export function UpdateInvitationDialog({
   invitationId,
   userRole,
   userRoleHierarchy,
+  queryKey,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   invitationId: number;
   userRole: Role;
   userRoleHierarchy: number;
+  queryKey?: string;
 }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -63,6 +66,7 @@ export function UpdateInvitationDialog({
           userRole={userRole}
           userRoleHierarchy={userRoleHierarchy}
           setIsOpen={setIsOpen}
+          queryKey={queryKey}
         />
       </DialogContent>
     </Dialog>
@@ -74,29 +78,54 @@ function UpdateInvitationForm({
   userRole,
   userRoleHierarchy,
   setIsOpen,
+  queryKey,
 }: React.PropsWithChildren<{
   invitationId: number;
   userRole: Role;
   userRoleHierarchy: number;
   setIsOpen: (isOpen: boolean) => void;
+  queryKey?: string;
 }>) {
   const { t } = useTranslation('team');
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<boolean>();
+  const queryClient = useQueryClient();
+
+  const updateInvitationMutation = useMutation({
+    mutationFn: async ({ role }: { role: Role }) => {
+      return await updateInvitationAction({
+        invitationId,
+        role,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [queryKey],
+      });
+      setIsOpen(false);
+    },
+    onError: () => {
+      setError(true);
+    },
+  });
 
   const onSubmit = ({ role }: { role: Role }) => {
-    startTransition(async () => {
-      try {
-        await updateInvitationAction({
-          invitationId,
-          role,
-        });
+    if (!queryKey) {
+      startTransition(async () => {
+        try {
+          await updateInvitationAction({
+            invitationId,
+            role,
+          });
 
-        setIsOpen(false);
-      } catch (e) {
-        setError(true);
-      }
-    });
+          setIsOpen(false);
+        } catch (e) {
+          setError(true);
+        }
+      });
+    } else {
+      updateInvitationMutation.mutate({ role });
+    }
   };
 
   const form = useForm({
@@ -117,6 +146,8 @@ function UpdateInvitationForm({
       role: userRole,
     },
   });
+
+  const isLoading = queryKey ? updateInvitationMutation.isPending : pending;
 
   return (
     <Form {...form}>
@@ -163,7 +194,7 @@ function UpdateInvitationForm({
           }}
         />
 
-        <Button type={'submit'} disabled={pending}>
+        <Button type={'submit'} disabled={isLoading}>
           <Trans i18nKey={'team:updateRoleSubmitLabel'} />
         </Button>
       </form>

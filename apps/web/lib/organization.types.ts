@@ -1,5 +1,6 @@
 import { Database } from './database.types'
 import { OrganizationSettings } from './organization-settings.types'
+import { User } from './user.types';
 
 export namespace Organization {
   export type Type = Database['public']['Tables']['organizations']['Row'];
@@ -12,6 +13,10 @@ export namespace Organization {
       key: OrganizationSettings.KeysEnum;
       value: string;
     }[] | null;
+    clients?: {
+      organization_client_id: string;
+    }[] | null;
+    owner?: User.Response | null;
   };
   export type TypeWithRelations = Type & {
     settings: {
