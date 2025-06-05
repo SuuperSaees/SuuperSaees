@@ -120,13 +120,6 @@ export async function loadPaginatedAccountMembers(
 
     const userIds = memberships?.map((m) => m.user_id) || [];
 
-    if (userIds.length === 0) {
-      return transformToPaginatedResponse<Member>(
-        { data: [], error: null, count: 0, status: 200, statusText: 'OK' },
-        config?.pagination ?? {},
-      );
-    }
-
     // Apply QueryBuilder pagination and filtering to accounts table
     const initialQuery = client
       .from('accounts')
@@ -227,7 +220,6 @@ export async function loadPaginatedAccountMembers(
       { ...accountsResponse, data: sortedData },
       config?.pagination ?? {},
     );
-    console.log(paginatedResponse);
     return paginatedResponse;
   } catch (error) {
     console.error(error);

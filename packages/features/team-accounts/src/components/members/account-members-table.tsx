@@ -274,6 +274,7 @@ function ActionsDropdown({
         currentUserId={currentUserId}
         inTeamMembers={true}
         targetRole={member.role}
+        queryKey="members"
       />
     </>
   );

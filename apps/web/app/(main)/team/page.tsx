@@ -91,7 +91,7 @@ async function ClientsMembersPage() {
     {
       pagination: {
         page: 1,
-        limit: 5
+        limit: 100
       },
     },
   ).catch((error) => {
