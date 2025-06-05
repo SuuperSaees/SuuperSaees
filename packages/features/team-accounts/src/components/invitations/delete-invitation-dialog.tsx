@@ -1,5 +1,6 @@
 import { useState, useTransition } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import {
   AlertDialog,
@@ -20,10 +21,12 @@ export function DeleteInvitationDialog({
   isOpen,
   setIsOpen,
   invitationId,
+  queryKey,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   invitationId: number;
+  queryKey?: string;
 }) {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -41,6 +44,7 @@ export function DeleteInvitationDialog({
         <DeleteInvitationForm
           setIsOpen={setIsOpen}
           invitationId={invitationId}
+          queryKey={queryKey}
         />
       </AlertDialogContent>
     </AlertDialog>
@@ -50,27 +54,53 @@ export function DeleteInvitationDialog({
 function DeleteInvitationForm({
   invitationId,
   setIsOpen,
+  queryKey,
 }: {
   invitationId: number;
   setIsOpen: (isOpen: boolean) => void;
+  queryKey?: string;
 }) {
   const [isSubmitting, startTransition] = useTransition();
   const [error, setError] = useState<boolean>();
+  const queryClient = useQueryClient();
+
+  // Client-side mutation when queryKey is provided
+  const deleteInvitationMutation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      return await deleteInvitationAction({ invitationId });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [queryKey],
+      });
+      setIsOpen(false);
+    },
+    onError: () => {
+      setError(true);
+    },
+  });
 
   const onInvitationRemoved = () => {
-    startTransition(async () => {
-      try {
-        await deleteInvitationAction({ invitationId });
-
-        setIsOpen(false);
-      } catch (e) {
-        setError(true);
-      }
-    });
+    if (!queryKey) {
+      // Server version (existing behavior)
+      startTransition(async () => {
+        try {
+          await deleteInvitationAction({ invitationId });
+          setIsOpen(false);
+        } catch (e) {
+          setError(true);
+        }
+      });
+    } else {
+      // Client version with mutation
+      deleteInvitationMutation.mutate(invitationId);
+    }
   };
 
+  const isLoading = queryKey ? deleteInvitationMutation.isPending : isSubmitting;
+
   return (
-    <form data-test={'delete-invitation-form'} action={onInvitationRemoved}>
+    <form data-test={'delete-invitation-form'}>
       <div className={'flex flex-col space-y-6'}>
         <p className={'text-muted-foreground text-sm'}>
           <Trans i18nKey={'common:modalConfirmationQuestion'} />
@@ -86,9 +116,10 @@ function DeleteInvitationForm({
           </AlertDialogCancel>
 
           <Button
-            type={'submit'}
+            type={'button'}
             variant={'destructive'}
-            disabled={isSubmitting}
+            disabled={isLoading}
+            onClick={onInvitationRemoved}
           >
             <Trans i18nKey={'team:deleteInvitation'} />
           </Button>

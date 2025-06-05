@@ -32,6 +32,19 @@ export type Member = {
   };
 };
 
+export type Invitation = {
+  id: number;
+  email: string;
+  organization_id: string;
+  invited_by: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+  inviter_name: string;
+  inviter_email: string;
+};
+
 /**
  * Load data for the members page
  * @param client
@@ -41,11 +54,12 @@ export async function loadMembersPageData(
   client: SupabaseClient<Database>,
   slug: string,
   organizationId: string,
-  config?: QueryConfigurations<User.Type>,
+  membersConfig?: QueryConfigurations<User.Type>,
+  invitationsConfig?: QueryConfigurations<Invitation>,
 ) {
   return Promise.all([
-    loadPaginatedAccountMembers(organizationId, config ?? {}),
-    loadInvitations(client, slug),
+    loadPaginatedAccountMembers(organizationId, membersConfig ?? {}),
+    loadPaginatedInvitations(organizationId, invitationsConfig ?? {}),
     canAddMember,
     loadTeamWorkspace(slug),
   ]);
@@ -227,23 +241,88 @@ export async function loadPaginatedAccountMembers(
   }
 }
 
-/**
- * Load account invitations
- * @param client
- * @param account
- */
-async function loadInvitations(
-  client: SupabaseClient<Database>,
-  account: string,
-) {
-  const { data, error } = await client.rpc('get_account_invitations', {
-    organization_slug: account,
+export async function loadPaginatedInvitations(
+  organizationId: string,
+  config: QueryConfigurations<Invitation> = {},
+): Promise<Pagination.Response<Invitation>> {
+  const client = getSupabaseServerComponentClient({
+    admin: true,
   });
 
-  if (error) {
+  try {
+    // Apply QueryBuilder pagination and filtering to invitations table
+    const initialQuery = client
+      .from('invitations')
+      .select('*', {
+        count: 'exact',
+      })
+      .eq('organization_id', organizationId);
+
+    // Apply QueryBuilder with the config for invitations
+    const paginatedQuery = QueryBuilder.getInstance().enhance(
+      initialQuery,
+      config,
+    );
+
+    const invitationsResponse = await paginatedQuery;
+
+    if (invitationsResponse.error) {
+      console.error(invitationsResponse.error);
+      throw new Error(
+        `Error fetching invitations: ${invitationsResponse.error.message}`,
+      );
+    }
+
+    const invitations = invitationsResponse.data || [];
+
+    if (invitations.length === 0) {
+      return transformToPaginatedResponse<Invitation>(
+        { ...invitationsResponse, data: [] },
+        config?.pagination ?? {},
+      );
+    }
+
+    // Get inviter account data for all unique invited_by user IDs
+    const inviterIds = [...new Set(invitations.map((inv) => inv.invited_by))];
+    
+    const { data: inviters, error: invitersError } = await client
+      .from('accounts')
+      .select('id, name, email')
+      .in('id', inviterIds);
+
+    if (invitersError) {
+      console.error(invitersError);
+      throw new Error(
+        `Error fetching inviters: ${invitersError.message}`,
+      );
+    }
+
+    // Transform the paginated invitations to include inviter data
+    const transformedData: Invitation[] = invitations.map((invitation) => {
+      const inviter = inviters?.find((inv) => inv.id === invitation.invited_by);
+
+      return {
+        id: invitation.id,
+        email: invitation.email,
+        organization_id: invitation.organization_id,
+        invited_by: invitation.invited_by,
+        role: invitation.role,
+        created_at: invitation.created_at,
+        updated_at: invitation.updated_at,
+        expires_at: invitation.expires_at,
+        inviter_name: inviter?.name ?? '',
+        inviter_email: inviter?.email ?? '',
+      };
+    });
+
+    // Return using transformToPaginatedResponse with the transformed data
+    const paginatedResponse = transformToPaginatedResponse<Invitation>(
+      { ...invitationsResponse, data: transformedData },
+      config?.pagination ?? {},
+    );
+    return paginatedResponse;
+  } catch (error) {
     console.error(error);
     throw error;
   }
-
-  return data ?? [];
 }

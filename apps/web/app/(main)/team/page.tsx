@@ -94,6 +94,12 @@ async function ClientsMembersPage() {
         limit: 100
       },
     },
+    {
+      pagination: {
+        page: 1,
+        limit: 100
+      },
+    }
   ).catch((error) => {
     console.error('Error loading members page data:', error);
     return [];
@@ -136,6 +142,7 @@ async function ClientsMembersPage() {
         <InviteMembersDialogContainer
           userRoleHierarchy={currentUserRoleHierarchy ?? 0}
           accountSlug={slug}
+          queryKey={"invitations"}
         >
           <ThemedButton
             data-test={'invite-members-form-trigger'}
@@ -164,7 +171,8 @@ async function ClientsMembersPage() {
           canRemoveInvitation: canManageRoles,
           currentUserRoleHierarchy: currentUserRoleHierarchy ?? 0,
         }}
-        invitations={invitations}
+        initialData={invitations}
+        organizationId={organization?.id ?? ''}
       />
     </PageBody>
   );
