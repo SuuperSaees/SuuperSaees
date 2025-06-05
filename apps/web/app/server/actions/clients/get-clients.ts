@@ -16,6 +16,9 @@ export const getClients = async (
   config: QueryConfigurations<Client.Response>,
 ): Promise<Pagination.Response<Client.Response> | Client.Response[]> => {
   const client = getSupabaseServerComponentClient();
+  const adminClient = getSupabaseServerComponentClient({
+    admin: true,
+  });
 
   const query = client
     .from("clients")
@@ -38,10 +41,9 @@ export const getClients = async (
   // Get roles for each client
   const userIds = response.data?.map((client) => client.user_client_id) ?? [];
 
-  const roles = await client
+  const roles = await adminClient
     .from("accounts_memberships")
     .select("account_role, user_id, organization_id")
-    .eq("agency_id", agencyId)
     .in("user_id", userIds);
 
   const parsedResponse = transformClients(response.data, roles.data);

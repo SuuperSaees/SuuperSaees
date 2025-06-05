@@ -395,6 +395,7 @@ const useClientColumns = (
                   name={client.user?.name ?? ""}
                   email={client.user?.email ?? ""}
                   targetRole={client.user?.role ?? undefined}
+                  queryKey="clients"
                 />
               </div>
             )
@@ -475,7 +476,7 @@ const useOrganizationColumns = (
         cell: ({ row }) => {
           return (
             <div className="h-18 flex items-center gap-4 self-stretch p-4">
-              <OrganizationOptionsDropdown organizationId={row.original.id} />
+              <OrganizationOptionsDropdown organizationId={row.original.id} queryKey="organizations" />
             </div>
           );
         },

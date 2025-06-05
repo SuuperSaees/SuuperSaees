@@ -11,6 +11,7 @@ import {
 } from '../../organizations/get/get-organizations';
 import { hasPermissionToDeleteClient } from '../../permissions/clients';
 import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
+import { revalidatePath } from 'next/cache';
 
 // Define la función handleDelete
 export const deleteClient = async (
@@ -146,6 +147,8 @@ export const deleteClient = async (
         );
       }
     }
+
+    revalidatePath('/clients')
     return CustomResponse.success(null, ErrorClientOperations.CLIENT_DELETED).toJSON();
   } catch (error) {
     console.error('Error deleting client or organization:', error);
