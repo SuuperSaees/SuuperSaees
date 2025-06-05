@@ -12,10 +12,12 @@ import DeleteUserDialog from '../../server/actions/clients/delete/delete-client'
 
 interface OrganizationOptionsDropdownProps {
   organizationId: string;
+  queryKey?: string;
 }
 
 export function OrganizationOptionsDropdown({
   organizationId,
+  queryKey,
 }: OrganizationOptionsDropdownProps) {
   const { t } = useTranslation(['clients']);
   const { updateOrganizationSetting, pinned_organizations } = useOrganizationSettings();
@@ -92,7 +94,7 @@ export function OrganizationOptionsDropdown({
     // Delete organization
     {
       value: (
-        <DeleteUserDialog userId={''} organizationId={organizationId} withText/>
+        <DeleteUserDialog userId={''} organizationId={organizationId} withText queryKey={queryKey}/>
       ),
       actionFn: () => {
         // Dialog handles the action

@@ -29,6 +29,7 @@ import { createClientUserAccount } from './services/create-client-account.servic
 import { insertClient } from './services/insert-client.service';
 import { CreateClient } from './create-client.types';
 import { reactivateDeletedClient } from './utils/client-reactivation.utils';
+import { revalidatePath } from 'next/cache';
 
 /**
  * @prop {adminActivated}: This is a boolean that indicates if the client is being created by an admin user.
@@ -178,6 +179,8 @@ export const createClient = async (clientData: CreateClient) => {
       clientData.adminActivated,
     );
 
+    revalidatePath('/clients');
+
     if (clientData.sendEmail) {
       return CustomResponse.success(client, 'clientCreated').toJSON();
     } else {
@@ -297,6 +300,7 @@ export const addClientMember = async ({
       supabase,
     );
 
+    revalidatePath('/clients');
     // return client;
     return CustomResponse.success(client, 'memberAdded').toJSON();
   } catch (error) {
