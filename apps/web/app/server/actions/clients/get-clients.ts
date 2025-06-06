@@ -152,7 +152,8 @@ export const getOrganizations = async (
             }
           : undefined,
       )
-      .in("id", organizationIds);
+      .in("id", organizationIds)
+      .not("name", "ilike", "guest%organization");
 
     if (config.pagination) {
       const paginatedOrganizations = QueryBuilder.getInstance().enhance(
