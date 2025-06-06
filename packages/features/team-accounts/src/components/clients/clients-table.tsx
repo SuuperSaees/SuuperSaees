@@ -114,15 +114,16 @@ export function ClientsTable({
   });
 
 
-  const filteredClients = (clients as Client.Response[])?.filter(
-    (client: Client.Response) => {
-      const isClientGuest =
-        client.user?.name?.toLowerCase().includes("guest") &&
-        client.user?.email?.toLowerCase().includes("guest") &&
-        client.user?.email?.toLowerCase().includes("@suuper.co");
-      return !isClientGuest;
-    },
-  );
+  // const filteredClients = (clients as Client.Response[])?.filter(
+  //   (client: Client.Response) => {
+  //     const isClientGuest =
+  //       client.user?.name?.toLowerCase().includes("guest") &&
+  //       client.user?.email?.toLowerCase().includes("guest") &&
+  //       client.user?.email?.toLowerCase().includes("@suuper.co");
+  //     return !isClientGuest;
+  //   },
+  // );
+  const filteredClients = clients;
   const extendedConfigClients = {
     ...config,
     pagination: {
