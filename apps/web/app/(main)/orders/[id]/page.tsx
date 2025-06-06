@@ -79,9 +79,12 @@ async function OrderDetailsPage({
     { title: order?.title ?? '', id: order?.uuid ?? '' },
   ];
 
+  // Create a consistent cursor timestamp to prevent server/client mismatch
+  const initialCursor = new Date().toISOString();
+
   const initialInteractions = await getInteractions(order?.id, {
     pagination: {
-      cursor: new Date().toISOString(),
+      cursor: initialCursor,
       limit: 20,
     },
   }).catch((err) => {
@@ -110,6 +113,7 @@ async function OrderDetailsPage({
       initialInteractions={initialInteractions}
       initialOrder={order}
       initialFiles={initialFiles ?? []}
+      initialCursor={initialCursor}
       // briefResponses={order?.brief_responses ?? []}
       userRole={role ?? ''}
       clientOrganizationId={order.client_organization_id}
