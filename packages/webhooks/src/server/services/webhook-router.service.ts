@@ -131,6 +131,8 @@ class WebhookRouterService {
               });
             }
 
+            console.log('Client created or fetched:', client);
+
             let clientOrganizationId;
 
             if(accountClientData) {
@@ -572,7 +574,9 @@ class WebhookRouterService {
 
       const { error: upsertError } = await this.adminClient
         .from('client_subscriptions')
-        .upsert(subscriptionData, { onConflict: 'billing_subscription_id' });
+        .upsert(subscriptionData, { 
+          onConflict: 'billing_customer_id,billing_provider' 
+        });
 
       if (upsertError) {
         console.error('Failed to create or update client subscription:', upsertError);
