@@ -33,7 +33,8 @@ export const getClients = async (
         : undefined,
     )
     .eq("agency_id", agencyId)
-    .is("deleted_on", null);
+    .is("deleted_on", null)
+    .not("user.email", "like", "guest%@suuper.co")
 
   const paginatedClients = QueryBuilder.getInstance().enhance(query, config);
   const response = await paginatedClients;
