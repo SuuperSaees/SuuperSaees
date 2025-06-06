@@ -96,7 +96,7 @@ export const useOrderApiActions = ({
         user_id: currentUser?.id ?? '',
         files: files.map((file) => ({
           ...file,
-          // id: file.id ?? '',
+          id: file.id ?? `temp-${Date.now()}-${Math.random()}`,
           isLoading: true,
           temp_id: file.temp_id,
         })),
@@ -152,12 +152,8 @@ export const useOrderApiActions = ({
           agencyId,
         );
       }
-      //  Remove the pending state of the message and for each file of the message the isLoading state
-      // Invalidate the messages query to refresh the data
-      await queryClient.fetchInfiniteQuery({
-        queryKey: ['interactions', orderId],
-        initialPageParam: new Date().toISOString(), // works because descending,
-      });
+      // Note: Not invalidating queries here as real-time subscriptions will handle updates
+      // This prevents race conditions between optimistic updates and fresh data fetches
     },
   });
 
