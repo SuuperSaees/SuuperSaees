@@ -114,7 +114,7 @@ const updateInteractionPage = (
           messages: updatedData.messages ?? [],
           activities: updatedData.activities ?? [],
           reviews: updatedData.reviews ?? [],
-          
+          nextCursor: null,
         }
       ],
       pageParams: [],
@@ -127,6 +127,7 @@ const updateInteractionPage = (
     messages: updatedData.messages ?? newPages[pageIndex]?.messages ?? [],
     activities: updatedData.activities ?? newPages[pageIndex]?.activities ?? [],
     reviews: updatedData.reviews ?? newPages[pageIndex]?.reviews ?? [],
+    nextCursor: newPages[pageIndex]?.nextCursor ?? null,
   };
 
   return {

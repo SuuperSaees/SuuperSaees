@@ -31,6 +31,7 @@ interface ActivityProviderProps {
   initialInteractions?: InteractionResponse;
   initialFiles?: File.Response[];
   initialOrder: DataResult.Order;
+  initialCursor: string;
   userRole: string;
   clientOrganizationId: string;
   agencyId: string;
@@ -49,6 +50,7 @@ export const ActivityProvider = ({
   initialInteractions,
   initialOrder,
   initialFiles,
+  initialCursor,
   userRole,
   clientOrganizationId,
   agencyId,
@@ -69,7 +71,8 @@ export const ActivityProvider = ({
   } = useOrderState({
     initialOrder,
     initialInteractions,
-    initialFiles
+    initialFiles,
+    initialCursor
   });
 
   // Get current user workspace information
