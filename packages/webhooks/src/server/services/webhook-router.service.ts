@@ -256,6 +256,18 @@ class WebhookRouterService {
         await this.handleInvoicePayment(data, stripeAccountId);
         return Promise.resolve();
       },
+
+      onInvoiceCreated: async (data) => {
+        console.log('Invoice created:', data);
+        await this.handleInvoiceCreated(event, stripeAccountId);
+        return Promise.resolve();
+      },
+
+      onInvoiceUpdated: async (data) => {
+        console.log('Invoice updated:', data);
+        await this.handleInvoiceUpdated(data, stripeAccountId);
+        return Promise.resolve();
+      },
       
       onEvent: async (event) => {
         console.log('Processing event:', event.type);

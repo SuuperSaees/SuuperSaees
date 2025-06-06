@@ -126,6 +126,8 @@ export class StripeWebhookHandlerService implements BillingWebhookHandlerService
       onPaymentFailed: (sessionId: string) => Promise<unknown>;
       onInvoicePaid: (data: UpsertSubscriptionParams) => Promise<unknown>;
       onEvent?(event: Stripe.Event): Promise<unknown>;
+      onInvoiceCreated?: (invoice: any) => Promise<unknown>;
+      onInvoiceUpdated?: (invoice: any) => Promise<unknown>;
     },
   ) {
     const handlers: WebhookEventHandlers = {
@@ -135,6 +137,8 @@ export class StripeWebhookHandlerService implements BillingWebhookHandlerService
       'checkout.session.async_payment_failed': params.onPaymentFailed,
       'checkout.session.async_payment_succeeded': params.onPaymentSucceeded,
       'invoice.paid': params.onInvoicePaid,
+      'invoice.created': params.onInvoiceCreated,
+      'invoice.updated': params.onInvoiceUpdated,
       'customer.subscription.created': params.onPaymentIntentSucceeded,
       'payment_intent.succeeded': params.onPaymentIntentSucceeded,
     };
