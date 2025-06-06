@@ -2,15 +2,12 @@
 
 import { useState, useTransition } from 'react';
 
-
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-
-
 
 import { Button } from '@kit/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@kit/ui/dialog';
@@ -18,8 +15,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { If } from '@kit/ui/if';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@kit/ui/tooltip';
 import { Trans } from '@kit/ui/trans';
-
-
 
 import { ThemedButton } from '../../../../accounts/src/components/ui/button-themed-with-settings';
 import { ThemedInput } from '../../../../accounts/src/components/ui/input-themed-with-settings';
@@ -42,13 +37,60 @@ export function InviteMembersDialogContainer({
   accountSlug,
   userRoleHierarchy,
   children,
+  queryKey,
 }: React.PropsWithChildren<{
   accountSlug: string;
   userRoleHierarchy: number;
+  queryKey?: string;
 }>) {
   const [pending, startTransition] = useTransition();
   const [isOpen, setIsOpen] = useState(false);
   const { t } = useTranslation('team');
+  const queryClient = useQueryClient();
+
+  // Client-side mutation when queryKey is provided
+  const inviteMembersMutation = useMutation({
+    mutationFn: async (data: { invitations: InviteModel[] }) => {
+      return await createInvitationsAction({
+        accountSlug,
+        invitations: data.invitations,
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [queryKey],
+      });
+      setIsOpen(false);
+      toast.success(t('inviteMembersSuccessMessage'));
+    },
+    onError: () => {
+      toast.error(t('inviteMembersErrorMessage'));
+    },
+  });
+
+  const handleSubmit = (data: { invitations: InviteModel[] }) => {
+    if (!queryKey) {
+      // Server version (existing behavior)
+      startTransition(() => {
+        const promise = createInvitationsAction({
+          accountSlug,
+          invitations: data.invitations,
+        });
+
+        toast.promise(() => promise, {
+          loading: t('invitingMembers'),
+          success: t('inviteMembersSuccessMessage'),
+          error: t('inviteMembersErrorMessage'),
+        });
+
+        setIsOpen(false);
+      });
+    } else {
+      // Client version with mutation
+      toast.loading(t('invitingMembers'));
+      inviteMembersMutation.mutate(data);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen} modal>
@@ -68,24 +110,9 @@ export function InviteMembersDialogContainer({
         <RolesDataProvider maxRoleHierarchy={userRoleHierarchy}>
           {(roles) => (
             <InviteMembersForm
-              pending={pending}
+              pending={queryKey ? inviteMembersMutation.isPending : pending}
               roles={roles}
-              onSubmit={(data) => {
-                startTransition(() => {
-                  const promise = createInvitationsAction({
-                    accountSlug,
-                    invitations: data.invitations,
-                  });
-
-                  toast.promise(() => promise, {
-                    loading: t('invitingMembers'),
-                    success: t('inviteMembersSuccessMessage'),
-                    error: t('inviteMembersErrorMessage'),
-                  });
-
-                  setIsOpen(false);
-                });
-              }}
+              onSubmit={handleSubmit}
             />
           )}
         </RolesDataProvider>
