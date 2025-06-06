@@ -6,6 +6,7 @@ import { ClientSubscriptions } from '../../../../../apps/web/lib/client-subscrip
 import { createClient } from '../../../../features/team-accounts/src/server/actions/clients/create/create-clients';
 import { getSessionById } from '../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
 import { insertServiceToClient } from '../../../../features/team-accounts/src/server/actions/services/create/create-service';
+import { RetryOperationService } from '@kit/shared/utils';
 
 export function createWebhookRouterService(
   adminClient: SupabaseClient<Database>,
@@ -131,8 +132,6 @@ class WebhookRouterService {
               });
             }
 
-            console.log('Client created or fetched:', client);
-
             let clientOrganizationId;
 
             if(accountClientData) {
@@ -228,7 +227,7 @@ class WebhookRouterService {
               })
               .eq('id', checkoutServiceData?.id);
 
-            // NUEVA FUNCIONALIDAD: Crear client_subscription con customer_id
+            // New functionality: Create client subscription with customer ID
             if (data.customer && clientId) {
               await this.createClientSubscription({
                 clientId,
@@ -434,47 +433,57 @@ class WebhookRouterService {
       }
 
       const invoice = event.data.object;
-      console.log('Processing invoice created:', invoice.id);
+      console.log('Processing invoice created:', invoice.id, stripeAccountId, invoice.customer);
 
-      // Buscar la agencia por el Stripe account ID
-      const { data: billingAccount, error: billingError } = await this.adminClient
-        .from('billing_accounts')
-        .select('account_id, accounts(id, organizations(id))')
-        .eq('provider_id', stripeAccountId)
-        .single();
+      const retryOperation = new RetryOperationService(
+        async () => {
+          // Search for the billing account by Stripe account ID
+          const { data: billingAccount, error: billingError } = await this.adminClient
+            .from('billing_accounts')
+            .select('account_id, accounts(id, organizations(id))')
+            .eq('provider_id', stripeAccountId)
+            .single();
 
-      if (billingError || !billingAccount) {
-        console.error('Error fetching billing account:', billingError);
-        return;
-      }
+          if (billingError ?? !billingAccount) {
+            console.error('Error fetching billing account:', billingError);
+            throw new Error('Billing account not found');
+          }
 
-      // Search for the client subscription by customer ID
-      const { data: clientSubscription, error: clientError } = await this.adminClient
-        .from('client_subscriptions')
-        .select('client_id, clients(organization_client_id)')
-        .eq('billing_customer_id', invoice.customer)
-        .eq('billing_provider', 'stripe')
-        .single();
+          // Search for the client subscription by customer ID
+          const { data: clientSubscription, error: clientError } = await this.adminClient
+            .from('client_subscriptions')
+            .select('client_id, clients(organization_client_id)')
+            .eq('billing_customer_id', invoice.customer)
+            .eq('billing_provider', 'stripe')
+            .single();
 
-      if (clientError || !clientSubscription) {
-        console.error('Error fetching client by customer_id:', clientError);
-        return;
-      }
+          if (clientError ?? !clientSubscription) {
+            console.error('Error fetching client by customer_id:', clientError);
+            throw new Error('Client subscription not found');
+          }
 
-      const agencyId = billingAccount.account_id;
-      const clientOrganizationId = Array.isArray(clientSubscription.clients?.organization_client_id)
-        ? clientSubscription.clients.organization_client_id[0]
-        : clientSubscription.clients?.organization_client_id;
+          const agencyId = billingAccount.accounts?.organizations[0]?.id ?? '';
+          const clientOrganizationId = Array.isArray(clientSubscription.clients?.organization_client_id)
+            ? clientSubscription.clients.organization_client_id[0]
+            : clientSubscription.clients?.organization_client_id;
 
-      // Crear la factura
-      await this.createInvoiceFromStripe({
-        invoice,
-        agencyId,
-        clientOrganizationId,
-        clientId: clientSubscription.client_id,
-      });
+          // Create the invoice in our database
+          await this.createInvoiceFromStripe({
+            invoice,
+            agencyId,
+            clientOrganizationId,
+          });
 
-      console.log('Invoice created successfully from Stripe');
+          console.log('Invoice created successfully from Stripe');
+        },
+        {
+          maxAttempts: 3,
+          backoffFactor: 2,
+          delayMs: 9000,
+        }
+      );
+
+      await retryOperation.execute();
 
     } catch (error) {
       console.error('Error handling invoice created:', error);
@@ -686,24 +695,21 @@ class WebhookRouterService {
     invoice,
     agencyId,
     clientOrganizationId,
-    clientId,
   }: {
     invoice: any;
     agencyId: string;
     clientOrganizationId: string;
-    clientId: string;
   }) {
-    // Generar número de factura
-
+    console.log('Creating invoice from Stripe:', invoice.id);
     const invoiceData = {
       agency_id: agencyId,
       client_organization_id: clientOrganizationId,
       number: '',
       issue_date: new Date(invoice.created * 1000).toISOString().split('T')[0],
-      due_date: invoice.due_date 
+      due_date: (invoice.due_date 
         ? new Date(invoice.due_date * 1000).toISOString().split('T')[0]
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: this.mapStripeInvoiceStatus(invoice.status),
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) ?? '',
+      status: this.mapStripeInvoiceStatus(invoice.status) || 'draft',
       subtotal_amount: invoice.subtotal / 100,
       tax_amount: invoice.tax || 0,
       total_amount: invoice.total / 100,
@@ -778,8 +784,8 @@ class WebhookRouterService {
     }
   }
 
-  private mapStripeInvoiceStatus(stripeStatus: string): string {
-    const statusMap: Record<string, string> = {
+  private mapStripeInvoiceStatus(stripeStatus: string): 'draft' | 'issued' | 'paid' | 'overdue' | 'voided' {
+    const statusMap: Record<string, 'draft' | 'issued' | 'paid' | 'overdue' | 'voided'> = {
       'draft': 'draft',
       'open': 'issued',
       'paid': 'paid',
@@ -787,7 +793,7 @@ class WebhookRouterService {
       'void': 'voided',
     };
 
-    return statusMap[stripeStatus] || 'draft';
+    return statusMap[stripeStatus] ?? 'draft';
   }
 
   // private async generateInvoiceNumber(agencyId: string): Promise<string> {
@@ -851,7 +857,7 @@ class WebhookRouterService {
     }
   }
 
-  // MANTENER TODA LA LÓGICA EXISTENTE DE TRELI
+  // Handle Treli webhook events
   private async handleTreliWebhook(body: string, treliSignature: string) {
     console.log('handleTreliWebhook', treliSignature);
     try {
