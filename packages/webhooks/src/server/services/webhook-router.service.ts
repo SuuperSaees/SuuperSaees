@@ -233,10 +233,8 @@ class WebhookRouterService {
                 clientId,
                 customerId: data.customer,
                 subscriptionId: data.id,
-                agencyId: agencyId ?? '',
               });
             }
-
           } else {
             console.log('Account ID not found in the event');
           }
@@ -346,7 +344,7 @@ class WebhookRouterService {
         return;
       }
 
-      let clientId = existingClient?.id;
+      const clientId = existingClient?.id ?? '';
 
       if (!existingClient) {
         console.log('No existing client found, this subscription might be orphaned');
@@ -355,9 +353,8 @@ class WebhookRouterService {
 
       // Crear la subscription en nuestra base de datos
       await this.createClientSubscriptionFromStripe({
-        clientId: clientId!,
+        clientId: clientId,
         subscription,
-        agencyId: agencyId!,
       });
 
       console.log('Client subscription created successfully');
@@ -589,12 +586,10 @@ class WebhookRouterService {
     clientId,
     customerId,
     subscriptionId,
-    agencyId,
   }: {
     clientId: string;
     customerId: string;
     subscriptionId: string;
-    agencyId: string;
   }) {
     try {
       const subscriptionData = {
@@ -628,11 +623,9 @@ class WebhookRouterService {
   private async createClientSubscriptionFromStripe({
     clientId,
     subscription,
-    agencyId,
   }: {
     clientId: string;
     subscription: any;
-    agencyId: string;
   }) {
     const subscriptionData = {
       client_id: clientId,
