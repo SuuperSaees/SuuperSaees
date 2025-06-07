@@ -583,7 +583,7 @@ class WebhookRouterService {
     await retryOperation.execute()
   }
 
-  // MÉTODOS AUXILIARES
+  // Auxiliar Methods
 
   private async createClientSubscription({
     clientId,
