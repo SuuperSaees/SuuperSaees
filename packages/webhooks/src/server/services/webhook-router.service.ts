@@ -253,8 +253,7 @@ class WebhookRouterService {
       },
       
       onInvoicePaid: async (data) => {
-        console.log('Invoice paid:', data);
-        await this.handleInvoicePayment(data, stripeAccountId);
+        await this.handleInvoicePayment(data);
         return Promise.resolve();
       },
 
@@ -522,6 +521,7 @@ class WebhookRouterService {
 
         // Si la factura fue pagada, registrar el pago
         if (invoice.status === 'paid' && existingInvoice.status !== 'paid') {
+          console.log('Invoice paid, recording payment:', invoice.id);
           await this.recordInvoicePayment({
             invoiceId: existingInvoice.id,
             invoice,
@@ -552,14 +552,35 @@ class WebhookRouterService {
     }
   }
 
-  private async handleInvoicePayment(data: any, stripeAccountId?: string) {
+  private async handleInvoicePayment(data: any) {
     console.log('Handling invoice payment:', data);
-    await this.recordInvoicePayment({
-      invoiceId: data.id,
-      invoice: data,
-    }).catch((error) => {
-      console.error('Error recording invoice payment:', error);
-    });
+    const retryOperation = new RetryOperationService(
+      async () => {
+        // get invoice id from invoices 
+        const { data: invoiceData, error: invoiceError } = await this.adminClient
+        .from('invoices')
+        .select('id')
+        .eq('provider_id', data.id)
+        .single()
+
+        if(invoiceError) {
+          throw new Error(`Failed to get Invoice ${invoiceError.message}`)
+        }
+
+        await this.recordInvoicePayment({
+        invoiceId: invoiceData.id,
+        invoice: data,
+      }).catch((error) => {
+        console.error('Error recording invoice payment:', error);
+      });
+      },
+      {
+          maxAttempts: 3,
+          backoffFactor: 2,
+          delayMs: 10000,
+      }
+    )
+    await retryOperation.execute()
   }
 
   // MÉTODOS AUXILIARES
