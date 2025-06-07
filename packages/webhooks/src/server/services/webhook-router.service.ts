@@ -306,7 +306,7 @@ class WebhookRouterService {
         .eq('provider_id', stripeAccountId)
         .single();
 
-      if (billingError || !billingAccount) {
+      if (billingError ?? !billingAccount) {
         console.error('Error fetching billing account:', billingError);
         return;
       }
@@ -371,10 +371,10 @@ class WebhookRouterService {
   private async handleSubscriptionUpdated(data: any, stripeAccountId?: string) {
     try {
       const subscription = data;
-      console.log('Processing subscription updated:', subscription.id || subscription.target_subscription_id);
+      console.log('Processing subscription updated:', subscription.id ?? subscription.target_subscription_id);
 
       // Buscar la subscription existente
-      const subscriptionId = subscription.id || subscription.target_subscription_id;
+      const subscriptionId = subscription.id ?? subscription.target_subscription_id;
       const { data: existingSubscription, error: subError } = await this.adminClient
         .from('client_subscriptions')
         .select('id, client_id')
@@ -390,7 +390,7 @@ class WebhookRouterService {
       if (existingSubscription) {
         await this.updateClientSubscriptionFromData(subscription, existingSubscription.id);
         
-        // Crear actividad
+        // Create activity for subscription update
         await this.createActivity({
           action: 'update',
           actor: 'System',
@@ -452,7 +452,7 @@ class WebhookRouterService {
           // Search for the client subscription by customer ID
           const { data: clientSubscription, error: clientError } = await this.adminClient
             .from('client_subscriptions')
-            .select('client_id, clients(organization_client_id)')
+            .select('client_id, clients(organization_client_id, user_client_id)')
             .eq('billing_customer_id', invoice.customer)
             .eq('billing_provider', 'stripe')
             .single();
@@ -466,12 +466,14 @@ class WebhookRouterService {
           const clientOrganizationId = Array.isArray(clientSubscription.clients?.organization_client_id)
             ? clientSubscription.clients.organization_client_id[0]
             : clientSubscription.clients?.organization_client_id;
+          const userClientId = clientSubscription.clients?.user_client_id ?? '';
 
           // Create the invoice in our database
           await this.createInvoiceFromStripe({
             invoice,
             agencyId,
             clientOrganizationId,
+            userClientId
           });
 
           console.log('Invoice created successfully from Stripe');
@@ -535,7 +537,7 @@ class WebhookRouterService {
           throw new Error(`Failed to update invoice: ${updateError.message}`);
         }
 
-        // Crear actividad
+        // Create activity for invoice update
         await this.createActivity({
           action: 'update',
           actor: 'System',
@@ -552,7 +554,12 @@ class WebhookRouterService {
 
   private async handleInvoicePayment(data: any, stripeAccountId?: string) {
     console.log('Handling invoice payment:', data);
-    // Aquí puedes agregar lógica adicional si es necesaria
+    await this.recordInvoicePayment({
+      invoiceId: data.id,
+      invoice: data,
+    }).catch((error) => {
+      console.error('Error recording invoice payment:', error);
+    });
   }
 
   // MÉTODOS AUXILIARES
@@ -621,7 +628,7 @@ class WebhookRouterService {
         : null,
       currency: subscription.currency,
       status: subscription.status,
-      active: subscription.status === 'active' || subscription.status === 'trialing',
+      active: subscription.status === 'active' ?? subscription.status === 'trialing',
     };
 
     const { error: insertError } = await this.adminClient
@@ -632,7 +639,7 @@ class WebhookRouterService {
       throw new Error(`Failed to create client subscription: ${insertError.message}`);
     }
 
-    // Crear actividad
+    // Create activity
     await this.createActivity({
       action: 'create',
       actor: 'System',
@@ -653,7 +660,7 @@ class WebhookRouterService {
         ? new Date(subscription.trial_end * 1000).toISOString() 
         : null,
       status: subscription.status,
-      active: subscription.status === 'active' || subscription.status === 'trialing',
+      active: subscription.status === 'active' ?? subscription.status === 'trialing',
       updated_at: new Date().toISOString(),
     };
 
@@ -695,12 +702,15 @@ class WebhookRouterService {
     invoice,
     agencyId,
     clientOrganizationId,
+    userClientId
   }: {
     invoice: any;
     agencyId: string;
     clientOrganizationId: string;
+    userClientId?: string
   }) {
     console.log('Creating invoice from Stripe:', invoice.id);
+    const mappedStatus = this.mapStripeInvoiceStatus(invoice.status) ?? 'draft'
     const invoiceData = {
       agency_id: agencyId,
       client_organization_id: clientOrganizationId,
@@ -709,9 +719,9 @@ class WebhookRouterService {
       due_date: (invoice.due_date 
         ? new Date(invoice.due_date * 1000).toISOString().split('T')[0]
         : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) ?? '',
-      status: this.mapStripeInvoiceStatus(invoice.status) || 'draft',
+      status: mappedStatus,
       subtotal_amount: invoice.subtotal / 100,
-      tax_amount: invoice.tax || 0,
+      tax_amount: invoice.tax ?? 0,
       total_amount: invoice.total / 100,
       currency: invoice.currency.toUpperCase(),
       provider_id: invoice.id,
@@ -732,8 +742,8 @@ class WebhookRouterService {
     if (invoice.lines && invoice.lines.data.length > 0) {
       const invoiceItems = invoice.lines.data.map((line: any) => ({
         invoice_id: createdInvoice.id,
-        description: line.description || 'Service item',
-        quantity: line.quantity || 1,
+        description: line.description ?? 'Service item',
+        quantity: line.quantity ?? 1,
         unit_price: line.amount / 100,
         total_price: line.amount / 100,
       }));
@@ -753,6 +763,7 @@ class WebhookRouterService {
       actor: 'System',
       message: `Invoice created from Stripe: ${createdInvoice.number}`,
       type: 'billing',
+      clientId: userClientId,
       invoiceId: createdInvoice.id,
     });
 
@@ -771,7 +782,7 @@ class WebhookRouterService {
       payment_method: 'stripe' as const,
       amount: invoice.amount_paid / 100,
       status: 'succeeded' as const,
-      provider_payment_id: invoice.payment_intent || invoice.id,
+      provider_payment_id: invoice.payment_intent ?? invoice.id,
       processed_at: new Date().toISOString(),
     };
 
@@ -796,28 +807,6 @@ class WebhookRouterService {
     return statusMap[stripeStatus] ?? 'draft';
   }
 
-  // private async generateInvoiceNumber(agencyId: string): Promise<string> {
-  //   const currentDate = new Date();
-  //   const dateStr = currentDate.toISOString().slice(0, 10).replace(/-/g, '');
-    
-  //   const { data: lastInvoice } = await this.adminClient
-  //     .from('invoices')
-  //     .select('number')
-  //     .eq('agency_id', agencyId)
-  //     .like('number', `INV-${dateStr}-%`)
-  //     .order('created_at', { ascending: false })
-  //     .limit(1)
-  //     .single();
-
-  //   let sequence = 1;
-  //   if (lastInvoice?.number) {
-  //     const lastSequence = parseInt(lastInvoice.number.split('-').pop() || '0');
-  //     sequence = lastSequence + 1;
-  //   }
-
-  //   return `INV-${dateStr}-${sequence}`;
-  // }
-
   private async createActivity({
     action,
     actor,
@@ -841,8 +830,8 @@ class WebhookRouterService {
         type,
         preposition: 'to',
         value: message,
-        invoice_id: invoiceId || null,
-        user_id: clientId || 'system',
+        invoice_id: invoiceId ?? null,
+        user_id: clientId ?? '',
       };
 
       const { error } = await this.adminClient
