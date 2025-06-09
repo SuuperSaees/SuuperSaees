@@ -1,8 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 
 import { Database } from '@kit/supabase/database';
-import { ClientSubscriptions } from '../../../../../apps/web/lib/client-subscriptions.types'
-
 import { createClient } from '../../../../features/team-accounts/src/server/actions/clients/create/create-clients';
 import { getSessionById } from '../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
 import { insertServiceToClient } from '../../../../features/team-accounts/src/server/actions/services/create/create-service';
@@ -78,7 +76,6 @@ class WebhookRouterService {
       onPaymentIntentSucceeded: async (data) => {
         console.log('onPaymentIntentSucceeded', data);
         try {
-          // Mantener toda la lógica existente
           if (stripeAccountId) {
             // Search organization by accountId
             const {
@@ -233,15 +230,21 @@ class WebhookRouterService {
                 clientId: clientId ?? '',
                 subscription: data,
               });
-          } else {
-            console.log('Account ID not found in the event');
+
+              if (!data?.current_period_start && !data?.current_period_end && !data?.trial_start && !data?.trial_end) {
+                console.log('Generate local invoice and payment:', data.id);
+                // Generate local invoice and payment
+                await this.handleOneTimePayment(data, agencyId, clientOrganizationId ?? '', accountClientData?.id ?? '', service);
+              }
+            } else {
+              console.log('Account ID not found in the event');
+            }
+            return;
+          } catch (error) {
+            console.error('Error handling subscription session completed:', error);
+            return;
           }
-          return;
-        } catch (error) {
-          console.error('Error handling subscription session completed:', error);
-          return;
-        }
-      },
+        },
       
       onPaymentFailed: async (sessionId) => {
         console.log('Payment failed:', sessionId);
@@ -586,6 +589,140 @@ class WebhookRouterService {
     await retryOperation.execute()
   }
 
+  // Method to create an local invoice
+  private async handleOneTimePayment(data: any, agencyId: string, clientOrganizationId: string, userClientId: string, service: any) {
+    try {
+      // Crear el invoice local
+      const invoiceId = await this.createLocalInvoiceForOneTimePayment({
+        agencyId: agencyId,
+        clientOrganizationId: clientOrganizationId,
+        userClientId: userClientId,
+        service: service,
+        paymentIntentId: data.id,
+        amount: data.amount / 100, // Stripe amounts are in cents
+        currency: data.currency,
+      });
+
+      // Record the payment
+      await this.recordLocalPaymentForOneTimePayment({
+        invoiceId: invoiceId,
+        paymentIntentId: data.id,
+        amount: data.amount / 100,
+      });
+
+      console.log('One-time payment processed successfully');
+
+    } catch (error) {
+      console.error('Error handling one-time payment:', error);
+    }
+  }
+
+  // Método para crear invoice local para pagos únicos
+  private async createLocalInvoiceForOneTimePayment({
+    agencyId,
+    clientOrganizationId,
+    userClientId,
+    service,
+    paymentIntentId,
+    amount,
+    currency,
+  }: {
+    agencyId: string;
+    clientOrganizationId: string;
+    userClientId: string;
+    service: any;
+    paymentIntentId: string;
+    amount: number;
+    currency: string;
+  }) {
+    console.log('Creating local invoice for one-time payment:', paymentIntentId);
+
+    const invoiceData = {
+      agency_id: agencyId,
+      client_organization_id: clientOrganizationId,
+      number: '', // Se generará automáticamente
+      issue_date: new Date().toISOString().split('T')[0],
+      due_date: new Date().toISOString().split('T')[0], // Pago inmediato
+      status: 'paid' as const, // Ya está pagado
+      subtotal_amount: amount,
+      tax_amount: 0,
+      total_amount: amount,
+      currency: currency.toUpperCase(),
+      provider_id: paymentIntentId,
+      checkout_url: null,
+    };
+
+    const { data: createdInvoice, error: invoiceError } = await this.adminClient
+      .from('invoices')
+      .insert(invoiceData)
+      .select('id, number')
+      .single();
+
+    if (invoiceError) {
+      throw new Error(`Failed to create local invoice: ${invoiceError.message}`);
+    }
+
+    // Crear invoice item
+    const invoiceItemData = {
+      invoice_id: createdInvoice.id,
+      description: service.name || 'Service',
+      quantity: 1,
+      unit_price: amount,
+      total_price: amount,
+    };
+
+    const { error: itemError } = await this.adminClient
+      .from('invoice_items')
+      .insert(invoiceItemData);
+
+    if (itemError) {
+      console.error('Error creating invoice item:', itemError);
+    }
+
+    // Crear actividad
+    await this.createActivity({
+      action: 'create',
+      actor: 'System',
+      message: `Local invoice created for one-time payment: ${createdInvoice.number}`,
+      type: 'billing',
+      clientId: userClientId,
+      invoiceId: createdInvoice.id,
+    });
+
+    return createdInvoice.id;
+  }
+
+  // Método para registrar pago local para pagos únicos
+  private async recordLocalPaymentForOneTimePayment({
+    invoiceId,
+    paymentIntentId,
+    amount,
+  }: {
+    invoiceId: string;
+    paymentIntentId: string;
+    amount: number;
+  }) {
+    const paymentData = {
+      invoice_id: invoiceId,
+      payment_method: 'stripe' as const,
+      amount: amount,
+      status: 'succeeded' as const,
+      provider_payment_id: paymentIntentId,
+      processed_at: new Date().toISOString(),
+    };
+
+    const { error: paymentError } = await this.adminClient
+      .from('invoice_payments')
+      .insert(paymentData);
+
+    if (paymentError) {
+      console.error('Error recording local payment:', paymentError);
+      throw new Error(`Failed to record local payment: ${paymentError.message}`);
+    }
+
+    console.log('Local payment recorded successfully for payment intent:', paymentIntentId);
+  }
+
   // Auxiliar Methods
 
   private async createClientSubscriptionFromStripe({
@@ -600,8 +737,8 @@ class WebhookRouterService {
       billing_subscription_id: subscription.id,
       billing_customer_id: subscription.customer,
       billing_provider: 'stripe' as const,
-      period_starts_at: new Date(subscription.current_period_start * 1000).toISOString(),
-      period_ends_at: new Date(subscription.current_period_end * 1000).toISOString(),
+      period_starts_at: subscription.current_period_start ? new Date(subscription.current_period_start * 1000).toISOString() : null,
+      period_ends_at: subscription.current_period_end ? new Date(subscription.current_period_end * 1000).toISOString() : null,
       trial_starts_at: subscription.trial_start 
         ? new Date(subscription.trial_start * 1000).toISOString() 
         : null,
