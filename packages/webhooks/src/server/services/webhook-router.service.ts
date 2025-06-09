@@ -454,18 +454,33 @@ class WebhookRouterService {
             throw new Error('Client subscription not found');
           }
 
+          // Search Billing Services
+          const { data: billingServices, error: serviceError } = await this.adminClient
+            .from('billing_services')
+            .select('service_id')
+            .eq('provider_id', invoice.pricing?.price_details?.price)
+            .eq('provider', 'stripe')
+            .single();
+
+          if (serviceError) {
+            console.error('Error fetching billing services:', serviceError);
+            throw new Error('Billing services not found');
+          }
+
           const agencyId = billingAccount.accounts?.organizations[0]?.id ?? '';
           const clientOrganizationId = Array.isArray(clientSubscription.clients?.organization_client_id)
             ? clientSubscription.clients.organization_client_id[0]
             : clientSubscription.clients?.organization_client_id;
           const userClientId = clientSubscription.clients?.user_client_id ?? '';
+          const serviceId = billingServices.service_id;
 
           // Create the invoice in our database
           await this.createInvoiceFromStripe({
             invoice,
             agencyId,
             clientOrganizationId,
-            userClientId
+            userClientId,
+            serviceId
           });
 
           console.log('Invoice created successfully from Stripe');
@@ -637,13 +652,15 @@ class WebhookRouterService {
   }) {
     console.log('Creating local invoice for one-time payment:', paymentIntentId);
 
+    const dueDate = new Date().toISOString()
+
     const invoiceData = {
       agency_id: agencyId,
       client_organization_id: clientOrganizationId,
-      number: '', // Se generará automáticamente
-      issue_date: new Date().toISOString().split('T')[0],
-      due_date: new Date().toISOString().split('T')[0], // Pago inmediato
-      status: 'paid' as const, // Ya está pagado
+      number: '', 
+      issue_date: dueDate,
+      due_date: dueDate, 
+      status: 'paid' as const, 
       subtotal_amount: amount,
       tax_amount: 0,
       total_amount: amount,
@@ -662,9 +679,10 @@ class WebhookRouterService {
       throw new Error(`Failed to create local invoice: ${invoiceError.message}`);
     }
 
-    // Crear invoice item
+    // Create a invoice
     const invoiceItemData = {
       invoice_id: createdInvoice.id,
+      service_id: service.id, 
       description: service.name || 'Service',
       quantity: 1,
       unit_price: amount,
@@ -812,10 +830,12 @@ class WebhookRouterService {
     invoice,
     agencyId,
     clientOrganizationId,
-    userClientId
+    userClientId,
+    serviceId
   }: {
     invoice: any;
     agencyId: string;
+    serviceId: number;
     clientOrganizationId: string;
     userClientId?: string
   }) {
@@ -852,6 +872,7 @@ class WebhookRouterService {
     if (invoice.lines && invoice.lines.data.length > 0) {
       const invoiceItems = invoice.lines.data.map((line: any) => ({
         invoice_id: createdInvoice.id,
+        service_id: serviceId,
         description: line.description ?? 'Service item',
         quantity: line.quantity ?? 1,
         unit_price: line.amount / 100,
