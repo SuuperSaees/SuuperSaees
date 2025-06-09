@@ -60,13 +60,13 @@ class WebhookRouterService {
       
       onSubscriptionUpdated: async (data) => {
         console.log('Subscription updated:', data);
-        await this.handleSubscriptionUpdated(data, stripeAccountId);
+        await this.handleSubscriptionUpdated(data);
         return Promise.resolve();
       },
       
       onSubscriptionDeleted: async (subscriptionId) => {
         console.log('Subscription deleted:', subscriptionId);
-        await this.handleSubscriptionDeleted(subscriptionId, stripeAccountId);
+        await this.handleSubscriptionDeleted(subscriptionId);
         return Promise.resolve();
       },
       
@@ -357,7 +357,7 @@ class WebhookRouterService {
     }
   }
 
-  private async handleSubscriptionUpdated(data: any, stripeAccountId?: string) {
+  private async handleSubscriptionUpdated(data: any) {
     try {
       const subscription = data;
       console.log('Processing subscription updated:', subscription.id ?? subscription.target_subscription_id);
@@ -366,7 +366,7 @@ class WebhookRouterService {
       const subscriptionId = subscription.id ?? subscription.target_subscription_id;
       const { data: existingSubscription, error: subError } = await this.adminClient
         .from('client_subscriptions')
-        .select('id, client_id')
+        .select('id, client_id, clients(user_client_id)')
         .eq('billing_subscription_id', subscriptionId)
         .eq('billing_provider', 'stripe')
         .single();
@@ -385,7 +385,7 @@ class WebhookRouterService {
           actor: 'System',
           message: `Subscription updated: ${subscription.status}`,
           type: 'billing',
-          clientId: existingSubscription.client_id,
+          clientId: existingSubscription.clients?.user_client_id,
         });
       }
 
@@ -394,7 +394,7 @@ class WebhookRouterService {
     }
   }
 
-  private async handleSubscriptionDeleted(subscriptionId: string, stripeAccountId?: string) {
+  private async handleSubscriptionDeleted(subscriptionId: string) {
     try {
       const { error } = await this.adminClient
         .from('client_subscriptions')
@@ -470,7 +470,7 @@ class WebhookRouterService {
         {
           maxAttempts: 3,
           backoffFactor: 2,
-          delayMs: 9000,
+          delayMs: 15000,
         }
       );
 
@@ -538,7 +538,7 @@ class WebhookRouterService {
         }
 
         const userClientId = clientSubscription?.clients?.user_client_id;
-        
+
         // Create activity for invoice update
         await this.createActivity({
           action: 'update',
@@ -580,51 +580,13 @@ class WebhookRouterService {
       {
           maxAttempts: 3,
           backoffFactor: 2,
-          delayMs: 10000,
+          delayMs: 20000,
       }
     )
     await retryOperation.execute()
   }
 
   // Auxiliar Methods
-
-  // private async createClientSubscription({
-  //   clientId,
-  //   customerId,
-  //   subscriptionId,
-  // }: {
-  //   clientId: string;
-  //   customerId: string;
-  //   subscriptionId: string;
-  // }) {
-  //   try {
-  //     const subscriptionData = {
-  //       client_id: clientId,
-  //       billing_subscription_id: subscriptionId,
-  //       billing_customer_id: customerId,
-  //       billing_provider: 'stripe' as const,
-  //       period_starts_at: new Date().toISOString(),
-  //       period_ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-  //       currency: 'USD',
-  //       status: 'active',
-  //       active: true,
-  //     };
-
-  //     const { error: upsertError } = await this.adminClient
-  //       .from('client_subscriptions')
-  //       .upsert(subscriptionData, { 
-  //         onConflict: 'billing_customer_id,billing_provider' 
-  //       });
-
-  //     if (upsertError) {
-  //       console.error('Failed to create or update client subscription:', upsertError);
-  //     } else {
-  //       console.log('Client subscription created with customer_id:', customerId);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error in createClientSubscription:', error);
-  //   }
-  // }
 
   private async createClientSubscriptionFromStripe({
     clientId,
@@ -660,15 +622,6 @@ class WebhookRouterService {
     if (insertError) {
       throw new Error(`Failed to create client subscription: ${insertError.message}`);
     }
-
-    // Create activity
-    await this.createActivity({
-      action: 'create',
-      actor: 'System',
-      message: `New subscription created: ${subscription.status}`,
-      type: 'billing',
-      clientId,
-    });
   }
 
   private async updateClientSubscription(subscription: any, subscriptionId: string) {
@@ -760,7 +713,7 @@ class WebhookRouterService {
       throw new Error(`Failed to create invoice: ${invoiceError.message}`);
     }
 
-    // Crear items de la factura si existen
+    // Create invoice items if they exist
     if (invoice.lines && invoice.lines.data.length > 0) {
       const invoiceItems = invoice.lines.data.map((line: any) => ({
         invoice_id: createdInvoice.id,
