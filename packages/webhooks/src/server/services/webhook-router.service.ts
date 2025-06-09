@@ -536,7 +536,9 @@ class WebhookRouterService {
           console.error('Error fetching client subscription:', clientSubError);
           return;
         }
+
         const userClientId = clientSubscription?.clients?.user_client_id;
+        
         // Create activity for invoice update
         await this.createActivity({
           action: 'update',
