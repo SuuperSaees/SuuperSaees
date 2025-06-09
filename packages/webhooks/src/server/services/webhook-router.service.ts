@@ -5,6 +5,7 @@ import { createClient } from '../../../../features/team-accounts/src/server/acti
 import { getSessionById } from '../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
 import { insertServiceToClient } from '../../../../features/team-accounts/src/server/actions/services/create/create-service';
 import { RetryOperationService } from '@kit/shared/utils';
+import { Activity } from '../../../../../apps/web/lib/activity.types';
 
 export function createWebhookRouterService(
   adminClient: SupabaseClient<Database>,
@@ -234,7 +235,7 @@ class WebhookRouterService {
               if (!data?.current_period_start && !data?.current_period_end && !data?.trial_start && !data?.trial_end) {
                 console.log('Generate local invoice and payment:', data.id);
                 // Generate local invoice and payment
-                await this.handleOneTimePayment(data, agencyId, clientOrganizationId ?? '', accountClientData?.id ?? '', service);
+                await this.handleOneTimePayment(data, agencyId, clientOrganizationId ?? '', accountClientData?.id ?? client?.success?.data?.user_client_id ?? '', service);
               }
             } else {
               console.log('Account ID not found in the event');
@@ -381,15 +382,6 @@ class WebhookRouterService {
 
       if (existingSubscription) {
         await this.updateClientSubscriptionFromData(subscription, existingSubscription.id);
-        
-        // Create activity for subscription update
-        // await this.createActivity({
-        //   action: 'update',
-        //   actor: 'System',
-        //   message: `Subscription updated: ${subscription.status}`,
-        //   type: 'billing',
-        //   clientId: existingSubscription.clients?.user_client_id,
-        // });
       }
 
     } catch (error) {
@@ -561,10 +553,11 @@ class WebhookRouterService {
         await this.createActivity({
           action: 'update',
           actor: 'System',
-          message: `Invoice updated: ${invoice.status}`,
-          type: 'billing',
+          message: `has updated`,
+          type: Activity.Enums.ActivityType.INVOICE,
           invoiceId: existingInvoice.id,
           clientId: userClientId,
+          value: 'paid',
         });
       }
 
@@ -607,7 +600,7 @@ class WebhookRouterService {
   // Method to create an local invoice
   private async handleOneTimePayment(data: any, agencyId: string, clientOrganizationId: string, userClientId: string, service: any) {
     try {
-      // Crear el invoice local
+      // Create the local invoice
       const invoiceId = await this.createLocalInvoiceForOneTimePayment({
         agencyId: agencyId,
         clientOrganizationId: clientOrganizationId,
@@ -697,14 +690,15 @@ class WebhookRouterService {
       console.error('Error creating invoice item:', itemError);
     }
 
-    // Crear actividad
+    // Create activity for invoice creation
     await this.createActivity({
       action: 'create',
       actor: 'System',
-      message: `Local invoice created for one-time payment: ${createdInvoice.number}`,
-      type: 'billing',
+      message: `has created`,
+      type: Activity.Enums.ActivityType.INVOICE,
       clientId: userClientId,
       invoiceId: createdInvoice.id,
+      value: createdInvoice.number,
     });
 
     return createdInvoice.id;
@@ -892,10 +886,11 @@ class WebhookRouterService {
     await this.createActivity({
       action: 'create',
       actor: 'System',
-      message: `Invoice created from Stripe: ${createdInvoice.number}`,
-      type: 'billing',
+      message: `has created`,
+      type: Activity.Enums.ActivityType.INVOICE,
       clientId: userClientId,
       invoiceId: createdInvoice.id,
+      value: createdInvoice.number,
     });
 
     return createdInvoice.id;
@@ -945,11 +940,13 @@ class WebhookRouterService {
     type,
     clientId,
     invoiceId,
+    value,
   }: {
     action: 'create' | 'update' | 'delete';
     actor: string;
     message: string;
-    type: 'billing';
+    type: Activity.Enums.ActivityType;
+    value: string;
     clientId?: string;
     invoiceId?: string;
   }) {
@@ -960,7 +957,7 @@ class WebhookRouterService {
         message,
         type,
         preposition: 'to',
-        value: message,
+        value,
         invoice_id: invoiceId ?? null,
         user_id: clientId ?? '',
       };
