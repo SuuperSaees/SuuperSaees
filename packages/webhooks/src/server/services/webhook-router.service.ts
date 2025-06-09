@@ -366,7 +366,7 @@ class WebhookRouterService {
       const subscriptionId = subscription.id ?? subscription.target_subscription_id;
       const { data: existingSubscription, error: subError } = await this.adminClient
         .from('client_subscriptions')
-        .select('id, client_id, clients(user_client_id)')
+        .select('id, client_id')
         .eq('billing_subscription_id', subscriptionId)
         .eq('billing_provider', 'stripe')
         .single();
@@ -380,13 +380,13 @@ class WebhookRouterService {
         await this.updateClientSubscriptionFromData(subscription, existingSubscription.id);
         
         // Create activity for subscription update
-        await this.createActivity({
-          action: 'update',
-          actor: 'System',
-          message: `Subscription updated: ${subscription.status}`,
-          type: 'billing',
-          clientId: existingSubscription.clients?.user_client_id,
-        });
+        // await this.createActivity({
+        //   action: 'update',
+        //   actor: 'System',
+        //   message: `Subscription updated: ${subscription.status}`,
+        //   type: 'billing',
+        //   clientId: existingSubscription.clients?.user_client_id,
+        // });
       }
 
     } catch (error) {
@@ -650,18 +650,16 @@ class WebhookRouterService {
   }
 
   private async updateClientSubscriptionFromData(subscription: any, subscriptionId: string) {
-    const updateData: ClientSubscriptions.Update = {
+
+    const updateData = {
       status: subscription.status,
       active: subscription.active,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString() ?? '',
+      period_starts_at: new Date(subscription.current_period_start * 1000).toISOString() ?? '',
+      period_ends_at: new Date(subscription.current_period_end * 1000).toISOString() ?? '',
+      trial_starts_at: new Date(subscription.trial_start * 1000).toISOString() ?? '',
+      trial_ends_at: new Date(subscription.trial_end * 1000).toISOString() ?? '',
     };
-
-    if (subscription.period_starts_at) {
-      updateData.period_starts_at = subscription.period_starts_at;
-    }
-    if (subscription.period_ends_at) {
-      updateData.period_ends_at = subscription.period_ends_at;
-    }
 
     const { error: updateError } = await this.adminClient
       .from('client_subscriptions')
