@@ -4011,18 +4011,6 @@ export type Database = {
         | "task"
         | "annotation"
         | "invoice"
-      activity_type__old_version_to_be_dropped:
-        | "message"
-        | "review"
-        | "status"
-        | "priority"
-        | "assign"
-        | "due_date"
-        | "description"
-        | "title"
-        | "assigned_to"
-        | "task"
-        | "annotation"
       annotations_status: "active" | "completed" | "draft"
       app_permissions:
         | "roles.manage"
@@ -4730,19 +4718,6 @@ export const Constants = {
         "task",
         "annotation",
         "invoice",
-      ],
-      activity_type__old_version_to_be_dropped: [
-        "message",
-        "review",
-        "status",
-        "priority",
-        "assign",
-        "due_date",
-        "description",
-        "title",
-        "assigned_to",
-        "task",
-        "annotation",
       ],
       annotations_status: ["active", "completed", "draft"],
       app_permissions: [

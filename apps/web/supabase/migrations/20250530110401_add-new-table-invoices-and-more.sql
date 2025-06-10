@@ -533,6 +533,10 @@ create type "public"."activity_type" as enum ('message', 'review', 'status', 'pr
 
 alter table "public"."activities" alter column type type "public"."activity_type" using type::text::"public"."activity_type";
 
+drop type "public"."activity_type__old_version_to_be_dropped";
+
+-- Make order_id column in activities table optional
+
 ALTER TABLE "public"."activities" 
 ALTER COLUMN "order_id" DROP NOT NULL;
 
