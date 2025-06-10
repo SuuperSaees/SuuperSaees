@@ -199,11 +199,11 @@ export type Database = {
           actor: string
           created_at: string
           id: number
-          invoice_id: string | null
           message: string
-          order_id: number
+          order_id: number | null
           preposition: string
           previous_value: string | null
+          reference_id: string | null
           temp_id: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
@@ -214,11 +214,11 @@ export type Database = {
           actor: string
           created_at?: string
           id?: number
-          invoice_id?: string | null
           message: string
-          order_id: number
+          order_id?: number | null
           preposition: string
           previous_value?: string | null
+          reference_id?: string | null
           temp_id?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
@@ -229,24 +229,17 @@ export type Database = {
           actor?: string
           created_at?: string
           id?: number
-          invoice_id?: string | null
           message?: string
-          order_id?: number
+          order_id?: number | null
           preposition?: string
           previous_value?: string | null
+          reference_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
           value?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "activities_invoice_id_fkey"
-            columns: ["invoice_id"]
-            isOneToOne: false
-            referencedRelation: "invoices"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "activities_order_id_fkey"
             columns: ["order_id"]
@@ -3857,8 +3850,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: string; brief_id: string }
           | { service_id: number; brief_id: string }
+          | { service_id: string; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
@@ -4006,6 +3999,19 @@ export type Database = {
     Enums: {
       action_type: "create" | "update" | "delete" | "complete"
       activity_type:
+        | "message"
+        | "review"
+        | "status"
+        | "priority"
+        | "assign"
+        | "due_date"
+        | "description"
+        | "title"
+        | "assigned_to"
+        | "task"
+        | "annotation"
+        | "invoice"
+      activity_type__old_version_to_be_dropped:
         | "message"
         | "review"
         | "status"
@@ -4712,6 +4718,20 @@ export const Constants = {
     Enums: {
       action_type: ["create", "update", "delete", "complete"],
       activity_type: [
+        "message",
+        "review",
+        "status",
+        "priority",
+        "assign",
+        "due_date",
+        "description",
+        "title",
+        "assigned_to",
+        "task",
+        "annotation",
+        "invoice",
+      ],
+      activity_type__old_version_to_be_dropped: [
         "message",
         "review",
         "status",
