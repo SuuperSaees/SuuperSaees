@@ -116,11 +116,11 @@ alter table "public"."role_permissions" alter column permission type "public"."a
 
 drop type "public"."payment_status__old_version_to_be_dropped" cascade;
 
-alter table "public"."activities" add column "invoice_id" uuid;
+alter table "public"."activities" add column "reference_id" text;
 
 CREATE UNIQUE INDEX client_subscriptions_pkey ON public.client_subscriptions USING btree (id);
 
-CREATE INDEX idx_activities_invoice_id ON public.activities USING btree (invoice_id);
+CREATE INDEX idx_activities_reference_id ON public.activities USING btree (reference_id);
 
 CREATE INDEX idx_client_subscriptions_active ON public.client_subscriptions USING btree (active);
 
@@ -179,8 +179,6 @@ alter table "public"."invoice_items" add constraint "invoice_items_pkey" PRIMARY
 alter table "public"."invoice_payments" add constraint "invoice_payments_pkey" PRIMARY KEY using index "invoice_payments_pkey";
 
 alter table "public"."invoices" add constraint "invoices_pkey" PRIMARY KEY using index "invoices_pkey";
-
-alter table "public"."activities" add constraint "activities_invoice_id_fkey" FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
 alter table "public"."activities" validate constraint "activities_invoice_id_fkey";
 
