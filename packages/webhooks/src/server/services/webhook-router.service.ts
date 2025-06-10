@@ -153,7 +153,7 @@ class WebhookRouterService {
             const { data: checkoutServiceData, error: checkoutServiceError } =
               await this.adminClient
                 .from('checkouts')
-                .select('id, checkout_services(service_id)')
+                .select('id, checkout_services(service_id, services(name))')
                 .eq('provider_id', data?.id)
                 .single();
 
@@ -209,10 +209,12 @@ class WebhookRouterService {
               clientId = client?.success?.data?.id;
             }
 
+            const serviceId = checkoutServiceData?.checkout_services[0]?.service_id;
+
             await insertServiceToClient(
               this.adminClient,
               clientOrganizationId ?? '',
-              checkoutServiceData?.checkout_services[0]?.service_id ?? 0,
+              serviceId ?? 0,
               clientId ?? '',
               createdBy ?? '',
               agencyId ?? '',
@@ -235,7 +237,8 @@ class WebhookRouterService {
               if (!data?.current_period_start && !data?.current_period_end && !data?.trial_start && !data?.trial_end) {
                 console.log('Generate local invoice and payment:', data.id);
                 // Generate local invoice and payment
-                await this.handleOneTimePayment(data, agencyId, clientOrganizationId ?? '', accountClientData?.id ?? client?.success?.data?.user_client_id ?? '', service);
+                await this.handleOneTimePayment(data, agencyId, clientOrganizationId ?? '', accountClientData?.id ?? client?.success?.data?.user_client_id ?? '', {
+                  id: serviceId ?? 0, name: checkoutServiceData?.checkout_services[0]?.services?.name ?? ''});
               }
             } else {
               console.log('Account ID not found in the event');
@@ -418,6 +421,7 @@ class WebhookRouterService {
 
       const invoice = event.data.object;
       console.log('Processing invoice created:', invoice.id, stripeAccountId, invoice.customer);
+      console.log('Searching billing services for price:', invoice.lines.data[0].price.id);
 
       const retryOperation = new RetryOperationService(
         async () => {
@@ -450,7 +454,7 @@ class WebhookRouterService {
           const { data: billingServices, error: serviceError } = await this.adminClient
             .from('billing_services')
             .select('service_id')
-            .eq('provider_id', invoice.pricing?.price_details?.price)
+            .eq('provider_id', invoice.lines.data[0].price.id)
             .eq('provider', 'stripe')
             .single();
 
@@ -598,14 +602,14 @@ class WebhookRouterService {
   }
 
   // Method to create an local invoice
-  private async handleOneTimePayment(data: any, agencyId: string, clientOrganizationId: string, userClientId: string, service: any) {
+  private async handleOneTimePayment(data: any, agencyId: string, clientOrganizationId: string, userClientId: string, service?: { id?: number, name?: string }) {
     try {
       // Create the local invoice
       const invoiceId = await this.createLocalInvoiceForOneTimePayment({
         agencyId: agencyId,
         clientOrganizationId: clientOrganizationId,
         userClientId: userClientId,
-        service: service,
+        service,
         paymentIntentId: data.id,
         amount: data.amount / 100, // Stripe amounts are in cents
         currency: data.currency,
@@ -630,18 +634,18 @@ class WebhookRouterService {
     agencyId,
     clientOrganizationId,
     userClientId,
-    service,
     paymentIntentId,
     amount,
     currency,
+    service
   }: {
     agencyId: string;
     clientOrganizationId: string;
     userClientId: string;
-    service: any;
     paymentIntentId: string;
     amount: number;
     currency: string;
+    service?: { name?: string; id?: number;  };
   }) {
     console.log('Creating local invoice for one-time payment:', paymentIntentId);
 
@@ -675,8 +679,8 @@ class WebhookRouterService {
     // Create a invoice
     const invoiceItemData = {
       invoice_id: createdInvoice.id,
-      service_id: service.id, 
-      description: service.name || 'Service',
+      service_id: service?.id ?? 0,
+      description: service?.name ?? 'Service',
       quantity: 1,
       unit_price: amount,
       total_price: amount,
