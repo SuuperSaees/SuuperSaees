@@ -180,8 +180,6 @@ alter table "public"."invoice_payments" add constraint "invoice_payments_pkey" P
 
 alter table "public"."invoices" add constraint "invoices_pkey" PRIMARY KEY using index "invoices_pkey";
 
-alter table "public"."activities" validate constraint "activities_invoice_id_fkey";
-
 alter table "public"."client_subscriptions" add constraint "client_subscriptions_client_id_fkey" FOREIGN KEY (client_id) REFERENCES clients(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
 alter table "public"."client_subscriptions" validate constraint "client_subscriptions_client_id_fkey";
