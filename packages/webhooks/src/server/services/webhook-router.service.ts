@@ -959,7 +959,7 @@ class WebhookRouterService {
         type,
         preposition: 'to',
         value,
-        invoice_id: invoiceId ?? null,
+        reference_id: invoiceId ?? null,
         user_id: clientId ?? '',
       };
 

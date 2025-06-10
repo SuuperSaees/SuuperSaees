@@ -526,3 +526,15 @@ CREATE TRIGGER trigger_protect_invoice_number
     BEFORE UPDATE ON invoices
     FOR EACH ROW
     EXECUTE FUNCTION protect_invoice_number();
+
+alter type "public"."activity_type" rename to "activity_type__old_version_to_be_dropped";
+
+create type "public"."activity_type" as enum ('message', 'review', 'status', 'priority', 'assign', 'due_date', 'description', 'title', 'assigned_to', 'task', 'annotation', 'invoice');
+
+alter table "public"."activities" alter column type type "public"."activity_type" using type::text::"public"."activity_type";
+
+ALTER TABLE "public"."activities" 
+ALTER COLUMN "order_id" DROP NOT NULL;
+
+-- Add comment to document the change
+COMMENT ON COLUMN "public"."activities"."order_id" IS 'Optional reference to order. Can be null when activity is not related to an order.';
