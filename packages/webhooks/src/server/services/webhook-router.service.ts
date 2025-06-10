@@ -367,7 +367,6 @@ class WebhookRouterService {
   private async handleSubscriptionUpdated(data: any) {
     try {
       const subscription = data;
-      console.log('Processing subscription updated:', subscription.id ?? subscription.target_subscription_id);
 
       // Buscar la subscription existente
       const subscriptionId = subscription.id ?? subscription.target_subscription_id;
@@ -420,8 +419,6 @@ class WebhookRouterService {
       }
 
       const invoice = event.data.object;
-      console.log('Processing invoice created:', invoice.id, stripeAccountId, invoice.customer);
-      console.log('Searching billing services for price:', invoice.lines.data[0].price.id);
 
       const retryOperation = new RetryOperationService(
         async () => {
