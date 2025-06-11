@@ -11,6 +11,7 @@ import { Order as ServerOrder } from '~/lib/order.types';
 import { Review as ServerReview } from '~/lib/review.types';
 import { User as ServerUser } from '~/lib/user.types';
 import { UnreadMessageCount } from '~/hooks/use-unread-message-counts';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 export enum ActivityType {
   MESSAGE = 'message',
@@ -186,4 +187,7 @@ export interface ActivityContextType {
   getUnreadCountForOrder: (orderId: number) => number;
   markOrderAsRead: (orderId: number) => Promise<void>;
   unreadCounts: UnreadMessageCount[];
+  fileUploads: FileUploadState[];
+  handleFileUpload: (file: File, onComplete?: (upload: FileUploadState) => void | undefined) => Promise<void>;
+  handleRemoveFile: (id: string) => void;
 }

@@ -19,6 +19,12 @@ export interface FileRendererProps {
   isLoading?: boolean;
   onDownload?: () => void;
   renderAs?: 'card' | 'inline';
+  uploadState?: {
+    id: string;
+    size: number;
+    progress: number;
+    status: 'uploading' | 'success' | 'error';
+  }
 }
 
 export const VideoRenderer: React.FC<FileRendererProps> = ({

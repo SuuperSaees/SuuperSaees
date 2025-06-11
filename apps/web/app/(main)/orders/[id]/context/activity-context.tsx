@@ -68,6 +68,9 @@ export const ActivityProvider = ({
     interactionsGroups,
     allFiles,
     setAllFiles,
+    fileUploads,
+    handleFileUpload,
+    handleRemoveFile,
   } = useOrderState({
     initialOrder,
     initialInteractions,
@@ -136,6 +139,9 @@ export const ActivityProvider = ({
         orderId: order.id,
         unreadCounts,
         allFiles,
+        fileUploads,
+        handleFileUpload,
+        handleRemoveFile,
       }}
     >
       {children}
