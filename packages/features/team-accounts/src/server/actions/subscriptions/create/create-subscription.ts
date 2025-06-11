@@ -76,7 +76,7 @@ export const createSubscription = async (): Promise<{
 
     const subscriptionData = await subscriptionResponse.clone().json();
 
-    const primary_owner_user_id = await getPrimaryOwnerId();
+    const primary_owner_user_id = await getPrimaryOwnerId(undefined, true);
 
     const newDate = new Date().toISOString();
     const newSubscription: Subscription.Type = {
