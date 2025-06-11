@@ -17,14 +17,14 @@ export class StripeSubscriptionService extends BaseWebhookService {
       const subscription = event.data.object;
       console.log('Processing subscription created:', subscription.id);
 
-      // Buscar la agencia por el Stripe account ID
+      // Search for the billing account using the Stripe account ID
       const { data: billingAccount, error: billingError } = await this.adminClient
         .from('billing_accounts')
         .select('account_id, accounts(id, organizations(id))')
         .eq('provider_id', stripeAccountId)
         .single();
 
-      if (billingError || !billingAccount) {
+      if (billingError ?? !billingAccount) {
         console.error('Error finding billing account:', billingError);
         return;
       }
@@ -72,7 +72,7 @@ export class StripeSubscriptionService extends BaseWebhookService {
         return;
       }
 
-      // Crear la subscription en nuestra base de datos
+      // Create a new client subscription
       await this.createClientSubscriptionFromStripe({
         clientId: clientId,
         subscription,
@@ -135,7 +135,7 @@ export class StripeSubscriptionService extends BaseWebhookService {
     }
   }
 
-  private async createClientSubscriptionFromStripe({
+  async createClientSubscriptionFromStripe({
     clientId,
     subscription,
   }: {

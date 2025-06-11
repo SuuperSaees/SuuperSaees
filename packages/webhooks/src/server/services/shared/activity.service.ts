@@ -30,8 +30,7 @@ export class ActivityService {
         type,
         value,
         user_id: clientId ?? '',
-        reference_id: invoiceId ?? '',
-        created_at: new Date().toISOString(),
+        reference_id: invoiceId ?? null,
         preposition: 'to'
       };
 

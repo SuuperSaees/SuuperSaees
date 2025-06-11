@@ -17,7 +17,6 @@ export function createWebhookRouterService(
 class WebhookRouterService {
   private readonly stripeEventHandlers: StripeEventHandlersService;
   private readonly treliWebhookService: TreliWebhookService;
-  private readonly ClientRoleStripeInvitation = 'client_owner';
 
   constructor(private readonly adminClient: SupabaseClient<Database>) {
     this.stripeEventHandlers = new StripeEventHandlersService(adminClient);
@@ -84,7 +83,7 @@ class WebhookRouterService {
       onPaymentIntentSucceeded: async (data) => {
         console.log('onPaymentIntentSucceeded', data);
         try {
-          await this.stripeEventHandlers.handlePaymentIntentSucceeded(data);
+          await this.stripeEventHandlers.handlePaymentIntentSucceeded(data, stripeAccountId ?? '');
         } catch (error) {
           console.error('Error handling payment intent succeeded:', error);
         }

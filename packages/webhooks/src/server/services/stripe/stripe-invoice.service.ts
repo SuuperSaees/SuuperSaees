@@ -1,8 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
-import { Activity } from '@kit/supabase/types';
+import { Activity } from '../../../../../../apps/web/lib/activity.types';
 import { BaseWebhookService } from '../shared/base-webhook.service';
-import { RetryOperationService } from '@kit/shared/retry-operation-service';
+import { RetryOperationService } from '@kit/shared/utils';
 
 export class StripeInvoiceService extends BaseWebhookService {
   constructor(adminClient: SupabaseClient<Database>) {
@@ -12,7 +12,7 @@ export class StripeInvoiceService extends BaseWebhookService {
   async handleInvoiceCreated(event: any, stripeAccountId?: string) {
     try {
       if (!stripeAccountId) {
-        console.log('No stripe account ID provided');
+        console.log('No Stripe account ID found for invoice created');
         return;
       }
 
@@ -20,53 +20,50 @@ export class StripeInvoiceService extends BaseWebhookService {
 
       const retryOperation = new RetryOperationService(
         async () => {
-          // Buscar la agencia por el Stripe account ID
+          // Search for the billing account by Stripe account ID
           const { data: billingAccount, error: billingError } = await this.adminClient
             .from('billing_accounts')
             .select('account_id, accounts(id, organizations(id))')
             .eq('provider_id', stripeAccountId)
             .single();
 
-          if (billingError || !billingAccount) {
-            throw new Error(`Failed to find billing account: ${billingError?.message}`);
+          if (billingError ?? !billingAccount) {
+            console.error('Error fetching billing account:', billingError);
+            throw new Error('Billing account not found');
           }
 
-          const agencyId = Array.isArray(billingAccount.accounts?.organizations) 
-            ? billingAccount.accounts.organizations[0]?.id 
-            : billingAccount.accounts?.organizations?.id;
-
-          if (!agencyId) {
-            throw new Error('Agency ID not found');
-          }
-
-          // Buscar el cliente por la subscription
-          const { data: clientSubscription, error: clientSubError } = await this.adminClient
+          // Search for the client subscription by customer ID
+          const { data: clientSubscription, error: clientError } = await this.adminClient
             .from('client_subscriptions')
-            .select('clients(organization_client_id, user_client_id)')
+            .select('client_id, clients(organization_client_id, user_client_id)')
             .eq('billing_customer_id', invoice.customer)
             .eq('billing_provider', 'stripe')
             .single();
 
-          if (clientSubError) {
-            throw new Error(`Failed to find client subscription: ${clientSubError.message}`);
+          if (clientError ?? !clientSubscription) {
+            console.error('Error fetching client by customer_id:', clientError);
+            throw new Error('Client subscription not found');
           }
 
-          // Buscar el servicio de billing
+          // Search Billing Services
           const { data: billingServices, error: serviceError } = await this.adminClient
             .from('billing_services')
             .select('service_id')
-            .eq('billing_product_id', invoice.lines.data[0]?.price?.product || '')
+            .eq('provider_id', invoice.lines.data[0].price.id)
+            .eq('provider', 'stripe')
             .single();
 
           if (serviceError) {
-            console.warn('Service not found for billing product:', invoice.lines.data[0]?.price?.product);
+            console.error('Error fetching billing services:', serviceError);
+            throw new Error('Billing services not found');
           }
 
+          const agencyId = billingAccount.accounts?.organizations[0]?.id ?? '';
           const clientOrganizationId = Array.isArray(clientSubscription.clients?.organization_client_id)
             ? clientSubscription.clients.organization_client_id[0]
             : clientSubscription.clients?.organization_client_id;
           const userClientId = clientSubscription.clients?.user_client_id ?? '';
-          const serviceId = billingServices?.service_id || 0;
+          const serviceId = billingServices.service_id;
 
           // Create the invoice in our database
           await this.createInvoiceFromStripe({
@@ -218,7 +215,7 @@ export class StripeInvoiceService extends BaseWebhookService {
       issue_date: new Date(invoice.created * 1000).toISOString().split('T')[0],
       due_date: (invoice.due_date 
         ? new Date(invoice.due_date * 1000).toISOString().split('T')[0]
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]) ?? '',
       status: mappedStatus,
       subtotal_amount: invoice.subtotal / 100,
       tax_amount: invoice.tax ?? 0,
@@ -243,7 +240,7 @@ export class StripeInvoiceService extends BaseWebhookService {
       const invoiceItems = invoice.lines.data.map((line: any) => ({
         invoice_id: createdInvoice.id,
         service_id: serviceId,
-        description: line.description || 'Service',
+        description: line.description || 'Service item',
         quantity: line.quantity || 1,
         unit_price: (line.amount || 0) / 100,
         total_price: (line.amount || 0) / 100,
