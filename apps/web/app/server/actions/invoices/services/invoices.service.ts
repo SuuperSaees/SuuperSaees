@@ -2,27 +2,6 @@ import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
 import { Invoice, InvoiceItem } from '~/lib/invoice.types';
 
-interface PaginationConfig {
-  pagination?: {
-    cursor?: string | number;
-    endCursor?: string | number;
-    page?: number;
-    offset?: number;
-    limit?: number;
-  };
-  search?: {
-    term?: string;
-    fields?: string[];
-  };
-  filters?: {
-    status?: string[];
-    customer_id?: string[];
-    organization_id?: string[];
-    date_from?: string;
-    date_to?: string;
-  };
-}
-
 export class InvoiceService {
   constructor(
     private readonly invoiceRepository: InvoiceRepository,
@@ -33,14 +12,14 @@ export class InvoiceService {
   async create(payload: Invoice.InsertWithRelations): Promise<Invoice.Type> {
     // Calculate totals from items
     const subtotal = payload.invoice_items?.reduce((sum, item) => 
-      sum + (item.quantity * item.unit_price), 0) ?? payload.subtotal ?? 0;
+      sum + (item.quantity ?? 0 * item.unit_price), 0) ?? payload.subtotal_amount ?? 0;
     
     const taxAmount = payload.tax_amount ?? 0;
     const totalAmount = subtotal + taxAmount;
 
     const createdInvoice = await this.invoiceRepository.create({
       ...payload,
-      subtotal,
+      subtotal_amount: subtotal,
       tax_amount: taxAmount,
       total_amount: totalAmount,
     });
@@ -57,10 +36,7 @@ export class InvoiceService {
   }
 
   // * GET SERVICES
-  async list(
-    organizationId: string, 
-    config?: PaginationConfig
-  ): Promise<{
+  async list(organizationId: string): Promise<{
     data: Invoice.Response[];
     nextCursor: string | null;
     count: number | null;
@@ -72,7 +48,7 @@ export class InvoiceService {
       isOffsetBased: boolean;
     };
   }> {
-    return await this.invoiceRepository.list(organizationId, config);
+    return await this.invoiceRepository.list(organizationId);
   }
 
   async get(invoiceId: string): Promise<Invoice.Relational> {
@@ -99,18 +75,18 @@ export class InvoiceService {
 
       // Recalculate totals
       const subtotal = payload.invoice_items.reduce((sum, item) => 
-        sum + (item.quantity * item.unit_price), 0);
+        sum + (item.quantity ?? 0 * item.unit_price), 0);
       
       const taxAmount = payload.tax_amount ?? 0;
       const totalAmount = subtotal + taxAmount;
 
-      payload.subtotal = subtotal;
+      payload.subtotal_amount = subtotal;
       payload.total_amount = totalAmount;
     }
 
     // Remove invoice_items from payload before updating invoice
-    const { invoice_items, ...invoicePayload } = payload;
+    const { ...invoicePayload } = payload;
     
     return await this.invoiceRepository.update(invoicePayload);
   }
-} 
+}

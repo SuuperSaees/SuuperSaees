@@ -1,38 +1,21 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { Invoice } from '~/lib/invoice.types';
-
-interface PaginationConfig {
-  pagination?: {
-    cursor?: string | number;
-    endCursor?: string | number;
-    page?: number;
-    offset?: number;
-    limit?: number;
-  };
-  search?: {
-    term?: string;
-    fields?: string[];
-  };
-  filters?: {
-    status?: string[];
-    customer_id?: string[];
-    organization_id?: string[];
-    date_from?: string;
-    date_to?: string;
-  };
-}
+import { QueryContext } from '../../query.config';
 
 export class InvoiceRepository {
   private client: SupabaseClient<Database>;
   private adminClient?: SupabaseClient<Database>;
+  private queryContext: QueryContext;
 
   constructor(
     client: SupabaseClient<Database>,
     adminClient?: SupabaseClient<Database>,
+    queryContext?: QueryContext
   ) {
     this.client = client;
     this.adminClient = adminClient;
+    this.queryContext = queryContext ?? QueryContext.getInstance();
   }
 
   // * CREATE REPOSITORIES
@@ -66,10 +49,7 @@ export class InvoiceRepository {
   }
 
   // * GET REPOSITORIES
-  async list(
-    organizationId: string, 
-    config?: PaginationConfig
-  ): Promise<{
+  async list(organizationId: string): Promise<{
     data: Invoice.Response[];
     nextCursor: string | null;
     count: number | null;
@@ -82,6 +62,7 @@ export class InvoiceRepository {
     };
   }> {
     const client = this.adminClient ?? this.client;
+    const config = this.queryContext.getConfig();
     const effectiveLimit = config?.pagination?.limit ?? 50;
     const currentPage = config?.pagination?.page ?? 1;
 
@@ -115,7 +96,7 @@ export class InvoiceRepository {
       .is('deleted_on', null)
       .order('created_at', { ascending: false });
 
-    // Apply filters
+    // Apply filters using internal config
     if (config?.filters) {
       const { status, customer_id, date_from, date_to } = config.filters;
 
@@ -136,7 +117,7 @@ export class InvoiceRepository {
       }
     }
 
-    // Apply search
+    // Apply search using internal config
     if (config?.search?.term) {
       query = query.or(`invoice_number.ilike.%${config.search.term}%,notes.ilike.%${config.search.term}%`);
     }
@@ -310,4 +291,4 @@ export class InvoiceRepository {
 
     return data as Invoice.Type;
   }
-} 
+}

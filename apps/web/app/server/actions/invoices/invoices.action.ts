@@ -49,4 +49,4 @@ export async function deleteInvoice(invoiceId: string) {
 
 export async function updateInvoice(payload: Invoice.Update & {invoice_items?: InvoiceItem.Insert[]}) {
   return await getInvoiceAction().update(payload);
-} 
+}

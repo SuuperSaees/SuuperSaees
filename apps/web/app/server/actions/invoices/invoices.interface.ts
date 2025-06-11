@@ -1,25 +1,5 @@
-import { Invoice } from "~/lib/invoice.types";
-
-interface PaginationConfig {
-  pagination?: {
-    cursor?: string | number;
-    endCursor?: string | number;
-    page?: number;
-    offset?: number;
-    limit?: number;
-  };
-  search?: {
-    term?: string;
-    fields?: string[];
-  };
-  filters?: {
-    status?: string[];
-    customer_id?: string[];
-    organization_id?: string[];
-    date_from?: string;
-    date_to?: string;
-  };
-}
+import { Invoice, InvoiceItem} from "~/lib/invoice.types";
+import { PaginationConfig } from "../query.config";
 
 export interface IInvoiceAction {
   //* CREATE INTERFACES

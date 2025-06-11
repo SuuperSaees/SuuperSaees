@@ -4,27 +4,7 @@ import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
 import { InvoiceService } from '../services/invoices.service';
 import { Invoice, InvoiceItem } from '~/lib/invoice.types';
-
-interface PaginationConfig {
-  pagination?: {
-    cursor?: string | number;
-    endCursor?: string | number;
-    page?: number;
-    offset?: number;
-    limit?: number;
-  };
-  search?: {
-    term?: string;
-    fields?: string[];
-  };
-  filters?: {
-    status?: string[];
-    customer_id?: string[];
-    organization_id?: string[];
-    date_from?: string;
-    date_to?: string;
-  };
-}
+import { createQueryContext, PaginationConfig } from '../../query.config';
 
 export class InvoiceController {
   private baseUrl: string;
@@ -67,9 +47,14 @@ export class InvoiceController {
     };
   }> {
     try {
-      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
+      // Create context with config
+      const queryContext = createQueryContext(config);
+      
+      // Inject context into repository
+      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient, queryContext);
       const invoiceService = new InvoiceService(invoiceRepository);
-      return await invoiceService.list(organizationId, config);
+      
+      return await invoiceService.list(organizationId);
     } catch (error) {
       console.error(error);
       throw error;
@@ -112,4 +97,4 @@ export class InvoiceController {
       throw error;
     }
   }
-} 
+}
