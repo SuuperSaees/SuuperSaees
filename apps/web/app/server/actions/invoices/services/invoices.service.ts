@@ -1,6 +1,6 @@
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
-import { Invoice, InvoiceItem } from '~/lib/invoice.types';
+import { Invoice } from '~/lib/invoice.types';
 
 export class InvoiceService {
   constructor(
@@ -9,7 +9,7 @@ export class InvoiceService {
   ) {}
 
   // * CREATE SERVICES
-  async create(payload: Invoice.InsertWithRelations): Promise<Invoice.Type> {
+  async create(payload: Invoice.Request.Create): Promise<Invoice.Type> {
     // Calculate totals from items
     const subtotal = payload.invoice_items?.reduce((sum, item) => 
       sum + (item.quantity ?? 0 * item.unit_price), 0) ?? payload.subtotal_amount ?? 0;
@@ -65,7 +65,7 @@ export class InvoiceService {
   }
 
   // * UPDATE SERVICES
-  async update(payload: Invoice.Update & {invoice_items?: InvoiceItem.Insert[]}): Promise<Invoice.Type> {
+  async update(payload: Invoice.Request.Update): Promise<Invoice.Type> {
     // Update invoice items if provided
     if (payload.invoice_items) {
       await this.invoiceItemsRepository?.updateMany(

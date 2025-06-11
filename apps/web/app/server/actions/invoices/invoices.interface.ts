@@ -1,14 +1,14 @@
-import { Invoice, InvoiceItem} from "~/lib/invoice.types";
+import { Invoice} from "~/lib/invoice.types";
 import { PaginationConfig } from "../query.config";
 
 export interface IInvoiceAction {
   //* CREATE INTERFACES
   /**
    * Creates a new invoice with items
-   * @param {Invoice.InsertWithRelations} payload - Data for creating the invoice
+   * @param {Invoice.Request.Create} payload - Data for creating the invoice
    * @returns {Promise<Invoice.Type>} - The created invoice object
    */
-  create(payload: Invoice.InsertWithRelations): Promise<Invoice.Type>;
+  create(payload: Invoice.Request.Create): Promise<Invoice.Type>;
 
   // * GET INTERFACES
   /**
@@ -48,8 +48,8 @@ export interface IInvoiceAction {
   // * UPDATE INTERFACES
   /**
    * Updates an invoice and its items
-   * @param {Invoice.Update & {invoice_items?: InvoiceItem.Insert[]}} payload - Updated invoice data
+   * @param {Invoice.Request.Update} payload - Updated invoice data
    * @returns {Promise<Invoice.Type>}
    */
-  update(payload: Invoice.Update & {invoice_items?: InvoiceItem.Insert[]}): Promise<Invoice.Type>;
+  update(payload: Invoice.Request.Update): Promise<Invoice.Type>;
 } 

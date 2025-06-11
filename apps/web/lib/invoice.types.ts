@@ -15,6 +15,26 @@ export namespace Invoice {
     items_count?: number;
   };
 
+  export namespace Request {
+    export type Create = Omit<
+      Invoice.Insert,
+      'customer_id' | 'organization_id' | 'invoice_items'
+    > & {
+      customer_id?: string | null;
+      organization_id?: string | null;
+      invoice_items?: InvoiceItem.Insert[] | null;
+    };
+    export type Update = Omit<
+      Invoice.Update,
+      'customer_id' | 'organization_id' | 'invoice_items'
+    > & {
+      id: Invoice.Type['id'];
+      customer_id?: string | null;
+      organization_id?: string | null;
+      invoice_items?: InvoiceItem.Insert[] | null;
+    };
+  }
+
   export type Relational = Invoice.Type & {
     customer: User.Response;
     organization: Organization.Response;

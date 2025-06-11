@@ -1,4 +1,4 @@
-import { Invoice, InvoiceItem } from '~/lib/invoice.types';
+import { Invoice } from '~/lib/invoice.types';
 import { BaseAction } from '../base-action';
 import { InvoiceController } from './controllers/invoices.controller';
 import { IInvoiceAction } from './invoices.interface';
@@ -16,7 +16,7 @@ export class InvoiceAction extends BaseAction implements IInvoiceAction {
     );
   }
 
-  async create(payload: Invoice.InsertWithRelations): Promise<Invoice.Type> {
+  async create(payload: Invoice.Request.Create): Promise<Invoice.Type> {
     return await this.controller.create(payload);
   }
 
@@ -46,7 +46,7 @@ export class InvoiceAction extends BaseAction implements IInvoiceAction {
     return await this.controller.delete(invoiceId);
   }
 
-  async update(payload: Invoice.Update & {invoice_items?: InvoiceItem.Insert[]}): Promise<Invoice.Type> {
+  async update(payload: Invoice.Request.Update): Promise<Invoice.Type> {
     return await this.controller.update(payload);
   }
 }

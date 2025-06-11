@@ -3,7 +3,7 @@ import { Database } from '~/lib/database.types';
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
 import { InvoiceService } from '../services/invoices.service';
-import { Invoice, InvoiceItem } from '~/lib/invoice.types';
+import { Invoice } from '~/lib/invoice.types';
 import { createQueryContext, PaginationConfig } from '../../query.config';
 
 export class InvoiceController {
@@ -18,7 +18,7 @@ export class InvoiceController {
   }
 
   // * CREATE CONTROLLERS
-  async create(payload: Invoice.InsertWithRelations): Promise<Invoice.Type> {
+  async create(payload: Invoice.Request.Create): Promise<Invoice.Type> {
     try {
       const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
       const invoiceItemsRepository = new InvoiceItemsRepository(this.client, this.adminClient);
@@ -86,7 +86,7 @@ export class InvoiceController {
   }
 
   // * UPDATE CONTROLLERS
-  async update(payload: Invoice.Update & {invoice_items?: InvoiceItem.Insert[]}): Promise<Invoice.Type> {
+  async update(payload: Invoice.Request.Update): Promise<Invoice.Type> {
     try {
       const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
       const invoiceItemsRepository = new InvoiceItemsRepository(this.client, this.adminClient);

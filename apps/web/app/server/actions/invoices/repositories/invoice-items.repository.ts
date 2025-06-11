@@ -20,7 +20,7 @@ export class InvoiceItemsRepository {
     const itemsToInsert = items.map(item => ({
       ...item,
       invoice_id: invoiceId,
-      total_price: item.quantity * item.unit_price,
+      total_price: (item.quantity ?? 0) * item.unit_price,
     }));
 
     const { data, error } = await client
