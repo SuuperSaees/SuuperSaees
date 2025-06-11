@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
 import { Activity } from '../../../../../../apps/web/lib/activity.types';
+import { Invoice } from '../../../../../../apps/web/lib/invoice.types'
 import { BaseWebhookService } from '../shared/base-webhook.service';
 import { RetryOperationService } from '@kit/shared/utils';
 
@@ -108,7 +109,7 @@ export class StripeInvoiceService extends BaseWebhookService {
 
       if (existingInvoice) {
         // Update status and other fields
-        const updateData: any = {
+        const updateData: Invoice.Update = {
           status: this.mapStripeInvoiceStatus(invoice.status),
           updated_at: new Date().toISOString(),
         };
@@ -117,7 +118,11 @@ export class StripeInvoiceService extends BaseWebhookService {
 
         // If the invoice was paid, record the payment
         if (invoice.status === 'paid' && existingInvoice.status !== 'paid') {
-          updateData.paid_at = new Date().toISOString();
+          console.log('Invoice paid, recording payment:', invoice.id);
+          await this.recordInvoicePayment({
+            invoiceId: existingInvoice.id,
+            invoice,
+          });
         }
 
         const { error: updateError } = await this.adminClient

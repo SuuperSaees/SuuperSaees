@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
-import { Activity } from '@kit/supabase/types';
+import { Activity } from '../../../../../../apps/web/lib/activity.types';
 import { BaseWebhookService } from '../shared/base-webhook.service';
 
 export class StripePaymentService extends BaseWebhookService {
