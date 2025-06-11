@@ -7,6 +7,15 @@ export namespace Invoice {
   export type Insert = Database['public']['Tables']['invoices']['Insert'];
   export type Update = Database['public']['Tables']['invoices']['Update'];
 
+  export namespace Request {
+    export type Create = Invoice.Insert & {
+      invoice_items?: InvoiceItem.Insert[] | null;
+    };
+    export type Update = Invoice.Update & {
+      invoice_items?: InvoiceItem.Insert[] | null;
+    };
+  }
+
   export type Response = Omit<Invoice.Type, 'customer_id' | 'organization_id'> & {
     customer: User.Response | null;
     organization: Organization.Response | null;
@@ -15,53 +24,11 @@ export namespace Invoice {
     items_count?: number;
   };
 
-  export namespace Request {
-    export type Create = Omit<
-      Invoice.Insert,
-      'customer_id' | 'organization_id' | 'invoice_items'
-    > & {
-      customer_id?: string | null;
-      organization_id?: string | null;
-      invoice_items?: InvoiceItem.Insert[] | null;
-    };
-    export type Update = Omit<
-      Invoice.Update,
-      'customer_id' | 'organization_id' | 'invoice_items'
-    > & {
-      id: Invoice.Type['id'];
-      customer_id?: string | null;
-      organization_id?: string | null;
-      invoice_items?: InvoiceItem.Insert[] | null;
-    };
-  }
-
   export type Relational = Invoice.Type & {
     customer: User.Response;
     organization: Organization.Response;
     invoice_items: InvoiceItem.Response[];
   };
-
-  export type InsertWithRelations = Invoice.Insert & {
-    invoice_items?: InvoiceItem.Insert[];
-  };
-
-  export namespace Relationships {
-    export type Customer = Invoice.Type & {
-      customer: User.Response;
-    };
-    export type Organization = Invoice.Type & {
-      organization: Organization.Response;
-    };
-    export type Items = Invoice.Type & {
-      invoice_items: InvoiceItem.Response[];
-    };
-    export type All = Invoice.Type & {
-      customer: User.Response;
-      organization: Organization.Response;
-      invoice_items: InvoiceItem.Response[];
-    };
-  }
-
   export namespace Enums {
     export enum Status {
       DRAFT = 'draft',
