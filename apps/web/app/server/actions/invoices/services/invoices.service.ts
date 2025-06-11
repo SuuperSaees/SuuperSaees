@@ -12,8 +12,8 @@ export class InvoiceService {
   async create(payload: Invoice.Request.Create): Promise<Invoice.Type> {
     // Calculate totals from items
     const subtotal = payload.invoice_items?.reduce((sum, item) => 
-      sum + (item.quantity ?? 0 * item.unit_price), 0) ?? payload.subtotal_amount ?? 0;
-    
+      sum + ((item.quantity ?? 0) * (item.unit_price ?? 0)), 0) ?? payload.subtotal_amount ?? 0;
+
     const taxAmount = payload.tax_amount ?? 0;
     const totalAmount = subtotal + taxAmount;
 
@@ -27,7 +27,7 @@ export class InvoiceService {
     // Create invoice items if provided
     if (payload.invoice_items && payload.invoice_items.length > 0) {
       await this.invoiceItemsRepository?.createMany(
-        createdInvoice.id.toString(),
+        createdInvoice.id,
         payload.invoice_items
       );
     }
@@ -57,7 +57,7 @@ export class InvoiceService {
 
   // * DELETE SERVICES
   async delete(invoiceId: string): Promise<void> {
-    // Soft delete invoice items first
+    // Hard delete invoice items first
     await this.invoiceItemsRepository?.deleteByInvoiceId(invoiceId);
     
     // Then soft delete the invoice
@@ -68,14 +68,14 @@ export class InvoiceService {
   async update(payload: Invoice.Request.Update): Promise<Invoice.Type> {
     // Update invoice items if provided
     if (payload.invoice_items) {
-      await this.invoiceItemsRepository?.updateMany(
-        payload.id?.toString() ?? '',
+      await this.invoiceItemsRepository?.upsert(
+        payload.id ?? '',
         payload.invoice_items
       );
 
       // Recalculate totals
       const subtotal = payload.invoice_items.reduce((sum, item) => 
-        sum + (item.quantity ?? 0 * item.unit_price), 0);
+        sum + ((item.quantity ?? 0) * (item.unit_price ?? 0)), 0);
       
       const taxAmount = payload.tax_amount ?? 0;
       const totalAmount = subtotal + taxAmount;
