@@ -49,7 +49,7 @@ export class InvoiceRepository {
   }
 
   // * GET REPOSITORIES
-  async list(organizationId: string): Promise<{
+  async list(): Promise<{
     data: Invoice.Response[];
     nextCursor: string | null;
     count: number | null;
@@ -71,14 +71,13 @@ export class InvoiceRepository {
       .from('invoices')
       .select(`
         *,
-        customer:accounts!customer_id(
+        client:organizations!client_organization_id(
           id,
           name,
-          email,
-          picture_url,
-          user_settings:user_settings(name, picture_url)
+          slug,
+          picture_url
         ),
-        organization:organizations!organization_id(
+        agency:organizations!agency_id(
           id,
           name,
           slug,
@@ -92,7 +91,6 @@ export class InvoiceRepository {
           total_price
         )
       `)
-      .eq('organization_id', organizationId)
       .is('deleted_on', null)
       .order('created_at', { ascending: false });
 
@@ -126,7 +124,6 @@ export class InvoiceRepository {
     const { count } = await client
       .from('invoices')
       .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
       .is('deleted_on', null);
 
     // Apply pagination
@@ -180,12 +177,12 @@ export class InvoiceRepository {
     // Transform data
     const transformedInvoices = paginatedInvoices?.map(invoice => ({
       ...invoice,
-      customer: invoice.customer ? {
-        ...invoice.customer,
-        name: Array.isArray(invoice.customer.settings) ? 
-          invoice.customer.settings[0]?.name : invoice.customer.name,
-        picture_url: Array.isArray(invoice.customer.settings) ?
-          invoice.customer.settings[0]?.picture_url : invoice.customer.picture_url,
+      client: invoice.client ? {
+        ...invoice.client,
+        name: Array.isArray(invoice.client) ?
+          invoice.client[0]?.name : invoice.client.name,
+        picture_url: Array.isArray(invoice.client) ?
+          invoice.client[0]?.picture_url : invoice.client.picture_url,
       } : null,
       total_amount: invoice.invoice_items?.reduce((sum, item) => sum + (item.total_price ?? 0), 0) ?? invoice.total_amount,
       items_count: invoice.invoice_items?.length ?? 0,
@@ -205,21 +202,20 @@ export class InvoiceRepository {
     };
   }
 
-  async get(invoiceId: string): Promise<Invoice.Relational> {
+  async get(invoiceId: string): Promise<Invoice.Response> {
     const client = this.client;
     
     const { data: invoice, error } = await client
       .from('invoices')
       .select(`
         *,
-        customer:accounts!customer_id(
+        client:organizations!client_organization_id(
           id,
           name,
-          email,
-          picture_url,
-          user_settings:user_settings(name, picture_url)
+          slug,
+          picture_url
         ),
-        organization:organizations!organization_id(
+        agency:organizations!agency_id(
           id,
           name,
           slug,
@@ -249,17 +245,10 @@ export class InvoiceRepository {
 
     return {
       ...invoice,
-      customer: {
-        ...invoice.customer,
-        // name: Array.isArray(invoice.customer.name) ?
-        //   invoice.customer.user_settings[0]?.name ?? invoice.customer.name :
-        //   invoice.customer.user_settings?.name ?? invoice.customer.name,
-        // picture_url: Array.isArray(invoice.customer.name) ?
-        //   invoice.customer.user_settings[0]?.picture_url ?? invoice.customer.picture_url :
-        //   invoice.customer.user_settings?.picture_url ?? invoice.customer.picture_url,
-      },
+      client: Array.isArray(invoice.client) ? invoice.client[0] ?? null : invoice.client ?? null,
+      agency: Array.isArray(invoice.agency) ? invoice.agency[0] ?? null : invoice.agency ?? null,
       invoice_items: invoice.invoice_items ?? [],
-    } as unknown as Invoice.Relational;
+    } as Invoice.Response;
   }
 
   // * DELETE REPOSITORIES

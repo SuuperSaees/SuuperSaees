@@ -32,7 +32,6 @@ export class InvoiceController {
 
   // * GET CONTROLLERS
   async list(
-    organizationId: string, 
     config?: PaginationConfig
   ): Promise<{
     data: Invoice.Response[];
@@ -54,14 +53,14 @@ export class InvoiceController {
       const invoiceRepository = new InvoiceRepository(this.client, this.adminClient, queryContext);
       const invoiceService = new InvoiceService(invoiceRepository);
       
-      return await invoiceService.list(organizationId);
+      return await invoiceService.list();
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-  async get(invoiceId: string): Promise<Invoice.Relational> {
+  async get(invoiceId: string): Promise<Invoice.Response> {
     try {
       const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
       const invoiceService = new InvoiceService(invoiceRepository);

@@ -1,5 +1,4 @@
 import { Database } from './database.types';
-import { User } from './user.types';
 import { Organization } from './organization.types';
 
 export namespace Invoice {
@@ -16,19 +15,14 @@ export namespace Invoice {
     };
   }
 
-  export type Response = Omit<Invoice.Type, 'customer_id' | 'organization_id'> & {
-    customer: User.Response | null;
-    organization: Organization.Response | null;
+  export type Response = Invoice.Type & {
+    client: Organization.Response | null;
+    agency: Organization.Response | null;
     invoice_items?: InvoiceItem.Response[] | null;
     total_amount?: number;
     items_count?: number;
   };
-
-  export type Relational = Invoice.Type & {
-    customer: User.Response;
-    organization: Organization.Response;
-    invoice_items: InvoiceItem.Response[];
-  };
+  
   export namespace Enums {
     export enum Status {
       DRAFT = 'draft',

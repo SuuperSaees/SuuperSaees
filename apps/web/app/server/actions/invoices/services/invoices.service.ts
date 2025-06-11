@@ -36,7 +36,7 @@ export class InvoiceService {
   }
 
   // * GET SERVICES
-  async list(organizationId: string): Promise<{
+  async list(): Promise<{
     data: Invoice.Response[];
     nextCursor: string | null;
     count: number | null;
@@ -48,10 +48,10 @@ export class InvoiceService {
       isOffsetBased: boolean;
     };
   }> {
-    return await this.invoiceRepository.list(organizationId);
+    return await this.invoiceRepository.list();
   }
 
-  async get(invoiceId: string): Promise<Invoice.Relational> {
+  async get(invoiceId: string): Promise<Invoice.Response> {
     return await this.invoiceRepository.get(invoiceId);
   }
 

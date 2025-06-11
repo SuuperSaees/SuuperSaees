@@ -13,11 +13,10 @@ export interface IInvoiceAction {
   // * GET INTERFACES
   /**
    * Retrieves all invoices with pagination
-   * @param {string} organizationId - Organization ID to filter invoices
    * @param {PaginationConfig} config - Pagination and filter configuration
    * @returns {Promise<{data: Invoice.Response[], nextCursor: string | null, count: number | null, pagination: object}>}
    */
-  list(organizationId: string, config?: PaginationConfig): Promise<{
+  list(config?: PaginationConfig): Promise<{
     data: Invoice.Response[];
     nextCursor: string | null;
     count: number | null;
@@ -33,9 +32,9 @@ export interface IInvoiceAction {
   /**
    * Retrieves a specific invoice by its ID with all relations
    * @param {string} invoiceId - The ID of the invoice to fetch
-   * @returns {Promise<Invoice.Relational>} - The invoice with all relations
+   * @returns {Promise<Invoice.Response>} - The invoice with all relations
    */
-  get(invoiceId: string): Promise<Invoice.Relational>;
+  get(invoiceId: string): Promise<Invoice.Response>;
 
   // * DELETE INTERFACES
   /**

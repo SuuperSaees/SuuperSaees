@@ -13,10 +13,9 @@ export async function createInvoice(payload: Invoice.Request.Create) {
 }
 
 export async function getInvoices(
-  organizationId: string, 
   config?: PaginationConfig
 ) {
-  return await getInvoiceAction().list(organizationId, config);
+  return await getInvoiceAction().list(config);
 }
 
 export async function getInvoice(invoiceId: string) {

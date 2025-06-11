@@ -21,7 +21,6 @@ export class InvoiceAction extends BaseAction implements IInvoiceAction {
   }
 
   async list(
-    organizationId: string, 
     config?: PaginationConfig
   ): Promise<{
     data: Invoice.Response[];
@@ -35,10 +34,10 @@ export class InvoiceAction extends BaseAction implements IInvoiceAction {
       isOffsetBased: boolean;
     };
   }> {
-    return await this.controller.list(organizationId, config);
+    return await this.controller.list(config);
   }
 
-  async get(invoiceId: string): Promise<Invoice.Relational> {
+  async get(invoiceId: string): Promise<Invoice.Response> {
     return await this.controller.get(invoiceId);
   }
 
