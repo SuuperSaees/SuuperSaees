@@ -5,6 +5,7 @@ import { File } from '~/lib/file.types';
 import FilePreview from '../../../../components/file-preview/file-preview';
 import { FileViewerMode, withFileOptions } from '../../../../(main)/hocs/with-file-options';
 import { getFileType } from '../../../../lib/file-types';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 interface UserFileProps {
   file: File.Response & {
@@ -18,6 +19,8 @@ interface UserFileProps {
     progress: number;
     status: 'uploading' | 'success' | 'error';
   }
+  onRemove?: (fileId: string) => void;
+  upload?: FileUploadState;
 }
 
 const FilePreviewComponent = withFileOptions(FilePreview);
@@ -30,7 +33,7 @@ const filesToDisplayAsCard = [
   'presentation',
   'other',
 ];
-const UserFile = ({ file, files, uploadState, viewerMode = FileViewerMode.DEFAULT }: UserFileProps) => {
+const UserFile = ({ file, files, upload, viewerMode = FileViewerMode.DEFAULT, onRemove }: UserFileProps) => {
   return (
     <FilePreviewComponent
       file={file}
@@ -39,7 +42,8 @@ const UserFile = ({ file, files, uploadState, viewerMode = FileViewerMode.DEFAUL
       isLoading={file.isLoading}
       viewerMode={viewerMode}
       files={files}
-      uploadState={uploadState}
+      upload={upload}
+      onRemove={onRemove}
       renderAs={
         filesToDisplayAsCard.includes(getFileType(file.type))
           ? 'card'

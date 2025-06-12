@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Message } from "~/lib/message.types";
+// import { Message } from "~/lib/message.types";
 import { useActivityContext } from "../context/activity-context";
 import { ClockIcon, KeyIcon, Trash2, X } from "lucide-react";
 import {
@@ -64,17 +64,13 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     message.files?.some((file) => file.id === upload.id),
   );
 
-  const getFileUploadState = (fileId: string) => {
+
+  const getFileUpload = (fileId: string) => {
     const fileUpload = messageFileUploads.find(
       (upload) => upload.id === fileId,
     );
     if (!fileUpload) return undefined;
-    return {
-      id: fileUpload?.id,
-      size: fileUpload?.file.size,
-      progress: fileUpload?.progress,
-      status: fileUpload?.status as "uploading" | "success" | "error",
-    };
+    return fileUpload;
   };
 
   return (
@@ -106,7 +102,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-hidden leading-relaxed">
+      <div className="flex flex-col gap-2 rounded-lg rounded-ss-none w-full bg-slate-0 overflow-visible leading-relaxed">
         <div
           className={`flex flex-col gap-2 text-sm break-words rounded-lg whitespace-normal ${
             isInternalMessage ? "p-3 bg-yellow-50" : "bg-transparent"
@@ -117,14 +113,15 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
             className="prose prose-sm max-w-none [&>p]:mb-4 last:[&>p]:mb-0 [&>p]:leading-relaxed"
           />
           {message.files && message.files.length > 0 && (
-            <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom">
+            <div className="flex max-w-full gap-4 overflow-x-auto scrollbar-custom py-2 pr-2">
               {message.files.map((file) => (
                 <UserFile
                   key={file.id}
                   file={file}
                   files={allFiles}
                   viewerMode={FileViewerMode.ANNOTATIONS}
-                  uploadState={getFileUploadState(file.id)}
+                  upload={getFileUpload(file.id)}
+                  // onRemove={handleRemoveFile}
                 />
               ))}
             </div>

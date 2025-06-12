@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { X } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import { Progress } from 'node_modules/@kit/ui/src/shadcn/progress';
 import { useTranslation } from 'react-i18next';
 
@@ -21,7 +21,7 @@ interface FileUploadCardProps {
   fileSize?: number;
   size?: 'sm' | 'md' | 'lg';
   upload?: FileUploadState;
-  onRemove?: (id: string) => void;
+  onRemove?: (id: string) => void | Promise<void>;
   loadingMethod?: 'progress' | 'loading';
   showImagePreview?: boolean;
 }
@@ -38,7 +38,9 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
   showImagePreview = true,
   upload,
 }) => {
-  const formattedFileSize = fileSize ? formatFileSize(fileSize) : '';
+  const formattedFileSize = fileSize ? 
+  `${formatFileSize(fileSize * (upload?.progress ?? 0) / 100)} / ${formatFileSize(fileSize)}` 
+  : '';
   const { t } = useTranslation('files');
   const isImage = fileType.startsWith('image/');
 
@@ -70,27 +72,27 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
         <button
           onClick={() => onRemove(upload.id)}
           className={cn(
-            'absolute -right-2 -top-2 z-10 rounded-full border-2 border-white p-0.5',
+            'absolute -right-2 -top-2 z-20 rounded-full border-2 border-white p-0.5',
+            'transition-all duration-200 hover:scale-110',
             loadingMethod === 'progress' && [
-              'transition-all duration-200 hover:scale-110',
               upload?.status === 'error'
                 ? 'bg-red-500 hover:bg-red-600'
                 : upload?.status === 'success'
                   ? 'bg-green-500 hover:bg-green-600'
                   : 'bg-gray-800 hover:bg-gray-700',
             ],
-            !loadingMethod || (loadingMethod === 'loading' && 'bg-gray-800'),
-            upload?.status === 'uploading' && loadingMethod === 'loading'
-              ? 'block'
-              : 'opacity-0 group-hover:opacity-100',
+            (!loadingMethod || loadingMethod === 'loading') && 'bg-gray-800 hover:bg-gray-700',
+            'opacity-0 group-hover:opacity-100',
           )}
         >
-          {upload?.status === 'uploading' && loadingMethod === 'loading' ? (
-            <Spinner className="h-3 w-3 text-white" />
-          ) : (
-            <X className="h-3 w-3 text-white" />
-          )}
+          <X className="h-3 w-3 text-white" />
         </button>
+      )}
+      
+      {upload?.status === 'uploading' && loadingMethod === 'loading' && (
+        <div className="absolute -right-2 -top-2 z-10 rounded-full border-2 border-white bg-gray-800 p-0.5">
+          <Spinner className="h-3 w-3 text-white" />
+        </div>
       )}
 
       <div className="flex w-full items-center justify-between gap-3">
@@ -132,7 +134,7 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
           </div>
         )}
 
-        <div className="flex w-full min-w-0 flex-col gap-0.5">
+        <div className="flex w-full min-w-0 flex-col gap-0.5 justify-center">
           <p
             className={cn(
               'line-clamp-1 text-sm font-medium',
@@ -147,10 +149,10 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
           {fileSize && (
             <p className="flex items-center gap-2 text-xs text-gray-500">
               {formattedFileSize}
-              {upload?.status === 'uploading' &&
+              {/* {upload?.status === 'uploading' &&
                 loadingMethod === 'loading' && (
                   <Spinner className="h-3 w-3 text-gray-400" />
-                )}
+                )} */}
             </p>
           )}
         </div>
@@ -190,7 +192,8 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
             </span>
           )}
           {upload?.status === 'success' && (
-            <span className="text-xs font-medium text-green-500">
+            <span className="flex items-center gap-1 text-xs font-medium text-green-500">
+              <CheckCircle className="h-3 w-3" />
               {t('upload.success')}
             </span>
           )}

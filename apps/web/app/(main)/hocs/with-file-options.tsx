@@ -48,7 +48,7 @@ export const withFileOptions = <P extends FileProps>(
   const WithFileOptions: React.FC<P> = (props) => {
     const { viewerMode = FileViewerMode.DEFAULT, ...rest } = props;
     return (
-      <div className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center overflow-hidden">
+      <div className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center ">
         <WrappedComponent {...rest} fileName={props.file.name} fileType={props.file.type} />
         <FileOptions
           file={props.file}
