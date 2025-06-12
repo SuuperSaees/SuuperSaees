@@ -1,5 +1,5 @@
 import React from 'react';
-import { StickyNote } from 'lucide-react';
+import { StickyNote, X } from 'lucide-react';
 import { FileType } from '../../lib/file-types';
 import { cn } from 'node_modules/@kit/ui/src/utils/cn';
 
@@ -97,7 +97,7 @@ export const FileIcon: React.FC<FileIconProps> = ({
     })} />;
   }
 
-  const borderColor = error ? '#DC2626' : '#D5D7DA';
+  const borderColor = '#D5D7DA'; // Keep border gray even on error for better contrast
 
   return (
     <div className={`relative ${sizeClasses[size]} ${className}`}>
@@ -126,27 +126,9 @@ export const FileIcon: React.FC<FileIconProps> = ({
         </text>
       </svg>
       {error && (
-        <span
-          style={{
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 22,
-            height: 22,
-            background: '#FEE4E2',
-            borderRadius: '50%',
-            border: '2.5px solid #DC2626',
-            zIndex: 10,
-            boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-          }}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <text x="7" y="11" textAnchor="middle" fontSize="12" fontWeight="bold" fill="#DC2626">!</text>
-          </svg>
-        </span>
+        <div className="absolute -right-0.5 -top-0.5 z-10 rounded-full bg-red-500  shadow-sm p-0.5">
+          <X className="h-2.5 w-2.5 text-white stroke-[2.5]" />
+        </div>
       )}
     </div>
   );
