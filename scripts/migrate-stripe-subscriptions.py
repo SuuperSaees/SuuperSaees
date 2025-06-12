@@ -140,15 +140,16 @@ async def check_existing_subscription(billing_customer_id: str) -> Optional[str]
 async def create_client_subscription(client_id: str, subscription: Any, customer_email: str) -> bool:
     """Crear nueva client subscription"""
     try:
+        log_info(f"Creando suscripción para cliente {client_id} - Email: {customer_email}, ID: {subscription.id}, Status: {subscription.status}")
         subscription_data = {
             'client_id': client_id,
             'billing_subscription_id': subscription.id,
             'billing_customer_id': subscription.customer,
             'billing_provider': 'stripe',
-            'period_starts_at': datetime.fromtimestamp(subscription.current_period_start).isoformat() if subscription.current_period_start else None,
-            'period_ends_at': datetime.fromtimestamp(subscription.current_period_end).isoformat() if subscription.current_period_end else None,
-            'trial_starts_at': datetime.fromtimestamp(subscription.trial_start).isoformat() if subscription.trial_start else None,
-            'trial_ends_at': datetime.fromtimestamp(subscription.trial_end).isoformat() if subscription.trial_end else None,
+            'period_starts_at': datetime.fromtimestamp(subscription['items']['data'][0]['current_period_start']).isoformat() if subscription['items']['data'][0]['current_period_start'] else None,
+            'period_ends_at': datetime.fromtimestamp(subscription['items']['data'][0]['current_period_end']).isoformat() if subscription['items']['data'][0]['current_period_end'] else None,
+            'trial_starts_at': datetime.fromtimestamp(subscription['items']['data'][0]['trial_start']).isoformat() if subscription.status in ['trialing'] else None,
+            'trial_ends_at': datetime.fromtimestamp(subscription['items']['data'][0]['trial_end']).isoformat() if subscription.status in ['trialing'] else None,
             'currency': subscription.currency,
             'status': subscription.status,
             'active': subscription.status in ['active', 'trialing'],
@@ -175,10 +176,10 @@ async def update_client_subscription(subscription_id: str, subscription: Any, cu
     try:
         update_data = {
             'billing_subscription_id': subscription.id,
-            'period_starts_at': datetime.fromtimestamp(subscription.current_period_start).isoformat() if subscription.current_period_start else None,
-            'period_ends_at': datetime.fromtimestamp(subscription.current_period_end).isoformat() if subscription.current_period_end else None,
-            'trial_starts_at': datetime.fromtimestamp(subscription.trial_start).isoformat() if subscription.trial_start else None,
-            'trial_ends_at': datetime.fromtimestamp(subscription.trial_end).isoformat() if subscription.trial_end else None,
+            'period_starts_at': datetime.fromtimestamp(subscription['items']['data'][0]['current_period_start']).isoformat() if subscription['items']['data'][0]['current_period_start'] else None,
+            'period_ends_at': datetime.fromtimestamp(subscription['items']['data'][0]['current_period_end']).isoformat() if subscription['items']['data'][0]['current_period_end'] else None,
+            'trial_starts_at': datetime.fromtimestamp(subscription['items']['data'][0]['trial_start']).isoformat() if subscription.status in ['trialing'] else None,
+            'trial_ends_at': datetime.fromtimestamp(subscription['items']['data'][0]['trial_end']).isoformat() if subscription.status in ['trialing'] else None,
             'status': subscription.status,
             'active': subscription.status in ['active', 'trialing'],
             'updated_at': datetime.now().isoformat()
@@ -198,11 +199,35 @@ async def update_client_subscription(subscription_id: str, subscription: Any, cu
         log_error(f"Error actualizando client subscription para {customer_email}: {str(e)}")
         return False
 
+async def get_organization_by_owner_id(owner_id: str) -> Optional[Dict[str, Any]]:
+    """Obtener organización por owner_id"""
+    try:
+        response = supabase.table('organizations').select(
+            'id, name, owner_id'
+        ).eq('owner_id', owner_id).single().execute()
+        
+        if response.data:
+            return response.data
+    except Exception as e:
+        if "PGRST116" not in str(e):  # No encontrado
+            log_error(f"Error buscando organización por owner_id {owner_id}: {str(e)}")
+    
+    return None
+
 async def process_agency_subscriptions(billing_account: Dict[str, Any]):
     """Procesar suscripciones de una agencia"""
     provider_id = billing_account['provider_id']
-    agency_id = billing_account['account_id']
-    agency_name = billing_account['accounts']['name'] if billing_account['accounts'] else "Unknown"
+    account_id = billing_account['account_id']
+    
+    # Buscar la organización usando el account_id como owner_id
+    organization = await get_organization_by_owner_id(account_id)
+    
+    if not organization:
+        log_error(f"No se encontró organización para account_id: {account_id}")
+        return
+    
+    agency_id = organization['id']
+    agency_name = organization['name']
     
     log_info(f"Procesando agencia: {agency_name} (ID: {agency_id})")
     
@@ -229,12 +254,11 @@ async def process_agency_subscriptions(billing_account: Dict[str, Any]):
                         'customer_id': subscription.customer,
                         'subscription_id': subscription.id,
                         'agency': agency_name,
+                        'agency_id': agency_id,
                         'reason': 'No email found in Stripe'
                     })
                     pbar.update(1)
                     continue
-                
-                log_info(f"Procesando suscripción {subscription.id} para email: {customer_email}")
                 
                 # Buscar cliente en nuestra base de datos
                 client = await find_client_by_email(customer_email, agency_id)
@@ -245,9 +269,10 @@ async def process_agency_subscriptions(billing_account: Dict[str, Any]):
                         'subscription_id': subscription.id,
                         'email': customer_email,
                         'agency': agency_name,
+                        'agency_id': agency_id,
                         'status': subscription.status,
-                        'period_starts_at': datetime.fromtimestamp(subscription.current_period_start).isoformat() if subscription.current_period_start else None,
-                        'period_ends_at': datetime.fromtimestamp(subscription.current_period_end).isoformat() if subscription.current_period_end else None,
+                        'period_starts_at': datetime.fromtimestamp(subscription['items']['data'][0]['current_period_start']).isoformat() if subscription['items']['data'][0]['current_period_start'] else None,
+                        'period_ends_at': datetime.fromtimestamp(subscription['items']['data'][0]['current_period_end']).isoformat() if subscription['items']['data'][0]['current_period_end'] else None,
                         'reason': 'Client not found in database'
                     })
                     pbar.update(1)
@@ -255,7 +280,7 @@ async def process_agency_subscriptions(billing_account: Dict[str, Any]):
                 
                 # Verificar si ya existe la suscripción
                 existing_subscription_id = await check_existing_subscription(subscription.customer)
-                
+
                 if existing_subscription_id:
                     # Actualizar suscripción existente
                     success = await update_client_subscription(existing_subscription_id, subscription, customer_email)
