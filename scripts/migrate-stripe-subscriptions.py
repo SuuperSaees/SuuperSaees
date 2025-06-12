@@ -52,7 +52,7 @@ async def get_billing_accounts_stripe() -> List[Dict[str, Any]]:
     try:
         response = supabase.table('billing_accounts').select(
             'provider_id, account_id, accounts(id, email, name)'
-        ).eq('billing_provider', 'stripe').execute()
+        ).eq('provider', 'stripe').execute()
         
         if response.data:
             log_success(f"Encontradas {len(response.data)} cuentas de Stripe")
@@ -234,6 +234,8 @@ async def process_agency_subscriptions(billing_account: Dict[str, Any]):
                     pbar.update(1)
                     continue
                 
+                log_info(f"Procesando suscripción {subscription.id} para email: {customer_email}")
+                
                 # Buscar cliente en nuestra base de datos
                 client = await find_client_by_email(customer_email, agency_id)
                 
@@ -244,8 +246,8 @@ async def process_agency_subscriptions(billing_account: Dict[str, Any]):
                         'email': customer_email,
                         'agency': agency_name,
                         'status': subscription.status,
-                        'period_start': datetime.fromtimestamp(subscription.current_period_start).isoformat() if subscription.current_period_start else None,
-                        'period_end': datetime.fromtimestamp(subscription.current_period_end).isoformat() if subscription.current_period_end else None,
+                        'period_starts_at': datetime.fromtimestamp(subscription.current_period_start).isoformat() if subscription.current_period_start else None,
+                        'period_ends_at': datetime.fromtimestamp(subscription.current_period_end).isoformat() if subscription.current_period_end else None,
                         'reason': 'Client not found in database'
                     })
                     pbar.update(1)
