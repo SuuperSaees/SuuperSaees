@@ -40,6 +40,28 @@ async function ServiceCheckoutPage({
   const organizationSettings = await getOrganizationSettingsByOrganizationId(
     tokendecoded?.organization_id ?? '',
     true,
+      [
+        'theme_color',
+        'logo_url',
+        'sidebar_background_color',
+        'language',
+        'favicon_url',
+        'sender_name',
+        'sender_domain',
+        'sender_email',
+        'auth_card_background_color',
+        'auth_section_background_color',
+        'dashboard_url',
+        'parteners_url',
+        'catalog_product_wholesale_url',
+        'catalog_product_private_label_url',
+        'training_url',
+        'catalog_sourcing_china_url',
+        'catalog_product_url',
+        'calendar_url',
+        'auth_background_url',
+        // 'payment_details',
+      ],
   );
 
   const logoUrl = organizationSettings.find(
@@ -48,6 +70,9 @@ async function ServiceCheckoutPage({
   const sidebarBackgroundColor = organizationSettings.find(
     (setting) => setting.key === 'sidebar_background_color',
   )?.value;
+  // const paymentDetails = organizationSettings.find(
+  //   (setting) => setting.key === 'payment_details',
+  // )?.value;
 
   const paymentMethods = await getPaymentsMethods(tokendecoded?.primary_owner_id ?? '', undefined, true).catch((error) => {
     console.error('Error fetching payment methods:', error);
@@ -56,6 +81,18 @@ async function ServiceCheckoutPage({
       primaryOwnerId: tokendecoded?.primary_owner_id ?? '',
     };
   });
+
+  // if(paymentDetails) {
+  //   paymentMethods.paymentMethods = [
+  //     ...paymentMethods.paymentMethods,
+  //     {
+  //       id: 'payment_details',
+  //       name: 'Payment Details',
+  //       icon: 'paymentswaydirect',
+  //       description: paymentDetails,
+  //     } as never,
+  //   ];
+  // }
 
   const service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
     console.error('Error fetching service:', error);
