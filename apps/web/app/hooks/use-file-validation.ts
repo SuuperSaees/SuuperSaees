@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { FileUploadState } from './use-file-upload';
 
 interface FileValidationResult {
   hasError: boolean;
@@ -9,6 +10,8 @@ interface FileValidationOptions {
   enabled?: boolean;
   timeout?: number;
   cacheResults?: boolean;
+  upload?: FileUploadState;
+  validationDelay?: number;
 }
 
 // Simple in-memory cache for validation results
@@ -24,7 +27,9 @@ export const useFileValidation = (
   const { 
     enabled = false, 
     timeout = 10000, 
-    cacheResults = true 
+    cacheResults = true,
+    upload,
+    validationDelay = 2000
   } = options;
 
   const [hasError, setHasError] = useState(false);
@@ -137,6 +142,13 @@ export const useFileValidation = (
       return;
     }
 
+    // Don't validate while file is still uploading
+    if (upload?.status === 'uploading') {
+      setHasError(false);
+      setIsValidating(false);
+      return;
+    }
+
     // Check cache first
     const cachedResult = getCachedResult(src);
     if (cachedResult !== null) {
@@ -150,6 +162,12 @@ export const useFileValidation = (
 
     const performValidation = async () => {
       try {
+        // Add delay for recently uploaded files to allow server processing
+        const isRecentUpload = upload?.status === 'success';
+        if (isRecentUpload) {
+          await new Promise(resolve => setTimeout(resolve, validationDelay));
+        }
+
         const isValid = await validateFile(src, fileType);
         setCachedResult(src, isValid);
         setHasError(!isValid);
@@ -162,7 +180,7 @@ export const useFileValidation = (
     };
 
     void performValidation();
-  }, [src, fileType, renderAs, enabled, validateFile, getCachedResult, setCachedResult]);
+  }, [src, fileType, renderAs, enabled, upload?.status, validateFile, getCachedResult, setCachedResult, validationDelay]);
 
   return { hasError, isValidating };
 };
