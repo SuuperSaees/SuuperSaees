@@ -202,13 +202,13 @@ alter table "public"."invoice_payments" validate constraint "invoice_payments_pr
 
 alter table "public"."invoice_payments" add constraint "invoice_payments_provider_payment_id_key" UNIQUE using index "invoice_payments_provider_payment_id_key";
 
-alter table "public"."invoices" add constraint "invoices_agency_id_fkey" FOREIGN KEY (agency_id) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
+alter table "public"."invoices" add constraint "invoices_agency_id_fkey" FOREIGN KEY (agency_id) REFERENCES organizations(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
 alter table "public"."invoices" validate constraint "invoices_agency_id_fkey";
 
 alter table "public"."invoices" add constraint "invoices_agency_id_number_key" UNIQUE using index "invoices_agency_id_number_key";
 
-alter table "public"."invoices" add constraint "invoices_client_organization_id_fkey" FOREIGN KEY (client_organization_id) REFERENCES accounts(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
+alter table "public"."invoices" add constraint "invoices_client_organization_id_fkey" FOREIGN KEY (client_organization_id) REFERENCES organizations(id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
 alter table "public"."invoices" validate constraint "invoices_client_organization_id_fkey";
 
