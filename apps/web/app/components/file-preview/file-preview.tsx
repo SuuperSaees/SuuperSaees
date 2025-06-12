@@ -35,7 +35,7 @@ const FilePreview: React.FC<FileRendererProps> = ({
     fileSize={upload.file.size}
     upload={upload}
     loadingMethod="loading"
-    className="w-full"
+    className={className}
     onRemove={onRemove}
     />
   }
