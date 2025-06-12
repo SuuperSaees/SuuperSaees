@@ -9,6 +9,7 @@ import { FileType } from '../../../lib/file-types';
 import { getFileExtension } from '../../shared/file-icons';
 import FileUploadCard from '../file-upload-card';
 import { ImageRenderer } from './image-renderer';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 export interface FileRendererProps {
   src: string;
@@ -18,7 +19,9 @@ export interface FileRendererProps {
   isDialog?: boolean;
   isLoading?: boolean;
   onDownload?: () => void;
+  onRemove?: (fileId: string) => void | Promise<void>;
   renderAs?: 'card' | 'inline';
+  upload?: FileUploadState
 }
 
 export const VideoRenderer: React.FC<FileRendererProps> = ({

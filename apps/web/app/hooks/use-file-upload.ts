@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 import * as tus from 'tus-js-client';
 
@@ -50,10 +50,11 @@ export interface FileUploadOptions {
  * @returns {Object} Upload state and control functions
  * @property {Record<string, FileUploadState>} uploads - Current state of all uploads
  * @property {Function} upload - Function to start a new file upload
+ * @property {Function} cancelUpload - Function to cancel an active upload
  *
  * @example
  * ```tsx
- * const { upload, uploads } = useFileUpload();
+ * const { upload, uploads, cancelUpload } = useFileUpload();
  *
  * // Start an upload
  * const handleUpload = async (file: File) => {
@@ -64,11 +65,35 @@ export interface FileUploadOptions {
  *     onProgress: (progress) => console.log(`Upload progress: ${progress}%`)
  *   });
  * };
+ *
+ * // Cancel an upload
+ * const handleCancel = (fileId: string) => {
+ *   cancelUpload(fileId);
+ * };
  * ```
  */
 export function useFileUpload() {
   const [uploads, setUploads] = useState<Record<string, FileUploadState>>({});
+  const activeUploads = useRef<Record<string, tus.Upload>>({});
   const supabase = useSupabase();
+
+  /**
+   * Cancels an active upload
+   * @param fileId - The ID of the file upload to cancel
+   */
+     const cancelUpload = (fileId: string) => {
+     const activeUpload = activeUploads.current[fileId];
+     if (activeUpload) {
+       void activeUpload.abort();
+       delete activeUploads.current[fileId];
+       
+       // Update upload state to cancelled
+       setUploads((prev) => {
+         const { [fileId]: _, ...rest } = prev;
+         return rest;
+       });
+     }
+   };
 
   /**
    * Uploads a file using TUS protocol for resumable uploads
@@ -98,7 +123,7 @@ export function useFileUpload() {
       [fileId]: {
         progress: 0,
         status: 'uploading',
-        url: null,
+        url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
         file,
         id: fileId,
       },
@@ -106,9 +131,10 @@ export function useFileUpload() {
 
     const filePath = `${options.path}/${options.filePath ?? fileId}`;
     const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${options.bucketName}/${filePath}`;
+    
     return new Promise((resolve, reject) => {
       // Configure TUS upload
-      const upload = new tus.Upload(file, {
+      const tusUpload = new tus.Upload(file, {
         endpoint: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/upload/resumable`,
         retryDelays: [0, 3000, 5000, 10000, 20000],
         headers: {
@@ -126,6 +152,7 @@ export function useFileUpload() {
         chunkSize: options.chunkSize ?? 6 * 1024 * 1024, // 6MB default
         onError: (error) => {
           console.error('Error uploading file:', error);
+          delete activeUploads.current[fileId];
           setUploads((prev) => {
             const errorUpload = {
               ...prev[fileId],
@@ -153,7 +180,7 @@ export function useFileUpload() {
               ...prev[fileId],
               progress,
               status: progress === 100 ? 'success' : 'uploading',
-              url: progress === 100 ? fileUrl : null,
+              url: progress === 100 ? fileUrl : file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
               file: prev[fileId]?.file ?? file,
               id: prev[fileId]?.id ?? fileId,
             };
@@ -166,16 +193,20 @@ export function useFileUpload() {
           });
         },
         onSuccess: () => {
+          delete activeUploads.current[fileId];
           resolve(filePath);
         },
       });
 
+      // Store reference for potential cancellation
+      activeUploads.current[fileId] = tusUpload;
+
       // Check for previous uploads to resume
-      void upload.findPreviousUploads().then((previousUploads) => {
+      void tusUpload.findPreviousUploads().then((previousUploads) => {
         if (previousUploads.length && previousUploads[0]) {
-          upload.resumeFromPreviousUpload(previousUploads[0]);
+          tusUpload.resumeFromPreviousUpload(previousUploads[0]);
         }
-        upload.start();
+        tusUpload.start();
       });
     });
   };
@@ -183,5 +214,6 @@ export function useFileUpload() {
   return {
     uploads,
     upload,
+    cancelUpload,
   };
 }

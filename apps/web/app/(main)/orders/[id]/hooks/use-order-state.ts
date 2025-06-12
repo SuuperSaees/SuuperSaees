@@ -11,6 +11,7 @@ import {
 } from '~/server/actions/interactions/get-interactions';
 
 import { DataResult } from '../context/activity.types';
+import { useFileUploadActions } from '../../../../components/file-preview/hooks/use-file-upload-actions';
 
 interface UseOrderStateProps {
   initialOrder: DataResult.Order;
@@ -141,6 +142,17 @@ export const useOrderState = ({
     [queryClient, messagesQueryKey],
   );
 
+
+  const {
+    fileUploads,
+    handleFile: handleFileUpload,
+    handleRemoveFile,
+  } = useFileUploadActions({
+    bucketName: 'orders',
+    path: `uploads/${order.uuid}`,
+  })
+
+  // console.log('uploads', fileUploads);
   return {
     order,
     setOrder,
@@ -154,5 +166,8 @@ export const useOrderState = ({
     interactionsGroups,
     allFiles,
     setAllFiles,
+    fileUploads,
+    handleFileUpload,
+    handleRemoveFile,
   };
 };

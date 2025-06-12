@@ -15,22 +15,22 @@ import { Editor } from '@tiptap/react';
 import { useQuery } from '@tanstack/react-query';
 import { LoomRecordButton } from '~/(main)/apps/components';
 import InternalMessagesToggle from '../../../../components/messages/internal-messages-toggle';
-import { FileUploadState, useFileUpload } from '~/hooks/use-file-upload';
 import { File } from '~/lib/file.types';
 import { Message } from '~/lib/message.types';
 import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import { FileUpload } from '../../../../components/messages/types';
 
 
 const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agencyStatuses: AgencyStatus.Type[] }) => {
-  const { order } = useActivityContext();
+  const { order, handleFileUpload, handleRemoveFile } = useActivityContext();
 
   const { addMessageMutation, userRole, userWorkspace } = useActivityContext();
 
   const { getInternalMessagingEnabled } = useInternalMessaging()
 
-  const { upload } = useFileUpload()
+  // const { upload } = useFileUpload()
 
-  const handleSendMessage = async (messageContent: string, fileUploads?: FileUploadState[], setUploads?: React.Dispatch<React.SetStateAction<FileUploadState[]>>) => {
+  const handleSendMessage = async (messageContent: string, fileUploads?: FileUpload[], _setUploads?: React.Dispatch<React.SetStateAction<FileUpload[]>>) => {
     try {
 
       const currentInternalMessagingState = getInternalMessagingEnabled();
@@ -48,6 +48,7 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
           const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/orders/uploads/${order.uuid}/${upload.id}`;
           const tempId = crypto.randomUUID();
           return {
+            id: upload.id ?? undefined,
             name: upload.file.name,
             size: upload.file.size,
             type: upload.file.type,
@@ -68,13 +69,6 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
         order_id: order.id,
       };
       await addMessageMutation.mutateAsync({message: newMessage, files: filesToAdd, tempId: messageTempId});
-      if(setUploads) {
-        setUploads((prev) => {
-          return prev.map((upload) => {
-            return { ...upload, status: 'success' };
-          });
-        });
-      }
       const emailsData = await getEmails(order.id.toString(), rolesAvailable, userWorkspace.id ?? '');
       await sendEmailsOfOrderMessages(
         order.id,
@@ -104,57 +98,29 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
    * Handles file uploads for the current chat
    *
    * @param file - The file to upload
-   * @param setUploadsFunction - Function to update upload state in the UI
    * @param fileId - Unique identifier for the upload
+   * @param onProgress - Callback to update upload state in the UI
    * @returns Promise resolving to the uploaded file path
    * @throws Error if no active chat or upload fails
    */
- const handleFileUpload = useCallback(
+ const handleRichTextEditorFileUpload = useCallback(
   async (
     file: File,
-    fileId: string,
-    setUploads?: React.Dispatch<React.SetStateAction<FileUploadState[]>>,
+    onProgress: (upload: FileUpload) => void,
   ) => {
-
     try {
-      const filePath = await upload(file, fileId, {
-        bucketName: 'orders',
-        path:  `uploads/${order.uuid}`,
-        onProgress: (progress) => {
-          setUploads?.((prev) => {
-            const existingUpload = prev.find((u) => u.id === fileId);
-            if (!existingUpload) return prev;
+      await handleFileUpload(file, (uploadState) => {
+        // Convert FileUploadState to FileUpload and call the progress callback
 
-            return prev.map((u) =>
-              u.id === fileId
-                ? {
-                    ...u,
-                    progress,
-                    status: progress === 100 ? 'success' : 'uploading',
-                  }
-                : u,
-            );
-          });
-        },
-        onError:(_, errorUpload) => {
-       
-          setUploads?.((prevFiles) => {
-            const fileExists = prevFiles.some((f) => f.id === fileId);
-            if (!fileExists) {
-              return [...prevFiles, errorUpload];
-            }
-            return prevFiles.map((f) => (f.id === fileId ? errorUpload : f));
-          });
-        }
+        onProgress(uploadState);
       });
-
-      return filePath;
     } catch (error) {
       console.error('File upload failed:', error);
+      // Report error state
       throw error;
     }
   },
-  [upload, order.uuid],
+  [handleFileUpload],
 );
   return (
     <div className="flex w-full flex-col gap-4 h-full min-h-0 max-h-full">
@@ -186,12 +152,13 @@ const ActivityPage = ({ agencyName, agencyStatuses }: { agencyName: string, agen
           onComplete={handleSendMessage}
           showToolbar={true}
           isEditable={true}
-          onFileUpload={handleFileUpload}
+          onFileUpload={handleRichTextEditorFileUpload}
+          onFileRemove={handleRemoveFile}
           customActionButtons={[
             (editor: Editor) => (
               <LoomRecordButton
                 onAction={(text: string) => editor.commands.setContent(text)}
-                loomAppId={accountPluginData?.credentials?.loom_app_id ?? ''}
+                loomAppId={String(accountPluginData?.credentials?.loom_app_id ?? '')}
                 isLoading={isAccountPluginLoading}
               />
             ),
