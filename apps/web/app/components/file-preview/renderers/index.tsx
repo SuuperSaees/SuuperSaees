@@ -43,6 +43,7 @@ export const VideoRenderer: React.FC<FileRendererProps> = ({
   const { hasError, isValidating } = useFileValidation(src, fileType, renderAs, {
     enabled: enableValidation,
     timeout: validationTimeout,
+    upload,
   });
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export const AudioRenderer: React.FC<FileRendererProps> = ({
   const { hasError, isValidating } = useFileValidation(src, fileType, renderAs, {
     enabled: enableValidation,
     timeout: validationTimeout,
+    upload,
   });
 
   useEffect(() => {
@@ -142,6 +144,7 @@ export const PDFRenderer: React.FC<FileRendererProps> = ({
   const { hasError, isValidating } = useFileValidation(src, fileType, renderAs, {
     enabled: enableValidation,
     timeout: validationTimeout,
+    upload,
   });
 
   useEffect(() => {
@@ -192,6 +195,7 @@ const UnsupportedRenderer: React.FC<FileRendererProps> = ({
   const { hasError, isValidating } = useFileValidation(src, fileType, 'card', {
     enabled: enableValidation,
     timeout: validationTimeout,
+    upload,
   });
 
   useEffect(() => {

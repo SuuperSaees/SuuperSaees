@@ -230,7 +230,7 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
       
       {isValidating && !fileCorrupted && (
         <div className="flex items-center gap-1 text-xs font-medium text-yellow-600">
-          <Spinner className="h-3 w-3" />
+          {/* <Spinner className="h-3 w-3" /> */}
           {t('validating', 'Validating file...')}
         </div>
       )}
