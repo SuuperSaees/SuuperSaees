@@ -1,6 +1,5 @@
 import { Editor } from '@tiptap/react';
 import { Dispatch, SetStateAction } from 'react';
-import { FileUploadState } from '~/hooks/use-file-upload';
 
 export interface FileUpload {
   id: string;
@@ -11,7 +10,7 @@ export interface FileUpload {
 }
 
 export interface RichTextEditorProps {
-  onComplete?: (richText: string, fileUploads?: FileUploadState[], setUploads?: Dispatch<SetStateAction<FileUpload[]>>) => void | Promise<void>;
+  onComplete?: (richText: string, fileUploads?: FileUpload[], setUploads?: Dispatch<SetStateAction<FileUpload[]>>) => void | Promise<void>;
   content?: string;
   onChange?: (richText: string) => void;
   onBlur?: () => void;
@@ -19,7 +18,8 @@ export interface RichTextEditorProps {
   showToolbar?: boolean;
   isEditable?: boolean;
   className?: string;
-  onFileUpload?: (file: File, fileId: string, setUploads: Dispatch<SetStateAction<FileUpload[]>>,) => Promise<string>;
+  onFileUpload?: (file: File, onProgress: (upload: FileUpload) => void) => Promise<string> | Promise<void>;
+  onFileRemove?: (id: string) => Promise<void> | void;
   customActionButtons?: ((editor: Editor) => JSX.Element)[];
 }
 

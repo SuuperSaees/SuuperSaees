@@ -11,11 +11,13 @@ import {
 } from '~/server/actions/interactions/get-interactions';
 
 import { DataResult } from '../context/activity.types';
+import { useFileUploadActions } from '../../../../components/file-preview/hooks/use-file-upload-actions';
 
 interface UseOrderStateProps {
   initialOrder: DataResult.Order;
   initialInteractions?: InteractionResponse;
-  initialFiles?: DataResult.File[]
+  initialFiles?: DataResult.File[];
+  initialCursor: string;
 }
 
 /**
@@ -24,7 +26,8 @@ interface UseOrderStateProps {
 export const useOrderState = ({
   initialOrder,
   initialInteractions,
-  initialFiles
+  initialFiles,
+  initialCursor
 }: UseOrderStateProps) => {
   // State management for various data types
   const { workspace: userWorkspace } = useUserWorkspace();
@@ -53,10 +56,10 @@ export const useOrderState = ({
       initialInteractions
         ? {
             pages: [initialInteractions],
-            pageParams: [new Date().toISOString()],
+            pageParams: [initialCursor],
           }
         : undefined,
-    initialPageParam: new Date().toISOString(), // works because descending
+    initialPageParam: initialCursor, // Use consistent cursor from server
     queryFn: async ({ pageParam }) =>
       await getInteractions(order.id, {
         pagination: {
@@ -139,6 +142,17 @@ export const useOrderState = ({
     [queryClient, messagesQueryKey],
   );
 
+
+  const {
+    fileUploads,
+    handleFile: handleFileUpload,
+    handleRemoveFile,
+  } = useFileUploadActions({
+    bucketName: 'orders',
+    path: `uploads/${order.uuid}`,
+  })
+
+  // console.log('uploads', fileUploads);
   return {
     order,
     setOrder,
@@ -152,5 +166,8 @@ export const useOrderState = ({
     interactionsGroups,
     allFiles,
     setAllFiles,
+    fileUploads,
+    handleFileUpload,
+    handleRemoveFile,
   };
 };

@@ -1,28 +1,48 @@
-import React from 'react';
-import { Download } from 'lucide-react';
-import { Button } from '@kit/ui/button';
-import { Spinner } from '@kit/ui/spinner';
-import { getFileType, canPreviewFile } from '../../lib/file-types';
-import { renderers, type FileRendererProps } from './renderers';
+"use client";
+import React from "react";
+import {  Download} from "lucide-react";
+import { Button } from "@kit/ui/button";
+import { Spinner } from "@kit/ui/spinner";
+import { getFileType, canPreviewFile } from "../../lib/file-types";
+import { renderers, type FileRendererProps } from "./renderers";
+// import { useTranslation } from "react-i18next";
+import FileUploadCard from "./file-upload-card";
+import { getFileExtension } from "../shared/file-icons";
 
 const FilePreview: React.FC<FileRendererProps> = ({
   src,
   fileName,
   fileType,
-  className = '',
+  className = "",
   isDialog = false,
   isLoading = false,
   onDownload,
-  renderAs = 'inline'
+  renderAs = "inline",
+  upload,
+  onRemove,
 }) => {
-  const type = getFileType(fileType, fileName.split('.').pop());
+  const type = getFileType(fileType, fileName.split(".").pop());
   const canPreview = canPreviewFile(type);
   const Component = renderers[type];
   const props = { src, fileName, fileType, className, isDialog, renderAs };
+  // const { t } = useTranslation("files");
 
+  if (upload &&  upload?.status === "uploading") {
+    return <FileUploadCard
+    fileName={upload.file.name}
+    fileType={upload.file.type}
+    extension={getFileExtension(upload.file.name)}
+    fileSize={upload.file.size}
+    upload={upload}
+    loadingMethod="loading"
+    className={className}
+    onRemove={onRemove}
+    />
+  }
   return (
-    <div className={`relative ${className}`}>
-      <div className={isLoading ? 'blur-[0.5px]' : ''}>
+    <div className={`relative ${className} flex flex-col gap-2`}>
+
+      <div className={isLoading ? "blur-[0.5px]" : ""}>
         <Component {...props} />
       </div>
 
@@ -49,4 +69,4 @@ const FilePreview: React.FC<FileRendererProps> = ({
   );
 };
 
-export default FilePreview; 
+export default FilePreview;

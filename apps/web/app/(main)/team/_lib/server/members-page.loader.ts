@@ -27,9 +27,9 @@ export type Member = {
   created_at: string;
   updated_at: string;
   settings: {
-    name: string;
-    picture_url: string;
-  };
+    name: string | null;
+    picture_url: string | null;
+  } | null;
 };
 
 export type Invitation = {
@@ -137,7 +137,7 @@ export async function loadPaginatedAccountMembers(
     // Apply QueryBuilder pagination and filtering to accounts table
     const initialQuery = client
       .from('accounts')
-      .select('*', {
+      .select('*, settings:user_settings(name, picture_url)', {
         count: 'exact',
       })
       .in('id', userIds)
@@ -204,15 +204,12 @@ export async function loadPaginatedAccountMembers(
         role: membership?.account_role ?? '',
         role_hierarchy_level: role?.hierarchy_level ?? 0,
         owner_user_id: organizationData.data?.owner_id ?? '',
-        name: account.name ?? '',
+        name: account.settings[0]?.name ?? account.name ?? '',
         email: account.email ?? '',
-        picture_url: account.picture_url ?? '',
+        picture_url: account.settings[0]?.picture_url ?? account.picture_url ?? '',
         created_at: membership?.created_at ?? account.created_at ?? '',
         updated_at: membership?.updated_at ?? account.updated_at ?? '',
-        settings: {
-          name: account.name ?? '',
-          picture_url: account.picture_url ?? '',
-        },
+        settings: account.settings[0] ?? null,
       };
     });
 
