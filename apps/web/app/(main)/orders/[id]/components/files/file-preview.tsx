@@ -207,7 +207,15 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       return (
         <div className={`h-full w-full ${className}`}>
           {isDialog ? (
-            <video src={src} controls className="h-[70vh] w-full" />
+            <video src={src} controls className="h-[70vh] w-full" 
+            onError={() => {
+              console.error('Error loading video:', src);
+              setError({
+                title: t('preview.error.title'),
+                description: t('preview.error.description'),
+                type: 'video',
+              });
+            }}/>
           ) : (
             <div className="flex h-full w-full items-center justify-center">
               <FileIcon
