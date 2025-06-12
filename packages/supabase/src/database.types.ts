@@ -1867,7 +1867,7 @@ export type Database = {
             foreignKeyName: "invoices_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -1875,13 +1875,20 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoices_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "invoices_client_organization_id_fkey"
             columns: ["client_organization_id"]
             isOneToOne: false
-            referencedRelation: "accounts"
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -1889,6 +1896,13 @@ export type Database = {
             columns: ["client_organization_id"]
             isOneToOne: false
             referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoices_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
             referencedColumns: ["id"]
           },
         ]
@@ -4120,6 +4134,7 @@ export type Database = {
         | "catalog_sourcing_china_url"
         | "calendar_url"
         | "notification_sound"
+        | "payment_details"
       payment_methods: "stripe" | "manual" | "bank_transfer" | "cash"
       payment_status: "pending" | "succeeded" | "failed" | "refunded"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
@@ -4833,6 +4848,7 @@ export const Constants = {
         "catalog_sourcing_china_url",
         "calendar_url",
         "notification_sound",
+        "payment_details",
       ],
       payment_methods: ["stripe", "manual", "bank_transfer", "cash"],
       payment_status: ["pending", "succeeded", "failed", "refunded"],
