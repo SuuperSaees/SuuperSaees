@@ -542,3 +542,11 @@ ALTER COLUMN "order_id" DROP NOT NULL;
 
 -- Add comment to document the change
 COMMENT ON COLUMN "public"."activities"."order_id" IS 'Optional reference to order. Can be null when activity is not related to an order.';
+
+ALTER TABLE "public"."client_subscriptions" 
+ADD CONSTRAINT "client_subscriptions_billing_customer_provider_key" 
+UNIQUE ("billing_customer_id", "billing_provider");
+
+CREATE INDEX "idx_client_subscriptions_billing_customer_provider" 
+ON "public"."client_subscriptions" 
+USING btree ("billing_customer_id", "billing_provider");

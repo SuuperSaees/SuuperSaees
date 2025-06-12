@@ -33,7 +33,10 @@ type UpsertSubscriptionParams =
     'invoice.paid'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
     'invoice.created'?: (invoice: any) => Promise<unknown>;
     'invoice.updated'?: (invoice: any) => Promise<unknown>;
-    'payment_intent.succeeded'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
+    'payment_intent.succeeded'?: (data: UpsertSubscriptionParams & {
+      current_period_start: string;
+      current_period_end: string;
+    }) => Promise<unknown>;
   };
 
 interface LineItem {

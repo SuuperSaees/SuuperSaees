@@ -157,6 +157,8 @@ class WebhookRouterService {
                 .eq('provider_id', data?.id)
                 .single();
 
+            console.log('checkoutServiceData', data?.id);
+
             if (checkoutServiceError) {
               console.error(
                 'Error fetching checkout service:',
