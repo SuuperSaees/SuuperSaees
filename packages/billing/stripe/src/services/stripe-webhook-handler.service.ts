@@ -18,6 +18,7 @@ type UpsertSubscriptionParams =
     line_items: Array<LineItem>;
   };
 
+  // Agregar estos eventos al tipo WebhookEventHandlers
   type WebhookEventHandlers = {
     'checkout.session.completed'?: (
       data: UpsertSubscriptionParams | UpsertOrderParams
@@ -25,12 +26,17 @@ type UpsertSubscriptionParams =
     'customer.subscription.updated'?: (
       data: UpsertSubscriptionParams
     ) => Promise<unknown>;
+    'customer.subscription.created'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
     'customer.subscription.deleted'?: (subscriptionId: string) => Promise<unknown>;
     'checkout.session.async_payment_failed'?: (sessionId: string) => Promise<unknown>;
     'checkout.session.async_payment_succeeded'?: (sessionId: string) => Promise<unknown>;
     'invoice.paid'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
-    'customer.subscription.created'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
-    'payment_intent.succeeded'?: (data: UpsertSubscriptionParams) => Promise<unknown>;
+    'invoice.created'?: (invoice: any) => Promise<unknown>;
+    'invoice.updated'?: (invoice: any) => Promise<unknown>;
+    'payment_intent.succeeded'?: (data: UpsertSubscriptionParams & {
+      current_period_start: string;
+      current_period_end: string;
+    }) => Promise<unknown>;
   };
 
 interface LineItem {
@@ -123,6 +129,8 @@ export class StripeWebhookHandlerService implements BillingWebhookHandlerService
       onPaymentFailed: (sessionId: string) => Promise<unknown>;
       onInvoicePaid: (data: UpsertSubscriptionParams) => Promise<unknown>;
       onEvent?(event: Stripe.Event): Promise<unknown>;
+      onInvoiceCreated?: (invoice: any) => Promise<unknown>;
+      onInvoiceUpdated?: (invoice: any) => Promise<unknown>;
     },
   ) {
     const handlers: WebhookEventHandlers = {
@@ -132,6 +140,8 @@ export class StripeWebhookHandlerService implements BillingWebhookHandlerService
       'checkout.session.async_payment_failed': params.onPaymentFailed,
       'checkout.session.async_payment_succeeded': params.onPaymentSucceeded,
       'invoice.paid': params.onInvoicePaid,
+      'invoice.created': params.onInvoiceCreated,
+      'invoice.updated': params.onInvoiceUpdated,
       'customer.subscription.created': params.onPaymentIntentSucceeded,
       'payment_intent.succeeded': params.onPaymentIntentSucceeded,
     };

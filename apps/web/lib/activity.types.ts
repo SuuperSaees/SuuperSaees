@@ -29,6 +29,7 @@ export namespace Activity {
       ASSIGNED_TO = 'assigned_to',
       TASK = 'task',
       ANNOTATION = 'annotation',
+      INVOICE = 'invoice',
     }
     // "create" | "update" | "delete"
 

@@ -10,7 +10,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database } from '../../../../../../../../apps/web/lib/database.types';
-import { getSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
+import { getSession, revalidateSession } from '../../../../../../../../apps/web/app/server/actions/accounts/accounts.action';
 
 // Helper function to fetch current user data
 export async function fetchCurrentUser(client: SupabaseClient<Database>) {
@@ -92,9 +92,13 @@ export async function fetchUsersAccounts(
 
 export async function getPrimaryOwnerId(
   client?: SupabaseClient<Database>,
+  revalidate = false,
 ): Promise<string | undefined> {
   try {
      // don't change this line
+     if(revalidate){
+      await revalidateSession();
+     }
     const ownerId = (await getSession())?.organization?.owner_id;
     return ownerId as string;
   } catch (error) {

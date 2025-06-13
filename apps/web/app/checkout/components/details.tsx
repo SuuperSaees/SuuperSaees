@@ -8,6 +8,7 @@ import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import BillingForm from './billing_form';
+import { Invoice } from '~/lib/invoice.types';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error('Stripe public key is not defined in environment variables');
@@ -17,6 +18,7 @@ type ServiceType = Service.Type;
 
 type DetailsSideProps = {
   service: ServiceType;
+  invoice?: Invoice.Response;
   stripeId: string;
   organizationId: string;
   logoUrl: string;
@@ -31,6 +33,7 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
   logoUrl,
   sidebarBackgroundColor,
   paymentMethods,
+  invoice,
 }) => {
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? '', {
     stripeAccount: stripeId,
@@ -47,6 +50,7 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
     >
       <BillingForm
         service={service}
+        invoice={invoice}
         stripeId={stripeId}
         organizationId={organizationId}
         logoUrl={logoUrl}
