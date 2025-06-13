@@ -161,11 +161,12 @@ const routes = [
   
  
 
-  // {
-  //   label: 'Facturas',
-  //   path: pathsConfig.app.invoices,
-  //   Icon: <Wallet className={iconClasses} />,
-  // },
+  {
+    type: 'route',
+    label: 'common:invoicesName',
+    path: pathsConfig.app.invoices,
+    Icon: <Wallet className={iconClasses} />,
+  },
   {
     type: 'route',
     label: 'common:pluginsName',

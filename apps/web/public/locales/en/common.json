@@ -216,5 +216,6 @@
     "saving": "Saving",
     "cancel": "Cancel",
     "save": "Save"
-  }
+  },
+  "invoicesName": "Invoices"
 }
