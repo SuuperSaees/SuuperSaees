@@ -4,10 +4,11 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
 
-import { FileUploadState, useFileUpload } from '~/hooks/use-file-upload';
 import type { Chats } from '~/lib/chats.types';
 import type { Message } from '~/lib/message.types';
 import type { User } from '~/lib/user.types';
+import { useFileUploadActions } from '../../../components/file-preview/hooks/use-file-upload-actions';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 /**
  * Props for the useChatState hook
@@ -24,7 +25,6 @@ interface UseChatStateProps {
  * - Chat selection and active chat state
  * - Member management
  * - Message operations with React Query cache
- * - File uploads for chat attachments
  * - Search and filtering functionality
  *
  * @param {UseChatStateProps} props - Hook configuration
@@ -34,7 +34,6 @@ interface UseChatStateProps {
  * const {
  *   chatId,
  *   setMessages,
- *   handleFileUpload,
  *   // ... other values
  * } = useChatState({ initialMembers: [] });
  * ```
@@ -55,7 +54,6 @@ export function useChatState({ initialMembers }: UseChatStateProps) {
 
   // Hooks initialization
   const queryClient = useQueryClient();
-  const { upload, uploads } = useFileUpload();
 
   /**
    * Memoized query key for chat messages
@@ -111,61 +109,18 @@ export function useChatState({ initialMembers }: UseChatStateProps) {
     [queryClient],
   );
 
-  /**
-   * Handles file uploads for the current chat
-   *
-   * @param file - The file to upload
-   * @param setUploadsFunction - Function to update upload state in the UI
-   * @param fileId - Unique identifier for the upload
-   * @returns Promise resolving to the uploaded file path
-   * @throws Error if no active chat or upload fails
-   */
-  const handleFileUpload = useCallback(
-    async (
-      file: File,
-      fileId: string,
-      setUploads?: React.Dispatch<React.SetStateAction<FileUploadState[]>>,
-      config?: {
-        bucketName: string;
-        path: string;
-      },
-    ) => {
-      if (!chatId) throw new Error('No active chat');
-
-      try {
-        const filePath = await upload(file, fileId, {
-          bucketName: config?.bucketName ?? 'chats',
-          path: config?.path ?? `${chatId}/uploads`,
-          onProgress: (progress) => {
-            setUploads?.((prev) => {
-              const existingUpload = prev.find((u) => u.id === fileId);
-              if (!existingUpload) return prev;
-
-              return prev.map((u) =>
-                u.id === fileId
-                  ? {
-                      ...u,
-                      progress,
-                      status: progress === 100 ? 'success' : 'uploading',
-                    }
-                  : u,
-              );
-            });
-          },
-        });
-
-        return filePath;
-      } catch (error) {
-        console.error('File upload failed:', error);
-        throw error;
-      }
+  // File upload actions using the new approach
+  const {
+    fileUploads,
+    handleFile: handleFileUpload,
+    handleRemoveFile: handleFileRemove,
+  } = useFileUploadActions({
+    bucketName: 'chats',
+    path: `${chatId}/uploads`,
+    onFilesSelected: (uploads: FileUploadState[]) => {
+      console.log('Files selected:', uploads);
     },
-    [chatId, upload],
-  );
-
-  // Update chatId when activeChat changes
-
-
+  });
   return {
     chatId,
     activeChat,
@@ -181,7 +136,8 @@ export function useChatState({ initialMembers }: UseChatStateProps) {
     isChatCreationDialogOpen,
     setIsChatCreationDialogOpen,
     setChats,
+    fileUploads,
     handleFileUpload,
-    uploads,
+    handleFileRemove,
   };
 }
