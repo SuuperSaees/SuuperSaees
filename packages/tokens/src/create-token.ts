@@ -14,9 +14,6 @@ export async function createToken(
     alg: 'HS256',
     typ: 'JWT',
   };
-  const client = getSupabaseServerComponentClient({
-    admin: true,
-  });
   const now = new Date();
   const expiresAt = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour
 
@@ -43,7 +40,7 @@ export async function createToken(
     updated_at: now.toISOString(),
   };
 
-  Promise.resolve().then(async () => {
+  await Promise.resolve().then(async () => {
     try {
       const client = getSupabaseServerComponentClient({ admin: true });
       const { error } = await client.from('tokens').insert(tokenData);

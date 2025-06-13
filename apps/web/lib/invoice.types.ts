@@ -1,0 +1,52 @@
+import { Database } from './database.types';
+import { Organization } from './organization.types';
+
+export namespace Invoice {
+  export type Type = Database['public']['Tables']['invoices']['Row'];
+  export type Insert = Database['public']['Tables']['invoices']['Insert'];
+  export type Update = Database['public']['Tables']['invoices']['Update'];
+
+  export namespace Request {
+    export type Create = Invoice.Insert & {
+      invoice_items?: InvoiceItem.Insert[] | null;
+    };
+    export type Update = Invoice.Update & {
+      invoice_items?: InvoiceItem.Insert[] | null;
+    };
+  }
+
+  export type Response = Invoice.Type & {
+    client: Organization.Response | null;
+    agency: Organization.Response | null;
+    invoice_items?: InvoiceItem.Response[] | null;
+    total_amount?: number;
+    items_count?: number;
+  };
+  
+  export namespace Enums {
+    export enum Status {
+      DRAFT = 'draft',
+      SENT = 'sent',
+      PAID = 'paid',
+      OVERDUE = 'overdue',
+      CANCELLED = 'cancelled',
+    }
+
+    export enum PaymentMethod {
+      BANK_TRANSFER = 'bank_transfer',
+      CREDIT_CARD = 'credit_card',
+      PAYPAL = 'paypal',
+      CASH = 'cash',
+    }
+  }
+}
+
+export namespace InvoiceItem {
+  export type Type = Database['public']['Tables']['invoice_items']['Row'];
+  export type Insert = Database['public']['Tables']['invoice_items']['Insert'];
+  export type Update = Database['public']['Tables']['invoice_items']['Update'];
+
+  export type Response = InvoiceItem.Type & {
+    total_price?: number;
+  };
+} 
