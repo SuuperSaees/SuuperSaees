@@ -1,7 +1,9 @@
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
 import { Invoice } from '~/lib/invoice.types';
-
+import { createUrlForCheckout } from '../../../../../../../packages/features/team-accounts/src/server/actions/services/create/create-token-for-checkout'
+import { RetryOperationService } from '@kit/shared/utils';
+import { getSession } from '../../accounts/accounts.action';
 export class InvoiceService {
   constructor(
     private readonly invoiceRepository: InvoiceRepository,
@@ -31,6 +33,40 @@ export class InvoiceService {
         payload.invoice_items
       );
     }
+
+    const generateCheckoutUrlPromise = new RetryOperationService(
+          async () => {
+            const organization = (await (getSession())).organization
+            const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+            const baseUrl = (organization?.domain?.includes('localhost') ?? !isProd) ? `http://${organization?.domain}` : `https://${organization?.domain}`;
+
+            const checkoutUrl = await createUrlForCheckout({
+              stripeId: '',
+              priceId: '',
+              invoice:  createdInvoice,
+              organizationId: organization?.id ?? '',
+              baseUrl: baseUrl,
+              primaryOwnerId: organization?.owner_id ?? '', 
+            });
+    
+            // Update the invoice with the generated checkout URL
+           await this.invoiceRepository.update({
+              id: createdInvoice.id,
+              checkout_url: checkoutUrl,
+            });
+    
+            return checkoutUrl;
+          },
+          {
+            maxAttempts: 3,
+            delayMs: 1000,
+            backoffFactor: 2,
+          }
+        );
+    
+        generateCheckoutUrlPromise.execute().catch((error) => {
+          console.error('Failed to generate checkout URL:', error);
+        });
 
     return createdInvoice;
   }
