@@ -37,6 +37,7 @@ import { Service } from '~/lib/services.types';
 import { handleSubmitPayment } from '../utils/billing-handlers';
 import { SideInfo } from './side-information';
 import { UserInfo } from './user-info';
+import { Invoice } from '~/lib/invoice.types';
 
 const paymentMethodsIcons = {
   mercadopago: (
@@ -198,7 +199,8 @@ const paymentMethodsIcons = {
 };
 
 const BillingForm: React.FC<{
-  service: Service.Relationships.Billing.BillingService;
+  service?: Service.Relationships.Billing.BillingService;
+  invoice?: Invoice.Response;
   stripeId: string;
   organizationId: string;
   logoUrl: string;
