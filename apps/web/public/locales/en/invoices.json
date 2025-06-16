@@ -1,5 +1,67 @@
 {
   "title": "Invoices",
+  "creation": {
+    "title": "New invoice",
+    "warning": {
+      "description": "Please set up your billing information before creating invoices.",
+      "link": "Go to settings"
+    },
+    "form": {
+      "information": {
+        "title": "Information",
+        "client": {
+          "label": "Client",
+          "placeholder": "Select a client"
+        },
+        "dateOfIssue": {
+          "label": "Date of issue",
+          "placeholder": "Select a date"
+        },
+        "paymentMethod": {
+          "label": "Payment method",
+          "placeholder": "Select a payment method"
+        },
+        "paymentReference": {
+          "label": "Payment reference",
+          "placeholder": "Enter a payment reference"
+        }
+      },
+      "items": {
+        "title": "Items",
+        "description": {
+          "label": "Description",
+          "placeholder": "Select a service"
+        },
+        "rate": {
+          "label": "Rate",
+          "placeholder": "Enter a rate"
+        },
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "Enter a quantity"
+        },
+        "lineTotal": {
+          "title": "Line total"
+        },
+        "total": {
+          "title": "Total"
+        },
+        "subtotal": {
+          "title": "Subtotal"
+        },
+        "add": "Add new line"
+      },
+      "notes": {
+        "title": "Notes",
+        "placeholder": "Write a note..."
+      },
+      "actions": {
+        "saveAsDraft": "Save as a draft",
+        "createInvoice": "Create invoice"
+      }
+    }
+  },
+
   "plan": {
     "title": "Plan",
     "nextInvoice": "Next invoice issue date "
