@@ -5,6 +5,7 @@ import { File } from '~/lib/file.types';
 import FilePreview from '../../../components/file-preview/file-preview';
 import { FileViewerMode, withFileOptions } from '../../hocs/with-file-options';
 import { getFileType } from '../../../lib/file-types';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 interface UserFileProps {
   file: File.Response & {
@@ -12,6 +13,9 @@ interface UserFileProps {
   };
   files: File.Type[];
   viewerMode?: FileViewerMode;
+  upload?: FileUploadState;
+  enableValidation?: boolean;
+  onRemove?: (fileId: string) => void;
 }
 
 const FilePreviewComponent = withFileOptions(FilePreview);
@@ -24,7 +28,7 @@ const filesToDisplayAsCard = [
   'presentation',
   'other',
 ];
-const UserFile = ({ file, files, viewerMode = FileViewerMode.DEFAULT }: UserFileProps) => {
+const UserFile = ({ file, files, viewerMode = FileViewerMode.DEFAULT, upload, enableValidation = false, onRemove }: UserFileProps) => {
   return (
     <FilePreviewComponent
       src={file.url}
@@ -38,6 +42,9 @@ const UserFile = ({ file, files, viewerMode = FileViewerMode.DEFAULT }: UserFile
           ? 'card'
           : 'inline'
       }
+      upload={upload}
+      enableValidation={enableValidation}
+      onRemove={onRemove}
     />
   );
 };

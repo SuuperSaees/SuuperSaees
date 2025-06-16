@@ -22,44 +22,57 @@ export function useFileUploadActions({
   onRemoveFile,
 }: UseFileUploadsOptions) {
   const [fileUploads, setFileUploads] = useState<FileUploadState[]>([]);
-  const { upload } = useFileUpload();
+  const { upload, cancelUpload } = useFileUpload();
 
+  // Helper function to add or update a file upload in the state
+  const addOrUpdateFileUpload = (fileUpload: FileUploadState) => {
+    setFileUploads((prevFiles) => {
+      const fileExists = prevFiles.some((f) => f.id === fileUpload.id);
+      if (!fileExists) {
+        return [...prevFiles, fileUpload];
+      }
+      return prevFiles.map((f) => (f.id === fileUpload.id ? fileUpload : f));
+    });
+  };
+
+  // Handle single file upload
+  const handleFile = async (file: File, onComplete?: (upload: FileUploadState) => void) => {
+    const fileId = generateFileId();
+    
+    await upload(file, fileId, {
+      bucketName,
+      path,
+      filePath: filePathWithFileName ? generateFilePath(file.name, fileId) : undefined,
+      onProgress: (_progress, updatedUpload) => {
+        addOrUpdateFileUpload(updatedUpload);
+        if (onComplete) {
+          onComplete(updatedUpload);
+        }
+      },
+      onError: (_, errorUpload) => {
+        addOrUpdateFileUpload(errorUpload);
+        if (onComplete) {
+          onComplete(errorUpload);
+        }
+      },
+    });
+  };
+
+  // Handle multiple files upload
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
 
-    let fileUploadsToReturn: FileUploadState[] = [];
+    const fileUploadsToReturn: FileUploadState[] = [];
 
     for (const file of Array.from(files)) {
-      const fileId = generateFileId();
-      await upload(file, fileId, {
-        bucketName,
-        path,
-        filePath: filePathWithFileName ? generateFilePath(file.name, fileId) : undefined,
-        onProgress: (_progress, updatedUpload) => {
-          setFileUploads((prevFiles) => {
-            const fileExists = prevFiles.some((f) => f.id === fileId);
-            if (!fileExists) {
-              const newFileUploads = [...prevFiles, updatedUpload];
-              fileUploadsToReturn = newFileUploads;
-              return newFileUploads;
-            }
-            const updatedFileUploads = prevFiles.map((f) =>
-              f.id === fileId ? updatedUpload : f,
-            );
-            fileUploadsToReturn = updatedFileUploads;
-            return updatedFileUploads;
-          });
-        },
-        onError: (_, errorUpload) => {
-          // Add the error upload to the fileUploads array if it doesn't exist or update the existing upload
-          setFileUploads((prevFiles) => {
-            const fileExists = prevFiles.some((f) => f.id === errorUpload.id);
-            if (!fileExists) {
-              return [...prevFiles, errorUpload];
-            }
-            return prevFiles.map((f) => (f.id === errorUpload.id ? errorUpload : f));
-          });
-        },
+      await handleFile(file, (upload) => {
+        // Update the local array for the onFilesSelected callback
+        const existingIndex = fileUploadsToReturn.findIndex((f) => f.id === upload.id);
+        if (existingIndex !== -1) {
+          fileUploadsToReturn[existingIndex] = upload;
+        } else {
+          fileUploadsToReturn.push(upload);
+        }
       });
     }
 
@@ -69,6 +82,10 @@ export function useFileUploadActions({
   };
 
   const handleRemoveFile = (id: string) => {
+    // Cancel the actual upload
+    cancelUpload(id);
+    
+    // Remove from local state
     setFileUploads((prevFiles) => prevFiles.filter((f) => f.id !== id));
     if (onRemoveFile) {
       onRemoveFile(id);
@@ -77,6 +94,7 @@ export function useFileUploadActions({
 
   return {
     fileUploads,
+    handleFile,
     handleFiles,
     handleRemoveFile,
   };

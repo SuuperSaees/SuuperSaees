@@ -2,12 +2,36 @@ import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import type { FileRendererProps } from './index';
 import { cn } from '@kit/ui/utils';
+import FileUploadCard from '../file-upload-card';
+import { getFileExtension } from '../../shared/file-icons';
+import { useFileValidation } from '~/hooks/use-file-validation';
 
-export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, className, isDialog }) => {
+export const ImageRenderer: React.FC<FileRendererProps> = ({ 
+  src, 
+  fileName, 
+  className, 
+  isDialog, 
+  fileType,
+  renderAs = 'inline',
+  upload,
+  onFileError,
+  enableValidation = false,
+  validationTimeout = 10000,
+}) => {
   const [isZoomedIn, setIsZoomedIn] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [imageError, setImageError] = useState(false);
+
+  const { hasError, isValidating } = useFileValidation(src, fileType || 'image/*', renderAs, {
+    enabled: enableValidation,
+    timeout: validationTimeout,
+    upload,
+  });
+
+  useEffect(() => {
+    onFileError?.(hasError);
+  }, [hasError, onFileError]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (containerRef.current) {
@@ -41,6 +65,20 @@ export const ImageRenderer: React.FC<FileRendererProps> = ({ src, fileName, clas
       document.removeEventListener('dialogClose', handleDialogClose);
     };
   }, []);
+
+  if (renderAs === 'card') {
+    return (
+      <FileUploadCard
+        fileName={fileName}
+        fileType={fileType || 'image/*'}
+        extension={getFileExtension(fileName)}
+        className={className}
+        upload={upload}
+        fileCorrupted={enableValidation ? hasError : false}
+        isValidating={enableValidation ? isValidating : false}
+      />
+    );
+  }
 
   if (!isDialog) {
     return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Music } from 'lucide-react';
 
@@ -9,6 +9,8 @@ import { FileType } from '../../../lib/file-types';
 import { getFileExtension } from '../../shared/file-icons';
 import FileUploadCard from '../file-upload-card';
 import { ImageRenderer } from './image-renderer';
+import { FileUploadState } from '~/hooks/use-file-upload';
+import { useFileValidation } from '~/hooks/use-file-validation';
 
 export interface FileRendererProps {
   src: string;
@@ -18,7 +20,13 @@ export interface FileRendererProps {
   isDialog?: boolean;
   isLoading?: boolean;
   onDownload?: () => void;
+  onRemove?: (fileId: string) => void | Promise<void>;
   renderAs?: 'card' | 'inline';
+  upload?: FileUploadState;
+  fileError?: boolean;
+  onFileError?: (hasError: boolean) => void;
+  enableValidation?: boolean;
+  validationTimeout?: number;
 }
 
 export const VideoRenderer: React.FC<FileRendererProps> = ({
@@ -27,7 +35,21 @@ export const VideoRenderer: React.FC<FileRendererProps> = ({
   className,
   fileType,
   renderAs = 'inline',
+  upload,
+  onFileError,
+  enableValidation = false,
+  validationTimeout = 10000,
 }) => {
+  const { hasError, isValidating } = useFileValidation(src, fileType, renderAs, {
+    enabled: enableValidation,
+    timeout: validationTimeout,
+    upload,
+  });
+
+  useEffect(() => {
+    onFileError?.(hasError);
+  }, [hasError, onFileError]);
+
   if (renderAs === 'card') {
     return (
       <FileUploadCard
@@ -35,6 +57,9 @@ export const VideoRenderer: React.FC<FileRendererProps> = ({
         fileType={fileType}
         extension={getFileExtension(fileName)}
         className={className}
+        upload={upload}
+        fileCorrupted={enableValidation ? hasError : false}
+        isValidating={enableValidation ? isValidating : false}
       />
     );
   }
@@ -58,7 +83,21 @@ export const AudioRenderer: React.FC<FileRendererProps> = ({
   className,
   fileType,
   renderAs = 'inline',
+  upload,
+  onFileError,
+  enableValidation = false,
+  validationTimeout = 10000,
 }) => {
+  const { hasError, isValidating } = useFileValidation(src, fileType, renderAs, {
+    enabled: enableValidation,
+    timeout: validationTimeout,
+    upload,
+  });
+
+  useEffect(() => {
+    onFileError?.(hasError);
+  }, [hasError, onFileError]);
+
   if (renderAs === 'card') {
     return (
       <FileUploadCard
@@ -66,6 +105,9 @@ export const AudioRenderer: React.FC<FileRendererProps> = ({
         fileType={fileType}
         extension={getFileExtension(fileName)}
         className={className}
+        upload={upload}
+        fileCorrupted={enableValidation ? hasError : false}
+        isValidating={enableValidation ? isValidating : false}
       />
     );
   }
@@ -94,7 +136,21 @@ export const PDFRenderer: React.FC<FileRendererProps> = ({
   className,
   fileType,
   renderAs = 'inline',
+  upload,
+  onFileError,
+  enableValidation = false,
+  validationTimeout = 10000,
 }) => {
+  const { hasError, isValidating } = useFileValidation(src, fileType, renderAs, {
+    enabled: enableValidation,
+    timeout: validationTimeout,
+    upload,
+  });
+
+  useEffect(() => {
+    onFileError?.(hasError);
+  }, [hasError, onFileError]);
+
   if (renderAs === 'card') {
     return (
       <FileUploadCard
@@ -102,6 +158,9 @@ export const PDFRenderer: React.FC<FileRendererProps> = ({
         fileType={fileType}
         extension={getFileExtension(fileName)}
         className={className}
+        upload={upload}
+        fileCorrupted={enableValidation ? hasError : false}
+        isValidating={enableValidation ? isValidating : false}
       />
     );
   }
@@ -127,13 +186,31 @@ const UnsupportedRenderer: React.FC<FileRendererProps> = ({
   fileType,
   fileName,
   className,
+  upload,
+  src,
+  onFileError,
+  enableValidation = false,
+  validationTimeout = 10000,
 }) => {
+  const { hasError, isValidating } = useFileValidation(src, fileType, 'card', {
+    enabled: enableValidation,
+    timeout: validationTimeout,
+    upload,
+  });
+
+  useEffect(() => {
+    onFileError?.(hasError);
+  }, [hasError, onFileError]);
+
   return (
     <FileUploadCard
       fileName={fileName}
       fileType={fileType}
       extension={getFileExtension(fileName)}
       className={className}
+      upload={upload}
+      fileCorrupted={enableValidation ? hasError : false}
+      isValidating={enableValidation ? isValidating : false}
     />
   );
 };

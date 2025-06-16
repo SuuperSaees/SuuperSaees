@@ -6,6 +6,7 @@ import { Check, Copy, Download, Eye, MoreVertical } from 'lucide-react';
 
 import Tooltip from '~/components/ui/tooltip';
 import { File } from '~/lib/file.types';
+import { FileUploadState } from '~/hooks/use-file-upload';
 
 import { useFileActions } from '../../hooks/use-file-actions';
 
@@ -37,26 +38,43 @@ interface FileProps {
   isDialog?: boolean;
   isLoading?: boolean;
   viewerMode?: FileViewerMode;
+  upload?: FileUploadState;
 }
 
 export const withFileOptions = <P extends FileProps>(
-  WrappedComponent: ComponentType<Omit<P, 'viewerMode'> & {
+  WrappedComponent: ComponentType<Omit<P, 'viewerMode' | 'isLoading' | 'upload'> & {
     fileName: string;
     fileType: string;
+    isLoading?: boolean;
+    upload?: FileUploadState;
   }>,
 ) => {
   const WithFileOptions: React.FC<P> = (props) => {
-    const { viewerMode = FileViewerMode.DEFAULT, ...rest } = props;
+    const { viewerMode = FileViewerMode.DEFAULT, isLoading, upload, ...rest } = props;
+    
+    // Don't show file options when loading or uploading
+    const shouldShowOptions = !isLoading && upload?.status !== 'uploading';
+    
     return (
-      <div className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center overflow-hidden">
-        <WrappedComponent {...rest} fileName={props.file.name} fileType={props.file.type} />
-        <FileOptions
-          file={props.file}
-          viewerMode={viewerMode}
-          files={props.files}
-          src={props.src}
-          bucketName={props.bucketName}
+      <div className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center ">
+        <WrappedComponent 
+          {...rest} 
+          fileName={props.file.name} 
+          fileType={props.file.type}
+          isLoading={isLoading}
+          upload={upload}
         />
+        {shouldShowOptions && (
+          <FileOptions
+            file={props.file}
+            viewerMode={viewerMode}
+            files={props.files}
+            src={props.src}
+            bucketName={props.bucketName}
+            isLoading={isLoading}
+            upload={upload}
+          />
+        )}
       </div>
     );
   };
