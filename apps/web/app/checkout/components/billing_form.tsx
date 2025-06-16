@@ -206,6 +206,7 @@ const BillingForm: React.FC<{
   logoUrl: string;
   sidebarBackgroundColor: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
+  manualPayment?: BillingAccounts.PaymentMethod;
 }> = ({
   service,
   stripeId,
@@ -213,6 +214,7 @@ const BillingForm: React.FC<{
   logoUrl,
   sidebarBackgroundColor,
   paymentMethods,
+  manualPayment,
 }) => {
   const { t } = useTranslation('services');
   const router = useRouter();
@@ -261,6 +263,7 @@ const BillingForm: React.FC<{
     card_cvv: z
       .string()
       .regex(/^\d{3,4}$/, t('checkout.validation.cardCvvRequired')),
+    manual_payment_info: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -281,6 +284,7 @@ const BillingForm: React.FC<{
       card_number: '',
       card_expiration_date: '',
       card_cvv: '',
+      manual_payment_info: '',
     },
   });
 
@@ -448,7 +452,7 @@ const BillingForm: React.FC<{
                       ))}
                     </div>
                   </div>
-                  <div className="mt-6 flex w-full flex-col gap-6">
+                  {selectedPaymentMethod !== 'manual_payment' ? (<div className="mt-6 flex w-full flex-col gap-6">
                     {/* Nombre en la tarjeta */}
                     <div className="w-full flex-col gap-1.5">
                       <FormField
@@ -650,7 +654,50 @@ const BillingForm: React.FC<{
                         )}
                       </div>
                     </div>
-                  </div>
+                  </div>) :
+                  
+                    (<div className="mt-6 space-y-6">
+                      {/* Información de pago manual */}
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <h3 className="font-inter mb-3 text-lg font-semibold text-gray-900">
+                          {t('checkout.manualPayment.title', 'Instrucciones de Pago Manual')}
+                        </h3>
+                        <div className="rounded-md bg-white p-3">
+                          <div 
+                            className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{ 
+                              __html: manualPayment?.description?.replace(/\n/g, '<br>') ?? ''
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Field for additional user information */}
+                      <div className="w-full">
+                        <FormField
+                          name="manual_payment_info"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem className="w-full">
+                              <CustomFormLabel
+                                label={t('checkout.manualPayment.additionalInfo', 'Información Adicional')}
+                                required={false}
+                                textSize="text-[14px]"
+                                textColor="text-[#747476]"
+                              />
+                              <FormControl>
+                                <textarea
+                                  className="w-full min-h-[100px] rounded-lg border border-gray-300 px-3.5 py-2.5 resize-vertical"
+                                  {...field}
+                                  placeholder={t('checkout.manualPayment.placeholder', 'Ingresa cualquier información adicional sobre tu pago, número de transacción, comentarios, etc.')}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>)}
                 </>
                 <div className="mt-8">
                   <ThemedButton

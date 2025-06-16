@@ -89,7 +89,7 @@ async function ServiceCheckoutPage({
       ...paymentMethods.paymentMethods,
       {
         id: 'payment_details',
-        name: 'Payment Details',
+        name: 'manual_payment',
         icon: 'paymentswaydirect',
         description: paymentDetails,
       } as never,
@@ -141,6 +141,14 @@ async function ServiceCheckoutPage({
                 logoUrl={logoUrl ?? suuperLogo ?? ''}
                 sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
                 paymentMethods={paymentMethods.paymentMethods ?? []}
+                manualPayment={
+                  {
+                    id: 'payment_details',
+                    name: 'manual_payment',
+                    icon: 'paymentswaydirect',
+                    description: paymentDetails,
+                  } as never
+                }
           />
             )
           }

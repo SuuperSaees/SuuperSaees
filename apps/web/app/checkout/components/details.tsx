@@ -24,6 +24,7 @@ type DetailsSideProps = {
   logoUrl: string;
   sidebarBackgroundColor: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
+  manualPayment?: BillingAccounts.PaymentMethod
 };
 
 const DetailsSide: React.FC<DetailsSideProps> = ({
@@ -34,6 +35,7 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
   sidebarBackgroundColor,
   paymentMethods,
   invoice,
+  manualPayment
 }) => {
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? '', {
     stripeAccount: stripeId,
@@ -56,6 +58,7 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
         logoUrl={logoUrl}
         sidebarBackgroundColor={sidebarBackgroundColor}
         paymentMethods={paymentMethods ?? []}
+        manualPayment={manualPayment}
       />
     </Elements>
   );

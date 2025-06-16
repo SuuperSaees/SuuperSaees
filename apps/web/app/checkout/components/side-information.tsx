@@ -223,7 +223,10 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
       )}
 
       {/* Campo de cupón de descuento */}
-      <FormField
+      {
+
+        selectedPaymentMethod === 'stripe' &&
+        <FormField
         name="discount_coupon"
         control={form.control}
         render={({ field }) => (
@@ -249,6 +252,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
           </div>
         )}
       />
+      }
 
       {/* Subtotal */}
       {!service.test_period && <div className="flex justify-between">
