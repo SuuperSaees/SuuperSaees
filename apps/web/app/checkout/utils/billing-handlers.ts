@@ -1,15 +1,9 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
-
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
-import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
-import { createSession } from '~/team-accounts/src/server/actions/sessions/create/create-sessions';
 import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '~/utils/credentials-crypto';
-
 
 type ValuesProps = {
   fullName: string;
@@ -27,18 +21,6 @@ type ValuesProps = {
   card_number?: string;
   card_expiration_date?: string;
   card_cvv?: string;
-};
-
-type HandlePaymentProps = {
-  service: Service.Relationships.Billing.BillingService;
-  values: ValuesProps;
-  stripeId: string;
-  organizationId: string;
-  paymentMethodId: string;
-  coupon: string;
-  quantity?: number;
-  selectedPaymentMethod: string;
-  baseUrl: string;
 };
 
 type HandlePaymentStripeProps = {
@@ -60,7 +42,7 @@ const calculateTrialDays = (service: Service.Relationships.Billing.BillingServic
   }
 
   const duration = service.test_period_duration;
-  const unit = service.test_period_duration_unit_of_measurement?.toLowerCase() || '';
+  const unit = service.test_period_duration_unit_of_measurement?.toLowerCase() ?? '';
 
   if (!unit) return 0;
 
@@ -91,7 +73,7 @@ export const handleRecurringPayment = async ({
   selectedPaymentMethod,
   baseUrl,
 }: HandlePaymentStripeProps) => {
-  // heree manage payment method
+  // here manage payment method
   if (selectedPaymentMethod === 'stripe') {
     const res = await fetch(`${baseUrl}/api/stripe/subscription-payment`, {
       method: 'POST',
@@ -120,7 +102,9 @@ export const handleRecurringPayment = async ({
     }
 
     return data.clientSecret;
-  } else {
+  } else if(selectedPaymentMethod === 'manual_payment') {
+    console.log('Manual payment method selected, no action taken.');
+  } else  {
     // here manage payment method treli
     const client = getSupabaseServerComponentClient({
       admin: true,
@@ -359,8 +343,8 @@ export const handleOneTimePayment = async ({
         // Only include card details if not using Mercado Pago
         ...(selectedPaymentMethod !== 'mercadopago' && {
           cardNumber: values.card_number,
-          month: values.card_expiration_date.split('/')[0],
-          year: values.card_expiration_date.split('/')[1],
+          month: values.card_expiration_date?.split('/')[0],
+          year: values.card_expiration_date?.split('/')[1],
           cardCvc: values.card_cvv,
         }),
       },
@@ -390,75 +374,5 @@ export const handleOneTimePayment = async ({
     const dataSubscriptionPlan = await responseSubscriptionPlan.clone().json();
 
     return dataSubscriptionPlan;
-  }
-};
-
-export const handleSubmitPayment = async ({
-  service,
-  values,
-  stripeId,
-  organizationId,
-  paymentMethodId,
-  coupon,
-  quantity,
-  selectedPaymentMethod,
-  baseUrl,
-}: HandlePaymentProps) => {
-  try {
-    const sessionCreated = await createSession({
-      client_address: values.address,
-      client_city: values.city,
-      client_country: values.country,
-      client_email: values.email,
-      client_name: values.fullName,
-      client_state: values.state_province_region,
-      client_postal_code: values.postal_code,
-      provider: 'suuper',
-      provider_id: null,
-    });
-
-    const responseRecurringOrOneTimePayment = service.recurring_subscription
-      ? await handleRecurringPayment({
-          service,
-          values,
-          stripeId,
-          organizationId,
-          paymentMethodId,
-          coupon,
-          sessionId: sessionCreated?.id ?? '',
-          selectedPaymentMethod,
-          baseUrl,
-        })
-      : await handleOneTimePayment({
-          service,
-          values,
-          stripeId,
-          organizationId,
-          paymentMethodId,
-          coupon,
-          sessionId: sessionCreated?.id ?? '',
-          quantity,
-          selectedPaymentMethod,
-          baseUrl,
-        });
-
-    const userAlreadyExists = await getUserByEmail(values.email, true);
-
-    const accountAlreadyExists = userAlreadyExists?.userData?.id ? true : false;
-
-    return {
-      success: true,
-      error: null,
-      accountAlreadyExists,
-      data: {
-        paymentUrl: responseRecurringOrOneTimePayment?.payment_url,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Payment processing failed',
-    };
   }
 };

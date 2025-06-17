@@ -7,7 +7,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
-import BillingForm from './billing_form';
+import BillingForm from './billing-form';
 import { Invoice } from '~/lib/invoice.types';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
