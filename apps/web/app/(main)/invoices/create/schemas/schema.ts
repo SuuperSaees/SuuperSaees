@@ -6,6 +6,7 @@ export const invoiceSchema = z.object({
   paymentMethod: z.string().optional(),
   paymentReference: z.string().optional(),
   lineItems: z.array(z.object({
+    serviceId: z.number().min(1, 'Service is required'),
     description: z.string().min(1, 'Description is required'),
     rate: z.number().min(0, 'Rate must be positive'),
     quantity: z.number().min(1, 'Quantity must be at least 1'),

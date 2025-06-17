@@ -13,10 +13,11 @@ import { AppWindowMac, Calendar, Check, CreditCard, Users } from "lucide-react";
 import { DatePicker } from "~/components/date-seletc";
 import { BaseOption, Combobox } from "~/components/ui/combobox";
 import Avatar from "~/(main)/../components/ui/avatar";
+import { Client } from "~/lib/client.types";
 
 interface InvoiceInformationSectionProps {
   control: Control<InvoiceFormData>;
-  clientOptions: BaseOption[];
+  clients: Client.Response[];
 }
 
 const customRenderItem = (option: BaseOption, isSelected: boolean) => {
@@ -56,8 +57,14 @@ const customRenderTrigger = (selectedOption: BaseOption | null) => {
 
 export function InvoiceInformationSection({
   control,
-  clientOptions,
+  clients,
 }: InvoiceInformationSectionProps) {
+
+  const clientOptions: BaseOption[] = clients.map((client) => ({
+    value: client.user_client_id ?? "",
+    label: client.user?.name ?? "",
+    pictureUrl: client.user?.picture_url ?? "",
+  }));
   return (
     <fieldset className="text-gray-600 px-3 py-4">
       <legend className="sr-only">
@@ -82,7 +89,14 @@ export function InvoiceInformationSection({
                     renderTrigger={customRenderTrigger}
                     triggerClassName="border-none"
                     defaultValue={field.value}
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      const selectedClient = clients.find(
+                        (client) => client.user_client_id === value
+                      );
+                      if (selectedClient) {
+                        field.onChange(selectedClient.organization_client_id ?? "");
+                      }
+                    }}
                   />
                 </FormControl>
 

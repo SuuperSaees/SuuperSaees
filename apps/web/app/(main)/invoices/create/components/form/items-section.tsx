@@ -18,7 +18,7 @@ interface LineItemRowProps {
   index: number;
   fieldId: string;
   onRemove: () => void;
-  onServiceChange: (serviceId: string) => void;
+  onServiceChange: (serviceId: number) => void;
   canRemove: boolean;
   calculateLineTotal: (rate: number, quantity: number) => number;
   serviceOptions: BaseOption[];
@@ -87,7 +87,7 @@ function LineItemRow({
             defaultValue={descriptionController.field.value}
             onValueChange={(value) => {
               descriptionController.field.onChange(value);
-              onServiceChange(value);
+              onServiceChange(Number(value));
             }}
           />
           {descriptionController.fieldState.error && (
@@ -175,7 +175,7 @@ export function InvoiceItemsSection({
   });
 
   const addLineItem = () => {
-    append({ description: "", rate: 0, quantity: 1 });
+    append({ description: "", rate: 0, quantity: 1, serviceId: 0 });
   };
 
   const removeLineItem = (index: number) => {
@@ -184,13 +184,14 @@ export function InvoiceItemsSection({
     }
   };
 
-  const handleServiceChange = (index: number, serviceId: string) => {
+  const handleServiceChange = (index: number, serviceId: number) => {
     const selectedService = services.find(
-      (service) => service.id.toString() === serviceId,
+      (service) => service.id === serviceId,
     );
     if (selectedService) {
-      setValue(`lineItems.${index}.description`, serviceId);
-      setValue(`lineItems.${index}.rate`, selectedService.price ?? 0);
+      setValue(`lineItems.${index}.description`, selectedService.name, { shouldValidate: true });
+      setValue(`lineItems.${index}.serviceId`, serviceId, { shouldValidate: true });
+      setValue(`lineItems.${index}.rate`, selectedService.price ?? 0, { shouldValidate: true });
     }
   };
 
@@ -240,7 +241,7 @@ export function InvoiceItemsSection({
             index={index}
             fieldId={field.id}
             onRemove={() => removeLineItem(index)}
-            onServiceChange={(serviceId) => handleServiceChange(index, serviceId)}
+            onServiceChange={(serviceId: number) => handleServiceChange(index, serviceId)}
             canRemove={fields.length > 1}
             calculateLineTotal={calculateLineTotal}
             serviceOptions={serviceOptions}

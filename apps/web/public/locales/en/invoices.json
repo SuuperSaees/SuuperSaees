@@ -100,5 +100,13 @@
         "backButton": "Back"
       }
     }
+  },
+  "errors": {
+    "failedToCreateInvoice": "Failed to create invoice",
+    "failedToCreateInvoiceDraft": "Failed to save invoice as draft"
+  },
+  "success": {
+    "invoiceCreated": "Invoice created successfully",
+    "invoiceDraftCreated": "Invoice saved as draft"
   }
 }

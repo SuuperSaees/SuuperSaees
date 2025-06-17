@@ -99,5 +99,13 @@
         }
       }
     }
+  },
+  "errors": {
+    "failedToCreateInvoice": "Error al crear la factura",
+    "failedToCreateInvoiceDraft": "Error al guardar la factura como borrador"
+  },
+  "success": {
+    "invoiceCreated": "Factura creada correctamente",
+    "invoiceDraftCreated": "Factura guardada como borrador"
   }
 }

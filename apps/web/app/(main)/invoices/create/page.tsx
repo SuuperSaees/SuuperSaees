@@ -1,12 +1,12 @@
 import { PageBody } from "@kit/ui/page";
 import { PageHeader } from "~/(main)/../components/page-header";
 import { TimerContainer } from "~/(main)/../components/timer-container";
-import { Alert } from "~/(main)/../components/shared/export-csv-button/alert";
+// import { Alert } from "~/(main)/../components/shared/export-csv-button/alert";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
-import { InvoiceSettingsLink } from "./components/settings-link";
+// import { InvoiceSettingsLink } from "./components/settings-link";
 import { InvoiceForm } from "./components/form/form";
-import { Trans } from "@kit/ui/trans";
+// import { Trans } from "@kit/ui/trans";
 import { getClients } from "~/server/actions/clients/get-clients";
 import { loadUserWorkspace } from "~/(main)/home/(user)/_lib/server/load-user-workspace";
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
@@ -33,19 +33,19 @@ async function CreateInvoicesPage() {
 
 
   return (
-    <PageBody>
+    <PageBody className="h-full">
       <PageHeader
         title="invoices:creation.title"
         rightContent={<TimerContainer />}
         className="w-full"
       />
-      <Alert
+      {/* <Alert
         description={<Trans i18nKey="invoices:creation.warning.description" />}
         visible={true}
         action={<InvoiceSettingsLink />}
         type="info"
-      />
-      <InvoiceForm clients={clients} services={services} />
+      /> */}
+      <InvoiceForm clients={clients} services={services} agencyId={agencyId} />
     </PageBody>
   );
 }
