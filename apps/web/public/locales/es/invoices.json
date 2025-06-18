@@ -1,5 +1,30 @@
 {
   "title": "Facturas",
+  "number": "Número",
+  "organization": "Organización",
+  "paymentMethod": "Método de pago",
+  "status": "Estado",
+  "createdAt": "Creado el",
+  "actions": "Acciones",
+  "search": "Buscar facturas...",
+  "empty": {
+    "title": "No se encontraron facturas",
+    "description": "Comienza creando tu primera factura."
+  },
+  "paid": "Pagado",
+  "issued": "Emitido",
+  "partiallyPaid": "Parcialmente pagado",
+  "draft": "Borrador",
+  "overdue": "Vencido",
+  "cancelled": "Cancelado",
+  "voided": "Anulado",
+  "openMenu": "Abrir menú",
+  "download": "Descargar",
+  "markAsPaid": "Marcar como pagado",
+  "requestPaymentByEmail": "Solicitar pago por email",
+  "getPaymentLink": "Obtener enlace de pago",
+  "paymentLinkCopied": "¡Enlace de pago copiado!",
+  "delete": "Eliminar",
   "creation": {
     "title": "Nueva factura",
     "warning": {
@@ -102,10 +127,23 @@
   },
   "errors": {
     "failedToCreateInvoice": "Error al crear la factura",
-    "failedToCreateInvoiceDraft": "Error al guardar la factura como borrador"
+    "failedToCreateInvoiceDraft": "Error al guardar la factura como borrador",
+    "failedToUpdateInvoice": "Error al actualizar la factura",
+    "failedToDeleteInvoice": "La factura no pudo ser eliminada",
+    "failedToSendEmail": "Error al enviar el email"
   },
   "success": {
     "invoiceCreated": "Factura creada correctamente",
-    "invoiceDraftCreated": "Factura guardada como borrador"
+    "invoiceDraftCreated": "Factura guardada como borrador",
+    "invoiceUpdated": "Factura actualizada correctamente!",
+    "invoiceDeleted": "Factura eliminada correctamente!",
+    "emailSent": "Email enviado correctamente!"
+  },
+  "loading": {
+    "updating": "Actualizando...",
+    "updatingInvoice": "Actualizando factura...",
+    "updatingInvoiceStatus": "Actualizando estado de la factura...",
+    "deletingInvoice": "Eliminando factura...",
+    "sendingEmail": "Enviando email..."
   }
 }

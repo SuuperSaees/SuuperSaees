@@ -1,5 +1,6 @@
 {
   "error": {
+    "title": "Something went wrong!",
     "toastError": "Error",
     "default": "Something went wrong while processing your request. Please try again.",
     "copyToClipboard": "Failed to copy link to clipboard.",
@@ -79,6 +80,7 @@
     }
   },
   "success": {
+    "title": "All set!",
     "toastSuccess": "Success",
     "default": "Operation completed successfully.",
     "copyToClipboard": "Link copied to clipboard.",
@@ -137,6 +139,7 @@
     }
   },
   "loading": {
+    "title": "Just a moment...",
     "embeds": {
       "removingAccountFromEmbed": "Removing account from embed...",
       "updatingEmbed": "Updating embed...",

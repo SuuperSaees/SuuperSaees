@@ -1,5 +1,30 @@
 {
   "title": "Invoices",
+  "number": "Number",
+  "organization": "Organization",
+  "paymentMethod": "Payment method",
+  "status": "Status",
+  "createdAt": "Created at",
+  "actions": "Actions",
+  "search": "Search invoices...",
+  "empty": {
+    "title": "No invoices found",
+    "description": "Get started by creating your first invoice."
+  },
+  "paid": "Paid",
+  "issued": "Issued",
+  "partiallyPaid": "Partially paid",
+  "draft": "Draft",
+  "overdue": "Overdue",
+  "cancelled": "Cancelled",
+  "voided": "Voided",
+  "openMenu": "Open menu",
+  "download": "Download",
+  "markAsPaid": "Mark as paid",
+  "requestPaymentByEmail": "Request payment by email",
+  "getPaymentLink": "Get payment link",
+  "paymentLinkCopied": "Payment link copied!",
+  "delete": "Delete",
   "creation": {
     "title": "New invoice",
     "warning": {
@@ -103,10 +128,23 @@
   },
   "errors": {
     "failedToCreateInvoice": "Failed to create invoice",
-    "failedToCreateInvoiceDraft": "Failed to save invoice as draft"
+    "failedToCreateInvoiceDraft": "Failed to save invoice as draft",
+    "failedToUpdateInvoice": "Failed to update invoice",
+    "failedToDeleteInvoice": "The invoice could not be deleted",
+    "failedToSendEmail": "Failed to send email"
   },
   "success": {
     "invoiceCreated": "Invoice created successfully",
-    "invoiceDraftCreated": "Invoice saved as draft"
+    "invoiceDraftCreated": "Invoice saved as draft",
+    "invoiceUpdated": "Invoice updated successfully!",
+    "invoiceDeleted": "Invoice deleted successfully!",
+    "emailSent": "Email sent successfully!"
+  },
+  "loading": {
+    "updating": "Updating...",
+    "updatingInvoice": "Updating invoice...",
+    "updatingInvoiceStatus": "Updating invoice status...",
+    "deletingInvoice": "Deleting invoice...",
+    "sendingEmail": "Sending email..."
   }
 }
