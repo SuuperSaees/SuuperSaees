@@ -27,7 +27,6 @@ type HandlePaymentProps = {
   service: Service.Relationships.Billing.BillingService;
   values: ValuesProps;
   stripeId: string;
-  organizationId: string;
   paymentMethodId: string;
   coupon: string;
   quantity?: number;
@@ -39,7 +38,6 @@ export const handleSubmitPayment = async ({
   service,
   values,
   stripeId,
-  organizationId,
   paymentMethodId,
   coupon,
   quantity,
@@ -78,7 +76,6 @@ export const handleSubmitPayment = async ({
           service,
           values,
           stripeId,
-          organizationId,
           paymentMethodId,
           coupon,
           sessionId: sessionCreated?.id ?? '',
@@ -89,7 +86,6 @@ export const handleSubmitPayment = async ({
           service,
           values,
           stripeId,
-          organizationId,
           paymentMethodId,
           coupon,
           sessionId: sessionCreated?.id ?? '',

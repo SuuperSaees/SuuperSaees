@@ -28,7 +28,6 @@ type HandlePaymentStripeProps = {
   service: Service.Relationships.Billing.BillingService;
   values: ValuesProps;
   stripeId: string;
-  organizationId: string;
   paymentMethodId: string;
   coupon: string;
   sessionId: string;
@@ -68,7 +67,6 @@ export const handleRecurringPayment = async ({
   service,
   values,
   stripeId,
-  organizationId,
   paymentMethodId,
   coupon,
   sessionId,
@@ -250,7 +248,6 @@ export const handleOneTimePayment = async ({
   service,
   values,
   stripeId,
-  organizationId,
   paymentMethodId,
   coupon,
   sessionId,

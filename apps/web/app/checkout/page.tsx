@@ -137,7 +137,6 @@ async function ServiceCheckoutPage({
                 }
                 invoice={invoice as Invoice.Response}
                 stripeId={accountId}
-                organizationId={tokendecoded?.organization_id ?? ''}
                 logoUrl={logoUrl ?? suuperLogo ?? ''}
                 sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
                 paymentMethods={paymentMethods.paymentMethods ?? []}

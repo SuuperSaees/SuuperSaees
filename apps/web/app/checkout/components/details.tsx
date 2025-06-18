@@ -20,7 +20,6 @@ type DetailsSideProps = {
   service: ServiceType;
   invoice?: Invoice.Response;
   stripeId: string;
-  organizationId: string;
   logoUrl: string;
   sidebarBackgroundColor: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
@@ -30,7 +29,6 @@ type DetailsSideProps = {
 const DetailsSide: React.FC<DetailsSideProps> = ({
   service,
   stripeId,
-  organizationId,
   logoUrl,
   sidebarBackgroundColor,
   paymentMethods,
@@ -54,7 +52,6 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
         service={service}
         invoice={invoice}
         stripeId={stripeId}
-        organizationId={organizationId}
         logoUrl={logoUrl}
         sidebarBackgroundColor={sidebarBackgroundColor}
         paymentMethods={paymentMethods ?? []}

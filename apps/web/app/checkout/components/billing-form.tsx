@@ -42,7 +42,6 @@ const BillingForm: React.FC<{
   service?: Service.Relationships.Billing.BillingService;
   invoice?: Invoice.Response;
   stripeId: string;
-  organizationId: string;
   logoUrl: string;
   sidebarBackgroundColor: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
@@ -50,7 +49,6 @@ const BillingForm: React.FC<{
 }> = ({
   service,
   stripeId,
-  organizationId,
   logoUrl,
   sidebarBackgroundColor,
   paymentMethods,
@@ -195,7 +193,6 @@ const BillingForm: React.FC<{
         service,
         values: form.getValues(),
         stripeId,
-        organizationId,
         paymentMethodId: paymentMethod.id,
         coupon: form.getValues('discount_coupon'),
         quantity: quantity,
