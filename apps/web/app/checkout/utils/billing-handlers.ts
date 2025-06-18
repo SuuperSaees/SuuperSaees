@@ -4,6 +4,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '~/utils/credentials-crypto';
+import { createCheckoutWithService } from '../../server/actions/checkouts/checkouts.action';
 
 type ValuesProps = {
   fullName: string;
@@ -67,6 +68,7 @@ export const handleRecurringPayment = async ({
   service,
   values,
   stripeId,
+  organizationId,
   paymentMethodId,
   coupon,
   sessionId,
@@ -103,7 +105,25 @@ export const handleRecurringPayment = async ({
 
     return data.clientSecret;
   } else if(selectedPaymentMethod === 'manual_payment') {
-    console.log('Manual payment method selected, no action taken.');
+    try {
+      // Solo crear checkout con servicio - el webhook se encargará del resto
+      const checkout = await createCheckoutWithService({
+        provider: 'manual',
+        provider_id: sessionId,
+        service_id: service.id,
+        quantity: 1,
+        status: 'pending',
+      });
+
+      return {
+        success: true,
+        checkout: checkout,
+        message: 'Manual payment checkout created successfully',
+      };
+    } catch (error) {
+      console.error('Error creating manual payment checkout:', error);
+      throw new Error(`Failed to create manual payment checkout: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   } else  {
     // here manage payment method treli
     const client = getSupabaseServerComponentClient({
@@ -230,6 +250,7 @@ export const handleOneTimePayment = async ({
   service,
   values,
   stripeId,
+  organizationId,
   paymentMethodId,
   coupon,
   sessionId,
@@ -264,6 +285,26 @@ export const handleOneTimePayment = async ({
     }
 
     return data.clientSecret;
+  } else if(selectedPaymentMethod === 'manual_payment') {
+    try {
+      // Solo crear checkout con servicio - el webhook se encargará del resto
+      const checkout = await createCheckoutWithService({
+        provider: 'manual',
+        provider_id: sessionId,
+        service_id: service.id,
+        quantity: quantity ?? 1,
+        status: 'pending',
+      });
+
+      return {
+        success: true,
+        checkout: checkout,
+        message: 'Manual payment checkout created successfully',
+      };
+    } catch (error) {
+      console.error('Error creating manual payment checkout:', error);
+      throw new Error(`Failed to create manual payment checkout: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   } else {
     // here manage payment method treli
     const client = getSupabaseServerComponentClient({

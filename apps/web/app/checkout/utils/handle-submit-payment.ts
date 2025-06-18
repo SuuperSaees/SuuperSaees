@@ -20,6 +20,7 @@ type ValuesProps = {
   card_number?: string;
   card_expiration_date?: string;
   card_cvv?: string;
+  manual_payment_info?: string;
 };
 
 type HandlePaymentProps = {
@@ -46,6 +47,19 @@ export const handleSubmitPayment = async ({
   baseUrl,
 }: HandlePaymentProps) => {
   try {
+    const metadata = {
+      manual_payment_info: '',
+      discount_coupon: '',
+    };
+    
+    if (selectedPaymentMethod === 'manual_payment' && values.manual_payment_info) {
+      metadata.manual_payment_info = values.manual_payment_info;
+    }
+    
+    if (values.discount_coupon) {
+      metadata.discount_coupon = values.discount_coupon;
+    }
+
     const sessionCreated = await createSession({
       client_address: values.address,
       client_city: values.city,
@@ -56,6 +70,7 @@ export const handleSubmitPayment = async ({
       client_postal_code: values.postal_code,
       provider: 'suuper',
       provider_id: null,
+      metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
     });
 
     const responseRecurringOrOneTimePayment = service.recurring_subscription
