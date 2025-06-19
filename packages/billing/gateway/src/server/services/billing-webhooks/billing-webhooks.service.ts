@@ -7,10 +7,14 @@ import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../apps/web/lib/services.types';
 import { Subscription } from '../../../../../../../apps/web/lib/subscriptions.types';
 import { Checkout } from '../../../../../../../apps/web/lib/checkout.types';
+import { Activity } from '../../../../../../../apps/web/lib/activity.types';
 import { getSessionById } from '../../../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
 import { createClient } from '../../../../../../features/team-accounts/src/server/actions/clients/create/create-clients';
 import { insertServiceToClient } from '../../../../../../features/team-accounts/src/server/actions/services/create/create-service';
 import { createBillingGatewayService } from '../billing-gateway/billing-gateway.service';
+import { ActivityService } from '../../../../../../webhooks/src/server/services/shared/activity.service';
+import { Session } from '../../../../../../../apps/web/lib/sessions.types';
+import { Invoice } from '../../../../../../../apps/web/lib/invoice.types';
 
 export function createBillingWebhooksService(
   adminClient: SupabaseClient<Database>,
@@ -25,11 +29,14 @@ export function createBillingWebhooksService(
  */
 class BillingWebhooksService {
   private readonly ClientRoleManualPayment = 'client_owner';
+  private readonly activityService: ActivityService;
 
   constructor(
     private readonly adminClient: SupabaseClient<Database>,
     private readonly baseUrl: string,
-  ) {}
+  ) {
+    this.activityService = new ActivityService(adminClient);
+  }
 
   /**
    * @name handleCheckoutCreatedWebhook
@@ -60,7 +67,7 @@ class BillingWebhooksService {
         await this.adminClient
           .from('checkouts')
           .select(
-            'id, checkout_services(service_id, services(name, propietary_organization_id))',
+            'id, checkout_services(service_id, services(name, propietary_organization_id, price, currency, recurring_subscription))',
           )
           .eq('id', checkout.id)
           .single();
@@ -76,8 +83,11 @@ class BillingWebhooksService {
 
       const serviceData = checkoutServiceData.checkout_services[0];
       const serviceId = serviceData.service_id;
-      // const serviceName = serviceData.services?.name;
+      const serviceName = serviceData.services?.name;
       const agencyOwnerId = serviceData.services?.propietary_organization_id;
+      const servicePrice = serviceData.services?.price ?? 0;
+      const serviceCurrency = serviceData.services?.currency ?? 'USD';
+      const isRecurring = serviceData.services?.recurring_subscription ?? false;
 
       // 3. Get agency information
       const { data: accountDataAgencyOwnerData, error: accountDataAgencyOwnerError } =
@@ -180,7 +190,23 @@ class BillingWebhooksService {
         agencyOrganizationId ?? '',
       );
 
-      // 9. Mark the session as deleted
+      const metadata = session.metadata as { quantity?: number };
+
+      // 9. Generate invoice, invoice items and invoice payment for manual payment
+      await this.handleManualPaymentInvoiceGeneration({
+        session: session as Session.Type,
+        agencyOrganizationId: agencyOrganizationId ?? '',
+        clientOrganizationId: clientOrganizationId ?? '',
+        userClientId: accountClientData?.id ?? client?.success?.data?.user_client_id ?? '',
+        serviceId: serviceId ?? 0,
+        serviceName: serviceName ?? '',
+        servicePrice,
+        serviceCurrency,
+        isRecurring,
+        checkoutServiceQuantity: metadata?.quantity ?? 1,
+      });
+
+      // 10. Mark the session as deleted
       await this.adminClient
         .from('sessions')
         .update({
@@ -206,6 +232,251 @@ class BillingWebhooksService {
       console.error('Error handling checkout created webhook:', error);
       throw error;
     }
+  }
+
+  /**
+   * @name handleManualPaymentInvoiceGeneration
+   * @description Generates invoice, invoice items and invoice payment for manual payments
+   */
+  private async handleManualPaymentInvoiceGeneration({
+    session,
+    agencyOrganizationId,
+    clientOrganizationId,
+    userClientId,
+    serviceId,
+    serviceName,
+    servicePrice,
+    serviceCurrency,
+    isRecurring,
+    checkoutServiceQuantity,
+  }: {
+    session: Session.Type;
+    agencyOrganizationId: string;
+    clientOrganizationId: string;
+    userClientId: string;
+    serviceId: number;
+    serviceName: string;
+    servicePrice: number;
+    serviceCurrency: string;
+    isRecurring: boolean;
+    checkoutServiceQuantity: number;
+  }) {
+    try {
+      console.log('Generating manual payment invoice for session:', session.id);
+
+      // Parse metadata to get payment details
+      let metadata = {
+        quantity: 1,
+        manual_payment_info: '',
+        discount_coupon: '',
+      };
+      if (session.metadata) {
+        try {
+          metadata = typeof session.metadata === 'string' 
+            ? JSON.parse(session.metadata) 
+            : session.metadata;
+        } catch (error) {
+          console.warn('Error parsing session metadata:', error);
+          metadata = {
+            quantity: 1,
+            manual_payment_info: '',
+            discount_coupon: '',
+          };
+        }
+      }
+
+      // Get quantity from metadata or use checkout service quantity
+      const quantity = metadata.quantity ?? checkoutServiceQuantity ?? 1;
+      const manualPaymentInfo = metadata.manual_payment_info;
+      const discountCoupon = metadata.discount_coupon;
+
+      // Calculate amounts
+      const unitPrice = servicePrice;
+      const subtotalAmount = unitPrice * quantity;
+      const taxAmount = 0; // You can add tax calculation logic here if needed
+      const totalAmount = subtotalAmount + taxAmount;
+
+      // Generate unique invoice number
+      const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+      // Prepare invoice data
+      const issueDate = new Date().toISOString().split('T')[0];
+      const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 30 days from now
+      const invoiceData: Invoice.Insert = {
+        agency_id: agencyOrganizationId,
+        client_organization_id: clientOrganizationId,
+        number: invoiceNumber,
+        issue_date: issueDate,
+        due_date: dueDate as string,
+        status: 'paid' as const, // Manual payments are marked as paid immediately
+        subtotal_amount: subtotalAmount,
+        tax_amount: taxAmount,
+        total_amount: totalAmount,
+        currency: serviceCurrency.toUpperCase(),
+        notes: this.buildInvoiceNotes({
+          serviceName,
+          isRecurring,
+          clientName: session.client_name ?? '',
+          clientEmail: session.client_email ?? '',
+          manualPaymentInfo,
+          discountCoupon,
+        }),
+      };
+
+      // Create the invoice
+      const { data: createdInvoice, error: invoiceError } = await this.adminClient
+        .from('invoices')
+        .insert(invoiceData)
+        .select('id, number')
+        .single();
+
+      if (invoiceError) {
+        throw new Error(`Failed to create invoice: ${invoiceError.message}`);
+      }
+
+      console.log('Invoice created successfully:', createdInvoice.id);
+
+      // Create invoice items
+      const invoiceItemData = {
+        invoice_id: createdInvoice.id,
+        service_id: serviceId,
+        description: this.buildItemDescription(serviceName, isRecurring),
+        quantity: quantity,
+        unit_price: unitPrice,
+        total_price: subtotalAmount,
+      };
+
+      const { error: itemsError } = await this.adminClient
+        .from('invoice_items')
+        .insert(invoiceItemData);
+
+      if (itemsError) {
+        console.error('Error creating invoice items:', itemsError);
+        throw new Error(`Failed to create invoice items: ${itemsError.message}`);
+      }
+
+      console.log('Invoice items created successfully');
+
+      // Record the manual payment
+      const paymentData = {
+        invoice_id: createdInvoice.id,
+        payment_method: 'manual' as const,
+        amount: totalAmount,
+        currency: serviceCurrency.toLowerCase(),
+        status: 'succeeded' as const,
+        payment_date: new Date().toISOString(),
+        reference_number: `MAN-${Date.now()}`,
+        notes: this.buildPaymentNotes({
+          serviceName,
+          manualPaymentInfo,
+          discountCoupon,
+        }),
+      };
+
+      const { error: paymentError } = await this.adminClient
+        .from('invoice_payments')
+        .insert(paymentData);
+
+      if (paymentError) {
+        console.error('Error recording manual payment:', paymentError);
+        throw new Error(`Failed to record manual payment: ${paymentError.message}`);
+      }
+
+      console.log('Manual payment recorded successfully');
+
+      // Create activity for invoice creation
+      await this.activityService.createActivity({
+        action: 'create',
+        actor: 'System',
+        message: 'has created',
+        type: Activity.Enums.ActivityType.INVOICE,
+        clientId: userClientId,
+        invoiceId: createdInvoice.id,
+        value: createdInvoice.number,
+      });
+
+      console.log('Activity created for invoice generation');
+
+      return {
+        invoiceId: createdInvoice.id,
+        invoiceNumber: createdInvoice.number,
+        totalAmount,
+      };
+
+    } catch (error) {
+      console.error('Error generating manual payment invoice:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * @name buildInvoiceNotes
+   * @description Builds comprehensive notes for the invoice
+   */
+  private buildInvoiceNotes({
+    serviceName,
+    isRecurring,
+    clientName,
+    clientEmail,
+    manualPaymentInfo,
+    discountCoupon,
+  }: {
+    serviceName: string;
+    isRecurring: boolean;
+    clientName?: string;
+    clientEmail?: string;
+    manualPaymentInfo?: string;
+    discountCoupon?: string;
+  }): string {
+    let notes = `Manual payment for ${isRecurring ? 'recurring' : 'one-time'} service: ${serviceName}`;
+    
+    if (clientName && clientEmail) {
+      notes += `\nCustomer: ${clientName} (${clientEmail})`;
+    }
+    
+    if (discountCoupon) {
+      notes += `\nDiscount coupon applied: ${discountCoupon}`;
+    }
+    
+    if (manualPaymentInfo) {
+      notes += `\nPayment details: ${manualPaymentInfo}`;
+    }
+    
+    return notes;
+  }
+
+  /**
+   * @name buildItemDescription
+   * @description Builds description for invoice items
+   */
+  private buildItemDescription(serviceName: string, isRecurring: boolean): string {
+    return `${serviceName} (${isRecurring ? 'Recurring subscription' : 'One-time payment'})`;
+  }
+
+  /**
+   * @name buildPaymentNotes
+   * @description Builds notes for payment records
+   */
+  private buildPaymentNotes({
+    serviceName,
+    manualPaymentInfo,
+    discountCoupon,
+  }: {
+    serviceName: string;
+    manualPaymentInfo?: string;
+    discountCoupon?: string;
+  }): string {
+    let notes = `Manual payment for service: ${serviceName}`;
+    
+    if (discountCoupon) {
+      notes += ` (Coupon: ${discountCoupon})`;
+    }
+    
+    if (manualPaymentInfo) {
+      notes += ` - ${manualPaymentInfo}`;
+    }
+    
+    return notes;
   }
 
   /**

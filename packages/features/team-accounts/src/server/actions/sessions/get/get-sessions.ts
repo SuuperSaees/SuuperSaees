@@ -9,7 +9,7 @@ export const getSessionById = async (sessionId: Session.Type['id']) => {
     const client = getSupabaseServerComponentClient({ admin: true });
     const { data: sessionInfo, error: sessionInfoError } = await client
       .from('sessions')
-      .select('client_name, client_email')
+      .select('client_name, client_email, metadata')
       .eq('id', sessionId)
       .single();
 
