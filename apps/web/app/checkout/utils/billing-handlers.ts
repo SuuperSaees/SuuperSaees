@@ -106,11 +106,9 @@ export const handleRecurringPayment = async ({
     try {
       // Solo crear checkout con servicio - el webhook se encargará del resto
       const checkout = await createCheckout({
-        provider: 'manual',
+        provider: 'suuper',
         provider_id: sessionId,
         service_id: service.id,
-        quantity: 1,
-        status: 'pending',
       });
 
       return {
@@ -286,11 +284,9 @@ export const handleOneTimePayment = async ({
     try {
       // Solo crear checkout con servicio - el webhook se encargará del resto
       const checkout = await createCheckout({
-        provider: 'manual',
+        provider: 'suuper',
         provider_id: sessionId,
         service_id: service.id,
-        quantity: quantity ?? 1,
-        status: 'pending',
       });
 
       return {
