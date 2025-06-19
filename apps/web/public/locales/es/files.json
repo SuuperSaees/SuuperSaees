@@ -6,6 +6,8 @@
     "error": "Carga fallida",
     "success": "Carga completada"
   },
+  "corrupted": "Archivo incompleto o dañado",
+  "validating": "Validando archivo...",
   "preview": {
     "error": {
       "title": "No se pudo mostrar este archivo",

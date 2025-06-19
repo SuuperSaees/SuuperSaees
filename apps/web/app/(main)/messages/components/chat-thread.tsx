@@ -1,30 +1,30 @@
-'use client';
+"use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
-import { useQuery } from '@tanstack/react-query';
-import { Editor } from '@tiptap/react';
-import { EllipsisVertical, Trash2 } from 'lucide-react';
+import { useQuery } from "@tanstack/react-query";
+import { Editor } from "@tiptap/react";
+import { EllipsisVertical, Trash2 } from "lucide-react";
 
-import { Button } from '@kit/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@kit/ui/popover';
+import { Button } from "@kit/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@kit/ui/popover";
 
-import { File } from '~/lib/file.types';
-import { Members } from '~/lib/members.types';
-import { getAccountPlugin } from '~/server/actions/account-plugins/account-plugins.action';
+import { File } from "~/lib/file.types";
+import { Members } from "~/lib/members.types";
+import { getAccountPlugin } from "~/server/actions/account-plugins/account-plugins.action";
 
-import LoomRecordButton from '../../apps/components/loom-record-button';
+import LoomRecordButton from "../../apps/components/loom-record-button";
 import {
   InternalMessagesToggle,
   useInternalMessaging,
-} from '../../../components/messages';
-import RichTextEditor from '../../../components/messages/rich-text-editor';
-import { FileUpload } from '../../../components/messages/types';
-import { TimerContainer } from '../../../components/timer-container';
-import ChatEmptyState from './chat-empty-state';
-import ChatMembersSelector from './chat-members-selector';
-import { useChat } from './context/chat-context';
-import MessageList from './message-list';
+} from "../../../components/messages";
+import RichTextEditor from "../../../components/messages/rich-text-editor";
+import { FileUpload } from "../../../components/messages/types";
+import { TimerContainer } from "../../../components/timer-container";
+import ChatEmptyState from "./chat-empty-state";
+import ChatMembersSelector from "./chat-members-selector";
+import { useChat } from "./context/chat-context";
+import MessageList from "./message-list";
 
 export default function ChatThread({
   agencyTeam,
@@ -45,6 +45,8 @@ export default function ChatThread({
     setActiveChat,
     setMembers,
     handleFileUpload,
+    fileUploads,
+    handleFileRemove,
   } = useChat();
   const userId = user.id;
   const chatById = chatByIdQuery.data;
@@ -54,7 +56,7 @@ export default function ChatThread({
   };
 
   const handleDelete = () => {
-    deleteChatMutation.mutate(activeChat?.id ?? '');
+    deleteChatMutation.mutate(activeChat?.id ?? "");
   };
 
   const handleUpdate = async (name: string) => {
@@ -64,25 +66,28 @@ export default function ChatThread({
   const handleSendMessage = async (
     message: string,
     fileUploads?: FileUpload[],
-    setUploads?: Dispatch<SetStateAction<FileUpload[]>>,
   ) => {
     const messageId = crypto.randomUUID();
     let filesToAdd: File.Insert[] | undefined = undefined;
     // add the files to the bd
     if (fileUploads) {
-      filesToAdd = [...fileUploads].map((upload) => {
-        const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chats/${chatByIdQuery.data?.id}/uploads/${upload.id}`;
-        const tempId = crypto.randomUUID();
-        return {
-          name: upload.file.name,
-          size: upload.file.size,
-          type: upload.file.type,
-          url: fileUrl,
-          message_id: messageId,
-          user_id: userId,
-          temp_id: tempId,
-        };
-      });
+      filesToAdd = [...fileUploads]
+        .map((upload) => {
+          if (upload.status === "error") return null;
+          const fileUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/chats/${chatByIdQuery.data?.id}/uploads/${upload.id}`;
+          const tempId = crypto.randomUUID();
+          return {
+            id: upload.id ?? undefined,
+            name: upload.file.name,
+            size: upload.file.size,
+            type: upload.file.type,
+            url: fileUrl,
+            message_id: messageId,
+            user_id: userId,
+            temp_id: tempId,
+          };
+        })
+        .filter((f) => f !== null);
 
       const newMessage = {
         id: messageId,
@@ -90,32 +95,21 @@ export default function ChatThread({
         user_id: userId,
         temp_id: messageId,
         visibility: getInternalMessagingEnabled()
-          ? ('internal_agency' as const)
-          : ('public' as const),
+          ? ("internal_agency" as const)
+          : ("public" as const),
       };
-      if (setUploads) {
-        // Since we're going to add the files to the bd, we need to update the current upload to be pending
-        setUploads((prev) =>
-          prev.map((upload) => ({ ...upload, status: 'uploading' })),
-        );
-      }
+
       await addMessageMutation.mutateAsync({
         message: newMessage,
         files: filesToAdd,
       });
-      if (setUploads) {
-        // Since we're going to add the files to the bd, we need to update the current upload to be pending
-        setUploads((prev) =>
-          prev.map((upload) => ({ ...upload, status: 'success' })),
-        );
-      }
     }
   };
 
   const { data: accountPluginData, isLoading: isAccountPluginLoading } =
     useQuery({
-      queryKey: ['account-plugins', user.id],
-      queryFn: async () => await getAccountPlugin(undefined, 'loom'),
+      queryKey: ["account-plugins", user.id],
+      queryFn: async () => await getAccountPlugin(undefined, "loom"),
       enabled: !!user.id,
       retry: 1,
     });
@@ -127,7 +121,52 @@ export default function ChatThread({
     }
   }, [chatByIdQuery.data, setMembers]);
 
-  // console.log('IS CREATING MESSAGE', addMessageMutation.isPending );
+  /**
+   * Handles file uploads for the current chat
+   *
+   * @param file - The file to upload
+   * @param fileId - Unique identifier for the upload
+   * @param onProgress - Callback to update upload state in the UI
+   * @returns Promise resolving to the uploaded file path
+   * @throws Error if no active chat or upload fails
+   */
+  const handleRichTextEditorFileUpload = useCallback(
+    async (file: File, onProgress: (upload: FileUpload) => void) => {
+      try {
+        await handleFileUpload(file, (uploadState) => {
+          // Convert FileUploadState to FileUpload and call the progress callback
+
+          onProgress(uploadState);
+        });
+      } catch (error) {
+        console.error("File upload failed:", error);
+        // Report error state
+        throw error;
+      }
+    },
+    [handleFileUpload],
+  );
+
+
+  // handle before unload
+  useEffect(() => {
+    const isUploading = fileUploads.some(
+      (upload) => upload.status === "uploading",
+    );
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = ""; // Required for Chrome to trigger the dialog
+    };
+
+    // Enable the prompt (e.g., when uploading is active)
+    if (isUploading) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [fileUploads]);
 
   if (!activeChat) {
     return <ChatEmptyState />;
@@ -137,6 +176,7 @@ export default function ChatThread({
   const isOwner = chatById?.user_id === user.id;
   const canEditName =
     isOwner || chatById?.members?.some((member) => member.id === user.id);
+
   return (
     <div className="relative flex h-full min-w-0 flex-col">
       {/* Header */}
@@ -169,7 +209,9 @@ export default function ChatThread({
           <ChatMembersSelector
             agencyTeam={agencyTeam}
             selectedMembers={
-              chatById?.members?.filter((member) => member.visibility && !member.deleted_on) ?? []
+              chatById?.members?.filter(
+                (member) => member.visibility && !member.deleted_on,
+              ) ?? []
             }
             onMembersUpdate={handleMembersUpdate}
             isLoading={isLoading}
@@ -208,12 +250,13 @@ export default function ChatThread({
           onComplete={handleSendMessage}
           showToolbar={true}
           isEditable={true}
-          onFileUpload={handleFileUpload}
+          onFileUpload={handleRichTextEditorFileUpload}
+          onFileRemove={handleFileRemove}
           customActionButtons={[
             (editor: Editor) => (
               <LoomRecordButton
                 onAction={(text: string) => editor.commands.setContent(text)}
-                loomAppId={accountPluginData?.credentials?.loom_app_id ?? ''}
+                loomAppId={accountPluginData?.credentials?.loom_app_id ?? ""}
                 isLoading={isAccountPluginLoading}
               />
             ),
@@ -221,9 +264,9 @@ export default function ChatThread({
               <InternalMessagesToggle
                 userRole={user.role}
                 allowedRoles={[
-                  'agency_member',
-                  'agency_project_manager',
-                  'agency_owner',
+                  "agency_member",
+                  "agency_project_manager",
+                  "agency_owner",
                 ]}
                 className="ml-2"
               />

@@ -1,6 +1,6 @@
 import Image from 'next/image';
 
-import { CheckCircle, X } from 'lucide-react';
+import { CheckCircle, X, AlertTriangle } from 'lucide-react';
 import { Progress } from 'node_modules/@kit/ui/src/shadcn/progress';
 import { useTranslation } from 'react-i18next';
 
@@ -24,6 +24,8 @@ interface FileUploadCardProps {
   onRemove?: (id: string) => void | Promise<void>;
   loadingMethod?: 'progress' | 'loading';
   showImagePreview?: boolean;
+  fileCorrupted?: boolean;
+  isValidating?: boolean;
 }
 
 const FileUploadCard: React.FC<FileUploadCardProps> = ({
@@ -37,6 +39,8 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
   loadingMethod = 'loading',
   showImagePreview = true,
   upload,
+  fileCorrupted = false,
+  isValidating = false,
 }) => {
   const formattedFileSize = fileSize ? 
   `${formatFileSize(fileSize * (upload?.progress ?? 0) / 100)} / ${formatFileSize(fileSize)}` 
@@ -45,6 +49,10 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
   const isImage = fileType.startsWith('image/');
 
   const getStatusColor = () => {
+    // File corruption takes precedence over upload status
+    if (fileCorrupted) return 'border-red-200 bg-red-50';
+    if (isValidating) return 'border-yellow-200 bg-yellow-50';
+    
     if (loadingMethod !== 'progress') return 'border-gray-200';
 
     switch (upload?.status) {
@@ -95,6 +103,18 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
         </div>
       )}
 
+      {fileCorrupted && (
+        <div className="absolute -right-2 -top-2 z-10 rounded-full border-2 border-white bg-red-500 p-0.5">
+          <AlertTriangle className="h-3 w-3 text-white" />
+        </div>
+      )}
+
+      {isValidating && !fileCorrupted && (
+        <div className="absolute -right-2 -top-2 z-10 rounded-full border-2 border-white bg-yellow-500 p-0.5">
+          <Spinner className="h-3 w-3 text-white" />
+        </div>
+      )}
+
       <div className="flex w-full items-center justify-between gap-3">
         {showImagePreview && upload?.url && isImage ? (
           <Image
@@ -130,7 +150,7 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
               ),
             }}
           >
-            <FileIcon extension={extension} size={size} error={upload?.status === 'error'}/>
+            <FileIcon extension={extension} size={size} error={upload?.status === 'error' || fileCorrupted}/>
           </div>
         )}
 
@@ -198,6 +218,21 @@ const FileUploadCard: React.FC<FileUploadCardProps> = ({
             </span>
           )}
         </>
+      )}
+
+      {/* File corruption/validation status */}
+      {fileCorrupted && (
+        <div className="flex items-center gap-1 text-xs font-medium text-red-500">
+          {/* <AlertTriangle className="h-3 w-3" /> */}
+          {t('corrupted', 'File corrupted or inaccessible')}
+        </div>
+      )}
+      
+      {isValidating && !fileCorrupted && (
+        <div className="flex items-center gap-1 text-xs font-medium text-yellow-600">
+          {/* <Spinner className="h-3 w-3" /> */}
+          {t('validating', 'Validating file...')}
+        </div>
       )}
     </div>
   );

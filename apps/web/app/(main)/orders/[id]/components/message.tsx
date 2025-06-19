@@ -18,6 +18,7 @@ import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
 import UserFile from "~/(main)/orders/[id]/components/user-file";
 import { FileViewerMode } from "../../../hocs/with-file-options";
 import { DataResult } from "../context/activity.types";
+import { useInView } from 'react-intersection-observer';
 
 interface ChatMessageProps {
   message: DataResult.Message;
@@ -30,6 +31,16 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
   const { user: currentUser } = useUserWorkspace();
   const { t } = useTranslation("orders");
   const [isOpen, setIsOpen] = useState(false);
+
+  // Use intersection observer to detect when message is in view
+  const { ref: elementRef, inView, entry } = useInView({
+    threshold: 0.1,
+    rootMargin: '100px', // Start validation a bit before the element is fully visible
+    triggerOnce: true, // Only trigger once for performance
+  });
+
+  // Track if the element has ever been in view for validation
+  const hasIntersected = inView || entry?.isIntersecting;
 
   const date = format(new Date(message.created_at), "MMM dd, p");
   const content = message.content ?? "";
@@ -74,7 +85,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full p-0 max-w-full min-w-0">
+    <div ref={elementRef} className="flex flex-col gap-2 w-full p-0 max-w-full min-w-0">
       <div className="flex justify-between w-full">
         <div className="flex gap-2">
           <span className="font-semibold">{displayName}</span>
@@ -121,6 +132,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
                   files={allFiles}
                   viewerMode={FileViewerMode.ANNOTATIONS}
                   upload={getFileUpload(file.id)}
+                  enableValidation={hasIntersected}
                   // onRemove={handleRemoveFile}
                 />
               ))}
