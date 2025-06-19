@@ -69,15 +69,26 @@ export default function BriefCompletionForm({
 
   const handleFilesChange = (uploads: FileUploadState[]) => {
     const filesToInsert: File.Insert[] = uploads.map(
-      (upload) => ({
-        name: upload.file.name ?? '',
-        size: upload.file.size ?? 0,
-        type: upload.file.type ?? '',
-        url: upload.url ?? '',
-        user_id: '',
-      }),
-    );
+        (upload) => ({
+          id: upload.id ?? undefined,
+          name: upload.file.name ?? '',
+          size: upload.file.size ?? 0,
+          type: upload.file.type ?? '',
+          url: upload.url ?? '',
+          user_id: '',
+        }),
+      );
     form.setValue('briefCompletion.files', filesToInsert);
+    const responseValue = filesToInsert.map((file) => file.url).join(',');
+    form.setValue('briefCompletion.files', responseValue as never);
+  };
+
+  const handleRemoveFile = (id: string) => {
+    const currentFiles = form.getValues('briefCompletion.files') as File.Insert[] || [];
+    const updatedFiles = currentFiles.filter((file) => file.id !== id);
+    form.setValue('briefCompletion.files', updatedFiles);
+    const responseValue = updatedFiles.map((file) => file.url).join(',');
+    form.setValue('briefCompletion.files', responseValue as never);
   };
 
   return (
@@ -139,6 +150,7 @@ export default function BriefCompletionForm({
                     // uuid={uniqueId}
                     // onFileIdsChange={handleFileIdsChange}
                     onFilesSelected={handleFilesChange}
+                    onRemoveFile={handleRemoveFile}
                   />
                 )}
               </>
