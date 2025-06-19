@@ -1,14 +1,14 @@
-import { Dispatch, ReactNode, SetStateAction } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from "react";
 
-import { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 
-import { FileUploadState } from '~/hooks/use-file-upload';
-import { ChatMembers } from '~/lib/chat-members.types';
-import { ChatMessages } from '~/lib/chat-messages.types';
-import { Chats } from '~/lib/chats.types';
-import { File } from '~/lib/file.types';
-import { Message } from '~/lib/message.types';
-import { User } from '~/lib/user.types';
+import { FileUploadState } from "~/hooks/use-file-upload";
+import { ChatMembers } from "~/lib/chat-members.types";
+import { ChatMessages } from "~/lib/chat-messages.types";
+import { Chats } from "~/lib/chats.types";
+import { File } from "~/lib/file.types";
+import { Message } from "~/lib/message.types";
+import { User } from "~/lib/user.types";
 
 /**
  * Interface for managing the active chat state
@@ -36,12 +36,12 @@ export interface ActiveChatState {
           | Chats.TypeWithRelations[]
           | ((prev: Chats.TypeWithRelations[]) => Chats.TypeWithRelations[]),
       ) => void);
+  fileUploads: FileUploadState[];
   handleFileUpload: (
     file: File,
-    fileId: string,
-    setUploads?: React.Dispatch<React.SetStateAction<FileUploadState[]>>,
-  ) => Promise<string>;
-  uploads: Record<string, FileUploadState>;
+    onComplete?: (upload: FileUploadState) => void,
+  ) => Promise<void>;
+  handleFileRemove: (id: string) => void;
 }
 
 /**
@@ -96,7 +96,12 @@ export interface ChatMutations {
   createChatMutation: UseMutationResult<
     Chats.Insert,
     Error,
-    { name: string; memberIds: string[]; clientOrganizationId: string; agencyId: string }
+    {
+      name: string;
+      memberIds: string[];
+      clientOrganizationId: string;
+      agencyId: string;
+    }
   >;
   /** Mutation for updating chat members */
   membersUpdateMutation: UseMutationResult<

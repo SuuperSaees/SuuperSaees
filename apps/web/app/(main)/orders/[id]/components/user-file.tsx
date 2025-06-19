@@ -21,6 +21,7 @@ interface UserFileProps {
   }
   onRemove?: (fileId: string) => void;
   upload?: FileUploadState;
+  enableValidation?: boolean;
 }
 
 const FilePreviewComponent = withFileOptions(FilePreview);
@@ -33,7 +34,7 @@ const filesToDisplayAsCard = [
   'presentation',
   'other',
 ];
-const UserFile = ({ file, files, upload, viewerMode = FileViewerMode.DEFAULT, onRemove }: UserFileProps) => {
+const UserFile = ({ file, files, upload, viewerMode = FileViewerMode.DEFAULT, onRemove, enableValidation = false }: UserFileProps) => {
   return (
     <FilePreviewComponent
       file={file}
@@ -44,6 +45,7 @@ const UserFile = ({ file, files, upload, viewerMode = FileViewerMode.DEFAULT, on
       files={files}
       upload={upload}
       onRemove={onRemove}
+      enableValidation={enableValidation}
       renderAs={
         filesToDisplayAsCard.includes(getFileType(file.type))
           ? 'card'

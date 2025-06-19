@@ -6,6 +6,8 @@
     "error": "Upload failed",
     "success": "Upload completed"
   },
+  "corrupted": "Incomplete or damaged file",
+  "validating": "Validating file...",
   "preview": {
     "error": {
       "title": "We couldn't preview this file",
