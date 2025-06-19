@@ -7,7 +7,6 @@ import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../apps/web/lib/services.types';
 import { Subscription } from '../../../../../../../apps/web/lib/subscriptions.types';
 import { Checkout } from '../../../../../../../apps/web/lib/checkout.types';
-import { getPrimaryOwnerId } from '../../../../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { getSessionById } from '../../../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
 import { createClient } from '../../../../../../features/team-accounts/src/server/actions/clients/create/create-clients';
 import { insertServiceToClient } from '../../../../../../features/team-accounts/src/server/actions/services/create/create-service';
@@ -39,8 +38,8 @@ class BillingWebhooksService {
    */
   async handleCheckoutCreatedWebhook(checkout: Checkout.Type) {
     try {
-      // Solo procesar si el provider es 'suuper' o 'manual'
-      if (checkout.provider !== 'suuper' && checkout.provider !== 'manual') {
+      // Only process if the provider is 'suuper'
+      if (checkout.provider !== 'suuper') {
         console.log(
           `Checkout provider is ${checkout.provider}, not processing manual payment logic`,
         );
@@ -49,14 +48,14 @@ class BillingWebhooksService {
 
       console.log('Processing manual payment checkout:', checkout.id);
 
-      // 1. Obtener información de la sesión usando el provider_id
+      // 1. Get the session by provider_id
       const session = await getSessionById(checkout.provider_id);
 
       if (!session) {
         throw new Error(`Session not found for provider_id: ${checkout.provider_id}`);
       }
 
-      // 2. Buscar el servicio asociado al checkout
+      // 2. Get the service associated with the checkout
       const { data: checkoutServiceData, error: checkoutServiceError } =
         await this.adminClient
           .from('checkouts')
@@ -77,15 +76,15 @@ class BillingWebhooksService {
 
       const serviceData = checkoutServiceData.checkout_services[0];
       const serviceId = serviceData.service_id;
-      const serviceName = serviceData.services?.name;
-      const agencyId = serviceData.services?.propietary_organization_id;
+      // const serviceName = serviceData.services?.name;
+      const agencyOwnerId = serviceData.services?.propietary_organization_id;
 
-      // 3. Obtener información de la agencia
+      // 3. Get agency information
       const { data: accountDataAgencyOwnerData, error: accountDataAgencyOwnerError } =
         await this.adminClient
           .from('accounts')
           .select('id, organizations(id)')
-          .eq('id', agencyId ?? '')
+          .eq('id', agencyOwnerId ?? '')
           .single();
 
       if (accountDataAgencyOwnerError) {
@@ -98,14 +97,14 @@ class BillingWebhooksService {
         ? accountDataAgencyOwnerData?.organizations[0]?.id
         : accountDataAgencyOwnerData?.organizations?.id;
 
-      // 4. Preparar datos del cliente
+      // 4. Prepare client data
       const newClient = {
         email: session.client_email ?? '',
         slug: `${session.client_name}'s Organization`,
         name: session.client_name ?? '',
       };
 
-      // 5. Verificar si el cliente ya existe
+      // 5. Verify if the client already exists
       const { data: accountClientData, error: accountClientError } =
         await this.adminClient
           .from('accounts')
@@ -121,7 +120,7 @@ class BillingWebhooksService {
       let clientOrganizationId;
       let clientId;
 
-      // 6. Crear cliente si no existe
+      // 6. Create client if not exists
       if (!accountClientData) {
         client = await createClient({
           client: newClient,
@@ -133,7 +132,7 @@ class BillingWebhooksService {
         clientOrganizationId = client?.success?.data?.organization_client_id;
         clientId = client?.success?.data?.id;
       } else {
-        // 7. Cliente existe, obtener o crear relación con la agencia
+        // 7. If client exists, fetch or create client relationship
         const { data: clientData, error: clientError } = await this.adminClient
           .from('clients')
           .select('id, organization_client_id')
@@ -149,13 +148,13 @@ class BillingWebhooksService {
           clientId = clientData.id;
           clientOrganizationId = clientData.organization_client_id;
         } else {
-          // Crear relación cliente-agencia si no existe
+          // Create client-agency relationship if not exists
           const { data: createClientData, error: createClientError } =
             await this.adminClient
               .from('clients')
               .insert({
                 agency_id: agencyOrganizationId ?? '',
-                organization_client_id: accountClientData.id, // Usar el ID de la cuenta como org ID temporal
+                organization_client_id: clientOrganizationId ?? '',
                 user_client_id: accountClientData.id,
               })
               .select('id, organization_client_id')
@@ -171,7 +170,7 @@ class BillingWebhooksService {
         }
       }
 
-      // 8. Asignar servicio al cliente
+      // 8. Assign the service to the client
       await insertServiceToClient(
         this.adminClient,
         clientOrganizationId ?? '',
@@ -181,19 +180,19 @@ class BillingWebhooksService {
         agencyOrganizationId ?? '',
       );
 
-      // 9. Marcar la sesión como eliminada
+      // 9. Mark the session as deleted
       await this.adminClient
         .from('sessions')
         .update({
           deleted_on: new Date().toISOString(),
         })
-        .eq('id', session.id);
+        .eq('id', checkout.provider_id);
 
       console.log('Manual payment checkout processed successfully:', {
         checkoutId: checkout.id,
         clientId,
         serviceId,
-        sessionId: session.id,
+        sessionId: checkout.provider_id,
       });
 
       return {
@@ -233,17 +232,12 @@ class BillingWebhooksService {
   }
 
   async handleBillingAccountCreatedWebhook(account: BillingAccounts.Type) {
-    // get primary owner user id from account
-    const primaryOwnerId = await getPrimaryOwnerId(
-      this.adminClient,
-      account.account_id,
-    );
-
+ 
     const { data: servicesResult, error: servicesError } =
       await this.adminClient
         .from('services')
         .select('*, billing_services(provider)')
-        .eq('propietary_organization_id', primaryOwnerId ?? '');
+        .eq('propietary_organization_id', account.account_id ?? '');
 
     if (servicesError) throw new Error(servicesError.message);
 
