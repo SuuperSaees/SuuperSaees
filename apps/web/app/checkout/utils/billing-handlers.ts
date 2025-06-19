@@ -4,7 +4,7 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '~/utils/credentials-crypto';
-import { createCheckoutWithService } from '../../server/actions/checkouts/checkouts.action';
+import { createCheckout } from '../../server/actions/checkouts/checkouts.action';
 
 type ValuesProps = {
   fullName: string;
@@ -105,7 +105,7 @@ export const handleRecurringPayment = async ({
   } else if(selectedPaymentMethod === 'manual_payment') {
     try {
       // Solo crear checkout con servicio - el webhook se encargará del resto
-      const checkout = await createCheckoutWithService({
+      const checkout = await createCheckout({
         provider: 'manual',
         provider_id: sessionId,
         service_id: service.id,
@@ -285,7 +285,7 @@ export const handleOneTimePayment = async ({
   } else if(selectedPaymentMethod === 'manual_payment') {
     try {
       // Solo crear checkout con servicio - el webhook se encargará del resto
-      const checkout = await createCheckoutWithService({
+      const checkout = await createCheckout({
         provider: 'manual',
         provider_id: sessionId,
         service_id: service.id,

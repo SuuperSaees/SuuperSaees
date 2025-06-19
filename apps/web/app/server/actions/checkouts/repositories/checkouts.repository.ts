@@ -1,21 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
-
-export interface CheckoutInsert {
-  provider: string;
-  provider_id: string;
-  status?: string;
-  created_at?: string;
-}
-
-export interface CheckoutType {
-  id: string;
-  provider: string;
-  provider_id: string;
-  status: string;
-  created_at: string;
-  updated_at: string;
-}
+import { Checkout } from '~/lib/checkout.types';
 
 export class CheckoutRepository {
   private client: SupabaseClient<Database>;
@@ -30,14 +15,13 @@ export class CheckoutRepository {
   }
 
   // * CREATE REPOSITORIES
-  async create(payload: CheckoutInsert): Promise<CheckoutType> {
+  async create(payload: Checkout.Request.Create): Promise<Checkout.Response> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('checkouts')
       .insert({
         provider: payload.provider,
         provider_id: payload.provider_id,
-        status: payload.status ?? 'pending',
       })
       .select()
       .single();
@@ -46,11 +30,11 @@ export class CheckoutRepository {
       throw new Error(`Error creating checkout: ${error.message}`);
     }
 
-    return data as CheckoutType;
+    return data as Checkout.Response;
   }
 
   // * GET REPOSITORIES
-  async get(checkoutId: string): Promise<CheckoutType> {
+  async get(checkoutId: string): Promise<Checkout.Response> {
     const client = this.client;
     const { data, error } = await client
       .from('checkouts')
@@ -62,10 +46,10 @@ export class CheckoutRepository {
       throw new Error(`Error fetching checkout ${checkoutId}: ${error.message}`);
     }
 
-    return data as CheckoutType;
+    return data as Checkout.Response;
   }
 
-  async getByProviderId(providerId: string): Promise<CheckoutType> {
+  async getByProviderId(providerId: string): Promise<Checkout.Response> {
     const client = this.client;
     const { data, error } = await client
       .from('checkouts')
@@ -77,23 +61,23 @@ export class CheckoutRepository {
       throw new Error(`Error fetching checkout by provider ID ${providerId}: ${error.message}`);
     }
 
-    return data as CheckoutType;
+    return data as Checkout.Response;
   }
 
   // * UPDATE REPOSITORIES
-  async update(checkoutId: string, updates: Partial<CheckoutInsert>): Promise<CheckoutType> {
+  async update(payload: Checkout.Request.Update): Promise<Checkout.Response> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('checkouts')
-      .update(updates)
-      .eq('id', checkoutId)
+      .update(payload)
+      .eq('id', payload.id ?? '')
       .select()
       .single();
 
     if (error) {
-      throw new Error(`Error updating checkout ${checkoutId}: ${error.message}`);
+      throw new Error(`Error updating checkout ${payload.id}: ${error.message}`);
     }
 
-    return data as CheckoutType;
+    return data as Checkout.Response;
   }
 }

@@ -1,8 +1,7 @@
 import { BaseAction } from '../base-action';
 import { CheckoutController } from './controllers/checkouts.controller';
 import { ICheckoutAction } from './checkouts.interface';
-import { CheckoutInsert, CheckoutType } from './repositories/checkouts.repository';
-import { CreateCheckoutWithServicePayload, CheckoutWithServices } from './services/checkouts.service';
+import { Checkout } from '~/lib/checkout.types';
 
 export class CheckoutAction extends BaseAction implements ICheckoutAction {
   private controller: CheckoutController;
@@ -16,28 +15,16 @@ export class CheckoutAction extends BaseAction implements ICheckoutAction {
     );
   }
 
-  async create(payload: CheckoutInsert): Promise<CheckoutType> {
+  async create(payload: Checkout.Request.Create): Promise<Checkout.Response> {
     return await this.controller.create(payload);
   }
 
-  async createWithService(payload: CreateCheckoutWithServicePayload): Promise<CheckoutWithServices> {
-    return await this.controller.createWithService(payload);
-  }
-
-  async get(checkoutId: string): Promise<CheckoutType> {
+  async get(checkoutId: string): Promise<Checkout.Response> {
     return await this.controller.get(checkoutId);
   }
 
-  async getByProviderId(providerId: string): Promise<CheckoutType> {
-    return await this.controller.getByProviderId(providerId);
-  }
-
-  async getWithServices(checkoutId: string): Promise<CheckoutWithServices> {
-    return await this.controller.getWithServices(checkoutId);
-  }
-
-  async update(checkoutId: string, updates: Partial<CheckoutInsert>): Promise<CheckoutType> {
-    return await this.controller.update(checkoutId, updates);
+  async update(payload: Checkout.Request.Update): Promise<Checkout.Response> {
+    return await this.controller.update(payload);
   }
 }
 
