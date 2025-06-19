@@ -6,7 +6,11 @@ import { BillingAccounts } from '../../../../../../../apps/web/lib/billing-accou
 import { Database } from '../../../../../../../apps/web/lib/database.types';
 import { Service } from '../../../../../../../apps/web/lib/services.types';
 import { Subscription } from '../../../../../../../apps/web/lib/subscriptions.types';
+import { Checkout } from '../../../../../../../apps/web/lib/checkout.types';
 import { getPrimaryOwnerId } from '../../../../../../features/team-accounts/src/server/actions/members/get/get-member-account';
+import { getSessionById } from '../../../../../../features/team-accounts/src/server/actions/sessions/get/get-sessions';
+import { createClient } from '../../../../../../features/team-accounts/src/server/actions/clients/create/create-clients';
+import { insertServiceToClient } from '../../../../../../features/team-accounts/src/server/actions/services/create/create-service';
 import { createBillingGatewayService } from '../billing-gateway/billing-gateway.service';
 
 export function createBillingWebhooksService(
@@ -21,10 +25,190 @@ export function createBillingWebhooksService(
  * @description Service for handling billing webhooks.
  */
 class BillingWebhooksService {
+  private readonly ClientRoleManualPayment = 'client_owner';
+
   constructor(
     private readonly adminClient: SupabaseClient<Database>,
     private readonly baseUrl: string,
   ) {}
+
+  /**
+   * @name handleCheckoutCreatedWebhook
+   * @description Handles the webhook for when a checkout is created with manual payment.
+   * @param checkout
+   */
+  async handleCheckoutCreatedWebhook(checkout: Checkout.Type) {
+    try {
+      // Solo procesar si el provider es 'suuper' o 'manual'
+      if (checkout.provider !== 'suuper' && checkout.provider !== 'manual') {
+        console.log(
+          `Checkout provider is ${checkout.provider}, not processing manual payment logic`,
+        );
+        return;
+      }
+
+      console.log('Processing manual payment checkout:', checkout.id);
+
+      // 1. Obtener información de la sesión usando el provider_id
+      const session = await getSessionById(checkout.provider_id);
+
+      if (!session) {
+        throw new Error(`Session not found for provider_id: ${checkout.provider_id}`);
+      }
+
+      // 2. Buscar el servicio asociado al checkout
+      const { data: checkoutServiceData, error: checkoutServiceError } =
+        await this.adminClient
+          .from('checkouts')
+          .select(
+            'id, checkout_services(service_id, services(name, propietary_organization_id))',
+          )
+          .eq('id', checkout.id)
+          .single();
+
+      if (checkoutServiceError) {
+        console.error('Error fetching checkout service:', checkoutServiceError);
+        throw checkoutServiceError;
+      }
+
+      if (!checkoutServiceData?.checkout_services?.[0]) {
+        throw new Error(`No service found for checkout: ${checkout.id}`);
+      }
+
+      const serviceData = checkoutServiceData.checkout_services[0];
+      const serviceId = serviceData.service_id;
+      const serviceName = serviceData.services?.name;
+      const agencyId = serviceData.services?.propietary_organization_id;
+
+      // 3. Obtener información de la agencia
+      const { data: accountDataAgencyOwnerData, error: accountDataAgencyOwnerError } =
+        await this.adminClient
+          .from('accounts')
+          .select('id, organizations(id)')
+          .eq('id', agencyId ?? '')
+          .single();
+
+      if (accountDataAgencyOwnerError) {
+        console.error('Error fetching agency account:', accountDataAgencyOwnerError);
+        throw accountDataAgencyOwnerError;
+      }
+
+      const createdBy = accountDataAgencyOwnerData?.id;
+      const agencyOrganizationId = Array.isArray(accountDataAgencyOwnerData?.organizations)
+        ? accountDataAgencyOwnerData?.organizations[0]?.id
+        : accountDataAgencyOwnerData?.organizations?.id;
+
+      // 4. Preparar datos del cliente
+      const newClient = {
+        email: session.client_email ?? '',
+        slug: `${session.client_name}'s Organization`,
+        name: session.client_name ?? '',
+      };
+
+      // 5. Verificar si el cliente ya existe
+      const { data: accountClientData, error: accountClientError } =
+        await this.adminClient
+          .from('accounts')
+          .select('id')
+          .eq('email', newClient.email ?? '')
+          .single();
+
+      if (accountClientError && accountClientError.code !== 'PGRST116') {
+        console.error('Error fetching user account:', accountClientError);
+      }
+
+      let client;
+      let clientOrganizationId;
+      let clientId;
+
+      // 6. Crear cliente si no existe
+      if (!accountClientData) {
+        client = await createClient({
+          client: newClient,
+          role: this.ClientRoleManualPayment,
+          agencyId: agencyOrganizationId ?? '',
+          adminActivated: true,
+        });
+
+        clientOrganizationId = client?.success?.data?.organization_client_id;
+        clientId = client?.success?.data?.id;
+      } else {
+        // 7. Cliente existe, obtener o crear relación con la agencia
+        const { data: clientData, error: clientError } = await this.adminClient
+          .from('clients')
+          .select('id, organization_client_id')
+          .eq('user_client_id', accountClientData.id)
+          .eq('agency_id', agencyOrganizationId ?? '')
+          .single();
+
+        if (clientError && clientError.code !== 'PGRST116') {
+          console.error('Error fetching client:', clientError);
+        }
+
+        if (clientData) {
+          clientId = clientData.id;
+          clientOrganizationId = clientData.organization_client_id;
+        } else {
+          // Crear relación cliente-agencia si no existe
+          const { data: createClientData, error: createClientError } =
+            await this.adminClient
+              .from('clients')
+              .insert({
+                agency_id: agencyOrganizationId ?? '',
+                organization_client_id: accountClientData.id, // Usar el ID de la cuenta como org ID temporal
+                user_client_id: accountClientData.id,
+              })
+              .select('id, organization_client_id')
+              .single();
+
+          if (createClientError) {
+            console.error('Error creating client relationship:', createClientError);
+            throw createClientError;
+          }
+
+          clientId = createClientData?.id;
+          clientOrganizationId = createClientData?.organization_client_id;
+        }
+      }
+
+      // 8. Asignar servicio al cliente
+      await insertServiceToClient(
+        this.adminClient,
+        clientOrganizationId ?? '',
+        serviceId ?? 0,
+        clientId ?? '',
+        createdBy ?? '',
+        agencyOrganizationId ?? '',
+      );
+
+      // 9. Marcar la sesión como eliminada
+      await this.adminClient
+        .from('sessions')
+        .update({
+          deleted_on: new Date().toISOString(),
+        })
+        .eq('id', session.id);
+
+      console.log('Manual payment checkout processed successfully:', {
+        checkoutId: checkout.id,
+        clientId,
+        serviceId,
+        sessionId: session.id,
+      });
+
+      return {
+        success: true,
+        checkoutId: checkout.id,
+        clientId,
+        serviceId,
+        clientOrganizationId,
+      };
+    } catch (error) {
+      console.error('Error handling checkout created webhook:', error);
+      throw error;
+    }
+  }
+
   /**
    * @name handleSubscriptionDeletedWebhook
    * @description Handles the webhook for when a subscription is deleted.
@@ -119,7 +303,6 @@ class BillingWebhooksService {
   }
 
   async handleServiceUpdatedWebhook(service: Service.Type, oldService?: Service.Type) {
-
     // stop bucle if oldService is not provided
     if (!oldService?.price_id && service.price_id) return true;
     const priceChanged = oldService?.price !== service.price;
