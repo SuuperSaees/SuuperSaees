@@ -10,7 +10,19 @@ export class CheckoutService {
 
   // * CREATE SERVICES
   async create(payload: Checkout.Request.Create): Promise<Checkout.Response> {
-    return await this.checkoutRepository.create(payload);
+    const checkoutCreated = await this.checkoutRepository.create(payload);
+    if(payload.service_id) {
+      const serviceCreated = await this.checkoutServiceRepository.create({
+        checkout_id: checkoutCreated.id,
+        service_id: payload.service_id,
+      });
+      if (!serviceCreated) {
+        throw new Error('Failed to create checkout service');
+      }
+    return {...checkoutCreated, checkout_services: [serviceCreated]};
+
+    }
+    return checkoutCreated;
   }
 
   // * GET SERVICES
