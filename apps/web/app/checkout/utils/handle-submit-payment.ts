@@ -52,6 +52,12 @@ export const handleSubmitPayment = async ({
     
     if (selectedPaymentMethod === 'manual_payment' && values.manual_payment_info) {
       metadata.manual_payment_info = values.manual_payment_info;
+    } else if( selectedPaymentMethod === 'manual_payment' && !values.manual_payment_info) {
+      const error = new Error('Manual payment info is required when using manual payment method');
+      return {
+        success: false,
+        error: error.message,
+      }
     }
     
     if (values.discount_coupon) {

@@ -362,10 +362,8 @@ class BillingWebhooksService {
         invoice_id: createdInvoice.id,
         payment_method: 'manual' as const,
         amount: totalAmount,
-        currency: serviceCurrency.toLowerCase(),
         status: 'succeeded' as const,
-        payment_date: new Date().toISOString(),
-        reference_number: `MAN-${Date.now()}`,
+        processed_at: new Date().toISOString(),
         notes: this.buildPaymentNotes({
           serviceName,
           manualPaymentInfo,

@@ -150,9 +150,9 @@ const BillingForm: React.FC<{
       return;
     }
 
-    if (selectedPaymentMethod !== 'stripe') {
-      return;
-    }
+    let paymentMethodId = '';
+
+    if (selectedPaymentMethod === 'stripe') {
 
     const cardNumberElement = elements.getElement(CardNumberElement);
 
@@ -187,13 +187,15 @@ const BillingForm: React.FC<{
     if (!paymentMethod?.id) {
       throw new Error(t('checkout.error.paymentFailed'));
     }
+    paymentMethodId = paymentMethod.id;
+    }
 
     const { success, error, accountAlreadyExists, data } =
       await handleSubmitPayment({
         service,
         values: form.getValues(),
         stripeId,
-        paymentMethodId: paymentMethod.id,
+        paymentMethodId: paymentMethodId,
         coupon: form.getValues('discount_coupon'),
         quantity: quantity,
         selectedPaymentMethod: selectedPaymentMethod,
@@ -220,7 +222,6 @@ const BillingForm: React.FC<{
         );
       }
 
-    return paymentMethod;
   };
 
   async function onSubmit() {
