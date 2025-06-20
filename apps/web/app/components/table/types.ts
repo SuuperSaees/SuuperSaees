@@ -22,6 +22,7 @@ type ServicePermissions = {
 
 type InvoicePermissions = {
   download: boolean;
+  view: boolean;
   markAsPaid: boolean;
   requestPayment: boolean;
   getPaymentLink: boolean;

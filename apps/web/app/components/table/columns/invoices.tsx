@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   Download,
@@ -9,6 +9,7 @@ import {
   Link2,
   Trash2,
   Mail,
+  Eye,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +35,8 @@ import { toast } from "sonner";
 import { sendEmail } from "~/server/services/send-email.service";
 import { EMAIL } from "~/server/services/email.types";
 import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
+import { useInvoicePDF } from "../../../hooks/use-invoice-pdf";
+import { PDFPreviewDialog } from "../../pdf/pdf-preview-dialog";
 
 export const invoicesColumns = (
   t: TFunction,
@@ -191,12 +194,14 @@ interface InvoiceActionsProps {
 }
 
 function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
-  console.log("invoice", invoice);
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string>("");
   const queryClient = useQueryClient();
   const { workspace: userWorkspace } = useUserWorkspace();
   const userId = userWorkspace?.id ?? "";
+  const { downloadInvoicePDF, previewInvoicePDF } = useInvoicePDF();
 
   const handleCopyPaymentUrl = () => {
     void navigator.clipboard.writeText(invoice.checkout_url ?? "");
@@ -204,10 +209,25 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    // TODO: Implement download functionality
-    console.log("Download invoice:", invoice.id);
-  };
+  const handleDownload = useCallback(async () => {
+    try {
+      await downloadInvoicePDF(invoice, {
+        filename: `invoice-${invoice.number}`,
+      });
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+    }
+  }, [downloadInvoicePDF, invoice]);
+
+  const handlePreview = useCallback(async () => {
+    try {
+      const pdfUrl = await previewInvoicePDF(invoice);
+      setPreviewPdfUrl(pdfUrl);
+      setShowPreview(true);
+    } catch (error) {
+      console.error("Failed to preview PDF:", error);
+    }
+  }, [previewInvoicePDF, invoice]);
 
   const updateStatusInvoiceMutation = useMutation({
     mutationFn: (invoice: Invoice.Response) =>
@@ -258,11 +278,12 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
   const sendEmailInvoiceMutation = useMutation({
     mutationFn: async (invoice: Invoice.Response) => {
       try {
+        // For now, use a placeholder email until client email field is available
         const result = await sendEmail(EMAIL.INVOICES.REQUEST_PAYMENT, {
-          to: invoice?.owner?.email ?? "",
+          to: invoice?.owner?.email ?? "", // TODO: Use invoice.client.email when available
           userId: userId,
           invoiceNumber: invoice.number,
-          clientName: invoice.client?.name ?? "",
+          clientName: invoice.owner?.name ?? "",
           amount: "$" + (invoice.total_amount ?? 0),
           buttonUrl: invoice.checkout_url ?? undefined,
           agencyName: invoice.agency?.name ?? "",
@@ -299,10 +320,6 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
   };
 
   const handleRequestPayment = () => {
-    console.log("DEBUG - handleRequestPayment called");
-    console.log("DEBUG - userId from workspace:", userId);
-    console.log("DEBUG - userWorkspace:", userWorkspace);
-
     if (!userId) {
       toast.error("User workspace not found");
       return;
@@ -316,68 +333,94 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">{t("openMenu")}</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="flex flex-col gap-2 p-2">
-        {hasPermission && hasPermission("download") && (
-          <DropdownMenuItem
-            onClick={handleDownload}
-            className="text-gray-600 cursor-pointer"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            {t("download")}
-          </DropdownMenuItem>
-        )}
-
-        {hasPermission &&
-          hasPermission("markAsPaid") &&
-          invoice.status !== "paid" && (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">{t("openMenu")}</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="flex flex-col gap-2 p-2">
+          {hasPermission && hasPermission("download") && (
             <DropdownMenuItem
-              onClick={handleMarkAsPaid}
+              onClick={handleDownload}
               className="text-gray-600 cursor-pointer"
             >
-              <Check className="mr-2 h-4 w-4" />
-              {t("markAsPaid")}
+              <Download className="mr-2 h-4 w-4" />
+              {t("download")}
             </DropdownMenuItem>
           )}
 
-        {hasPermission && hasPermission("requestPayment") && (
-          <DropdownMenuItem
-            onClick={handleRequestPayment}
-            className="text-gray-600 cursor-pointer"
-          >
-            <Mail className="mr-2 h-4 w-4" />
-            {t("requestPaymentByEmail")}
-          </DropdownMenuItem>
-        )}
-
-        {hasPermission &&
-          hasPermission("getPaymentLink") &&
-          invoice.checkout_url && (
+          {hasPermission && hasPermission("view") && (
             <DropdownMenuItem
-              onClick={handleCopyPaymentUrl}
+              onClick={handlePreview}
               className="text-gray-600 cursor-pointer"
             >
-              <Link2 className="mr-2 h-4 w-4" />
-              {copied ? t("paymentLinkCopied") : t("getPaymentLink")}
+              <Eye className="mr-2 h-4 w-4" />
+              {t("view")}
             </DropdownMenuItem>
           )}
 
-        {hasPermission && hasPermission("delete") && (
-          <DropdownMenuItem
-            onClick={handleDelete}
-            className="text-gray-600 cursor-pointer"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            {t("delete")}
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {hasPermission &&
+            hasPermission("markAsPaid") &&
+            invoice.status !== "paid" && (
+              <DropdownMenuItem
+                onClick={handleMarkAsPaid}
+                className="text-gray-600 cursor-pointer"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                {t("markAsPaid")}
+              </DropdownMenuItem>
+            )}
+
+          {hasPermission && hasPermission("requestPayment") && (
+            <DropdownMenuItem
+              onClick={handleRequestPayment}
+              className="text-gray-600 cursor-pointer"
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              {t("requestPaymentByEmail")}
+            </DropdownMenuItem>
+          )}
+
+          {hasPermission &&
+            hasPermission("getPaymentLink") &&
+            invoice.checkout_url && (
+              <DropdownMenuItem
+                onClick={handleCopyPaymentUrl}
+                className="text-gray-600 cursor-pointer"
+              >
+                <Link2 className="mr-2 h-4 w-4" />
+                {copied ? t("paymentLinkCopied") : t("getPaymentLink")}
+              </DropdownMenuItem>
+            )}
+
+          {hasPermission && hasPermission("delete") && (
+            <DropdownMenuItem
+              onClick={handleDelete}
+              className="text-gray-600 cursor-pointer"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              {t("delete")}
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <PDFPreviewDialog
+        isOpen={showPreview}
+        onClose={() => {
+          setShowPreview(false);
+          if (previewPdfUrl) {
+            URL.revokeObjectURL(previewPdfUrl);
+            setPreviewPdfUrl("");
+          }
+        }}
+        pdfUrl={previewPdfUrl}
+        fileName={`invoice-${invoice.number}.pdf`}
+        title={`Invoice #${invoice.number}`}
+      />
+    </>
   );
 }
