@@ -17,13 +17,7 @@ import {
 import { Order } from '../../../../../../../../apps/web/lib/order.types';
 import { Pagination } from '../../../../../../../../apps/web/lib/pagination';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
-import {
-  fetchCurrentUser,
-  fetchCurrentUserAccount,
-  getPrimaryOwnerId,
-  getUserRole,
-} from '../../members/get/get-member-account';
-import { fetchClientServices } from '../../services/get/get-services';
+// Removed unused imports - RLS policies handle access control automatically
 
 interface Configurations {
   includes?: Array<string>;
@@ -35,148 +29,48 @@ export const getBriefs = async (
   try {
     const client = getSupabaseServerComponentClient<Database>();
 
-    // Step 1: verify the user is authenticated
-    const user = await fetchCurrentUser(client);
+    // RLS policies handle all the access control automatically
+    const query = client
+      .from('briefs')
+      .select(
+        'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))' +
+          (configurations?.includes?.includes('services')
+            ? ', services(id, name)'
+            : ''),
+        {
+          count: configurations?.pagination ? 'exact' : undefined,
+        },
+      )
+      .is('deleted_on', null)
+      .order('created_at', { ascending: false });
 
-    // Step 3: get the role and define the valid roles
-    const accountRole = await getUserRole();
-
-    // Check if accountRole is null
-    if (!accountRole) {
-      throw new Error('User role not found');
-    }
-
-    const validAgencyRoles = new Set([
-      'agency_owner',
-      'agency_project_manager',
-      'agency_member',
-    ]);
-
-    const validClientRoles = new Set(['client_owner', 'client_member']);
-
-    // Step 4: get the briefs for agency users
-    if (validAgencyRoles.has(accountRole)) {
-      // Step 4.1: get the propitary_organization_id
-      const organizationOwnerId = await getPrimaryOwnerId();
-
-      // Step 4.2: get the briefs for the organization
-      const query = client
-        .from('briefs')
-        .select(
-          'id, created_at, name, propietary_organization_id, description, image_url, deleted_on, form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required))' +
-            (configurations?.includes?.includes('services')
-              ? ', services(id, name)'
-              : ''),
-          {
-            count: configurations?.pagination ? 'exact' : undefined,
-          },
-        )
-        .is('deleted_on', null)
-        .eq('propietary_organization_id', organizationOwnerId ?? '')
-        .order('created_at', { ascending: false });
-
-      // Apply pagination only if configurations and pagination are provided
-      if (configurations && configurations?.pagination) {
-        const paginatedBriefs = QueryBuilder.getInstance().enhance(
-          query,
-          configurations,
-        );
-        const response = await paginatedBriefs;
-        
-        if (response.error) {
-          throw new Error(`Error fetching briefs: ${response.error.message}`);
-        }
-        
-        return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
-          response,
-          configurations.pagination,
-        );
-      } else {
-        // No pagination - get all results
-        const { data, error } = await query;
-        
-        if (error) {
-          throw new Error(`Error fetching briefs: ${error.message}`);
-        }
-
-        return data as unknown as Brief.Relationships.Services.Response[];
-      }
-    } else if (validClientRoles.has(accountRole)) {
-      // Step 4: get the briefs for client users
-
-      // Step 4.1: get organization id of the user
-      const clientOrganizationId = (
-        await fetchCurrentUserAccount(client, user.id)
-      ).organization_id;
-
-      // Step 4.2: get the attached services to the client
-      const clientServices = await fetchClientServices(
-        client,
-        clientOrganizationId ?? '',
+    // Apply pagination only if configurations and pagination are provided
+    if (configurations?.pagination) {
+      const paginatedBriefs = QueryBuilder.getInstance().enhance(
+        query,
+        configurations,
       );
-
-      const serviceIds = clientServices
-        ?.map((service) => service.info?.id)
-        .filter((id) => id != null);
-
-      // Step 4.4: get the briefs for the services
-      const serviceBriefs = await fetchServiceBriefs(client, serviceIds);
-      const briefIds = serviceBriefs?.map((brief) => brief.brief_id);
-
-      // Step 4.5: get the briefs for the client
-      let query = client
-        .from('briefs')
-        .select(
-          `id, created_at, name, propietary_organization_id, description, image_url, deleted_on,
-      form_fields:brief_form_fields(field:form_fields(id, description, label, type, options, placeholder, position, alert_message, required)),
-      services!inner( id, name )`,
-          {
-            count: configurations?.pagination ? 'exact' : undefined,
-          },
-        )
-        .is('deleted_on', null)
-        .in('id', briefIds || []);
-
-      if (serviceIds && serviceIds.length > 0) {
-        query = query.in('services.id', serviceIds);
+      const response = await paginatedBriefs;
+      
+      if (response.error) {
+        throw new Error(`Error fetching briefs: ${response.error.message}`);
+      }
+      
+      return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
+        response,
+        configurations.pagination,
+      );
+    } else {
+      // No pagination - get all results
+      const { data, error } = await query;
+      
+      if (error) {
+        throw new Error(`Error fetching briefs: ${error.message}`);
       }
 
-      // Apply pagination only if configurations and pagination are provided
-      if (configurations && configurations?.pagination) {
-        const paginatedBriefs = QueryBuilder.getInstance().enhance(
-          query,
-          configurations,
-        );
-        const response = await paginatedBriefs;
-        
-        if (response.error) {
-          throw new Error(`Error fetching briefs: ${response.error.message}`);
-        }
-        
-        return transformToPaginatedResponse<Brief.Relationships.Services.Response>(
-          response,
-          configurations.pagination,
-        );
-      } else {
-        // No pagination - get all results
-        const { data, error } = await query;
-        
-        if (error) {
-          throw new Error(`Error fetching briefs: ${error.message}`);
-        }
-
-        return data as unknown as Brief.Relationships.Services.Response[];
-      }
+      return data as unknown as Brief.Relationships.Services.Response[];
     }
-
-    return {
-      data: [],
-      total: 0,
-      limit: null,
-      page: null,
-      nextCursor: null,
-      prevCursor: null,
-    };
+    //asd
   } catch (error) {
     console.error('Error obtaining briefs', error);
     throw error;

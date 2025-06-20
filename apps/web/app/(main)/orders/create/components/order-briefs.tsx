@@ -76,6 +76,7 @@ export const OrderBriefs = ({
     return {
       responseValue,
       files: uploads.map((upload) => ({
+        id: upload.id ?? undefined,
         name: upload.file.name ?? '',
         size: upload.file.size ?? 0,
         type: upload.file.type ?? '',
@@ -290,6 +291,19 @@ export const OrderBriefs = ({
                                     responseValue as never,
                                   );
                                 }}
+                                onRemoveFile={(id) => {
+                                  const currentFiles = form.getValues('briefCompletion.files') || [];
+                     
+                                  // Filter by URL only since stored files don't have id
+                                  const updatedFiles = currentFiles.filter((file) => file.id !== id);
+                                  form.setValue('briefCompletion.files', updatedFiles);
+                                  // Update the response value to reflect the removed file
+                                  const responseValue = updatedFiles.map((file) => file.url).join(',');
+                                  form.setValue(
+                                    `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
+                                    responseValue as never,
+                                  );
+                                }}
                               />
                             ) : formField.field?.type === 'date' ? (
                               <DatePicker
@@ -306,7 +320,7 @@ export const OrderBriefs = ({
                                 items={
                                   (formField.field?.options as Option[]) ?? []
                                 }
-                                // question={formField.field?.label ?? ''}
+                                question={formField.field?.label ?? ''}
                                 selectedOption={
                                   form.getValues(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,

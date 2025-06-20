@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
@@ -45,6 +45,12 @@ export function AdminImpersonateUserDialog(
       userId: props.userId,
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      userId: props.userId,
+    });
+  }, [props.userId, form]);
 
   const [tokens, setTokens] = useState<{
     accessToken: string;
