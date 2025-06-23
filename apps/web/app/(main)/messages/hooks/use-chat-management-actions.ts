@@ -257,15 +257,62 @@ export const useChatManagement = ({
    * Handles adding/updating member roles
    */
   const membersUpdateMutation = useMutation({
-    mutationFn: (members: string[]) =>
-      upsertMembers({
+    mutationFn: ({
+      selectedUserIds,
+      agencyMembers,
+    }: {
+      selectedUserIds: string[];
+      agencyMembers: { id: string; role: string }[];
+    }) => {
+      // Find agency members with special roles that should always be included
+      const specialRoleMembers = agencyMembers.filter(member => 
+        member.role === 'agency_owner' || member.role === 'agency_project_manager'
+      );
+      
+      // Create set of selected user IDs for quick lookup
+      const selectedUserIdsSet = new Set(selectedUserIds);
+      
+      // Map all members (selected + special roles)
+      const allMemberIds = new Set([
+        ...selectedUserIds,
+        ...specialRoleMembers.map(member => member.id)
+      ]);
+      
+      const members = Array.from(allMemberIds).map(userId => {
+        const agencyMember = agencyMembers.find(m => m.id === userId);
+        const isSpecialRole = agencyMember && (
+          agencyMember.role === 'agency_owner' || 
+          agencyMember.role === 'agency_project_manager'
+        );
+        
+        // For special roles: visibility based on whether they're in selectedUserIds
+        // For regular members: visibility is true (they were selected)
+        const visibility = isSpecialRole 
+          ? selectedUserIdsSet.has(userId)
+          : true;
+          
+        // Map agency roles to chat member types
+        let type: 'guest' | 'project_manager' | 'assistant' | 'owner' = 'guest';
+        if (agencyMember) {
+          if (agencyMember.role === 'agency_owner') {
+            type = 'owner';
+          } else if (agencyMember.role === 'agency_project_manager') {
+            type = 'project_manager';
+          }
+        }
+        
+        return {
+          user_id: userId,
+          type,
+          visibility,
+        };
+      });
+      
+      return upsertMembers({
         chat_id: chatId,
-        members: members.map((member) => ({
-          user_id: member,
-          type: 'guest',
-          visibility: true,
-        })),
-      }),
+        members,
+      });
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey });
     },

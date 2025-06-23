@@ -51,8 +51,11 @@ export default function ChatThread({
   const userId = user.id;
   const chatById = chatByIdQuery.data;
   const isLoading = chatByIdQuery.isLoading;
-  const handleMembersUpdate = async (members: string[]) => {
-    await membersUpdateMutation.mutateAsync(members);
+  const handleMembersUpdate = async (params: {
+    selectedUserIds: string[];
+    agencyMembers: { id: string; role: string }[];
+  }) => {
+    await membersUpdateMutation.mutateAsync(params);
   };
 
   const handleDelete = () => {
@@ -177,6 +180,7 @@ export default function ChatThread({
   const canEditName =
     isOwner || chatById?.members?.some((member) => member.id === user.id);
 
+    console.log('chatById', chatById)
   return (
     <div className="relative flex h-full min-w-0 flex-col">
       {/* Header */}
