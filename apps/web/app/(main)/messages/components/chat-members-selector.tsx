@@ -45,7 +45,6 @@ export default function ChatMembersSelector({
 
   const canAddMembers = isValidAgencyRole || isValidClientRole;
 
-  console.log('agencyTeam', agencyTeam)
   const clientOrganizationIds = useMemo(
     () =>
       selectedMembers

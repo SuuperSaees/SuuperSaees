@@ -180,7 +180,6 @@ export default function ChatThread({
   const canEditName =
     isOwner || chatById?.members?.some((member) => member.id === user.id);
 
-    console.log('chatById', chatById)
   return (
     <div className="relative flex h-full min-w-0 flex-col">
       {/* Header */}
