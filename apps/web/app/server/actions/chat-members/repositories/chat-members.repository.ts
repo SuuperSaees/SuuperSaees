@@ -77,7 +77,7 @@ export class ChatMembersRepository {
     if (upsertData.length > 0) {
       const { data: upsertedData, error: upsertError } = await client
         .from('chat_members')
-        .upsert(upsertData)
+        .upsert(upsertData, { onConflict: 'chat_id,user_id' })
         .select('*, user:accounts(email, settings:user_settings(name, picture_url))');
 
       if (upsertError) {
