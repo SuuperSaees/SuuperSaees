@@ -184,7 +184,7 @@ export const useChatManagement = ({
         chat_members: members.map((member) => ({
           chat_id: '',
           user_id: member.id,
-          type: 'guest',
+          type: member.role === 'agency_owner' ? 'owner' : member.role === 'agency_project_manager' ? 'project_manager' : 'guest',
           visibility: member.visibility,
         })),
         visibility: true,
