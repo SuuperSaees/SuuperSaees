@@ -5,7 +5,7 @@ import { ActivityService } from './activity.service';
 export abstract class BaseWebhookService {
   protected readonly activityService: ActivityService;
 
-  constructor(protected readonly adminClient: SupabaseClient<Database>) {
+  constructor(protected readonly adminClient: SupabaseClient<Database>, protected readonly baseUrl: string) {
     this.activityService = new ActivityService(adminClient);
   }
 

@@ -2981,6 +2981,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
+          metadata: Json | null
           provider: string | null
           provider_id: string | null
         }
@@ -2995,6 +2996,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          metadata?: Json | null
           provider?: string | null
           provider_id?: string | null
         }
@@ -3009,6 +3011,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          metadata?: Json | null
           provider?: string | null
           provider_id?: string | null
         }
