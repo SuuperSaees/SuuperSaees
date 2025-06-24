@@ -193,9 +193,8 @@ class AuthCallbackService {
       // if type is update_email we use the rpc
       if (type === 'update_email' as EmailOtpType) {
 
-        console.log('Updating email for user', payload?.user_id, emailToInvite);
         const { error } = await adminClient.rpc('update_email', {
-          new_email: emailToInvite ?? '',
+          new_email: emailToInvite?.replace(' ', '+') ?? '',
           user_id: payload?.user_id ?? '',
           p_domain: onlyDomain ?? '',
         });
