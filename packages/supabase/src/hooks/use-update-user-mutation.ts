@@ -105,6 +105,7 @@ export function useUpdateUser() {
       const tokenRecoveryTypeActualEmail: TokenRecoveryType = {
         email,
         redirectTo: generatedMagicLink,
+        user_id: userData.user?.id,
       };
       const { tokenId } = await createToken(tokenRecoveryTypeActualEmail);
       const url = new URL(redirectTo);
