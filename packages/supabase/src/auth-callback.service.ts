@@ -191,7 +191,7 @@ class AuthCallbackService {
 
         console.log('Updating email for user', payload?.user_id, payload?.email);
         const { error } = await adminClient.rpc('update_email', {
-          new_email: payload?.email ?? '',
+          new_email: emailToInvite ?? '',
           user_id: payload?.user_id ?? '',
         });
 
