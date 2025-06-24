@@ -75,6 +75,7 @@ export class InvoiceRepository {
           id,
           name,
           slug,
+          owner_id,
           picture_url,
           accounts(
             email
