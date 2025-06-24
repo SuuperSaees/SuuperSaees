@@ -85,6 +85,7 @@ export class InvoiceRepository {
         ),
         invoice_items(
           id,
+          service_id,
           description,
           quantity,
           unit_price,

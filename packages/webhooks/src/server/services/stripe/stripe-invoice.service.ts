@@ -4,10 +4,11 @@ import { Activity } from '../../../../../../apps/web/lib/activity.types';
 import { Invoice } from '../../../../../../apps/web/lib/invoice.types'
 import { BaseWebhookService } from '../shared/base-webhook.service';
 import { RetryOperationService } from '@kit/shared/utils';
+import { createUrlForCheckout } from '../../../../../features/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 
 export class StripeInvoiceService extends BaseWebhookService {
   constructor(adminClient: SupabaseClient<Database>) {
-    super(adminClient);
+    super(adminClient, '');
   }
 
   async handleInvoiceCreated(event: any, stripeAccountId?: string) {
@@ -227,13 +228,12 @@ export class StripeInvoiceService extends BaseWebhookService {
       total_amount: invoice.total / 100,
       currency: invoice.currency.toUpperCase(),
       provider_id: invoice.id,
-      checkout_url: invoice.hosted_invoice_url,
     };
 
     const { data: createdInvoice, error: invoiceError } = await this.adminClient
       .from('invoices')
       .insert(invoiceData)
-      .select('id, number')
+      .select()
       .single();
 
     if (invoiceError) {
@@ -259,6 +259,56 @@ export class StripeInvoiceService extends BaseWebhookService {
         console.error('Error creating invoice items:', itemsError);
       }
     }
+
+    // Generate checkout URL and update invoice
+    const generateCheckoutUrlPromise = new RetryOperationService(
+      async () => {
+        // Get agency organization data for domain
+          const { data: organizationData, error: orgError } = await this.adminClient
+            .from('organizations')
+            .select('id, organization_subdomains(subdomains(domain)), owner_id')
+            .eq('id', agencyId)
+            .single();
+
+          if (orgError) {
+            console.error('Error fetching organization:', orgError);
+            throw new Error(`Failed to fetch organization: ${orgError.message}`);
+          }
+
+          const domain = organizationData?.organization_subdomains?.[0]?.subdomains?.domain ?? '';
+
+          const isProd = process.env.NEXT_PUBLIC_IS_PROD === 'true';
+          const baseUrl = (domain.includes('localhost') ?? !isProd)
+            ? `http://${domain}`
+            : `https://${domain}`;
+
+        const checkoutUrl = await createUrlForCheckout({
+          stripeId: '',
+          priceId: '',
+          invoice: createdInvoice,
+          organizationId: agencyId,
+          baseUrl: baseUrl,
+          primaryOwnerId: organizationData.owner_id ?? '',
+        });
+
+        // Update the invoice with the generated checkout URL
+        await this.adminClient
+          .from('invoices')
+          .update({ checkout_url: checkoutUrl })
+          .eq('id', createdInvoice.id);
+
+        return checkoutUrl;
+      },
+      {
+        maxAttempts: 3,
+        delayMs: 1000,
+        backoffFactor: 2,
+      }
+    );
+
+    generateCheckoutUrlPromise.execute().catch((error) => {
+      console.error('Failed to generate checkout URL:', error);
+    });
 
     // Create activity for invoice creation
     await this.activityService.createActivity({
