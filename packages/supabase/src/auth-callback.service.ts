@@ -199,7 +199,6 @@ class AuthCallbackService {
 
         if (error) {
           console.error('Error updating email', error);
-          throw new Error(`Error updating email: ${error.message}`);
         }
       }
       
