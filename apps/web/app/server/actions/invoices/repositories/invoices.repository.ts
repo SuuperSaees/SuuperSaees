@@ -75,7 +75,10 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          accounts(
+            email
+          )
         ),
         agency:organizations!agency_id(
           id,
@@ -90,6 +93,15 @@ export class InvoiceRepository {
           quantity,
           unit_price,
           total_price
+        ),
+        invoice_payments(
+          id,
+          payment_method,
+          amount,
+          status,
+          currency,
+          processed_by,
+          processed_at
         )
       `)
       .is('deleted_on', null)
