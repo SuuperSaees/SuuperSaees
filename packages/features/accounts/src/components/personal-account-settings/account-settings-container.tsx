@@ -11,6 +11,7 @@ import { useOrganizationSettings } from '../../context/organization-settings-con
 import { Separator } from '@kit/ui/separator';
 import ProfileSettings from '../profile-settings';
 import SiteSettings from '../site-settings';
+import InvoiceSettings from '../invoice-settings';
 import { useQuery } from '@tanstack/react-query';
 import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
 import { useUserWorkspace } from '../../hooks/use-user-workspace';
@@ -111,6 +112,16 @@ export function PersonalAccountSettingsContainer(
             >
               {t('subscriptionTab')}
             </ThemedTabTrigger>
+
+            {role === 'agency_owner' && (
+              <ThemedTabTrigger
+                value="invoices"
+                option="invoices"
+                activeTab={accountBillingTab}
+              >
+                {t('invoicesTab')}
+              </ThemedTabTrigger>
+            )}
           </TabsList>
           </div>
         )}
@@ -135,6 +146,12 @@ export function PersonalAccountSettingsContainer(
         <TabsContent value="subscription">
           <BillingContainerConfig tab={tab ?? ''} />
         </TabsContent>
+        
+        {role === 'agency_owner' && (
+          <TabsContent value="invoices">
+            <InvoiceSettings role={role} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

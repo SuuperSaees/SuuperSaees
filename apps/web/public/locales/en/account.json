@@ -236,5 +236,6 @@
   "invalidLoomAppIdFormat": "Invalid Loom App ID format",
   "domainUpdatedSuccessfully": "Domain updated successfully",
   "domainUpdateError": "Error updating domain",
-  "subscriptionTab": "Subscription"
+  "subscriptionTab": "Subscription",
+  "invoicesTab": "Invoices"
 }

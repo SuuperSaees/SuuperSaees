@@ -41,10 +41,10 @@ const getAlertStyles = (type: AlertType) => {
       icon: "text-green-500",
     },
     info: {
-      borderColor: "border-gray-200",
-      pulseOuter: "border-gray-200",
-      pulseInner: "border-gray-300",
-      icon: "text-gray-500",
+      borderColor: "border-blue-200",
+      pulseOuter: "border-blue-200",
+      pulseInner: "border-blue-300",
+      icon: "text-blue-500",
     },
   };
   

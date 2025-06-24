@@ -153,5 +153,63 @@
     "updatingInvoiceStatus": "Updating invoice status...",
     "deletingInvoice": "Deleting invoice...",
     "sendingEmail": "Sending email..."
+  },
+  "settings": {
+    "invoiceManagement": {
+      "title": "Enable Invoice Generation",
+      "description": "Generate professional invoices for client transactions and access invoice management tools."
+    },
+    "requireCompleteAddress": {
+      "title": "Collect Full Address at Checkout",
+      "description": "Require complete billing address from clients. Disable for faster checkout with country-only collection."
+    },
+    "automaticInvoiceNote": {
+      "title": "Auto-add Invoice Notes",
+      "description": "Automatically include a standard note on all new invoices."
+    },
+    "billingInformation": {
+      "title": "Billing Information",
+      "description": "This information will be used to generate invoices for your clients.",
+      "companyInformation": {
+        "title": "Company Information",
+        "subtitle": "Basic details for your invoices",
+        "companyName": {
+          "label": "Company Name",
+          "placeholder": "Enter your company name"
+        },
+        "taxId": {
+          "label": "Tax ID / VAT Number",
+          "placeholder": "Enter tax identification"
+        },
+        "country": {
+          "label": "Country",
+          "placeholder": "Select your country"
+        }
+      },
+      "businessAddress": {
+        "title": "Business Address",
+        "subtitle": "Location details for billing",
+        "streetAddress": {
+          "label": "Street Address",
+          "placeholder": "Enter your business address"
+        },
+        "city": {
+          "label": "City",
+          "placeholder": "City"
+        },
+        "stateProvince": {
+          "label": "State / Province",
+          "placeholder": "State or Province"
+        },
+        "zipCode": {
+          "label": "ZIP / Postal Code",
+          "placeholder": "ZIP Code"
+        }
+      },
+      "infoNote": {
+        "title": "Invoice Information",
+        "description": "This information will appear on all invoices generated for your clients. Make sure all details are accurate and up-to-date for professional billing."
+      }
+    }
   }
 }
