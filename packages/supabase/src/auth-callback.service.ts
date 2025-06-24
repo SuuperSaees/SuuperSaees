@@ -186,9 +186,7 @@ class AuthCallbackService {
         newCallbackNextPath = `${newCallbackNextPath}&email=${emailToInvite}`;
       }
 
-        const fullUrl = url.href;
-        const domainMatch = fullUrl.match(/^https?:\/\/([^\\/]+)/);
-        const onlyDomain = domainMatch ? domainMatch[1] : '';
+        
 
       // if type is update_email we use the rpc
       if (type === 'update_email' as EmailOtpType) {
@@ -196,7 +194,7 @@ class AuthCallbackService {
         const { error } = await adminClient.rpc('update_email', {
           new_email: emailToInvite?.replace(' ', '+') ?? '',
           user_id: payload?.user_id ?? '',
-          p_domain: onlyDomain ?? '',
+          p_domain: payload?.domain ?? '',
         });
 
         if (error) {
@@ -223,7 +221,9 @@ class AuthCallbackService {
       
       if (accessToken && refreshToken && !(await this.client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })).error) {       
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
-
+        const fullUrl = url.href;
+        const domainMatch = fullUrl.match(/^https?:\/\/([^\\/]+)/);
+        const onlyDomain = payload?.domain ?? (domainMatch ? domainMatch[1] : '');
 
         await this.client.rpc('set_session', {
           domain: onlyDomain,
