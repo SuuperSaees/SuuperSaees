@@ -12,6 +12,7 @@ import { Service } from "~/lib/services.types";
 // Invoice type is used in the component
 import { notFound } from "next/navigation";
 import { InvoiceForm } from "../components/form/form";
+import { Trans } from "@kit/ui/trans";
 
 interface UpdateInvoicePageProps {
   params: {
@@ -19,13 +20,23 @@ interface UpdateInvoicePageProps {
   };
 }
 
-export const generateMetadata = async () => {
+export const generateMetadata = async ({ params }: UpdateInvoicePageProps) => {
   const i18n = await createI18nServerInstance();
-  const title = i18n.t("invoices:update.title");
-
-  return {
-    title,
-  };
+  
+  try {
+    const invoice = await getInvoice(params.id);
+    const title = i18n.t("invoices:update.title", { number: invoice.number });
+    
+    return {
+      title,
+    };
+  } catch (error) {
+    // Fallback title if invoice doesn't exist or fails to load
+    const title = i18n.t("invoices:update.title", { number: "" });
+    return {
+      title,
+    };
+  }
 };
 
 async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
@@ -46,12 +57,16 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
   }
 
   return (
-    <PageBody className="h-full">
+    <PageBody >
       <PageHeader
         title="invoices:update.title"
         rightContent={<TimerContainer />}
-        className="w-full"
-      />
+        className="w-full flex"
+      >
+         <h2 className="text-xl font-medium">
+          <Trans i18nKey="invoices:update.title" values={{ number: invoice.number }} />
+        </h2>
+      </PageHeader>
       <InvoiceForm 
         clients={clients} 
         services={services} 

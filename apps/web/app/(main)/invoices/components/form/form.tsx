@@ -128,7 +128,6 @@ export function InvoiceForm({
           >
             <Trans
               i18nKey={`invoices:${mode === "create" ? "creation" : "update"}.form.actions.${isUpdate ? "updateInvoice" : "createInvoice"}`}
-              values={{ number: invoice?.number ?? "" }}
             />
             {invoiceMutation.isPending ? <Spinner className="w-4 h-4" /> : null}
           </Button>

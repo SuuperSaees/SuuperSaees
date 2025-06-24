@@ -17,6 +17,7 @@ import { Pagination } from '~/lib/pagination';
 
 import Table from '../../../components/table/table';
 import { getInvoices } from '~/server/actions/invoices/invoices.action';
+import AddButton from './add-button';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -34,7 +35,7 @@ const InvoicesTable = ({
   const { t } = useTranslation(['invoices']);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { config } = useTableConfigs('table-config');
-
+  
   const {
     data: invoices,
     isLoading: invoicesAreLoading,
@@ -79,7 +80,7 @@ const InvoicesTable = ({
 
   return (
     <>
-      <div className="flex flex-wrap justify-end gap-4 sm:flex-nowrap">
+      <div className="flex flex-wrap w-fit justify-end gap-4 sm:flex-nowrap ml-auto">
         <SearchInput
           placeholder={t('invoices:search')}
           value={searchTerm}
@@ -87,6 +88,9 @@ const InvoicesTable = ({
             setSearchTerm(e.target.value)
           }
         />
+        {hasPermissionToActionInvoices() && (
+          <AddButton />
+        )}
       </div>
       {invoicesAreLoading ? (
         <TableSkeleton columns={6} rows={4} />

@@ -91,7 +91,7 @@
     "nextInvoice": "Next invoice issue date "
   },
   "update": {
-    "title": "Edit invoice {{number}}",
+    "title": "Edit invoice - {{number}}",
     "form": {
       "actions": {
         "updateInvoice": "Save"
