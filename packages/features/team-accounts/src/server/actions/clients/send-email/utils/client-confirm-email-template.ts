@@ -1,5 +1,12 @@
 import { getEmailTranslations } from '@kit/mailers';
 
+const typeEmailTranslations = {
+  confirm: 'clientConfirmEmail',
+  recovery: 'clientRecoveryEmail',
+  invitation: 'clientInvitationEmail',
+  reactivation: 'clientConfirmEmail',
+  update_email: 'clientUpdateEmail',
+} as const;
 
 export const getClientConfirmEmailTemplate = (
   toEmail: string,
@@ -11,15 +18,9 @@ export const getClientConfirmEmailTemplate = (
   agencyLogo: string,
   agencyColor: string,
   textColor: string,
-  type: 'confirm' | 'recovery' | 'invitation' | 'reactivation' = 'confirm',
+  type: 'confirm' | 'recovery' | 'invitation' | 'reactivation' | 'update_email' = 'confirm',
 ) => {
-  const { t } = type === 'confirm' 
-    ? getEmailTranslations('clientConfirmEmail', lang)
-    : type === 'invitation'
-    ? getEmailTranslations('clientInvitationEmail', lang) 
-    : type === 'reactivation'
-    ? getEmailTranslations('clientConfirmEmail', lang)
-    : getEmailTranslations('clientRecoveryEmail', lang);
+  const { t } = getEmailTranslations(typeEmailTranslations[type], lang);
   const template = `
   <!doctype html>
 <html dir="ltr" lang="${lang}">

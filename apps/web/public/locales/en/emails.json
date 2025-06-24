@@ -103,6 +103,18 @@
       "farewell": "Best regards,",
       "footer": "You are receiving this email because you are a participant in this chat. If you don't want to receive these notifications, you can adjust your notification settings.",
       "at": "at"
+  },
+  "clientUpdateEmail": {
+    "subject": "Update your email",
+    "body": "Update your email",
+    "yourUsername": "Your username:",
+    "team": "The team",
+    "greeting": "Hi ${toEmail}",
+    "activateAccount": "Update email",
+    "thanks": "Thanks,",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   }
 }
 
