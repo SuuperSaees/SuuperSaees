@@ -51,7 +51,7 @@ export const invoicesColumns = (
           href={`/invoices/${row.original.id}`}
           className="flex w-full gap-2 font-semibold"
         >
-          <div className="">{row.getValue("number")}</div>
+          {row.getValue("number")}
         </PrefetcherLink>
       ),
     },

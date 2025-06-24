@@ -1,58 +1,66 @@
 import { PageBody } from "@kit/ui/page";
 import { PageHeader } from "~/(main)/../components/page-header";
 import { TimerContainer } from "~/(main)/../components/timer-container";
-// import { Alert } from "~/(main)/../components/shared/export-csv-button/alert";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
-// import { InvoiceSettingsLink } from "./components/settings-link";
-import { InvoiceForm } from "../components/form/form";
-// import { Trans } from "@kit/ui/trans";
 import { getClients } from "~/server/actions/clients/get-clients";
 import { loadUserWorkspace } from "~/(main)/home/(user)/_lib/server/load-user-workspace";
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
+import { getInvoice } from "~/server/actions/invoices/invoices.action";
 import { Client } from "~/lib/client.types";
 import { Service } from "~/lib/services.types";
+// Invoice type is used in the component
+import { notFound } from "next/navigation";
+import { InvoiceForm } from "../components/form/form";
+
+interface UpdateInvoicePageProps {
+  params: {
+    id: string;
+  };
+}
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
-  const title = i18n.t("invoices:creation.title");
+  const title = i18n.t("invoices:update.title");
 
   return {
     title,
   };
 };
 
-async function CreateInvoicesPage() {
+async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
   const { organization, agency, workspace } = await loadUserWorkspace();
   const userRole = workspace.role ?? "";
   const agencyId =
     (userRole.startsWith("agency_") ? organization.id : agency?.id) ?? "";
-  const clients = (await getClients(agencyId)) as Client.Response[];
-  const services =
-    (await getServicesByOrganizationId()) as Service.Relationships.Billing.BillingService[];
 
+  // Fetch all required data in parallel
+  const [invoice, clients, services] = await Promise.all([
+    getInvoice(params.id).catch(() => null),
+    getClients(agencyId) as Promise<Client.Response[]>,
+    getServicesByOrganizationId() as Promise<Service.Relationships.Billing.BillingService[]>,
+  ]);
+
+  if (!invoice) {
+    notFound();
+  }
 
   return (
     <PageBody className="h-full">
       <PageHeader
-        title="invoices:creation.title"
+        title="invoices:update.title"
         rightContent={<TimerContainer />}
         className="w-full"
       />
-      {/* <Alert
-        description={<Trans i18nKey="invoices:creation.warning.description" />}
-        visible={true}
-        action={<InvoiceSettingsLink />}
-        type="info"
-      /> */}
       <InvoiceForm 
         clients={clients} 
         services={services} 
         agencyId={agencyId}
-        mode="create"
+        invoice={invoice}
+        mode="update"
       />
     </PageBody>
   );
 }
 
-export default withI18n(CreateInvoicesPage);
+export default withI18n(UpdateInvoicePage); 

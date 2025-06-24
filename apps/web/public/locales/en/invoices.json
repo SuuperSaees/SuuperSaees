@@ -86,10 +86,17 @@
       }
     }
   },
-
   "plan": {
     "title": "Plan",
     "nextInvoice": "Next invoice issue date "
+  },
+  "update": {
+    "title": "Edit invoice {{number}}",
+    "form": {
+      "actions": {
+        "updateInvoice": "Save"
+      }
+    }
   },
   "total": {
     "title": "Invoice total",

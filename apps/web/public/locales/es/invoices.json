@@ -89,6 +89,14 @@
       "title": "Plan",
       "nextInvoice": "Fecha de la próxima factura"
     },
+    "update": {
+      "title": "Editar factura {{number}}",
+      "form": {
+        "actions": {
+          "updateInvoice": "Guardar"
+        }
+      }
+    },
     "total": {
       "title": "Total de la factura",
       "usersEquivalent": "equivalente a {{currentUsers}}",

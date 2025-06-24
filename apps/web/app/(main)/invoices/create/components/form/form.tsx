@@ -6,10 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@kit/ui/button";
 import { Form } from "@kit/ui/form";
-import { invoiceSchema, InvoiceFormData } from "../../schemas/schema";
-import { InvoiceInformationSection } from "./information-section";
-import { InvoiceItemsSection } from "./items-section";
-import { InvoiceNotesSection } from "./notes-section";
+import { invoiceSchema, InvoiceFormData } from "../../../schemas/schema";
+import { InvoiceInformationSection } from "../../../components/form/information-section";
+import { InvoiceItemsSection } from "../../../components/form/items-section";
+import { InvoiceNotesSection } from "../../../components/form/notes-section";
 import { Trans } from "@kit/ui/trans";
 import { Service } from "~/lib/services.types";
 import { Client } from "~/lib/client.types";
