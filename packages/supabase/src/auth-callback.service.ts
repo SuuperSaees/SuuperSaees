@@ -49,6 +49,10 @@ class AuthCallbackService {
     const host = request.headers.get('host');
     const emailToInvite = searchParams.get('email');
 
+    const adminClient = getSupabaseServerComponentClient({
+          admin: true,
+      });
+
     // set the host to the request host since outside of Vercel it gets set as "localhost"
     if (url.host.includes('localhost:') && !host?.includes('localhost')) {
       url.host = host as string;
@@ -109,9 +113,7 @@ class AuthCallbackService {
       ) as { isValidToken: boolean; payload?: DefaultToken };
 
       if (payload) {
-        const adminClient = getSupabaseServerComponentClient({
-          admin: true,
-        });
+        
         const { data, error } = await adminClient
         .from('accounts')
         .select('count')
@@ -180,8 +182,24 @@ class AuthCallbackService {
 
       let newCallbackNextPath = callbackNextPath;
 
-      if (emailToInvite && !newCallbackNextPath?.includes('set-password')) {
+      if (emailToInvite && !newCallbackNextPath?.includes('set-password') && !newCallbackNextPath?.includes('orders')) {
         newCallbackNextPath = `${newCallbackNextPath}&email=${emailToInvite}`;
+      }
+
+        
+
+      // if type is update_email we use the rpc
+      if (type === 'update_email' as EmailOtpType) {
+
+        const { error } = await adminClient.rpc('update_email', {
+          new_email: emailToInvite?.replace(' ', '+') ?? '',
+          user_id: payload?.user_id ?? '',
+          p_domain: payload?.domain ?? '',
+        });
+
+        if (error) {
+          console.error('Error updating email', error);
+        }
       }
       
       const response = await fetch(payload?.redirectTo ?? '', {
@@ -204,7 +222,7 @@ class AuthCallbackService {
         url.href = newCallbackNextPath ?? newUrlPayload.searchParams.get('redirect_to') ?? url.href;
         const fullUrl = url.href;
         const domainMatch = fullUrl.match(/^https?:\/\/([^\\/]+)/);
-        const onlyDomain = domainMatch ? domainMatch[1] : '';
+        const onlyDomain = payload?.domain ?? (domainMatch ? domainMatch[1] : '');
 
         await this.client.rpc('set_session', {
           domain: onlyDomain,

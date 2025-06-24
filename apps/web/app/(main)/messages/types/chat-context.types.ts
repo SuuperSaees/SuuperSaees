@@ -107,7 +107,10 @@ export interface ChatMutations {
   membersUpdateMutation: UseMutationResult<
     ChatMembers.TypeWithRelations[],
     Error,
-    string[],
+    {
+      selectedUserIds: string[];
+      agencyMembers: { id: string; role: string }[];
+    },
     unknown
   >;
 }

@@ -57,7 +57,7 @@
   "updateEmailSubmitLabel": "Update email",
   "updateEmailSuccess": "Email update request successful",
   "updateEmailSuccessMessage": "We've sent an email to confirm your new address. Please check your inbox and click the link to confirm.",
-  "updateEmailLoading": "Updating your email...",
+  "updateEmailLoading": "Sending email...",
   "updateEmailError": "Email not updated. Please try again",
   "passwordNotMatching": "Passwords do not match. Ensure you're using the correct password",
   "emailNotMatching": "Emails do not match. Ensure you're using the correct email",

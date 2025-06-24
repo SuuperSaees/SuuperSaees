@@ -147,6 +147,7 @@ const OrderCreationForm = ({ briefs, userRole }: OrderCreationFormProps) => {
       ) {
         const filesToInsert:File.Insert[] = values.briefCompletion.files.map(
           (file) => ({
+            id: file.id ?? undefined,
             name: file.name ?? '',
             size: file.size ?? 0,
             type: file.type ?? '',
