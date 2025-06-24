@@ -190,15 +190,15 @@ class AuthCallbackService {
       if (type === 'update_email' as EmailOtpType) {
 
         console.log('Updating email for user', payload?.user_id, payload?.email);
-        // const { error } = await adminClient.rpc('update_email', {
-        //   new_email: payload?.email,
-        //   user_id: payload?.user_id,
-        // });
+        const { error } = await adminClient.rpc('update_email', {
+          new_email: payload?.email,
+          user_id: payload?.user_id,
+        });
 
-        // if (error) {
-        //   console.error('Error updating email', error);
-        //   throw new Error(`Error updating email: ${error.message}`);
-        // }
+        if (error) {
+          console.error('Error updating email', error);
+          throw new Error(`Error updating email: ${error.message}`);
+        }
       }
       
       const response = await fetch(payload?.redirectTo ?? '', {

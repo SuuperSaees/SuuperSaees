@@ -3639,6 +3639,10 @@ export type Database = {
         Args: { target_account_id: string; new_owner_id: string }
         Returns: undefined
       }
+      update_email: {
+        Args: { user_id: string; new_email: string }
+        Returns: undefined
+      }
       update_order_with_position: {
         Args: {
           p_order_id: number
