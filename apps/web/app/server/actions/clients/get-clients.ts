@@ -13,7 +13,7 @@ import { transformUser } from "../utils/transformers";
 
 export const getClients = async (
   agencyId: string,
-  config: QueryConfigurations<Client.Response>,
+  config?: QueryConfigurations<Client.Response>,
 ): Promise<Pagination.Response<Client.Response> | Client.Response[]> => {
   const client = getSupabaseServerComponentClient();
   const adminClient = getSupabaseServerComponentClient({
@@ -49,7 +49,7 @@ export const getClients = async (
 
   const parsedResponse = transformClients(response.data, roles.data);
   // Check if pagination is requested
-  if (config.pagination) {
+  if (config?.pagination) {
     const paginatedResponse = transformToPaginatedResponse<Client.Response>(
       response,
       config.pagination,

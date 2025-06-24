@@ -12,7 +12,7 @@ import { transformToPaginatedResponse } from '../utils/response-transformers';
 export const getServicesByOrganizationId = async (
   config?: QueryConfigurations<Service.Relationships.Billing.BillingService>,
 ): Promise<
-  Pagination.Response<Service.Relationships.Billing.BillingService>
+  Pagination.Response<Service.Relationships.Billing.BillingService> | Service.Relationships.Billing.BillingService[]
 > => {
   const client = getSupabaseServerComponentClient();
   const primary_owner_user_id = await getPrimaryOwnerId();
@@ -31,12 +31,16 @@ export const getServicesByOrganizationId = async (
     const paginatedProducts = QueryBuilder.getInstance().enhance(initialQuery, config);
     const response = await paginatedProducts;
 
-    const paginatedResponse =
+    if (config?.pagination) {
+      const paginatedResponse =
       transformToPaginatedResponse<Service.Relationships.Billing.BillingService>(
         response,
         config?.pagination ?? {},
       );
     return paginatedResponse;
+    }
+
+    return response.data ?? [];
   } catch (error) {
     console.error('Error fetching products or prices:', error);
     return transformToPaginatedResponse<Service.Relationships.Billing.BillingService>(

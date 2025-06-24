@@ -1,7 +1,8 @@
 import { // Briefcase,
 CreditCard, Layers, Settings, Users, Home, Package, Bot,
 Inbox,
-Store, // Wallet,
+Store, 
+Wallet,
 GraduationCap,
 Handshake,
 Calendar,
@@ -151,11 +152,12 @@ const routes = [
   //   path: pathsConfig.app.services,
   //   Icon: <SquareCheck className={iconClasses} />,
   // },
-  // {
-  //   label: 'Facturas',
-  //   path: pathsConfig.app.invoices,
-  //   Icon: <Wallet className={iconClasses} />,
-  // },
+  {
+    type: 'route',
+    label: 'common:invoicesName',
+    path: pathsConfig.app.invoices,
+    Icon: <Wallet className={iconClasses} />,
+  },
   {
     type: 'route',
     label: 'common:settingsName',

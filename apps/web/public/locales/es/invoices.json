@@ -1,42 +1,157 @@
 {
   "title": "Facturas",
-  "plan": {
-    "title": "Plan",
-    "nextInvoice": "Fecha de la próxima factura"
+  "number": "Número",
+  "organization": "Organización",
+  "paymentMethod": "Método de pago",
+  "status": "Estado",
+  "createdAt": "Creado el",
+  "actions": "Acciones",
+  "search": "Buscar facturas...",
+  "empty": {
+    "title": "No se encontraron facturas",
+    "description": "Comienza creando tu primera factura."
   },
-  "total": {
-    "title": "Total de la factura",
-    "usersEquivalent": "equivalente a {{currentUsers}}",
-    "users": "usuarios",
-    "user": "usuario",
-    "upgrade": "Mejorar su plan"
-  },
-  "history": {
-    "title": "Historial de facturación",
-    "invoice": "Factura",
-    "amount": "Cantidad",
-    "date": "Fecha",
-    "status": "Estado"
-  },
-  "manage": {
-    "title": "Gestionar suscripción",
-    "description": "Actulizar estado de suscripción",
-    "cancel": "Cancelar suscripción",
-    "modal": {
-      "cancel": {
-        "title": "Cancelar suscripción",
-        "description": {
-          "paragraph1": "¿Estás seguro de que quieres cancelar tu suscripción?",
-          "paragraph2": {
-            "text1": "Escribe",
-            "text2": "para confirmar."
-          }
+  "paid": "Pagado",
+  "issued": "Emitido",
+  "partiallyPaid": "Parcialmente pagado",
+  "draft": "Borrador",
+  "overdue": "Vencido",
+  "cancelled": "Cancelado",
+  "voided": "Anulado",
+  "openMenu": "Abrir menú",
+  "download": "Descargar",
+  "markAsPaid": "Marcar como pagado",
+  "requestPaymentByEmail": "Solicitar pago por email",
+  "getPaymentLink": "Obtener enlace de pago",
+  "paymentLinkCopied": "¡Enlace de pago copiado!",
+  "delete": "Eliminar",
+  "creation": {
+    "title": "Nueva factura",
+    "warning": {
+      "description": "Por favor, configure su información de facturación antes de crear facturas.",
+      "link": "Ir a configuraciones"
+    },
+    "form": {
+      "information": {
+        "title": "Información",
+        "client": {
+          "label": "Cliente",
+          "placeholder": "Seleccionar un cliente"
         },
-        "submit": "Cancelar suscripción",
-        "placeholder": "Escribe 'cancel_subscription'",
-        "cancelButton": "Cancelar",
-        "backButton": "Volver"
+        "dateOfIssue": {
+          "label": "Fecha de emisión",
+          "placeholder": "Seleccionar una fecha"
+        },
+        "paymentMethod": {
+          "label": "Método de pago",
+          "placeholder": "Seleccionar un método de pago"
+        },
+        "paymentReference": {
+          "label": "Referencia de pago",
+          "placeholder": "Ingresar una referencia de pago"
+        }
+      },
+      "items": {
+        "title": "Items",
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Seleccionar un servicio"
+        },
+        "rate": {
+          "label": "Tasa",
+          "placeholder": "Ingresar una tasa"
+        },
+        "quantity": {
+          "label": "Cantidad",
+          "placeholder": "Ingresar una cantidad"
+        },
+        "lineTotal": {
+          "title": "Total de la línea"
+        },
+        "total": {
+          "title": "Total"
+        },
+        "subtotal": {
+          "title": "Subtotal"
+        },
+        "add": "Agregar nueva línea"
+      },
+      "notes": {
+        "title": "Notas",
+        "placeholder": "Escribir una nota..."
+      },
+      "actions": {
+        "saveAsDraft": "Guardar como borrador",
+        "createInvoice": "Crear factura"
+      }
+    },
+    "plan": {
+      "title": "Plan",
+      "nextInvoice": "Fecha de la próxima factura"
+    },
+    "update": {
+      "title": "Editar factura - {{number}}",
+      "form": {
+        "actions": {
+          "updateInvoice": "Guardar"
+        }
+      }
+    },
+    "total": {
+      "title": "Total de la factura",
+      "usersEquivalent": "equivalente a {{currentUsers}}",
+      "users": "usuarios",
+      "user": "usuario",
+      "upgrade": "Mejorar su plan"
+    },
+    "history": {
+      "title": "Historial de facturación",
+      "invoice": "Factura",
+      "amount": "Cantidad",
+      "date": "Fecha",
+      "status": "Estado"
+    },
+    "manage": {
+      "title": "Gestionar suscripción",
+      "description": "Actulizar estado de suscripción",
+      "cancel": "Cancelar suscripción",
+      "modal": {
+        "cancel": {
+          "title": "Cancelar suscripción",
+          "description": {
+            "paragraph1": "¿Estás seguro de que quieres cancelar tu suscripción?",
+            "paragraph2": {
+              "text1": "Escribe",
+              "text2": "para confirmar."
+            }
+          },
+          "submit": "Cancelar suscripción",
+          "placeholder": "Escribe 'cancel_subscription'",
+          "cancelButton": "Cancelar",
+          "backButton": "Volver"
+        }
       }
     }
+  },
+  "errors": {
+    "failedToCreateInvoice": "Error al crear la factura",
+    "failedToCreateInvoiceDraft": "Error al guardar la factura como borrador",
+    "failedToUpdateInvoice": "Error al actualizar la factura",
+    "failedToDeleteInvoice": "La factura no pudo ser eliminada",
+    "failedToSendEmail": "Error al enviar el email"
+  },
+  "success": {
+    "invoiceCreated": "Factura creada correctamente",
+    "invoiceDraftCreated": "Factura guardada como borrador",
+    "invoiceUpdated": "Factura actualizada correctamente!",
+    "invoiceDeleted": "Factura eliminada correctamente!",
+    "emailSent": "Email enviado correctamente!"
+  },
+  "loading": {
+    "updating": "Actualizando...",
+    "updatingInvoice": "Actualizando factura...",
+    "updatingInvoiceStatus": "Actualizando estado de la factura...",
+    "deletingInvoice": "Eliminando factura...",
+    "sendingEmail": "Enviando email..."
   }
 }
