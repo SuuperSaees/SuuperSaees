@@ -56,7 +56,7 @@ export class ChatRepository {
     if (chatIds) {
       const query = client
       .from('chats')
-      .select(`*, members:chat_members (user:accounts())`)
+      .select(`*, members:chat_members(user:accounts(*))`)
       .in('id', chatIds)
       .is('deleted_on', null);
 

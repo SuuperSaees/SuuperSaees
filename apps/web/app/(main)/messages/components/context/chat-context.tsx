@@ -84,8 +84,9 @@ export function ChatProvider({
     filteredChats,
     setFilteredChats,
     setChats,
+    fileUploads,
     handleFileUpload,
-    uploads,
+    handleFileRemove,
   } = useChatState({ initialMembers });
 
   // Query for chat by id
@@ -284,7 +285,6 @@ export function ChatProvider({
     searchQuery,
     setSearchQuery,
     chatsQuery,
-
     filteredChats,
     setFilteredChats,
     setChats: setChats as ActiveChatState['setChats'],
@@ -295,8 +295,9 @@ export function ChatProvider({
       email: user?.email ?? '',
       picture_url: currentUser?.picture_url ?? '',
     },
+    fileUploads,
     handleFileUpload,
-    uploads,
+    handleFileRemove,
     chatByIdQuery,
     ...chatActions,
     ...messageActions,

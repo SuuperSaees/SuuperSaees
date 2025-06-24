@@ -19,7 +19,7 @@ export const createUrlForCheckout = async ({
   stripeId?: string;
   priceId?: string;
   service?: Service.Relationships.Billing.BillingService | Service.Type;
-  invoice?: Invoice.Response | Invoice.Type;
+  invoice?: Invoice.Type;
   organizationId: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
   baseUrl: string;

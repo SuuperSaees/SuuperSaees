@@ -120,6 +120,18 @@
     "farewell": "Thank you for your business.",
     "footer": "This email was sent to ${toEmail}. If you have any questions, please contact us.",
     "at": "at"
+  },
+  "clientUpdateEmail": {
+    "subject": "Update your email",
+    "body": "Update your email",
+    "yourUsername": "Your username:",
+    "team": "The team",
+    "greeting": "Hi ${toEmail}",
+    "activateAccount": "Update email",
+    "thanks": "Thanks,",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   }
 }
 

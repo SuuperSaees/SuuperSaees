@@ -26,8 +26,10 @@ export namespace Invoice {
   export namespace Enums {
     export enum Status {
       DRAFT = 'draft',
-      SENT = 'sent',
+      ISSUED = 'issued',
       PAID = 'paid',
+      PARTIALLY_PAID = 'partially_paid',
+      VOIDED = 'voided',
       OVERDUE = 'overdue',
       CANCELLED = 'cancelled',
     }

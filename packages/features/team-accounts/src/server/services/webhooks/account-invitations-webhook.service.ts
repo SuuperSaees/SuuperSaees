@@ -6,9 +6,6 @@ import { OrganizationSettings } from '../../../../../../../apps/web/lib/organiza
 import { getDomainByOrganizationId } from '../../../../../../../packages/multitenancy/utils/get/get-domain';
 import { getOrganizationSettingsByOrganizationId } from '../../actions/organizations/get/get-organizations';
 
-
-// import { getOrganizationById } from '../../actions/organizations/get/get-organizations';
-
 type Invitation = Database['public']['Tables']['invitations']['Row'];
 
 const invitePath = '/join';

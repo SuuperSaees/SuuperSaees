@@ -121,5 +121,16 @@
     "farewell": "Saludos cordiales,",
     "footer": "Este correo fue enviado a ${toEmail}. Si tienes alguna pregunta, por favor contáctanos.",
     "at": "de"
+  },
+  "clientUpdateEmail": {
+    "subject": "Actualiza tu correo",
+    "body": "Actualiza tu correo",
+    "yourUsername": "Tu nombre de usuario:",
+    "team": "El equipo",
+    "greeting": "Hola ${toEmail}",
+    "activateAccount": "Actualizar correo",
+    "thanks": "Gracias,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   }
 }

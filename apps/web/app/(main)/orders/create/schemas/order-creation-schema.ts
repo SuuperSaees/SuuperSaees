@@ -57,6 +57,7 @@ export const generateOrderCreationSchema = (
           message: t('creation.validation.minDescriptionCharacters'),
         }),
     files: z.array(z.object({
+      id: z.string().optional(),
       name: z.string(),
       size: z.number(),
       type: z.string(),

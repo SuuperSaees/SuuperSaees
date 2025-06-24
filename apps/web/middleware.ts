@@ -18,6 +18,64 @@ export const config = {
   ],
 };
 
+/**
+ * Define path access restrictions based on user roles
+ * Each entry specifies which roles are allowed to access specific paths
+ */
+const PATH_ROLE_RESTRICTIONS = [
+  {
+    path: '/briefs',
+    allowedRoles: ['agency_project_manager', 'agency_owner'],
+    redirectTo: '/orders', // Where to redirect if access is denied
+  },
+  {
+    path: '/clients',
+    allowedRoles: ['agency_owner', 'agency_project_manager', 'agency_member'],
+    redirectTo: '/orders',
+  },
+  {
+    path: '/team',
+    allowedRoles: ['agency_owner', 'agency_project_manager', 'agency_member'],
+    redirectTo: '/orders',
+  },
+  {
+    path: '/services',
+    allowedRoles: ['agency_owner', 'agency_project_manager'],
+    redirectTo: '/orders',
+  },
+
+] as const;
+
+/**
+ * Check if a user role has access to a specific path
+ * @param userRole - The current user's role
+ * @param pathname - The path being accessed
+ * @returns Object with access status and redirect URL if denied
+ */
+function checkRoleAccess(userRole: string, pathname: string): 
+  | { hasAccess: true; redirectTo: null }
+  | { hasAccess: false; redirectTo: string } {
+  for (const restriction of PATH_ROLE_RESTRICTIONS) {
+    // Check if the current path matches the restricted path
+    if (pathname.startsWith(restriction.path)) {
+      // Check if the user's role is in the allowed roles list
+      const hasAccess = (restriction.allowedRoles as readonly string[]).includes(userRole);
+      
+      if (!hasAccess) {
+        return {
+          hasAccess: false,
+          redirectTo: restriction.redirectTo,
+        };
+      }
+    }
+  }
+  
+  return {
+    hasAccess: true,
+    redirectTo: null,
+  };
+}
+
 function getCachedLanguage(request: NextRequest): string | null {
   const langCookie = request.cookies.get('lang');
   return langCookie ? langCookie.value : null;
@@ -184,7 +242,7 @@ async function adminMiddleware(request: NextRequest, response: NextResponse) {
 
   // If user is not an admin, redirect to 404 page.
   if (!role || role !== 'super-admin') {
-    return NextResponse.redirect(new URL('/404', request.nextUrl.origin).href);
+    return NextResponse.redirect(new URL('/orders', request.nextUrl.origin).href);
   }
 
   // in all other cases, return the response
@@ -347,6 +405,16 @@ function getPatterns() {
           });
         }
         const userRole = userRoleWithId.split('-')[0];
+
+        // Check role-based path access restrictions (only if userRole exists)
+        if (userRole) {
+          const roleAccess = checkRoleAccess(userRole, req.nextUrl.pathname);
+          if (!roleAccess.hasAccess) {
+            return NextResponse.redirect(
+              new URL(roleAccess.redirectTo, origin).href,
+            );
+          }
+        }
 
         if (userRole === 'client_guest') {
           const allowedPaths = ['/orders', '/auth'];

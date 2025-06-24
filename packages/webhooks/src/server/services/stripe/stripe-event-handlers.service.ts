@@ -104,8 +104,6 @@ export class StripeEventHandlersService extends BaseWebhookService {
                 .eq('provider_id', data?.id)
                 .single();
 
-            console.log('checkoutServiceData', checkoutServiceData);
-
             if (checkoutServiceError) {
               console.error(
                 'Error fetching checkout service:',

@@ -20,11 +20,25 @@ const FilePreview: React.FC<FileRendererProps> = ({
   renderAs = "inline",
   upload,
   onRemove,
+  enableValidation = false,
+  validationTimeout = 10000,
+  onFileError,
 }) => {
   const type = getFileType(fileType, fileName.split(".").pop());
   const canPreview = canPreviewFile(type);
   const Component = renderers[type];
-  const props = { src, fileName, fileType, className, isDialog, renderAs };
+  const props = { 
+    src, 
+    fileName, 
+    fileType, 
+    className, 
+    isDialog, 
+    renderAs,
+    upload,
+    enableValidation,
+    validationTimeout,
+    onFileError,
+  };
   // const { t } = useTranslation("files");
 
   if (upload &&  upload?.status === "uploading") {
