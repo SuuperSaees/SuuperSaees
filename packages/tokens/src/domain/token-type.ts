@@ -36,6 +36,8 @@ export interface TokenRecoveryType {
   id?: string;
   email: string;
   redirectTo: string;
+  user_id?: string;
+  domain?: string;
 }
 
 export interface DefaultToken {

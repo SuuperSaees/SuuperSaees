@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -67,6 +67,7 @@ function EditUserDialog({
   const { t } = useTranslation('clients');
   const router = useRouter();
   // const [localOpen, setLocalOpen] = useState<boolean>(false);
+  const queryClient = useQueryClient();
   const [roles, setRoles] = useState<
     {
       value: string;
@@ -144,6 +145,7 @@ function EditUserDialog({
       toast.success(t('success'), {
         description: t('editUser.successEdit'),
       });
+      void queryClient.invalidateQueries({ queryKey: ['members'] });
     },
     onError: (error) => {
       console.log(error);

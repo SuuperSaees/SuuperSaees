@@ -77,7 +77,12 @@ export function useFileUploadActions({
     }
 
     if (onFilesSelected) {
-      onFilesSelected(fileUploadsToReturn);
+      // Get the current state and combine with new uploads
+      setFileUploads((currentFiles) => {
+        const allFiles = [...currentFiles];
+        onFilesSelected(allFiles);
+        return currentFiles;
+      });
     }
   };
 

@@ -21,7 +21,10 @@ import MembersAssignations from '../../../components/users/member-assignations';
 interface ChatMembersSelectorProps {
   agencyTeam: Members.Organization;
   selectedMembers: Members.Member[];
-  onMembersUpdate: (userIds: string[]) => Promise<void>;
+  onMembersUpdate: (params: {
+    selectedUserIds: string[];
+    agencyMembers: { id: string; role: string }[];
+  }) => Promise<void>;
   isLoading?: boolean;
 }
 
@@ -131,10 +134,16 @@ export default function ChatMembersSelector({
                 users={clientMembers ?? []}
                 selectedUsers={selectedClientOrganizationMembers}
                 onMembersUpdate={async (userIds: string[]) => {
-                  await onMembersUpdate([
-                    ...userIds,
-                    ...selectedAgencyMembers.map((member) => member.id),
-                  ]);
+                  await onMembersUpdate({
+                    selectedUserIds: [
+                      ...userIds,
+                      ...selectedAgencyMembers.map((member) => member.id),
+                    ],
+                    agencyMembers: agencyMembers.map((member) => ({
+                      id: member.id,
+                      role: member.role,
+                    })),
+                  });
                 }}
                 isLoading={clientMembersQuery.isLoading}
                 canAddMembers={canAddMembers}
@@ -147,12 +156,18 @@ export default function ChatMembersSelector({
                   users={agencyMembers}
                   selectedUsers={selectedAgencyMembers}
                   onMembersUpdate={async (userIds: string[]) => {
-                    await onMembersUpdate([
-                      ...userIds,
-                      ...selectedClientOrganizationMembers.map(
-                        (member) => member.id,
-                      ),
-                    ]);
+                    await onMembersUpdate({
+                      selectedUserIds: [
+                        ...userIds,
+                        ...selectedClientOrganizationMembers.map(
+                          (member) => member.id,
+                        ),
+                      ],
+                      agencyMembers: agencyMembers.map((member) => ({
+                        id: member.id,
+                        role: member.role,
+                      })),
+                    });
                   }}
                   isLoading={isLoading}
                   canAddMembers={isValidAgencyRole}

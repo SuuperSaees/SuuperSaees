@@ -302,6 +302,9 @@ export const updateInvitationAction = enhanceAction(
 export const acceptInvitationAction = enhanceAction(
   async (data: FormData, user) => {
     const client = getSupabaseServerActionClient();
+    const adminClient = getSupabaseServerActionClient({
+      admin: true,
+    }); 
 
     const { inviteToken, nextPath } = AcceptInvitationSchema.parse(
       Object.fromEntries(data),
@@ -312,16 +315,30 @@ export const acceptInvitationAction = enhanceAction(
     const service = createAccountInvitationsService(client); 
 
     // Get the organization of the sender
-    const { error: senderOrganizationError } = await client
+    const { data: senderOrganization, error: senderOrganizationError } = await client
       .from('invitations')
       .select('organization_id, role')
       .eq('invite_token', inviteToken)
       .single();
+      
+      if (senderOrganizationError) {
+        console.error('Failed to obtain the sender organization');
+        throw new Error(senderOrganizationError.message);
+      }
 
-    if (senderOrganizationError) {
-      console.error('Failed to obtain the sender organization');
-      throw new Error(senderOrganizationError.message);
-    }
+      // configure user settings 
+     const { error: userSettingsError } = await adminClient
+       .from('user_settings')
+       .update({
+         organization_id: senderOrganization.organization_id,
+       })
+       .eq('user_id', user.id)
+       .is('organization_id', null)
+  
+     if (userSettingsError) {  
+       console.error('Failed to configure user settings', userSettingsError);
+       throw new Error(userSettingsError.message);
+     }
 
     // Accept the invitation
     const organizationId = await service.acceptInvitationToTeam(
@@ -342,7 +359,7 @@ export const acceptInvitationAction = enhanceAction(
     await client.rpc('set_session', {
       domain: domain,
     });
-    
+
     // Increase the seats for the account
     await perSeatBillingService.increaseSeats(organizationId).catch((error) => {
       console.error('Failed to increase seats', error);
