@@ -100,7 +100,6 @@ export class InvoiceRepository {
           payment_method,
           amount,
           status,
-          currency,
           processed_by,
           processed_at
         )
