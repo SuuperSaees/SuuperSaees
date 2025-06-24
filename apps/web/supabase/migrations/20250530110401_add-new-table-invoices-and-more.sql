@@ -472,28 +472,33 @@ CREATE OR REPLACE FUNCTION generate_invoice_number()
 RETURNS TRIGGER AS $$
 DECLARE
     current_date_str TEXT;
+    client_hash TEXT;
     next_sequence INTEGER;
     new_invoice_number TEXT;
 BEGIN
     -- Generate date in format YYYYMMDD
     current_date_str := to_char(NEW.issue_date, 'YYYYMMDD');
     
-    -- Get next sequential number for that day and agency
+    -- Generate a consistent hash from client_organization_id (first 8 characters of MD5)
+    client_hash := upper(substring(md5(NEW.client_organization_id::text), 1, 8));
+    
+    -- Get next sequential number for that client (across all time, not just that day)
     SELECT COALESCE(MAX(
         CASE 
-            WHEN number ~ ('^INV-' || current_date_str || '-[0-9]+$') 
-            THEN CAST(split_part(number, '-', 3) AS INTEGER)
+            WHEN number ~ ('^INV-[0-9]{8}-' || client_hash || '-[0-9]+$') 
+            THEN CAST(split_part(number, '-', 4) AS INTEGER)
             ELSE 0
         END
     ), 0) + 1
     INTO next_sequence
     FROM invoices 
     WHERE agency_id = NEW.agency_id 
-    AND number LIKE 'INV-' || current_date_str || '-%'
+    AND client_organization_id = NEW.client_organization_id
+    AND number LIKE 'INV-%-' || client_hash || '-%'
     AND deleted_on IS NULL;
     
-    -- Generate new invoice number
-    new_invoice_number := 'INV-' || current_date_str || '-' || next_sequence;
+    -- Generate new invoice number: INV-YYYYMMDD-CLIENTHASH-SEQUENCE
+    new_invoice_number := 'INV-' || current_date_str || '-' || client_hash || '-' || next_sequence;
     
     -- Assign generated number
     NEW.number := new_invoice_number;
