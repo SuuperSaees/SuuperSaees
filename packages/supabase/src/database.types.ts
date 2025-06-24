@@ -3627,7 +3627,7 @@ export type Database = {
         Returns: undefined
       }
       update_email: {
-        Args: { user_id: string; new_email: string }
+        Args: { user_id: string; new_email: string; p_domain: string }
         Returns: undefined
       }
       update_order_with_position: {

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.update_email(user_id uuid, new_email text)
+CREATE OR REPLACE FUNCTION public.update_email(user_id uuid, new_email text, p_domain text)
  RETURNS void
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -6,7 +6,6 @@ CREATE OR REPLACE FUNCTION public.update_email(user_id uuid, new_email text)
 AS $function$
 DECLARE
     old_email text;
-    v_domain text;
 BEGIN
     -- Verify that user_id is provided
     IF user_id IS NULL THEN
@@ -16,6 +15,11 @@ BEGIN
     -- Verify that new_email is provided and not empty
     IF new_email IS NULL OR new_email = '' THEN
         RAISE EXCEPTION 'New email cannot be null or empty';
+    END IF;
+
+    -- Verify that p_domain is provided and not empty
+    IF p_domain IS NULL OR p_domain = '' THEN
+        RAISE EXCEPTION 'Domain cannot be null or empty';
     END IF;
     
     -- Get the current email from auth.users
@@ -62,7 +66,7 @@ BEGIN
     SET 
         email = new_email,
         updated_at = now()
-    WHERE email = old_email;
+    WHERE email = old_email AND domain = p_domain;
     
     -- Log the operation (optional)
     RAISE NOTICE 'Email successfully updated from % to % for user ID: %', old_email, new_email, user_id;
