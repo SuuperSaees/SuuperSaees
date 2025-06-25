@@ -88,7 +88,7 @@ export function InvoiceInformationSection({
                     renderItem={customRenderItem}
                     renderTrigger={customRenderTrigger}
                     triggerClassName="border-none"
-                    defaultValue={field.value}
+                    defaultValue={clients.find(client => client.organization_client_id === field.value)?.user_client_id ?? ''}
                     onValueChange={(value) => {
                       const selectedClient = clients.find(
                         (client) => client.user_client_id === value

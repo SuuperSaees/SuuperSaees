@@ -62,6 +62,11 @@ function LineItemRow({
     name: `lineItems.${index}.description`,
   });
 
+  const serviceIdController = useController({
+    control,
+    name: `lineItems.${index}.serviceId`,
+  });
+
   const rateController = useController({
     control,
     name: `lineItems.${index}.rate`,
@@ -84,9 +89,8 @@ function LineItemRow({
             renderItem={customRenderItem}
             renderTrigger={customRenderTrigger}
             triggerClassName="border-none"
-            defaultValue={descriptionController.field.value}
+            defaultValue={serviceIdController.field.value?.toString() || ''}
             onValueChange={(value) => {
-              descriptionController.field.onChange(value);
               onServiceChange(Number(value));
             }}
           />
@@ -184,6 +188,7 @@ export function InvoiceItemsSection({
     }
   };
 
+  console.log('fields', fields);
   const handleServiceChange = (index: number, serviceId: number) => {
     const selectedService = services.find(
       (service) => service.id === serviceId,
