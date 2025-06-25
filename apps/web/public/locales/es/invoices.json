@@ -24,6 +24,7 @@
   "requestPaymentByEmail": "Solicitar pago por email",
   "getPaymentLink": "Obtener enlace de pago",
   "paymentLinkCopied": "¡Enlace de pago copiado!",
+  "view": "Ver",
   "delete": "Eliminar",
   "creation": {
     "title": "Nueva factura",

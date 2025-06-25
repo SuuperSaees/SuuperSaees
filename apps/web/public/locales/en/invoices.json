@@ -24,6 +24,7 @@
   "requestPaymentByEmail": "Request payment by email",
   "getPaymentLink": "Get payment link",
   "paymentLinkCopied": "Payment link copied!",
+  "view": "View",
   "delete": "Delete",
   "creation": {
     "title": "New invoice",

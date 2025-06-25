@@ -189,7 +189,7 @@ export const PDFPreviewDialog: React.FC<PDFPreviewDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 overflow-hidden">
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 flex flex-col">
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-lg font-semibold">
@@ -288,7 +288,7 @@ export const PDFPreviewDialog: React.FC<PDFPreviewDialogProps> = ({
         </div>
 
         {/* PDF Content */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto min-h-0">
           {viewerState.isLoading ? (
             <div className="flex items-center justify-center h-96">
               <div className="text-center">
