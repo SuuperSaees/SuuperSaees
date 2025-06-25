@@ -78,7 +78,9 @@ export class InvoiceRepository {
           owner_id,
           picture_url,
           accounts(
-            email
+            email,
+            name,
+            user_settings(name)
           )
         ),
         agency:organizations!agency_id(
@@ -192,6 +194,11 @@ export class InvoiceRepository {
       ...invoice,
       client: invoice.client ? {
         ...invoice.client,
+        owner: {
+          id: invoice.client.owner_id,
+          name: invoice.client.accounts?.user_settings?.[0]?.name ?? invoice.client.accounts?.name ?? null,
+          email: invoice.client.accounts?.email ?? null,
+        },
         name: Array.isArray(invoice.client) ?
           invoice.client[0]?.name : invoice.client.name,
         picture_url: Array.isArray(invoice.client) ?
@@ -226,7 +233,13 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          owner_id,
+          accounts(
+            email,
+            name,
+            user_settings(name)
+          )
         ),
         agency:organizations!agency_id(
           id,
@@ -258,7 +271,29 @@ export class InvoiceRepository {
 
     return {
       ...invoice,
-      client: Array.isArray(invoice.client) ? invoice.client[0] ?? null : invoice.client ?? null,
+      client: Array.isArray(invoice.client) ? {
+        ...invoice.client[0],
+        owner: {
+          id: invoice?.client[0]?.owner_id,
+          name: invoice?.client[0]?.accounts?.user_settings?.[0]?.name ?? invoice?.client[0]?.accounts?.name ?? null,
+          email: invoice?.client[0]?.accounts?.email ?? null,
+        },
+        name: invoice.client[0]?.name,
+        picture_url: invoice.client[0]?.picture_url,
+      } : (
+        invoice.client && typeof invoice.client === 'object'
+          ? {
+              ...invoice.client,
+              owner: {
+                id: invoice.client.owner_id,
+                name: invoice.client.accounts?.user_settings?.[0]?.name ?? invoice.client.accounts?.name,
+                email: invoice.client.accounts?.email,
+              },
+              name: invoice.client.name,
+              picture_url: invoice.client.picture_url,
+            }
+          : null
+      ),
       agency: Array.isArray(invoice.agency) ? invoice.agency[0] ?? null : invoice.agency ?? null,
       invoice_items: invoice.invoice_items ?? [],
     } as Invoice.Response;
