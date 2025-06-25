@@ -237,5 +237,6 @@
   "domainUpdatedSuccessfully": "Dominio actualizado con éxito",
   "domainUpdateError": "Error al actualizar el dominio",
   "subscriptionTab": "Suscripción",
-  "invoicesTab": "Facturas"
+  "invoicesTab": "Facturas",
+  "paymentsTab": "Pagos"
 }

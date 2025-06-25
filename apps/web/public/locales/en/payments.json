@@ -1,0 +1,24 @@
+{
+  "settings": {
+    "title": "Payment Settings",
+    "description": "Configure your payment methods and preferences",
+    "enableManualPayments": {
+      "title": "Enable manual payments",
+      "description": "Allow clients to pay outside the platform using bank transfers, checks, or other offline payment methods."
+    },
+    "paymentMethodName": {
+      "title": "Payment method name",
+      "description": "The name of your preferred payment method",
+      "placeholder": "e.g., Bank transfer, Wire transfer"
+    },
+    "instructions": {
+      "title": "Payment instructions",
+      "description": "Provide detailed payment instructions for your clients",
+      "placeholder": "Enter payment instructions..."
+    }
+  },
+  "messages": {
+    "updateSuccess": "Payment settings updated successfully",
+    "updateError": "Failed to update payment settings. Please try again."
+  }
+} 
