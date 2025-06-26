@@ -24,8 +24,8 @@ async function CreateOrderPage() {
   });
 
   return (
-    <PageBody className="mx-auto flex w-full max-w-7xl p-8 max-h-full">
-      <div className="mb-[32px] flex w-full items-center justify-between">
+    <PageBody className="mx-auto flex w-full max-w-full p-8 max-h-full">
+      <div className="mb-[32px] flex w-full items-center justify-between max-w-7xl mx-auto">
         <h2
           className={
             'font-inter text-[20px] font-semibold leading-8 text-gray-900'
