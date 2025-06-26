@@ -270,6 +270,7 @@ export const OrderBriefs = ({
                                   );
                                 }}
                                 style={{ whiteSpace: 'pre-wrap' }}
+                                rows={5}
                               >
                                 {field.value}
                               </Textarea>
