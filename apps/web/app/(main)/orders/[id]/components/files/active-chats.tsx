@@ -21,6 +21,9 @@ const ActiveChats = ({ chat, onUpdate, onDelete, onChatClick, t}: ActiveChatsPro
     return message;
   }
 
+  if (!chat.accounts) {
+    return null;
+  }
   return (
     <>
       <div 
