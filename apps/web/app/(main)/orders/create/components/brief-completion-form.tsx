@@ -94,76 +94,79 @@ export default function BriefCompletionForm({
   return (
     <Form {...form}>
       <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
-        <div className="no-scrollbar flex h-full flex-wrap gap-16 overflow-y-auto lg:flex-nowrap">
-          <div className="flex w-full max-w-full shrink-0 flex-col items-start justify-between gap-16 lg:sticky lg:top-0 lg:h-fit lg:max-w-xs">
-            <BriefCard brief={brief} />
-            {(userRole === 'agency_owner' ||
-              userRole === 'agency_project_manager' ||
-              userRole === 'agency_member') && (
-              <ClientAssignation
-                onSelectOrganization={setClientOrganizationId}
-              />
-            )}
-          </div>
+        <div className="no-scrollbar flex h-full flex-wrap gap-16 overflow-y-auto lg:flex-nowrap w-full">
+          <div className='max-w-7xl flex h-full flex-wrap gap-16 lg:flex-nowrap mx-auto w-full'>
 
-          <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
-            {!brief && (
-              <>
-                <FormField
-                  name="briefCompletion.title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <ThemedInput
-                          {...field}
-                          placeholder={t('creation.form.titlePlaceholder')}
-                          className="focus-visible:ring-none"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <div className="flex w-full max-w-full shrink-0 flex-col items-start justify-between gap-16 lg:sticky lg:top-0 lg:h-fit lg:max-w-xs">
+              <BriefCard brief={brief} />
+              {(userRole === 'agency_owner' ||
+                userRole === 'agency_project_manager' ||
+                userRole === 'agency_member') && (
+                <ClientAssignation
+                  onSelectOrganization={setClientOrganizationId}
                 />
-                <FormField
-                  name="briefCompletion.description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <ThemedTextarea
-                          {...field}
-                          placeholder={t(
-                            'creation.form.descriptionPlaceholder',
-                          )}
-                          rows={5}
-                          className="focus-visible:ring-none"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {clientOrganizationId && agencyId && (
-                  <FilesUploader
-                    bucketName="orders"
-                    path={`/uploads/${uniqueId}`}
-                    // bucketName="orders"
-                    // uuid={uniqueId}
-                    // onFileIdsChange={handleFileIdsChange}
-                    onFilesSelected={handleFilesChange}
-                    onRemoveFile={handleRemoveFile}
+              )}
+            </div>
+
+            <div className="flex h-full max-h-full w-full flex-col justify-between gap-8">
+              {!brief && (
+                <>
+                  <FormField
+                    name="briefCompletion.title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ThemedInput
+                            {...field}
+                            placeholder={t('creation.form.titlePlaceholder')}
+                            className="focus-visible:ring-none"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                )}
-              </>
-            )}
-            {clientOrganizationId && agencyId && (
-              <OrderBriefs
-                brief={brief}
-                form={form}
-                orderId={form.getValues('briefCompletion.uuid')}
-              />
-            )}
+                  <FormField
+                    name="briefCompletion.description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ThemedTextarea
+                            {...field}
+                            placeholder={t(
+                              'creation.form.descriptionPlaceholder',
+                            )}
+                            rows={5}
+                            className="focus-visible:ring-none"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {clientOrganizationId && agencyId && (
+                    <FilesUploader
+                      bucketName="orders"
+                      path={`/uploads/${uniqueId}`}
+                      // bucketName="orders"
+                      // uuid={uniqueId}
+                      // onFileIdsChange={handleFileIdsChange}
+                      onFilesSelected={handleFilesChange}
+                      onRemoveFile={handleRemoveFile}
+                    />
+                  )}
+                </>
+              )}
+              {clientOrganizationId && agencyId && (
+                <OrderBriefs
+                  brief={brief}
+                  form={form}
+                  orderId={form.getValues('briefCompletion.uuid')}
+                />
+              )}
+            </div>
           </div>
-        </div>
+          </div>
         <div className="flex w-full justify-between py-4">
           <Button variant={'outline'} type="button" onClick={prevStep}>
             {t('pagination.previous')}
