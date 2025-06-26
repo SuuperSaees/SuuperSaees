@@ -4,19 +4,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { usePDFManager } from './use-pdf-manager';
-import { Invoice, InvoiceItem } from '~/lib/invoice.types';
-
-interface InvoiceTemplate {
-  invoice: Invoice.Response;
-  companyLogo?: string;
-  companyDetails?: {
-    name: string;
-    address: string;
-    phone?: string;
-    email?: string;
-    website?: string;
-  };
-}
+import { Invoice } from '~/lib/invoice.types';
 
 export const useInvoicePDF = () => {
   const { t } = useTranslation(['invoices']);
@@ -37,392 +25,87 @@ export const useInvoicePDF = () => {
     });
   }, []);
 
-  const _generateInvoiceHTML = useCallback((template: InvoiceTemplate): string => {
-    const { invoice, companyLogo, companyDetails } = template;
+  // Helper function to load and process images with circular clipping
+  const loadImageWithFallback = useCallback(async (imageUrl?: string | null): Promise<string | null> => {
+    if (!imageUrl) return null;
     
-    const itemsHTML = invoice.invoice_items?.map((item: InvoiceItem.Response) => `
-      <tr class="invoice-item">
-        <td class="item-description">${item.description}</td>
-        <td class="item-quantity">${item.quantity}</td>
-        <td class="item-price">${formatCurrency(item.unit_price, invoice.currency)}</td>
-        <td class="item-total">${formatCurrency(item.total_price || 0, invoice.currency)}</td>
-      </tr>
-    `).join('') ?? '';
-
-    const subtotal = invoice.subtotal_amount ?? 0;
-    const taxAmount = invoice.tax_amount ?? 0;
-    const total = invoice.total_amount || 0;
-
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    try {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        // Set timeout to avoid hanging
+        const timeout = setTimeout(() => {
+          resolve(null);
+        }, 5000); // 5 second timeout
+        
+        img.onload = () => {
+          clearTimeout(timeout);
+          
+          // Create canvas for circular clipping
+          const size = 200; // Higher resolution for better quality
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          if (!ctx) {
+            resolve(null);
+            return;
           }
           
-          body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            line-height: 1.4;
-            color: #333;
-            background: white;
+          canvas.width = size;
+          canvas.height = size;
+          
+          // Create circular clipping path
+          ctx.beginPath();
+          ctx.arc(size/2, size/2, size/2, 0, 2 * Math.PI);
+          ctx.clip();
+          
+          // Calculate dimensions to maintain aspect ratio within circle
+          const aspectRatio = img.width / img.height;
+          let drawWidth = size;
+          let drawHeight = size;
+          let offsetX = 0;
+          let offsetY = 0;
+          
+          if (aspectRatio > 1) {
+            // Image is wider than tall
+            drawHeight = size / aspectRatio;
+            offsetY = (size - drawHeight) / 2;
+          } else {
+            // Image is taller than wide
+            drawWidth = size * aspectRatio;
+            offsetX = (size - drawWidth) / 2;
           }
           
-          .invoice-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: white;
-          }
+          // Draw the image with proper aspect ratio
+          ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
           
-          .invoice-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #3b82f6;
-            padding-bottom: 20px;
-          }
-          
-          .company-info {
-            flex: 1;
-          }
-          
-          .company-logo {
-            max-width: 150px;
-            max-height: 80px;
-            margin-bottom: 15px;
-          }
-          
-          .company-details {
-            font-size: 14px;
-            line-height: 1.5;
-            color: #666;
-          }
-          
-          .company-details .company-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-          }
-          
-          .invoice-title {
-            text-align: right;
-            flex: 1;
-          }
-          
-          .invoice-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #3b82f6;
-            margin-bottom: 10px;
-          }
-          
-          .invoice-dates {
-            font-size: 14px;
-            color: #666;
-          }
-          
-          .invoice-dates div {
-            margin-bottom: 5px;
-          }
-          
-          .billing-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
-          }
-          
-          .billing-section {
-            flex: 1;
-            margin-right: 40px;
-          }
-          
-          .billing-section:last-child {
-            margin-right: 0;
-          }
-          
-          .billing-section h3 {
-            font-size: 16px;
-            font-weight: bold;
-            color: #3b82f6;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          
-          .billing-details {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #666;
-          }
-          
-          .billing-details .client-name {
-            font-weight: bold;
-            color: #333;
-            font-size: 16px;
-            margin-bottom: 5px;
-          }
-          
-          .invoice-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          }
-          
-          .invoice-table th {
-            background: #3b82f6;
-            color: white;
-            padding: 15px 10px;
-            text-align: left;
-            font-weight: bold;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          
-          .invoice-table th:last-child {
-            text-align: right;
-          }
-          
-          .invoice-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
-          }
-          
-          .invoice-table td:last-child {
-            text-align: right;
-            font-weight: bold;
-          }
-          
-          .invoice-item:nth-child(even) {
-            background: #f9fafb;
-          }
-          
-          .item-description {
-            font-weight: 500;
-            color: #333;
-          }
-          
-          .item-quantity, .item-price {
-            text-align: center;
-            color: #666;
-          }
-          
-          .totals-section {
-            float: right;
-            width: 300px;
-            margin-top: 20px;
-          }
-          
-          .totals-table {
-            width: 100%;
-            border-collapse: collapse;
-          }
-          
-          .totals-table td {
-            padding: 8px 15px;
-            font-size: 14px;
-            border-bottom: 1px solid #e5e7eb;
-          }
-          
-          .totals-table .label {
-            text-align: left;
-            color: #666;
-            font-weight: 500;
-          }
-          
-          .totals-table .amount {
-            text-align: right;
-            font-weight: bold;
-            color: #333;
-          }
-          
-          .totals-table .total-row {
-            background: #3b82f6;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-          }
-          
-          .totals-table .total-row td {
-            border-bottom: none;
-            padding: 12px 15px;
-          }
-          
-          .invoice-notes {
-            clear: both;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-          }
-          
-          .invoice-notes h4 {
-            font-size: 16px;
-            color: #3b82f6;
-            margin-bottom: 10px;
-            font-weight: bold;
-          }
-          
-          .notes-content {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #666;
-            background: #f9fafb;
-            padding: 15px;
-            border-radius: 5px;
-          }
-          
-          .invoice-footer {
-            text-align: center;
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-            font-size: 12px;
-            color: #999;
-          }
-          
-          .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          
-          .status-paid {
-            background: #dcfce7;
-            color: #166534;
-          }
-          
-          .status-issued {
-            background: #dbeafe;
-            color: #1d4ed8;
-          }
-          
-          .status-draft {
-            background: #f3f4f6;
-            color: #374151;
-          }
-          
-          .status-overdue {
-            background: #fee2e2;
-            color: #dc2626;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="invoice-container">
-          <div class="invoice-header">
-            <div class="company-info">
-              ${companyLogo ? `<img src="${companyLogo}" alt="Company Logo" class="company-logo">` : ''}
-              <div class="company-details">
-                ${companyDetails ? `
-                  <div class="company-name">${companyDetails.name}</div>
-                  <div>${companyDetails.address}</div>
-                  ${companyDetails.phone ? `<div>Phone: ${companyDetails.phone}</div>` : ''}
-                  ${companyDetails.email ? `<div>Email: ${companyDetails.email}</div>` : ''}
-                  ${companyDetails.website ? `<div>Website: ${companyDetails.website}</div>` : ''}
-                ` : `
-                  <div class="company-name">${invoice.agency?.name ?? 'Your Company'}</div>
-                `}
-              </div>
-            </div>
-            <div class="invoice-title">
-              <div class="invoice-number">INVOICE</div>
-              <div class="invoice-number" style="font-size: 24px; margin-bottom: 15px;">#${invoice.number}</div>
-              <div class="invoice-dates">
-                <div><strong>Issue Date:</strong> ${formatDate(invoice.issue_date)}</div>
-                <div><strong>Due Date:</strong> ${formatDate(invoice.due_date)}</div>
-                <div class="status-badge status-${invoice.status}">${invoice.status.replace('_', ' ')}</div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="billing-info">
-            <div class="billing-section">
-              <h3>Bill From</h3>
-              <div class="billing-details">
-                <div class="client-name">${invoice.agency?.name ?? 'Your Company'}</div>
-              </div>
-            </div>
-            <div class="billing-section">
-              <h3>Bill To</h3>
-              <div class="billing-details">
-                <div class="client-name">${invoice.client?.name ?? 'Client Name'}</div>
-              </div>
-            </div>
-          </div>
-          
-          <table class="invoice-table">
-            <thead>
-              <tr>
-                <th>Description</th>
-                <th style="text-align: center;">Qty</th>
-                <th style="text-align: center;">Unit Price</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${itemsHTML}
-            </tbody>
-          </table>
-          
-          <div class="totals-section">
-            <table class="totals-table">
-              <tr>
-                <td class="label">Subtotal:</td>
-                <td class="amount">${formatCurrency(subtotal, invoice.currency)}</td>
-              </tr>
-              ${taxAmount > 0 ? `
-                <tr>
-                  <td class="label">Tax:</td>
-                  <td class="amount">${formatCurrency(taxAmount, invoice.currency)}</td>
-                </tr>
-              ` : ''}
-              <tr class="total-row">
-                <td class="label">Total:</td>
-                <td class="amount">${formatCurrency(total, invoice.currency)}</td>
-              </tr>
-            </table>
-          </div>
-          
-          ${invoice.notes ? `
-            <div class="invoice-notes">
-              <h4>Notes</h4>
-              <div class="notes-content">${invoice.notes}</div>
-            </div>
-          ` : ''}
-          
-          <div class="invoice-footer">
-            <p>Thank you for your business!</p>
-            <p>This invoice was generated on ${formatDate(new Date().toISOString())}</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-  }, [formatCurrency, formatDate]);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        
+        img.onerror = () => {
+          clearTimeout(timeout);
+          resolve(null);
+        };
+        
+        img.src = imageUrl;
+      });
+    } catch {
+      return null;
+    }
+  }, []);
 
   const generateInvoicePDF = useCallback(async (
     invoice: Invoice.Response,
-    _options?: {
-      companyLogo?: string;
-      companyDetails?: InvoiceTemplate['companyDetails'];
-      filename?: string;
-    }
   ): Promise<Blob> => {
     try {
       const { jsPDF } = await import('jspdf');
+      
+      // Load logos with fallback
+      const [agencyLogo, clientLogo] = await Promise.all([
+        loadImageWithFallback(invoice.agency?.picture_url),
+        loadImageWithFallback(invoice.client?.picture_url),
+      ]);
       
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -440,33 +123,32 @@ export const useInvoicePDF = () => {
       const darkGray: [number, number, number] = [17, 24, 39]; // #111827
       const mediumGray: [number, number, number] = [107, 114, 128]; // #6B7280
       const lightGray: [number, number, number] = [156, 163, 175]; // #9CA3AF
-      const green: [number, number, number] = [16, 185, 129]; // #10B981 for design work
-      const yellow: [number, number, number] = [245, 158, 11]; // #F59E0B for development work
 
       // Header Section - Horizontal Layout like Dribbble design
-      // Left side - Company logo and name
-      pdf.setFillColor(...darkGray);
-      pdf.roundedRect(margin, yPosition, 10, 10, 2, 2, 'F');
+      // Left side - Company logo
+      const logoSize = 10;
+      const companyName = invoice.agency?.name ?? '';
       
-      // Company logo initials
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(8);
-      pdf.setFont('helvetica', 'bold');
-      const companyName = invoice.agency?.name ?? 'Ace Studio';
-      const companyInitials = companyName.substring(0, 2).toUpperCase();
-      pdf.text(companyInitials, margin + 5, yPosition + 7, { align: 'center' });
-      
-      // Company name next to logo
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(...darkGray);
-      pdf.text(companyName, margin + 15, yPosition + 7);
+      if (agencyLogo) {
+        // Use actual agency logo (already processed with circular clipping)
+        pdf.addImage(agencyLogo, 'PNG', margin, yPosition, logoSize, logoSize);
+      } else {
+        // Fallback to initials
+        pdf.setFillColor(...darkGray);
+        pdf.roundedRect(margin, yPosition, logoSize, logoSize, 2, 2, 'F');
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'bold');
+        const companyInitials = companyName.substring(0, 2).toUpperCase();
+        pdf.text(companyInitials, margin + logoSize/2, yPosition + 7, { align: 'center' });
+      }
 
-      // Right side - Invoice meta info in horizontal layout
-      const rightSideX = pageWidth - margin - 120;
+      // Right side - Invoice meta info in horizontal layout (with better spacing)
+      const rightSideX = pageWidth - margin - 150; // Increased space for better layout
       
       // Invoice Number
-      pdf.setFontSize(9);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(...mediumGray);
       pdf.text('Invoice Number', rightSideX, yPosition + 2);
@@ -474,23 +156,23 @@ export const useInvoicePDF = () => {
       pdf.setFont('helvetica', 'bold');
       pdf.text(invoice.number, rightSideX, yPosition + 8);
       
-      // Issued Date
+      // Issued Date (more spacing)
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(...mediumGray);
-      pdf.text('Issued', rightSideX + 40, yPosition + 2);
+      pdf.text('Issued', rightSideX + 55, yPosition + 2);
       pdf.setTextColor(...darkGray);
       pdf.setFont('helvetica', 'bold');
       const issuedDate = invoice.created_at ? formatDate(invoice.created_at) : formatDate(new Date().toISOString());
-      pdf.text(issuedDate, rightSideX + 40, yPosition + 8);
+      pdf.text(issuedDate, rightSideX + 55, yPosition + 8);
       
-      // Due Date (only if available)
+      // Due Date (only if available, with more spacing)
       if (invoice.due_date) {
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(...mediumGray);
-        pdf.text('Due Date', rightSideX + 80, yPosition + 2);
+        pdf.text('Due Date', rightSideX + 110, yPosition + 2);
         pdf.setTextColor(...darkGray);
         pdf.setFont('helvetica', 'bold');
-        pdf.text(formatDate(invoice.due_date), rightSideX + 80, yPosition + 8);
+        pdf.text(formatDate(invoice.due_date), rightSideX + 110, yPosition + 8);
       }
 
       yPosition += 25;
@@ -502,17 +184,25 @@ export const useInvoicePDF = () => {
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...mediumGray);
-      pdf.text('↗ FROM', margin, yPosition);
+      pdf.text('FROM', margin, yPosition);
       
       yPosition += 8;
       
-      // Company avatar (dark circle)
-      pdf.setFillColor(...darkGray);
-      pdf.circle(margin + 8, yPosition + 8, 8, 'F');
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(companyInitials, margin + 8, yPosition + 10, { align: 'center' });
+      // Company logo/avatar
+      const avatarSize = 16;
+      if (agencyLogo) {
+        // Use actual agency logo (already processed with circular clipping)
+        pdf.addImage(agencyLogo, 'PNG', margin, yPosition, avatarSize, avatarSize);
+      } else {
+        // Fallback to initials circle
+        pdf.setFillColor(...darkGray);
+        pdf.circle(margin + avatarSize/2, yPosition + avatarSize/2, avatarSize/2, 'F');
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        const companyInitials = companyName.substring(0, 2).toUpperCase();
+        pdf.text(companyInitials, margin + avatarSize/2, yPosition + avatarSize/2 + 2, { align: 'center' });
+      }
       
       // Company details
       pdf.setTextColor(...darkGray);
@@ -524,32 +214,39 @@ export const useInvoicePDF = () => {
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(...mediumGray);
-      pdf.text('Pay@Acestudio.pro', margin + 20, yPosition + 12);
+      pdf.text(invoice.agency?.owner?.email ?? '', margin + 20, yPosition + 12);
       
       // Contact info placeholders (will be dynamic when fields are added to Organization type)
       pdf.setFontSize(8);
-      pdf.text('🏠 Address', margin + 20, yPosition + 20);
-      pdf.text('🌍 City, State, Zip', margin + 20, yPosition + 26);
-      pdf.text('💼 Tax ID', margin + 20, yPosition + 32);
+      pdf.text(invoice.agency?.address ?? '', margin + 20, yPosition + 20);
+      pdf.text(`${invoice.agency?.city ?? ''}, ${invoice.agency?.state ?? ''}, ${invoice.agency?.zip ?? ''}`, margin + 20, yPosition + 26);
+      pdf.text(invoice.agency?.tax_id ?? '', margin + 20, yPosition + 32);
 
       // TO section (right side)
       const toStartX = margin + sectionWidth + 20;
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...mediumGray);
-      pdf.text('↙ TO', toStartX, yPosition - 8);
+      pdf.text('TO', toStartX, yPosition - 8);
       
       // Only show client section if client exists
       if (invoice.client?.name) {
-        // Client avatar (colored circle)
-        pdf.setFillColor(254, 243, 199); // Light yellow background
-        pdf.circle(toStartX + 8, yPosition + 8, 8, 'F');
-        pdf.setTextColor(146, 64, 14); // Dark yellow text
-        pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'bold');
         const clientName = invoice.client.name;
-        const clientInitials = clientName.substring(0, 2).toUpperCase();
-        pdf.text(clientInitials, toStartX + 8, yPosition + 10, { align: 'center' });
+        
+        // Client logo/avatar
+        if (clientLogo) {
+          // Use actual client logo (already processed with circular clipping)
+          pdf.addImage(clientLogo, 'PNG', toStartX, yPosition, avatarSize, avatarSize);
+        } else {
+          // Fallback to initials circle
+          pdf.setFillColor(254, 243, 199); // Light yellow background
+          pdf.circle(toStartX + avatarSize/2, yPosition + avatarSize/2, avatarSize/2, 'F');
+          pdf.setTextColor(146, 64, 14); // Dark yellow text
+          pdf.setFontSize(10);
+          pdf.setFont('helvetica', 'bold');
+          const clientInitials = clientName.substring(0, 2).toUpperCase();
+          pdf.text(clientInitials, toStartX + avatarSize/2, yPosition + avatarSize/2 + 2, { align: 'center' });
+        }
         
         // Client details
         pdf.setTextColor(...darkGray);
@@ -561,13 +258,13 @@ export const useInvoicePDF = () => {
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(...mediumGray);
-        pdf.text('Pay@client.com', toStartX + 20, yPosition + 12);
+        pdf.text(invoice.client?.owner?.email ?? '', toStartX + 20, yPosition + 12);
         
         // Contact info placeholders
         pdf.setFontSize(8);
-        pdf.text('🏠 Address', toStartX + 20, yPosition + 20);
-        pdf.text('🌍 City, State, Zip', toStartX + 20, yPosition + 26);
-        pdf.text('💼 Tax ID', toStartX + 20, yPosition + 32);
+        pdf.text(invoice.client?.address ?? '', toStartX + 20, yPosition + 20);
+        pdf.text(`${invoice.client?.settings?.city ?? ''}, ${invoice.client?.settings?.state ?? ''}, ${invoice.client?.zip ?? ''}`, toStartX + 20, yPosition + 26);
+        pdf.text(invoice.client?.tax_id ?? '', toStartX + 20, yPosition + 32);
       } else {
         // Placeholder if no client
         pdf.setFontSize(9);
@@ -579,17 +276,27 @@ export const useInvoicePDF = () => {
 
       // Items Table
       // Table header
-      pdf.setFontSize(9);
+      pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...mediumGray);
       
-      const colWidths = [90, 20, 30, 35]; // Description, QTY, Price, Amount
+      // Calculate column widths to span full width and align with totals
       const tableStartX = margin;
+      const tableWidth = pageWidth - 2 * margin;
+      const qtyColWidth = 20;
+      const priceColWidth = 35;
+      const amountColWidth = 50;
+      const descriptionColWidth = tableWidth - qtyColWidth - priceColWidth - amountColWidth;
       
-             pdf.text('Description', tableStartX, yPosition);
-       pdf.text('QTY', tableStartX + (colWidths[0] ?? 0), yPosition, { align: 'right' });
-       pdf.text('Price', tableStartX + (colWidths[0] ?? 0) + (colWidths[1] ?? 0), yPosition, { align: 'right' });
-       pdf.text('Amount', tableStartX + (colWidths[0] ?? 0) + (colWidths[1] ?? 0) + (colWidths[2] ?? 0), yPosition, { align: 'right' });
+      // Column positions
+      const qtyColX = tableStartX + descriptionColWidth;
+      const priceColX = qtyColX + qtyColWidth;
+      const amountColX = priceColX + priceColWidth;
+      
+      pdf.text('Description', tableStartX, yPosition);
+      pdf.text('QTY', qtyColX, yPosition, { align: 'center' });
+      pdf.text('Price', priceColX, yPosition, { align: 'center' });
+      pdf.text('Amount', amountColX + amountColWidth, yPosition, { align: 'right' });
       
       // Header underline
       pdf.setDrawColor(...lightGray);
@@ -602,37 +309,47 @@ export const useInvoicePDF = () => {
       
       if (invoice.invoice_items && invoice.invoice_items.length > 0) {
         invoice.invoice_items.forEach((item, _index) => {
-          if (yPosition > pageHeight - 60) {
+          // Check if we need a new page (leaving more space for totals section)
+          if (yPosition > pageHeight - 80) {
             pdf.addPage();
             yPosition = margin;
+            
+            // Re-draw table header on new page
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(...mediumGray);
+            
+            pdf.text('Description', tableStartX, yPosition);
+            pdf.text('QTY', qtyColX, yPosition, { align: 'center' });
+            pdf.text('Price', priceColX, yPosition, { align: 'center' });
+            pdf.text('Amount', amountColX + amountColWidth, yPosition, { align: 'right' });
+            
+            // Header underline
+            pdf.setDrawColor(...lightGray);
+            pdf.line(tableStartX, yPosition + 2, pageWidth - margin, yPosition + 2);
+            
+            yPosition += 10;
           }
 
-          // Colored indicator dot based on service type
-          const isDesignWork = item.description.toLowerCase().includes('design');
-          const dotColor = isDesignWork ? green : yellow;
-          
-          pdf.setFillColor(...dotColor);
-          pdf.circle(tableStartX + 2, yPosition + 2, 1.5, 'F');
-          
-          // Item description
+          // Item description (no colored dots)
           pdf.setFontSize(11);
           pdf.setFont('helvetica', 'bold');
           pdf.setTextColor(...darkGray);
-          const description = item.description.length > 45 ? 
-            item.description.substring(0, 42) + '...' : item.description;
-          pdf.text(description, tableStartX + 8, yPosition + 3);
+          const description = item.description.length > 50 ? 
+            item.description.substring(0, 47) + '...' : item.description;
+          pdf.text(description, tableStartX, yPosition + 3);
           
           // Quantity, Price, Amount
           pdf.setFontSize(11);
           pdf.setFont('helvetica', 'normal');
           pdf.setTextColor(...mediumGray);
-                     pdf.text(item.quantity.toString(), tableStartX + (colWidths[0] ?? 0), yPosition + 3, { align: 'right' });
-           pdf.text(formatCurrency(item.unit_price, invoice.currency), tableStartX + (colWidths[0] ?? 0) + (colWidths[1] ?? 0), yPosition + 3, { align: 'right' });
+          pdf.text(item.quantity.toString(), qtyColX, yPosition + 3, { align: 'center' });
+          pdf.text(formatCurrency(item.unit_price, invoice.currency), priceColX, yPosition + 3, { align: 'center' });
            
-           // Amount (bold and dark)
-           pdf.setFont('helvetica', 'bold');
-           pdf.setTextColor(...darkGray);
-           pdf.text(formatCurrency(item.total_price ?? 0, invoice.currency), tableStartX + (colWidths[0] ?? 0) + (colWidths[1] ?? 0) + (colWidths[2] ?? 0), yPosition + 3, { align: 'right' });
+          // Amount (bold and dark)
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(...darkGray);
+          pdf.text(formatCurrency(item.total_price ?? 0, invoice.currency), amountColX + amountColWidth, yPosition + 3, { align: 'right' });
           
           yPosition += 12;
         });
@@ -640,8 +357,16 @@ export const useInvoicePDF = () => {
 
       yPosition += 10;
 
-      // Totals section (right-aligned)
-      const totalsStartX = pageWidth - margin - 60;
+      // Check if totals section needs a new page
+      const totalsHeight = 50; // Estimated height for totals section
+      if (yPosition > pageHeight - totalsHeight) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+
+      // Totals section (aligned with Amount column)
+      const totalsStartX = amountColX;
+      const totalsValueX = amountColX + amountColWidth;
       const subtotal = invoice.subtotal_amount ?? 0;
       // const taxAmount = invoice.tax_amount ?? 0;
       const discountAmount =  0;
@@ -655,7 +380,7 @@ export const useInvoicePDF = () => {
       pdf.text('Subtotal', totalsStartX, yPosition);
       pdf.setTextColor(...darkGray);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(formatCurrency(subtotal, invoice.currency), pageWidth - margin, yPosition, { align: 'right' });
+      pdf.text(formatCurrency(subtotal, invoice.currency), totalsValueX, yPosition, { align: 'right' });
       yPosition += 8;
 
       // Discount (if exists)
@@ -665,7 +390,7 @@ export const useInvoicePDF = () => {
         pdf.text('Discount', totalsStartX, yPosition);
         pdf.setTextColor(...darkGray);
         pdf.setFont('helvetica', 'bold');
-        pdf.text(`-${formatCurrency(discountAmount, invoice.currency)}`, pageWidth - margin, yPosition, { align: 'right' });
+        pdf.text(`-${formatCurrency(discountAmount, invoice.currency)}`, totalsValueX, yPosition, { align: 'right' });
         yPosition += 8;
       }
 
@@ -674,25 +399,7 @@ export const useInvoicePDF = () => {
       pdf.setFontSize(13);
       pdf.setTextColor(...darkGray);
       pdf.text('Total', totalsStartX, yPosition);
-      pdf.text(formatCurrency(total, invoice.currency), pageWidth - margin, yPosition, { align: 'right' });
-
-      yPosition += 25;
-
-      // Signature section
-      pdf.setFontSize(9);
-      pdf.setTextColor(...mediumGray);
-      pdf.text('Signature', margin, yPosition);
-      
-      yPosition += 8;
-      
-      // Signature line
-      pdf.setDrawColor(...lightGray);
-      pdf.line(margin, yPosition, margin + 50, yPosition);
-      
-      yPosition += 6;
-      pdf.setFontSize(7);
-      pdf.setTextColor(...lightGray);
-      pdf.text('Authorized Signature', margin, yPosition);
+      pdf.text(formatCurrency(total, invoice.currency), totalsValueX, yPosition, { align: 'right' });
 
       return pdf.output('blob');
     } catch (error) {
@@ -700,19 +407,14 @@ export const useInvoicePDF = () => {
       toast.error(t('invoices:errors.failedToGeneratePDF'));
       throw error;
     }
-  }, [t, formatCurrency, formatDate]);
+  }, [t, formatCurrency, formatDate, loadImageWithFallback]);
 
   const downloadInvoicePDF = useCallback(async (
     invoice: Invoice.Response,
-    options?: {
-      companyLogo?: string;
-      companyDetails?: InvoiceTemplate['companyDetails'];
-      filename?: string;
-    }
   ): Promise<void> => {
     try {
-      const pdfBlob = await generateInvoicePDF(invoice, options);
-      const filename = options?.filename ?? `invoice-${invoice.number}`;
+      const pdfBlob = await generateInvoicePDF(invoice);
+      const filename = `${invoice.number}`;
       downloadPDF(pdfBlob, filename);
       
       toast.success(t('invoices:success.pdfDownloaded'));
@@ -723,13 +425,9 @@ export const useInvoicePDF = () => {
 
   const previewInvoicePDF = useCallback(async (
     invoice: Invoice.Response,
-    options?: {
-      companyLogo?: string;
-      companyDetails?: InvoiceTemplate['companyDetails'];
-    }
   ): Promise<string> => {
     try {
-      const pdfBlob = await generateInvoicePDF(invoice, options);
+      const pdfBlob = await generateInvoicePDF(invoice);
       return URL.createObjectURL(pdfBlob);
     } catch (error) {
       toast.error(t('invoices:errors.failedToPreviewPDF'));

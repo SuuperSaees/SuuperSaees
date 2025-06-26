@@ -67,7 +67,15 @@ export const invoicesColumns = (
     {
       accessorKey: "payment_method",
       header: t("invoices:paymentMethod"),
-      cell: ({ row: _row }) => <PaymentMethodDisplay paymentMethod="Manual" />,
+      cell: ({ row }) => {
+        const paymentMethod: string =
+          row.original?.invoice_payments?.[0]?.payment_method ?? "-";
+        // returns => bank_account = > Bank account, manual => Manual
+        const formattedPaymentMethod = paymentMethod
+          .replace(/_/g, " ")
+          .replace(/\b\w/g, (char: string) => char.toUpperCase());
+        return <PaymentMethodDisplay paymentMethod={formattedPaymentMethod} />;
+      },
     },
     {
       accessorKey: "status",
@@ -211,9 +219,7 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
 
   const handleDownload = useCallback(async () => {
     try {
-      await downloadInvoicePDF(invoice, {
-        filename: `invoice-${invoice.number}`,
-      });
+      await downloadInvoicePDF(invoice);
     } catch (error) {
       console.error("Failed to download PDF:", error);
     }

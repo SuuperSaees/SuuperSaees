@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Check, ChevronsUpDown, PlusIcon } from 'lucide-react';
 
@@ -29,6 +29,7 @@ interface ComboboxProps<T extends BaseOption = BaseOption> {
   className?: string;
   resetOnSelect?: boolean;
   defaultValue?: string;
+  value?: string;
   onValueChange?: (value: string) => void;
   // Custom render functions
   renderTrigger?: (selectedOption: T | null, hasTitle: boolean) => React.ReactNode;
@@ -54,12 +55,20 @@ export function Combobox<T extends BaseOption = BaseOption>({
   searchPlaceholder = 'Search option...',
   emptyMessage = 'No option found.',
   defaultValue = '',
+  value: controlledValue,
   onValueChange,
   renderTrigger,
   renderItem,
 }: ComboboxProps<T>) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(defaultValue);
+  const [value, setValue] = useState(controlledValue ?? defaultValue);
+
+  // Sync internal state with controlled value
+  useEffect(() => {
+    if (controlledValue !== undefined) {
+      setValue(controlledValue);
+    }
+  }, [controlledValue]);
 
   const isValueMatching = (value: string, option: string) => {
     return value.trim().toLowerCase() === option.trim().toLowerCase();

@@ -24,6 +24,7 @@
   "requestPaymentByEmail": "Solicitar pago por email",
   "getPaymentLink": "Obtener enlace de pago",
   "paymentLinkCopied": "¡Enlace de pago copiado!",
+  "view": "Ver",
   "delete": "Eliminar",
   "creation": {
     "title": "Nueva factura",
@@ -153,5 +154,63 @@
     "updatingInvoiceStatus": "Actualizando estado de la factura...",
     "deletingInvoice": "Eliminando factura...",
     "sendingEmail": "Enviando email..."
+  },
+  "settings": {
+    "invoiceManagement": {
+      "title": "Habilitar Generación de Facturas",
+      "description": "Genera facturas profesionales para transacciones de clientes y accede a herramientas de gestión."
+    },
+    "requireCompleteAddress": {
+      "title": "Recopilar Dirección Completa en Checkout",
+      "description": "Requiere dirección de facturación completa de clientes. Desactiva para checkout rápido solo con país."
+    },
+    "automaticInvoiceNote": {
+      "title": "Auto-agregar Notas de Factura",
+      "description": "Incluye automáticamente una nota estándar en todas las nuevas facturas."
+    },
+    "billingInformation": {
+      "title": "Información de Facturación",
+      "description": "Esta información se utilizará para generar facturas para tus clientes.",
+      "companyInformation": {
+        "title": "Información de la Empresa",
+        "subtitle": "Detalles básicos para tus facturas",
+        "companyName": {
+          "label": "Nombre de la Empresa",
+          "placeholder": "Ingresa el nombre de tu empresa"
+        },
+        "taxId": {
+          "label": "ID Fiscal / Número IVA",
+          "placeholder": "Ingresa la identificación fiscal"
+        },
+        "country": {
+          "label": "País",
+          "placeholder": "Selecciona tu país"
+        }
+      },
+      "businessAddress": {
+        "title": "Dirección del Negocio",
+        "subtitle": "Detalles de ubicación para facturación",
+        "streetAddress": {
+          "label": "Dirección",
+          "placeholder": "Ingresa la dirección de tu negocio"
+        },
+        "city": {
+          "label": "Ciudad",
+          "placeholder": "Ciudad"
+        },
+        "stateProvince": {
+          "label": "Estado / Provincia",
+          "placeholder": "Estado o Provincia"
+        },
+        "zipCode": {
+          "label": "Código Postal",
+          "placeholder": "Código Postal"
+        }
+      },
+      "infoNote": {
+        "title": "Información de Facturas",
+        "description": "Esta información aparecerá en todas las facturas generadas para tus clientes. Asegúrate de que todos los detalles sean precisos y estén actualizados para una facturación profesional."
+      }
+    }
   }
 }

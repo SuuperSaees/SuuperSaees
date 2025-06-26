@@ -16,6 +16,9 @@ import { Client } from "~/lib/client.types";
 import { Invoice } from "~/lib/invoice.types";
 import { Spinner } from "@kit/ui/spinner";
 import { useInvoiceApiActions } from "../../hooks/use-invoice-api-actions";
+import { sendEmail } from "~/server/services/send-email.service";
+import { EMAIL } from "~/server/services/email.types";
+import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
 
 interface InvoiceFormProps {
   clients: Client.Response[];
@@ -33,6 +36,9 @@ export function InvoiceForm({
   mode,
 }: InvoiceFormProps) {
   const [isDraft, setIsDraft] = React.useState(false);
+  const { workspace: userWorkspace, organization } = useUserWorkspace();
+  const userId = userWorkspace?.id ?? "";
+  
   const isUpdate = mode === "update";
   const { invoiceMutation, draftMutation, buildInvoicePayload } =
     useInvoiceApiActions({ mode });
@@ -80,7 +86,19 @@ export function InvoiceForm({
     if (isDraft) {
       await draftMutation.mutateAsync(invoiceData);
     } else {
-      await invoiceMutation.mutateAsync(invoiceData);
+      const invoice = await invoiceMutation.mutateAsync(invoiceData);
+      const client = clients.find(client => client.organization_client_id === invoiceData.client_organization_id);
+      const agencyName = organization?.name ?? "";
+
+      void sendEmail(EMAIL.INVOICES.REQUEST_PAYMENT, {
+        to: client?.user?.email ?? "", // TODO: Use invoice.client.email when available
+        userId: userId,
+        invoiceNumber: invoice.number,
+        clientName: client?.user?.name ?? "",
+        amount: "$" + (invoice.total_amount ?? 0),
+        buttonUrl: invoice.checkout_url ?? undefined,
+        agencyName,
+        });
     }
 
     // Reset draft state after submission
