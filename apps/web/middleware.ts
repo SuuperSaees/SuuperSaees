@@ -43,6 +43,11 @@ const PATH_ROLE_RESTRICTIONS = [
     allowedRoles: ['agency_owner', 'agency_project_manager'],
     redirectTo: '/orders',
   },
+  {
+    path: '/invoices',
+    allowedRoles: ['agency_owner', 'client_owner'],
+    redirectTo: '/orders',
+  },
 
 ] as const;
 
