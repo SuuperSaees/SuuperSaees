@@ -10,7 +10,6 @@ import { getInvoice } from "~/server/actions/invoices/invoices.action";
 import { Client } from "~/lib/client.types";
 import { Service } from "~/lib/services.types";
 // Invoice type is used in the component
-import { notFound } from "next/navigation";
 import { InvoiceForm } from "../components/form/form";
 import { Trans } from "@kit/ui/trans";
 
@@ -52,9 +51,6 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
     getServicesByOrganizationId() as Promise<Service.Relationships.Billing.BillingService[]>,
   ]);
 
-  if (!invoice) {
-    notFound();
-  }
 
   return (
     <PageBody >
