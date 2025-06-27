@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 import { Database } from '~/lib/database.types';
 import { InvoiceItem } from '~/lib/invoice.types';
 
@@ -134,6 +135,7 @@ export class InvoiceItemsRepository {
       quantity: item.quantity,
       unit_price: item.unit_price,
       total_price: (item.quantity ?? 0) * item.unit_price,
+      service_id: item.service_id,
     }));
 
 
@@ -162,6 +164,7 @@ export class InvoiceItemsRepository {
       throw new Error(`Error fetching final invoice items: ${finalFetchError.message}`);
     }
 
+    revalidatePath(`/invoices/${invoiceId}`);
     return allCurrentItems as InvoiceItem.Type[];
   }
 
