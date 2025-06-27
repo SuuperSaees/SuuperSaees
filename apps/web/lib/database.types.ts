@@ -1804,6 +1804,89 @@ export type Database = {
           },
         ]
       }
+      invoice_settings: {
+        Row: {
+          address_1: string
+          address_2: string | null
+          city: string
+          country: string
+          created_at: string
+          deleted_on: string | null
+          id: string
+          invoice_id: string
+          name: string
+          organization_id: string
+          postal_code: string
+          state: string | null
+          tax_id_number: string | null
+          tax_id_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_1: string
+          address_2?: string | null
+          city: string
+          country: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          invoice_id: string
+          name: string
+          organization_id: string
+          postal_code: string
+          state?: string | null
+          tax_id_number?: string | null
+          tax_id_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_1?: string
+          address_2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          invoice_id?: string
+          name?: string
+          organization_id?: string
+          postal_code?: string
+          state?: string | null
+          tax_id_number?: string | null
+          tax_id_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_settings_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           agency_id: string
@@ -4142,6 +4225,7 @@ export type Database = {
         | "calendar_url"
         | "notification_sound"
         | "payment_details"
+        | "billing_details"
       payment_methods: "stripe" | "manual" | "bank_transfer" | "cash"
       payment_status: "pending" | "succeeded" | "failed" | "refunded"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
@@ -4856,6 +4940,7 @@ export const Constants = {
         "calendar_url",
         "notification_sound",
         "payment_details",
+        "billing_details",
       ],
       payment_methods: ["stripe", "manual", "bank_transfer", "cash"],
       payment_status: ["pending", "succeeded", "failed", "refunded"],
