@@ -5,10 +5,14 @@ import { Invoice } from '../../../../../../apps/web/lib/invoice.types'
 import { BaseWebhookService } from '../shared/base-webhook.service';
 import { RetryOperationService } from '@kit/shared/utils';
 import { createUrlForCheckout } from '../../../../../features/team-accounts/src/server/actions/services/create/create-token-for-checkout';
+import { InvoiceSettingsWebhookHelper } from '../shared/invoice-settings-webhook.helper';
 
 export class StripeInvoiceService extends BaseWebhookService {
+  private invoiceSettingsHelper: InvoiceSettingsWebhookHelper;
+
   constructor(adminClient: SupabaseClient<Database>) {
     super(adminClient, '');
+    this.invoiceSettingsHelper = new InvoiceSettingsWebhookHelper(adminClient);
   }
 
   async handleInvoiceCreated(event: any, stripeAccountId?: string) {
@@ -258,6 +262,18 @@ export class StripeInvoiceService extends BaseWebhookService {
       if (itemsError) {
         console.error('Error creating invoice items:', itemsError);
       }
+    }
+
+    // Create invoice_settings for both agency and client organizations
+    try {
+      const invoiceSettings = await this.invoiceSettingsHelper.createInvoiceSettingsForWebhook(
+        createdInvoice.id,
+        agencyId,
+        clientOrganizationId
+      );
+      console.log(`Created ${invoiceSettings.length} invoice settings for invoice ${createdInvoice.id}`);
+    } catch (error) {
+      console.error('Error creating invoice settings for Stripe invoice:', error);
     }
 
     // Generate checkout URL and update invoice

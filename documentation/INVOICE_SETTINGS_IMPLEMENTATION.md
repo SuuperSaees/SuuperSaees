@@ -162,6 +162,75 @@ const clientSettings = invoice.invoice_settings?.find(
 );
 ```
 
+## 🔌 Webhook Integration
+
+### Stripe Webhooks
+
+Invoice settings are now automatically created when invoices are generated via Stripe webhooks:
+
+```typescript
+// In StripeInvoiceService.createInvoiceFromStripe()
+const invoiceSettings = await this.invoiceSettingsHelper.createInvoiceSettingsForWebhook(
+  createdInvoice.id,
+  agencyId,
+  clientOrganizationId
+);
+```
+
+**Data Sources for Stripe Webhooks:**
+- **Agency Settings**: Extracted from `organization_settings.billing_details`
+- **Client Settings**: Extracted from `organization_settings.billing_details` or session data if new client
+- **Fallback**: If no organization billing data exists, system uses default values
+
+### Manual/Database Webhooks
+
+Invoice settings are created during manual payment processing with enhanced data extraction:
+
+```typescript
+// In BillingWebhooksService.handleManualPaymentInvoiceGeneration()
+const invoiceSettings = await this.invoiceSettingsHelper.createInvoiceSettingsForWebhook(
+  createdInvoice.id,
+  agencyOrganizationId,
+  clientOrganizationId,
+  {
+    client_name: session.client_name,
+    client_email: session.client_email,
+    client_address: session.client_address,
+    client_city: session.client_city,
+    client_country: session.client_country,
+    client_state: session.client_state,
+    client_postal_code: session.client_postal_code,
+    metadata: session.metadata,
+  }
+);
+```
+
+**Data Sources for Manual Webhooks:**
+- **Agency Settings**: Always from `organization_settings.billing_details`
+- **Client Settings**: From `organization_settings.billing_details` OR session data for new clients
+- **Session Data**: Used when client organization has no billing details
+- **Metadata**: Includes `enterprise_name`, `tax_code`, `buying_for_organization`
+
+### Organization Settings Auto-Update
+
+When creating invoice_settings for a new client organization, the system automatically updates that organization's settings:
+
+```typescript
+// Creates organization_settings.billing_details for future use
+const billingDetails = {
+  name: metadataTyped.enterprise_name || session.client_name,
+  address_1: session.client_address,
+  country: session.client_country,
+  postal_code: session.client_postal_code,
+  city: session.client_city,
+  state: session.client_state,
+  tax_id_type: metadataTyped.tax_code ? 'EIN' : null,
+  tax_id_number: metadataTyped.tax_code,
+};
+```
+
+This ensures future invoices will automatically have proper billing information.
+
 ## 📋 Database Schema
 
 ```sql
@@ -259,7 +328,7 @@ Organization Settings (JSON) → Invoice Settings (Table)
   "address_2": "Suite 100",        → address_2
   "city": "New York",              → city
   "state": "NY",                   → state
-  "country": "United States",      → country
+  "country": "United States"      → country
   "postal_code": "12345",          → postal_code
   "zip": "12345",                  → postal_code (fallback)
   "tax_id": "12-3456789",          → tax_id_number
@@ -317,6 +386,42 @@ interface InvoiceSettings.Response {
 }
 ```
 
+## 🔄 Webhook Data Flow
+
+```mermaid
+sequenceDiagram
+    participant WH as Webhook
+    participant IWH as InvoiceSettingsWebhookHelper
+    participant ISR as InvoiceSettingsRepository
+    participant DB as Database
+
+    WH->>IWH: createInvoiceSettingsForWebhook()
+    
+    IWH->>ISR: getOrganizationBillingInfo(agencyId)
+    ISR->>DB: Query organization_settings
+    DB-->>ISR: Return billing_details
+    ISR-->>IWH: Return agency settings
+    
+    IWH->>ISR: getOrganizationBillingInfo(clientId)
+    ISR->>DB: Query organization_settings
+    
+    alt Client has billing_details
+        DB-->>ISR: Return billing_details
+        ISR-->>IWH: Return client settings
+    else No billing_details
+        IWH->>IWH: createSettingsFromSession()
+        IWH->>DB: Create organization_settings entry
+        IWH-->>IWH: Return session-based settings
+    end
+    
+    IWH->>ISR: create(agencySettings)
+    IWH->>ISR: create(clientSettings)
+    ISR->>DB: Insert invoice_settings
+    DB-->>ISR: Confirm creation
+    ISR-->>IWH: Return created settings
+    IWH-->>WH: Return all invoice settings
+```
+
 ## 🔄 Migration Path
 
 ### For Existing Code
@@ -346,3 +451,57 @@ All functionality has been implemented and tested:
 - ✅ Database constraints and indexes in place
 
 The system is ready for frontend integration while maintaining 100% compatibility with existing invoice workflows.
+
+## ✅ Webhook Integration Status
+
+### Completed Features
+
+✅ **Stripe Webhooks Integration**
+- Automatic invoice_settings creation during `invoice.created` events
+- Agency data extracted from `organization_settings.billing_details`
+- Client data extracted from existing organization billing info
+- Fallback to default values when organization data is missing
+
+✅ **Manual/Database Webhooks Integration**  
+- Automatic invoice_settings creation during manual payment processing
+- Enhanced session data extraction for new client organizations
+- Organization settings auto-update for future invoice automation
+- Proper JSON structure generation for frontend processing
+
+✅ **InvoiceSettingsWebhookHelper**
+- Centralized helper class for webhook invoice_settings processing
+- Smart data source prioritization (organization → session → defaults)
+- Automatic organization_settings updates for new clients
+- Type-safe session data handling
+
+✅ **Data Flow Enhancement**
+- Session metadata parsing for billing information
+- Tax ID and enterprise name extraction
+- Address and contact information mapping
+- Future-ready organization settings structure
+
+### Integration Points
+
+1. **StripeInvoiceService.createInvoiceFromStripe()**
+   - Calls `invoiceSettingsHelper.createInvoiceSettingsForWebhook()`
+   - Uses organization data for both agency and client
+   - Logs creation success/failure
+
+2. **BillingWebhooksService.handleManualPaymentInvoiceGeneration()**
+   - Calls `invoiceSettingsHelper.createInvoiceSettingsForWebhook()` with session data
+   - Updates client organization_settings for future use
+   - Handles new client organization setup
+
+### Webhook Processing Flow
+
+```typescript
+// Both webhook types now follow this pattern:
+const invoiceSettings = await this.invoiceSettingsHelper.createInvoiceSettingsForWebhook(
+  invoiceId,
+  agencyOrganizationId, 
+  clientOrganizationId,
+  sessionData // Only for manual webhooks
+);
+```
+
+## 🔄 Migration Path

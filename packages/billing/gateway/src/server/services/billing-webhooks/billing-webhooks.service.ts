@@ -17,6 +17,7 @@ import { Session } from '../../../../../../../apps/web/lib/sessions.types';
 import { Invoice } from '../../../../../../../apps/web/lib/invoice.types';
 import { createUrlForCheckout } from '../../../../../../features/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { RetryOperationService } from '@kit/shared/utils';
+import { InvoiceSettingsWebhookHelper } from '../../../../../../webhooks/src/server/services/shared/invoice-settings-webhook.helper';
 
 export function createBillingWebhooksService(
   adminClient: SupabaseClient<Database>,
@@ -32,12 +33,14 @@ export function createBillingWebhooksService(
 class BillingWebhooksService {
   private readonly ClientRoleManualPayment = 'client_owner';
   private readonly activityService: ActivityService;
+  private readonly invoiceSettingsHelper: InvoiceSettingsWebhookHelper;
 
   constructor(
     private readonly adminClient: SupabaseClient<Database>,
     private readonly baseUrl: string,
   ) {
     this.activityService = new ActivityService(adminClient);
+    this.invoiceSettingsHelper = new InvoiceSettingsWebhookHelper(adminClient);
   }
 
   /**
@@ -105,9 +108,11 @@ class BillingWebhooksService {
       }
 
       const createdBy = accountDataAgencyOwnerData?.id;
-      const agencyOrganizationId = Array.isArray(accountDataAgencyOwnerData?.organizations)
-        ? accountDataAgencyOwnerData?.organizations[0]?.id
-        : accountDataAgencyOwnerData?.organizations?.id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const organizations = accountDataAgencyOwnerData?.organizations as any;
+      const agencyOrganizationId = Array.isArray(organizations)
+        ? organizations[0]?.id
+        : organizations?.id;
 
       // 4. Prepare client data
       const newClient = {
@@ -358,6 +363,28 @@ class BillingWebhooksService {
       }
 
       console.log('Invoice items created successfully');
+
+      // Create invoice_settings for both agency and client organizations
+      try {
+        const invoiceSettings = await this.invoiceSettingsHelper.createInvoiceSettingsForWebhook(
+          createdInvoice.id,
+          agencyOrganizationId,
+          clientOrganizationId,
+          {
+            client_name: session.client_name ?? undefined,
+            client_email: session.client_email ?? undefined,
+            client_address: session.client_address ?? undefined,
+            client_city: session.client_city ?? undefined,
+            client_country: session.client_country ?? undefined,
+            client_state: session.client_state ?? undefined,
+            client_postal_code: session.client_postal_code ?? undefined,
+            metadata: session.metadata,
+          }
+        );
+        console.log(`Created ${invoiceSettings.length} invoice settings for manual payment invoice ${createdInvoice.id}`);
+      } catch (error) {
+        console.error('Error creating invoice settings for manual payment:', error);
+      }
 
       // Record the manual payment
       const paymentData = {
