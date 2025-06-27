@@ -29,6 +29,7 @@ export function ValueField({ control, watch }: ValueFieldProps) {
                 type: type === "link" ? "URL" : "embed URL",
               })}
               {...field}
+              rows={5}
             />
           </FormControl>
         </FormItem>
