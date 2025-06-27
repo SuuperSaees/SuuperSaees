@@ -67,6 +67,41 @@ class BillingWebhooksService {
         throw new Error(`Session not found for provider_id: ${checkout.provider_id}`);
       }
 
+      // Check metadata type to determine if we should create a client or just process payment
+      const sessionMetadata = session.metadata as { type?: string; quantity?: number };
+      const sessionType = sessionMetadata?.type;
+
+      console.log('Session type from metadata:', sessionType);
+
+      // If it's an invoice payment, only update the payment, don't create client
+      if (sessionType === 'invoice') {
+        console.log('Invoice payment detected, processing payment only (no client creation)');
+        
+        // For invoice payments, we just need to update the invoice payment status
+        // The client and invoice should already exist
+        // TODO: Add invoice payment processing logic here if needed
+        console.log('Invoice payment processed for session:', checkout.provider_id);
+        
+        // Mark the session as deleted
+        await this.adminClient
+          .from('sessions')
+          .update({
+            deleted_on: new Date().toISOString(),
+          })
+          .eq('id', checkout.provider_id);
+          
+        return {
+          success: true,
+          type: 'invoice_payment',
+          sessionId: checkout.provider_id,
+        };
+      }
+
+      // Continue with service flow (create client if needed)
+      if (sessionType !== 'service') {
+        console.warn(`Unknown session type: ${sessionType}, proceeding with service flow as fallback`);
+      }
+
       // 2. Get the service associated with the checkout
       const { data: checkoutServiceData, error: checkoutServiceError } =
         await this.adminClient
@@ -197,7 +232,7 @@ class BillingWebhooksService {
         agencyOrganizationId ?? '',
       );
 
-      const metadata = session.metadata as { quantity?: number };
+      const paymentMetadata = session.metadata as { quantity?: number };
 
       // 9. Generate invoice, invoice items and invoice payment for manual payment
       await this.handleManualPaymentInvoiceGeneration({
@@ -210,7 +245,7 @@ class BillingWebhooksService {
         servicePrice,
         serviceCurrency,
         isRecurring,
-        checkoutServiceQuantity: metadata?.quantity ?? 1,
+        checkoutServiceQuantity: paymentMetadata?.quantity ?? 1,
       });
 
       // 10. Mark the session as deleted

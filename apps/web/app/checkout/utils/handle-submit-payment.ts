@@ -59,6 +59,7 @@ export const handleSubmitPayment = async ({
     const metadata = {
       manual_payment_info: '',
       discount_coupon: '',
+      type: service ? 'service' : 'invoice', // Add type based on whether it's a service or invoice
     };
     
     if (selectedPaymentMethod === 'manual_payment' && values.manual_payment_info) {
