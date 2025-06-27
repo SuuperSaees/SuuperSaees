@@ -1,8 +1,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { Invoice } from '~/lib/invoice.types';
+import { AccountRoles } from '~/lib/account.types';
 import { QueryContext } from '../../query.config';
 import { InvoiceSettingsRepository } from './invoice-settings.repository';
+import { getSession } from '../../accounts/accounts.action';
 
 export class InvoiceRepository {
   private client: SupabaseClient<Database>;
@@ -97,6 +99,15 @@ export class InvoiceRepository {
     const effectiveLimit = config?.pagination?.limit ?? 50;
     const currentPage = config?.pagination?.page ?? 1;
 
+    // Get session to determine user role and organization
+    const session = await getSession();
+    const userRole = session.organization?.role ?? '';
+    const organizationId = session.organization?.id ?? '';
+
+    if (!userRole || !organizationId) {
+      throw new Error('User session or organization not found');
+    }
+
     // Build base query
     let query = client
       .from('invoices')
@@ -150,8 +161,21 @@ export class InvoiceRepository {
           tax_id_number
         )
       `)
-      .is('deleted_on', null)
-      .order('created_at', { ascending: false });
+      .is('deleted_on', null);
+
+    // Apply role-based filtering
+    if (AccountRoles.agencyRoles.has(userRole)) {
+      // User is from agency - filter by agency_id
+      query = query.eq('agency_id', organizationId);
+    } else if (AccountRoles.clientRoles.has(userRole)) {
+      // User is from client - filter by client_organization_id  
+      query = query.eq('client_organization_id', organizationId);
+    } else {
+      throw new Error(`Invalid user role: ${userRole}`);
+    }
+
+    // Apply ordering
+    query = query.order('created_at', { ascending: false });
 
     // Apply filters using internal config
     if (config?.filters) {
@@ -179,11 +203,46 @@ export class InvoiceRepository {
       query = query.or(`invoice_number.ilike.%${config.search.term}%,notes.ilike.%${config.search.term}%`);
     }
 
-    // Get total count
-    const { count } = await client
+    // Get total count with same role-based filtering
+    let countQuery = client
       .from('invoices')
       .select('*', { count: 'exact', head: true })
       .is('deleted_on', null);
+
+    // Apply same role-based filtering to count query
+    if (AccountRoles.agencyRoles.has(userRole)) {
+      countQuery = countQuery.eq('agency_id', organizationId);
+    } else if (AccountRoles.clientRoles.has(userRole)) {
+      countQuery = countQuery.eq('client_organization_id', organizationId);
+    }
+
+    // Apply same filters to count query
+    if (config?.filters) {
+      const { status, customer_id, date_from, date_to } = config.filters;
+
+      if (status && status.length > 0) {
+        countQuery = countQuery.in('status', status);
+      }
+
+      if (customer_id && customer_id.length > 0) {
+        countQuery = countQuery.in('customer_id', customer_id);
+      }
+
+      if (date_from) {
+        countQuery = countQuery.gte('issue_date', date_from);
+      }
+
+      if (date_to) {
+        countQuery = countQuery.lte('issue_date', date_to);
+      }
+    }
+
+    // Apply same search to count query
+    if (config?.search?.term) {
+      countQuery = countQuery.or(`invoice_number.ilike.%${config.search.term}%,notes.ilike.%${config.search.term}%`);
+    }
+
+    const { count } = await countQuery;
 
     // Apply pagination
     const isOffsetBased = 
