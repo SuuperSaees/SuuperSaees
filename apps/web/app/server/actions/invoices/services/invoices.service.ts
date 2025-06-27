@@ -1,6 +1,7 @@
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
 import { Invoice } from '~/lib/invoice.types';
+import { Pagination } from '~/lib/pagination';
 import { createUrlForCheckout } from '../../../../../../../packages/features/team-accounts/src/server/actions/services/create/create-token-for-checkout'
 import { RetryOperationService } from '@kit/shared/utils';
 import { getSession } from '../../accounts/accounts.action';
@@ -72,19 +73,18 @@ export class InvoiceService {
   }
 
   // * GET SERVICES
-  async list(): Promise<{
-    data: Invoice.Response[];
-    nextCursor: string | null;
-    count: number | null;
-    pagination: {
-      limit: number;
-      hasNextPage: boolean;
-      totalPages: number | null;
-      currentPage: number | null;
-      isOffsetBased: boolean;
+  async list(): Promise<Pagination.Response<Invoice.Response>> {
+    const repositoryResponse = await this.invoiceRepository.list();
+    
+    // Transform repository response to match frontend Pagination.Response structure
+    return {
+      data: repositoryResponse.data,
+      total: repositoryResponse.count,
+      limit: repositoryResponse.pagination.limit,
+      page: repositoryResponse.pagination.currentPage,
+      nextCursor: repositoryResponse.nextCursor,
+      prevCursor: null, // Not implemented in repository yet, but part of Pagination.Response
     };
-  }> {
-    return await this.invoiceRepository.list();
   }
 
   async get(invoiceId: string): Promise<Invoice.Response> {

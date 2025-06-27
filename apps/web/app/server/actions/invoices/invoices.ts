@@ -1,4 +1,5 @@
 import { Invoice } from '~/lib/invoice.types';
+import { Pagination } from '~/lib/pagination';
 import { BaseAction } from '../base-action';
 import { InvoiceController } from './controllers/invoices.controller';
 import { IInvoiceAction } from './invoices.interface';
@@ -22,18 +23,7 @@ export class InvoiceAction extends BaseAction implements IInvoiceAction {
 
   async list(
     config?: PaginationConfig
-  ): Promise<{
-    data: Invoice.Response[];
-    nextCursor: string | null;
-    count: number | null;
-    pagination: {
-      limit: number;
-      hasNextPage: boolean;
-      totalPages: number | null;
-      currentPage: number | null;
-      isOffsetBased: boolean;
-    };
-  }> {
+  ): Promise<Pagination.Response<Invoice.Response>> {
     return await this.controller.list(config);
   }
 

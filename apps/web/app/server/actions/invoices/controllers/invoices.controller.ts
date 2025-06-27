@@ -4,6 +4,7 @@ import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoiceItemsRepository } from '../repositories/invoice-items.repository';
 import { InvoiceService } from '../services/invoices.service';
 import { Invoice } from '~/lib/invoice.types';
+import { Pagination } from '~/lib/pagination';
 import { createQueryContext, PaginationConfig } from '../../query.config';
 
 export class InvoiceController {
@@ -33,18 +34,7 @@ export class InvoiceController {
   // * GET CONTROLLERS
   async list(
     config?: PaginationConfig
-  ): Promise<{
-    data: Invoice.Response[];
-    nextCursor: string | null;
-    count: number | null;
-    pagination: {
-      limit: number;
-      hasNextPage: boolean;
-      totalPages: number | null;
-      currentPage: number | null;
-      isOffsetBased: boolean;
-    };
-  }> {
+  ): Promise<Pagination.Response<Invoice.Response>> {
     try {
       // Create context with config
       const queryContext = createQueryContext(config);
