@@ -60,14 +60,14 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
         className="w-full flex"
       >
          <h2 className="text-xl font-medium">
-          <Trans i18nKey="invoices:update.title" values={{ number: invoice.number }} />
+          <Trans i18nKey="invoices:update.title" values={{ number: invoice?.number ?? '' }} />
         </h2>
       </PageHeader>
       <InvoiceForm 
         clients={clients} 
         services={services} 
         agencyId={agencyId}
-        invoice={invoice}
+        invoice={invoice ?? undefined}
         mode="update"
       />
     </PageBody>
