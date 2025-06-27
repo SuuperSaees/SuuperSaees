@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@kit/ui/select";
+import { Combobox } from "../../../../../apps/web/components/ui/combobox";
 
 import { ThemedInput } from "./ui/input-themed-with-settings";
 import { useOrganizationSettings } from "../context/organization-settings-context";
@@ -30,6 +31,7 @@ import {
   mergeWithDefaults,
 } from "../../../../../apps/web/app/server/actions/invoices/type-guards";
 import { Textarea } from "@kit/ui/textarea";
+import { getCountries } from "../../../../../apps/web/lib/countries";
 
 // Schema for invoice settings with improved structure
 const InvoiceSettingsSchema = z.object({
@@ -56,25 +58,6 @@ const InvoiceSettingsSchema = z.object({
 
 type InvoiceSettingsType = z.infer<typeof InvoiceSettingsSchema>;
 
-// TODO: Replace with proper country library like 'react-select-country-list' or 'react-country-state-city'
-// Recommended: npm install react-select-country-list
-// import countryList from 'react-select-country-list';
-// const countries = countryList().getData();
-
-// Dummy countries data - ready to be replaced with actual country list
-const countries = [
-  { value: "us", label: "United States" },
-  { value: "ca", label: "Canada" },
-  { value: "gb", label: "United Kingdom" },
-  { value: "de", label: "Germany" },
-  { value: "fr", label: "France" },
-  { value: "es", label: "Spain" },
-  { value: "it", label: "Italy" },
-  { value: "mx", label: "Mexico" },
-  { value: "br", label: "Brazil" },
-  { value: "au", label: "Australia" },
-];
-
 // Note: Default values are now handled by the type guards functions
 
 interface InvoiceSettingsProps {
@@ -85,6 +68,9 @@ function InvoiceSettings({ role: _role }: InvoiceSettingsProps) {
   const { t } = useTranslation("invoices");
   const { updateOrganizationSetting, billing_details } =
     useOrganizationSettings();
+
+  // Get all countries using the utility function
+  const countries = getCountries();
 
   // Safely parse billing_details with fallback to defaults using type guards
   const getInitialValues = (): InvoiceSettingsType => {
@@ -343,19 +329,19 @@ function InvoiceSettings({ role: _role }: InvoiceSettingsProps) {
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem className="text-gray-700" value="EIN">
+                          <SelectItem value="EIN">
                             EIN (Employer Identification Number)
                           </SelectItem>
-                          <SelectItem className="text-gray-700" value="VAT">
+                          <SelectItem value="VAT">
                             VAT (Value Added Tax)
                           </SelectItem>
-                          <SelectItem className="text-gray-700" value="GST">
+                          <SelectItem value="GST">
                             GST (Goods and Services Tax)
                           </SelectItem>
-                          <SelectItem className="text-gray-700" value="TIN">
+                          <SelectItem value="TIN">
                             TIN (Tax Identification Number)
                           </SelectItem>
-                          <SelectItem className="text-gray-700" value="OTHER">
+                          <SelectItem value="OTHER">
                             Other
                           </SelectItem>
                         </SelectContent>
@@ -429,33 +415,24 @@ function InvoiceSettings({ role: _role }: InvoiceSettingsProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleFieldChange("information.country", value);
-                        }}
-                      >
-                        <SelectTrigger className="text-gray-700">
-                          <SelectValue
-                            className="text-gray-700"
-                            placeholder={t(
-                              "settings.billingInformation.companyInformation.country.placeholder",
-                            )}
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {countries.map((country) => (
-                            <SelectItem
-                              className="text-gray-700"
-                              key={country.value}
-                              value={country.value}
-                            >
-                              {country.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="w-full">
+                        <Combobox
+                          options={countries}
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            handleFieldChange("information.country", value);
+                          }}
+                          placeholder={t(
+                            "settings.billingInformation.companyInformation.country.placeholder",
+                          )}
+                          searchPlaceholder={t("settings.billingInformation.companyInformation.country.searchPlaceholder")}
+                          emptyMessage={t("settings.billingInformation.companyInformation.country.emptyMessage")}
+                          contentClassName="text-gray-700"
+                          triggerClassName="text-gray-700"
+                          className="w-full text-gray-700 bg-transparent font-normal"
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

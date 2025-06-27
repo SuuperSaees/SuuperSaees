@@ -192,7 +192,9 @@
         "country": {
           "label": "Country",
           "placeholder": "Select your country",
-          "description": "Choose your business location"
+          "description": "Choose your business location",
+          "searchPlaceholder": "Search countries...",
+          "emptyMessage": "No country found."
         }
       },
       "businessAddress": {

@@ -86,7 +86,8 @@ export function Combobox<T extends BaseOption = BaseOption>({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            `gap-1 flex ${width} items-center justify-between`,
+            'gap-1 flex items-center justify-between',
+            width,
             triggerClassName,
             className
           )}
@@ -107,7 +108,7 @@ export function Combobox<T extends BaseOption = BaseOption>({
           <ChevronsUpDown className="ml-2 ml-auto h-4 w-4 shrink-0 justify-self-end opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className={cn(width, 'p-0', contentClassName)}>
+      <PopoverContent className={cn(width, 'p-0', contentClassName)} style={{ width: 'var(--radix-popover-trigger-width)' }}>
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>

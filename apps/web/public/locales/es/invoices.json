@@ -192,7 +192,9 @@
         "country": {
           "label": "País",
           "placeholder": "Selecciona tu país",
-          "description": "Elige la ubicación de tu negocio"
+          "description": "Elige la ubicación de tu negocio",
+          "searchPlaceholder": "Buscar países...",
+          "emptyMessage": "No se encontró el país."
         }
       },
       "businessAddress": {
