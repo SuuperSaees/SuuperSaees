@@ -2,9 +2,11 @@
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { Service } from '~/lib/services.types';
+import { Invoice } from '~/lib/invoice.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '~/utils/credentials-crypto';
 import { createCheckout } from '../../server/actions/checkouts/checkouts.action';
+import { processManualPayment } from '../../server/actions/invoice-payments/invoice-payments.action';
 
 type ValuesProps = {
   fullName: string;
@@ -22,6 +24,7 @@ type ValuesProps = {
   card_number?: string;
   card_expiration_date?: string;
   card_cvv?: string;
+  manual_payment_info?: string;
 };
 
 type HandlePaymentStripeProps = {
@@ -101,6 +104,7 @@ export const handleRecurringPayment = async ({
       throw new Error(data.error.message);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return data.clientSecret;
   } else if(selectedPaymentMethod === 'manual_payment') {
     try {
@@ -279,6 +283,7 @@ export const handleOneTimePayment = async ({
       throw new Error(data.error.message);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return data.clientSecret;
   } else if(selectedPaymentMethod === 'manual_payment') {
     try {
@@ -407,6 +412,84 @@ export const handleOneTimePayment = async ({
 
     const dataSubscriptionPlan = await responseSubscriptionPlan.clone().json();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return dataSubscriptionPlan;
+  }
+};
+
+type HandleInvoicePaymentProps = {
+  invoice: Invoice.Response;
+  values: ValuesProps;
+  stripeId: string;
+  paymentMethodId: string;
+  coupon: string;
+  sessionId: string;
+  selectedPaymentMethod: string;
+  baseUrl: string;
+};
+
+export const handleInvoicePayment = async ({
+  invoice,
+  values,
+  stripeId,
+  paymentMethodId,
+  coupon,
+  sessionId,
+  selectedPaymentMethod,
+  baseUrl,
+}: HandleInvoicePaymentProps) => {
+  // Validar que la invoice tenga provider_id si el método de pago es stripe
+  if (selectedPaymentMethod === 'stripe') {
+    if (!invoice.provider_id || invoice.provider_id.trim() === '') {
+      throw new Error('Invoice cannot be paid with Stripe as it has no provider_id');
+    }
+
+    const res = await fetch(`${baseUrl}/api/stripe/invoice-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        invoiceId: invoice.id,
+        stripeInvoiceId: invoice.provider_id,
+        email: values.email,
+        accountId: stripeId,
+        paymentMethodId,
+        couponId: coupon,
+        sessionId: sessionId,
+      }),
+    });
+
+    const data = await res.clone().json();
+
+    if (data.error) {
+      console.error(data.error.message);
+      throw new Error(data.error.message);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return data;
+  } else if (selectedPaymentMethod === 'manual_payment') {
+    try {
+      // Procesar pago manual para la invoice
+      const payment = await processManualPayment(invoice.id, {
+        amount: invoice.total_amount ?? 0,
+        currency: invoice.currency ?? 'USD',
+        paymentMethod: 'manual',
+        notes: values.manual_payment_info,
+        referenceNumber: sessionId,
+      });
+
+      return {
+        success: true,
+        payment: payment,
+        message: 'Manual payment processed successfully for invoice',
+      };
+    } catch (error) {
+      console.error('Error processing manual payment for invoice:', error);
+      throw new Error(`Failed to process manual payment for invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  } else {
+    throw new Error(`Payment method ${selectedPaymentMethod} not supported for invoice payments`);
   }
 };
