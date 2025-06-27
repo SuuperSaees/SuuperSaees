@@ -1,6 +1,14 @@
 import { Database } from './database.types';
 import { Organization } from './organization.types';
 
+export namespace InvoiceSettings {
+  export type Type = Database['public']['Tables']['invoice_settings']['Row'];
+  export type Insert = Database['public']['Tables']['invoice_settings']['Insert'];
+  export type Update = Database['public']['Tables']['invoice_settings']['Update'];
+
+  export type Response = InvoiceSettings.Type;
+}
+
 export namespace Invoice {
   export type Type = Database['public']['Tables']['invoices']['Row'];
   export type Insert = Database['public']['Tables']['invoices']['Insert'];
@@ -9,9 +17,11 @@ export namespace Invoice {
   export namespace Request {
     export type Create = Invoice.Insert & {
       invoice_items?: InvoiceItem.Insert[] | null;
+      invoice_settings?: InvoiceSettings.Insert[] | null;
     };
     export type Update = Invoice.Update & {
       invoice_items?: InvoiceItem.Insert[] | null;
+      invoice_settings?: InvoiceSettings.Insert[] | null;
     };
   }
 
@@ -19,6 +29,7 @@ export namespace Invoice {
     client: Organization.Response | null;
     agency: Organization.Response | null;
     invoice_items?: InvoiceItem.Response[] | null;
+    invoice_settings?: InvoiceSettings.Response[] | null;
     total_amount?: number;
     items_count?: number;
   };
@@ -51,4 +62,4 @@ export namespace InvoiceItem {
   export type Response = InvoiceItem.Type & {
     total_price?: number;
   };
-} 
+}
