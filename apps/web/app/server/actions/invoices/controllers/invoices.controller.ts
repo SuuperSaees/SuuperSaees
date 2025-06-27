@@ -21,8 +21,8 @@ export class InvoiceController {
   // * CREATE CONTROLLERS
   async create(payload: Invoice.Request.Create): Promise<Invoice.Type> {
     try {
-      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
-      const invoiceItemsRepository = new InvoiceItemsRepository(this.client, this.adminClient);
+      const invoiceRepository = new InvoiceRepository(this.client, undefined);
+      const invoiceItemsRepository = new InvoiceItemsRepository(this.client, undefined);
       const invoiceService = new InvoiceService(invoiceRepository, invoiceItemsRepository);
       return await invoiceService.create(payload);
     } catch (error) {
@@ -40,7 +40,7 @@ export class InvoiceController {
       const queryContext = createQueryContext(config);
       
       // Inject context into repository
-      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient, queryContext);
+      const invoiceRepository = new InvoiceRepository(this.client, undefined, queryContext);
       const invoiceService = new InvoiceService(invoiceRepository);
       
       return await invoiceService.list();
@@ -52,7 +52,7 @@ export class InvoiceController {
 
   async get(invoiceId: string): Promise<Invoice.Response> {
     try {
-      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
+      const invoiceRepository = new InvoiceRepository(this.client, undefined);
       const invoiceService = new InvoiceService(invoiceRepository);
       return await invoiceService.get(invoiceId);
     } catch (error) {
@@ -64,8 +64,8 @@ export class InvoiceController {
   // * DELETE CONTROLLERS
   async delete(invoiceId: string): Promise<void> {
     try {
-      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
-      const invoiceItemsRepository = new InvoiceItemsRepository(this.client, this.adminClient);
+      const invoiceRepository = new InvoiceRepository(this.client, undefined);
+      const invoiceItemsRepository = new InvoiceItemsRepository(this.client, undefined);
       const invoiceService = new InvoiceService(invoiceRepository, invoiceItemsRepository);
       return await invoiceService.delete(invoiceId);
     } catch (error) {
@@ -77,8 +77,8 @@ export class InvoiceController {
   // * UPDATE CONTROLLERS
   async update(payload: Invoice.Request.Update): Promise<Invoice.Type> {
     try {
-      const invoiceRepository = new InvoiceRepository(this.client, this.adminClient);
-      const invoiceItemsRepository = new InvoiceItemsRepository(this.client, this.adminClient);
+      const invoiceRepository = new InvoiceRepository(this.client, undefined);
+      const invoiceItemsRepository = new InvoiceItemsRepository(this.client, undefined);
       const invoiceService = new InvoiceService(invoiceRepository, invoiceItemsRepository);
       return await invoiceService.update(payload);
     } catch (error) {
