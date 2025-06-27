@@ -51,7 +51,7 @@ export default function BriefSelectionForm({
   return (
     <Form {...form}>
       <div className="flex h-full max-h-full  flex-col gap-8">
-        <div className="flex w-full p-2 px-3 items-center gap-2 self-stretch rounded-lg border border-[#E4E7EC] bg-[rgba(255,255,255,0.8)]">
+        <div className="flex w-full max-w-7xl mx-auto p-2 px-3 items-center gap-2 self-stretch rounded-lg border border-[#E4E7EC] bg-[rgba(255,255,255,0.8)]">
           <svg
             className="h-5 w-5 text-gray-400 mr-[8px]"
             xmlns="http://www.w3.org/2000/svg"
@@ -75,27 +75,29 @@ export default function BriefSelectionForm({
           />
         </div>
         
-        <div className="no-scrollbar h-full overflow-y-auto thin-scrollbar">
+        <div className="no-scrollbar  w-full overflow-y-auto thin-scrollbar">
           <FormField
             control={form.control}
             name="briefSelection.selectedBriefId"
             render={() => (
               <FormItem>
                 <FormControl>
-                  <div className="flex h-full gap-x-[24px] gap-y-[24px] flex-wrap">
-                    {filteredBriefs?.map((brief) => (
-                      <div
-                        key={brief.id}
-                        className=""
-                        onClick={() => handleBriefSelection(brief.id)}
-                      >
-                        <BriefCard 
-                          brief={brief} 
-                          selected={selectedBriefId === brief.id}
-                          SelectIcon={selectedBriefId === brief.id ? CheckboxRoundedFilled : CheckboxRounded}
-                        />
-                      </div>
-                    ))}
+                  <div className='max-w-7xl flex h-full flex-wrap gap-16 lg:flex-nowrap mx-auto w-full'>
+                    <div className="flex h-full gap-x-[24px] gap-y-[24px] flex-wrap">
+                      {filteredBriefs?.map((brief) => (
+                        <div
+                          key={brief.id}
+                          className=""
+                          onClick={() => handleBriefSelection(brief.id)}
+                        >
+                          <BriefCard 
+                            brief={brief} 
+                            selected={selectedBriefId === brief.id}
+                            SelectIcon={selectedBriefId === brief.id ? CheckboxRoundedFilled : CheckboxRounded}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -103,6 +105,7 @@ export default function BriefSelectionForm({
             )}
           />
         </div>
+        
         <div className="flex w-full shrink-0 justify-between py-4">
           {/* <Button variant={'outline'} type="button">
             {t('pagination.previous')}

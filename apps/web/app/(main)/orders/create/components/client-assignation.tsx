@@ -21,12 +21,15 @@ import {
   getClientMembersForOrganization,
   getClientsOrganizations,
 } from '~/team-accounts/src/server/actions/clients/get/get-clients';
+import { cn } from '@kit/ui/utils';
 
 interface ClientAssignationProps {
   onSelectOrganization: (organizationId: string) => void;
+  className?: string;
 }
 export default function ClientAssignation({
   onSelectOrganization,
+  className,
 }: ClientAssignationProps) {
   const { form } = useMultiStepFormContext();
 
@@ -142,14 +145,14 @@ export default function ClientAssignation({
   );
 
   return (
-    <div className="flex flex-col border-t border-gray-100 py-2">
+    <div className={cn('flex flex-col border-t gap-2 border-gray-100 py-2', className)}>
       <h3 className="text-[16px] font-semibold">
         {t('form.completion.client.title')}
       </h3>
       <div>
         <SelectAction
           options={organizationOptions}
-          className="w-full bg-transparent"
+          className="w-full bg-transparent font-medium text-gray-700"
           groupName={t('dialogs.add.select.label')}
           onSelectHandler={(value: string) => {
             const selectedOrganization = clientsOrganizationsQuery?.data?.find(
@@ -166,16 +169,16 @@ export default function ClientAssignation({
             clientsOrganizationsQuery.isPending
           }
         >
-          <span className="text-sm">
+          <span className="text-sm font-medium text-gray-700">
             {t('form.completion.client.label')}
-            <span className="text-red"> *</span>{' '}
+            <span className="text-red "> *</span>{' '}
             {/* Change text-red-500 to any desired color */}
           </span>
         </SelectAction>
       </div>
       {selectedOrganization && (
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold">
+          <span className="text-sm font-medium text-gray-700">
             {t('form.completion.client.members.label')}
             <span className="text-red"> *</span>{' '}
             {/* Change text-red-500 to any desired color */}
@@ -244,7 +247,7 @@ const CustomTrigger = ({
                   {member?.name.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-xs font-semibold text-gray-600">
+              <span className="text-xs font-medium text-gray-600">
                 {member?.name}
               </span>
               <button
