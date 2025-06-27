@@ -17,6 +17,7 @@ import { Session } from '../../../../../../../apps/web/lib/sessions.types';
 import { Invoice } from '../../../../../../../apps/web/lib/invoice.types';
 import { createUrlForCheckout } from '../../../../../../features/team-accounts/src/server/actions/services/create/create-token-for-checkout';
 import { RetryOperationService } from '@kit/shared/utils';
+import { InvoiceSettingsWebhookHelper } from '../../../../../../webhooks/src/server/services/shared/invoice-settings-webhook.helper';
 
 export function createBillingWebhooksService(
   adminClient: SupabaseClient<Database>,
@@ -32,12 +33,14 @@ export function createBillingWebhooksService(
 class BillingWebhooksService {
   private readonly ClientRoleManualPayment = 'client_owner';
   private readonly activityService: ActivityService;
+  private readonly invoiceSettingsHelper: InvoiceSettingsWebhookHelper;
 
   constructor(
     private readonly adminClient: SupabaseClient<Database>,
     private readonly baseUrl: string,
   ) {
     this.activityService = new ActivityService(adminClient);
+    this.invoiceSettingsHelper = new InvoiceSettingsWebhookHelper(adminClient);
   }
 
   /**
@@ -62,6 +65,41 @@ class BillingWebhooksService {
 
       if (!session) {
         throw new Error(`Session not found for provider_id: ${checkout.provider_id}`);
+      }
+
+      // Check metadata type to determine if we should create a client or just process payment
+      const sessionMetadata = session.metadata as { type?: string; quantity?: number };
+      const sessionType = sessionMetadata?.type;
+
+      console.log('Session type from metadata:', sessionType);
+
+      // If it's an invoice payment, only update the payment, don't create client
+      if (sessionType === 'invoice') {
+        console.log('Invoice payment detected, processing payment only (no client creation)');
+        
+        // For invoice payments, we just need to update the invoice payment status
+        // The client and invoice should already exist
+        // TODO: Add invoice payment processing logic here if needed
+        console.log('Invoice payment processed for session:', checkout.provider_id);
+        
+        // Mark the session as deleted
+        await this.adminClient
+          .from('sessions')
+          .update({
+            deleted_on: new Date().toISOString(),
+          })
+          .eq('id', checkout.provider_id);
+          
+        return {
+          success: true,
+          type: 'invoice_payment',
+          sessionId: checkout.provider_id,
+        };
+      }
+
+      // Continue with service flow (create client if needed)
+      if (sessionType !== 'service') {
+        console.warn(`Unknown session type: ${sessionType}, proceeding with service flow as fallback`);
       }
 
       // 2. Get the service associated with the checkout
@@ -105,9 +143,11 @@ class BillingWebhooksService {
       }
 
       const createdBy = accountDataAgencyOwnerData?.id;
-      const agencyOrganizationId = Array.isArray(accountDataAgencyOwnerData?.organizations)
-        ? accountDataAgencyOwnerData?.organizations[0]?.id
-        : accountDataAgencyOwnerData?.organizations?.id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const organizations = accountDataAgencyOwnerData?.organizations as any;
+      const agencyOrganizationId = Array.isArray(organizations)
+        ? organizations[0]?.id
+        : organizations?.id;
 
       // 4. Prepare client data
       const newClient = {
@@ -192,7 +232,7 @@ class BillingWebhooksService {
         agencyOrganizationId ?? '',
       );
 
-      const metadata = session.metadata as { quantity?: number };
+      const paymentMetadata = session.metadata as { quantity?: number };
 
       // 9. Generate invoice, invoice items and invoice payment for manual payment
       await this.handleManualPaymentInvoiceGeneration({
@@ -205,7 +245,7 @@ class BillingWebhooksService {
         servicePrice,
         serviceCurrency,
         isRecurring,
-        checkoutServiceQuantity: metadata?.quantity ?? 1,
+        checkoutServiceQuantity: paymentMetadata?.quantity ?? 1,
       });
 
       // 10. Mark the session as deleted
@@ -358,6 +398,28 @@ class BillingWebhooksService {
       }
 
       console.log('Invoice items created successfully');
+
+      // Create invoice_settings for both agency and client organizations
+      try {
+        const invoiceSettings = await this.invoiceSettingsHelper.createInvoiceSettingsForWebhook(
+          createdInvoice.id,
+          agencyOrganizationId,
+          clientOrganizationId,
+          {
+            client_name: session.client_name ?? undefined,
+            client_email: session.client_email ?? undefined,
+            client_address: session.client_address ?? undefined,
+            client_city: session.client_city ?? undefined,
+            client_country: session.client_country ?? undefined,
+            client_state: session.client_state ?? undefined,
+            client_postal_code: session.client_postal_code ?? undefined,
+            metadata: session.metadata,
+          }
+        );
+        console.log(`Created ${invoiceSettings.length} invoice settings for manual payment invoice ${createdInvoice.id}`);
+      } catch (error) {
+        console.error('Error creating invoice settings for manual payment:', error);
+      }
 
       // Record the manual payment
       const paymentData = {

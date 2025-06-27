@@ -1,4 +1,5 @@
-import { Invoice} from "~/lib/invoice.types";
+import { Invoice } from "~/lib/invoice.types";
+import { Pagination } from "~/lib/pagination";
 import { PaginationConfig } from "../query.config";
 
 export interface IInvoiceAction {
@@ -14,20 +15,9 @@ export interface IInvoiceAction {
   /**
    * Retrieves all invoices with pagination
    * @param {PaginationConfig} config - Pagination and filter configuration
-   * @returns {Promise<{data: Invoice.Response[], nextCursor: string | null, count: number | null, pagination: object}>}
+   * @returns {Promise<Pagination.Response<Invoice.Response>>}
    */
-  list(config?: PaginationConfig): Promise<{
-    data: Invoice.Response[];
-    nextCursor: string | null;
-    count: number | null;
-    pagination: {
-      limit: number;
-      hasNextPage: boolean;
-      totalPages: number | null;
-      currentPage: number | null;
-      isOffsetBased: boolean;
-    };
-  }>;
+  list(config?: PaginationConfig): Promise<Pagination.Response<Invoice.Response>>;
 
   /**
    * Retrieves a specific invoice by its ID with all relations
