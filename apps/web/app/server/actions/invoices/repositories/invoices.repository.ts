@@ -29,7 +29,7 @@ export class InvoiceRepository {
     const { data, error } = await client
       .from('invoices') 
       .insert({
-        number: payload.number,
+        number: '',
         client_organization_id: payload.client_organization_id,
         agency_id: payload.agency_id,
         issue_date: payload.issue_date,
@@ -52,20 +52,28 @@ export class InvoiceRepository {
 
     const invoice = data as Invoice.Type;
 
-    // Create invoice settings if provided
-    if (payload.invoice_settings && payload.invoice_settings.length > 0) {
-      try {
+    // Create invoice settings automatically from organizations or use provided settings
+    try {
+      if (payload.invoice_settings && payload.invoice_settings.length > 0) {
+        // Use provided settings
         const settingsWithInvoiceId = payload.invoice_settings.map(setting => ({
           ...setting,
           invoice_id: invoice.id,
         }));
         
         await this.invoiceSettingsRepository.createMany(settingsWithInvoiceId);
-      } catch (settingsError) {
-        // If settings creation fails, we should consider rolling back the invoice
-        console.error('Error creating invoice settings:', settingsError);
-        // You might want to implement a rollback strategy here
+      } else {
+        // Automatically create settings from organization data
+        await this.invoiceSettingsRepository.createInvoiceSettingsFromOrganizations(
+          invoice.id,
+          payload.agency_id,
+          payload.client_organization_id
+        );
       }
+    } catch (settingsError) {
+      // If settings creation fails, log but don't fail the invoice creation
+      console.error('Error creating invoice settings:', settingsError);
+      console.warn('Invoice created successfully but without settings');
     }
 
     return invoice;

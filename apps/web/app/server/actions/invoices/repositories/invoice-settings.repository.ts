@@ -14,6 +14,119 @@ export class InvoiceSettingsRepository {
     this.adminClient = adminClient;
   }
 
+  // * UTILITY METHODS
+  async getOrganizationBillingInfo(organizationId: string): Promise<InvoiceSettings.Insert | null> {
+    const client = this.client;
+    
+    try {
+      // Get organization basic data
+      const { data: org, error: orgError } = await client
+        .from('organizations')
+        .select('id, name')
+        .eq('id', organizationId)
+        .single();
+
+      if (orgError ?? !org) {
+        console.warn(`Organization ${organizationId} not found:`, orgError);
+        return null;
+      }
+
+      // Get organization billing settings
+      const { data: settings, error: settingsError } = await client
+        .from('organization_settings')
+        .select('key, value')
+        .eq('organization_id', organizationId)
+        .in('key', ['billing_details', 'payment_details']);
+
+      if (settingsError) {
+        console.warn(`Error fetching settings for organization ${organizationId}:`, settingsError);
+      }
+
+      // Parse billing details from settings
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let billingData: any = {};
+      if (settings) {
+        const billingDetails = settings.find(s => s.key === 'billing_details');
+        const paymentDetails = settings.find(s => s.key === 'payment_details');
+        
+        if (billingDetails?.value) {
+          try {
+            billingData = JSON.parse(billingDetails.value);
+          } catch (e) {
+            console.warn('Error parsing billing_details JSON:', e);
+          }
+        }
+        
+        if (paymentDetails?.value && !billingData.address_1) {
+          try {
+            const paymentData = JSON.parse(paymentDetails.value);
+            billingData = { ...billingData, ...paymentData };
+          } catch (e) {
+            console.warn('Error parsing payment_details JSON:', e);
+          }
+        }
+      }
+
+      // Create invoice settings with available data
+      const invoiceSettings: InvoiceSettings.Insert = {
+        invoice_id: '', // Will be set when used
+        organization_id: organizationId,
+        name: billingData.name || org.name || 'Organization Name',
+        address_1: billingData.address_1 || billingData.address || 'Address not provided',
+        address_2: billingData.address_2 || null,
+        country: billingData.country || 'United States',
+        postal_code: billingData.postal_code || billingData.zip || 'N/A',
+        city: billingData.city || 'City not provided',
+        state: billingData.state || billingData.region || null,
+        tax_id_type: billingData.tax_id_type || (billingData.tax_id ? 'EIN' : null),
+        tax_id_number: billingData.tax_id_number || billingData.tax_id || null,
+      };
+
+      return invoiceSettings;
+    } catch (error) {
+      console.error(`Error getting billing info for organization ${organizationId}:`, error);
+      return null;
+    }
+  }
+
+  async createInvoiceSettingsFromOrganizations(
+    invoiceId: string,
+    agencyId: string,
+    clientOrganizationId: string
+  ): Promise<InvoiceSettings.Type[]> {
+    const results: InvoiceSettings.Type[] = [];
+
+    // Get agency billing info
+    const agencyInfo = await this.getOrganizationBillingInfo(agencyId);
+    if (agencyInfo) {
+      try {
+        const agencySettings = await this.create({
+          ...agencyInfo,
+          invoice_id: invoiceId,
+        });
+        results.push(agencySettings);
+      } catch (error) {
+        console.error('Error creating agency settings:', error);
+      }
+    }
+
+    // Get client billing info  
+    const clientInfo = await this.getOrganizationBillingInfo(clientOrganizationId);
+    if (clientInfo) {
+      try {
+        const clientSettings = await this.create({
+          ...clientInfo,
+          invoice_id: invoiceId,
+        });
+        results.push(clientSettings);
+      } catch (error) {
+        console.error('Error creating client settings:', error);
+      }
+    }
+
+    return results;
+  }
+
   // * CREATE REPOSITORIES
   async create(payload: InvoiceSettings.Insert): Promise<InvoiceSettings.Type> {
     const client = this.adminClient ?? this.client;

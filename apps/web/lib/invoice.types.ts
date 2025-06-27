@@ -15,7 +15,8 @@ export namespace Invoice {
   export type Update = Database['public']['Tables']['invoices']['Update'];
 
   export namespace Request {
-    export type Create = Invoice.Insert & {
+    export type Create = Omit<Invoice.Insert, 'number'> & {
+      number?: string; // Optional since it's auto-generated
       invoice_items?: InvoiceItem.Insert[] | null;
       invoice_settings?: InvoiceSettings.Insert[] | null;
     };

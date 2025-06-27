@@ -12,30 +12,72 @@ The invoice system now supports `invoice_settings` which store organization bill
 - ✅ Unique constraint on `invoice_id + organization_id` combination
 - ✅ Indexes for optimal query performance
 
-### 2. **Type System Updates**
-- ✅ `InvoiceSettings` namespace added to `invoice.types.ts`
-- ✅ `Invoice.Request.Create` and `Invoice.Request.Update` now support `invoice_settings[]`
-- ✅ `Invoice.Response` includes `invoice_settings[]` in responses
+### 2. **Automatic Settings Generation**
+- ✅ **NEW**: Invoice settings are created automatically from `organization_settings`
+- ✅ Reads `billing_details` and `payment_details` from organizations
+- ✅ Falls back to organization name and default values when billing data is missing
+- ✅ Creates settings for both agency and client automatically
+- ✅ Manual override still available by providing `invoice_settings` in payload
 
-### 3. **Repository Layer**
+### 3. **Type System Updates**
+- ✅ `InvoiceSettings` namespace added to `invoice.types.ts`
+- ✅ `Invoice.Request.Create` now has optional `invoice_settings[]` (auto-generated if not provided)
+- ✅ `Invoice.Request.Update` supports updating `invoice_settings[]`
+- ✅ `Invoice.Response` includes `invoice_settings[]` in responses
+- ✅ `number` field made optional in Create (auto-generated)
+
+### 4. **Repository Layer**
 - ✅ New `InvoiceSettingsRepository` with full CRUD operations
-- ✅ `InvoiceRepository` updated to handle settings creation/updates
+- ✅ **NEW**: `getOrganizationBillingInfo()` - extracts billing data from organization settings
+- ✅ **NEW**: `createInvoiceSettingsFromOrganizations()` - auto-creates settings
+- ✅ `InvoiceRepository` updated to handle automatic and manual settings creation/updates
 - ✅ Both `list()` and `get()` methods include invoice_settings in queries
 - ✅ Cascade handling for invoice deletion
 
-### 4. **Backward Compatibility**
+### 5. **Backward Compatibility**
 - ✅ **100% backward compatible** - existing invoices work without changes
-- ✅ `invoice_settings` is optional in all operations
+- ✅ `invoice_settings` is optional and auto-generated when not provided
 - ✅ No breaking changes to existing server actions
+- ✅ Frontend doesn't need any immediate changes
 
 ## 🚀 Usage
 
-### Creating Invoice with Settings
+### Creating Invoice with AUTOMATIC Settings (Default Behavior)
 
 ```typescript
 import { createInvoice } from '~/server/actions/invoices/invoices.action';
 
-const invoiceWithSettings = await createInvoice({
+// Invoice settings will be created automatically from organization data
+const invoice = await createInvoice({
+  client_organization_id: 'client_id',
+  agency_id: 'agency_id',
+  issue_date: new Date().toISOString(),
+  due_date: new Date().toISOString(),
+  status: 'draft',
+  subtotal_amount: 1000,
+  tax_amount: 100,
+  total_amount: 1100,
+  currency: 'USD',
+  notes: 'Monthly services',
+  invoice_items: [
+    {
+      description: 'Web Development',
+      quantity: 40,
+      unit_price: 25,
+      total_price: 1000,
+    }
+  ],
+  // NO invoice_settings provided - they will be created automatically!
+});
+
+console.log('Invoice created with automatic settings from organizations');
+```
+
+### Creating Invoice with MANUAL Settings (Override Behavior)
+
+```typescript
+// Provide invoice_settings to override automatic behavior
+const invoiceWithManualSettings = await createInvoice({
   client_organization_id: 'client_id',
   agency_id: 'agency_id',
   issue_date: new Date().toISOString(),
@@ -193,6 +235,48 @@ get(invoiceId: string): Promise<Invoice.Response>
 // Returns list with invoice_settings included for each invoice
 list(): Promise<{ data: Invoice.Response[], ... }>
 ```
+
+## 🤖 Automatic Settings Generation
+
+### How It Works
+
+When creating an invoice without providing `invoice_settings`, the system:
+
+1. **Queries Organization Data**: Gets basic info from `organizations` table for both agency and client
+2. **Fetches Billing Settings**: Looks for `billing_details` and `payment_details` in `organization_settings`
+3. **Parses JSON Data**: Extracts address, tax info, etc. from the settings JSON values
+4. **Creates Invoice Settings**: Automatically creates 2 records (agency + client) in `invoice_settings`
+5. **Graceful Fallback**: Uses organization name and defaults if billing data is missing
+
+### Data Mapping
+
+```typescript
+Organization Settings (JSON) → Invoice Settings (Table)
+{
+  "name": "Company LLC",           → name
+  "address": "123 Main St",        → address_1  
+  "address_1": "123 Main St",      → address_1 (preferred)
+  "address_2": "Suite 100",        → address_2
+  "city": "New York",              → city
+  "state": "NY",                   → state
+  "country": "United States",      → country
+  "postal_code": "12345",          → postal_code
+  "zip": "12345",                  → postal_code (fallback)
+  "tax_id": "12-3456789",          → tax_id_number
+  "tax_id_type": "EIN"             → tax_id_type
+}
+```
+
+### Fallback Strategy
+
+| Field | Primary Source | Fallback | Default |
+|-------|---------------|----------|---------|
+| `name` | `billing_details.name` | `organizations.name` | `'Organization Name'` |
+| `address_1` | `billing_details.address_1` | `billing_details.address` | `'Address not provided'` |
+| `country` | `billing_details.country` | - | `'United States'` |
+| `postal_code` | `billing_details.postal_code` | `billing_details.zip` | `'N/A'` |
+| `city` | `billing_details.city` | - | `'City not provided'` |
+| `tax_id_number` | `billing_details.tax_id_number` | `billing_details.tax_id` | `null` |
 
 ## 🛡️ Data Integrity
 
