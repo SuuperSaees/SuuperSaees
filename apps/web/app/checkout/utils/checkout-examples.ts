@@ -1,8 +1,8 @@
 /**
- * Ejemplo de uso del checkout compatible con invoices
+ * Example of using invoice-compatible checkout
  * 
- * Este archivo muestra cómo usar la nueva funcionalidad de checkout
- * que soporta tanto services como invoices.
+ * This file shows how to use the new checkout functionality
+ * that supports both services and invoices.
  */
 
 import { handleSubmitPayment } from './handle-submit-payment';
@@ -10,11 +10,11 @@ import { getInvoice } from '../../server/actions/invoices/invoices.action';
 import { Service } from '~/lib/services.types';
 import { Invoice } from '~/lib/invoice.types';
 
-// Ejemplo 1: Pago de Service (funcionalidad existente)
+// Example 1: Service Payment (existing functionality)
 async function payService(service: Service.Relationships.Billing.BillingService, formData: any) {
   try {
     const result = await handleSubmitPayment({
-      service, // Solo service, NO invoice
+      service, // Only service, NO invoice
       values: {
         fullName: formData.fullName,
         email: formData.email,
@@ -27,7 +27,7 @@ async function payService(service: Service.Relationships.Billing.BillingService,
         enterprise_name: formData.companyName,
         tax_code: formData.taxCode,
         discount_coupon: formData.couponCode,
-        manual_payment_info: formData.manualPaymentInfo, // Solo para pagos manuales
+        manual_payment_info: formData.manualPaymentInfo, // Only for manual payments
       },
       stripeId: 'acct_1234567890',
       paymentMethodId: 'pm_1234567890',
@@ -47,19 +47,19 @@ async function payService(service: Service.Relationships.Billing.BillingService,
   }
 }
 
-// Ejemplo 2: Pago de Invoice con Stripe
+// Example 2: Invoice Payment with Stripe
 async function payInvoiceWithStripe(invoiceId: string, formData: any) {
   try {
-    // Primero obtener la invoice
+    // First get the invoice
     const invoice = await getInvoice(invoiceId);
     
-    // Validar que la invoice tenga provider_id para Stripe
+    // Validate that the invoice has provider_id for Stripe
     if (!invoice.provider_id || invoice.provider_id.trim() === '') {
       throw new Error('Invoice cannot be paid with Stripe as it has no provider_id');
     }
 
     const result = await handleSubmitPayment({
-      invoice, // Solo invoice, NO service
+      invoice, // Only invoice, NO service
       values: {
         fullName: formData.fullName,
         email: formData.email,
@@ -90,14 +90,14 @@ async function payInvoiceWithStripe(invoiceId: string, formData: any) {
   }
 }
 
-// Ejemplo 3: Pago Manual de Invoice
+// Example 3: Manual Invoice Payment
 async function payInvoiceManually(invoiceId: string, formData: any) {
   try {
-    // Obtener la invoice
+    // Get the invoice
     const invoice = await getInvoice(invoiceId);
 
     const result = await handleSubmitPayment({
-      invoice, // Solo invoice, NO service
+      invoice, // Only invoice, NO service
       values: {
         fullName: formData.fullName,
         email: formData.email,
@@ -110,10 +110,10 @@ async function payInvoiceManually(invoiceId: string, formData: any) {
         enterprise_name: formData.companyName,
         tax_code: formData.taxCode,
         discount_coupon: formData.couponCode,
-        manual_payment_info: formData.manualPaymentInfo, // REQUERIDO para pagos manuales
+        manual_payment_info: formData.manualPaymentInfo, // REQUIRED for manual payments
       },
-      stripeId: '', // No necesario para pagos manuales
-      paymentMethodId: '', // No necesario para pagos manuales
+      stripeId: '', // Not needed for manual payments
+      paymentMethodId: '', // Not needed for manual payments
       coupon: formData.couponCode,
       selectedPaymentMethod: 'manual_payment',
       baseUrl: 'https://myapp.com',
@@ -129,7 +129,7 @@ async function payInvoiceManually(invoiceId: string, formData: any) {
   }
 }
 
-// Ejemplo 4: Componente React de Checkout Universal
+// Example 4: Universal Checkout React Component
 interface UniversalCheckoutProps {
   service?: Service.Relationships.Billing.BillingService;
   invoice?: Invoice.Response;
@@ -138,7 +138,7 @@ interface UniversalCheckoutProps {
 }
 
 export function UniversalCheckout({ service, invoice, onSuccess, onError }: UniversalCheckoutProps) {
-  // Validar props
+  // Validate props
   if ((!service && !invoice) || (service && invoice)) {
     throw new Error('Must provide either service or invoice, but not both');
   }
@@ -155,12 +155,12 @@ export function UniversalCheckout({ service, invoice, onSuccess, onError }: Univ
         name: service.name,
         price: service.price,
         currency: service.currency,
-        canPayWithStripe: true, // Los services siempre pueden pagarse con Stripe
+        canPayWithStripe: true, // Services can always be paid with Stripe
       };
 
   const handleSubmit = async (formData: any) => {
     try {
-      // Validar pago con Stripe para invoices
+      // Validate Stripe payment for invoices
       if (isInvoice && formData.selectedPaymentMethod === 'stripe' && !displayData.canPayWithStripe) {
         onError('This invoice cannot be paid with Stripe. Please use manual payment.');
         return;
@@ -198,7 +198,7 @@ export function UniversalCheckout({ service, invoice, onSuccess, onError }: Univ
         </div>
       )}
       
-      {/* Aquí iría tu formulario de checkout */}
+      {/* Here would go your checkout form */}
       {/* ... */}
     </div>
   );
