@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { createInvoice, updateInvoice } from "~/server/actions/invoices/invoices.action";
 import { Invoice } from "~/lib/invoice.types";
+import { InvoiceSettings } from "~/server/actions/invoices/type-guards";
 
 interface UseInvoiceApiActionsProps {
   mode: "create" | "update";
@@ -68,7 +69,8 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
     }, 
     agencyId: string, 
     isDraft: boolean, 
-    invoice?: Invoice.Response
+    invoice?: Invoice.Response,
+    billingInfo?: InvoiceSettings | null
   ) => {
     // Calculate totals
     const subtotal = data.lineItems.reduce(
@@ -81,6 +83,21 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
     const dueDate = new Date(data.dateOfIssue);
     dueDate.setDate(dueDate.getDate() + 30);
 
+    // Build invoice settings from billing info
+    const invoiceSettings = billingInfo?.information ? [{
+      invoice_id: "", // Will be set by the service
+      organization_id: agencyId,
+      name: billingInfo.information.company_name || "",
+      address_1: billingInfo.information.address_1,
+      address_2: billingInfo.information.address_2,
+      country: billingInfo.information.country,
+      postal_code: billingInfo.information.postal_code,
+      city: billingInfo.information.city,
+      state: billingInfo.information.state,
+      tax_id_type: billingInfo.information.tax_id_type,
+      tax_id_number: billingInfo.information.tax_id_number,
+    }] : null;
+
     return {
       ...(isUpdate && invoice ? { id: invoice.id } : {}),
       agency_id: agencyId,
@@ -92,7 +109,7 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
       total_amount: totalAmount,
       notes: data.notes ?? null,
       status: isDraft ? ("draft" as const) : ("issued" as const),
-              invoice_items: data.lineItems.map((item) => ({
+      invoice_items: data.lineItems.map((item) => ({
         invoice_id: isUpdate ? (invoice?.id ?? "") : "", 
         description: item.description,
         service_id: item.serviceId,
@@ -100,6 +117,7 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
         quantity: item.quantity,
         total_price: item.rate * item.quantity,
       })),
+      invoice_settings: invoiceSettings,
     };
   };
 

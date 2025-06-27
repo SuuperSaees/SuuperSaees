@@ -168,6 +168,11 @@
       "title": "Auto-add Invoice Notes",
       "description": "Automatically include a standard note on all new invoices."
     },
+    "noteContent": {
+      "title": "Note Content",
+      "description": "Default note content for automatic invoices",
+      "placeholder": "Enter default note content..."
+    },
     "billingInformation": {
       "title": "Billing Information",
       "description": "This information will be used to generate invoices for your clients.",
@@ -176,15 +181,18 @@
         "subtitle": "Basic details for your invoices",
         "companyName": {
           "label": "Company Name",
-          "placeholder": "Enter your company name"
+          "placeholder": "Enter your company name",
+          "description": "This will be shown in your invoices"
         },
         "taxId": {
           "label": "Tax ID / VAT Number",
-          "placeholder": "Enter tax identification"
+          "placeholder": "Enter tax identification",
+          "description": "Your business tax identification number"
         },
         "country": {
           "label": "Country",
-          "placeholder": "Select your country"
+          "placeholder": "Select your country",
+          "description": "Choose your business location"
         }
       },
       "businessAddress": {
@@ -192,19 +200,28 @@
         "subtitle": "Location details for billing",
         "streetAddress": {
           "label": "Street Address",
-          "placeholder": "Enter your business address"
+          "placeholder": "Enter your business address",
+          "description": "Your business street address"
+        },
+        "addressLine2": {
+          "label": "Address Line 2",
+          "placeholder": "Suite, apt, floor (optional)",
+          "description": "Apartment, suite, unit, building, floor, etc. (optional)"
         },
         "city": {
           "label": "City",
-          "placeholder": "City"
+          "placeholder": "City",
+          "description": "City where your business is located"
         },
         "stateProvince": {
           "label": "State / Province",
-          "placeholder": "State or Province"
+          "placeholder": "State or Province",
+          "description": "State or province (if applicable)"
         },
         "zipCode": {
           "label": "ZIP / Postal Code",
-          "placeholder": "ZIP Code"
+          "placeholder": "ZIP Code",
+          "description": "Your postal or ZIP code"
         }
       },
       "infoNote": {
