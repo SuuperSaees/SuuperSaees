@@ -1,8 +1,103 @@
 {
   "title": "Invoices",
+  "number": "Number",
+  "organization": "Organization",
+  "paymentMethod": "Payment method",
+  "status": "Status",
+  "createdAt": "Created at",
+  "actions": "Actions",
+  "search": "Search invoices...",
+  "empty": {
+    "title": "No invoices found",
+    "description": "Get started by creating your first invoice."
+  },
+  "paid": "Paid",
+  "issued": "Issued",
+  "partiallyPaid": "Partially paid",
+  "draft": "Draft",
+  "overdue": "Overdue",
+  "cancelled": "Cancelled",
+  "voided": "Voided",
+  "openMenu": "Open menu",
+  "download": "Download",
+  "markAsPaid": "Mark as paid",
+  "requestPaymentByEmail": "Request payment by email",
+  "getPaymentLink": "Get payment link",
+  "paymentLinkCopied": "Payment link copied!",
+  "view": "View",
+  "delete": "Delete",
+  "creation": {
+    "title": "New invoice",
+    "warning": {
+      "description": "Please set up your billing information before creating invoices.",
+      "link": "Go to settings"
+    },
+    "form": {
+      "information": {
+        "title": "Information",
+        "client": {
+          "label": "Client",
+          "placeholder": "Select a client"
+        },
+        "dateOfIssue": {
+          "label": "Date of issue",
+          "placeholder": "Select a date"
+        },
+        "paymentMethod": {
+          "label": "Payment method",
+          "placeholder": "Select a payment method"
+        },
+        "paymentReference": {
+          "label": "Payment reference",
+          "placeholder": "Enter a payment reference"
+        }
+      },
+      "items": {
+        "title": "Items",
+        "description": {
+          "label": "Description",
+          "placeholder": "Select a service"
+        },
+        "rate": {
+          "label": "Rate",
+          "placeholder": "Enter a rate"
+        },
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "Enter a quantity"
+        },
+        "lineTotal": {
+          "title": "Line total"
+        },
+        "total": {
+          "title": "Total"
+        },
+        "subtotal": {
+          "title": "Subtotal"
+        },
+        "add": "Add new line"
+      },
+      "notes": {
+        "title": "Notes",
+        "placeholder": "Write a note..."
+      },
+      "actions": {
+        "saveAsDraft": "Save as a draft",
+        "createInvoice": "Create invoice"
+      }
+    }
+  },
   "plan": {
     "title": "Plan",
     "nextInvoice": "Next invoice issue date "
+  },
+  "update": {
+    "title": "Edit invoice - {{number}}",
+    "form": {
+      "actions": {
+        "updateInvoice": "Save"
+      }
+    }
   },
   "total": {
     "title": "Invoice total",
@@ -36,6 +131,104 @@
         "placeholder": "Type 'cancel_subscription'",
         "cancelButton": "Cancel",
         "backButton": "Back"
+      }
+    }
+  },
+  "errors": {
+    "failedToCreateInvoice": "Failed to create invoice",
+    "failedToCreateInvoiceDraft": "Failed to save invoice as draft",
+    "failedToUpdateInvoice": "Failed to update invoice",
+    "failedToDeleteInvoice": "The invoice could not be deleted",
+    "failedToSendEmail": "Failed to send email"
+  },
+  "success": {
+    "invoiceCreated": "Invoice created successfully",
+    "invoiceDraftCreated": "Invoice saved as draft",
+    "invoiceUpdated": "Invoice updated successfully!",
+    "invoiceDeleted": "Invoice deleted successfully!",
+    "emailSent": "Email sent successfully!"
+  },
+  "loading": {
+    "updating": "Updating...",
+    "updatingInvoice": "Updating invoice...",
+    "updatingInvoiceStatus": "Updating invoice status...",
+    "deletingInvoice": "Deleting invoice...",
+    "sendingEmail": "Sending email..."
+  },
+  "settings": {
+    "invoiceManagement": {
+      "title": "Enable Invoice Generation",
+      "description": "Generate professional invoices for client transactions and access invoice management tools."
+    },
+    "requireCompleteAddress": {
+      "title": "Collect Full Address at Checkout",
+      "description": "Require complete billing address from clients. Disable for faster checkout with country-only collection."
+    },
+    "automaticInvoiceNote": {
+      "title": "Auto-add Invoice Notes",
+      "description": "Automatically include a standard note on all new invoices."
+    },
+    "noteContent": {
+      "title": "Note Content",
+      "description": "Default note content for automatic invoices",
+      "placeholder": "Enter default note content..."
+    },
+    "billingInformation": {
+      "title": "Billing Information",
+      "description": "This information will be used to generate invoices for your clients.",
+      "companyInformation": {
+        "title": "Company Information",
+        "subtitle": "Basic details for your invoices",
+        "companyName": {
+          "label": "Company Name",
+          "placeholder": "Enter your company name",
+          "description": "This will be shown in your invoices"
+        },
+        "taxId": {
+          "label": "Tax ID / VAT Number",
+          "placeholder": "Enter tax identification",
+          "description": "Your business tax identification number"
+        },
+        "country": {
+          "label": "Country",
+          "placeholder": "Select your country",
+          "description": "Choose your business location",
+          "searchPlaceholder": "Search countries...",
+          "emptyMessage": "No country found."
+        }
+      },
+      "businessAddress": {
+        "title": "Business Address",
+        "subtitle": "Location details for billing",
+        "streetAddress": {
+          "label": "Street Address",
+          "placeholder": "Enter your business address",
+          "description": "Your business street address"
+        },
+        "addressLine2": {
+          "label": "Address Line 2",
+          "placeholder": "Suite, apt, floor (optional)",
+          "description": "Apartment, suite, unit, building, floor, etc. (optional)"
+        },
+        "city": {
+          "label": "City",
+          "placeholder": "City",
+          "description": "City where your business is located"
+        },
+        "stateProvince": {
+          "label": "State / Province",
+          "placeholder": "State or Province",
+          "description": "State or province (if applicable)"
+        },
+        "zipCode": {
+          "label": "ZIP / Postal Code",
+          "placeholder": "ZIP Code",
+          "description": "Your postal or ZIP code"
+        }
+      },
+      "infoNote": {
+        "title": "Invoice Information",
+        "description": "This information will appear on all invoices generated for your clients. Make sure all details are accurate and up-to-date for professional billing."
       }
     }
   }

@@ -200,9 +200,10 @@ export type Database = {
           created_at: string
           id: number
           message: string
-          order_id: number
+          order_id: number | null
           preposition: string
           previous_value: string | null
+          reference_id: string | null
           temp_id: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
@@ -214,9 +215,10 @@ export type Database = {
           created_at?: string
           id?: number
           message: string
-          order_id: number
+          order_id?: number | null
           preposition: string
           previous_value?: string | null
+          reference_id?: string | null
           temp_id?: string | null
           type: Database["public"]["Enums"]["activity_type"]
           user_id: string
@@ -228,9 +230,10 @@ export type Database = {
           created_at?: string
           id?: number
           message?: string
-          order_id?: number
+          order_id?: number | null
           preposition?: string
           previous_value?: string | null
+          reference_id?: string | null
           temp_id?: string | null
           type?: Database["public"]["Enums"]["activity_type"]
           user_id?: string
@@ -1007,6 +1010,77 @@ export type Database = {
           },
         ]
       }
+      client_subscriptions: {
+        Row: {
+          active: boolean | null
+          billing_customer_id: string | null
+          billing_provider:
+            | Database["public"]["Enums"]["billing_provider"]
+            | null
+          billing_subscription_id: string | null
+          client_id: string
+          created_at: string
+          currency: string | null
+          days_used: number | null
+          deleted_on: string | null
+          id: string
+          period_ends_at: string | null
+          period_starts_at: string | null
+          status: string | null
+          trial_ends_at: string | null
+          trial_starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          billing_customer_id?: string | null
+          billing_provider?:
+            | Database["public"]["Enums"]["billing_provider"]
+            | null
+          billing_subscription_id?: string | null
+          client_id: string
+          created_at?: string
+          currency?: string | null
+          days_used?: number | null
+          deleted_on?: string | null
+          id?: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          status?: string | null
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          billing_customer_id?: string | null
+          billing_provider?:
+            | Database["public"]["Enums"]["billing_provider"]
+            | null
+          billing_subscription_id?: string | null
+          client_id?: string
+          created_at?: string
+          currency?: string | null
+          days_used?: number | null
+          deleted_on?: string | null
+          id?: string
+          period_ends_at?: string | null
+          period_starts_at?: string | null
+          status?: string | null
+          trial_ends_at?: string | null
+          trial_starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_subscriptions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           agency_id: string
@@ -1609,6 +1683,313 @@ export type Database = {
           },
         ]
       }
+      invoice_items: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          invoice_id: string
+          quantity: number
+          service_id: number | null
+          total_price: number
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          invoice_id: string
+          quantity?: number
+          service_id?: number | null
+          total_price: number
+          unit_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          service_id?: number | null
+          total_price?: number
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          invoice_id: string
+          notes: string | null
+          payment_method: Database["public"]["Enums"]["payment_methods"]
+          processed_at: string | null
+          processed_by: string | null
+          provider_charge_id: string | null
+          provider_payment_id: string | null
+          reference_number: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          payment_method: Database["public"]["Enums"]["payment_methods"]
+          processed_at?: string | null
+          processed_by?: string | null
+          provider_charge_id?: string | null
+          provider_payment_id?: string | null
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_methods"]
+          processed_at?: string | null
+          processed_by?: string | null
+          provider_charge_id?: string | null
+          provider_payment_id?: string | null
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_payments_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_settings: {
+        Row: {
+          address_1: string
+          address_2: string | null
+          city: string
+          country: string
+          created_at: string
+          deleted_on: string | null
+          id: string
+          invoice_id: string
+          name: string
+          organization_id: string
+          postal_code: string
+          state: string | null
+          tax_id_number: string | null
+          tax_id_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_1: string
+          address_2?: string | null
+          city: string
+          country: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          invoice_id: string
+          name: string
+          organization_id: string
+          postal_code: string
+          state?: string | null
+          tax_id_number?: string | null
+          tax_id_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_1?: string
+          address_2?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          invoice_id?: string
+          name?: string
+          organization_id?: string
+          postal_code?: string
+          state?: string | null
+          tax_id_number?: string | null
+          tax_id_type?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_settings_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoice_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          agency_id: string
+          checkout_url: string | null
+          client_organization_id: string
+          created_at: string | null
+          currency: string
+          deleted_on: string | null
+          due_date: string
+          id: string
+          issue_date: string
+          notes: string | null
+          number: string
+          provider_id: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal_amount: number
+          tax_amount: number | null
+          total_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id: string
+          checkout_url?: string | null
+          client_organization_id: string
+          created_at?: string | null
+          currency?: string
+          deleted_on?: string | null
+          due_date: string
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal_amount: number
+          tax_amount?: number | null
+          total_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string
+          checkout_url?: string | null
+          client_organization_id?: string
+          created_at?: string | null
+          currency?: string
+          deleted_on?: string | null
+          due_date?: string
+          id?: string
+          issue_date?: string
+          notes?: string | null
+          number?: string
+          provider_id?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal_amount?: number
+          tax_amount?: number | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoices_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "invoices_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_reads: {
         Row: {
           agency_id: string | null
@@ -2052,6 +2433,7 @@ export type Database = {
         Row: {
           agency_id: string
           brief_id: string | null
+          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -2073,6 +2455,7 @@ export type Database = {
         Insert: {
           agency_id: string
           brief_id?: string | null
+          brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
           customer_id: string
@@ -2094,6 +2477,7 @@ export type Database = {
         Update: {
           agency_id?: string
           brief_id?: string | null
+          brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
           customer_id?: string
@@ -2680,6 +3064,7 @@ export type Database = {
           created_at: string
           deleted_on: string | null
           id: string
+          metadata: Json | null
           provider: string | null
           provider_id: string | null
         }
@@ -2694,6 +3079,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          metadata?: Json | null
           provider?: string | null
           provider_id?: string | null
         }
@@ -2708,6 +3094,7 @@ export type Database = {
           created_at?: string
           deleted_on?: string | null
           id?: string
+          metadata?: Json | null
           provider?: string | null
           provider_id?: string | null
         }
@@ -3371,6 +3758,7 @@ export type Database = {
         Returns: {
           agency_id: string
           brief_id: string | null
+          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -3562,8 +3950,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: string; brief_id: string }
           | { service_id: number; brief_id: string }
+          | { service_id: string; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
@@ -3639,6 +4027,7 @@ export type Database = {
         Returns: {
           agency_id: string
           brief_id: string | null
+          brief_ids: string[] | null
           client_organization_id: string
           created_at: string
           customer_id: string
@@ -3661,29 +4050,6 @@ export type Database = {
       update_user_credentials: {
         Args: { p_domain: string; p_email: string; p_password: string }
         Returns: undefined
-      }
-      upsert_order: {
-        Args: {
-          target_account_id: string
-          target_customer_id: string
-          target_order_id: string
-          status: Database["public"]["Enums"]["payment_status"]
-          billing_provider: Database["public"]["Enums"]["billing_provider"]
-          total_amount: number
-          currency: string
-          line_items: Json
-        }
-        Returns: {
-          account_id: string
-          billing_customer_id: number
-          billing_provider: Database["public"]["Enums"]["billing_provider"]
-          created_at: string
-          currency: string
-          id: string
-          status: Database["public"]["Enums"]["payment_status"]
-          total_amount: number
-          updated_at: string
-        }
       }
       upsert_subscription: {
         Args: {
@@ -3748,6 +4114,7 @@ export type Database = {
         | "assigned_to"
         | "task"
         | "annotation"
+        | "invoice"
       annotations_status: "active" | "completed" | "draft"
       app_permissions:
         | "roles.manage"
@@ -3778,6 +4145,10 @@ export type Database = {
         | "embeds.read"
         | "embeds.manage"
         | "embeds.delete"
+        | "invoices.write"
+        | "invoices.read"
+        | "invoices.manage"
+        | "invoices.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"
@@ -3806,6 +4177,14 @@ export type Database = {
         | "image"
         | "video"
       file_types: "image" | "video" | "pdf" | "fig"
+      invoice_status:
+        | "draft"
+        | "issued"
+        | "paid"
+        | "partially_paid"
+        | "overdue"
+        | "cancelled"
+        | "voided"
       message_category: "chat_message" | "annotation"
       messages_types: "public" | "internal_agency"
       notification_channel: "in_app" | "email"
@@ -3845,7 +4224,10 @@ export type Database = {
         | "catalog_sourcing_china_url"
         | "calendar_url"
         | "notification_sound"
-      payment_status: "pending" | "succeeded" | "failed"
+        | "payment_details"
+        | "billing_details"
+      payment_methods: "stripe" | "manual" | "bank_transfer" | "cash"
+      payment_status: "pending" | "succeeded" | "failed" | "refunded"
       plugin_status: "installed" | "uninstalled" | "failed" | "in progress"
       plugin_type: "tool" | "internal" | "external" | "integration"
       priority_types: "high" | "medium" | "low"
@@ -4441,6 +4823,7 @@ export const Constants = {
         "assigned_to",
         "task",
         "annotation",
+        "invoice",
       ],
       annotations_status: ["active", "completed", "draft"],
       app_permissions: [
@@ -4472,6 +4855,10 @@ export const Constants = {
         "embeds.read",
         "embeds.manage",
         "embeds.delete",
+        "invoices.write",
+        "invoices.read",
+        "invoices.manage",
+        "invoices.delete",
       ],
       billing_provider: [
         "stripe",
@@ -4503,6 +4890,15 @@ export const Constants = {
         "video",
       ],
       file_types: ["image", "video", "pdf", "fig"],
+      invoice_status: [
+        "draft",
+        "issued",
+        "paid",
+        "partially_paid",
+        "overdue",
+        "cancelled",
+        "voided",
+      ],
       message_category: ["chat_message", "annotation"],
       messages_types: ["public", "internal_agency"],
       notification_channel: ["in_app", "email"],
@@ -4543,8 +4939,11 @@ export const Constants = {
         "catalog_sourcing_china_url",
         "calendar_url",
         "notification_sound",
+        "payment_details",
+        "billing_details",
       ],
-      payment_status: ["pending", "succeeded", "failed"],
+      payment_methods: ["stripe", "manual", "bank_transfer", "cash"],
+      payment_status: ["pending", "succeeded", "failed", "refunded"],
       plugin_status: ["installed", "uninstalled", "failed", "in progress"],
       plugin_type: ["tool", "internal", "external", "integration"],
       priority_types: ["high", "medium", "low"],

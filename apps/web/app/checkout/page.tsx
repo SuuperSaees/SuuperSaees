@@ -12,6 +12,8 @@ import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/a
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import EmptyPaymentMethods from './components/empty-payment-methods';
 import ErrorDecodedToken from './components/error-decoded-token';
+import { getInvoice } from '~/server/actions/invoices/invoices.action';
+import { Invoice } from '~/lib/invoice.types';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -40,6 +42,28 @@ async function ServiceCheckoutPage({
   const organizationSettings = await getOrganizationSettingsByOrganizationId(
     tokendecoded?.organization_id ?? '',
     true,
+      [
+        'theme_color',
+        'logo_url',
+        'sidebar_background_color',
+        'language',
+        'favicon_url',
+        'sender_name',
+        'sender_domain',
+        'sender_email',
+        'auth_card_background_color',
+        'auth_section_background_color',
+        'dashboard_url',
+        'parteners_url',
+        'catalog_product_wholesale_url',
+        'catalog_product_private_label_url',
+        'training_url',
+        'catalog_sourcing_china_url',
+        'catalog_product_url',
+        'calendar_url',
+        'auth_background_url',
+        'payment_details',
+      ],
   );
 
   const logoUrl = organizationSettings.find(
@@ -47,6 +71,9 @@ async function ServiceCheckoutPage({
   )?.value;
   const sidebarBackgroundColor = organizationSettings.find(
     (setting) => setting.key === 'sidebar_background_color',
+  )?.value;
+  const paymentDetails = organizationSettings.find(
+    (setting) => setting.key === 'payment_details',
   )?.value;
 
   const paymentMethods = await getPaymentsMethods(tokendecoded?.primary_owner_id ?? '', undefined, true).catch((error) => {
@@ -57,10 +84,30 @@ async function ServiceCheckoutPage({
     };
   });
 
-  const service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
+  if(paymentDetails) {
+    paymentMethods.paymentMethods = [
+      ...paymentMethods.paymentMethods,
+      {
+        id: 'payment_details',
+        name: 'manual_payment',
+        icon: 'paymentswaydirect',
+        description: paymentDetails,
+      } as never,
+    ];
+  }
+  let service = null;
+  let invoice = null;
+  if (tokendecoded?.service.id) {
+  service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
     console.error('Error fetching service:', error);
     return null;
   });
+} else if (tokendecoded?.invoice?.id) {
+  invoice = await getInvoice(tokendecoded?.invoice.id ?? '').catch((error) => {
+    console.error('Error fetching invoice:', error);
+    return null;
+  });
+}
 
   let accountId = tokendecoded?.account_id ?? '';
 
@@ -88,11 +135,19 @@ async function ServiceCheckoutPage({
                 service={
                   service as Service.Relationships.Billing.BillingService
                 }
+                invoice={invoice as Invoice.Response}
                 stripeId={accountId}
-                organizationId={tokendecoded?.organization_id ?? ''}
                 logoUrl={logoUrl ?? suuperLogo ?? ''}
                 sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
                 paymentMethods={paymentMethods.paymentMethods ?? []}
+                manualPayment={
+                  {
+                    id: 'payment_details',
+                    name: 'manual_payment',
+                    icon: 'paymentswaydirect',
+                    description: paymentDetails,
+                  } as never
+                }
           />
             )
           }

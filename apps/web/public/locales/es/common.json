@@ -213,5 +213,6 @@
     "saving": "Guardando",
     "cancel": "Cancelar",
     "save": "Guardar"
-  }
+  },
+  "invoicesName": "Facturas"
 }

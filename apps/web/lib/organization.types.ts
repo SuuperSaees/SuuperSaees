@@ -17,6 +17,13 @@ export namespace Organization {
       organization_client_id: string;
     }[] | null;
     owner?: User.Response | null;
+    accounts?: {
+      email: string;
+      name: string;
+      user_settings: {
+        name: string;
+      }[] | null;
+    } | null;
   };
   export type TypeWithRelations = Type & {
     settings: {

@@ -104,6 +104,23 @@
       "footer": "You are receiving this email because you are a participant in this chat. If you don't want to receive these notifications, you can adjust your notification settings.",
       "at": "at"
   },
+  "requestPayment": {
+    "subject": "Payment requested for invoice ${invoiceNumber}",
+    "body": "We hope this message finds you well. We would like to remind you that invoice ${invoiceNumber} for ${clientName} in the amount of ${amount} is pending payment.",
+    "greeting": "Hello ${clientName}!",
+    "farewell": "Best regards,",
+    "buttonText": "Pay Now",
+    "footer": "This email was sent to ${toEmail}. If you have any questions, please contact us.",
+    "at": "at"
+  },
+  "paymentReceived": {
+    "subject": "Payment received for invoice ${invoiceNumber}",
+    "body": "We are pleased to confirm that we have received your payment of ${amount} for invoice ${invoiceNumber}. Thank you for your prompt payment.",
+    "greeting": "Hello ${clientName}!",
+    "farewell": "Thank you for your business.",
+    "footer": "This email was sent to ${toEmail}. If you have any questions, please contact us.",
+    "at": "at"
+  },
   "clientUpdateEmail": {
     "subject": "Update your email",
     "body": "Update your email",

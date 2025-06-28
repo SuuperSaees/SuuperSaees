@@ -36,6 +36,13 @@
   "step_service_price": "Configuración de precios",
   "checkout": {
     "pay": "Pagar",
+    "manualPayment": {
+      "title": "Instrucciones de Pago Manual",
+      "description": "Puedes pagar el servicio más tarde. Por favor contáctanos para finalizar el pago.",
+      "contactUs": "Contáctanos",
+      "additionalInfo": "Información adicional",
+      "additionalInfoDescription": "Proporciona cualquier información adicional que pueda ser útil para procesar tu pago."
+    },
     "trial": {
       "perDay": "por día",
       "perWeek": "por semana",

@@ -12,7 +12,6 @@ import {
   useElements,
   useStripe,
 } from '@stripe/react-stripe-js';
-import { DollarSignIcon } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -30,187 +29,30 @@ import {
 import { Input } from '@kit/ui/input';
 import { Spinner } from '@kit/ui/spinner';
 
-import { StripeIcon } from '~/components/icons/icons';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
 import { Service } from '~/lib/services.types';
 
-import { handleSubmitPayment } from '../utils/billing-handlers';
+import { handleSubmitPayment } from '../utils/handle-submit-payment';
 import { SideInfo } from './side-information';
 import { UserInfo } from './user-info';
-
-const paymentMethodsIcons = {
-  mercadopago: (
-    <div>
-      <img
-        src="images/checkout/mercadopago.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  stripedirect: (
-    <div>
-      <StripeIcon className="h-4 w-4" />
-    </div>
-  ),
-  wompidirect: (
-    <div>
-      <img
-        src="images/checkout/wompi.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  epaycodirect: (
-    <div>
-      <img
-        src="images/checkout/epayco.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  payudirect: (
-    <div>
-      <img
-        src="images/checkout/payu.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  placetopay: (
-    <div>
-      <img
-        src="images/checkout/placetopay.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  openpaydirect: (
-    <div>
-      <img
-        src="images/checkout/openpay.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  payucodirect: (
-    <div>
-      <DollarSignIcon className="h-4 w-4" />
-    </div>
-  ),
-  placetopaydirect: (
-    <div>
-      <DollarSignIcon className="h-4 w-4" />
-    </div>
-  ),
-  paymentswaydirect: (
-    <div>
-      <img
-        src="images/checkout/paymentssway.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  dlocalgodirect: (
-    <div>
-      <img
-        src="images/checkout/dlocal.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-  palommadirect: (
-    <div>
-      <DollarSignIcon className="h-4 w-4" />
-    </div>
-  ),
-  coinkdirect: (
-    <div>
-      <DollarSignIcon className="h-4 w-4" />
-    </div>
-  ),
-  payzendirect: (
-    <div>
-      <DollarSignIcon className="h-4 w-4" />
-    </div>
-  ),
-  stripe: (
-    <div>
-      <img
-        src="images/checkout/stripe.png"
-        alt="Stripe"
-        style={{
-          minWidth: '60px',
-          minHeight: '25px',
-          maxHeight: '25px',
-          objectFit: 'contain',
-        }}
-      />
-    </div>
-  ),
-};
+import { Invoice } from '~/lib/invoice.types';
+import { paymentMethodsIcons } from '../utils/payment-methods-icons';
 
 const BillingForm: React.FC<{
-  service: Service.Relationships.Billing.BillingService;
+  service?: Service.Relationships.Billing.BillingService;
+  invoice?: Invoice.Response;
   stripeId: string;
-  organizationId: string;
   logoUrl: string;
   sidebarBackgroundColor: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
+  manualPayment?: BillingAccounts.PaymentMethod;
 }> = ({
   service,
   stripeId,
-  organizationId,
   logoUrl,
   sidebarBackgroundColor,
   paymentMethods,
+  manualPayment,
 }) => {
   const { t } = useTranslation('services');
   const router = useRouter();
@@ -259,6 +101,7 @@ const BillingForm: React.FC<{
     card_cvv: z
       .string()
       .regex(/^\d{3,4}$/, t('checkout.validation.cardCvvRequired')),
+    manual_payment_info: z.string().optional(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -279,6 +122,7 @@ const BillingForm: React.FC<{
       card_number: '',
       card_expiration_date: '',
       card_cvv: '',
+      manual_payment_info: '',
     },
   });
 
@@ -306,9 +150,9 @@ const BillingForm: React.FC<{
       return;
     }
 
-    if (selectedPaymentMethod !== 'stripe') {
-      return;
-    }
+    let paymentMethodId = '';
+
+    if (selectedPaymentMethod === 'stripe') {
 
     const cardNumberElement = elements.getElement(CardNumberElement);
 
@@ -343,14 +187,15 @@ const BillingForm: React.FC<{
     if (!paymentMethod?.id) {
       throw new Error(t('checkout.error.paymentFailed'));
     }
+    paymentMethodId = paymentMethod.id;
+    }
 
     const { success, error, accountAlreadyExists, data } =
       await handleSubmitPayment({
         service,
         values: form.getValues(),
         stripeId,
-        organizationId,
-        paymentMethodId: paymentMethod.id,
+        paymentMethodId: paymentMethodId,
         coupon: form.getValues('discount_coupon'),
         quantity: quantity,
         selectedPaymentMethod: selectedPaymentMethod,
@@ -377,7 +222,6 @@ const BillingForm: React.FC<{
         );
       }
 
-    return paymentMethod;
   };
 
   async function onSubmit() {
@@ -446,7 +290,7 @@ const BillingForm: React.FC<{
                       ))}
                     </div>
                   </div>
-                  <div className="mt-6 flex w-full flex-col gap-6">
+                  {selectedPaymentMethod !== 'manual_payment' ? (<div className="mt-6 flex w-full flex-col gap-6">
                     {/* Nombre en la tarjeta */}
                     <div className="w-full flex-col gap-1.5">
                       <FormField
@@ -648,7 +492,50 @@ const BillingForm: React.FC<{
                         )}
                       </div>
                     </div>
-                  </div>
+                  </div>) :
+                  
+                    (<div className="mt-6 space-y-6">
+                      {/* Información de pago manual */}
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <h3 className="font-inter mb-3 text-lg font-semibold text-gray-900">
+                          {t('checkout.manualPayment.title', 'Instrucciones de Pago Manual')}
+                        </h3>
+                        <div className="rounded-md bg-white p-3">
+                          <div 
+                            className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap"
+                            dangerouslySetInnerHTML={{ 
+                              __html: manualPayment?.description?.replace(/\n/g, '<br>') ?? ''
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Field for additional user information */}
+                      <div className="w-full">
+                        <FormField
+                          name="manual_payment_info"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem className="w-full">
+                              <CustomFormLabel
+                                label={t('checkout.manualPayment.additionalInfo', 'Información Adicional')}
+                                required={false}
+                                textSize="text-[14px]"
+                                textColor="text-[#747476]"
+                              />
+                              <FormControl>
+                                <textarea
+                                  className="w-full min-h-[100px] rounded-lg border border-gray-300 px-3.5 py-2.5 resize-vertical"
+                                  {...field}
+                                  placeholder={t('checkout.manualPayment.placeholder', 'Ingresa cualquier información adicional sobre tu pago, número de transacción, comentarios, etc.')}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>)}
                 </>
                 <div className="mt-8">
                   <ThemedButton

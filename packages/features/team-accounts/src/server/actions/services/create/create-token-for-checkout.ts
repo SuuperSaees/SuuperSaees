@@ -2,6 +2,7 @@
 
 import { BillingAccounts } from '../../../../../../../../apps/web/lib/billing-accounts.types';
 import { Service } from '../../../../../../../../apps/web/lib/services.types';
+import { Invoice } from '../../../../../../../../apps/web/lib/invoice.types';
 import { createToken } from '../../../../../../../tokens/src/create-token';
 
 
@@ -9,6 +10,7 @@ export const createUrlForCheckout = async ({
   stripeId,
   priceId,
   service,
+  invoice,
   organizationId,
   paymentMethods,
   baseUrl,
@@ -16,7 +18,8 @@ export const createUrlForCheckout = async ({
 }: {
   stripeId?: string;
   priceId?: string;
-  service: Service.Relationships.Billing.BillingService | Service.Type;
+  service?: Service.Relationships.Billing.BillingService | Service.Type;
+  invoice?: Invoice.Type;
   organizationId: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
   baseUrl: string;
@@ -24,11 +27,12 @@ export const createUrlForCheckout = async ({
 }) => {
   try {
     // Validate input parameters
-    if (!service || !organizationId) {
+    if ((!service && !invoice) || !organizationId) {
       throw new Error(
         'Missing required parameters: ' +
           JSON.stringify({
             hasService: !!service,
+            hasInvoice: !!invoice,
             hasOrgId: !!organizationId,
           }),
       );
@@ -40,7 +44,8 @@ export const createUrlForCheckout = async ({
       token = await createToken({
         account_id: stripeId ?? '',
         price_id: priceId ?? '',
-        service: service,
+        service: service as NonNullable<typeof service>,
+        invoice: invoice,
         expires_at: new Date(),
         organization_id: organizationId,
         payment_methods: paymentMethods ?? [],

@@ -1,0 +1,1 @@
+CREATE TRIGGER checkouts_insert AFTER INSERT ON public.checkouts FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('http://host.docker.internal:3000/api/db/webhook', 'POST', '{"Content-type":"application/json","X-Supabase-Event-Signature":"WEBHOOKSECRET"}', '{}', '5000');

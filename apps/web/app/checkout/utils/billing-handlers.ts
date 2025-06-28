@@ -1,15 +1,12 @@
 'use server';
 
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
-
-
-
 import { Service } from '~/lib/services.types';
+import { Invoice } from '~/lib/invoice.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
-import { getUserByEmail } from '~/team-accounts/src/server/actions/clients/get/get-clients';
-import { createSession } from '~/team-accounts/src/server/actions/sessions/create/create-sessions';
 import { TreliCredentials, CredentialsCrypto, EncryptedCredentials } from '~/utils/credentials-crypto';
-
+import { createCheckout } from '../../server/actions/checkouts/checkouts.action';
+import { processManualPayment } from '../../server/actions/invoice-payments/invoice-payments.action';
 
 type ValuesProps = {
   fullName: string;
@@ -27,25 +24,13 @@ type ValuesProps = {
   card_number?: string;
   card_expiration_date?: string;
   card_cvv?: string;
-};
-
-type HandlePaymentProps = {
-  service: Service.Relationships.Billing.BillingService;
-  values: ValuesProps;
-  stripeId: string;
-  organizationId: string;
-  paymentMethodId: string;
-  coupon: string;
-  quantity?: number;
-  selectedPaymentMethod: string;
-  baseUrl: string;
+  manual_payment_info?: string;
 };
 
 type HandlePaymentStripeProps = {
   service: Service.Relationships.Billing.BillingService;
   values: ValuesProps;
   stripeId: string;
-  organizationId: string;
   paymentMethodId: string;
   coupon: string;
   sessionId: string;
@@ -60,7 +45,7 @@ const calculateTrialDays = (service: Service.Relationships.Billing.BillingServic
   }
 
   const duration = service.test_period_duration;
-  const unit = service.test_period_duration_unit_of_measurement?.toLowerCase() || '';
+  const unit = service.test_period_duration_unit_of_measurement?.toLowerCase() ?? '';
 
   if (!unit) return 0;
 
@@ -91,7 +76,7 @@ export const handleRecurringPayment = async ({
   selectedPaymentMethod,
   baseUrl,
 }: HandlePaymentStripeProps) => {
-  // heree manage payment method
+  // here manage payment method
   if (selectedPaymentMethod === 'stripe') {
     const res = await fetch(`${baseUrl}/api/stripe/subscription-payment`, {
       method: 'POST',
@@ -119,8 +104,27 @@ export const handleRecurringPayment = async ({
       throw new Error(data.error.message);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return data.clientSecret;
-  } else {
+  } else if(selectedPaymentMethod === 'manual_payment') {
+    try {
+      // Solo crear checkout con servicio - el webhook se encargará del resto
+      const checkout = await createCheckout({
+        provider: 'suuper',
+        provider_id: sessionId,
+        service_id: service.id,
+      });
+
+      return {
+        success: true,
+        checkout: checkout,
+        message: 'Manual payment checkout created successfully',
+      };
+    } catch (error) {
+      console.error('Error creating manual payment checkout:', error);
+      throw new Error(`Failed to create manual payment checkout: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  } else  {
     // here manage payment method treli
     const client = getSupabaseServerComponentClient({
       admin: true,
@@ -279,7 +283,26 @@ export const handleOneTimePayment = async ({
       throw new Error(data.error.message);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return data.clientSecret;
+  } else if(selectedPaymentMethod === 'manual_payment') {
+    try {
+      // Solo crear checkout con servicio - el webhook se encargará del resto
+      const checkout = await createCheckout({
+        provider: 'suuper',
+        provider_id: sessionId,
+        service_id: service.id,
+      });
+
+      return {
+        success: true,
+        checkout: checkout,
+        message: 'Manual payment checkout created successfully',
+      };
+    } catch (error) {
+      console.error('Error creating manual payment checkout:', error);
+      throw new Error(`Failed to create manual payment checkout: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   } else {
     // here manage payment method treli
     const client = getSupabaseServerComponentClient({
@@ -359,8 +382,8 @@ export const handleOneTimePayment = async ({
         // Only include card details if not using Mercado Pago
         ...(selectedPaymentMethod !== 'mercadopago' && {
           cardNumber: values.card_number,
-          month: values.card_expiration_date.split('/')[0],
-          year: values.card_expiration_date.split('/')[1],
+          month: values.card_expiration_date?.split('/')[0],
+          year: values.card_expiration_date?.split('/')[1],
           cardCvc: values.card_cvv,
         }),
       },
@@ -389,76 +412,84 @@ export const handleOneTimePayment = async ({
 
     const dataSubscriptionPlan = await responseSubscriptionPlan.clone().json();
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return dataSubscriptionPlan;
   }
 };
 
-export const handleSubmitPayment = async ({
-  service,
+type HandleInvoicePaymentProps = {
+  invoice: Invoice.Response;
+  values: ValuesProps;
+  stripeId: string;
+  paymentMethodId: string;
+  coupon: string;
+  sessionId: string;
+  selectedPaymentMethod: string;
+  baseUrl: string;
+};
+
+export const handleInvoicePayment = async ({
+  invoice,
   values,
   stripeId,
-  organizationId,
   paymentMethodId,
   coupon,
-  quantity,
+  sessionId,
   selectedPaymentMethod,
   baseUrl,
-}: HandlePaymentProps) => {
-  try {
-    const sessionCreated = await createSession({
-      client_address: values.address,
-      client_city: values.city,
-      client_country: values.country,
-      client_email: values.email,
-      client_name: values.fullName,
-      client_state: values.state_province_region,
-      client_postal_code: values.postal_code,
-      provider: 'suuper',
-      provider_id: null,
+}: HandleInvoicePaymentProps) => {
+  // Validar que la invoice tenga provider_id si el método de pago es stripe
+  if (selectedPaymentMethod === 'stripe') {
+    if (!invoice.provider_id || invoice.provider_id.trim() === '') {
+      throw new Error('Invoice cannot be paid with Stripe as it has no provider_id');
+    }
+
+    const res = await fetch(`${baseUrl}/api/stripe/invoice-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        invoiceId: invoice.id,
+        stripeInvoiceId: invoice.provider_id,
+        email: values.email,
+        accountId: stripeId,
+        paymentMethodId,
+        couponId: coupon,
+        sessionId: sessionId,
+      }),
     });
 
-    const responseRecurringOrOneTimePayment = service.recurring_subscription
-      ? await handleRecurringPayment({
-          service,
-          values,
-          stripeId,
-          organizationId,
-          paymentMethodId,
-          coupon,
-          sessionId: sessionCreated?.id ?? '',
-          selectedPaymentMethod,
-          baseUrl,
-        })
-      : await handleOneTimePayment({
-          service,
-          values,
-          stripeId,
-          organizationId,
-          paymentMethodId,
-          coupon,
-          sessionId: sessionCreated?.id ?? '',
-          quantity,
-          selectedPaymentMethod,
-          baseUrl,
-        });
+    const data = await res.clone().json();
 
-    const userAlreadyExists = await getUserByEmail(values.email, true);
+    if (data.error) {
+      console.error(data.error.message);
+      throw new Error(data.error.message);
+    }
 
-    const accountAlreadyExists = userAlreadyExists?.userData?.id ? true : false;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return data;
+  } else if (selectedPaymentMethod === 'manual_payment') {
+    try {
+      // Procesar pago manual para la invoice
+      const payment = await processManualPayment(invoice.id, {
+        amount: invoice.total_amount ?? 0,
+        currency: invoice.currency ?? 'USD',
+        paymentMethod: 'manual',
+        notes: values.manual_payment_info,
+        referenceNumber: sessionId,
+      });
 
-    return {
-      success: true,
-      error: null,
-      accountAlreadyExists,
-      data: {
-        paymentUrl: responseRecurringOrOneTimePayment?.payment_url,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : 'Payment processing failed',
-    };
+      return {
+        success: true,
+        payment: payment,
+        message: 'Manual payment processed successfully for invoice',
+      };
+    } catch (error) {
+      console.error('Error processing manual payment for invoice:', error);
+      throw new Error(`Failed to process manual payment for invoice: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  } else {
+    throw new Error(`Payment method ${selectedPaymentMethod} not supported for invoice payments`);
   }
 };

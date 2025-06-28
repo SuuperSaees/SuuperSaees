@@ -105,6 +105,23 @@
       "footer": "Estás recibiendo este correo porque eres participante de este chat. Si no deseas recibir estas notificaciones, puedes ajustar tu configuración de notificaciones.",
       "at": "en"
   },
+  "requestPayment": {
+    "subject": "Solicitud de pago para la factura ${invoiceNumber}",
+    "body": "Esperamos que este mensaje te encuentre bien. Queremos recordarte que la factura ${invoiceNumber} para ${clientName} por el monto de ${amount} está pendiente de pago.",
+    "greeting": "¡Hola ${clientName}!",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Pagar Ahora",
+    "footer": "Este correo fue enviado a ${toEmail}. Si tienes alguna pregunta, por favor contáctanos.",
+    "at": "de"
+  },
+  "paymentReceived": {
+    "subject": "Pago recibido para la factura ${invoiceNumber}",
+    "body": "Nos complace confirmar que hemos recibido tu pago de ${amount} para la factura ${invoiceNumber}. Gracias por tu pronto pago.",
+    "greeting": "¡Hola ${clientName}!",
+    "farewell": "Saludos cordiales,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si tienes alguna pregunta, por favor contáctanos.",
+    "at": "de"
+  },
   "clientUpdateEmail": {
     "subject": "Actualiza tu correo",
     "body": "Actualiza tu correo",

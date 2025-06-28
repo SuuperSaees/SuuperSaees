@@ -221,3 +221,183 @@ graph TD
    - Use Stripe Dashboard for supervision.
    - Implement detailed event logging.
   
+
+# Invoice Management System
+
+## Automatic Invoice Creation via Stripe Webhooks
+
+```mermaid
+sequenceDiagram
+    participant Stripe
+    participant Webhook
+    participant Database
+    participant InvoiceService
+    participant NotificationService
+
+    Stripe->>Webhook: customer.subscription.created
+    activate Webhook
+    Webhook->>Database: Create client_subscriptions record
+    Note over Database: Store billing_customer_id<br/>billing_subscription_id<br/>billing_provider: 'stripe'
+    Database-->>Webhook: Subscription created
+    deactivate Webhook
+
+    Stripe->>Webhook: invoice.created
+    activate Webhook
+    Webhook->>Database: Query client_subscriptions by billing_customer_id
+    Database-->>Webhook: Return client info
+    Webhook->>InvoiceService: Create invoice with Stripe data
+    activate InvoiceService
+    InvoiceService->>Database: Insert into invoices table
+    Note over Database: status: 'issued'<br/>provider_id: stripe_invoice_id<br/>checkout_url: stripe_hosted_url
+    InvoiceService->>Database: Insert invoice_items
+    InvoiceService->>Database: Insert activity record
+    Database-->>InvoiceService: Invoice created
+    InvoiceService->>NotificationService: Send invoice notification
+    InvoiceService-->>Webhook: Invoice processed
+    deactivate InvoiceService
+    deactivate Webhook
+
+    Stripe->>Webhook: invoice.payment_succeeded
+    activate Webhook
+    Webhook->>Database: Update invoice status to 'paid'
+    Webhook->>Database: Insert invoice_payments record
+    Note over Database: payment_method: 'stripe'<br/>status: 'completed'<br/>provider_payment_id
+    Webhook->>Database: Insert activity record
+    Database-->>Webhook: Payment recorded
+    deactivate Webhook
+```
+
+## Manual Invoice Creation with Stripe Integration
+
+```mermaid
+sequenceDiagram
+    participant Agency
+    participant Platform
+    participant Database
+    participant StripeAPI
+    participant Client
+
+    Agency->>Platform: Create new invoice
+    activate Platform
+    Platform->>Database: Insert invoice (status: 'draft')
+    Platform->>Database: Insert invoice_items
+    Database-->>Platform: Invoice created
+    Platform-->>Agency: Show invoice draft
+    deactivate Platform
+
+    Agency->>Platform: Issue invoice
+    activate Platform
+    Platform->>Database: Update invoice status to 'issued'
+    
+    alt Agency has Stripe connected
+        Platform->>Database: Check if client has billing_customer_id
+        alt Client has Stripe customer
+            Platform->>StripeAPI: Create Stripe invoice
+            activate StripeAPI
+            StripeAPI-->>Platform: Return invoice with hosted URL
+            deactivate StripeAPI
+            Platform->>Database: Update provider_id and checkout_url
+        else Client doesn't have Stripe customer
+            Platform->>StripeAPI: Create Stripe customer
+            activate StripeAPI
+            StripeAPI-->>Platform: Return customer_id
+            deactivate StripeAPI
+            Platform->>Database: Update client billing_customer_id
+            Platform->>StripeAPI: Create Stripe invoice
+            activate StripeAPI
+            StripeAPI-->>Platform: Return invoice with hosted URL
+            deactivate StripeAPI
+            Platform->>Database: Update provider_id and checkout_url
+        end
+    end
+    
+    Platform->>Database: Insert activity record
+    Platform->>Client: Send invoice notification
+    Platform-->>Agency: Invoice issued successfully
+    deactivate Platform
+```
+
+## Manual Payment Recording
+
+```mermaid
+sequenceDiagram
+    participant Agency
+    participant Platform
+    participant Database
+    participant NotificationService
+
+    Agency->>Platform: Record manual payment
+    activate Platform
+    Platform->>Database: Insert invoice_payments record
+    Note over Database: payment_method: 'manual'/'bank_transfer'/'cash'<br/>status: 'completed'<br/>reference_number<br/>processed_by: agency_user_id
+    
+    Platform->>Database: Calculate total payments for invoice
+    Database-->>Platform: Return payment total
+    
+    alt Full payment received
+        Platform->>Database: Update invoice status to 'paid'
+    else Partial payment received
+        Platform->>Database: Update invoice status to 'partially_paid'
+    end
+    
+    Platform->>Database: Insert activity record
+    Platform->>NotificationService: Send payment confirmation
+    Platform-->>Agency: Payment recorded successfully
+    deactivate Platform
+```
+
+## Invoice Status Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: Create invoice
+    draft --> issued: Issue invoice
+    draft --> cancelled: Cancel draft
+    
+    issued --> paid: Full payment received
+    issued --> partially_paid: Partial payment received
+    issued --> overdue: Due date passed
+    issued --> cancelled: Cancel issued invoice
+    
+    partially_paid --> paid: Remaining payment received
+    partially_paid --> overdue: Due date passed
+    partially_paid --> cancelled: Cancel invoice
+    
+    overdue --> paid: Payment received
+    overdue --> partially_paid: Partial payment received
+    overdue --> cancelled: Cancel invoice
+    
+    paid --> voided: Void paid invoice
+    cancelled --> [*]
+    voided --> [*]
+```
+
+## Webhook Event Processing Flow
+
+```mermaid
+graph TD
+    A[Stripe Webhook Event] --> B{Event Type}
+    
+    B -->|customer.subscription.created| C[Create client_subscriptions]
+    B -->|customer.subscription.updated| D[Update client_subscriptions]
+    B -->|customer.subscription.deleted| E[Mark subscription as deleted]
+    
+    B -->|invoice.created| F[Create invoice record]
+    B -->|invoice.updated| G[Update invoice details]
+    B -->|invoice.payment_succeeded| H[Record payment & update status]
+    B -->|invoice.payment_failed| I[Record failed payment]
+    
+    C --> J[Store billing_customer_id<br/>billing_subscription_id]
+    F --> K[Query client by billing_customer_id]
+    K --> L[Create invoice with items]
+    L --> M[Set status to 'issued']
+    
+    H --> N[Insert payment record]
+    N --> O[Update invoice status to 'paid']
+    O --> P[Create activity log]
+    
+    I --> Q[Insert failed payment record]
+    Q --> R[Keep invoice status as 'issued']
+    R --> S[Create activity log]
+```
+
