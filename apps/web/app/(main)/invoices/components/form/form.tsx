@@ -41,7 +41,7 @@ export function InvoiceForm({
   const { workspace: userWorkspace, organization } = useUserWorkspace();
   const { billing_details } = useOrganizationSettings();
   const userId = userWorkspace?.id ?? "";
-  
+
   const isUpdate = mode === "update";
   const { invoiceMutation, draftMutation, buildInvoicePayload } =
     useInvoiceApiActions({ mode });
@@ -81,19 +81,30 @@ export function InvoiceForm({
             lineItems: [
               { description: "", rate: 0, quantity: 1, serviceId: 0 },
             ],
-            notes: "",
+            notes: billingInfo?.invoices.note.enabled
+              ? billingInfo?.invoices.note.content
+              : "",
           },
     mode: "onBlur",
   });
 
   const onSubmit = async (data: InvoiceFormData) => {
-    const invoiceData = buildInvoicePayload(data, agencyId, isDraft, invoice, billingInfo);
+    const invoiceData = buildInvoicePayload(
+      data,
+      agencyId,
+      isDraft,
+      invoice,
+      billingInfo,
+    );
 
     if (isDraft) {
       await draftMutation.mutateAsync(invoiceData);
     } else {
       const invoice = await invoiceMutation.mutateAsync(invoiceData);
-      const client = clients.find(client => client.organization_client_id === invoiceData.client_organization_id);
+      const client = clients.find(
+        (client) =>
+          client.organization_client_id === invoiceData.client_organization_id,
+      );
       const agencyName = organization?.name ?? "";
 
       void sendEmail(EMAIL.INVOICES.REQUEST_PAYMENT, {
@@ -104,7 +115,7 @@ export function InvoiceForm({
         amount: "$" + (invoice.total_amount ?? 0),
         buttonUrl: invoice.checkout_url ?? undefined,
         agencyName,
-        });
+      });
     }
 
     // Reset draft state after submission
