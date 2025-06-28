@@ -19,6 +19,8 @@ import { useInvoiceApiActions } from "../../hooks/use-invoice-api-actions";
 import { sendEmail } from "~/server/services/send-email.service";
 import { EMAIL } from "~/server/services/email.types";
 import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
+import { useOrganizationSettings } from "../../../../../../../packages/features/accounts/src/context/organization-settings-context";
+import { parseInvoiceSettings } from "~/server/actions/invoices/type-guards";
 
 interface InvoiceFormProps {
   clients: Client.Response[];
@@ -37,11 +39,15 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const [isDraft, setIsDraft] = React.useState(false);
   const { workspace: userWorkspace, organization } = useUserWorkspace();
+  const { billing_details } = useOrganizationSettings();
   const userId = userWorkspace?.id ?? "";
-  
+
   const isUpdate = mode === "update";
   const { invoiceMutation, draftMutation, buildInvoicePayload } =
     useInvoiceApiActions({ mode });
+
+  // Parse billing details to get invoice settings
+  const billingInfo = parseInvoiceSettings(billing_details);
 
   // Transform invoice data for form
   const transformInvoiceToFormData = (
@@ -75,19 +81,30 @@ export function InvoiceForm({
             lineItems: [
               { description: "", rate: 0, quantity: 1, serviceId: 0 },
             ],
-            notes: "",
+            notes: billingInfo?.invoices.note.enabled
+              ? billingInfo?.invoices.note.content
+              : "",
           },
     mode: "onBlur",
   });
 
   const onSubmit = async (data: InvoiceFormData) => {
-    const invoiceData = buildInvoicePayload(data, agencyId, isDraft, invoice);
+    const invoiceData = buildInvoicePayload(
+      data,
+      agencyId,
+      isDraft,
+      invoice,
+      billingInfo,
+    );
 
     if (isDraft) {
       await draftMutation.mutateAsync(invoiceData);
     } else {
       const invoice = await invoiceMutation.mutateAsync(invoiceData);
-      const client = clients.find(client => client.organization_client_id === invoiceData.client_organization_id);
+      const client = clients.find(
+        (client) =>
+          client.organization_client_id === invoiceData.client_organization_id,
+      );
       const agencyName = organization?.name ?? "";
 
       void sendEmail(EMAIL.INVOICES.REQUEST_PAYMENT, {
@@ -98,7 +115,7 @@ export function InvoiceForm({
         amount: "$" + (invoice.total_amount ?? 0),
         buttonUrl: invoice.checkout_url ?? undefined,
         agencyName,
-        });
+      });
     }
 
     // Reset draft state after submission

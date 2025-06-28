@@ -168,6 +168,11 @@
       "title": "Auto-agregar Notas de Factura",
       "description": "Incluye automáticamente una nota estándar en todas las nuevas facturas."
     },
+    "noteContent": {
+      "title": "Contenido de la Nota",
+      "description": "Contenido predeterminado de la nota para facturas automáticas",
+      "placeholder": "Ingresa el contenido predeterminado de la nota..."
+    },
     "billingInformation": {
       "title": "Información de Facturación",
       "description": "Esta información se utilizará para generar facturas para tus clientes.",
@@ -176,15 +181,20 @@
         "subtitle": "Detalles básicos para tus facturas",
         "companyName": {
           "label": "Nombre de la Empresa",
-          "placeholder": "Ingresa el nombre de tu empresa"
+          "placeholder": "Ingresa el nombre de tu empresa",
+          "description": "Esto se mostrará en tus facturas"
         },
         "taxId": {
           "label": "ID Fiscal / Número IVA",
-          "placeholder": "Ingresa la identificación fiscal"
+          "placeholder": "Ingresa la identificación fiscal",
+          "description": "Tu número de identificación fiscal empresarial"
         },
         "country": {
           "label": "País",
-          "placeholder": "Selecciona tu país"
+          "placeholder": "Selecciona tu país",
+          "description": "Elige la ubicación de tu negocio",
+          "searchPlaceholder": "Buscar países...",
+          "emptyMessage": "No se encontró el país."
         }
       },
       "businessAddress": {
@@ -192,19 +202,28 @@
         "subtitle": "Detalles de ubicación para facturación",
         "streetAddress": {
           "label": "Dirección",
-          "placeholder": "Ingresa la dirección de tu negocio"
+          "placeholder": "Ingresa la dirección de tu negocio",
+          "description": "La dirección de tu negocio"
+        },
+        "addressLine2": {
+          "label": "Línea de Dirección 2",
+          "placeholder": "Suite, apt, piso (opcional)",
+          "description": "Apartamento, suite, unidad, edificio, piso, etc. (opcional)"
         },
         "city": {
           "label": "Ciudad",
-          "placeholder": "Ciudad"
+          "placeholder": "Ciudad",
+          "description": "Ciudad donde se encuentra tu negocio"
         },
         "stateProvince": {
           "label": "Estado / Provincia",
-          "placeholder": "Estado o Provincia"
+          "placeholder": "Estado o Provincia",
+          "description": "Estado o provincia (si aplica)"
         },
         "zipCode": {
           "label": "Código Postal",
-          "placeholder": "Código Postal"
+          "placeholder": "Código Postal",
+          "description": "Tu código postal o ZIP"
         }
       },
       "infoNote": {

@@ -58,20 +58,22 @@ const InvoicesTable = ({
 
   const hasPermissionToActionInvoices = (type?: string) => {
     switch (type) {
+      case 'create':
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'download':
-        return ['agency_owner', 'client_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager', 'client_owner'].includes(accountRole);
       case 'view':
-        return ['agency_owner', 'client_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager', 'client_owner'].includes(accountRole);
       case 'edit':
-        return ['agency_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'delete':
         return ['agency_owner'].includes(accountRole);
       case 'markAsPaid':
-        return ['agency_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'requestPayment':
-        return ['agency_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'getPaymentLink':
-        return ['agency_owner', 'client_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager', 'client_owner'].includes(accountRole);
       default:
         return false;
     }
@@ -104,7 +106,7 @@ const InvoicesTable = ({
             setSearchTerm(e.target.value)
           }
         />
-        {hasPermissionToActionInvoices() && (
+        {hasPermissionToActionInvoices('create') && (
           <AddButton />
         )}
       </div>

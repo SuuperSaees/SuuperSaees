@@ -364,7 +364,8 @@ export class InvoiceRepository {
           unit_price,
           total_price,
           created_at,
-          updated_at
+          updated_at,
+          service_id
         ),
         invoice_settings(
           id,

@@ -125,6 +125,7 @@ function PaymentSettings({ role: _role }: PaymentSettingsProps) {
                       {...field}
                       placeholder={t('settings.paymentMethodName.placeholder')}
                       onBlur={(e: React.FocusEvent<HTMLInputElement>) => handleFieldChange('paymentMethodName', e.target.value)}
+                      className="text-gray-700"
                     />
                   </FormControl>
                   <FormMessage />
@@ -155,7 +156,7 @@ function PaymentSettings({ role: _role }: PaymentSettingsProps) {
                     <Textarea
                       {...field}
                       placeholder={t('settings.instructions.placeholder')}
-                      className="min-h-[120px] resize-none"
+                      className="min-h-[120px] resize-none text-gray-700"
                       onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => handleFieldChange('instructions', e.target.value)}
                     />
                   </FormControl>

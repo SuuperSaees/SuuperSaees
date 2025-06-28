@@ -28,6 +28,7 @@ type InvoicePermissions = {
   getPaymentLink: boolean;
   delete: boolean;
   edit: boolean;
+  create: boolean;
 };
 
 export type ColumnConfigs = {
