@@ -138,6 +138,7 @@ export function InvoiceForm({
             control={form.control}
             setValue={form.setValue}
             services={services}
+            currency={services[0]?.currency ?? "USD"}
           />
 
           <InvoiceNotesSection control={form.control} />
