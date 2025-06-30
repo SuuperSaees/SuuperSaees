@@ -84,6 +84,7 @@ export function InvoiceInformationSection({
 
                 <FormControl>
                   <Combobox
+                    className="w-full"
                     options={clientOptions}
                     renderItem={customRenderItem}
                     renderTrigger={customRenderTrigger}

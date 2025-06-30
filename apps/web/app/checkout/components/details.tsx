@@ -14,10 +14,8 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error('Stripe public key is not defined in environment variables');
 }
 
-type ServiceType = Service.Type;
-
 type DetailsSideProps = {
-  service: ServiceType;
+  service?: Service.Relationships.Billing.BillingService;
   invoice?: Invoice.Response;
   stripeId: string;
   logoUrl: string;
@@ -43,9 +41,9 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
     <Elements
       stripe={stripePromise}
       options={{
-        mode: service.recurrence ? 'subscription' : 'payment',
-        amount: convertToSubcurrency(service.price ?? 0),
-        currency: service.currency,
+        mode: service?.recurrence ? 'subscription' : 'payment',
+        amount: convertToSubcurrency(service ? service.price ?? 0 : invoice?.total_amount ?? 0),
+        currency: (service?.currency ?? invoice?.currency ?? 'usd').toLowerCase(),
       }}
     >
       <BillingForm

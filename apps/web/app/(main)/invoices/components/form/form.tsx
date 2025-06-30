@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@kit/ui/button";
+import { ThemedButton } from "node_modules/@kit/accounts/src/components/ui/button-themed-with-settings";
 import { Form } from "@kit/ui/form";
 import { invoiceSchema, InvoiceFormData } from "../../schemas/schema";
 import { InvoiceInformationSection } from "./information-section";
@@ -115,6 +116,8 @@ export function InvoiceForm({
         amount: "$" + (invoice.total_amount ?? 0),
         buttonUrl: invoice.checkout_url ?? undefined,
         agencyName,
+      }).catch((error) => {
+        console.error("Failed to send invoice request payment email:", error);
       });
     }
 
@@ -156,7 +159,7 @@ export function InvoiceForm({
               {draftMutation.isPending ? <Spinner className="w-4 h-4" /> : null}
             </Button>
           )}
-          <Button
+          <ThemedButton
             type="submit"
             onClick={() => setIsDraft(false)}
             className="flex items-center gap-2"
@@ -165,7 +168,7 @@ export function InvoiceForm({
               i18nKey={`invoices:${mode === "create" ? "creation" : "update"}.form.actions.${isUpdate ? "updateInvoice" : "createInvoice"}`}
             />
             {invoiceMutation.isPending ? <Spinner className="w-4 h-4" /> : null}
-          </Button>
+          </ThemedButton>
         </div>
       </form>
     </Form>

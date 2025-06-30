@@ -20,5 +20,6 @@ export namespace BillingAccounts {
     name: string;
     icon: React.ReactNode;
     description: string;
+    custom_name?: string;
   };
 }

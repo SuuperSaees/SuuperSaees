@@ -27,8 +27,8 @@ export class InvoiceAction extends BaseAction implements IInvoiceAction {
     return await this.controller.list(config);
   }
 
-  async get(invoiceId: string): Promise<Invoice.Response> {
-    return await this.controller.get(invoiceId);
+  async get(invoiceId: string, adminActivated?: boolean): Promise<Invoice.Response> {
+    return await this.controller.get(invoiceId, adminActivated);
   }
 
   async delete(invoiceId: string): Promise<void> {
