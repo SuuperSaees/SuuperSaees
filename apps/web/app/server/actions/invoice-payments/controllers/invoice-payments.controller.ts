@@ -82,6 +82,7 @@ export class InvoicePaymentController {
       paymentMethod: string;
       notes?: string;
       referenceNumber?: string;
+      sessionId?: string;
     }
   ): Promise<InvoicePayment.Type> {
     try {

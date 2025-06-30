@@ -15,7 +15,7 @@ export class InvoicePaymentRepository {
   }
 
   // * CREATE REPOSITORIES
-  async create(payload: InvoicePayment.Insert): Promise<InvoicePayment.Type> {
+  async create(payload: InvoicePayment.Request.Create): Promise<InvoicePayment.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('invoice_payments')
@@ -33,6 +33,19 @@ export class InvoicePaymentRepository {
 
     if (error) {
       throw new Error(`Error creating invoice payment: ${error.message}`);
+    }
+
+    const { error: sessionError } = await client
+      .from('checkouts')
+      .insert({
+      provider: 'suuper',
+      provider_id: payload.session_id ?? '',
+      })
+      .select('id')
+      .single();
+
+    if (sessionError) {
+      throw new Error(`Error fetching checkout session: ${sessionError.message}`);
     }
 
     return data as InvoicePayment.Type;

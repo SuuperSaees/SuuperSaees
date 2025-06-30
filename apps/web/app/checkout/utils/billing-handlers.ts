@@ -476,7 +476,8 @@ export const handleInvoicePayment = async ({
         amount: invoice.total_amount ?? 0,
         paymentMethod: 'manual',
         notes: values.manual_payment_info,
-        referenceNumber: sessionId,
+        referenceNumber: invoice.number,
+        sessionId: sessionId,
       });
 
       return {

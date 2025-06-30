@@ -34,6 +34,7 @@ export async function processManualPayment(
     paymentMethod: string;
     notes?: string;
     referenceNumber?: string;
+    sessionId?: string;
   }
 ) {
   return await getInvoicePaymentAction().processManualPayment(invoiceId, paymentData);

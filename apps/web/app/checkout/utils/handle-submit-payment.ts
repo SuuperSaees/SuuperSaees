@@ -60,6 +60,8 @@ export const handleSubmitPayment = async ({
       manual_payment_info: '',
       discount_coupon: '',
       type: service ? 'service' : 'invoice', // Add type based on whether it's a service or invoice
+      service_id: service?.id ?? null,
+      invoice_id: invoice?.id ?? null,
     };
 
     if (selectedPaymentMethod === 'manual_payment' && values.manual_payment_info) {

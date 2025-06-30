@@ -6,7 +6,9 @@ export namespace InvoicePayment {
   export type Update = Database["public"]["Tables"]["invoice_payments"]["Update"];
 
   export namespace Request {
-    export type Create = Insert
+    export type Create = Insert & {
+      session_id?: string; // Optional for manual payments
+    };
     export type Update = InvoicePayment.Update
   }
 

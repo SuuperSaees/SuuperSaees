@@ -38,6 +38,7 @@ export class InvoicePaymentService {
       paymentMethod: string;
       notes?: string;
       referenceNumber?: string;
+      sessionId?: string;
     }
   ): Promise<InvoicePayment.Type> {
     const payment = await this.create({
@@ -47,6 +48,7 @@ export class InvoicePaymentService {
       status: 'succeeded', 
       reference_number: paymentData.referenceNumber,
       notes: paymentData.notes,
+      session_id: paymentData.sessionId,
     });
 
     return payment;
