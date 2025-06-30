@@ -23,7 +23,7 @@
   "markAsPaid": "Marcar como pagado",
   "requestPaymentByEmail": "Solicitar pago por email",
   "getPaymentLink": "Obtener enlace de pago",
-  "paymentLinkCopied": "¡Enlace de pago copiado!",
+  "paymentLinkCopied": "¡Enlace de pago copiado!",  
   "view": "Ver",
   "delete": "Eliminar",
   "creation": {
@@ -189,6 +189,11 @@
           "label": "ID Fiscal / Número IVA",
           "placeholder": "Ingresa la identificación fiscal",
           "description": "Tu número de identificación fiscal empresarial"
+        },
+        "taxType": {
+          "label": "Tipo de identificación fiscal",
+          "placeholder": "Seleccionar el tipo de identificación fiscal",
+          "description": "Seleccionar el tipo de identificación fiscal"
         },
         "country": {
           "label": "País",

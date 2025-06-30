@@ -21,11 +21,11 @@ interface UpdateInvoicePageProps {
 
 export const generateMetadata = async ({ params }: UpdateInvoicePageProps) => {
   const i18n = await createI18nServerInstance();
-  
+
   try {
     const invoice = await getInvoice(params.id);
     const title = i18n.t("invoices:update.title", { number: invoice.number });
-    
+
     return {
       title,
     };
@@ -48,24 +48,32 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
   const [invoice, clients, services] = await Promise.all([
     getInvoice(params.id).catch(() => null),
     getClients(agencyId) as Promise<Client.Response[]>,
-    getServicesByOrganizationId() as Promise<Service.Relationships.Billing.BillingService[]>,
+    getServicesByOrganizationId() as Promise<
+      Service.Relationships.Billing.BillingService[]
+    >,
   ]);
 
+  const filteredClients = clients.filter(
+    (client) => client.user?.role === "client_owner",
+  );
 
   return (
-    <PageBody >
+    <PageBody>
       <PageHeader
         title="invoices:update.title"
         rightContent={<TimerContainer />}
         className="w-full flex"
       >
-         <h2 className="text-xl font-medium">
-          <Trans i18nKey="invoices:update.title" values={{ number: invoice?.number ?? '' }} />
+        <h2 className="text-xl font-medium">
+          <Trans
+            i18nKey="invoices:update.title"
+            values={{ number: invoice?.number ?? "" }}
+          />
         </h2>
       </PageHeader>
-      <InvoiceForm 
-        clients={clients} 
-        services={services} 
+      <InvoiceForm
+        clients={filteredClients}
+        services={services}
         agencyId={agencyId}
         invoice={invoice ?? undefined}
         mode="update"
@@ -74,4 +82,4 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
   );
 }
 
-export default withI18n(UpdateInvoicePage); 
+export default withI18n(UpdateInvoicePage);

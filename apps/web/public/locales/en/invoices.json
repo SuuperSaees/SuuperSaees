@@ -190,6 +190,11 @@
           "placeholder": "Enter tax identification",
           "description": "Your business tax identification number"
         },
+        "taxType": {
+          "label": "Tax ID Type",
+          "placeholder": "Select the type of tax identification number",
+          "description": "Select the type of tax identification number"
+        },
         "country": {
           "label": "Country",
           "placeholder": "Select your country",

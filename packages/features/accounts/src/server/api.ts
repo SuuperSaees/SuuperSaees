@@ -3,6 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@kit/supabase/database';
 import { getEmbeds } from '../../../../../apps/web/app/server/actions/embeds/embeds.action'
 import { fetchClientOrganizations } from '../../../team-accounts/src/server/actions/clients/get/get-clients'
+import { parseInvoiceSettings } from '../../../../../apps/web/app/server/actions/invoices/type-guards';
 /**
  * Class representing an API for interacting with user accounts.
  * @constructor
@@ -80,6 +81,9 @@ class AccountsApi {
       accounts[0]?.picture_url ??
       '';
 
+    const billingDetails = accounts[0]?.settings?.find((setting) => setting.key === 'billing_details')?.value;
+
+
     // Get pinned organizations from settings
     const pinnedOrganizationsString = accounts[0]?.settings?.find(
       (setting) => setting.key === 'pinned_organizations'
@@ -108,6 +112,11 @@ class AccountsApi {
       members: accounts[0]?.members,
       statuses: accounts[0]?.statuses,
       tags: accounts[0]?.tags,
+      settings: {
+        billing: {
+          ...parseInvoiceSettings(billingDetails)
+        }
+      }
     };
   }
 

@@ -24,7 +24,7 @@ import {
 import { Combobox } from "../../../../../apps/web/components/ui/combobox";
 
 import { ThemedInput } from "./ui/input-themed-with-settings";
-import { useOrganizationSettings } from "../context/organization-settings-context";
+import { OrganizationSettingKeys } from "../context/organization-settings-context";
 import {
   parseInvoiceSettings,
   getDefaultInvoiceSettings,
@@ -32,6 +32,11 @@ import {
 } from "../../../../../apps/web/app/server/actions/invoices/type-guards";
 import { Textarea } from "@kit/ui/textarea";
 import { getCountries } from "../../../../../apps/web/lib/countries";
+import { canAccessInvoiceSection, UserRole } from "../utils/role-permissions";
+import { useUserWorkspace } from "../hooks/use-user-workspace";
+import { handleResponse } from "../../../../../apps/web/lib/response/handle-response";
+import { upsertOrganizationSettings } from "../../../team-accounts/src/server/actions/organizations/update/update-organizations";
+import { useMutation } from "@tanstack/react-query";
 
 // Schema for invoice settings with improved structure
 const InvoiceSettingsSchema = z.object({
@@ -64,17 +69,39 @@ interface InvoiceSettingsProps {
   role: string;
 }
 
-function InvoiceSettings({ role: _role }: InvoiceSettingsProps) {
+function InvoiceSettings({ role }: InvoiceSettingsProps) {
   const { t } = useTranslation("invoices");
-  const { updateOrganizationSetting, billing_details } =
-    useOrganizationSettings();
+
+  const updateOrganizationSetting = useMutation({
+    mutationFn: async (organizationSetting: {
+      key: OrganizationSettingKeys;
+      value: string;
+    }) => {
+      const rest = await upsertOrganizationSettings(organizationSetting);
+      await handleResponse(rest, "organizations", t);
+      if (rest.ok && rest.success?.data) {
+        // const { key, value } = rest.success.data;
+        // Update only if valid color when it's the theme color
+
+        // setOrganizationSettings((prev) => ({
+        //   ...prev,
+        //   [key]: newValue,
+        // }));
+        return rest.success.data;
+      }
+      throw new Error("Failed to update organization setting");
+    },
+  });
+  const { organization } = useUserWorkspace();
+  const billing_details = organization?.settings.billing;
+  const userRole = role as UserRole;
 
   // Get all countries using the utility function
   const countries = getCountries();
 
   // Safely parse billing_details with fallback to defaults using type guards
   const getInitialValues = (): InvoiceSettingsType => {
-    const parsed = parseInvoiceSettings(billing_details);
+    const parsed = parseInvoiceSettings(JSON.stringify(billing_details));
     return parsed ? mergeWithDefaults(parsed) : getDefaultInvoiceSettings();
   };
 
@@ -123,108 +150,340 @@ function InvoiceSettings({ role: _role }: InvoiceSettingsProps) {
   return (
     <div className="mt-4 w-full max-w-full pr-48 pb-32 space-y-8">
       <Form {...form}>
-        {/* Invoice Management Toggle */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t("settings.invoiceManagement.title")}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t("settings.invoiceManagement.description")}
-              </p>
+        {/* Invoice Management Toggle - Agency Owner Only */}
+        {/* {canAccessInvoiceSection(userRole, "invoice_management") && (
+          <>
+            <div className="space-y-2">
+              <div className="flex justify-between items-start">
+                <div className="w-[45%] pr-4">
+                  <label className="text-sm font-medium text-gray-900">
+                    {t("settings.invoiceManagement.title")}
+                  </label>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {t("settings.invoiceManagement.description")}
+                  </p>
+                </div>
+                <div className="flex-1 flex justify-end">
+                  <Switch
+                    checked={form.getValues("invoices.enabled")}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange("invoices.enabled", checked)
+                    }
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex-1 flex justify-end">
-              <Switch
-                checked={form.getValues("invoices.enabled")}
-                onCheckedChange={(checked) =>
-                  handleSwitchChange("invoices.enabled", checked)
-                }
-              />
-            </div>
-          </div>
-        </div>
+            <Separator />
+          </>
+        )} */}
 
-        <Separator />
-
-        {/* Require Complete Address Toggle */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t("settings.requireCompleteAddress.title")}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t("settings.requireCompleteAddress.description")}
-              </p>
+        {/* Require Complete Address Toggle - Agency Owner Only */}
+        {/* {canAccessInvoiceSection(userRole, "require_complete_address") && (
+          <>
+            <div className="space-y-2">
+              <div className="flex justify-between items-start">
+                <div className="w-[45%] pr-4">
+                  <label className="text-sm font-medium text-gray-900">
+                    {t("settings.requireCompleteAddress.title")}
+                  </label>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {t("settings.requireCompleteAddress.description")}
+                  </p>
+                </div>
+                <div className="flex-1 flex justify-end">
+                  <Switch
+                    checked={form.getValues(
+                      "invoices.require_complete_address",
+                    )}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange(
+                        "invoices.require_complete_address",
+                        checked,
+                      )
+                    }
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex-1 flex justify-end">
-              <Switch
-                checked={form.getValues("invoices.require_complete_address")}
-                onCheckedChange={(checked) =>
-                  handleSwitchChange(
-                    "invoices.require_complete_address",
-                    checked,
-                  )
-                }
-              />
-            </div>
-          </div>
-        </div>
+            <Separator />
+          </>
+        )} */}
 
-        <Separator />
-
-        {/* Automatic Invoice Note Toggle */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t("settings.automaticInvoiceNote.title")}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t("settings.automaticInvoiceNote.description")}
-              </p>
+        {/* Automatic Invoice Note Toggle - Agency Owner Only */}
+        {canAccessInvoiceSection(userRole, "automatic_note") && (
+          <>
+            <div className="space-y-2">
+              <div className="flex justify-between items-start">
+                <div className="w-[45%] pr-4">
+                  <label className="text-sm font-bold text-gray-900 ">
+                    {t("settings.automaticInvoiceNote.title")}
+                  </label>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {t("settings.automaticInvoiceNote.description")}
+                  </p>
+                </div>
+                <div className="flex-1 flex justify-end">
+                  <Switch
+                    checked={form.getValues("invoices.note.enabled")}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange("invoices.note.enabled", checked)
+                    }
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex-1 flex justify-end">
-              <Switch
-                checked={form.getValues("invoices.note.enabled")}
-                onCheckedChange={(checked) =>
-                  handleSwitchChange("invoices.note.enabled", checked)
-                }
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Note Content */}
-        {form.getValues("invoices.note.enabled") && (
+            {/* Note Content */}
+            {form.getValues("invoices.note.enabled") && (
+              <div className="space-y-2 p-6 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div className="w-[45%] pr-4">
+                    <label className="text-sm font-medium text-gray-900">
+                      {t("settings.noteContent.title")}
+                    </label>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {t("settings.noteContent.description")}
+                    </p>
+                  </div>
+                  <div className="flex-1">
+                    <FormField
+                      name="invoices.note.content"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder={t(
+                                "settings.noteContent.placeholder",
+                              )}
+                              className="min-h-[100px] resize-none text-gray-700"
+                              onBlur={(
+                                e: React.FocusEvent<HTMLTextAreaElement>,
+                              ) =>
+                                handleFieldChange(
+                                  "invoices.note.content",
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            <Separator />
+          </>
+        )}
+
+        {/* Billing Information Section Header */}
+        {canAccessInvoiceSection(userRole, "billing_information") && (
           <div className="space-y-2">
+            <label className="text-sm font-bold text-gray-900">
+              {t("settings.billingInformation.title")}
+            </label>
+            <p className="text-sm text-gray-600">
+              {t("settings.billingInformation.description")}
+            </p>
+          </div>
+        )}
+
+        {/* Company Information Group */}
+        {canAccessInvoiceSection(userRole, "company_information") && (
+          <div className="bg-gray-50 rounded-lg p-6 space-y-6">
+            <div className="border-b border-gray-200 pb-3">
+              <h4 className="text-sm font-semibold text-gray-900">
+                {t("settings.billingInformation.companyInformation.title")}
+              </h4>
+              <p className="text-xs text-gray-500 mt-1">
+                {t("settings.billingInformation.companyInformation.subtitle")}
+              </p>
+            </div>
+
+            {/* Company Name */}
             <div className="flex justify-between items-start">
               <div className="w-[45%] pr-4">
                 <label className="text-sm font-medium text-gray-900">
-                  {t("settings.noteContent.title")}
+                  {t(
+                    "settings.billingInformation.companyInformation.companyName.label",
+                  )}
                 </label>
                 <p className="text-sm text-gray-600 mt-1">
-                  {t("settings.noteContent.description")}
+                  {t(
+                    "settings.billingInformation.companyInformation.companyName.description",
+                  )}
                 </p>
               </div>
               <div className="flex-1">
                 <FormField
-                  name="invoices.note.content"
+                  name="information.company_name"
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Textarea
+                        <ThemedInput
                           {...field}
-                          placeholder={t("settings.noteContent.placeholder")}
-                          className="min-h-[100px] resize-none text-gray-700"
-                          onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) =>
+                          placeholder={t(
+                            "settings.billingInformation.companyInformation.companyName.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
                             handleFieldChange(
-                              "invoices.note.content",
+                              "information.company_name",
                               e.target.value,
                             )
                           }
+                          className="text-gray-700"
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Tax ID Type */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.companyInformation.taxType.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.companyInformation.taxType.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.tax_id_type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            handleFieldChange("information.tax_id_type", value);
+                          }}
+                        >
+                          <SelectTrigger className="text-gray-700">
+                            <SelectValue
+                              className="text-gray-700"
+                              placeholder="Select tax ID type"
+                            />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="EIN">
+                              EIN (Employer Identification Number)
+                            </SelectItem>
+                            <SelectItem value="VAT">
+                              VAT (Value Added Tax)
+                            </SelectItem>
+                            <SelectItem value="GST">
+                              GST (Goods and Services Tax)
+                            </SelectItem>
+                            <SelectItem value="TIN">
+                              TIN (Tax Identification Number)
+                            </SelectItem>
+                            <SelectItem value="OTHER">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Tax ID Number */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.companyInformation.taxId.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.companyInformation.taxId.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.tax_id_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t(
+                            "settings.billingInformation.companyInformation.taxId.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                            handleFieldChange(
+                              "information.tax_id_number",
+                              e.target.value,
+                            )
+                          }
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Country */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.companyInformation.country.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.companyInformation.country.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="w-full">
+                          <Combobox
+                            options={countries}
+                            value={field.value}
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              handleFieldChange("information.country", value);
+                            }}
+                            placeholder={t(
+                              "settings.billingInformation.companyInformation.country.placeholder",
+                            )}
+                            searchPlaceholder={t(
+                              "settings.billingInformation.companyInformation.country.searchPlaceholder",
+                            )}
+                            emptyMessage={t(
+                              "settings.billingInformation.companyInformation.country.emptyMessage",
+                            )}
+                            contentClassName="text-gray-700"
+                            triggerClassName="text-gray-700"
+                            className="w-full text-gray-700 bg-transparent font-normal"
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -235,419 +494,222 @@ function InvoiceSettings({ role: _role }: InvoiceSettingsProps) {
           </div>
         )}
 
-        <Separator />
-
-        {/* Billing Information Section Header */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-900">
-            {t("settings.billingInformation.title")}
-          </label>
-          <p className="text-sm text-gray-600">
-            {t("settings.billingInformation.description")}
-          </p>
-        </div>
-
-        {/* Company Information Group */}
-        <div className="bg-gray-50 rounded-lg p-6 space-y-6">
-          <div className="border-b border-gray-200 pb-3">
-            <h4 className="text-sm font-semibold text-gray-900">
-              {t("settings.billingInformation.companyInformation.title")}
-            </h4>
-            <p className="text-xs text-gray-500 mt-1">
-              {t("settings.billingInformation.companyInformation.subtitle")}
-            </p>
-          </div>
-
-          {/* Company Name */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t(
-                  "settings.billingInformation.companyInformation.companyName.label",
-                )}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.companyInformation.companyName.description",
-                )}
-              </p>
-            </div>
-            <div className="flex-1">
-              <FormField
-                name="information.company_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.companyInformation.companyName.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange(
-                            "information.company_name",
-                            e.target.value,
-                          )
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Tax ID Type */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                Tax ID Type
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                Select the type of tax identification number
-              </p>
-            </div>
-            <div className="flex-1">
-              <FormField
-                name="information.tax_id_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          handleFieldChange("information.tax_id_type", value);
-                        }}
-                      >
-                        <SelectTrigger className="text-gray-700">
-                          <SelectValue
-                            className="text-gray-700"
-                            placeholder="Select tax ID type"
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="EIN">
-                            EIN (Employer Identification Number)
-                          </SelectItem>
-                          <SelectItem value="VAT">
-                            VAT (Value Added Tax)
-                          </SelectItem>
-                          <SelectItem value="GST">
-                            GST (Goods and Services Tax)
-                          </SelectItem>
-                          <SelectItem value="TIN">
-                            TIN (Tax Identification Number)
-                          </SelectItem>
-                          <SelectItem value="OTHER">
-                            Other
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Tax ID Number */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t(
-                  "settings.billingInformation.companyInformation.taxId.label",
-                )}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.companyInformation.taxId.description",
-                )}
-              </p>
-            </div>
-            <div className="flex-1">
-              <FormField
-                name="information.tax_id_number"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.companyInformation.taxId.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange(
-                            "information.tax_id_number",
-                            e.target.value,
-                          )
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-
-          {/* Country */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t(
-                  "settings.billingInformation.companyInformation.country.label",
-                )}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.companyInformation.country.description",
-                )}
-              </p>
-            </div>
-            <div className="flex-1">
-              <FormField
-                name="information.country"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <div className="w-full">
-                        <Combobox
-                          options={countries}
-                          value={field.value}
-                          onValueChange={(value) => {
-                            field.onChange(value);
-                            handleFieldChange("information.country", value);
-                          }}
-                          placeholder={t(
-                            "settings.billingInformation.companyInformation.country.placeholder",
-                          )}
-                          searchPlaceholder={t("settings.billingInformation.companyInformation.country.searchPlaceholder")}
-                          emptyMessage={t("settings.billingInformation.companyInformation.country.emptyMessage")}
-                          contentClassName="text-gray-700"
-                          triggerClassName="text-gray-700"
-                          className="w-full text-gray-700 bg-transparent font-normal"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-        </div>
-
         {/* Business Address Group */}
-        <div className="bg-gray-50 rounded-lg p-6 space-y-6">
-          <div className="border-b border-gray-200 pb-3">
-            <h4 className="text-sm font-semibold text-gray-900">
-              {t("settings.billingInformation.businessAddress.title")}
-            </h4>
-            <p className="text-xs text-gray-500 mt-1">
-              {t("settings.billingInformation.businessAddress.subtitle")}
-            </p>
-          </div>
-
-          {/* Street Address */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t(
-                  "settings.billingInformation.businessAddress.streetAddress.label",
-                )}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.businessAddress.streetAddress.description",
-                )}
+        {canAccessInvoiceSection(userRole, "business_address") && (
+          <div className="bg-gray-50 rounded-lg p-6 space-y-6">
+            <div className="border-b border-gray-200 pb-3">
+              <h4 className="text-sm font-semibold text-gray-900">
+                {t("settings.billingInformation.businessAddress.title")}
+              </h4>
+              <p className="text-xs text-gray-500 mt-1">
+                {t("settings.billingInformation.businessAddress.subtitle")}
               </p>
             </div>
-            <div className="flex-1">
-              <FormField
-                name="information.address_1"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.businessAddress.streetAddress.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange(
-                            "information.address_1",
-                            e.target.value,
-                          )
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
 
-          {/* Address Line 2 */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t(
-                  "settings.billingInformation.businessAddress.addressLine2.label",
-                )}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.businessAddress.addressLine2.description",
-                )}
-              </p>
+            {/* Street Address */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.businessAddress.streetAddress.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.businessAddress.streetAddress.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.address_1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t(
+                            "settings.billingInformation.businessAddress.streetAddress.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                            handleFieldChange(
+                              "information.address_1",
+                              e.target.value,
+                            )
+                          }
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <FormField
-                name="information.address_2"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.businessAddress.addressLine2.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange(
-                            "information.address_2",
-                            e.target.value,
-                          )
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
 
-          {/* City */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t("settings.billingInformation.businessAddress.city.label")}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.businessAddress.city.description",
-                )}
-              </p>
+            {/* Address Line 2 */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.businessAddress.addressLine2.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.businessAddress.addressLine2.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.address_2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t(
+                            "settings.billingInformation.businessAddress.addressLine2.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                            handleFieldChange(
+                              "information.address_2",
+                              e.target.value,
+                            )
+                          }
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <FormField
-                name="information.city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.businessAddress.city.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange("information.city", e.target.value)
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
 
-          {/* State/Province */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t(
-                  "settings.billingInformation.businessAddress.stateProvince.label",
-                )}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.businessAddress.stateProvince.description",
-                )}
-              </p>
+            {/* City */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t("settings.billingInformation.businessAddress.city.label")}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.businessAddress.city.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t(
+                            "settings.billingInformation.businessAddress.city.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                            handleFieldChange(
+                              "information.city",
+                              e.target.value,
+                            )
+                          }
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <FormField
-                name="information.state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.businessAddress.stateProvince.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange("information.state", e.target.value)
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
 
-          {/* ZIP Code */}
-          <div className="flex justify-between items-start">
-            <div className="w-[45%] pr-4">
-              <label className="text-sm font-medium text-gray-900">
-                {t("settings.billingInformation.businessAddress.zipCode.label")}
-              </label>
-              <p className="text-sm text-gray-600 mt-1">
-                {t(
-                  "settings.billingInformation.businessAddress.zipCode.description",
-                )}
-              </p>
+            {/* State/Province */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.businessAddress.stateProvince.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.businessAddress.stateProvince.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t(
+                            "settings.billingInformation.businessAddress.stateProvince.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                            handleFieldChange(
+                              "information.state",
+                              e.target.value,
+                            )
+                          }
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <FormField
-                name="information.postal_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ThemedInput
-                        {...field}
-                        placeholder={t(
-                          "settings.billingInformation.businessAddress.zipCode.placeholder",
-                        )}
-                        onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-                          handleFieldChange(
-                            "information.postal_code",
-                            e.target.value,
-                          )
-                        }
-                        className="text-gray-700"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
+            {/* ZIP Code */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t(
+                    "settings.billingInformation.businessAddress.zipCode.label",
+                  )}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t(
+                    "settings.billingInformation.businessAddress.zipCode.description",
+                  )}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="information.postal_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t(
+                            "settings.billingInformation.businessAddress.zipCode.placeholder",
+                          )}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                            handleFieldChange(
+                              "information.postal_code",
+                              e.target.value,
+                            )
+                          }
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <Separator />
 
