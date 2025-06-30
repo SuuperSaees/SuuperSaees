@@ -146,7 +146,8 @@
     "invoiceDraftCreated": "Factura guardada como borrador",
     "invoiceUpdated": "Factura actualizada correctamente!",
     "invoiceDeleted": "Factura eliminada correctamente!",
-    "emailSent": "Email enviado correctamente!"
+    "emailSent": "Email enviado correctamente!",
+    "pdfDownloaded": "PDF descargado correctamente!"
   },
   "loading": {
     "updating": "Actualizando...",

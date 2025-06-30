@@ -14,6 +14,15 @@ import EmptyPaymentMethods from './components/empty-payment-methods';
 import ErrorDecodedToken from './components/error-decoded-token';
 import { getInvoice } from '~/server/actions/invoices/invoices.action';
 import { Invoice } from '~/lib/invoice.types';
+import { z } from 'zod';
+
+const PaymentSettingsSchema = z.object({
+  enableManualPayments: z.boolean(),
+  paymentMethodName: z.string().min(1, 'Payment method name is required'),
+  instructions: z.string().min(1, 'Instructions are required'),
+});
+
+type PaymentSettingsType = z.infer<typeof PaymentSettingsSchema>;
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -72,9 +81,9 @@ async function ServiceCheckoutPage({
   const sidebarBackgroundColor = organizationSettings.find(
     (setting) => setting.key === 'sidebar_background_color',
   )?.value;
-  const paymentDetails = organizationSettings.find(
+  const paymentDetails = JSON.parse(organizationSettings.find(
     (setting) => setting.key === 'payment_details',
-  )?.value;
+  )?.value ?? '{}') as PaymentSettingsType;
 
   const paymentMethods = await getPaymentsMethods(tokendecoded?.primary_owner_id ?? '', undefined, true).catch((error) => {
     console.error('Error fetching payment methods:', error);
@@ -84,26 +93,29 @@ async function ServiceCheckoutPage({
     };
   });
 
-  if(paymentDetails) {
+  console.log('Payment methods:', paymentDetails);
+
+  if(paymentDetails?.enableManualPayments && paymentDetails?.paymentMethodName && paymentDetails?.instructions) {
     paymentMethods.paymentMethods = [
       ...paymentMethods.paymentMethods,
       {
         id: 'payment_details',
         name: 'manual_payment',
         icon: 'paymentswaydirect',
-        description: paymentDetails,
+        custom_name: paymentDetails?.paymentMethodName,
+        description: paymentDetails?.instructions,
       } as never,
     ];
   }
   let service = null;
   let invoice = null;
-  if (tokendecoded?.service.id) {
+  if (tokendecoded?.service?.id) {
   service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
     console.error('Error fetching service:', error);
     return null;
   });
 } else if (tokendecoded?.invoice?.id) {
-  invoice = await getInvoice(tokendecoded?.invoice.id ?? '').catch((error) => {
+  invoice = await getInvoice(tokendecoded?.invoice.id ?? '', true).catch((error) => {
     console.error('Error fetching invoice:', error);
     return null;
   });
@@ -145,7 +157,8 @@ async function ServiceCheckoutPage({
                     id: 'payment_details',
                     name: 'manual_payment',
                     icon: 'paymentswaydirect',
-                    description: paymentDetails,
+                    custom_name: paymentDetails?.paymentMethodName,
+                    description: paymentDetails?.instructions,
                   } as never
                 }
           />

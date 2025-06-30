@@ -333,8 +333,8 @@ export class InvoiceRepository {
   }
 
   async get(invoiceId: string): Promise<Invoice.Response> {
-    const client = this.client;
-    
+    const client = this.adminClient ?? this.client;
+
     const { data: invoice, error } = await client
       .from('invoices')
       .select(`

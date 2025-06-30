@@ -48,6 +48,7 @@ const BillingForm: React.FC<{
   manualPayment?: BillingAccounts.PaymentMethod;
 }> = ({
   service,
+  invoice,
   stripeId,
   logoUrl,
   sidebarBackgroundColor,
@@ -193,6 +194,7 @@ const BillingForm: React.FC<{
     const { success, error, accountAlreadyExists, data } =
       await handleSubmitPayment({
         service,
+        invoice,
         values: form.getValues(),
         stripeId,
         paymentMethodId: paymentMethodId,
@@ -544,7 +546,7 @@ const BillingForm: React.FC<{
                     className="w-full transform transition duration-300 ease-in-out hover:scale-105"
                     onClick={onSubmit}
                   >
-                    {service.test_period ? t('checkout.trial.subscribe') : service.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
+                    {service?.test_period ? t('checkout.trial.subscribe') : service?.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
                     {loading && <Spinner className="ml-2 h-4 w-4" />}
                   </ThemedButton>
                 </div>
@@ -567,6 +569,7 @@ const BillingForm: React.FC<{
                 <SideInfo
                   form={form}
                   service={service}
+                  invoice={invoice}
                   loading={loading}
                   errorMessage={errorMessage ?? ''}
                   accountId={stripeId}

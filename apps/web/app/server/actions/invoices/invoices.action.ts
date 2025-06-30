@@ -18,8 +18,8 @@ export async function getInvoices(
   return await getInvoiceAction().list(config);
 }
 
-export async function getInvoice(invoiceId: string) {
-  return await getInvoiceAction().get(invoiceId);
+export async function getInvoice(invoiceId: string, adminActivated?: boolean) {
+  return await getInvoiceAction().get(invoiceId, adminActivated);
 }
 
 export async function deleteInvoice(invoiceId: string) {

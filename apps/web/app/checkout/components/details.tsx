@@ -17,7 +17,7 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
 type ServiceType = Service.Type;
 
 type DetailsSideProps = {
-  service: ServiceType;
+  service?: ServiceType;
   invoice?: Invoice.Response;
   stripeId: string;
   logoUrl: string;
@@ -43,9 +43,9 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
     <Elements
       stripe={stripePromise}
       options={{
-        mode: service.recurrence ? 'subscription' : 'payment',
-        amount: convertToSubcurrency(service.price ?? 0),
-        currency: service.currency,
+        mode: service?.recurrence ? 'subscription' : 'payment',
+        amount: convertToSubcurrency(service ? service.price ?? 0 : invoice?.total_amount ?? 0),
+        currency: service?.currency ?? invoice?.currency ?? 'usd',
       }}
     >
       <BillingForm

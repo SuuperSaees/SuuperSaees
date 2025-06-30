@@ -119,6 +119,10 @@
     "securityCode": "CVC",
     "securePayment": "Pago seguro",
     "discount": "Descuento",
+    "invoice": {
+      "dueDate": "Fecha de vencimiento",
+      "client": "Cliente"
+    },
     "successTitle": "Pago exitoso",
     "cancelTitle": "Cancelar",
     "enter_full_name": "Ingresa el nombre completo",

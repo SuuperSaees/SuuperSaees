@@ -21,6 +21,7 @@ export const formSchema = z.object({
     .min(0, 'Card expiration date is required')
     .optional(),
   card_cvv: z.string().min(0, 'Card CVV is required').optional(),
+  manual_payment_info: z.string().optional(),
 });
 
 export type FormData = z.infer<typeof formSchema>;
