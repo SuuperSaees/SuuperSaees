@@ -220,7 +220,7 @@ const BillingForm: React.FC<{
         router.push(data.paymentUrl);
       } else {
         router.push(
-          `${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}`,
+          `${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}&type=${invoice ? 'invoice' : 'service'}`,
         );
       }
 
