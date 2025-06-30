@@ -71,11 +71,12 @@ export function InvoiceInformationSection({
   clients,
 }: InvoiceInformationSectionProps) {
   const clientOptions: BaseOption[] = clients.map((client) => ({
-    value: client.user_client_id ?? "",
+    value: client.user?.email ?? "",
     label: client.user?.name ?? "",
     pictureUrl: client.user?.picture_url ?? "",
     organizationName: client.organization?.name ?? "",
   }));
+
   return (
     <fieldset className="text-gray-600 px-3 py-4">
       <legend className="sr-only">
@@ -104,11 +105,11 @@ export function InvoiceInformationSection({
                       clients.find(
                         (client) =>
                           client.organization_client_id === field.value,
-                      )?.user_client_id ?? ""
+                      )?.user?.email ?? ""
                     }
                     onValueChange={(value) => {
                       const selectedClient = clients.find(
-                        (client) => client.user_client_id === value,
+                        (client) => client.user?.email === value,
                       );
                       if (selectedClient) {
                         field.onChange(
