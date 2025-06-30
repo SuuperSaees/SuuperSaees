@@ -79,7 +79,6 @@ export class InvoicePaymentController {
     invoiceId: string,
     paymentData: {
       amount: number;
-      currency: string;
       paymentMethod: string;
       notes?: string;
       referenceNumber?: string;

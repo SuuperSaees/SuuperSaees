@@ -23,9 +23,8 @@ export class InvoicePaymentRepository {
         invoice_id: payload.invoice_id,
         payment_method: payload.payment_method,
         amount: payload.amount,
-        currency: payload.currency,
         status: payload.status ?? 'pending',
-        payment_date: payload.payment_date ?? new Date().toISOString(),
+        processed_at: new Date().toISOString(),
         reference_number: payload.reference_number,
         notes: payload.notes,
       })
@@ -92,7 +91,7 @@ export class InvoicePaymentRepository {
     const { data, error } = await client
       .from('invoice_payments')
       .update(payload)
-      .eq('id', payload.id)
+      .eq('id', payload.id ?? '')
       .select()
       .single();
 
