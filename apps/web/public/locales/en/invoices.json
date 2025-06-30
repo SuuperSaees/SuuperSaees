@@ -146,7 +146,8 @@
     "invoiceDraftCreated": "Invoice saved as draft",
     "invoiceUpdated": "Invoice updated successfully!",
     "invoiceDeleted": "Invoice deleted successfully!",
-    "emailSent": "Email sent successfully!"
+    "emailSent": "Email sent successfully!",
+    "pdfDownloaded": "PDF downloaded successfully!"
   },
   "loading": {
     "updating": "Updating...",

@@ -48,6 +48,7 @@ const BillingForm: React.FC<{
   manualPayment?: BillingAccounts.PaymentMethod;
 }> = ({
   service,
+  invoice,
   stripeId,
   logoUrl,
   sidebarBackgroundColor,
@@ -193,6 +194,7 @@ const BillingForm: React.FC<{
     const { success, error, accountAlreadyExists, data } =
       await handleSubmitPayment({
         service,
+        invoice,
         values: form.getValues(),
         stripeId,
         paymentMethodId: paymentMethodId,
@@ -498,8 +500,11 @@ const BillingForm: React.FC<{
                       {/* Información de pago manual */}
                       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                         <h3 className="font-inter mb-3 text-lg font-semibold text-gray-900">
-                          {t('checkout.manualPayment.title', 'Instrucciones de Pago Manual')}
+                          {t('checkout.manualPayment.title', 'Pago Manual')}
+                          
                         </h3>
+
+                           <span>{manualPayment?.custom_name}</span>
                         <div className="rounded-md bg-white p-3">
                           <div 
                             className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap"
@@ -544,7 +549,7 @@ const BillingForm: React.FC<{
                     className="w-full transform transition duration-300 ease-in-out hover:scale-105"
                     onClick={onSubmit}
                   >
-                    {service.test_period ? t('checkout.trial.subscribe') : service.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
+                    {service?.test_period ? t('checkout.trial.subscribe') : service?.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
                     {loading && <Spinner className="ml-2 h-4 w-4" />}
                   </ThemedButton>
                 </div>
@@ -567,6 +572,7 @@ const BillingForm: React.FC<{
                 <SideInfo
                   form={form}
                   service={service}
+                  invoice={invoice}
                   loading={loading}
                   errorMessage={errorMessage ?? ''}
                   accountId={stripeId}

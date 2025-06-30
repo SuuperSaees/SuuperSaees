@@ -50,9 +50,9 @@ export class InvoiceController {
     }
   }
 
-  async get(invoiceId: string): Promise<Invoice.Response> {
+  async get(invoiceId: string, adminActivated?: boolean): Promise<Invoice.Response> {
     try {
-      const invoiceRepository = new InvoiceRepository(this.client, undefined);
+      const invoiceRepository = new InvoiceRepository(this.client, adminActivated ? this.adminClient : undefined);
       const invoiceService = new InvoiceService(invoiceRepository);
       return await invoiceService.get(invoiceId);
     } catch (error) {
