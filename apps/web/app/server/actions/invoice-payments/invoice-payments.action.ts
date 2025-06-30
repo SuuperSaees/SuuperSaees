@@ -31,10 +31,10 @@ export async function processManualPayment(
   invoiceId: string,
   paymentData: {
     amount: number;
-    currency: string;
     paymentMethod: string;
     notes?: string;
     referenceNumber?: string;
+    sessionId?: string;
   }
 ) {
   return await getInvoicePaymentAction().processManualPayment(invoiceId, paymentData);

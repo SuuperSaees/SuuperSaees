@@ -93,8 +93,6 @@ async function ServiceCheckoutPage({
     };
   });
 
-  console.log('Payment methods:', paymentDetails);
-
   if(paymentDetails?.enableManualPayments && paymentDetails?.paymentMethodName && paymentDetails?.instructions) {
     paymentMethods.paymentMethods = [
       ...paymentMethods.paymentMethods,
@@ -119,6 +117,7 @@ async function ServiceCheckoutPage({
     console.error('Error fetching invoice:', error);
     return null;
   });
+
 }
 
   let accountId = tokendecoded?.account_id ?? '';

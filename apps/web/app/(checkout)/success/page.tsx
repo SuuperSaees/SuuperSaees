@@ -17,11 +17,12 @@ export const generateMetadata = async () => {
 };
 
 function PaymentSuccess({
-  searchParams: { accountAlreadyExists },
+  searchParams: { accountAlreadyExists, type },
 }: {
-  searchParams: { accountAlreadyExists: string };
+  searchParams: { accountAlreadyExists: string; type: string };
 }) {
   const accountAlreadyExistsBool = accountAlreadyExists === 'true';
+  const isInvoice = type === 'invoice';
   return (
     <PageBody className="flex h-screen items-center justify-center">
       <main className="m-10 mx-auto max-w-6xl rounded-md text-center border bg-white">
@@ -36,12 +37,12 @@ function PaymentSuccess({
           <div>
             <CheckCircle size={64} className="text-green-500 mx-auto" />
           </div>
-          {accountAlreadyExistsBool && (
+          {accountAlreadyExistsBool && !isInvoice && (
             <p className="mt-4">
               <Trans i18nKey="services:checkout:success:already_account"  />
             </p>
           )}
-          {!accountAlreadyExistsBool && (
+          {!accountAlreadyExistsBool && !isInvoice && (
             <p className="mt-4">
               <Trans i18nKey="services:checkout:success:not_account"  />
             </p>

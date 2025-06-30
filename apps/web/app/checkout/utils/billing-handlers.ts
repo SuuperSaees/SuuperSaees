@@ -474,10 +474,10 @@ export const handleInvoicePayment = async ({
       // Procesar pago manual para la invoice
       const payment = await processManualPayment(invoice.id, {
         amount: invoice.total_amount ?? 0,
-        currency: invoice.currency ?? 'USD',
         paymentMethod: 'manual',
         notes: values.manual_payment_info,
-        referenceNumber: sessionId,
+        referenceNumber: invoice.number,
+        sessionId: sessionId,
       });
 
       return {

@@ -35,20 +35,20 @@ export class InvoicePaymentService {
     invoiceId: string,
     paymentData: {
       amount: number;
-      currency: string;
       paymentMethod: string;
       notes?: string;
       referenceNumber?: string;
+      sessionId?: string;
     }
   ): Promise<InvoicePayment.Type> {
     const payment = await this.create({
       invoice_id: invoiceId,
-      payment_method: paymentData.paymentMethod,
+      payment_method: 'manual',
       amount: paymentData.amount,
-      currency: paymentData.currency,
-      status: 'completed', // Para pagos manuales los marcamos como completados
+      status: 'succeeded', 
       reference_number: paymentData.referenceNumber,
       notes: paymentData.notes,
+      session_id: paymentData.sessionId,
     });
 
     return payment;

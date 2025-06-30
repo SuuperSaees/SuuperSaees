@@ -68,7 +68,7 @@ class BillingWebhooksService {
       }
 
       // Check metadata type to determine if we should create a client or just process payment
-      const sessionMetadata = session.metadata as { type?: string; quantity?: number };
+      const sessionMetadata = session.metadata as { type?: string; quantity?: number; invoice_id?: string; service_id?: string };
       const sessionType = sessionMetadata?.type;
 
       console.log('Session type from metadata:', sessionType);
@@ -78,6 +78,17 @@ class BillingWebhooksService {
         console.log('Invoice payment detected, processing payment only (no client creation)');
         
         // For invoice payments, we just need to update the invoice payment status
+        const { error: updateError } = await this.adminClient
+          .from('invoices')
+          .update({ status: 'paid' })
+          .eq('id', sessionMetadata?.invoice_id ?? '')
+          .single();
+
+        if (updateError) {
+          console.error('Error updating invoice payment status:', updateError);
+          throw updateError;
+        }
+
         // The client and invoice should already exist
         // TODO: Add invoice payment processing logic here if needed
         console.log('Invoice payment processed for session:', checkout.provider_id);

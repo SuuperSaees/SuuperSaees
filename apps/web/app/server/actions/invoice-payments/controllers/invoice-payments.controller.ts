@@ -79,10 +79,10 @@ export class InvoicePaymentController {
     invoiceId: string,
     paymentData: {
       amount: number;
-      currency: string;
       paymentMethod: string;
       notes?: string;
       referenceNumber?: string;
+      sessionId?: string;
     }
   ): Promise<InvoicePayment.Type> {
     try {
