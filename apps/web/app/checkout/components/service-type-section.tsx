@@ -79,7 +79,7 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
       {service?.service_image ? (
         <img
           src={service?.service_image}
-          alt={service?.name}
+          alt={service?.name ?? ''}
           className="h-20 w-40 rounded-md object-cover"
         />
       ) : (
@@ -101,7 +101,7 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
 
         {/* Precio */}
         <span className={`text-base font-medium ${textColor}`}>
-          ${(service?.price ?? 0)?.toFixed(2)} {service?.currency?.toUpperCase()} {service?.recurring_subscription ? getPerRecurrence(service?.recurrence ?? '') : ''}
+          ${(service?.price ?? 0)?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'} {service?.recurring_subscription ? getPerRecurrence(service?.recurrence ?? '') : ''}
         </span>
       </div>
     </div>

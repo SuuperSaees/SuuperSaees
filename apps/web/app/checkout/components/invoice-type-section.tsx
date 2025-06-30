@@ -64,7 +64,7 @@ export const InvoiceTypeSection: React.FC<InvoiceTypeSectionProps> = ({
 
         {/* Precio total */}
         <span className={`text-base font-medium ${textColor}`}>
-          ${invoice.total_amount?.toFixed(2)} {invoice.currency?.toUpperCase()}
+          ${invoice.total_amount?.toFixed(2)} {invoice.currency?.toUpperCase() ?? 'USD'}
         </span>
       </div>
     </div>

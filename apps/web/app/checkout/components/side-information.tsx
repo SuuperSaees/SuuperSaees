@@ -333,7 +333,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
               isDarkBackground ? 'text-white' : 'text-gray-950'
             }`}
           >
-            ${(invoice.total_amount ?? 0).toFixed(2)} {invoice.currency?.toUpperCase()}
+            ${(invoice.total_amount ?? 0).toFixed(2)} {invoice.currency?.toUpperCase() ?? 'USD'}
           </div>
         </div>
       ) : !service?.test_period ? (
