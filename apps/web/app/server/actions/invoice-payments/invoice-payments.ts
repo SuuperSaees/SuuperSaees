@@ -39,10 +39,10 @@ export class InvoicePaymentAction extends BaseAction implements IInvoicePaymentA
     invoiceId: string,
     paymentData: {
       amount: number;
-      currency: string;
       paymentMethod: string;
       notes?: string;
       referenceNumber?: string;
+      sessionId?: string;
     }
   ): Promise<InvoicePayment.Type> {
     return await this.controller.processManualPayment(invoiceId, paymentData);

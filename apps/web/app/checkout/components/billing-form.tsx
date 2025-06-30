@@ -108,8 +108,8 @@ const BillingForm: React.FC<{
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
+      fullName: invoice ? invoice.client?.owner?.name ?? '' : '',
+      email: invoice ? invoice.client?.owner?.email ?? '' : '',
       address: '',
       city: '',
       country: '',
@@ -220,7 +220,7 @@ const BillingForm: React.FC<{
         router.push(data.paymentUrl);
       } else {
         router.push(
-          `${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}`,
+          `${baseUrl}/success?accountAlreadyExists=${accountAlreadyExists}&type=${invoice ? 'invoice' : 'service'}`,
         );
       }
 

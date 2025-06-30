@@ -15,7 +15,7 @@ export class InvoicePaymentRepository {
   }
 
   // * CREATE REPOSITORIES
-  async create(payload: InvoicePayment.Insert): Promise<InvoicePayment.Type> {
+  async create(payload: InvoicePayment.Request.Create): Promise<InvoicePayment.Type> {
     const client = this.adminClient ?? this.client;
     const { data, error } = await client
       .from('invoice_payments')
@@ -23,9 +23,8 @@ export class InvoicePaymentRepository {
         invoice_id: payload.invoice_id,
         payment_method: payload.payment_method,
         amount: payload.amount,
-        currency: payload.currency,
         status: payload.status ?? 'pending',
-        payment_date: payload.payment_date ?? new Date().toISOString(),
+        processed_at: new Date().toISOString(),
         reference_number: payload.reference_number,
         notes: payload.notes,
       })
@@ -34,6 +33,19 @@ export class InvoicePaymentRepository {
 
     if (error) {
       throw new Error(`Error creating invoice payment: ${error.message}`);
+    }
+
+    const { error: sessionError } = await client
+      .from('checkouts')
+      .insert({
+      provider: 'suuper',
+      provider_id: payload.session_id ?? '',
+      })
+      .select('id')
+      .single();
+
+    if (sessionError) {
+      throw new Error(`Error fetching checkout session: ${sessionError.message}`);
     }
 
     return data as InvoicePayment.Type;
@@ -92,7 +104,7 @@ export class InvoicePaymentRepository {
     const { data, error } = await client
       .from('invoice_payments')
       .update(payload)
-      .eq('id', payload.id)
+      .eq('id', payload.id ?? '')
       .select()
       .single();
 
