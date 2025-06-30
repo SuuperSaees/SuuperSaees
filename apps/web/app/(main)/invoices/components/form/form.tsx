@@ -56,7 +56,7 @@ export function InvoiceForm({
   ): InvoiceFormData => {
     return {
       clientId: invoice.client?.id ?? "",
-      dateOfIssue: new Date(invoice.issue_date),
+      dateOfIssue: invoice.issue_date ? new Date(invoice.issue_date) : new Date(),
       paymentMethod: "", // Set default since it's not in the response type
       paymentReference: "", // Set default since it's not in the response type
       lineItems: invoice.invoice_items?.map((item) => ({
@@ -138,6 +138,7 @@ export function InvoiceForm({
             control={form.control}
             setValue={form.setValue}
             services={services}
+            currency={services[0]?.currency ?? "USD"}
           />
 
           <InvoiceNotesSection control={form.control} />

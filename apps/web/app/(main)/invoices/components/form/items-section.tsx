@@ -3,14 +3,22 @@ import { Input } from "@kit/ui/input";
 import { Check, Plus, X } from "lucide-react";
 import { BaseOption, Combobox } from "~/components/ui/combobox";
 import { Trans } from "@kit/ui/trans";
-import { Control, useController, useFieldArray, UseFormSetValue, useWatch } from "react-hook-form";
+import {
+  Control,
+  useController,
+  useFieldArray,
+  UseFormSetValue,
+  useWatch,
+} from "react-hook-form";
 import { InvoiceFormData } from "../../schemas/schema";
 import { Service } from "~/lib/services.types";
+import { formatCurrency } from "@kit/shared/utils";
 
 interface InvoiceItemsSectionProps {
   control: Control<InvoiceFormData>;
   setValue: UseFormSetValue<InvoiceFormData>;
   services: Service.Relationships.Billing.BillingService[];
+  currency: string;
 }
 
 interface LineItemRowProps {
@@ -22,7 +30,10 @@ interface LineItemRowProps {
   canRemove: boolean;
   calculateLineTotal: (rate: number, quantity: number) => number;
   serviceOptions: BaseOption[];
+  currency: string;
 }
+
+// Utility function to format currency with proper separators
 
 const customRenderItem = (option: BaseOption, isSelected: boolean) => {
   return (
@@ -56,6 +67,7 @@ function LineItemRow({
   canRemove,
   calculateLineTotal,
   serviceOptions,
+  currency,
 }: LineItemRowProps) {
   const descriptionController = useController({
     control,
@@ -89,10 +101,11 @@ function LineItemRow({
             renderItem={customRenderItem}
             renderTrigger={customRenderTrigger}
             triggerClassName="border-none"
-            defaultValue={serviceIdController.field.value?.toString() || ''}
+            defaultValue={serviceIdController.field.value?.toString() || ""}
             onValueChange={(value) => {
               onServiceChange(Number(value));
             }}
+            className="w-full"
           />
           {descriptionController.fieldState.error && (
             <p className="text-red-500 text-xs font-medium px-2">
@@ -139,12 +152,13 @@ function LineItemRow({
         </div>
       </div>
       <div className="col-span-2 px-4 pt-2">
-        $
-        {calculateLineTotal(
-          rateController.field.value,
-          quantityController.field.value,
-        ).toFixed(2)}{" "}
-        USD
+        {formatCurrency(
+          currency,
+          calculateLineTotal(
+            rateController.field.value,
+            quantityController.field.value,
+          ),
+        )}{" "}
       </div>
       <div className="col-span-1 pt-2">
         {canRemove && (
@@ -167,6 +181,7 @@ export function InvoiceItemsSection({
   control,
   setValue,
   services,
+  currency = "USD",
 }: InvoiceItemsSectionProps) {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -188,15 +203,20 @@ export function InvoiceItemsSection({
     }
   };
 
-  console.log('fields', fields);
   const handleServiceChange = (index: number, serviceId: number) => {
     const selectedService = services.find(
       (service) => service.id === serviceId,
     );
     if (selectedService) {
-      setValue(`lineItems.${index}.description`, selectedService.name, { shouldValidate: true });
-      setValue(`lineItems.${index}.serviceId`, serviceId, { shouldValidate: true });
-      setValue(`lineItems.${index}.rate`, selectedService.price ?? 0, { shouldValidate: true });
+      setValue(`lineItems.${index}.description`, selectedService.name, {
+        shouldValidate: true,
+      });
+      setValue(`lineItems.${index}.serviceId`, serviceId, {
+        shouldValidate: true,
+      });
+      setValue(`lineItems.${index}.rate`, selectedService.price ?? 0, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -246,10 +266,13 @@ export function InvoiceItemsSection({
             index={index}
             fieldId={field.id}
             onRemove={() => removeLineItem(index)}
-            onServiceChange={(serviceId: number) => handleServiceChange(index, serviceId)}
+            onServiceChange={(serviceId: number) =>
+              handleServiceChange(index, serviceId)
+            }
             canRemove={fields.length > 1}
             calculateLineTotal={calculateLineTotal}
             serviceOptions={serviceOptions}
+            currency={currency}
           />
         ))}
 
@@ -272,13 +295,13 @@ export function InvoiceItemsSection({
             <span>
               <Trans i18nKey="invoices:creation.form.items.subtotal.title" />
             </span>
-            <span>${calculateSubtotal().toFixed(2)} USD</span>
+            <span>{formatCurrency(currency, calculateSubtotal())}</span>
           </div>
           <div className="flex justify-between font-medium text-lg py-3">
             <span>
               <Trans i18nKey="invoices:creation.form.items.total.title" />
             </span>
-            <span>${calculateSubtotal().toFixed(2)} USD</span>
+            <span>{formatCurrency(currency, calculateSubtotal())}</span>
           </div>
         </div>
       </div>

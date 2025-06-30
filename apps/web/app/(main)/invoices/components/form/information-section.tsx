@@ -28,11 +28,17 @@ const customRenderItem = (option: BaseOption, isSelected: boolean) => {
         alt={option.label}
         username={option.label}
       />
-      <span className="text-sm font-medium truncate  w-full">
-        {option.label}
-      </span>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="text-sm font-medium truncate">
+          {option.label}
+        </span>
+        <span className="text-xs text-gray-500 truncate text-start min-w-0">
+          {(option?.organizationName ?? "" ) as string}
+        </span>
+      </div>
+
       <Check
-        className={`w-4 h-4 shrink-0 ${isSelected ? "text-primary" : "text-transparent"}`}
+        className={`w-4 h-4 shrink-0 ml-auto ${isSelected ? "text-primary" : "text-transparent"}`}
       />
     </div>
   );
@@ -40,17 +46,22 @@ const customRenderItem = (option: BaseOption, isSelected: boolean) => {
 
 const customRenderTrigger = (selectedOption: BaseOption | null) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 w-full">
       <Avatar
         src={(selectedOption?.pictureUrl ?? "") as string}
         alt={selectedOption?.label ?? ""}
         username={selectedOption?.label ?? ""}
       />
-      <span className="text-sm font-medium truncate">
-        {selectedOption?.label ?? (
-          <Trans i18nKey="invoices:creation.form.information.client.placeholder" />
-        )}
-      </span>
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="text-sm font-medium truncate text-start">
+          {selectedOption?.label ?? (
+            <Trans i18nKey="invoices:creation.form.information.client.placeholder" />
+          )}
+        </span>
+        <span className="text-xs text-gray-500 truncate text-start min-w-0">
+          {(selectedOption?.organizationName ?? "") as string}
+        </span>
+      </div>
     </div>
   );
 };
@@ -59,12 +70,13 @@ export function InvoiceInformationSection({
   control,
   clients,
 }: InvoiceInformationSectionProps) {
-
   const clientOptions: BaseOption[] = clients.map((client) => ({
-    value: client.user_client_id ?? "",
+    value: client.user?.email ?? "",
     label: client.user?.name ?? "",
     pictureUrl: client.user?.picture_url ?? "",
+    organizationName: client.organization?.name ?? "",
   }));
+
   return (
     <fieldset className="text-gray-600 px-3 py-4">
       <legend className="sr-only">
@@ -89,13 +101,20 @@ export function InvoiceInformationSection({
                     renderItem={customRenderItem}
                     renderTrigger={customRenderTrigger}
                     triggerClassName="border-none"
-                    defaultValue={clients.find(client => client.organization_client_id === field.value)?.user_client_id ?? ''}
+                    defaultValue={
+                      clients.find(
+                        (client) =>
+                          client.organization_client_id === field.value,
+                      )?.user?.email ?? ""
+                    }
                     onValueChange={(value) => {
                       const selectedClient = clients.find(
-                        (client) => client.user_client_id === value
+                        (client) => client.user?.email === value,
                       );
                       if (selectedClient) {
-                        field.onChange(selectedClient.organization_client_id ?? "");
+                        field.onChange(
+                          selectedClient.organization_client_id ?? "",
+                        );
                       }
                     }}
                   />

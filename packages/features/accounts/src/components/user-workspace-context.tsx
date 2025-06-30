@@ -5,6 +5,7 @@ import { createContext } from 'react';
 import { User } from '@supabase/supabase-js';
 
 import { Tables } from '@kit/supabase/database';
+import { InvoiceSettings } from '../../../../../apps/web/app/server/actions/invoices/type-guards';
 
 export interface UserWorkspace {
   accounts: Array<{
@@ -39,6 +40,9 @@ export interface UserWorkspace {
       id: string | null;
       name: string | null;
     }[]
+    settings: {
+      billing: InvoiceSettings
+    }
   };
 
   agency: {

@@ -61,9 +61,9 @@ const InvoicesTable = ({
       case 'create':
         return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'download':
-        return ['agency_owner', 'agency_project_manager', 'client_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager', 'client_owner', 'client_member'].includes(accountRole);
       case 'view':
-        return ['agency_owner', 'agency_project_manager', 'client_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager', 'client_owner', 'client_member'].includes(accountRole);
       case 'edit':
         return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'delete':
@@ -73,7 +73,7 @@ const InvoicesTable = ({
       case 'requestPayment':
         return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'getPaymentLink':
-        return ['agency_owner', 'agency_project_manager', 'client_owner'].includes(accountRole);
+        return ['agency_owner', 'agency_project_manager', 'client_owner', 'client_member'].includes(accountRole);
       default:
         return false;
     }

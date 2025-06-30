@@ -28,9 +28,11 @@ async function CreateInvoicesPage() {
   const agencyId =
     (userRole.startsWith("agency_") ? organization.id : agency?.id) ?? "";
   const clients = (await getClients(agencyId)) as Client.Response[];
+  const filteredClients = clients.filter(
+    (client) => client.user?.role === "client_owner",
+  );
   const services =
     (await getServicesByOrganizationId()) as Service.Relationships.Billing.BillingService[];
-
 
   return (
     <PageBody className="h-full">
@@ -45,9 +47,9 @@ async function CreateInvoicesPage() {
         action={<InvoiceSettingsLink />}
         type="info"
       /> */}
-      <InvoiceForm 
-        clients={clients} 
-        services={services} 
+      <InvoiceForm
+        clients={filteredClients}
+        services={services}
         agencyId={agencyId}
         mode="create"
       />
