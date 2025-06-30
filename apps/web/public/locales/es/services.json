@@ -37,7 +37,7 @@
   "checkout": {
     "pay": "Pagar",
     "manualPayment": {
-      "title": "Instrucciones de Pago Manual",
+      "title": "Pago Manual",
       "description": "Puedes pagar el servicio más tarde. Por favor contáctanos para finalizar el pago.",
       "contactUs": "Contáctanos",
       "additionalInfo": "Información adicional",

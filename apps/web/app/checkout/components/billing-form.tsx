@@ -500,8 +500,11 @@ const BillingForm: React.FC<{
                       {/* Información de pago manual */}
                       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                         <h3 className="font-inter mb-3 text-lg font-semibold text-gray-900">
-                          {t('checkout.manualPayment.title', 'Instrucciones de Pago Manual')}
+                          {t('checkout.manualPayment.title', 'Pago Manual')}
+                          
                         </h3>
+
+                           <span>{manualPayment?.custom_name}</span>
                         <div className="rounded-md bg-white p-3">
                           <div 
                             className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap"
