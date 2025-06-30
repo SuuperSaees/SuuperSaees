@@ -151,7 +151,7 @@ function InvoiceSettings({ role }: InvoiceSettingsProps) {
     <div className="mt-4 w-full max-w-full pr-48 pb-32 space-y-8">
       <Form {...form}>
         {/* Invoice Management Toggle - Agency Owner Only */}
-        {canAccessInvoiceSection(userRole, "invoice_management") && (
+        {/* {canAccessInvoiceSection(userRole, "invoice_management") && (
           <>
             <div className="space-y-2">
               <div className="flex justify-between items-start">
@@ -175,10 +175,10 @@ function InvoiceSettings({ role }: InvoiceSettingsProps) {
             </div>
             <Separator />
           </>
-        )}
+        )} */}
 
         {/* Require Complete Address Toggle - Agency Owner Only */}
-        {canAccessInvoiceSection(userRole, "require_complete_address") && (
+        {/* {canAccessInvoiceSection(userRole, "require_complete_address") && (
           <>
             <div className="space-y-2">
               <div className="flex justify-between items-start">
@@ -207,7 +207,7 @@ function InvoiceSettings({ role }: InvoiceSettingsProps) {
             </div>
             <Separator />
           </>
-        )}
+        )} */}
 
         {/* Automatic Invoice Note Toggle - Agency Owner Only */}
         {canAccessInvoiceSection(userRole, "automatic_note") && (
@@ -215,7 +215,7 @@ function InvoiceSettings({ role }: InvoiceSettingsProps) {
             <div className="space-y-2">
               <div className="flex justify-between items-start">
                 <div className="w-[45%] pr-4">
-                  <label className="text-sm font-medium text-gray-900">
+                  <label className="text-sm font-bold text-gray-900 ">
                     {t("settings.automaticInvoiceNote.title")}
                   </label>
                   <p className="text-sm text-gray-600 mt-1">
@@ -235,7 +235,7 @@ function InvoiceSettings({ role }: InvoiceSettingsProps) {
 
             {/* Note Content */}
             {form.getValues("invoices.note.enabled") && (
-              <div className="space-y-2">
+              <div className="space-y-2 p-6 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-start">
                   <div className="w-[45%] pr-4">
                     <label className="text-sm font-medium text-gray-900">

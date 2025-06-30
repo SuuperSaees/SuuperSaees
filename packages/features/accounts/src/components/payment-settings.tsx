@@ -88,7 +88,7 @@ function PaymentSettings({ role: _role }: PaymentSettingsProps) {
         {/* Enable Manual Payments Toggle */}
         <div className="flex justify-between items-start">
           <div className="w-[45%] pr-4">
-            <label className="text-sm font-medium text-gray-900">
+            <label className="text-sm font-bold text-gray-900">
               {t('settings.enableManualPayments.title')}
             </label>
             <p className="text-sm text-gray-600 mt-1">
@@ -103,69 +103,72 @@ function PaymentSettings({ role: _role }: PaymentSettingsProps) {
           </div>
         </div>
 
-        <Separator />
+        {/* Conditional fields shown only when manual payments are enabled */}
+        {form.getValues('enableManualPayments') && (
+          <div className="p-6 space-y-6 bg-gray-50 rounded-lg">
+            {/* Payment Method Name */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t('settings.paymentMethodName.title')}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t('settings.paymentMethodName.description')}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="paymentMethodName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ThemedInput
+                          {...field}
+                          placeholder={t('settings.paymentMethodName.placeholder')}
+                          onBlur={(e: React.FocusEvent<HTMLInputElement>) => handleFieldChange('paymentMethodName', e.target.value)}
+                          className="text-gray-700"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
-        {/* Payment Method Name */}
-        <div className="flex justify-between items-start">
-          <div className="w-[45%] pr-4">
-            <label className="text-sm font-medium text-gray-900">
-              {t('settings.paymentMethodName.title')}
-            </label>
-            <p className="text-sm text-gray-600 mt-1">
-              {t('settings.paymentMethodName.description')}
-            </p>
-          </div>
-          <div className="flex-1">
-            <FormField
-              name="paymentMethodName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <ThemedInput
-                      {...field}
-                      placeholder={t('settings.paymentMethodName.placeholder')}
-                      onBlur={(e: React.FocusEvent<HTMLInputElement>) => handleFieldChange('paymentMethodName', e.target.value)}
-                      className="text-gray-700"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+            <Separator />
 
-        <Separator />
-
-        {/* Instructions */}
-        <div className="flex justify-between items-start">
-          <div className="w-[45%] pr-4">
-            <label className="text-sm font-medium text-gray-900">
-              {t('settings.instructions.title')}
-            </label>
-            <p className="text-sm text-gray-600 mt-1">
-              {t('settings.instructions.description')}
-            </p>
+            {/* Instructions */}
+            <div className="flex justify-between items-start">
+              <div className="w-[45%] pr-4">
+                <label className="text-sm font-medium text-gray-900">
+                  {t('settings.instructions.title')}
+                </label>
+                <p className="text-sm text-gray-600 mt-1">
+                  {t('settings.instructions.description')}
+                </p>
+              </div>
+              <div className="flex-1">
+                <FormField
+                  name="instructions"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder={t('settings.instructions.placeholder')}
+                          className="min-h-[120px] resize-none text-gray-700"
+                          onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => handleFieldChange('instructions', e.target.value)}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex-1">
-            <FormField
-              name="instructions"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder={t('settings.instructions.placeholder')}
-                      className="min-h-[120px] resize-none text-gray-700"
-                      onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) => handleFieldChange('instructions', e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+        )}
       </Form>
     </div>
   );
