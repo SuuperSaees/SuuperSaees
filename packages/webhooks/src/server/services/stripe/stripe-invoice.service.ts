@@ -369,15 +369,34 @@ export class StripeInvoiceService extends BaseWebhookService {
       processed_at: new Date().toISOString(),
     };
 
-    const { error: paymentError } = await this.adminClient
+    // Check if payment already exists for this provider_payment_id
+    const { data: existingPayment } = await this.adminClient
       .from('invoice_payments')
-      .upsert(paymentData, {
-        onConflict: 'invoice_id',
-      });
+      .select('id')
+      .eq('provider_payment_id', paymentData.provider_payment_id)
+      .single();
 
-    if (paymentError) {
-      console.error('Error recording invoice payment:', paymentError);
-      throw new Error(`Failed to record invoice payment: ${paymentError.message}`);
+
+    if (existingPayment) {
+      // Update existing payment
+      const { error: updateError } = await this.adminClient
+        .from('invoice_payments')
+        .update(paymentData)
+        .eq('id', existingPayment.id);
+
+        if (updateError) {
+          console.error('Error updating existing invoice payment:', updateError);
+          throw new Error(`Failed to update invoice payment: ${updateError.message}`);
+        }
+    } else {
+      // Insert new payment
+      const { error: insertError } = await this.adminClient
+        .from('invoice_payments')
+        .insert(paymentData);
+      if (insertError) {
+        console.error('Error inserting invoice payment:', insertError);
+        throw new Error(`Failed to insert invoice payment: ${insertError.message}`);
+      }
     }
   }
 }
