@@ -189,10 +189,14 @@ export class InvoiceRepository {
 
     // Apply filters using internal config
     if (config?.filters) {
-      const { status, customer_id, date_from, date_to } = config.filters;
+      const { status, customer_id, date_from, date_to, organization_id } = config.filters;
 
       if (status && status.length > 0) {
         query = query.in('status', status);
+      }
+
+      if (organization_id && organization_id.length > 0) {
+        query = query.in('client_organization_id', organization_id);
       }
 
       if (customer_id && customer_id.length > 0) {
@@ -228,10 +232,14 @@ export class InvoiceRepository {
 
     // Apply same filters to count query
     if (config?.filters) {
-      const { status, customer_id, date_from, date_to } = config.filters;
+      const { status, customer_id, date_from, date_to, organization_id } = config.filters;
 
       if (status && status.length > 0) {
         countQuery = countQuery.in('status', status);
+      }
+
+      if (organization_id && organization_id.length > 0) {
+        countQuery = countQuery.in('client_organization_id', organization_id);
       }
 
       if (customer_id && customer_id.length > 0) {
