@@ -145,7 +145,7 @@ export class InvoiceRepository {
           unit_price,
           total_price
         ),
-        invoice_payments!id(
+        invoice_payments(
           id,
           payment_method,
           amount,
