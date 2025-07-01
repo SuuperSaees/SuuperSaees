@@ -53,6 +53,8 @@ export const OrderHeader = ({
   const completedStatusId =
     agencyStatuses.find((s) => s.status_name === 'completed')?.id ?? null;
 
+  const hasExistingReview = order.reviews.some(review => review.order_id === order.id);
+
   return (
     <div className="lg:px-6.5 lg:pt-6">
       <div className="flex flex-wrap lg:flex-nowrap items-center">
@@ -64,7 +66,12 @@ export const OrderHeader = ({
           rolesThatCanEdit={rolesThatCanEdit}
         />
         {(userRole === 'client_owner' || userRole === 'client_member') && (
-          <ReviewDialog orderId={order.id} statusId={completedStatusId} className="w-fit" />
+          <ReviewDialog 
+            orderId={order.id} 
+            statusId={completedStatusId} 
+            className="w-fit"
+            hasExistingReview={hasExistingReview}
+          />
         )}
       </div>
       <div className="flex items-center">
