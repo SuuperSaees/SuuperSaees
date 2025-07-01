@@ -16,7 +16,6 @@ import {
   RotateCcw, 
   ChevronLeft, 
   ChevronRight,
-  X 
 } from 'lucide-react';
 import { usePDFManager } from '../../hooks/use-pdf-manager';
 
@@ -195,14 +194,6 @@ export const PDFPreviewDialog: React.FC<PDFPreviewDialogProps> = ({
             <DialogTitle className="text-lg font-semibold">
               {title}
             </DialogTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </DialogHeader>
 
