@@ -147,11 +147,15 @@ export class InvoiceRepository {
         ),
         invoice_payments(
           id,
+          invoice_id,
           payment_method,
           amount,
           status,
+          provider_charge_id,
+          reference_number,
+          notes,
           processed_by,
-          processed_at
+          processed_at,
         ),
         invoice_settings(
           id,
@@ -396,6 +400,17 @@ export class InvoiceRepository {
           updated_at,
           service_id
         ),
+        invoice_payments(
+          id,
+          invoice_id,
+          payment_method,
+          amount,
+          status,
+          reference_number,
+          notes,
+          processed_by,
+          processed_at
+        ),
         invoice_settings(
           id,
           organization_id,
@@ -471,6 +486,7 @@ export class InvoiceRepository {
           : null
       ),
       invoice_items: invoice.invoice_items ?? [],
+      invoice_payments: invoice.invoice_payments ?? [],
       invoice_settings: invoice.invoice_settings ?? [],
     } as Invoice.Response;
   }
