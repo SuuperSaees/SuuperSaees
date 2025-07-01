@@ -25,31 +25,46 @@ export const config = {
 const PATH_ROLE_RESTRICTIONS = [
   {
     path: '/briefs',
+    pattern: '^/briefs',
     allowedRoles: ['agency_project_manager', 'agency_owner'],
     redirectTo: '/orders', // Where to redirect if access is denied
   },
   {
     path: '/clients',
+    pattern: '^/clients',
     allowedRoles: ['agency_owner', 'agency_project_manager', 'agency_member'],
     redirectTo: '/orders',
   },
   {
     path: '/team',
+    pattern: '^/team',
     allowedRoles: ['agency_owner', 'agency_project_manager', 'agency_member'],
     redirectTo: '/orders',
   },
   {
     path: '/services',
+    pattern: '^/services',
     allowedRoles: ['agency_owner', 'agency_project_manager'],
     redirectTo: '/orders',
   },
   {
     path: '/invoices',
+    pattern: '^/invoices$',
     allowedRoles: ['agency_owner', 'agency_project_manager', 'client_owner', 'client_member'],
     redirectTo: '/orders',
   },
-
-] as const;
+  {
+    path: '/invoices/',
+    pattern: '^/invoices/.+',
+    allowedRoles: ['agency_owner', 'agency_project_manager'],
+    redirectTo: '/orders',
+  },
+] as const satisfies ReadonlyArray<{
+  path: string;
+  pattern?: string;
+  allowedRoles: readonly string[];
+  redirectTo: string;
+}>;
 
 /**
  * Check if a user role has access to a specific path
@@ -61,8 +76,9 @@ function checkRoleAccess(userRole: string, pathname: string):
   | { hasAccess: true; redirectTo: null }
   | { hasAccess: false; redirectTo: string } {
   for (const restriction of PATH_ROLE_RESTRICTIONS) {
-    // Check if the current path matches the restricted path
-    if (pathname.startsWith(restriction.path)) {
+    // Check if the current path matches the restricted path pattern
+    const pattern = restriction.pattern ? new RegExp(restriction.pattern) : null;
+    if (pattern ? pattern.test(pathname) : pathname.startsWith(restriction.path)) {
       // Check if the user's role is in the allowed roles list
       const hasAccess = (restriction.allowedRoles as readonly string[]).includes(userRole);
       
