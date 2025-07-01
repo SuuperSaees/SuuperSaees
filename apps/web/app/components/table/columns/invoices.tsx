@@ -286,10 +286,10 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
       try {
         // For now, use a placeholder email until client email field is available
         const result = await sendEmail(EMAIL.INVOICES.REQUEST_PAYMENT, {
-          to: invoice?.owner?.email ?? "", // TODO: Use invoice.client.email when available
+          to: invoice?.client?.owner?.email ?? "",
           userId: userId,
           invoiceNumber: invoice.number,
-          clientName: invoice.owner?.name ?? "",
+          clientName: invoice.client?.owner?.name ?? "",
           amount: "$" + (invoice.total_amount ?? 0),
           buttonUrl: invoice.checkout_url ?? undefined,
           agencyName: invoice.agency?.name ?? "",

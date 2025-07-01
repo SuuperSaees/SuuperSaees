@@ -31,7 +31,7 @@ export class InvoiceRepository {
     const { data, error } = await client
       .from('invoices') 
       .insert({
-        number: '',
+        number: 'dummy',
         client_organization_id: payload.client_organization_id,
         agency_id: payload.agency_id,
         issue_date: payload.issue_date,
@@ -129,7 +129,13 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          owner: accounts(
+            email,
+            name,
+            settings:user_settings(name)
+          ),
+          settings:organization_settings(key,value)
         ),
         invoice_items(
           id,
@@ -141,9 +147,13 @@ export class InvoiceRepository {
         ),
         invoice_payments(
           id,
+          invoice_id,
           payment_method,
           amount,
           status,
+          provider_charge_id,
+          reference_number,
+          notes,
           processed_by,
           processed_at
         ),
@@ -179,10 +189,14 @@ export class InvoiceRepository {
 
     // Apply filters using internal config
     if (config?.filters) {
-      const { status, customer_id, date_from, date_to } = config.filters;
+      const { status, customer_id, date_from, date_to, client_organization_id } = config.filters;
 
       if (status && status.length > 0) {
         query = query.in('status', status);
+      }
+
+      if (client_organization_id && client_organization_id.length > 0) {
+        query = query.in('client_organization_id', client_organization_id);
       }
 
       if (customer_id && customer_id.length > 0) {
@@ -218,10 +232,14 @@ export class InvoiceRepository {
 
     // Apply same filters to count query
     if (config?.filters) {
-      const { status, customer_id, date_from, date_to } = config.filters;
+      const { status, customer_id, date_from, date_to, client_organization_id } = config.filters;
 
       if (status && status.length > 0) {
         countQuery = countQuery.in('status', status);
+      }
+
+      if (client_organization_id && client_organization_id.length > 0) {
+        countQuery = countQuery.in('client_organization_id', client_organization_id);
       }
 
       if (customer_id && customer_id.length > 0) {
@@ -295,6 +313,15 @@ export class InvoiceRepository {
     // Transform data
     const transformedInvoices = paginatedInvoices?.map(invoice => ({
       ...invoice,
+      agency: invoice.agency ? {
+        ...invoice.agency,
+        picture_url: invoice.agency.settings?.find(setting => setting.key === 'logo_url')?.value ?? invoice.agency.picture_url,
+        owner: {
+          id: invoice.agency.owner_id,
+          name: invoice.agency.owner?.settings?.[0]?.name ?? invoice.agency.owner?.name ?? null,
+          email: invoice.agency.owner?.email ?? null,
+        },
+      } : null,
       client: invoice.client ? {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(invoice.client as any),
@@ -355,7 +382,13 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          owner_id,
+          accounts(
+            email,
+            name,
+            user_settings(name)
+          )
         ),
         invoice_items(
           id,
@@ -366,6 +399,17 @@ export class InvoiceRepository {
           created_at,
           updated_at,
           service_id
+        ),
+        invoice_payments(
+          id,
+          invoice_id,
+          payment_method,
+          amount,
+          status,
+          reference_number,
+          notes,
+          processed_by,
+          processed_at
         ),
         invoice_settings(
           id,
@@ -395,6 +439,23 @@ export class InvoiceRepository {
 
     return {
       ...invoice,
+            agency: invoice.agency ? {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(invoice.agency as any),
+        owner: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (invoice.agency as any).owner_id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          name: (invoice.agency as any).accounts?.user_settings?.[0]?.name ?? (invoice.agency as any).accounts?.name ?? null,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          email: (invoice.agency as any).accounts?.email ?? null,
+        },
+        name: Array.isArray(invoice.agency) ?
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          invoice.agency[0]?.name : (invoice.agency as any).name,
+        picture_url: Array.isArray(invoice.agency) ?
+          invoice.agency[0]?.picture_url : (invoice.agency as any).picture_url,
+      } : null,
       client: Array.isArray(invoice.client) ? {
         ...invoice.client[0],
         owner: {
@@ -424,8 +485,8 @@ export class InvoiceRepository {
             }
           : null
       ),
-      agency: Array.isArray(invoice.agency) ? invoice.agency[0] ?? null : invoice.agency ?? null,
       invoice_items: invoice.invoice_items ?? [],
+      invoice_payments: invoice.invoice_payments ?? [],
       invoice_settings: invoice.invoice_settings ?? [],
     } as Invoice.Response;
   }
