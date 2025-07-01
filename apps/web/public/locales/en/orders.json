@@ -89,6 +89,8 @@
       "files": "Files"
     },
     "dialog": {
+      "titleCompleteOrder": "Complete order",
+      "descriptionCompleteOrder": "This order already has a review. Do you want to mark it as completed?",
       "button": "Mark as completed",
       "title": "Leave a review",
       "description": "Tell us about your experience with this project!",
