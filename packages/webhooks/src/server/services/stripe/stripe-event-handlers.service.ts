@@ -14,7 +14,7 @@ export class StripeEventHandlersService extends BaseWebhookService {
   private readonly paymentService: StripePaymentService;
 
   constructor(adminClient: SupabaseClient<Database>) {
-    super(adminClient);
+    super(adminClient, '');
     this.subscriptionService = new StripeSubscriptionService(adminClient);
     this.invoiceService = new StripeInvoiceService(adminClient);
     this.paymentService = new StripePaymentService(adminClient);
