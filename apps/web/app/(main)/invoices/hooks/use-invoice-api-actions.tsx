@@ -85,8 +85,11 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
     const dueDate = new Date(data.dateOfIssue);
     dueDate.setDate(dueDate.getDate() + 30);
 
+    const invoiceSettings = []
     // Build agency invoice settings
     const agencyinvoiceSettings = agencybillingInfo?.information ? {
+      invoice_id: "",
+      organization_id: agencyId,
       address_1: agencybillingInfo.information.address_1,
       address_2: agencybillingInfo.information.address_2,
       city: agencybillingInfo.information.city,
@@ -100,6 +103,8 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
 
     // Build client invoice settings
     const clientinvoiceSettings = clientbillingInfo?.information ? {
+      invoice_id: "",
+      organization_id: clientOrganizationId,
       address_1: clientbillingInfo.information.address_1,
       address_2: clientbillingInfo.information.address_2,
       city: clientbillingInfo.information.city,
@@ -111,7 +116,12 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
       tax_id_number: clientbillingInfo.information.tax_id_number,
     } : null;
 
-    const invoiceSettings = [agencyinvoiceSettings, clientinvoiceSettings].filter(Boolean);
+    if (agencyinvoiceSettings) {
+      invoiceSettings.push(agencyinvoiceSettings)
+    }
+    if (clientinvoiceSettings) {
+      invoiceSettings.push(clientinvoiceSettings)
+    }
 
     return {
       ...(isUpdate && invoice ? { id: invoice.id } : {}),
