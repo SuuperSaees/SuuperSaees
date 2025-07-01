@@ -27,8 +27,12 @@ interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
 
 const InvoicesTable = ({
   initialData,
+  queryKey = ['invoices'],
+  queryFn,
 }: {
   initialData?: Pagination.Response<Invoice.Response>;
+  queryKey: string[];
+  queryFn?: () => Promise<Pagination.Response<Invoice.Response>>;
 }) => {
   const { workspace } = useUserWorkspace();
   const accountRole = workspace?.role ?? '';
@@ -41,14 +45,14 @@ const InvoicesTable = ({
     isLoading: invoicesAreLoading,
     pagination,
   } = useDataPagination<Invoice.Response>({
-    queryKey: ['invoices'],
-    queryFn: ({ page, limit, filters }) =>
+    queryKey,
+    queryFn: queryFn ?? (({ page, limit, filters }) =>
       getInvoices({
         pagination: { page, limit },
         filters: filters?.searchTerm
           ? { searchTerm: filters.searchTerm }
           : undefined,
-      }),
+      })),
     initialData,
     config: {
       limit: config.rowsPerPage.value,
@@ -97,7 +101,7 @@ const InvoicesTable = ({
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-5">
       <div className="flex flex-wrap w-fit justify-end gap-4 sm:flex-nowrap ml-auto">
         <SearchInput
           placeholder={t('invoices:search')}
@@ -129,7 +133,7 @@ const InvoicesTable = ({
           configs={extendedConfig}
         />
       )}
-    </>
+    </div>
   );
 };
 
