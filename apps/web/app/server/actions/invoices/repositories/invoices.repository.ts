@@ -129,7 +129,13 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          owner_id,
+          accounts(
+            email,
+            name,
+            user_settings(name)
+          )
         ),
         invoice_items(
           id,
@@ -295,6 +301,23 @@ export class InvoiceRepository {
     // Transform data
     const transformedInvoices = paginatedInvoices?.map(invoice => ({
       ...invoice,
+      agency: invoice.agency ? {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(invoice.agency as any),
+        owner: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (invoice.agency as any).owner_id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          name: (invoice.agency as any).accounts?.user_settings?.[0]?.name ?? (invoice.agency as any).accounts?.name ?? null,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          email: (invoice.agency as any).accounts?.email ?? null,
+        },
+        name: Array.isArray(invoice.agency) ?
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          invoice.agency[0]?.name : (invoice.agency as any).name,
+        picture_url: Array.isArray(invoice.agency) ?
+          invoice.agency[0]?.picture_url : (invoice.agency as any).picture_url,
+      } : null,
       client: invoice.client ? {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(invoice.client as any),
@@ -355,7 +378,13 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          owner_id,
+          accounts(
+            email,
+            name,
+            user_settings(name)
+          )
         ),
         invoice_items(
           id,
