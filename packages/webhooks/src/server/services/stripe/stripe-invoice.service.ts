@@ -24,6 +24,12 @@ export class StripeInvoiceService extends BaseWebhookService {
 
       const invoice = event.data.object;
 
+      // Check if the invoice is already processed
+      if(invoice.metadata?.suuper_invoice_id) {
+        console.log('Invoice already processed:', invoice.metadata.suuper_invoice_id);
+        return;
+      }
+
       const retryOperation = new RetryOperationService(
         async () => {
           // Search for the billing account by Stripe account ID
@@ -99,6 +105,13 @@ export class StripeInvoiceService extends BaseWebhookService {
   async handleInvoiceUpdated(event: any) {
     try {
       const invoice = event;
+
+      // Check if the invoice is already processed
+      if(invoice.metadata?.suuper_invoice_id) {
+        console.log('Invoice already processed:', invoice.metadata.suuper_invoice_id);
+        return;
+      }
+
 
       // Search for the existing invoice in our database
       const { data: existingInvoice, error: invoiceError } = await this.adminClient
@@ -356,13 +369,34 @@ export class StripeInvoiceService extends BaseWebhookService {
       processed_at: new Date().toISOString(),
     };
 
-    const { error: paymentError } = await this.adminClient
+    // Check if payment already exists for this provider_payment_id
+    const { data: existingPayment } = await this.adminClient
       .from('invoice_payments')
-      .insert(paymentData);
+      .select('id')
+      .eq('provider_payment_id', paymentData.provider_payment_id)
+      .single();
 
-    if (paymentError) {
-      console.error('Error recording invoice payment:', paymentError);
-      throw new Error(`Failed to record invoice payment: ${paymentError.message}`);
+
+    if (existingPayment) {
+      // Update existing payment
+      const { error: updateError } = await this.adminClient
+        .from('invoice_payments')
+        .update(paymentData)
+        .eq('id', existingPayment.id);
+
+        if (updateError) {
+          console.error('Error updating existing invoice payment:', updateError);
+          throw new Error(`Failed to update invoice payment: ${updateError.message}`);
+        }
+    } else {
+      // Insert new payment
+      const { error: insertError } = await this.adminClient
+        .from('invoice_payments')
+        .insert(paymentData);
+      if (insertError) {
+        console.error('Error inserting invoice payment:', insertError);
+        throw new Error(`Failed to insert invoice payment: ${insertError.message}`);
+      }
     }
   }
 }
