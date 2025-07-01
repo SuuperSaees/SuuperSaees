@@ -155,7 +155,7 @@ export class InvoiceRepository {
           reference_number,
           notes,
           processed_by,
-          processed_at,
+          processed_at
         ),
         invoice_settings(
           id,
