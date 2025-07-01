@@ -9,6 +9,14 @@ export namespace InvoiceSettings {
   export type Response = InvoiceSettings.Type;
 }
 
+export namespace InvoicePayment {
+  export type Type = Database['public']['Tables']['invoice_payments']['Row'];
+  export type Insert = Database['public']['Tables']['invoice_payments']['Insert'];
+  export type Update = Database['public']['Tables']['invoice_payments']['Update'];
+
+  export type Response = InvoicePayment.Type;
+}
+
 export namespace Invoice {
   export type Type = Database['public']['Tables']['invoices']['Row'];
   export type Insert = Database['public']['Tables']['invoices']['Insert'];
@@ -29,6 +37,7 @@ export namespace Invoice {
   export type Response = Invoice.Type & {
     client: Organization.Response | null;
     agency: Organization.Response | null;
+    invoice_payments?: InvoicePayment.Response[] | null;
     invoice_items?: InvoiceItem.Response[] | null;
     invoice_settings?: InvoiceSettings.Response[] | null;
     total_amount?: number;

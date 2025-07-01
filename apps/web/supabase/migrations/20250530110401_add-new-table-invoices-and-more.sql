@@ -494,8 +494,7 @@ BEGIN
     FROM invoices 
     WHERE agency_id = NEW.agency_id 
     AND client_organization_id = NEW.client_organization_id
-    AND number LIKE 'INV-%-' || client_hash || '-%'
-    AND deleted_on IS NULL;
+    AND number LIKE 'INV-%-' || client_hash || '-%';
     
     -- Generate new invoice number: INV-YYYYMMDD-CLIENTHASH-SEQUENCE
     new_invoice_number := 'INV-' || current_date_str || '-' || client_hash || '-' || next_sequence;
