@@ -106,11 +106,11 @@
   },
   "requestPayment": {
     "subject": "Payment requested for invoice ${invoiceNumber}",
-    "body": "We hope this message finds you well. We would like to remind you that invoice ${invoiceNumber} for ${clientName} in the amount of ${amount} is pending payment.",
-    "greeting": "Hello ${clientName}!",
+    "body": "You have a new pending invoice for ${amount}.",
+    "greeting": "Hi ${clientName},",
     "farewell": "Best regards,",
     "buttonText": "Pay Now",
-    "footer": "This email was sent to ${toEmail}. If you have any questions, please contact us.",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
     "at": "at"
   },
   "paymentReceived": {

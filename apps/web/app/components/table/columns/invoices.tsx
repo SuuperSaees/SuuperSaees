@@ -286,10 +286,10 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
       try {
         // For now, use a placeholder email until client email field is available
         const result = await sendEmail(EMAIL.INVOICES.REQUEST_PAYMENT, {
-          to: invoice?.owner?.email ?? "", // TODO: Use invoice.client.email when available
+          to: invoice?.client?.owner?.email ?? "", // TODO: Use invoice.client.email when available
           userId: userId,
           invoiceNumber: invoice.number,
-          clientName: invoice.owner?.name ?? "",
+          clientName: invoice.client?.owner?.name ?? "",
           amount: "$" + (invoice.total_amount ?? 0),
           buttonUrl: invoice.checkout_url ?? undefined,
           agencyName: invoice.agency?.name ?? "",
@@ -348,16 +348,6 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="flex flex-col gap-2 p-2">
-          {hasPermission && hasPermission("download") && (
-            <DropdownMenuItem
-              onClick={handleDownload}
-              className="text-gray-600 cursor-pointer"
-            >
-              <Download className="mr-2 h-4 w-4" />
-              {t("download")}
-            </DropdownMenuItem>
-          )}
-
           {hasPermission && hasPermission("view") && (
             <DropdownMenuItem
               onClick={handlePreview}
@@ -367,7 +357,15 @@ function InvoiceActions({ invoice, hasPermission }: InvoiceActionsProps) {
               {t("view")}
             </DropdownMenuItem>
           )}
-
+          {hasPermission && hasPermission("download") && (
+            <DropdownMenuItem
+              onClick={handleDownload}
+              className="text-gray-600 cursor-pointer"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              {t("download")}
+            </DropdownMenuItem>
+          )}
           {hasPermission &&
             hasPermission("markAsPaid") &&
             invoice.status !== "paid" && (
