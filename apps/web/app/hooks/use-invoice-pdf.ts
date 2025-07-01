@@ -138,7 +138,7 @@ export const useInvoicePDF = () => {
         pdf.roundedRect(margin, yPosition, logoSize, logoSize, 2, 2, 'F');
         
         pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(8);
+        pdf.setFontSize(11);
         pdf.setFont('helvetica', 'bold');
         const companyInitials = companyName.substring(0, 2).toUpperCase();
         pdf.text(companyInitials, margin + logoSize/2, yPosition + 7, { align: 'center' });
@@ -181,7 +181,7 @@ export const useInvoicePDF = () => {
       const sectionWidth = (pageWidth - 2 * margin - 20) / 2;
       
       // FROM section
-      pdf.setFontSize(10);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...mediumGray);
       pdf.text('FROM', margin, yPosition);
@@ -198,7 +198,7 @@ export const useInvoicePDF = () => {
         pdf.setFillColor(...darkGray);
         pdf.circle(margin + avatarSize/2, yPosition + avatarSize/2, avatarSize/2, 'F');
         pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(10);
+        pdf.setFontSize(11);
         pdf.setFont('helvetica', 'bold');
         const companyInitials = companyName.substring(0, 2).toUpperCase();
         pdf.text(companyInitials, margin + avatarSize/2, yPosition + avatarSize/2 + 2, { align: 'center' });
@@ -206,25 +206,33 @@ export const useInvoicePDF = () => {
       
       // Company details
       pdf.setTextColor(...darkGray);
-      pdf.setFontSize(12);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.text(companyName, margin + 20, yPosition + 6);
       
       // Additional agency info (placeholder for future fields)
-      pdf.setFontSize(9);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'normal');
       pdf.setTextColor(...mediumGray);
       pdf.text(invoice.agency?.owner?.email ?? '', margin + 20, yPosition + 12);
       
       // Contact info placeholders (will be dynamic when fields are added to Organization type)
-      pdf.setFontSize(8);
-      pdf.text(invoice.agency?.address ?? '', margin + 20, yPosition + 20);
-      pdf.text(`${invoice.agency?.city ?? ''}, ${invoice.agency?.state ?? ''}, ${invoice.agency?.zip ?? ''}`, margin + 20, yPosition + 26);
-      pdf.text(invoice.agency?.tax_id ?? '', margin + 20, yPosition + 32);
+      const agencyBillingInfo = invoice.invoice_settings?.find(setting => setting.organization_id === invoice.agency?.id);
+      pdf.setFontSize(11);
+      // Address info with consistent formatting
+      pdf.text(agencyBillingInfo?.address_1 ?? '', margin + 20, yPosition + 20);
+      pdf.text(agencyBillingInfo?.address_2 ?? '', margin + 20, yPosition + 26);
+              pdf.text(`${agencyBillingInfo?.city ?? ''}, ${agencyBillingInfo?.state ?? ''}, ${agencyBillingInfo?.postal_code ?? ''}`, margin + 20, yPosition + 32);
+      pdf.text(agencyBillingInfo?.country ?? '', margin + 20, yPosition + 38);
+      
+      // Tax ID with label
+      if (agencyBillingInfo?.tax_id_number) {
+        pdf.text(`Tax ID: ${agencyBillingInfo.tax_id_number}`, margin + 20, yPosition + 44);
+      }
 
       // TO section (right side)
       const toStartX = margin + sectionWidth + 20;
-      pdf.setFontSize(10);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...mediumGray);
       pdf.text('TO', toStartX, yPosition - 8);
@@ -242,7 +250,7 @@ export const useInvoicePDF = () => {
           pdf.setFillColor(254, 243, 199); // Light yellow background
           pdf.circle(toStartX + avatarSize/2, yPosition + avatarSize/2, avatarSize/2, 'F');
           pdf.setTextColor(146, 64, 14); // Dark yellow text
-          pdf.setFontSize(10);
+          pdf.setFontSize(11);
           pdf.setFont('helvetica', 'bold');
           const clientInitials = clientName.substring(0, 2).toUpperCase();
           pdf.text(clientInitials, toStartX + avatarSize/2, yPosition + avatarSize/2 + 2, { align: 'center' });
@@ -250,33 +258,41 @@ export const useInvoicePDF = () => {
         
         // Client details
         pdf.setTextColor(...darkGray);
-        pdf.setFontSize(12);
+        pdf.setFontSize(11);
         pdf.setFont('helvetica', 'bold');
         pdf.text(clientName, toStartX + 20, yPosition + 6);
         
-        // Client contact info (placeholder for future fields)
-        pdf.setFontSize(9);
+        // Client contact info
+        pdf.setFontSize(11);
         pdf.setFont('helvetica', 'normal');
         pdf.setTextColor(...mediumGray);
         pdf.text(invoice.client?.owner?.email ?? '', toStartX + 20, yPosition + 12);
         
-        // Contact info placeholders
-        pdf.setFontSize(8);
-        pdf.text(invoice.client?.address ?? '', toStartX + 20, yPosition + 20);
-        pdf.text(`${invoice.client?.settings?.city ?? ''}, ${invoice.client?.settings?.state ?? ''}, ${invoice.client?.zip ?? ''}`, toStartX + 20, yPosition + 26);
-        pdf.text(invoice.client?.tax_id ?? '', toStartX + 20, yPosition + 32);
+        // Contact info with consistent formatting
+        const clientBillingInfo = invoice.invoice_settings?.find(setting => setting.organization_id === invoice.client?.id);
+        pdf.setFontSize(11);
+        pdf.text(clientBillingInfo?.address_1 ?? '', toStartX + 20, yPosition + 20);
+        pdf.text(clientBillingInfo?.address_2 ?? '', toStartX + 20, yPosition + 26);
+                  pdf.text(`${clientBillingInfo?.city ?? ''}, ${clientBillingInfo?.state ?? ''}, ${clientBillingInfo?.postal_code ?? ''}`, toStartX + 20, yPosition + 32);
+        pdf.text(clientBillingInfo?.country ?? '', toStartX + 20, yPosition + 38);
+        
+        // Tax ID with label
+        if (clientBillingInfo?.tax_id_number) {
+          pdf.text(`Tax ID: ${clientBillingInfo.tax_id_number}`, toStartX + 20, yPosition + 44);
+        }
       } else {
         // Placeholder if no client
-        pdf.setFontSize(9);
+        pdf.setFontSize(11);
         pdf.setTextColor(...mediumGray);
         pdf.text('Client information not available', toStartX + 20, yPosition + 6);
       }
 
-      yPosition += 50;
+      // Add more space between FROM/TO sections and Items table
+      yPosition += 70; // Increased from 50 to 80 for better spacing
 
       // Items Table
       // Table header
-      pdf.setFontSize(10);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(...mediumGray);
       
@@ -315,7 +331,7 @@ export const useInvoicePDF = () => {
             yPosition = margin;
             
             // Re-draw table header on new page
-            pdf.setFontSize(10);
+            pdf.setFontSize(11);
             pdf.setFont('helvetica', 'bold');
             pdf.setTextColor(...mediumGray);
             
@@ -396,10 +412,42 @@ export const useInvoicePDF = () => {
 
       // Total (larger and prominent)
       pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(13);
+      pdf.setFontSize(11);
       pdf.setTextColor(...darkGray);
       pdf.text('Total', totalsStartX, yPosition);
       pdf.text(formatCurrency(total, invoice.currency), totalsValueX, yPosition, { align: 'right' });
+
+      // Add notes section if available
+      if (invoice.notes) {
+        yPosition += 30;
+        
+        // Notes header
+        pdf.setFontSize(11);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(...mediumGray);
+        pdf.text('Notes', margin, yPosition);
+        
+        // Notes content
+        yPosition += 8;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.setTextColor(...darkGray);
+        
+        // Split notes into lines if they're too long
+        const maxWidth = pageWidth - (2 * margin);
+        const lines = pdf.splitTextToSize(invoice.notes, maxWidth);
+        
+        // Check if we need a new page for notes
+        if (yPosition + (lines.length * 5) > pageHeight - margin) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+        
+        (lines as string[]).forEach((line: string) => {
+          pdf.text(line, margin, yPosition);
+          yPosition += 5;
+        });
+      }
 
       return pdf.output('blob');
     } catch (error) {
