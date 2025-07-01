@@ -130,12 +130,12 @@ export class InvoiceRepository {
           name,
           slug,
           picture_url,
-          owner_id,
-          accounts(
+          owner: accounts(
             email,
             name,
-            user_settings(name)
-          )
+            settings:user_settings(name)
+          ),
+          settings:organization_settings(key,value)
         ),
         invoice_items(
           id,
@@ -314,21 +314,13 @@ export class InvoiceRepository {
     const transformedInvoices = paginatedInvoices?.map(invoice => ({
       ...invoice,
       agency: invoice.agency ? {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(invoice.agency as any),
+        ...invoice.agency,
+        picture_url: invoice.agency.settings?.find(setting => setting.key === 'logo_url')?.value ?? invoice.agency.picture_url,
         owner: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          id: (invoice.agency as any).owner_id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          name: (invoice.agency as any).accounts?.user_settings?.[0]?.name ?? (invoice.agency as any).accounts?.name ?? null,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          email: (invoice.agency as any).accounts?.email ?? null,
+          id: invoice.agency.owner_id,
+          name: invoice.agency.owner?.settings?.[0]?.name ?? invoice.agency.owner?.name ?? null,
+          email: invoice.agency.owner?.email ?? null,
         },
-        name: Array.isArray(invoice.agency) ?
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          invoice.agency[0]?.name : (invoice.agency as any).name,
-        picture_url: Array.isArray(invoice.agency) ?
-          invoice.agency[0]?.picture_url : (invoice.agency as any).picture_url,
       } : null,
       client: invoice.client ? {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
