@@ -129,7 +129,14 @@ export class InvoiceRepository {
           id,
           name,
           slug,
-          picture_url
+          picture_url,
+          owner: accounts(
+            email,
+            name,
+            settings:user_settings(name)
+          ),
+          settings:organization_settings(key,value)
+          
         ),
         invoice_items(
           id,
@@ -295,6 +302,15 @@ export class InvoiceRepository {
     // Transform data
     const transformedInvoices = paginatedInvoices?.map(invoice => ({
       ...invoice,
+      agency: invoice.agency ? {
+        ...invoice.agency,
+        picture_url: invoice.agency.settings?.find(setting => setting.key === 'logo_url')?.value ?? invoice.agency.picture_url,
+        owner: {
+          id: invoice.agency.owner_id,
+          name: invoice.agency.owner?.settings?.[0]?.name ?? invoice.agency.owner?.name ?? null,
+          email: invoice.agency.owner?.email ?? null,
+        },
+      } : null,
       client: invoice.client ? {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(invoice.client as any),
