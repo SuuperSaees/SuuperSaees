@@ -24,6 +24,12 @@ export class StripeInvoiceService extends BaseWebhookService {
 
       const invoice = event.data.object;
 
+      // Check if the invoice is already processed
+      if(invoice.metadata?.suuper_invoice_id) {
+        console.log('Invoice already processed:', invoice.metadata.suuper_invoice_id);
+        return;
+      }
+
       const retryOperation = new RetryOperationService(
         async () => {
           // Search for the billing account by Stripe account ID
@@ -99,6 +105,13 @@ export class StripeInvoiceService extends BaseWebhookService {
   async handleInvoiceUpdated(event: any) {
     try {
       const invoice = event;
+
+      // Check if the invoice is already processed
+      if(invoice.metadata?.suuper_invoice_id) {
+        console.log('Invoice already processed:', invoice.metadata.suuper_invoice_id);
+        return;
+      }
+
 
       // Search for the existing invoice in our database
       const { data: existingInvoice, error: invoiceError } = await this.adminClient
@@ -358,7 +371,9 @@ export class StripeInvoiceService extends BaseWebhookService {
 
     const { error: paymentError } = await this.adminClient
       .from('invoice_payments')
-      .insert(paymentData);
+      .upsert(paymentData, {
+        onConflict: 'invoice_id',
+      });
 
     if (paymentError) {
       console.error('Error recording invoice payment:', paymentError);
