@@ -31,7 +31,7 @@ export class InvoiceRepository {
     const { data, error } = await client
       .from('invoices') 
       .insert({
-        number: '',
+        number: 'dummy',
         client_organization_id: payload.client_organization_id,
         agency_id: payload.agency_id,
         issue_date: payload.issue_date,
