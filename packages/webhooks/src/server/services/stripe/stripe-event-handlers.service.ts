@@ -26,6 +26,10 @@ export class StripeEventHandlersService extends BaseWebhookService {
         try {
           if (stripeAccountId) {
             // Search organization by accountId
+
+            if(data.metadata.suuper_invoice_id) {
+             await this.handleInvoicePayment(data)
+            }
             const {
               data: accountDataAgencyOwnerData,
               error: accountDataAgencyOwnerError,

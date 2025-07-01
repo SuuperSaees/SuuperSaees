@@ -20,6 +20,7 @@ import OrdersSection from './orders';
 import ServiceSection from './services';
 import { Spinner } from '@kit/ui/spinner';
 import MemberSection from './members';
+import InvoicesSection from './invoices';
 
 // Dynamically import button components
 const MemberButtonTriggers = dynamic(() => import('./member-button-triggers'), {
@@ -125,8 +126,8 @@ function SectionView({
 
   // Define base tabs that are always available
   const baseTabs = availableTabsBasedOnRole.has(currentUserRole)
-    ? ['orders', 'members', 'services', 'files']
-    : ['members', 'services', 'orders'];
+    ? ['orders', 'members', 'services', 'files', 'invoices']
+    : ['members', 'services', 'orders', 'invoices'];
 
   // Use our new EmbedTabsContainer to manage embed tabs
   const {
@@ -149,7 +150,7 @@ function SectionView({
     },
     getTabLabel: (option) => {
       // For standard tabs, use translation
-      if (['orders', 'members', 'services', 'files'].includes(option)) {
+      if (['orders', 'members', 'services', 'files', 'invoices'].includes(option)) {
         return t(`organizations.${option}.title`)
           .split('')
           .map((char, index) => (index === 0 ? char.toUpperCase() : char))
@@ -177,7 +178,6 @@ function SectionView({
       <OrdersSection
         key={'orders'}
         organizationId={clientOrganizationId}
-        agencyId={agencyId}
         showCardStats={showCardStats}
       />,
     ],
@@ -207,6 +207,13 @@ function SectionView({
         key={'services'}
         organizationId={clientOrganizationId}
         currentUserRole={currentUserRole}
+      />,
+    ],
+    [
+      'invoices',
+      <InvoicesSection
+        key={'invoices'}
+        clientOrganizationId={clientOrganizationId}
       />,
     ],
   ]);
