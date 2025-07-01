@@ -13,6 +13,7 @@ export interface PaginationConfig {
   filters?: {
     status?: string[];
     customer_id?: string[];
+    client_organization_id?: string[];
     organization_id?: string[];
     date_from?: string;
     date_to?: string;

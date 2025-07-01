@@ -68,6 +68,7 @@ export const invoicesColumns = (
       accessorKey: "payment_method",
       header: t("invoices:paymentMethod"),
       cell: ({ row }) => {
+        console.log("DEBUG - row.original:", row.original);
         const paymentMethod: string =
           row.original?.invoice_payments?.[0]?.payment_method ?? "-";
         // returns => bank_account = > Bank account, manual => Manual

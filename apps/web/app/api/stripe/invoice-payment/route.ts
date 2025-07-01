@@ -247,20 +247,6 @@ export async function POST(request: NextRequest) {
         .update({ status: 'paid' })
         .eq('id', invoiceId);
 
-      // Crear registro de pago
-      await supabase
-        .from('invoice_payments')
-        .insert({
-          invoice_id: invoiceId,
-          payment_method: 'stripe',
-          amount: finalAmount / 100, // Convertir de centavos a unidades
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-          currency: stripeInvoice.currency.toUpperCase(),
-          status: 'succeeded',
-          provider_payment_id: paymentIntent.id,
-          processed_at: new Date().toISOString(),
-        });
-
       // Si la factura fue creada nueva en Stripe (sin provider_id inicial), 
       // marcarla como pagada en Stripe también para mantener sincronización
       if (!invoice.provider_id || invoice.provider_id.trim() === '') {
