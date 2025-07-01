@@ -341,8 +341,6 @@ export class InvoiceRepository {
       invoice_settings: invoice.invoice_settings ?? [],
     })) ?? [];
 
-    console.log("DEBUG - transformedInvoices:", transformedInvoices);
-
     return {
       data: transformedInvoices as Invoice.Response[],
       nextCursor,
