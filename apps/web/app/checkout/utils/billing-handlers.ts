@@ -440,9 +440,27 @@ export const handleInvoicePayment = async ({
 }: HandleInvoicePaymentProps) => {
   // Validar que la invoice tenga provider_id si el método de pago es stripe
   if (selectedPaymentMethod === 'stripe') {
-    if (!invoice.provider_id || invoice.provider_id.trim() === '') {
-      throw new Error('Invoice cannot be paid with Stripe as it has no provider_id');
+
+    // get the customer_id from database
+    const client = getSupabaseServerComponentClient({ admin: true });
+    const { data: clientData, error: clientError } = await client
+      .from('clients')
+      .select('id')
+      .eq('organization_client_id', invoice.client?.id ?? '')
+      .eq('agency_id', invoice.agency?.id ?? '')
+      .single();
+
+    if (clientError ?? !clientData) {
+      throw new Error('Client not found');
     }
+
+    const { data: stripeCustomer } = await client
+      .from('client_subscriptions')
+      .select('billing_customer_id')
+      .eq('client_id', clientData.id)
+      .eq('provider', 'stripe')
+      .is('deleted_on', null)
+      .single();
 
     const res = await fetch(`${baseUrl}/api/stripe/invoice-payment`, {
       method: 'POST',
@@ -457,6 +475,7 @@ export const handleInvoicePayment = async ({
         paymentMethodId,
         couponId: coupon,
         sessionId: sessionId,
+        customerId: stripeCustomer?.billing_customer_id ?? '',
       }),
     });
 
@@ -468,7 +487,10 @@ export const handleInvoicePayment = async ({
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return data;
+    return {
+      success: true,
+      message: 'Invoice payment processed successfully',
+    };
   } else if (selectedPaymentMethod === 'manual_payment') {
     try {
       // Procesar pago manual para la invoice
