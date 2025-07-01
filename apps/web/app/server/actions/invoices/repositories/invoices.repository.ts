@@ -145,7 +145,7 @@ export class InvoiceRepository {
           unit_price,
           total_price
         ),
-        invoice_payments(
+        invoice_payments!id(
           id,
           payment_method,
           amount,
@@ -341,6 +341,8 @@ export class InvoiceRepository {
       invoice_settings: invoice.invoice_settings ?? [],
     })) ?? [];
 
+    console.log("DEBUG - transformedInvoices:", transformedInvoices);
+
     return {
       data: transformedInvoices as Invoice.Response[],
       nextCursor,
@@ -470,7 +472,6 @@ export class InvoiceRepository {
             }
           : null
       ),
-      agency: Array.isArray(invoice.agency) ? invoice.agency[0] ?? null : invoice.agency ?? null,
       invoice_items: invoice.invoice_items ?? [],
       invoice_settings: invoice.invoice_settings ?? [],
     } as Invoice.Response;
