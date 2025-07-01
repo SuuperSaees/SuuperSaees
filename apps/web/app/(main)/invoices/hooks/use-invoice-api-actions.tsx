@@ -68,9 +68,11 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
       notes?: string;
     }, 
     agencyId: string, 
+    clientOrganizationId: string,
     isDraft: boolean, 
     invoice?: Invoice.Response,
-    billingInfo?: InvoiceSettings | null
+    agencybillingInfo?: InvoiceSettings,
+    clientbillingInfo?: InvoiceSettings
   ) => {
     // Calculate totals
     const subtotal = data.lineItems.reduce(
@@ -84,19 +86,43 @@ export function useInvoiceApiActions({ mode }: UseInvoiceApiActionsProps) {
     dueDate.setDate(dueDate.getDate() + 30);
 
     // Build invoice settings from billing info
-    const invoiceSettings = billingInfo?.information ? [{
+    // Build agency invoice settings
+    const agencyinvoiceSettings = agencybillingInfo?.information ? {
       invoice_id: "", // Will be set by the service
       organization_id: agencyId,
-      name: billingInfo.information.company_name || "",
-      address_1: billingInfo.information.address_1,
-      address_2: billingInfo.information.address_2,
-      country: billingInfo.information.country,
-      postal_code: billingInfo.information.postal_code,
-      city: billingInfo.information.city,
-      state: billingInfo.information.state,
-      tax_id_type: billingInfo.information.tax_id_type,
-      tax_id_number: billingInfo.information.tax_id_number,
-    }] : null;
+      name: agencybillingInfo.information.company_name || "",
+      address_1: agencybillingInfo.information.address_1,
+      address_2: agencybillingInfo.information.address_2,
+      country: agencybillingInfo.information.country,
+      postal_code: agencybillingInfo.information.postal_code,
+      city: agencybillingInfo.information.city,
+      state: agencybillingInfo.information.state,
+      tax_id_type: agencybillingInfo.information.tax_id_type,
+      tax_id_number: agencybillingInfo.information.tax_id_number,
+    } : null;
+
+    // Build client invoice settings
+    const clientinvoiceSettings = clientbillingInfo?.information ? {
+      invoice_id: "", // Will be set by the service
+      organization_id: clientOrganizationId,
+      name: clientbillingInfo.information.company_name || "",
+      address_1: clientbillingInfo.information.address_1,
+      address_2: clientbillingInfo.information.address_2,
+      country: clientbillingInfo.information.country,
+      postal_code: clientbillingInfo.information.postal_code,
+      city: clientbillingInfo.information.city,
+      state: clientbillingInfo.information.state,
+      tax_id_type: clientbillingInfo.information.tax_id_type,
+      tax_id_number: clientbillingInfo.information.tax_id_number,
+    } : null;
+
+    const invoiceSettings = []
+    if (agencyinvoiceSettings) {
+      invoiceSettings.push(agencyinvoiceSettings)
+    }
+    if (clientinvoiceSettings) {
+      invoiceSettings.push(clientinvoiceSettings)
+    }
 
     return {
       ...(isUpdate && invoice ? { id: invoice.id } : {}),

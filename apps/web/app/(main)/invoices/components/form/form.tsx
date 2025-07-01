@@ -40,6 +40,7 @@ export function InvoiceForm({
 }: InvoiceFormProps) {
   const [isDraft, setIsDraft] = React.useState(false);
   const { workspace: userWorkspace, organization } = useUserWorkspace();
+
   const { billing_details } = useOrganizationSettings();
   const userId = userWorkspace?.id ?? "";
 
@@ -48,7 +49,7 @@ export function InvoiceForm({
     useInvoiceApiActions({ mode });
 
   // Parse billing details to get invoice settings
-  const billingInfo = parseInvoiceSettings(billing_details);
+  const agencybillingInfo = parseInvoiceSettings(billing_details);
 
   // Transform invoice data for form
   const transformInvoiceToFormData = (
@@ -56,7 +57,9 @@ export function InvoiceForm({
   ): InvoiceFormData => {
     return {
       clientId: invoice.client?.id ?? "",
-      dateOfIssue: invoice.issue_date ? new Date(invoice.issue_date) : new Date(),
+      dateOfIssue: invoice.issue_date
+        ? new Date(invoice.issue_date)
+        : new Date(),
       paymentMethod: "", // Set default since it's not in the response type
       paymentReference: "", // Set default since it's not in the response type
       lineItems: invoice.invoice_items?.map((item) => ({
@@ -82,20 +85,26 @@ export function InvoiceForm({
             lineItems: [
               { description: "", rate: 0, quantity: 1, serviceId: 0 },
             ],
-            notes: billingInfo?.invoices.note.enabled
-              ? billingInfo?.invoices.note.content
+            notes: agencybillingInfo?.invoices.note.enabled
+              ? agencybillingInfo?.invoices.note.content
               : "",
           },
     mode: "onBlur",
   });
 
   const onSubmit = async (data: InvoiceFormData) => {
+    const clientbillingInfo = clients.find(
+      (client) => client.organization_client_id === data.clientId,
+    )?.organization?.settings?.billing;
+
     const invoiceData = buildInvoicePayload(
       data,
       agencyId,
+      data.clientId,
       isDraft,
       invoice,
-      billingInfo,
+      agencybillingInfo ?? undefined,
+      clientbillingInfo ?? undefined,
     );
 
     if (isDraft) {
