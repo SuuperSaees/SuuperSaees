@@ -8,22 +8,45 @@ export async function POST(request: NextRequest) {
   try {
     const {
       invoiceId,
-      stripeInvoiceId,
       email,
       accountId,
       paymentMethodId,
       couponId,
       sessionId,
+      customerId: customerProvidedId
     } = await request.clone().json();
+
+    let customerId = customerProvidedId;
 
     const supabase = getSupabaseServerComponentClient(
       { admin: true },
     );
 
+    console.log('Processing invoice payment for invoiceId:', invoiceId);
+
+    // verify that customerId is provided
+    if (!customerId ) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const customer = await stripe.customers.create(
+          { email },
+          { stripeAccount: accountId },
+        );
+      customerId = customer.id;
+    }
+
     // Verificar que la invoice existe en nuestra base de datos
     const { data: invoice, error: invoiceError } = await supabase
       .from('invoices')
-      .select('*')
+      .select(`
+        *,
+        invoice_items (
+          id,
+          description,
+          quantity,
+          unit_price,
+          total_price
+        )
+      `)
       .eq('id', invoiceId)
       .single();
 
@@ -34,41 +57,94 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que la invoice tiene un provider_id válido
+    let currentStripeInvoiceId = invoice.provider_id;
+    
+    // Si la invoice no tiene provider_id, necesitamos crearla en Stripe
     if (!invoice.provider_id || invoice.provider_id.trim() === '') {
-      return NextResponse.json(
-        { error: { message: 'Invoice has no Stripe provider_id' } },
-        { status: 400 },
-      );
-    }
-
-    let customer;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const existingCustomers = await stripe.customers.list(
-      { email, limit: 1 },
-      { stripeAccount: accountId },
-    );
-
-    if (existingCustomers.data.length > 0) {
-      customer = existingCustomers.data[0];
-    } else {
+      console.log('Invoice has no provider_id, creating in Stripe...');
+      
+      // Create the invoice in Stripe
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      customer = await stripe.customers.create(
-        { email },
+      const stripeInvoice = await stripe.invoices.create(
+        {
+          customer: customerId,
+          currency: invoice.currency?.toLowerCase() || 'usd',
+          collection_method: 'charge_automatically',
+          auto_advance: false, // No avanzar automáticamente para control manual
+          description: invoice.notes ?? `Invoice #${invoice.number}`,
+          // Note: No incluimos due_date porque collection_method es 'charge_automatically'
+          // Stripe solo permite due_date con 'send_invoice'
+          metadata: {
+            suuper_invoice_id: invoiceId,
+            suuper_invoice_number: invoice.number || '',
+            suuper_due_date: invoice.due_date, // Guardamos la fecha de vencimiento en metadata
+          },
+        },
         { stripeAccount: accountId },
       );
+
+      // Agregar los items de la invoice como invoice items
+      if (invoice.invoice_items && invoice.invoice_items.length > 0) {
+        for (const item of invoice.invoice_items) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          await stripe.invoiceItems.create(
+            {
+              customer: customerId,
+              invoice: stripeInvoice.id,
+              unit_amount: Math.round(item.unit_price * 100), // Precio unitario en centavos
+              quantity: item.quantity,
+              currency: invoice.currency?.toLowerCase() || 'usd',
+              description: item.description,
+            },
+            { stripeAccount: accountId },
+          );
+        }
+      } else {
+        // Si no hay items específicos, crear un item con el total
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        await stripe.invoiceItems.create(
+          {
+            customer: customerId,
+            invoice: stripeInvoice.id,
+            amount: Math.round((invoice.total_amount || 0) * 100), // Convertir a centavos
+            currency: invoice.currency?.toLowerCase() || 'usd',
+            description: invoice.notes ?? `Payment for Invoice #${invoice.number}`,
+          },
+          { stripeAccount: accountId },
+        );
+      }
+
+      // Finalizar la invoice para que pueda ser pagada
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(
+        stripeInvoice.id,
+        { stripeAccount: accountId },
+      );
+
+      currentStripeInvoiceId = finalizedInvoice.id;
+
+      // Actualizar nuestra base de datos con el provider_id
+      await supabase
+        .from('invoices')
+        .update({ provider_id: currentStripeInvoiceId })
+        .eq('id', invoiceId);
+
+      console.log(`Created and finalized Stripe invoice: ${currentStripeInvoiceId}`);
+      
+      // Nota: La factura se creó en Stripe y se finalizó, pero aún no está pagada.
+      // El pago se procesará más adelante en este mismo flujo cuando se cree el payment intent.
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await stripe.paymentMethods.attach(
       paymentMethodId,
-      { customer: customer.id },
+      { customer: customerId },
       { stripeAccount: accountId },
     );
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     await stripe.customers.update(
-      customer.id,
+      customerId,
       {
         invoice_settings: { default_payment_method: paymentMethodId },
       },
@@ -78,7 +154,7 @@ export async function POST(request: NextRequest) {
     // Obtener la invoice de Stripe
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const stripeInvoice = await stripe.invoices.retrieve(
-      stripeInvoiceId,
+      currentStripeInvoiceId,
       { stripeAccount: accountId }
     );
 
@@ -145,7 +221,7 @@ export async function POST(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     const paymentIntent = await stripe.paymentIntents.create(
       {
-        customer: customer.id,
+        customer: customerId,
         amount: finalAmount,
         currency: stripeInvoice.currency,
         payment_method: paymentMethodId,
@@ -157,7 +233,7 @@ export async function POST(request: NextRequest) {
         metadata: { 
           sessionId: sessionId,
           invoiceId: invoiceId,
-          stripeInvoiceId: stripeInvoiceId,
+          stripeInvoiceId: currentStripeInvoiceId,
         },
       },
       { stripeAccount: accountId },
@@ -184,6 +260,26 @@ export async function POST(request: NextRequest) {
           provider_payment_id: paymentIntent.id,
           processed_at: new Date().toISOString(),
         });
+
+      // Si la factura fue creada nueva en Stripe (sin provider_id inicial), 
+      // marcarla como pagada en Stripe también para mantener sincronización
+      if (!invoice.provider_id || invoice.provider_id.trim() === '') {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+          await stripe.invoices.pay(
+            currentStripeInvoiceId,
+            {
+              payment_method: paymentMethodId,
+            },
+            { stripeAccount: accountId }
+          );
+          console.log(`Marked Stripe invoice as paid: ${currentStripeInvoiceId}`);
+        } catch (stripePayError) {
+          console.warn('Could not mark Stripe invoice as paid:', stripePayError);
+          // No fallamos el flujo si no podemos marcar la factura en Stripe,
+          // ya que el payment intent ya fue exitoso
+        }
+      }
     }
 
     return NextResponse.json({ 
