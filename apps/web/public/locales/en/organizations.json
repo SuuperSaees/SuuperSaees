@@ -43,7 +43,8 @@
       "cannotCreateInOrderFolder": "You cannot create folders in the projects folder"
     },
     "delete": "Delete folder",
-    "deleteSuccess": "Folder deleted"
+    "deleteSuccess": "Folder deleted",
+    "deleteError": "This folder could not be deleted"
   },
   "loading": "Loading...",
   "members": {
