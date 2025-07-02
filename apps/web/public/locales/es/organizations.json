@@ -44,7 +44,7 @@
     },
     "delete": "Eliminar carpeta",
     "deleteSuccess": "Carpeta eliminada",
-    "deleteError": "Error al eliminar carpeta"
+    "deleteError": "No se pudo eliminar la carpeta"
   },
   "loading": "Cargando...",
   "members": {
