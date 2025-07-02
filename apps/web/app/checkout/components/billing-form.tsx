@@ -153,6 +153,12 @@ const BillingForm: React.FC<{
 
     let paymentMethodId = '';
 
+    if (selectedPaymentMethod === 'manual_payment' && !form.getValues('manual_payment_info')) {
+      setErrorMessage(t('checkout.error.manualPaymentInfoRequired'));
+      toast.error(t('checkout.error.manualPaymentInfoRequired'));
+      return null;
+    }
+
     if (selectedPaymentMethod === 'stripe') {
 
     const cardNumberElement = elements.getElement(CardNumberElement);
@@ -282,10 +288,18 @@ const BillingForm: React.FC<{
                           }
                         >
                           <div className="flex flex-col items-center gap-2">
-                            {
-                              paymentMethodsIcons[
-                                paymentMethod.icon as keyof typeof paymentMethodsIcons
-                              ]
+                            {paymentMethodsIcons[
+                              paymentMethod.icon as keyof typeof paymentMethodsIcons
+                            ] ?? <div className="flex ">
+                                <img
+                                  src={logoUrl}
+                                  alt="Logo"
+                                  style={{
+                                    width: 'auto',
+                                    height: 'auto',
+                                  }}
+                                />
+                              </div>
                             }
                           </div>
                         </div>
@@ -499,11 +513,7 @@ const BillingForm: React.FC<{
                     (<div className="mt-6 space-y-6">
                       {/* Información de pago manual */}
                       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <h3 className="font-inter mb-3 text-lg font-semibold text-gray-900">
-                          {t('checkout.manualPayment.title', 'Pago Manual')}
-                          
-                        </h3>
-
+                        
                            <span>{manualPayment?.custom_name}</span>
                         <div className="rounded-md bg-white p-3">
                           <div 

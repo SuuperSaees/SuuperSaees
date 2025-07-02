@@ -41,24 +41,18 @@ export const InvoiceTypeSection: React.FC<InvoiceTypeSectionProps> = ({
         </svg>
       </div>
 
-      <div className="flex flex-col mt-1 justify-between">
-        {/* Número de factura */}
+      <div className="flex flex-col mt-1 justify-between w-full">
+        {/* invoice number */}
         <span className={`text-base font-medium ${textColor}`}>
           Invoice #{invoice.number}
         </span>
 
-        {/* Información adicional de la factura */}
-        <div className="flex flex-col gap-1">
-          {invoice.due_date && (
-            <span className={`text-sm ${secondaryTextColor}`}>
-              {t('checkout.invoice.dueDate')}: {formatDate(invoice.due_date)}
-            </span>
-          )}
-          
+        {/* Additional Information */}
+        <div className="flex">
           {invoice.client?.name && (
             <span className={`text-sm ${secondaryTextColor}`}>
-              {t('checkout.invoice.client')}: {invoice.client.name}
-            </span>
+              {t('checkout.invoice.client')}: {invoice.client.name} - {invoice.due_date && t('checkout.invoice.dueDate')}: {formatDate(invoice.due_date)}
+            </span> 
           )}
         </div>
 
