@@ -43,7 +43,8 @@
       "cannotCreateInOrderFolder": "No puedes crear carpetas en la carpeta de proyectos"
     },
     "delete": "Eliminar carpeta",
-    "deleteSuccess": "Carpeta eliminada"
+    "deleteSuccess": "Carpeta eliminada",
+    "deleteError": "Error al eliminar carpeta"
   },
   "loading": "Cargando...",
   "members": {
