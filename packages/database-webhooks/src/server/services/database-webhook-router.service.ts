@@ -48,11 +48,11 @@ class DatabaseWebhookRouterService {
         return this.handleBillingAccountsWebhook(payload);
       }
 
-      // case 'subscriptions': {
-      //   const payload = body as RecordChange<typeof body.table>;
+      case 'checkouts': {
+        const payload = body as RecordChange<typeof body.table>;
 
-      //   return this.handleSubscriptionsWebhook(payload);
-      // }
+        return this.handleCheckoutsWebhook(payload);
+      }
 
       case 'accounts': {
         const payload = body as RecordChange<typeof body.table>;
@@ -151,6 +151,22 @@ class DatabaseWebhookRouterService {
         body.record,
       );
     }
+  }
+
+  private async handleCheckoutsWebhook(body: RecordChange<'checkouts'>) {
+    const logger = await getLogger();
+    const { createBillingWebhooksService } = await import(
+      '@kit/billing-gateway'
+    );
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? '';
+
+    if (body.type === 'INSERT' && body.record) {
+      const service = createBillingWebhooksService(this.adminClient, baseUrl);
+      logger.info(body, 'Handling checkouts webhook');
+      return service.handleCheckoutCreatedWebhook(body.record);
+    }
+
+    return;
   }
 }
 

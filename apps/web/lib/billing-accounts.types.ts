@@ -18,7 +18,8 @@ export namespace BillingAccounts {
   export type PaymentMethod = {
     id: string;
     name: string;
-    icon: React.ReactNode;
+    icon: string;
     description: string;
+    custom_name?: string;
   };
 }

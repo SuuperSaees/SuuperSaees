@@ -36,6 +36,13 @@
   "step_service_price": "Price Settings",
   "checkout": {
     "pay": "Pay",
+    "manualPayment": {
+      "title": "Manual Payment",
+      "description": "You can pay for the service later. Please contact us to finalize the payment.",
+      "contactUs": "Contact Us", 
+      "additionalInfo": "Additional Information",
+      "placeholder": "Enter any additional information about your payment, transaction ID, comments, etc."
+    },
     "trial": {
       "perDay": "per Day",
       "perWeek": "per Week",
@@ -112,6 +119,19 @@
     "securityCode": "CVC",
     "securePayment": "Secure payment",
     "discount": "Discount",
+    "invoice": {
+      "dueDate": "Due Date",
+      "client": "Client",
+      "paidTitle": "Invoice Paid",
+      "paidDescription": "Your invoice has been successfully paid.",
+      "invoiceNumber": "Invoice Number",
+      "paymentDate": "Payment Date",
+      "paymentMethod": "Payment Method",
+      "downloading": "Downloading...",
+      "downloadInvoice": "Download Invoice",
+      "backToDashboard": "Back to Dashboard", 
+      "needHelp": "Need help? Contact our support team."
+    },
     "successTitle": "Success payment",
     "cancelTitle": "Cancel",
     "enter_full_name": "Enter full name",
@@ -137,7 +157,8 @@
       "userAlreadyRegistered": "Payment processing failed: {{error}} and is not a client account",
       "paymentFailedWithError": "Payment processing failed: {{error}}",
       "paymentFailed": "Payment processing failed",
-      "cardNumberElement": "Card number elements not found"
+      "cardNumberElement": "Card number elements not found",
+      "manualPaymentInfoRequired": "Manual payment information is required"
     },
     "validation": {
       "fullNameRequired": "Full name is required",

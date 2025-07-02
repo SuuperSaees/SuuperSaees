@@ -36,6 +36,13 @@
   "step_service_price": "Configuración de precios",
   "checkout": {
     "pay": "Pagar",
+    "manualPayment": {
+      "title": "Pago Manual",
+      "description": "Puedes pagar el servicio más tarde. Por favor contáctanos para finalizar el pago.",
+      "contactUs": "Contáctanos",
+      "additionalInfo": "Información adicional",
+      "additionalInfoDescription": "Proporciona cualquier información adicional que pueda ser útil para procesar tu pago."
+    },
     "trial": {
       "perDay": "por día",
       "perWeek": "por semana",
@@ -112,6 +119,19 @@
     "securityCode": "CVC",
     "securePayment": "Pago seguro",
     "discount": "Descuento",
+    "invoice": {
+      "dueDate": "Fecha de vencimiento",
+      "client": "Cliente",
+      "paidTitle": "Factura Pagada",
+      "paidDescription": "Tu factura ha sido pagada exitosamente.",
+      "invoiceNumber": "Número de Factura",
+      "paymentDate": "Fecha de Pago",
+      "paymentMethod": "Método de Pago",
+      "downloading": "Descargando...",
+      "downloadInvoice": "Descargar Factura",
+      "backToDashboard": "Volver al Panel",
+      "needHelp": "¿Necesitas ayuda? Contacta a nuestro equipo de soporte."
+    },
     "successTitle": "Pago exitoso",
     "cancelTitle": "Cancelar",
     "enter_full_name": "Ingresa el nombre completo",
@@ -137,7 +157,8 @@
       "userAlreadyRegistered": "Error en el procesamiento del pago: {{error}} y no es una cuenta de cliente",
       "paymentFailedWithError": "Error en el procesamiento del pago: {{error}}",
       "paymentFailed": "Error en el procesamiento del pago",
-      "cardNumberElement": "No se encontraron los elementos del número de tarjeta"
+      "cardNumberElement": "No se encontraron los elementos del número de tarjeta",
+      "manualPaymentInfoRequired": "Se requiere información de pago manual"
     },
     "validation": {
       "fullNameRequired": "Se requiere el nombre completo",

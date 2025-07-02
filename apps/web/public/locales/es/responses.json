@@ -1,5 +1,6 @@
 {
   "error": {
+    "title": "¡Algo salió mal!",
     "toastError": "Error",
     "default": "Ocurrió un error inesperado al procesar tu solicitud. Inténtalo de nuevo más tarde.",
     "clients": {
@@ -78,6 +79,7 @@
     }
   },
   "success": {
+    "title": "¡Todo Listo!",
     "toastSuccess": "Éxito",
     "default": "Operación completada exitosamente.",
     "clients": {
@@ -135,6 +137,7 @@
     }
   },
   "loading": {
+    "title": "Espera un momento...",
     "embeds": {
       "removingAccountFromEmbed": "Eliminando cuenta del enlace...",
       "updatingEmbed": "Actualizando enlace...",

@@ -42,6 +42,8 @@ export namespace OrganizationSettings {
     catalog_sourcing_china_url: 'catalog_sourcing_china_url',
     calendar_url: 'calendar_url',
     notification_sound: 'notification_sound',
+    payment_details: 'payment_details',
+    billing_details: 'billing_details',
     // If you want to add more keys, make sure they are defined in the 'organization_setting_key' enum in 'database.types.ts'
   };
 

@@ -7,30 +7,31 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Service } from '~/lib/services.types';
 import convertToSubcurrency from '~/(main)/select-plan/components/convertToSubcurrency';
 import { BillingAccounts } from '~/lib/billing-accounts.types';
-import BillingForm from './billing_form';
+import BillingForm from './billing-form';
+import { Invoice } from '~/lib/invoice.types';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY) {
   throw new Error('Stripe public key is not defined in environment variables');
 }
 
-type ServiceType = Service.Type;
-
 type DetailsSideProps = {
-  service: ServiceType;
+  service?: Service.Relationships.Billing.BillingService;
+  invoice?: Invoice.Response;
   stripeId: string;
-  organizationId: string;
   logoUrl: string;
   sidebarBackgroundColor: string;
   paymentMethods?: BillingAccounts.PaymentMethod[];
+  manualPayment?: BillingAccounts.PaymentMethod
 };
 
 const DetailsSide: React.FC<DetailsSideProps> = ({
   service,
   stripeId,
-  organizationId,
   logoUrl,
   sidebarBackgroundColor,
   paymentMethods,
+  invoice,
+  manualPayment
 }) => {
   const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ?? '', {
     stripeAccount: stripeId,
@@ -40,18 +41,19 @@ const DetailsSide: React.FC<DetailsSideProps> = ({
     <Elements
       stripe={stripePromise}
       options={{
-        mode: service.recurrence ? 'subscription' : 'payment',
-        amount: convertToSubcurrency(service.price ?? 0),
-        currency: service.currency,
+        mode: service?.recurrence ? 'subscription' : 'payment',
+        amount: convertToSubcurrency(service ? service.price ?? 0 : invoice?.total_amount ?? 0),
+        currency: (service?.currency ?? invoice?.currency ?? 'usd').toLowerCase(),
       }}
     >
       <BillingForm
         service={service}
+        invoice={invoice}
         stripeId={stripeId}
-        organizationId={organizationId}
         logoUrl={logoUrl}
         sidebarBackgroundColor={sidebarBackgroundColor}
         paymentMethods={paymentMethods ?? []}
+        manualPayment={manualPayment}
       />
     </Elements>
   );

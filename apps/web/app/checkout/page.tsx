@@ -12,6 +12,18 @@ import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/a
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import EmptyPaymentMethods from './components/empty-payment-methods';
 import ErrorDecodedToken from './components/error-decoded-token';
+import { PaidInvoiceView } from './components/paid-invoice-view';
+import { getInvoice } from '~/server/actions/invoices/invoices.action';
+import { z } from 'zod';
+import { Toaster } from '@kit/ui/sonner';
+
+const PaymentSettingsSchema = z.object({
+  enableManualPayments: z.boolean(),
+  paymentMethodName: z.string().min(1, 'Payment method name is required'),
+  instructions: z.string().min(1, 'Instructions are required'),
+});
+
+type PaymentSettingsType = z.infer<typeof PaymentSettingsSchema>;
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -40,6 +52,28 @@ async function ServiceCheckoutPage({
   const organizationSettings = await getOrganizationSettingsByOrganizationId(
     tokendecoded?.organization_id ?? '',
     true,
+      [
+        'theme_color',
+        'logo_url',
+        'sidebar_background_color',
+        'language',
+        'favicon_url',
+        'sender_name',
+        'sender_domain',
+        'sender_email',
+        'auth_card_background_color',
+        'auth_section_background_color',
+        'dashboard_url',
+        'parteners_url',
+        'catalog_product_wholesale_url',
+        'catalog_product_private_label_url',
+        'training_url',
+        'catalog_sourcing_china_url',
+        'catalog_product_url',
+        'calendar_url',
+        'auth_background_url',
+        'payment_details',
+      ],
   );
 
   const logoUrl = organizationSettings.find(
@@ -48,6 +82,9 @@ async function ServiceCheckoutPage({
   const sidebarBackgroundColor = organizationSettings.find(
     (setting) => setting.key === 'sidebar_background_color',
   )?.value;
+  const paymentDetails = JSON.parse(organizationSettings.find(
+    (setting) => setting.key === 'payment_details',
+  )?.value ?? '{}') as PaymentSettingsType;
 
   const paymentMethods = await getPaymentsMethods(tokendecoded?.primary_owner_id ?? '', undefined, true).catch((error) => {
     console.error('Error fetching payment methods:', error);
@@ -57,10 +94,32 @@ async function ServiceCheckoutPage({
     };
   });
 
-  const service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
+  if(paymentDetails?.enableManualPayments && paymentDetails?.paymentMethodName && paymentDetails?.instructions) {
+    paymentMethods.paymentMethods = [
+      ...paymentMethods.paymentMethods,
+      {
+        id: 'payment_details',
+        name: 'manual_payment',
+        icon: paymentDetails?.paymentMethodName,
+        custom_name: paymentDetails?.paymentMethodName,
+        description: paymentDetails?.instructions,
+      } as never,
+    ];
+  }
+  let service = null;
+  let invoice = null;
+  if (tokendecoded?.service?.id) {
+  service = await getServiceById(tokendecoded?.service.id ?? 0, false, true, true).catch((error) => {
     console.error('Error fetching service:', error);
     return null;
   });
+} else if (tokendecoded?.invoice?.id) {
+  invoice = await getInvoice(tokendecoded?.invoice.id ?? '', true).catch((error) => {
+    console.error('Error fetching invoice:', error);
+    return null;
+  });
+
+}
 
   let accountId = tokendecoded?.account_id ?? '';
 
@@ -74,30 +133,48 @@ async function ServiceCheckoutPage({
   }
 
   return (
-    <OrganizationSettingsProvider initialSettings={organizationSettings}>
-      <div
-        className="flex min-h-screen w-full flex-grow flex-col items-center"
-        style={{ backgroundColor: sidebarBackgroundColor }}
-      >
-        <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
-          {
-            !paymentMethods.paymentMethods.length ? (
-              <EmptyPaymentMethods logoUrl={logoUrl ?? suuperLogo ?? ''} />
-            ) : (
-              <DetailsSide
-                service={
-                  service as Service.Relationships.Billing.BillingService
-                }
-                stripeId={accountId}
-                organizationId={tokendecoded?.organization_id ?? ''}
-                logoUrl={logoUrl ?? suuperLogo ?? ''}
-                sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
-                paymentMethods={paymentMethods.paymentMethods ?? []}
-          />
-            )
-          }
+    <OrganizationSettingsProvider initialSettings={organizationSettings as never}>
+      {/* If it's an invoice and it's already paid, show the paid invoice view without container */}
+      {invoice && invoice.status === 'paid' ? (
+        <PaidInvoiceView
+          invoice={invoice}
+          logoUrl={logoUrl ?? suuperLogo ?? ''}
+        />
+      ) : (
+        <div
+          className="flex min-h-screen w-full flex-grow flex-col items-center"
+          style={{ backgroundColor: sidebarBackgroundColor }}
+        >
+          <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
+            {
+              !paymentMethods.paymentMethods.length ? (
+                <EmptyPaymentMethods logoUrl={logoUrl ?? suuperLogo ?? ''} />
+              ) : (
+                <DetailsSide
+                  service={
+                    service as Service.Relationships.Billing.BillingService
+                  }
+                  invoice={invoice ?? undefined}
+                  stripeId={accountId}
+                  logoUrl={logoUrl ?? suuperLogo ?? ''}
+                  sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
+                  paymentMethods={paymentMethods.paymentMethods ?? []}
+                  manualPayment={
+                    {
+                      id: 'payment_details',
+                      name: 'manual_payment',
+                      icon: paymentDetails?.paymentMethodName,
+                      custom_name: paymentDetails?.paymentMethodName,
+                      description: paymentDetails?.instructions,
+                    } as never
+                  }
+                />
+              )
+            }
+          </div>
         </div>
-      </div>
+      )}
+      <Toaster richColors={false} />
     </OrganizationSettingsProvider>
   );
 }

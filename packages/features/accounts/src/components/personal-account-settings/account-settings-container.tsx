@@ -11,9 +11,18 @@ import { useOrganizationSettings } from '../../context/organization-settings-con
 import { Separator } from '@kit/ui/separator';
 import ProfileSettings from '../profile-settings';
 import SiteSettings from '../site-settings';
+import InvoiceSettings from '../invoice-settings';
+import PaymentSettings from '../payment-settings';
 import { useQuery } from '@tanstack/react-query';
 import { getAccountSettings } from '../../../../team-accounts/src/server/actions/accounts/get/get-account';
 import { useUserWorkspace } from '../../hooks/use-user-workspace';
+import { 
+  canAccessTab, 
+  shouldShowTabsList, 
+  getDefaultTab,
+  UserRole,
+  TabName 
+} from '../../utils/role-permissions';
 
 
 export function PersonalAccountSettingsContainer(
@@ -34,8 +43,7 @@ export function PersonalAccountSettingsContainer(
   const checkoutResult = searchParams.get('checkout');
   const {accountBillingTab, setAccountBillingTab, upgradeSubscription } = useBilling();
   const { workspace, user } = useUserWorkspace();
-  const role = workspace.role;
-
+  const role = workspace.role as UserRole;
 
   const fetchSettings = async () => {
     const response = await getAccountSettings(props.userId);
@@ -55,18 +63,24 @@ export function PersonalAccountSettingsContainer(
           await upgradeSubscription();
           router.push('/home/settings')
         }
-        if(role !== 'agency_owner'){
-          setAccountBillingTab('profile');
+        
+        // Use role-based default tab selection
+        if (!tab) {
+          setAccountBillingTab(getDefaultTab(role));
+        } else {
+          // Validate that the user can access the requested tab
+          if (canAccessTab(role, tab as TabName)) {
+            setAccountBillingTab(tab);
+          } else {
+            setAccountBillingTab(getDefaultTab(role));
+          }
         }
       } catch (error) {
         console.error(error);
       }
     };
-    if (tab){
-      setAccountBillingTab(tab);
-    }
     void fetchUserRole();
-  }, [tab, checkoutResult]);
+  }, [tab, checkoutResult, role]);
   
   const { updateOrganizationSetting } =
   useOrganizationSettings();
@@ -80,61 +94,99 @@ export function PersonalAccountSettingsContainer(
 
   return (
     <div>
-      <Tabs defaultValue={"site"} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
-        {role !== 'client_member' && role !== 'client_owner' && (
+      <Tabs defaultValue={getDefaultTab(role)} value={accountBillingTab} onValueChange={(value: string) => setAccountBillingTab(value)}>
+        {shouldShowTabsList(role) && (
           <div className="flex items-center justify-between pb-[24px]">
           <TabsList className='gap-2 bg-transparent '>
-            {
-              role == 'agency_owner' && (
-                <ThemedTabTrigger
+            {canAccessTab(role, 'site') && (
+              <ThemedTabTrigger
                 value="site"
                 option="site"
                 activeTab={accountBillingTab}
               >
                 Portal
-                </ThemedTabTrigger>
-              )
-            }
+              </ThemedTabTrigger>
+            )}
             
-            <ThemedTabTrigger
-              value="profile"
-              option="profile"
-              activeTab={accountBillingTab}
-            >
-              {t('profileTab')}
-            </ThemedTabTrigger>
+            {canAccessTab(role, 'profile') && (
+              <ThemedTabTrigger
+                value="profile"
+                option="profile"
+                activeTab={accountBillingTab}
+              >
+                {t('profileTab')}
+              </ThemedTabTrigger>
+            )}
 
-            <ThemedTabTrigger
-              value="subscription"
-              option="subscription"
-              activeTab={accountBillingTab}
-            >
-              {t('subscriptionTab')}
-            </ThemedTabTrigger>
+            {canAccessTab(role, 'subscription') && (
+              <ThemedTabTrigger
+                value="subscription"
+                option="subscription"
+                activeTab={accountBillingTab}
+              >
+                {t('subscriptionTab')}
+              </ThemedTabTrigger>
+            )}
+
+            {canAccessTab(role, 'invoices') && (
+              <ThemedTabTrigger
+                value="invoices"
+                option="invoices"
+                activeTab={accountBillingTab}
+              >
+                {t('invoicesTab')}
+              </ThemedTabTrigger>
+            )}
+
+            {canAccessTab(role, 'payments') && (
+              <ThemedTabTrigger
+                value="payments"
+                option="payments"
+                activeTab={accountBillingTab}
+              >
+                {t('paymentsTab')}
+              </ThemedTabTrigger>
+            )}
           </TabsList>
           </div>
         )}
         <Separator />
-        {
-          role === 'agency_owner' && (
-            <TabsContent value="site">
-              <SiteSettings role = {role} handleChangeLanguage = {handleChangeLanguage} user={user}/>
-            </TabsContent>
-          )
-        }
         
-        <TabsContent value="profile">
-          <ProfileSettings userId={user.id} userSettings={{
-            ...userSettings,
-            name: userSettings?.name ?? workspace?.name ?? '',
-            picture_url: userSettings?.picture_url ?? workspace?.picture_url ?? '',
-            calendar: userSettings?.calendar ?? '',
-            preferences: userSettings?.preferences ?? {},
-          }} callback={props.paths.callback} userRole={role ?? ''	} />
-        </TabsContent>
-        <TabsContent value="subscription">
-          <BillingContainerConfig tab={tab ?? ''} />
-        </TabsContent>
+        {canAccessTab(role, 'site') && (
+          <TabsContent value="site">
+            <SiteSettings role={role} handleChangeLanguage={handleChangeLanguage} user={user}/>
+          </TabsContent>
+        )}
+        
+        {canAccessTab(role, 'profile') && (
+          <TabsContent value="profile">
+            <ProfileSettings userId={user.id} userSettings={{
+              ...userSettings,
+              name: userSettings?.name ?? workspace?.name ?? '',
+              picture_url: userSettings?.picture_url ?? workspace?.picture_url ?? '',
+              calendar: userSettings?.calendar ?? '',
+              preferences: userSettings?.preferences ?? {},
+            }} callback={props.paths.callback} userRole={role ?? ''} />
+          </TabsContent>
+        )}
+        
+        {canAccessTab(role, 'subscription') && (
+          <TabsContent value="subscription">
+            <BillingContainerConfig tab={tab ?? ''} />
+          </TabsContent>
+        )}
+        
+        {canAccessTab(role, 'invoices') && (
+          <TabsContent value="invoices">
+            <InvoiceSettings role={role} />
+          </TabsContent>
+        )}
+        
+        {canAccessTab(role, 'payments') && (
+          <TabsContent value="payments">
+            <PaymentSettings role={role} />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

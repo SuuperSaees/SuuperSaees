@@ -1,24 +1,28 @@
 import { useTranslation } from "react-i18next";
+import { Invoice } from '~/lib/invoice.types';
+import { InvoiceTypeSection } from './invoice-type-section';
 
 interface ServiceTypeSectionProps {
-  service: {
-    name: string;
-    price: number;
-    currency: string;
-    recurrence?: string;
+  service?: {
+    name?: string | null;
+    price?: number | null;
+    currency?: string | null;
+    recurrence?: string | null;
     service_image?: string | null;
-    test_period?: boolean;
-    test_period_price?: number;
-    test_period_duration?: number;
-    test_period_duration_unit_of_measurement?: string;
-    recurring_subscription?: boolean;
+    test_period?: boolean | null;
+    test_period_price?: number | null;
+    test_period_duration?: number | null;
+    test_period_duration_unit_of_measurement?: string | null;
+    recurring_subscription?: boolean | null;
   };
+  invoice?: Invoice.Response;
   isDarkBackground: boolean;
-  quantity: number; 
+  quantity?: number; 
 }
 
 export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
   service,
+  invoice,
   isDarkBackground,
 }) => {
   const { t } = useTranslation('services');
@@ -45,7 +49,7 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
   };
 
   const getTestPeriodPrice = () => {
-    return `${t('for')} $${service.test_period_price?.toFixed(2)} ${t('then')}`;
+    return `${t('for')} $${service?.test_period_price?.toFixed(2)} ${t('then')}`;
   };
 
   const getPerRecurrence = (recurrence: string) => {
@@ -64,13 +68,18 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
     return '';
   };
 
+  // Si es una factura, usar el componente específico para invoices
+  if (invoice) {
+    return <InvoiceTypeSection invoice={invoice} isDarkBackground={isDarkBackground} />;
+  }
+
   return (
     <div className="flex items-start gap-4 rounded-lg p-1">
-      {/* Imagen */}
-      {service.service_image ? (
+      {/* Imagen - solo para servicios */}
+      {service?.service_image ? (
         <img
-          src={service.service_image}
-          alt={service.name}
+          src={service?.service_image}
+          alt={service?.name ?? ''}
           className="h-20 w-40 rounded-md object-cover"
         />
       ) : (
@@ -78,21 +87,21 @@ export const ServiceTypeSection: React.FC<ServiceTypeSectionProps> = ({
       )}
 
       <div className="flex flex-col mt-1 justify-between">
+        {/* Nombre del servicio */}
         <span className={`text-base font-medium ${textColor}`}>
-          {service.name}
+          {service?.name}
         </span>
-        {
-          service.test_period && (
-            <span className={`text-sm ${secondaryTextColor}`}>
-              {service.test_period_duration} {getUnit(service.test_period_duration_unit_of_measurement ?? '', service.test_period_duration ?? 0)} {getTestPeriodPrice()}
-            </span>
-          )
-        }
-        {/* {!service.recurring_subscription && <span className={`text-sm ${secondaryTextColor}`}>
-          {t(`${quantity} x`)}
-        </span>} */}
+
+        {/* Detalles del período de prueba - solo para servicios */}
+        {service?.test_period && (
+          <span className={`text-sm ${secondaryTextColor}`}>
+            {service?.test_period_duration} {getUnit(service?.test_period_duration_unit_of_measurement ?? '', service?.test_period_duration ?? 0)} {getTestPeriodPrice()}
+          </span>
+        )}
+
+        {/* Precio */}
         <span className={`text-base font-medium ${textColor}`}>
-          ${service.price.toFixed(2)} {service.currency.toUpperCase()} {service.recurring_subscription ? getPerRecurrence(service.recurrence ?? '') : ''}
+          ${(service?.price ?? 0)?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'} {service?.recurring_subscription ? getPerRecurrence(service?.recurrence ?? '') : ''}
         </span>
       </div>
     </div>

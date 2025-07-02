@@ -11,8 +11,22 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { DiscountIcon, SecurityIcon } from '~/components/icons/icons';
 
-import { FormData, ServiceType } from '../types/billing-form-types';
+import { FormData } from '../types/billing-form-types';
 import { ServiceTypeSection } from './service-type-section';
+import { Invoice } from '~/lib/invoice.types';
+
+type ServiceForCheckout = {
+  name?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  recurrence?: string | null;
+  service_image?: string | null;
+  test_period?: boolean | null;
+  test_period_price?: number | null;
+  test_period_duration?: number | null;
+  test_period_duration_unit_of_measurement?: string | null;
+  recurring_subscription?: boolean | null;
+};
 
 const isColorDark = (hexColor: string) => {
   const hex = hexColor.replace('#', '');
@@ -25,7 +39,8 @@ const isColorDark = (hexColor: string) => {
 
 interface SideDataFieldsProps {
   form: UseFormReturn<FormData>;
-  service: ServiceType;
+  service?: ServiceForCheckout;
+  invoice?: Invoice.Response;
   loading: boolean;
   errorMessage: string;
   accountId: string;
@@ -40,6 +55,7 @@ interface SideDataFieldsProps {
 export const SideInfo: React.FC<SideDataFieldsProps> = ({
   form,
   service,
+  invoice,
   loading,
   accountId,
   validSuccess,
@@ -56,7 +72,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
   const isDarkBackground = isColorDark(sidebarBackgroundColor);
 
   const handleApplyDiscount = async () => {
-    if (selectedPaymentMethod !== 'stripe') return;
+    if (selectedPaymentMethod !== 'stripe' || invoice) return; // Don't apply discount for invoices
     const discountCode = form.getValues('discount_coupon');
     setIsApplyingDiscount(true);
 
@@ -67,7 +83,7 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
         body: JSON.stringify({
           discountCode,
           accountId,
-          servicePrice: service.price,
+          servicePrice: service?.price,
         }),
       });
       const data = await response.clone().json();
@@ -96,33 +112,34 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
 
-  const discountedTotal =
-    (discountAmount
-      ? (service.price ?? 0) - discountAmount
-      : (service.price ?? 0)) * quantity;
+  const discountedTotal = invoice
+    ? invoice.total_amount ?? 0
+    : (discountAmount
+      ? (service?.price ?? 0) - discountAmount
+      : (service?.price ?? 0)) * quantity;
 
       const secondaryTextColor = isDarkBackground
       ? 'text-gray-300'
       : 'text-gray-500';
 
       const getTextPeriodForBilling = () => {
-        if (service.recurrence?.includes('day')) {
+        if (service?.recurrence?.includes('day')) {
           return t('checkout.trial.dayBilling');
         }
-        if (service.recurrence?.includes('week')) {
+        if (service?.recurrence?.includes('week')) {
           return t('checkout.trial.weekBilling');
         }
-        if (service.recurrence?.includes('month')) {
+        if (service?.recurrence?.includes('month')) {
           return t('checkout.trial.monthBilling');
         }
-        if (service.recurrence?.includes('year')) {
+        if (service?.recurrence?.includes('year')) {
           return t('checkout.trial.yearBilling');
         }
       };
 
       const getStartPeriod = () => {
-        const testPeriodDuration = service.test_period_duration ?? 0;
-        const testPeriodUnit = service.test_period_duration_unit_of_measurement ?? '';
+        const testPeriodDuration = service?.test_period_duration ?? 0;
+        const testPeriodUnit = service?.test_period_duration_unit_of_measurement ?? '';
         const currentDate = new Date();
 
         if(testPeriodUnit.includes('day')) {
@@ -162,16 +179,17 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
         {t('checkout.resume')}
       </div>
 
-      {/* Componente de servicio */}
+      {/* Componente de servicio o invoice */}
       <div className="space-y-4">
         <ServiceTypeSection
           service={service}
+          invoice={invoice}
           isDarkBackground={isDarkBackground}
         />
       </div>
 
-      {/* Manejo de cantidades */}
-      {!service.recurrence && (
+      {/* Manejo de cantidades - solo para servicios sin recurrencia */}
+      {!service?.recurrence && !invoice && (
         <div className="mb-4 flex items-center justify-between">
           <div
             className={`text-sm font-medium leading-5 ${
@@ -222,8 +240,9 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
         </div>
       )}
 
-      {/* Campo de cupón de descuento */}
-      <FormField
+      {/* Campo de cupón de descuento - solo para servicios con Stripe */}
+      {selectedPaymentMethod === 'stripe' && !invoice && (
+        <FormField
         name="discount_coupon"
         control={form.control}
         render={({ field }) => (
@@ -249,107 +268,131 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
           </div>
         )}
       />
+      )}
 
-      {/* Subtotal */}
-      {!service.test_period && <div className="flex justify-between">
-        <div
+      {/* Subtotal - solo para servicios sin período de prueba */}
+      {!service?.test_period && !invoice && (
+        <div className="flex justify-between">
+          <div
+            className={`text-sm font-medium leading-5 ${
+              isDarkBackground ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            {t('checkout.subtotal')}
+          </div>        <div
           className={`text-sm font-medium leading-5 ${
             isDarkBackground ? 'text-gray-300' : 'text-gray-700'
           }`}
         >
-          {t('checkout.subtotal')}
+          ${(service?.price ?? 0 * quantity)?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'}
         </div>
-        <div
-          className={`text-sm font-medium leading-5 ${
-            isDarkBackground ? 'text-gray-300' : 'text-gray-700'
-          }`}
-        >
-          ${(service.price! * quantity)?.toFixed(2)} {service.currency.toUpperCase()}
         </div>
-      </div>}
+      )}
 
       
 
-      {
-        service.test_period && (
+      {/* Período de prueba - solo para servicios */}
+      {service?.test_period && !invoice && (
           <div className="flex justify-between">
             <div className={`text-sm font-normal leading-5 ${secondaryTextColor}`}>
               <p>{getTextPeriodForBilling()}</p>
               <p>{getStartPeriod()}</p>
             </div>
             <span className={`text-sm ${secondaryTextColor}`}>
-              ${(service.price ?? 0 * quantity)?.toFixed(2)} {service.currency.toUpperCase()}
+              ${(service?.price ?? 0 * quantity)?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'}
             </span>
           </div>
         )
       }
 
-      {/* Descuento */}
-      {discountAmount !== null && (
+      {/* Descuento - solo para servicios */}
+      {discountAmount !== null && !invoice && (
         <div className={`flex justify-between ${secondaryTextColor}`}>
           <div className="text-sm font-medium leading-5">
             {t('checkout.discount')}
           </div>
           <div className="text-sm font-medium leading-5">
-            -${(discountAmount * quantity).toFixed(2)} {service.currency.toUpperCase()}
+            -${(discountAmount * quantity).toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'}
           </div>
         </div>
       )}
 
       {/* Total */}
-      {!service.test_period ? (<div className="flex justify-between">
-        <div
-          className={`text-sm font-bold leading-5 ${
-            isDarkBackground ? 'text-white' : 'text-gray-950'
-          }`}
-        >
-          {service.recurring_subscription ? t('checkout.trial.totalDueToday') : t('checkout.total')}
+      {invoice ? (
+        // Total para invoices
+        <div className="flex justify-between">
+          <div
+            className={`text-sm font-bold leading-5 ${
+              isDarkBackground ? 'text-white' : 'text-gray-950'
+            }`}
+          >
+            {t('checkout.total')}
+          </div>
+          <div
+            className={`text-sm font-bold leading-5 ${
+              isDarkBackground ? 'text-white' : 'text-gray-950'
+            }`}
+          >
+            ${(invoice.total_amount ?? 0).toFixed(2)} {invoice.currency?.toUpperCase() ?? 'USD'}
+          </div>
         </div>
-        <div
-          className={`text-sm font-bold leading-5 ${
-            isDarkBackground ? 'text-white' : 'text-gray-950'
-          }`}
-        >
-          ${(discountedTotal)?.toFixed(2)} {service.currency.toUpperCase()}
+      ) : !service?.test_period ? (
+        // Total para servicios sin período de prueba
+        <div className="flex justify-between">
+          <div
+            className={`text-sm font-bold leading-5 ${
+              isDarkBackground ? 'text-white' : 'text-gray-950'
+            }`}
+          >
+            {service?.recurring_subscription ? t('checkout.trial.totalDueToday') : t('checkout.total')}
+          </div>
+          <div
+            className={`text-sm font-bold leading-5 ${
+              isDarkBackground ? 'text-white' : 'text-gray-950'
+            }`}
+          >
+            ${(discountedTotal)?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'}
+          </div>
         </div>
-      </div>) : (
+      ) : (
+        // Total para servicios con período de prueba
         <div>
           <div className="flex justify-between">
-        <div
-          className={`text-sm font-bold leading-5 ${
-            isDarkBackground ? 'text-white' : 'text-gray-950'
-          }`}
-        >
-          {t('checkout.trial.totalAfterTrial')}
-        </div>
-        <div
-          className={`text-sm font-bold leading-5 ${
-            isDarkBackground ? 'text-white' : 'text-gray-950'
-          }`}
-        >
-          ${(discountedTotal)?.toFixed(2)} {service.currency.toUpperCase()}
-        </div>
-      </div>
-      <div className="flex justify-between">
-      <div
-        className={`text-sm font-bold leading-5 ${
-          isDarkBackground ? 'text-white' : 'text-gray-950'
-        }`}
-      >
-        {t('checkout.trial.totalDueToday')}
-      </div>
-      <div
-        className={`text-sm font-bold leading-5 ${
-          isDarkBackground ? 'text-white' : 'text-gray-950'
-        }`}
-      >
-        ${service.test_period_price?.toFixed(2)} {service.currency.toUpperCase()}
-      </div>
-    </div>
+            <div
+              className={`text-sm font-bold leading-5 ${
+                isDarkBackground ? 'text-white' : 'text-gray-950'
+              }`}
+            >
+              {t('checkout.trial.totalAfterTrial')}
+            </div>
+            <div
+              className={`text-sm font-bold leading-5 ${
+                isDarkBackground ? 'text-white' : 'text-gray-950'
+              }`}
+            >
+              ${(discountedTotal)?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'}
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div
+              className={`text-sm font-bold leading-5 ${
+                isDarkBackground ? 'text-white' : 'text-gray-950'
+              }`}
+            >
+              {t('checkout.trial.totalDueToday')}
+            </div>
+            <div
+              className={`text-sm font-bold leading-5 ${
+                isDarkBackground ? 'text-white' : 'text-gray-950'
+              }`}
+            >
+              ${service?.test_period_price?.toFixed(2)} {service?.currency?.toUpperCase() ?? 'USD'}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Botón de suscripción */}
+      {/* Botón de pago */}
       <div>
         {validSuccess ? (
           <Button
@@ -365,7 +408,14 @@ export const SideInfo: React.FC<SideDataFieldsProps> = ({
             className="w-full transform transition duration-300 ease-in-out hover:scale-105"
             onClick={onSubmit}
           >
-            {service.test_period ? t('checkout.trial.subscribe') : service.recurring_subscription ? t('checkout.subscribe') : t('checkout.pay')}
+            {invoice 
+              ? t('checkout.pay') 
+              : service?.test_period 
+                ? t('checkout.trial.subscribe') 
+                : service?.recurring_subscription 
+                  ? t('checkout.subscribe') 
+                  : t('checkout.pay')
+            }
             {loading && <Spinner className="ml-2 h-4 w-4" />}
           </ThemedButton>
         )}

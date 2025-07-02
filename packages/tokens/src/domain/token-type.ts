@@ -1,5 +1,6 @@
 import { BillingAccounts } from '../../../../apps/web/lib/billing-accounts.types';
 import { Service } from '../../../../apps/web/lib/services.types';
+import { Invoice } from '../../../../apps/web/lib/invoice.types';
 
 
 export interface Token {
@@ -16,6 +17,7 @@ export interface PayToken {
 account_id: string;
 price_id: string;
 service: Service.Type;
+invoice?: Invoice.Type;
 expires_at: Date;
 organization_id: string;
 payment_methods: BillingAccounts.PaymentMethod[];

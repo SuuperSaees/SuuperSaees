@@ -19,7 +19,7 @@
   "orderCreation": {
     "subject": "Nuevo proyecto creado",
     "body": "Tienes un nuevo proyecto",
-    "greeting": "Hola ${toEmail}",
+    "greeting": "Hola ${toEmail}",  
     "newOrderMessage": "Tienes un nuevo proyecto de ${emailSender}",
     "viewOrder": "Ver proyecto",
     "farewell": "Saludos,",
@@ -104,6 +104,23 @@
       "farewell": "Saludos cordiales,",
       "footer": "Estás recibiendo este correo porque eres participante de este chat. Si no deseas recibir estas notificaciones, puedes ajustar tu configuración de notificaciones.",
       "at": "en"
+  },
+  "requestPayment": {
+    "subject": "Solicitud de pago para la factura ${invoiceNumber}",
+    "body": "Tienes una nueva factura pendiente de pago por ${amount}.",
+    "greeting": "Hola ${clientName},",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Pagar Ahora",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "paymentReceived": {
+    "subject": "Pago recibido para la factura ${invoiceNumber}",
+    "body": "Nos complace confirmar que hemos recibido tu pago de ${amount} para la factura ${invoiceNumber}. Gracias por tu pronto pago.",
+    "greeting": "¡Hola ${clientName}!",
+    "farewell": "Saludos cordiales,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si tienes alguna pregunta, por favor contáctanos.",
+    "at": "de"
   },
   "clientUpdateEmail": {
     "subject": "Actualiza tu correo",

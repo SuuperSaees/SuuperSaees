@@ -10,10 +10,11 @@ import { User } from "~/lib/user.types";
 import { QueryBuilder, QueryConfigurations } from "../query.config";
 import { transformToPaginatedResponse } from "../utils/response-transformers";
 import { transformUser } from "../utils/transformers";
+import { InvoiceSettings, parseInvoiceSettings } from "../invoices/type-guards";
 
 export const getClients = async (
   agencyId: string,
-  config: QueryConfigurations<Client.Response>,
+  config?: QueryConfigurations<Client.Response>,
 ): Promise<Pagination.Response<Client.Response> | Client.Response[]> => {
   const client = getSupabaseServerComponentClient();
   const adminClient = getSupabaseServerComponentClient({
@@ -25,7 +26,7 @@ export const getClients = async (
     .select(
       `id, organization_client_id, user_client_id, agency_id, deleted_on,
        user:accounts!inner(id, name, email, picture_url, created_at, settings:user_settings(name, picture_url)), 
-      organization:organizations!organization_client_id(id, name, slug, owner_id, picture_url)`,
+      organization:organizations!organization_client_id(id, name, slug, owner_id, picture_url, settings:organization_settings(key, value))`,
       config
         ? {
             count: "exact",
@@ -49,7 +50,7 @@ export const getClients = async (
 
   const parsedResponse = transformClients(response.data, roles.data);
   // Check if pagination is requested
-  if (config.pagination) {
+  if (config?.pagination) {
     const paginatedResponse = transformToPaginatedResponse<Client.Response>(
       response,
       config.pagination,
@@ -78,7 +79,12 @@ type ClientUnparsed = Pick<
     | Pick<
         Organization.Type,
         "id" | "name" | "slug" | "owner_id" | "picture_url"
-      >[]
+      > & {
+        settings: {
+          key: string;
+          value: string;
+        }[] | null;
+      }[]
     | null;
 };
 
@@ -94,6 +100,9 @@ const transformClients = (
 ): Client.Response[] => {
   if (!clients) return [];
   return clients.map((client) => {
+    const organization = Array.isArray(client.organization) ? client.organization?.[0] : client.organization;
+    const billingSettings = organization?.settings?.find((setting) => setting.key === "billing_details")?.value ?? null;
+    const billingSettingsParsed: InvoiceSettings | null = billingSettings ? parseInvoiceSettings(billingSettings) : null;
     return {
       ...client,
       user: client.user
@@ -104,9 +113,14 @@ const transformClients = (
                 ?.account_role ?? null,
           })
         : null,
-      organization: Array.isArray(client.organization)
-        ? client.organization[0]
-        : (client.organization ?? null),
+      organization: organization
+        ? {
+            ...organization,
+            settings: {
+              billing: billingSettingsParsed,
+            }
+          }
+        : null,
     };
   });
 };

@@ -1,0 +1,24 @@
+{
+  "settings": {
+    "title": "Configuración de Pagos",
+    "description": "Configura tus métodos de pago y preferencias",
+    "enableManualPayments": {
+      "title": "Habilitar pagos manuales",
+      "description": "Permite que los clientes paguen fuera de la plataforma usando transferencias bancarias, cheques u otros métodos de pago offline."
+    },
+    "paymentMethodName": {
+      "title": "Nombre del método de pago",
+      "description": "El nombre de tu método de pago preferido",
+      "placeholder": "ej., Transferencia bancaria, Transferencia wire"
+    },
+    "instructions": {
+      "title": "Instrucciones de pago",
+      "description": "Proporciona instrucciones detalladas de pago para tus clientes",
+      "placeholder": "Ingresa las instrucciones de pago..."
+    }
+  },
+  "messages": {
+    "updateSuccess": "Configuración de pagos actualizada exitosamente",
+    "updateError": "Error al actualizar la configuración de pagos. Por favor intenta de nuevo."
+  }
+} 
