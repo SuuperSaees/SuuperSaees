@@ -128,6 +128,7 @@ export const createClient = async (clientData: CreateClient) => {
     // Step 3: Create or fetch the client organization user account
     const clientOrganizationUser = await createClientUserAccount(
       clientData.client.email,
+      clientData.client.name,
       organization.name ?? '',
       clientData.adminActivated,
       clientData.agencyId,
@@ -273,6 +274,7 @@ export const addClientMember = async ({
     // Step 5: Create the new client user account
     const clientOrganizationUser = await createClientUserAccount(
       email,
+      '',
       clientOrganization.name ?? '',
     );
     const clientUserId = clientOrganizationUser.user?.id;
