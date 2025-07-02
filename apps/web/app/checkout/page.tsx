@@ -12,8 +12,8 @@ import { getPaymentsMethods, getServiceById } from '~/team-accounts/src/server/a
 import { getStripeAccountID } from '~/team-accounts/src/server/actions/members/get/get-member-account';
 import EmptyPaymentMethods from './components/empty-payment-methods';
 import ErrorDecodedToken from './components/error-decoded-token';
+import { PaidInvoiceView } from './components/paid-invoice-view';
 import { getInvoice } from '~/server/actions/invoices/invoices.action';
-import { Invoice } from '~/lib/invoice.types';
 import { z } from 'zod';
 
 const PaymentSettingsSchema = z.object({
@@ -132,39 +132,47 @@ async function ServiceCheckoutPage({
   }
 
   return (
-    <OrganizationSettingsProvider initialSettings={organizationSettings}>
-      <div
-        className="flex min-h-screen w-full flex-grow flex-col items-center"
-        style={{ backgroundColor: sidebarBackgroundColor }}
-      >
-        <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
-          {
-            !paymentMethods.paymentMethods.length ? (
-              <EmptyPaymentMethods logoUrl={logoUrl ?? suuperLogo ?? ''} />
-            ) : (
-              <DetailsSide
-                service={
-                  service as Service.Relationships.Billing.BillingService
-                }
-                invoice={invoice as Invoice.Response}
-                stripeId={accountId}
-                logoUrl={logoUrl ?? suuperLogo ?? ''}
-                sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
-                paymentMethods={paymentMethods.paymentMethods ?? []}
-                manualPayment={
-                  {
-                    id: 'payment_details',
-                    name: 'manual_payment',
-                    icon: 'paymentswaydirect',
-                    custom_name: paymentDetails?.paymentMethodName,
-                    description: paymentDetails?.instructions,
-                  } as never
-                }
-          />
-            )
-          }
+    <OrganizationSettingsProvider initialSettings={organizationSettings as never}>
+      {/* If it's an invoice and it's already paid, show the paid invoice view without container */}
+      {invoice && invoice.status === 'paid' ? (
+        <PaidInvoiceView
+          invoice={invoice}
+          logoUrl={logoUrl ?? suuperLogo ?? ''}
+        />
+      ) : (
+        <div
+          className="flex min-h-screen w-full flex-grow flex-col items-center"
+          style={{ backgroundColor: sidebarBackgroundColor }}
+        >
+          <div className="flex w-full max-w-[1200px] flex-col pb-10 lg:flex-row">
+            {
+              !paymentMethods.paymentMethods.length ? (
+                <EmptyPaymentMethods logoUrl={logoUrl ?? suuperLogo ?? ''} />
+              ) : (
+                <DetailsSide
+                  service={
+                    service as Service.Relationships.Billing.BillingService
+                  }
+                  invoice={invoice ?? undefined}
+                  stripeId={accountId}
+                  logoUrl={logoUrl ?? suuperLogo ?? ''}
+                  sidebarBackgroundColor={sidebarBackgroundColor ?? '#FFFFFF'}
+                  paymentMethods={paymentMethods.paymentMethods ?? []}
+                  manualPayment={
+                    {
+                      id: 'payment_details',
+                      name: 'manual_payment',
+                      icon: 'paymentswaydirect',
+                      custom_name: paymentDetails?.paymentMethodName,
+                      description: paymentDetails?.instructions,
+                    } as never
+                  }
+                />
+              )
+            }
+          </div>
         </div>
-      </div>
+      )}
     </OrganizationSettingsProvider>
   );
 }

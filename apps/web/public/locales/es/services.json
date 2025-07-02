@@ -121,7 +121,16 @@
     "discount": "Descuento",
     "invoice": {
       "dueDate": "Fecha de vencimiento",
-      "client": "Cliente"
+      "client": "Cliente",
+      "paidTitle": "Factura Pagada",
+      "paidDescription": "Tu factura ha sido pagada exitosamente.",
+      "invoiceNumber": "Número de Factura",
+      "paymentDate": "Fecha de Pago",
+      "paymentMethod": "Método de Pago",
+      "downloading": "Descargando...",
+      "downloadInvoice": "Descargar Factura",
+      "backToDashboard": "Volver al Panel",
+      "needHelp": "¿Necesitas ayuda? Contacta a nuestro equipo de soporte."
     },
     "successTitle": "Pago exitoso",
     "cancelTitle": "Cancelar",
