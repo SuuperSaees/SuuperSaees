@@ -99,7 +99,7 @@ async function ServiceCheckoutPage({
       {
         id: 'payment_details',
         name: 'manual_payment',
-        icon: 'paymentswaydirect',
+        icon: paymentDetails?.paymentMethodName,
         custom_name: paymentDetails?.paymentMethodName,
         description: paymentDetails?.instructions,
       } as never,
