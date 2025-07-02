@@ -13,6 +13,7 @@ import { Tokens } from '../../../../../../../../../apps/web/lib/tokens.types';
 
 export const createClientUserAccount = async (
     clientEmail: string,
+    clientName: string,
     organizationName: Account.Type['name'],
     adminActivated = false,
     agencyId?: string,
@@ -158,6 +159,23 @@ export const createClientUserAccount = async (
             provider: providerToken,
           }
         };
+      }
+
+      if(clientName) {
+          // Update the accounts name
+        const {  error: updateError } = await client
+          .from('accounts')
+          .update({
+            name: clientName,
+            updated_at: createdAtAndUpdatedAt,
+          })
+          .eq('id', clientOrganizationUser.user?.id ?? '')
+          .select()
+          .single();
+
+        if (updateError) {
+          console.error('Error occurred while updating the client user name', updateError);
+        }
       }
       // Step 6: Return the client organization user
       return clientOrganizationUser;
