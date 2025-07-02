@@ -95,7 +95,7 @@ export function useUpdateUser() {
       }
     } 
 
-    if(email !== params.email) {
+    if(params.email && email !== params.email) {
       // step 1: Generate a token from suuper and save it in the database
       const generatedMagicLink = await generateMagicLinkRecoveryPassword(
         email,
