@@ -121,7 +121,16 @@
     "discount": "Discount",
     "invoice": {
       "dueDate": "Due Date",
-      "client": "Client"
+      "client": "Client",
+      "paidTitle": "Invoice Paid",
+      "paidDescription": "Your invoice has been successfully paid.",
+      "invoiceNumber": "Invoice Number",
+      "paymentDate": "Payment Date",
+      "paymentMethod": "Payment Method",
+      "downloading": "Downloading...",
+      "downloadInvoice": "Download Invoice",
+      "backToDashboard": "Back to Dashboard", 
+      "needHelp": "Need help? Contact our support team."
     },
     "successTitle": "Success payment",
     "cancelTitle": "Cancel",
@@ -148,7 +157,8 @@
       "userAlreadyRegistered": "Payment processing failed: {{error}} and is not a client account",
       "paymentFailedWithError": "Payment processing failed: {{error}}",
       "paymentFailed": "Payment processing failed",
-      "cardNumberElement": "Card number elements not found"
+      "cardNumberElement": "Card number elements not found",
+      "manualPaymentInfoRequired": "Manual payment information is required"
     },
     "validation": {
       "fullNameRequired": "Full name is required",

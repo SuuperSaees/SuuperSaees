@@ -121,7 +121,16 @@
     "discount": "Descuento",
     "invoice": {
       "dueDate": "Fecha de vencimiento",
-      "client": "Cliente"
+      "client": "Cliente",
+      "paidTitle": "Factura Pagada",
+      "paidDescription": "Tu factura ha sido pagada exitosamente.",
+      "invoiceNumber": "Número de Factura",
+      "paymentDate": "Fecha de Pago",
+      "paymentMethod": "Método de Pago",
+      "downloading": "Descargando...",
+      "downloadInvoice": "Descargar Factura",
+      "backToDashboard": "Volver al Panel",
+      "needHelp": "¿Necesitas ayuda? Contacta a nuestro equipo de soporte."
     },
     "successTitle": "Pago exitoso",
     "cancelTitle": "Cancelar",
@@ -148,7 +157,8 @@
       "userAlreadyRegistered": "Error en el procesamiento del pago: {{error}} y no es una cuenta de cliente",
       "paymentFailedWithError": "Error en el procesamiento del pago: {{error}}",
       "paymentFailed": "Error en el procesamiento del pago",
-      "cardNumberElement": "No se encontraron los elementos del número de tarjeta"
+      "cardNumberElement": "No se encontraron los elementos del número de tarjeta",
+      "manualPaymentInfoRequired": "Se requiere información de pago manual"
     },
     "validation": {
       "fullNameRequired": "Se requiere el nombre completo",
