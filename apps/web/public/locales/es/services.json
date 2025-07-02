@@ -157,7 +157,8 @@
       "userAlreadyRegistered": "Error en el procesamiento del pago: {{error}} y no es una cuenta de cliente",
       "paymentFailedWithError": "Error en el procesamiento del pago: {{error}}",
       "paymentFailed": "Error en el procesamiento del pago",
-      "cardNumberElement": "No se encontraron los elementos del número de tarjeta"
+      "cardNumberElement": "No se encontraron los elementos del número de tarjeta",
+      "manualPaymentInfoRequired": "Se requiere información de pago manual"
     },
     "validation": {
       "fullNameRequired": "Se requiere el nombre completo",

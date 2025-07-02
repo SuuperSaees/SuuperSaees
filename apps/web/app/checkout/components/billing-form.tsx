@@ -153,6 +153,12 @@ const BillingForm: React.FC<{
 
     let paymentMethodId = '';
 
+    if (selectedPaymentMethod === 'manual_payment' && !form.getValues('manual_payment_info')) {
+      setErrorMessage(t('checkout.error.manualPaymentInfoRequired'));
+      toast.error(t('checkout.error.manualPaymentInfoRequired'));
+      return null;
+    }
+
     if (selectedPaymentMethod === 'stripe') {
 
     const cardNumberElement = elements.getElement(CardNumberElement);

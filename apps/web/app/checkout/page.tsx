@@ -15,6 +15,7 @@ import ErrorDecodedToken from './components/error-decoded-token';
 import { PaidInvoiceView } from './components/paid-invoice-view';
 import { getInvoice } from '~/server/actions/invoices/invoices.action';
 import { z } from 'zod';
+import { Toaster } from '@kit/ui/sonner';
 
 const PaymentSettingsSchema = z.object({
   enableManualPayments: z.boolean(),
@@ -173,6 +174,7 @@ async function ServiceCheckoutPage({
           </div>
         </div>
       )}
+      <Toaster richColors={false} />
     </OrganizationSettingsProvider>
   );
 }

@@ -157,7 +157,8 @@
       "userAlreadyRegistered": "Payment processing failed: {{error}} and is not a client account",
       "paymentFailedWithError": "Payment processing failed: {{error}}",
       "paymentFailed": "Payment processing failed",
-      "cardNumberElement": "Card number elements not found"
+      "cardNumberElement": "Card number elements not found",
+      "manualPaymentInfoRequired": "Manual payment information is required"
     },
     "validation": {
       "fullNameRequired": "Full name is required",
