@@ -30,6 +30,10 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
   //   handleQuestionChange(question.id, `options.${optIndex}.selected`, true);
   // };
 
+  // Get the number of options to determine layout
+  const optionsCount = question.options?.length ?? 0;
+  const useGridLayout = optionsCount > 3;
+
   return (
     <FormField
       index={index}
@@ -40,7 +44,13 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
       handleQuestionBlur={handleQuestionBlur}
       {...props}
     >
-      <div className="mt-4 flex w-full flex-col gap-3">
+      <div 
+        className={`mt-4 w-full ${
+          useGridLayout 
+            ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3' 
+            : 'flex flex-col gap-3'
+        }`}
+      >
         {question.options?.map(
           (option: { value: string; label: string }, optIndex: number) => (
             <FormFieldProvider
@@ -48,18 +58,17 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
               control={form.control}
               name={`questions.${index}.options`}
               render={({ fieldState, field }) => (
-                <FormItem className='flex items-center space-y-0'>
-                    <CheckboxRounded className='w-4 h-4'/>
+                <FormItem className='flex items-center space-y-0 p-2 rounded-lg'>
+                    <CheckboxRounded className='w-4 h-4 mr-2 flex-shrink-0'/>
                   <FormControl>
                     <ThemedInput
                     {...field}
-                    className="focus-visible:ring-none border-none text-sm font-medium leading-6 text-gray-600 shadow-none outline-0"
+                    className="focus-visible:ring-none border-none text-sm font-medium leading-6 text-gray-600 shadow-none outline-0 w-full"
                     onFocus={() =>
                       handleQuestionFocus &&
                       handleQuestionFocus(question.id, 'options')
                     }
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      
                       const { value } = e.target;
                       const newOptions = [...(question.options ?? [])];
                       newOptions[optIndex] = {
