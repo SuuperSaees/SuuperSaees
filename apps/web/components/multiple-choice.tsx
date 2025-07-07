@@ -8,16 +8,18 @@ interface Item {
 
 interface CheckboxProps {
     items: Item[];
-    question: string;
     selectedOptions: string[];  
-    onChange: (selected: string) => void; 
+    onChange: (selected: string) => void;
+    className?: string;
+    useGridLayout?: boolean;
 }
 
 export function MultipleChoice({
     items,
-    question,
     selectedOptions,
-    onChange
+    onChange,
+    className = '',
+    useGridLayout = false
 }: CheckboxProps) {
     const { theme_color } = useOrganizationSettings();
     const [selected, setSelected] = useState<string[]>(selectedOptions);
@@ -36,8 +38,8 @@ export function MultipleChoice({
     };
 
     return (
-        <div className="space-y-2.5">
-            <style jsx>{`
+        <div className={`space-y-2.5 ${className}`}>
+            <style>{`
                 .custom-checkbox {
                     appearance: none;
                     -webkit-appearance: none;
@@ -63,24 +65,26 @@ export function MultipleChoice({
                 }
             `}</style>
  
-            {items.map((item) => (
-                <div
-                    key={item.value}
-                    className="flex flex-row items-center space-x-3 space-y-0"
-                >
-                    <div className="flex-shrink-0 h-5 w-5">
-                        <input
-                            type="checkbox"
-                            checked={selected.includes(item.value)}  
-                            onChange={(e) =>
-                                handleCheckboxChange(item.value, e.target.checked)
-                            }
-                            className="custom-checkbox h-5 w-5"
-                        />
+            <div className={useGridLayout ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3' : ''}>
+                {items.map((item) => (
+                    <div
+                        key={item.value}
+                        className="flex flex-row items-center space-x-3 space-y-0"
+                    >
+                        <div className="flex-shrink-0 h-5 w-5">
+                            <input
+                                type="checkbox"
+                                checked={selected.includes(item.value)}  
+                                onChange={(e) =>
+                                    handleCheckboxChange(item.value, e.target.checked)
+                                }
+                                className="custom-checkbox h-5 w-5"
+                            />
+                        </div>
+                        <p className="text-gray-500 text-sm font-medium font-inter leading-6">{item.label}</p>
                     </div>
-                    <p className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{item.label}</p>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 }

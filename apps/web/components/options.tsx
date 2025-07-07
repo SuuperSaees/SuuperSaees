@@ -8,14 +8,15 @@ interface RadioOptionProps {
   selectedOption: string | null;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   label: string;
+  className?: string;
 }
 
-export function RadioOption({ value, selectedOption, onChange, label }: RadioOptionProps) {
+export function RadioOption({ value, selectedOption, onChange, label, className }: RadioOptionProps) {
   const { theme_color } = useOrganizationSettings();
   const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
 
   return (
-    <label className="flex items-center gap-2 w-fit">
+    <label className={`flex items-center gap-2 w-fit text-md text-4 font-medium  ${className} `}>
       <input
         type="radio"
         value={value}
@@ -37,7 +38,7 @@ export function RadioOption({ value, selectedOption, onChange, label }: RadioOpt
           <div className="w-2 h-2 bg-white rounded-full"></div>
         )}
       </div>
-      <span className="text-gray-500 text-md font-medium font-inter text-4 leading-6">{label}</span>
+      <span className="text-gray-500 font-inter leading-6">{label}</span>
     </label>
   );
 }
