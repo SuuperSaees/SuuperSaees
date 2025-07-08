@@ -89,6 +89,8 @@
       "files": "Archivos"
     },
     "dialog": {
+      "titleCompleteOrder": "Completar orden",
+      "descriptionCompleteOrder": "Esta orden ya tiene una reseña. ¿Deseas marcarla como completada?",
       "button": "Marcar como completado",
       "title": "Deja una reseña",
       "description": "¡Cuentanos sobre tu experiencia con este proyecto!",

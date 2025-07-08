@@ -531,8 +531,8 @@ export function SidebarItem({
           key={path}
           href={path}
           prefetch={true}
+          target={path.includes('http') ? '_blank' : undefined}
           className="flex w-full  items-center gap-2 font-normal line-clamp-1"
-          prefetch={true}
         >
           {buttonContent}
         </Link>

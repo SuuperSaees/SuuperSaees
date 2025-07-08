@@ -64,7 +64,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
         `*, client:accounts!customer_id(id, name, email, picture_url, created_at, settings:user_settings(name, picture_url)), 
          assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
-         order_tags(tag:tags(id, name, color, organization_id))
+         order_tags(tag:tags(id, name, color, organization_id)),
+         reviews(order_id)
         `,
       )
       .eq('id', orderId)

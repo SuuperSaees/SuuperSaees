@@ -32,6 +32,25 @@ import FormRichTextComponent from './content-fields/rich-text-content';
 import { RenderVideoContent } from './render-video-content';
 import UploadImageDropzone from './upload-image-dropzone';
 
+// Constants for the "other" option
+const OTHER_OPTION_PREFIX = 'suuper-custom';
+
+// Helper functions for managing the "other" option
+const isOtherOption = (option: Option): boolean => {
+  return option.label.startsWith(OTHER_OPTION_PREFIX);
+};
+
+const createOtherOption = (t: (key: string) => string): Option => {
+  return {
+    label: `${OTHER_OPTION_PREFIX}-${t('creation.form.marks.other_option_label')}`,
+    value: '',
+  };
+};
+
+const hasOtherOption = (options: Option[]): boolean => {
+  return options.some(isOtherOption);
+};
+
 function organizeFormField(field: FormFieldType.Type) {
   // Create a new object with keys in the desired order
   return {
@@ -113,6 +132,39 @@ export function WidgetEditForm() {
       });
     }
   };
+
+  // Handle "Add other" switch change
+  const handleAllowOtherChange = (checked: boolean) => {
+    const currentOptions = form.getValues('options') ?? [];
+    
+    if (checked) {
+      // Add "other" option if not already present
+      if (!hasOtherOption(currentOptions)) {
+        const otherOption = createOtherOption(t);
+        const updatedOptions = [...currentOptions, otherOption];
+        form.setValue('options', updatedOptions);
+        
+        if (currentFormField) {
+          updateFormField(currentFormField.id, {
+            ...currentFormField,
+            options: updatedOptions,
+          });
+        }
+      }
+    } else {
+      // Remove "other" option
+      const filteredOptions = currentOptions.filter(option => !isOtherOption(option));
+      form.setValue('options', filteredOptions);
+      
+      if (currentFormField) {
+        updateFormField(currentFormField.id, {
+          ...currentFormField,
+          options: filteredOptions,
+        });
+      }
+    }
+  };
+
   // Helper for updating form and context state
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -181,7 +233,13 @@ export function WidgetEditForm() {
 
   const renderOptionFields = (type: string, options: Option[]) => (
     <React.Fragment>
-      {options?.map((_, index) => (
+      {options?.map((option, index) => {
+        // Don't render the "other" option in the regular option list
+        if (isOtherOption(option)) {
+          return null;
+        }
+        
+        return (
         <div
           key={'opt-' + index}
           className="group relative flex flex-col gap-2"
@@ -210,7 +268,20 @@ export function WidgetEditForm() {
             <Trash className="w-full" />
           </Button>
         </div>
-      ))}
+        );
+      })}
+      
+      {/* Add Other Option Switch */}
+      <div className="flex items-center justify-between space-y-0 py-2">
+        <p className="text-sm font-bold text-gray-600">
+          {t('creation.form.marks.allow_other')}
+        </p>
+        <Switch
+          checked={hasOtherOption(form.getValues('options') ?? [])}
+          onCheckedChange={handleAllowOtherChange}
+        />
+      </div>
+      
       <div className="flex justify-center">
         <Button
           type="button"

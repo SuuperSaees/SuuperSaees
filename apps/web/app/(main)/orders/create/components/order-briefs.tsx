@@ -199,6 +199,7 @@ export const OrderBriefs = ({
                                 options={
                                   (formField.field?.options as Option[]) ?? []
                                 }
+                                useGridLayout={((formField.field?.options as Option[]) ?? []).length > 3}
                                 onChange={(
                                   event: React.ChangeEvent<HTMLInputElement>,
                                 ) => {
@@ -211,7 +212,7 @@ export const OrderBriefs = ({
                                 selectedOption={
                                   form.getValues(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
-                                  ) ?? ''
+                                  ) ?? null
                                 }
                               />
                             ) : formField.field?.type === 'multiple_choice' ? (
@@ -219,7 +220,7 @@ export const OrderBriefs = ({
                                 items={
                                   (formField.field?.options as Option[]) ?? []
                                 }
-                                question={formField.field?.label ?? ''}
+                                useGridLayout={((formField.field?.options as Option[]) ?? []).length > 3}
                                 selectedOptions={(
                                   form.getValues(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,

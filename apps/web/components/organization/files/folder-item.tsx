@@ -48,6 +48,7 @@ const FolderItem: React.FC<FolderItemProps> = ({
 
     onError: () => {
       console.error('Error deleting file');
+      toast.error(t('folders.deleteError'));
     },
   });
 

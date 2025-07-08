@@ -56,7 +56,10 @@
           "options": {
             "label": "Opción {{number}}",
             "value": "Valor {{number}}"
-          }
+          },
+          "allow_other": "Agregar \"otra\" opción",
+          "other_option_label": "Otro",
+          "other_option_placeholder": "El usuario ingresará texto personalizado aquí"
         }
     },
     "widgets": {

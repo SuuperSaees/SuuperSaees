@@ -183,7 +183,6 @@ export function OptionFiles({
     }
 
     try {
-      console.log('currentFolders', currentFolders);
       if (currentFolders.length > 0) {
     
 
@@ -194,6 +193,7 @@ export function OptionFiles({
             name: folderName,
             client_organization_id: clientOrganizationId,
             agency_id: agencyId,
+            is_subfolder: true,
           },
         });
       } 

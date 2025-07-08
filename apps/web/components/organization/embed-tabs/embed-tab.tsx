@@ -9,6 +9,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import Dropdown from '~/components/ui/dropdown';
 
 import { DynamicEmoji } from '../../../app/components/shared/dynamic-emoji';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 type EmbedTabProps = {
   id: string;
@@ -27,6 +28,11 @@ export function EmbedTab({
   onDelete,
   onEdit,
 }: EmbedTabProps) {
+  const { workspace } = useUserWorkspace();
+  const userRole = workspace?.role;
+  const availableRoles = ['agency_owner', 'agency_project_manager'];
+
+
   const isActive = activeTab === id;
 
   const options = [
@@ -58,6 +64,7 @@ export function EmbedTab({
     },
   ];
 
+  const canDelete = (role: string) => availableRoles.includes(role);
   return (
     <ThemedTabTrigger
       activeTab={activeTab}
@@ -67,7 +74,7 @@ export function EmbedTab({
     >
       <DynamicEmoji emoji={icon ?? ''} fallback={"🔗"} className="h-4 w-4" />
       <span>{title}</span>
-      {(onDelete ?? onEdit) && (
+      {(onDelete ?? onEdit) && canDelete(userRole ?? '') && (
         <Dropdown
           showSeparators={false}
           options={options}
