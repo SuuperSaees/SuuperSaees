@@ -56,7 +56,10 @@
           "options": {
             "label": "Option {{number}}",
             "value": "Value {{number}}"
-          }
+          },
+          "allow_other": "Add \"other\" option",
+          "other_option_label": "Other",
+          "other_option_placeholder": "User will enter custom text here"
         }
     },
     "widgets": {
@@ -187,11 +190,11 @@
     "invalidFileType": "Please select a valid image file"
   },
   "empty": {
-    "title": "You don’t have any brief yet!",
+    "title": "You don't have any brief yet!",
     "description": "Start by creating a brief clicking on the button below.",
     "orderCreation": {
       "agency": {
-        "title": "You don’t have any service yet!",
+        "title": "You don't have any service yet!",
         "description": "Start by buying a service to create your first project."
       },
       "client": {
@@ -200,7 +203,7 @@
       }
     },
     "agency": {
-      "title": "You don’t have any brief yet!",
+      "title": "You don't have any brief yet!",
       "description": "Start by creating a brief clicking on the button below."
     }
   }

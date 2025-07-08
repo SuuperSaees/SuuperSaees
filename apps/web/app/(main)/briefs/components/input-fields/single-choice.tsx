@@ -6,11 +6,26 @@ import {
   FormItem,
   FormMessage,
 } from '@kit/ui/form';
+import { useTranslation } from 'react-i18next';
 
 import { ComponentProps, Option } from '../../types/brief.types';
 import FormField from './form-field';
 import { ThemedInput } from 'node_modules/@kit/accounts/src/components/ui/input-themed-with-settings';
 import { CheckboxRounded } from '~/components/icons/icons';
+
+// Helper functions for managing the "other" option display
+const OTHER_OPTION_PREFIX = 'suuper-custom';
+
+const isOtherOption = (option: Option): boolean => {
+  return option.label.startsWith(OTHER_OPTION_PREFIX);
+};
+
+const getDisplayLabel = (option: Option, t: (key: string) => string): string => {
+  if (isOtherOption(option)) {
+    return t('creation.form.marks.other_option_label');
+  }
+  return option.label;
+};
 
 const FormFieldSingleChoice: React.FC<ComponentProps> = ({
   index,
@@ -21,14 +36,7 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
   handleQuestionBlur,
   ...props
 }) => {
-  // const [selectedOption, setSelectedOption] = useState<string | null>(
-  //   question.options?.[0]?.value ?? null,
-  // );
-
-  // const handleOptionChange = (value: string, optIndex: number) => {
-  //   setSelectedOption(value);
-  //   handleQuestionChange(question.id, `options.${optIndex}.selected`, true);
-  // };
+  const { t } = useTranslation('briefs');
 
   return (
     <FormField
@@ -51,26 +59,39 @@ const FormFieldSingleChoice: React.FC<ComponentProps> = ({
                 <FormItem className='flex items-center space-y-0'>
                     <CheckboxRounded className='w-4 h-4'/>
                   <FormControl>
-                    <ThemedInput
-                    {...field}
-                    className="focus-visible:ring-none border-none text-sm font-medium leading-6 text-gray-600 shadow-none outline-0"
-                    onFocus={() =>
-                      handleQuestionFocus &&
-                      handleQuestionFocus(question.id, 'options')
-                    }
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      
-                      const { value } = e.target;
-                      const newOptions = [...(question.options ?? [])];
-                      newOptions[optIndex] = {
-                        ...question?.options?.[optIndex] as Option,
-                        label: value,
-                      };
+                    <div className="relative flex-1">
+                      <ThemedInput
+                      {...field}
+                      className={`focus-visible:ring-none border-transparent border-none text-sm font-medium leading-6 text-gray-600 shadow-none outline-0 ${
+                        isOtherOption(option as Option) 
+                          ? 'rounded-none border-b-2 border-dotted border-b-gray-300 cursor-not-allowed italic bg-transparent' 
+                          : ''
+                      }`}
+                      onFocus={() =>
+                        !isOtherOption(option as Option) && handleQuestionFocus &&
+                        handleQuestionFocus(question.id, 'options')
+                      }
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        // Don't allow editing of "other" options
+                        if (isOtherOption(option as Option)) {
+                          return;
+                        }
+                        
+                        const { value } = e.target;
+                        const newOptions = [...(question.options ?? [])];
+                        
+                        newOptions[optIndex] = {
+                          ...question?.options?.[optIndex] as Option,
+                          label: value,
+                        };
 
-                      handleQuestionChange(question.id, `options`, newOptions);
-                    }}
-                    value={question?.options?.[optIndex]?.label}
-                  />
+                        handleQuestionChange(question.id, `options`, newOptions);
+                      }}
+                      value={getDisplayLabel(option as Option, t)}
+                      readOnly={isOtherOption(option as Option)}
+                      placeholder={isOtherOption(option as Option) ? t('creation.form.marks.other_option_placeholder') : undefined}
+                    />
+                    </div>
                   </FormControl>
                   <FormMessage>{fieldState.error?.message}</FormMessage>
                 </FormItem>
