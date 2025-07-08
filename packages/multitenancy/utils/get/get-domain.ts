@@ -186,6 +186,7 @@ export async function getFullDomainBySubdomain(
     return {
       domainData,
       settings: organizationSettings,
+      organizationId: organizationSubdomainData.organization_id,
     };
   } catch (error) {
     console.error(`Error in getFullDomainBySubdomain: ${error}`);

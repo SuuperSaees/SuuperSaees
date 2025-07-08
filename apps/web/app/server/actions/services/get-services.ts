@@ -8,16 +8,30 @@ import { getPrimaryOwnerId } from '~/team-accounts/src/server/actions/members/ge
 
 import { QueryBuilder, QueryConfigurations } from '../query.config';
 import { transformToPaginatedResponse } from '../utils/response-transformers';
+import { getOrganizationById } from '../organizations/organizations.action';
 
 export const getServicesByOrganizationId = async (
   config?: QueryConfigurations<Service.Relationships.Billing.BillingService>,
+  organizationId?: string,
+  adminActived?: boolean,
 ): Promise<
   Pagination.Response<Service.Relationships.Billing.BillingService> | Service.Relationships.Billing.BillingService[]
 > => {
-  const client = getSupabaseServerComponentClient();
-  const primary_owner_user_id = await getPrimaryOwnerId();
+  const client = getSupabaseServerComponentClient({
+    admin: adminActived ?? false,
+  });
+
 
   try {
+
+    let primary_owner_user_id = '';
+    if (organizationId) {
+      const organization = await getOrganizationById(organizationId, adminActived);
+      primary_owner_user_id = organization?.owner_id ?? '';
+    } else {
+      primary_owner_user_id = await getPrimaryOwnerId() ?? '';
+    }
+
     const initialQuery = client
       .from('services')
       .select(
