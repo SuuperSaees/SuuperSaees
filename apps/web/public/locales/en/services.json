@@ -1,4 +1,7 @@
 {
+  "catalog": {
+    "title": "Catalog"
+  },
   "serviceTitle": "Services",
   "serviceCheckout": "Checkout",
   "name": "Name",

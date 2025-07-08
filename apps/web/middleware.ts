@@ -43,7 +43,7 @@ const PATH_ROLE_RESTRICTIONS = [
   },
   {
     path: '/services',
-    pattern: '^/services',
+    pattern: '^/services(?!/catalog)',
     allowedRoles: ['agency_owner', 'agency_project_manager'],
     redirectTo: '/orders',
   },
@@ -380,8 +380,10 @@ function getPatterns() {
           (req.nextUrl.searchParams.has('tokenId') ||
             req.nextUrl.searchParams.has('token_id'));
 
-        // Skip authentication check for invitation URLs
+        const isServicesCatalogUrl =
+          req.nextUrl.pathname === '/services/catalog';
 
+        // Skip authentication check for invitation URLs
         if (isOrdersPath) {
           const publicTokenId = req.nextUrl.searchParams.get('public_token_id');
           const originalPath = req.nextUrl.href;
@@ -389,7 +391,7 @@ function getPatterns() {
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }
 
-        if (isInvitationUrl || isCheckoutUrl) {
+        if (isInvitationUrl || isCheckoutUrl || isServicesCatalogUrl) {
           return;
         }
         // If user is not logged in, redirect to sign in page.

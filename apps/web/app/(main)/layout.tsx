@@ -36,7 +36,7 @@ export default async function RootLayout({
 
   
   const pathname = headers().get('x-current-path') ?? '/';
-  const exlusionPaths = ['/set-password', '/checkout'];
+  const exlusionPaths = ['/set-password', '/checkout', '/services/catalog'];
   const style = getLayoutStyle();
   const workspace = exlusionPaths.includes(pathname) ? null : await loadUserWorkspace();
   const theme = getTheme();
