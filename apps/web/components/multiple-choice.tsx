@@ -213,7 +213,7 @@ export function MultipleChoice({
                                         handleCustomTextChange(item.value, e.target.value);
                                     }}
                                     placeholder={t('pleaseSpecify')}
-                                    className="ml-8 px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    className="ml-8 px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                                 />
                             )}
                         </div>

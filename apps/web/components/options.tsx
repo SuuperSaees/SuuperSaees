@@ -34,40 +34,28 @@ export function RadioOption({ value, selectedOption, onChange, label, onCustomVa
   const { theme_color } = useOrganizationSettings();
   const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
   const [customText, setCustomText] = useState('');
-  const [isOtherSelected, setIsOtherSelected] = useState(false);
   const isOther = isOtherOption(label);
   
-  // Simple selection logic
-  const isSelected = isOther ? isOtherSelected : selectedOption === value;
+  // Determine if this option is selected
+  const isSelected = isOther 
+    ? Boolean(selectedOption === value || (allOptionValues && selectedOption && !allOptionValues.includes(selectedOption)))
+    : selectedOption === value;
 
   // Handle initialization and updates for "other" options
   useEffect(() => {
-    if (isOther) {
-      // Only select "other" if the selectedOption is actually custom text or explicitly this value
-      const shouldBeSelected = Boolean(
-        selectedOption === value || 
-        (allOptionValues && selectedOption && selectedOption !== '' && selectedOption !== null && !allOptionValues.includes(selectedOption))
-      );
-      
-      setIsOtherSelected(shouldBeSelected);
-      
-      // If selected and has custom text, set it
-      if (shouldBeSelected && selectedOption && selectedOption !== value) {
+    if (isOther && isSelected) {
+      // If selected and the selectedOption is custom text (not the default value), set it
+      if (selectedOption && selectedOption !== value) {
         setCustomText(selectedOption);
-      } else if (!shouldBeSelected) {
-        // Clear custom text when not selected
-        setCustomText('');
       }
-    } else {
-      // For non-other options, clear any other state
-      setIsOtherSelected(false);
+    } else if (!isSelected) {
+      // Clear custom text when not selected
       setCustomText('');
     }
-  }, [isOther, selectedOption, value, allOptionValues]);
+  }, [isOther, isSelected, selectedOption, value]);
 
   const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isOther) {
-      setIsOtherSelected(true);
       // If there's already custom text, send it; otherwise send the value
       if (customText && onCustomValueChange) {
         onCustomValueChange(value, customText);
@@ -75,9 +63,6 @@ export function RadioOption({ value, selectedOption, onChange, label, onCustomVa
         onChange(event);
       }
     } else {
-      // Clear other option state when selecting a different option
-      setIsOtherSelected(false);
-      setCustomText('');
       onChange(event);
     }
   };
@@ -85,8 +70,11 @@ export function RadioOption({ value, selectedOption, onChange, label, onCustomVa
   const handleCustomTextChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newCustomText = event.target.value;
     setCustomText(newCustomText);
-    
-    // Always update when text changes for "other" options
+  };
+
+  const handleCustomTextBlur = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newCustomText = event.target.value;
+    // Only update parent when user finishes typing (onBlur)
     if (isOther && onCustomValueChange) {
       onCustomValueChange(value, newCustomText);
     }
@@ -126,8 +114,9 @@ export function RadioOption({ value, selectedOption, onChange, label, onCustomVa
           type="text"
           value={customText}
           onChange={handleCustomTextChange}
+          onBlur={handleCustomTextBlur}
           placeholder={t('pleaseSpecify')}
-          className="ml-7 px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="ml-7 px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
         />
       )}
     </div>
