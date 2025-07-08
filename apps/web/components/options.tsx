@@ -26,9 +26,10 @@ interface RadioOptionProps {
   label: string;
   onCustomValueChange?: (value: string, customText: string) => void;
   allOptionValues?: string[]; // Add this to help determine if selectedOption is custom text
+  className?: string;
 }
 
-export function RadioOption({ value, selectedOption, onChange, label, onCustomValueChange, allOptionValues }: RadioOptionProps) {
+export function RadioOption({ value, selectedOption, onChange, label, onCustomValueChange, allOptionValues, className }: RadioOptionProps) {
   const { t } = useTranslation(['common', 'briefs']);
   const { theme_color } = useOrganizationSettings();
   const textColor = getTextColorBasedOnBackground(theme_color ?? '#000000');
@@ -93,7 +94,7 @@ export function RadioOption({ value, selectedOption, onChange, label, onCustomVa
 
   return (
     <div className="flex flex-col gap-2 w-full">
-      <label className="flex items-center gap-2 w-fit">
+      <label className={`flex items-center gap-2 w-fit text-sm font-medium  ${className} `}>
       <input
         type="radio"
         value={value}
@@ -115,7 +116,7 @@ export function RadioOption({ value, selectedOption, onChange, label, onCustomVa
           <div className="w-2 h-2 bg-white rounded-full"></div>
         )}
       </div>
-        <span className="text-gray-500 text-md font-medium font-inter text-4 leading-6">
+        <span className="text-gray-500 font-inter leading-6">
           {getDisplayLabel(label, t)}
         </span>
     </label>
