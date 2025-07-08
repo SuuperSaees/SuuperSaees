@@ -212,7 +212,7 @@ export const OrderBriefs = ({
                                 selectedOption={
                                   form.getValues(
                                     `${briefSetValuePrefix}.${briefResponseSufix}.${formField.field?.id}`,
-                                  ) ?? ''
+                                  ) ?? null
                                 }
                               />
                             ) : formField.field?.type === 'multiple_choice' ? (
