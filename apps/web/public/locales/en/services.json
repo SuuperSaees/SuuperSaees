@@ -1,9 +1,10 @@
 {
   "catalog": {
-    "title": "Catalog"
+    "title": "Services Catalog"
   },
   "serviceTitle": "Services",
   "serviceCheckout": "Checkout",
+  "purchase": "Purchase",
   "name": "Name",
   "price": "Price",
   "clients": "Clients",

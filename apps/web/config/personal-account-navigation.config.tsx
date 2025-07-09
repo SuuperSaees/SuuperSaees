@@ -147,10 +147,21 @@ const routes = [
   //   ],
   // },
   {
-    type: 'route',
+    type: 'group',
     label: 'common:servicesName',
-    path: pathsConfig.app.services,
     Icon: <Wallet className={iconClasses} />,
+    children: [
+      {
+        type: 'route',
+        label: 'common:servicesListName',
+        path: pathsConfig.app.services,
+      },
+      {
+        type: 'route',
+        label: 'common:servicesCatalogName',
+        path: pathsConfig.app.servicesCatalog,
+      },
+    ],    
   },
   {
     type: 'route',
