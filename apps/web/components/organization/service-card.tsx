@@ -65,9 +65,6 @@ export default function ServiceCard({
         />
       </div>
       <div className="line-clamp-4">
-        {/* <small className="font-semibold text-purple">
-          {service.created_at}
-        </small> */}
         <h3 className="text-lg font-semibold">{service.name}</h3>
         <p className="mt-2 text-sm text-gray-600">
           {service.service_description}
