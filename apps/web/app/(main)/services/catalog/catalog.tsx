@@ -1,20 +1,9 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "node_modules/@kit/ui/src/shadcn/pagination";
+
 import { useTranslation } from "react-i18next";
 
 import { Trans } from "@kit/ui/trans";
-
-import { usePagination } from "~/hooks/usePagination";
 
 import EmptyState from "~/components/ui/empty-state";
 import { SkeletonCards } from "~/components/ui/skeleton";
@@ -22,61 +11,77 @@ import { SkeletonCardService } from "~/components/organization/skeleton-card-ima
 import CatalogServiceCard from "./catalog-service-card";
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
 import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
+import { Pagination as PaginationType } from "~/lib/pagination";
+import { Service } from "~/lib/services.types";
+import { useDataPagination } from "~/hooks/use-data-pagination";
+import { useTableConfigs } from "~/(views)/hooks/use-table-configs";
+import Pagination from "~/(main)/../components/ui/pagination";
+
 interface ServiceSectionProps {
   organizationId: string;
   isPublicView?: boolean;
   logoUrl?: string;
   themeColor?: string;
+  initialServices?: PaginationType.Response<Service.Relationships.Billing.BillingService>
 }
+
 function ServicesCatalog({
   organizationId,
   logoUrl,
   themeColor,
+  initialServices,
 }: ServiceSectionProps) {
-  const { data: services, isLoading } = useQuery({
-    queryKey: ["services", organizationId],
-    queryFn: async () =>
-      await getServicesByOrganizationId(undefined, organizationId, true),
-    enabled: !!organizationId,
+  const { config } = useTableConfigs('table-config');
+
+  const {
+    data: services,
+    isLoading,
+    pagination,
+  } = useDataPagination<Service.Relationships.Billing.BillingService>({
+    queryKey: ['services'],
+    queryFn: ({ page, limit, filters }) =>
+      getServicesByOrganizationId({
+        pagination: { page, limit },
+        filters: filters?.searchTerm
+          ? [
+              {
+                field: 'name',
+                operator: 'ilike',
+                value: filters.searchTerm,
+              },
+            ]
+          : undefined,
+      }, organizationId, true) as Promise<PaginationType.Response<Service.Relationships.Billing.BillingService>>,
+    initialData: initialServices,
+    config: {
+      limit: config.rowsPerPage.value,
+    },
   });
 
   // User role
   const { workspace: userWorkspace } = useUserWorkspace();
   const userRole = userWorkspace?.role;
 
-
   const { t } = useTranslation("services");
-
-  const totalItems = Array.isArray(services) ? services.length : 0;
-
-  // Use the pagination hook
-  const {
-    currentPage,
-    totalPages,
-    startIndex,
-    endIndex,
-    nextPage,
-    previousPage,
-    goToPage,
-  } = usePagination({
-    totalItems,
-    pageSize: 8, // Define the number of items per page
-  });
 
   const validRoles = ["agency_owner", "agency_project_manager"];
   const canEditService = validRoles.includes(userRole ?? "");
 
-  // Filter the services to only show public services
+  // Filter the services to only show public services - this filtering happens on the current page data
   const filteredServices = Array.isArray(services)
     ? canEditService
       ? services
       : services.filter((service) => service.visibility === "public")
     : [];
 
-  // Slice the services data for the current page
-  const paginatedServices = Array.isArray(filteredServices)
-    ? filteredServices.slice(startIndex, endIndex)
-    : [];
+  // Create pagination config for the Pagination component
+  const paginationConfig = {
+    totalPages: pagination.totalPages,
+    currentPage: pagination.currentPage - 1, // Convert to 0-based indexing for the component
+    goToPage: (page: number) => pagination.goToPage(page + 1), // Convert back to 1-based
+    nextPage: pagination.nextPage,
+    previousPage: pagination.previousPage,
+  };
 
   return (
     <div className="flex h-full w-full flex-col gap-8">
@@ -84,7 +89,7 @@ function ServicesCatalog({
         <SkeletonCards count={9} className="flex h-full w-full flex-wrap gap-8 max-w-7xl mx-auto">
           <SkeletonCardService className="max-w-sm w-full"/>
         </SkeletonCards>
-      ) : paginatedServices.length === 0 || !paginatedServices ? (
+      ) : filteredServices.length === 0 ? (
         <EmptyState
           imageSrc="/images/illustrations/Illustration-box.svg"
           title={t("catalog.empty.title")}
@@ -108,7 +113,7 @@ function ServicesCatalog({
             </p>
           </div>
           <div className="flex h-full w-full flex-wrap gap-8 mx-auto">
-            {paginatedServices.map((service) => (
+            {filteredServices.map((service) => (
               <CatalogServiceCard
                 service={service}
                 key={service.id}
@@ -121,60 +126,7 @@ function ServicesCatalog({
         </div>
       )}
 
-      {totalPages > 1 && (
-        <Pagination className="mt-auto border-t p-4">
-          <PaginationContent className="flex w-full items-center justify-between">
-            <PaginationItem>
-              <PaginationPrevious
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  previousPage();
-                }}
-              >
-                <Trans i18nKey={"common:pagination.previous"} />
-              </PaginationPrevious>
-            </PaginationItem>
-
-            <div className="flex flex-1 justify-center">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      className={`${currentPage === page - 1 ? "bg-gray-100" : ""} border-none hover:bg-gray-50`}
-                      href="#"
-                      isActive={currentPage === page - 1}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        goToPage(page - 1);
-                      }}
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ),
-              )}
-              {totalPages > 3 && currentPage < totalPages - 2 && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-            </div>
-
-            <PaginationItem>
-              <PaginationNext
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  nextPage();
-                }}
-              >
-                <Trans i18nKey={"common:pagination.next"} />
-              </PaginationNext>
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      )}
+      <Pagination {...paginationConfig} />
     </div>
   );
 }
