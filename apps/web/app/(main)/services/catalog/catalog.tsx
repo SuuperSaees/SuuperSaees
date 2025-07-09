@@ -1,7 +1,6 @@
-'use client';
+"use client";
 
-import { useQuery } from '@tanstack/react-query';
-import { getClientServices } from 'node_modules/@kit/team-accounts/src/server/actions/services/get/get-services';
+import { useQuery } from "@tanstack/react-query";
 import {
   Pagination,
   PaginationContent,
@@ -10,35 +9,42 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from 'node_modules/@kit/ui/src/shadcn/pagination';
-import { useTranslation } from 'react-i18next';
+} from "node_modules/@kit/ui/src/shadcn/pagination";
+import { useTranslation } from "react-i18next";
 
-import { Trans } from '@kit/ui/trans';
+import { Trans } from "@kit/ui/trans";
 
-import { usePagination } from '~/hooks/usePagination';
+import { usePagination } from "~/hooks/usePagination";
+import { useAuthDetails } from "@kit/auth/sign-in";
 
-import EmptyState from '~/components/ui/empty-state';
-import { SkeletonCards } from '~/components/ui/skeleton';
-import { SkeletonCardService } from '~/components/organization/skeleton-card-image';
-import ServiceCard from '~/components/organization/service-card';
-import { getServicesByOrganizationId } from '~/server/actions/services/get-services';
-
-// import { getServicesByOrganizationId } from "node_modules/@kit/team-accounts/src/server/actions/services/get/get-services-by-organization-id";
+import EmptyState from "~/components/ui/empty-state";
+import { SkeletonCards } from "~/components/ui/skeleton";
+import { SkeletonCardService } from "~/components/organization/skeleton-card-image";
+import CatalogServiceCard from "./catalog-service-card";
+import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
+import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
 interface ServiceSectionProps {
   organizationId: string;
-  currentUserRole?: string;
+  hostname: string;
+  isPublicView?: boolean;
 }
 function ServicesCatalog({
   organizationId,
-  currentUserRole = 'client_member',
+  hostname,
 }: ServiceSectionProps) {
   const { data: services, isLoading } = useQuery({
-    queryKey: ['services', organizationId],
-    queryFn: async () => await getServicesByOrganizationId(undefined, organizationId, true),
+    queryKey: ["services", organizationId],
+    queryFn: async () =>
+      await getServicesByOrganizationId(undefined, organizationId, true),
     enabled: !!organizationId,
   });
 
-  const { t } = useTranslation('services');
+  // User role
+  const { workspace: userWorkspace } = useUserWorkspace();
+  const userRole = userWorkspace?.role;
+
+  const { authDetails } = useAuthDetails(hostname);
+  const { t } = useTranslation("services");
 
   const totalItems = Array.isArray(services) ? services.length : 0;
 
@@ -56,35 +62,60 @@ function ServicesCatalog({
     pageSize: 8, // Define the number of items per page
   });
 
+  const validRoles = ["agency_owner", "agency_project_manager"];
+  const canEditService = validRoles.includes(userRole ?? "");
+
+  // Filter the services to only show public services
+  const filteredServices = Array.isArray(services)
+    ? canEditService
+      ? services
+      : services.filter((service) => service.visibility === "public")
+    : [];
+
   // Slice the services data for the current page
-  const paginatedServices = Array.isArray(services) ? services.slice(startIndex, endIndex) : [];
+  const paginatedServices = Array.isArray(filteredServices)
+    ? filteredServices.slice(startIndex, endIndex)
+    : [];
 
   return (
-    <div className="flex h-full flex-col gap-8">
+    <div className="flex h-full w-full flex-col gap-8">
       {isLoading ? (
-        <SkeletonCards count={8} className="flex h-full w-full flex-wrap gap-8">
-          <SkeletonCardService />
+        <SkeletonCards count={9} className="flex h-full w-full flex-wrap gap-8 max-w-7xl mx-auto">
+          <SkeletonCardService className="max-w-sm w-full"/>
         </SkeletonCards>
-      ) : (paginatedServices.length === 0 || !paginatedServices) ? (
+      ) : paginatedServices.length === 0 || !paginatedServices ? (
         <EmptyState
           imageSrc="/images/illustrations/Illustration-box.svg"
-          title={t(
-            `${currentUserRole === 'agency_owner' || currentUserRole === 'agency_project_manager' ? 'empty.agency.title' : 'empty.client.title'}`,
-          )}
-          description={t(
-            `${currentUserRole === 'agency_owner' || currentUserRole === 'agency_project_manager' ? 'empty.agency.description' : 'empty.client.description'}`,
-          )}
+          title={t("catalog.empty.title")}
+          description={t("catalog.empty.description")}
         />
       ) : (
-        <div className="flex h-full w-full flex-wrap gap-8">
-          {paginatedServices.map((service) => (
-            <ServiceCard
-              currentUserRole={currentUserRole}
-              service={service}
-              key={service.subscription_id}
-              clientOrganizationId={organizationId}
-            />
-          ))}
+        <div className="flex flex-col max-w-7xl mx-auto w-full">
+          <div className="flex flex-col gap-2 w-full p-8 rounded-sm border-gray-200">
+            {authDetails?.logo_url && (
+              <img
+                src={authDetails?.logo_url}
+                alt="logo"
+                className="w-10 h-10 rounded-sm mx-auto"
+              />
+            )}
+            <p className=" text-sm text-gray-600 text-center">
+              <Trans
+                i18nKey="services:catalog.description"
+                defaults="Choose from our professional services to grow your business"
+              />
+            </p>
+          </div>
+          <div className="flex h-full w-full flex-wrap gap-8 mx-auto">
+            {paginatedServices.map((service) => (
+              <CatalogServiceCard
+                service={service}
+                key={service.id}
+                logoUrl={authDetails?.logo_url}
+                userRole={userRole}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -99,7 +130,7 @@ function ServicesCatalog({
                   previousPage();
                 }}
               >
-                <Trans i18nKey={'common:pagination.previous'} />
+                <Trans i18nKey={"common:pagination.previous"} />
               </PaginationPrevious>
             </PaginationItem>
 
@@ -108,7 +139,7 @@ function ServicesCatalog({
                 (page) => (
                   <PaginationItem key={page}>
                     <PaginationLink
-                      className={`${currentPage === page - 1 ? 'bg-gray-100' : ''} border-none hover:bg-gray-50`}
+                      className={`${currentPage === page - 1 ? "bg-gray-100" : ""} border-none hover:bg-gray-50`}
                       href="#"
                       isActive={currentPage === page - 1}
                       onClick={(e) => {
@@ -136,7 +167,7 @@ function ServicesCatalog({
                   nextPage();
                 }}
               >
-                <Trans i18nKey={'common:pagination.next'} />
+                <Trans i18nKey={"common:pagination.next"} />
               </PaginationNext>
             </PaginationItem>
           </PaginationContent>

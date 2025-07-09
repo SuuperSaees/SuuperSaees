@@ -380,8 +380,8 @@ function getPatterns() {
           (req.nextUrl.searchParams.has('tokenId') ||
             req.nextUrl.searchParams.has('token_id'));
 
-        const isServicesCatalogUrl =
-          req.nextUrl.pathname === '/services/catalog';
+        const isServicesCatalogPublicUrl =
+          req.nextUrl.pathname === '/services/catalog/public';
 
         // Skip authentication check for invitation URLs
         if (isOrdersPath) {
@@ -391,7 +391,7 @@ function getPatterns() {
           return NextResponse.redirect(new URL(confirmPath, origin).href);
         }
 
-        if (isInvitationUrl || isCheckoutUrl || isServicesCatalogUrl) {
+        if (isInvitationUrl || isCheckoutUrl || isServicesCatalogPublicUrl) {
           return;
         }
         // If user is not logged in, redirect to sign in page.

@@ -29,7 +29,7 @@ export const ThemedButton: React.FC<{
 
   return (
     <Button
-      className={`bg-brand flex gap-1 text-black ${className}`}
+      className={`bg-brand flex gap-1 text-black hover:text-white ${className}`}
       style={
         themeColor
           ? {
