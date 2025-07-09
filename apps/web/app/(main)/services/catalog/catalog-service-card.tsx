@@ -25,12 +25,14 @@ interface CatalogServiceCardProps {
   userRole?: string | null;
   service: Service.Type;
   logoUrl?: string;
+  themeColor?: string;
 }
 
 export default function CatalogServiceCard({
   service,
   logoUrl,
   userRole,
+  themeColor,
 }: CatalogServiceCardProps) {
   // Function to handle the visibility of the card in the catalog
   // Only available for agency roles
@@ -261,6 +263,7 @@ export default function CatalogServiceCard({
             <ThemedButton
               className="w-full font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group/btn"
               size="lg"
+              themeColor={themeColor}
             >
               <span className="flex items-center justify-center gap-2">
                 <Trans

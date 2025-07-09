@@ -15,7 +15,6 @@ import { useTranslation } from "react-i18next";
 import { Trans } from "@kit/ui/trans";
 
 import { usePagination } from "~/hooks/usePagination";
-import { useAuthDetails } from "@kit/auth/sign-in";
 
 import EmptyState from "~/components/ui/empty-state";
 import { SkeletonCards } from "~/components/ui/skeleton";
@@ -25,12 +24,14 @@ import { getServicesByOrganizationId } from "~/server/actions/services/get-servi
 import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
 interface ServiceSectionProps {
   organizationId: string;
-  hostname: string;
   isPublicView?: boolean;
+  logoUrl?: string;
+  themeColor?: string;
 }
 function ServicesCatalog({
   organizationId,
-  hostname,
+  logoUrl,
+  themeColor,
 }: ServiceSectionProps) {
   const { data: services, isLoading } = useQuery({
     queryKey: ["services", organizationId],
@@ -43,7 +44,7 @@ function ServicesCatalog({
   const { workspace: userWorkspace } = useUserWorkspace();
   const userRole = userWorkspace?.role;
 
-  const { authDetails } = useAuthDetails(hostname);
+
   const { t } = useTranslation("services");
 
   const totalItems = Array.isArray(services) ? services.length : 0;
@@ -92,9 +93,9 @@ function ServicesCatalog({
       ) : (
         <div className="flex flex-col max-w-7xl mx-auto w-full">
           <div className="flex flex-col gap-2 w-full p-8 rounded-sm border-gray-200">
-            {authDetails?.logo_url && (
+            {logoUrl && (
               <img
-                src={authDetails?.logo_url}
+                src={logoUrl}
                 alt="logo"
                 className="w-10 h-10 rounded-sm mx-auto"
               />
@@ -111,8 +112,9 @@ function ServicesCatalog({
               <CatalogServiceCard
                 service={service}
                 key={service.id}
-                logoUrl={authDetails?.logo_url}
+                logoUrl={logoUrl}
                 userRole={userRole}
+                themeColor={themeColor}
               />
             ))}
           </div>

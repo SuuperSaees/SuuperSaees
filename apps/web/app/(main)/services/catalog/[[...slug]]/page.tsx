@@ -11,7 +11,7 @@ import { Trans } from "@kit/ui/trans";
 interface ServicesCatalogPageProps {
   params: {
     slug?: string[];
-  };
+  };  
 }
 
 export const generateMetadata = async () => {
@@ -27,7 +27,7 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   const host = headersList.get("host") ?? "";
 
   // Get organization data from the subdomain
-  const domainData = await getFullDomainBySubdomain(host, true);
+  const domainData = await getFullDomainBySubdomain(host, true, ['logo_url', 'theme_color']);
 
   // Get current user and role
 
@@ -52,6 +52,14 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   // Get the base URL for sharing
   const baseUrl = `${protocol}://${host}`;
 
+  // Get organization settings (logo_url, theme_color)
+  const organizationSettings = domainData.settings;
+
+  const logoUrl = organizationSettings.find((setting) => setting.key === "logo_url")?.value ?? "";
+  const themeColor = organizationSettings.find((setting) => setting.key === "theme_color")?.value ?? "";
+
+
+  console.log("organizationSettings", organizationSettings);
   return (
     <PageBody className="w-full h-full">
       <PageHeader title="services:catalog.title" className="w-full flex">
@@ -65,8 +73,9 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
 
       <ServicesCatalog
         organizationId={organizationId}
-        hostname={host}
         isPublicView={isPublicView}
+        logoUrl={logoUrl}
+        themeColor={themeColor}
       />
     </PageBody>
   );
