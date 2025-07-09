@@ -54,6 +54,8 @@
   "pageNotFoundHeading": "¡Ay! :|",
   "errorPageHeading": "¡Ay! :|",
   "servicesName": "Servicios",
+  "servicesListName": "Listado",
+  "servicesCatalogName": "Catálogo",
   "settingsName": "Configuraciones",
   "usersName": "Usuarios",
   "ordersName": "Proyectos",

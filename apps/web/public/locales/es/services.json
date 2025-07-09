@@ -1,9 +1,10 @@
 {
   "catalog": {
-    "title": "Catálogo"
+    "title": "Catálogo de servicios"
   },
   "serviceTitle": "Servicios",
   "serviceCheckout": "Checkout",
+  "purchase": "Comprar",
   "name": "Nombre",
   "price": "Precio",
   "clients": "Clientes",
