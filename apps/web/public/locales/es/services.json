@@ -1,6 +1,50 @@
 {
   "catalog": {
-    "title": "Catálogo de servicios"
+    "title": "Catálogo de servicios",
+    "description": "Elige entre nuestros servicios profesionales para crecer tu negocio",
+    "card": {
+      "hide": "Ocultar del catálogo",
+      "show": "Mostrar en el catálogo",
+      "edit": "Editar",
+      "purchase": "Comenzar",
+      "unavailable": "No disponible",
+      "features": {
+        "professional": "Servicio profesional",
+        "support": "Soporte incluido",
+        "fast": "Entrega rápida",
+        "guaranteed": "Garantizado"
+      },
+      "clients": {
+        "singular": "Cliente",
+        "plural": "Clientes"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "available": "Disponible ahora",
+      "type": {
+        "oneTime": "Una vez",
+        "subscription": "Suscripción",
+        "service": "Servicio"
+      },
+      "pricing": {
+        "oneTime": "Pago único",
+        "subscription": "Suscripción mensual",
+        "contact": "Contactar para precio"
+      }
+    },
+    "share": {
+      "title": "Compartir",
+      "copyLink": "Copiar enlace",
+      "linkCopied": "¡Enlace copiado!",
+      "pageTitle": "Catálogo de servicios",
+      "description": "Descubre nuestro catálogo de servicios profesionales"
+    },
+    "empty": {
+      "title": "No se encontraron servicios",
+      "description": "No hay servicios disponibles en este momento. Por favor, revisa más tarde."
+    }
   },
   "serviceTitle": "Servicios",
   "serviceCheckout": "Checkout",

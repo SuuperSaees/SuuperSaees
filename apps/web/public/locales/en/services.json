@@ -1,6 +1,50 @@
 {
   "catalog": {
-    "title": "Services Catalog"
+    "title": "Services Catalog",
+    "description": "Choose from our professional services to grow your business",
+    "card": {
+      "hide": "Hide from catalog",
+      "show": "Show in catalog",
+      "edit": "Edit",
+      "purchase": "Get Started",
+      "unavailable": "Unavailable",
+      "features": {
+        "professional": "Professional service",
+        "support": "Support included",
+        "fast": "Fast delivery",
+        "guaranteed": "Guaranteed"
+      },
+      "clients": {
+        "singular": "Client",
+        "plural": "Clients"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "available": "Available now",
+      "type": {
+        "oneTime": "One-time",
+        "subscription": "Subscription",
+        "service": "Service"
+      },
+      "pricing": {
+        "oneTime": "One-time payment",
+        "subscription": "Monthly subscription",
+        "contact": "Contact for pricing"
+      }
+    },
+    "share": {
+      "title": "Share",
+      "copyLink": "Copy link",
+      "linkCopied": "Copied!",
+      "pageTitle": "Services Catalog",
+      "description": "Check out our professional services catalog"
+    },
+    "empty": {
+      "title": "No services found",
+      "description": "There are no services available at the moment. Please check back later."
+    }
   },
   "serviceTitle": "Services",
   "serviceCheckout": "Checkout",
