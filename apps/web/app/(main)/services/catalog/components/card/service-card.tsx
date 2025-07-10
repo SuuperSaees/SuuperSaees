@@ -32,7 +32,7 @@ export function CatalogServiceCard({
   const recurrenceText = getServiceRecurrenceText(service);
 
   return (
-    <div className={`group relative flex h-fit w-full max-w-sm flex-col rounded-xl bg-white border border-gray-100 transition-all duration-300 hover:-translate-y-1`}>
+    <div className={`group relative flex h-fit w-full max-w-sm flex-col rounded-xl bg-white border border-gray-100`}>
       {/* Trial Banner - Prominent placement for conversion */}
       {/* <ServiceTrialBanner service={service} /> */}
 

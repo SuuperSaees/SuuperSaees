@@ -50,11 +50,11 @@ export function ServiceCardImage({ service, serviceTags, userRole }: ServiceCard
         <img
           src={imageUrl}
           alt={service.name ?? "service"}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+          className="h-full w-full object-cover"
         />
 
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      {/* <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" /> */}
 
       {/* Action Buttons */}
       <ServiceCardActions service={service} userRole={userRole} />

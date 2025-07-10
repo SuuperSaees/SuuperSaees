@@ -30,6 +30,7 @@ function ServicesCatalog({
   logoUrl,
   themeColor,
   initialServices,
+  isPublicView,
 }: ServiceSectionProps) {
   const { config } = useTableConfigs('table-config');
 
@@ -98,7 +99,7 @@ function ServicesCatalog({
       ) : (
         <div className="flex flex-col max-w-7xl mx-auto w-full">
           <div className="flex flex-col gap-2 w-full p-8 rounded-sm border-gray-200">
-            {logoUrl && (
+            {logoUrl && isPublicView && (
               <img
                 src={logoUrl}
                 alt="logo"
