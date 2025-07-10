@@ -120,7 +120,7 @@ INSERT INTO "public"."plugins" (
     'Advanced credit management system that allows organizations to track, consume, and purchase credits for various operations and services within the platform.',
     '{"version": "1.0.0", "documentation_url": "https://suuper.co/docs", "users": []}',
     'credits',
-    'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//suuper.jpeg'
+    'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//credits.png'
 );
 
 INSERT INTO "public"."plugins" 

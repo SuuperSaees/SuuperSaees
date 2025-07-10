@@ -77,6 +77,8 @@ alter table "public"."credits" enable row level security;
 
 alter table "public"."orders_v2" add column "credit_operation_id" uuid;
 
+alter table "public"."account_plugins" add column "config" jsonb;
+
 CREATE UNIQUE INDEX credit_operations_pkey ON public.credit_operations USING btree (id);
 
 CREATE UNIQUE INDEX credits_client_organization_id_unique ON public.credits USING btree (client_organization_id);
