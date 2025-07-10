@@ -1,25 +1,25 @@
 import Link from "next/link";
-import { Users, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@kit/ui/button";
 import { Trans } from "@kit/ui/trans";
 import { ThemedButton } from "node_modules/@kit/accounts/src/components/ui/button-themed-with-settings";
 import { ServiceCardContentProps } from "../../types";
-import { ServiceTags } from "./tags";
+// import { ServiceTags } from "./tags";
 import { ServicePricing } from "./pricing";
 import {
-  getServiceDescription,
+  // getServiceDescription,
   hasFreeTrial,
   // isServiceAvailable,
 } from "../../lib/utils";
 
 export function ServiceCardContent({
   service,
-  serviceTags,
+  // serviceTags,
   recurrenceText,
   // logoUrl,
   themeColor,
 }: ServiceCardContentProps) {
-  const description = getServiceDescription(service);
+  // const description = getServiceDescription(service);
   const isFreeTrial = hasFreeTrial(service);
   // const isAvailable = isServiceAvailable(service);
 
@@ -27,24 +27,24 @@ export function ServiceCardContent({
     <div className="flex flex-col p-6 gap-4">
       {/* Service Name */}
       <h3
-        className="text-xl font-bold leading-tight text-gray-900 line-clamp-1"
+        className="font-medium leading-tight text-gray-900 line-clamp-1"
         title={service.name}
       >
         {service.name}
       </h3>
 
       {/* Description */}
-      <p
+      {/* <p
         className="text-sm leading-relaxed text-gray-600 line-clamp-2"
         title={description}
       >
         {description}
-      </p>
+      </p> */}
 
       {/* Client Info & Availability */}
 
       {/* <div className="flex items-center gap-4 text-xs text-gray-600"> */}
-      {service.number_of_clients && service.number_of_clients > 0 ? (
+      {/* {service.number_of_clients && service.number_of_clients > 0 ? (
         <div className="flex items-center gap-1 text-xs text-gray-600">
           <Users className="h-4 w-4 text-gray-400" />
           <span className="font-medium">
@@ -59,7 +59,7 @@ export function ServiceCardContent({
             />
           </span>
         </div>
-      ) : null}
+      ) : null} */}
 
       {/* {isAvailable && (
           <div className="flex items-center gap-1">
@@ -75,7 +75,7 @@ export function ServiceCardContent({
       {/* </div> */}
 
       {/* Service Tags */}
-      <ServiceTags tags={serviceTags} />
+      {/* <ServiceTags tags={serviceTags} /> */}
 
       {/* Pricing */}
       <ServicePricing service={service} recurrenceText={recurrenceText} />
@@ -84,7 +84,7 @@ export function ServiceCardContent({
       {service.checkout_url ? (
         <Link href={service.checkout_url} className="w-full">
           <ThemedButton
-            className="w-full font-semibold py-3 px-6 rounded-lg transition-all duration-300 group/btn"
+            className="w-fit font-semibold py-3 px-6 rounded-lg group/btn"
             size="lg"
             themeColor={themeColor}
           >
@@ -100,13 +100,13 @@ export function ServiceCardContent({
                   defaults="Get Started"
                 />
               )}
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+              <ArrowRight className="h-4 w-4" />
             </span>
           </ThemedButton>
         </Link>
       ) : (
         <Button
-          className="w-full bg-gray-300 text-gray-500 font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
+          className="w-fit bg-gray-300 text-gray-500 font-semibold py-3 px-6 rounded-lg cursor-not-allowed"
           size="lg"
           disabled
         >

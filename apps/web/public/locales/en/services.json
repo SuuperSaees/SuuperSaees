@@ -39,14 +39,27 @@
         "service": "Service"
       },
       "pricing": {
-        "oneTime": "One-time payment",
+        "oneTime": "",
         "subscription": "Monthly subscription",
         "contact": "Contact for pricing",
-        "daily": "Daily billing",
-        "weekly": "Weekly billing",
-        "monthly": "Monthly billing",
-        "yearly": "Yearly billing",
-        "free": "FREE",
+        "daily": "per day",
+        "weekly": "per week",
+        "monthly": "per month",
+        "yearly": "per year",
+        "free": {
+          "singular": {
+            "day": "{{times}} Day Trial for {{currency}} then",
+            "week": "{{times}} Week Trial for {{currency}} then",
+            "month": "{{times}} Month Trial for {{currency}} then",
+            "year": "{{times}} Year Trial for {{currency}} then"
+          },
+          "plural": {
+            "day": "{{times}} Days Trial for {{currency}} then",
+            "week": "{{times}} Weeks Trial for {{currency}} then",
+            "month": "{{times}} Months Trial for {{currency}} then",
+            "year": "{{times}} Years Trial for {{currency}} then"
+          }
+        },
         "thenRegularPrice": "Then regular price"
       }
     },
