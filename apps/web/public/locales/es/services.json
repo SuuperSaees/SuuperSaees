@@ -42,11 +42,24 @@
         "oneTime": "Pago único",
         "subscription": "Suscripción mensual",
         "contact": "Contactar para precio",
-        "daily": "Facturación diaria",
-        "weekly": "Facturación semanal",
-        "monthly": "Facturación mensual",
-        "yearly": "Facturación anual",
-        "free": "GRATIS",
+        "daily": "por día",
+        "weekly": "por semana",
+        "monthly": "por mes",
+        "yearly": "por año",
+        "free": {
+          "singular": {
+            "day": "{{times}} Día de Prueba para {{currency}} luego",
+            "week": "{{times}} Semana de Prueba para {{currency}} luego",
+            "month": "{{times}} Mes de Prueba para {{currency}} luego",
+            "year": "{{times}} Año de Prueba para {{currency}} luego"
+          },
+          "plural": {
+            "day": "{{times}} Días de Prueba para {{currency}} luego",
+            "week": "{{times}} Semanas de Prueba para {{currency}} luego",
+            "month": "{{times}} Meses de Prueba para {{currency}} luego",
+            "year": "{{times}} Años de Prueba para {{currency}} luego"
+          }
+        },
         "thenRegularPrice": "Luego precio regular"
       }
     },
