@@ -102,7 +102,7 @@ function ServicesCatalog({
               <img
                 src={logoUrl}
                 alt="logo"
-                className="w-10 h-10 rounded-sm mx-auto"
+                className="w-auto h-10 rounded-sm mx-auto"
               />
             )}
             {/* <p className=" text-sm text-gray-600 text-center">
