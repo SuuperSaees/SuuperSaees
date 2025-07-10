@@ -25,7 +25,8 @@
       "faildedToCreateService": "No se pudo crear el servicio. Inténtalo más tarde.",
       "failedToDeleteService": "No se pudo eliminar el servicio. Reinténtalo más tarde.",
       "failedToDeleteServiceFromStripe": "No se pudo eliminar el servicio de Stripe. Inténtalo más tarde.",
-      "failedToFindStripeAccount": "No encontramos la cuenta de Stripe. Por favor, intenta de nuevo más tarde."
+      "failedToFindStripeAccount": "No encontramos la cuenta de Stripe. Por favor, intenta de nuevo más tarde.",
+      "failedToUpdateService": "No se pudo actualizar el servicio. Inténtalo de nuevo."
     },
     "briefs": {
       "failedToCreateBrief": "No se pudo crear el brief. Intenta nuevamente.",

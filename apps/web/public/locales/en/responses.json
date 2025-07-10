@@ -26,7 +26,8 @@
       "failedToCreateService": "Couldn't create the service. Please try again.",
       "failedToDeleteService": "Couldn't delete the service. Please try again.",
       "failedToDeleteServiceFromStripe": "Couldn't delete the service from Stripe. Please try again.",
-      "failedToFindStripeAccount": "Stripe account couldn't be found. Please try again later."
+      "failedToFindStripeAccount": "Stripe account couldn't be found. Please try again later.",
+      "failedToUpdateService": "Couldn't update the service. Please try again."
     },
     "briefs": {
       "failedToCreateBrief": "Couldn't create the brief. Please try again.",

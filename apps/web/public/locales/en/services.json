@@ -12,7 +12,16 @@
         "professional": "Professional service",
         "support": "Support included",
         "fast": "Fast delivery",
-        "guaranteed": "Guaranteed"
+        "guaranteed": "Guaranteed",
+        "trialAvailable": "Trial available",
+        "trialIncluded": "Trial available",
+        "freeTrial": "Free trial",
+        "subscription": "Recurring",
+        "oneTime": "One-time",
+        "timeBased": "Time-based",
+        "creditBased": "Credit-based",
+        "hoursIncluded": "hours included",
+        "creditsIncluded": "credits"
       },
       "clients": {
         "singular": "Client",
@@ -31,7 +40,13 @@
       "pricing": {
         "oneTime": "One-time payment",
         "subscription": "Monthly subscription",
-        "contact": "Contact for pricing"
+        "contact": "Contact for pricing",
+        "daily": "Daily billing",
+        "weekly": "Weekly billing",
+        "monthly": "Monthly billing",
+        "yearly": "Yearly billing",
+        "free": "FREE",
+        "thenRegularPrice": "Then regular price"
       }
     },
     "share": {
@@ -48,7 +63,10 @@
   },
   "serviceTitle": "Services",
   "serviceCheckout": "Checkout",
-  "purchase": "Purchase",
+  "purchase": {
+    "default": "Purchase", 
+    "startTrial": "Start Free Trial"
+  },
   "name": "Name",
   "price": "Price",
   "clients": "Clients",
