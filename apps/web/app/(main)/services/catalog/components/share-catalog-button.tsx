@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@kit/ui/button';
-import { Copy, Share2, Check, ExternalLink } from 'lucide-react';
+import { Copy, Share2, Check } from 'lucide-react';
 import { Trans } from '@kit/ui/trans';
 import { useTranslation } from 'react-i18next';
 
@@ -87,12 +87,12 @@ export default function ShareCatalogButton({ baseUrl }: ShareCatalogButtonProps)
       </Button>
 
       {/* URL Preview */}
-      <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
+      {/* <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200">
         <ExternalLink className="h-3 w-3 text-gray-400" />
         <span className="text-xs text-gray-600 font-mono max-w-xs truncate">
           {catalogUrl}
         </span>
-      </div>
+      </div> */}
     </div>
   );
 } 

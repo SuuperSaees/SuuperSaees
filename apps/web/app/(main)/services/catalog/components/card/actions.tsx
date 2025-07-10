@@ -1,91 +1,123 @@
 import Link from "next/link";
-import { Eye, EyeOff, SquarePen, ShoppingCart } from "lucide-react";
+import { useState } from "react";
+import { SquarePen, MoreVertical, Link2, Check, Trash2 } from "lucide-react";
 import { Button } from "@kit/ui/button";
+// import { Switch } from "@kit/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@kit/ui/dropdown-menu";
 import { Trans } from "@kit/ui/trans";
-import Tooltip from "~/components/ui/tooltip";
 import { ServiceCardActionsProps } from "../../types";
-import { useServiceApiActions } from "../../hooks/use-service-api-actions";
+// import { useServiceApiActions } from "../../hooks/use-service-api-actions";
 import { canUserEditService, ANIMATION_CLASSES } from "../../lib/utils";
+import DeleteServiceDialog from "~/(main)/services/delete/delete-component";
 
-export function ServiceCardActions({ service, userRole }: ServiceCardActionsProps) {
-  const { updateService, isLoading } = useServiceApiActions();
+export function ServiceCardActions({
+  service,
+  userRole,
+}: ServiceCardActionsProps) {
+  // const { updateService } = useServiceApiActions();
   const canEdit = canUserEditService(userRole);
-  const isVisible = service.visibility === "public";
+  // const isVisible = service.visibility === "public";
+  const [copied, setCopied] = useState(false);
 
-  const handleVisibilityToggle = () => {
-    if (!canEdit) return;
+  // const handleVisibilityToggle = () => {
+  //   if (!canEdit) return;
 
-    const newVisibility = isVisible ? "private" : "public";
-    updateService.mutate({
-      id: service.id,
-      data: { visibility: newVisibility },
-    });
+  //   const newVisibility = isVisible ? "private" : "public";
+  //   updateService.mutate({
+  //     id: service.id,
+  //     data: { visibility: newVisibility },
+  //   });
+  // };
+
+  const handleCopyCheckoutUrl = () => {
+    if (!service.checkout_url) return;
+    
+    void navigator.clipboard.writeText(service.checkout_url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <>
-      {/* Edit Actions - Only for valid roles */}
+      {/* Edit Actions Dropdown - Only for valid roles */}
       {canEdit && (
-        <div className={`absolute bottom-3 left-3 ${ANIMATION_CLASSES.OVERLAY_FADE} flex items-center justify-center gap-2`}>
-          <Tooltip
-            content={
-              <Trans
-                i18nKey={`services:catalog.card.${isVisible ? "hide" : "show"}`}
-                defaults={`${isVisible ? "Hide from catalog" : "Show in catalog"}`}
-              />
-            }
-          >
-            <Button
-              size="sm"
-              onClick={handleVisibilityToggle}
-              disabled={isLoading}
-              className={`rounded-lg bg-white/95 text-gray-700 shadow-md hover:bg-white hover:shadow-lg border border-gray-200 hover:bg-gray-100 ${ANIMATION_CLASSES.BUTTON_HOVER}`}
-            >
-              {isVisible ? (
-                <Eye className="h-4 w-4" />
-              ) : (
-                <EyeOff className="h-4 w-4" />
-              )}
-            </Button>
-          </Tooltip>
-          
-          <Tooltip
-            content={
-              <Trans i18nKey="services:catalog.card.edit" defaults="Edit" />
-            }
-          >
-            <Link
-              href={`/services/update?id=${service.id}`}
-              className={`rounded-lg bg-white/95 text-gray-700 shadow-md hover:shadow-lg border border-gray-200 h-8 px-3 flex items-center justify-center hover:bg-gray-100 ${ANIMATION_CLASSES.BUTTON_HOVER}`}
-            >
-              <SquarePen className="h-4 w-4" />
-            </Link>
-          </Tooltip>
-        </div>
-      )}
-
-      {/* Quick Purchase Action */}
-      {service.checkout_url && (
-        <div className={`absolute bottom-3 right-3 ${ANIMATION_CLASSES.OVERLAY_FADE}`}>
-          <Tooltip
-            content={
-              <Trans
-                i18nKey="services:catalog.card.purchase"
-                defaults="Get Started"
-              />
-            }
-          >
-            <Link href={service.checkout_url}>
+        <div
+          className={`absolute top-3 right-3 ${ANIMATION_CLASSES.OVERLAY_FADE} z-10`}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
                 size="sm"
-                className={`rounded-lg bg-white/95 text-gray-700 shadow-md hover:bg-white hover:shadow-lg border border-gray-200 hover:bg-gray-100 ${ANIMATION_CLASSES.BUTTON_HOVER}`}
+                variant="ghost"
+                className="rounded-full bg-white/70 text-gray-700 hover:bg-white h-8 w-8 p-0"
               >
-                <ShoppingCart className="h-4 w-4" />
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
               </Button>
-            </Link>
-          </Tooltip>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="flex flex-col gap-1 p-2">
+              
+
+              <DropdownMenuItem asChild className="text-gray-600 cursor-pointer">
+                <Link href={`/services/update?id=${service.id}`}>
+                  <SquarePen className="mr-2 h-4 w-4" />
+                  <Trans i18nKey="services:catalog.card.edit" defaults="Edit" />
+                </Link>
+              </DropdownMenuItem>
+
+              {service.checkout_url && (
+                <DropdownMenuItem 
+                  onClick={handleCopyCheckoutUrl}
+                  className="text-gray-600 cursor-pointer"
+                >
+                  {copied ? (
+                    <Check className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Link2 className="mr-2 h-4 w-4" />
+                  )}
+                  <Trans i18nKey="services:catalog.card.checkout" defaults="Copy" />
+                </DropdownMenuItem>
+              )}
+
+              {/* <DropdownMenuItem
+                className="text-gray-600 cursor-pointer flex items-center"
+                onSelect={(e) => e.preventDefault()}
+              >
+                <Switch
+                  checked={isVisible}
+                  onCheckedChange={handleVisibilityToggle}
+                  disabled={isLoading}
+                  className="mr-2"
+                />
+                <span>
+                  <Trans
+                    i18nKey="services:catalog.card.visibility"
+                    defaults="Show in catalog"
+                  />
+                </span>
+              </DropdownMenuItem> */}
+
+              <DeleteServiceDialog 
+                serviceId={service.id}
+                triggerComponent={
+                  <DropdownMenuItem 
+                    className="text-gray-600 cursor-pointer"
+                    onSelect={(e) => e.preventDefault()}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trans i18nKey="services:delete" defaults="Delete" />
+                  </DropdownMenuItem>
+                }
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )}
     </>
   );
-} 
+}

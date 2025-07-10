@@ -6,6 +6,7 @@
       "hide": "Ocultar del catálogo",
       "show": "Mostrar en el catálogo",
       "edit": "Editar",
+      "checkout": "Copiar enlace",
       "purchase": "Comenzar",
       "unavailable": "No disponible",
       "features": {
@@ -69,6 +70,7 @@
   },
   "name": "Nombre",
   "price": "Precio",
+  "visibility": "¿Mostrar en el catálogo?",
   "clients": "Clientes",
   "status": "Estado",
   "createdAt": "Creado en",

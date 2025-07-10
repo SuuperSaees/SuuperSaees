@@ -1,10 +1,10 @@
 "use client";
 
 import { CatalogServiceCardProps } from "../../types";
-import { ServiceTrialBanner } from "./trial-banner";
+// import { ServiceTrialBanner } from "./trial-banner";
 import { ServiceCardImage } from "./image";
 import { ServiceCardContent } from "./content";
-import { getServiceTags, getServiceRecurrenceText, ANIMATION_CLASSES } from "../../lib/utils";
+import { getServiceTags, getServiceRecurrenceText } from "../../lib/utils";
 
 /**
  * A modern, responsive service card component for the catalog.
@@ -32,9 +32,9 @@ export function CatalogServiceCard({
   const recurrenceText = getServiceRecurrenceText(service);
 
   return (
-    <div className={`group relative flex h-fit w-full max-w-sm flex-col rounded-xl bg-white shadow-md border border-gray-100 ${ANIMATION_CLASSES.CARD_HOVER}`}>
+    <div className={`group relative flex h-fit w-full max-w-sm flex-col rounded-xl bg-white border border-gray-100 transition-all duration-300 hover:-translate-y-1`}>
       {/* Trial Banner - Prominent placement for conversion */}
-      <ServiceTrialBanner service={service} />
+      {/* <ServiceTrialBanner service={service} /> */}
 
       {/* Image Section with Badges and Actions */}
       <ServiceCardImage 

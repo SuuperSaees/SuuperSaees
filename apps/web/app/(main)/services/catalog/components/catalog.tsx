@@ -3,7 +3,7 @@
 
 import { useTranslation } from "react-i18next";
 
-import { Trans } from "@kit/ui/trans";
+// import { Trans } from "@kit/ui/trans";
 
 import EmptyState from "~/components/ui/empty-state";
 import { SkeletonCards } from "~/components/ui/skeleton";
@@ -70,7 +70,7 @@ function ServicesCatalog({
   // Filter the services to only show public services - this filtering happens on the current page data
   const filteredServices = Array.isArray(services)
     ? canEditService
-      ? services
+      ? services.filter((service) => service.visibility === "public")
       : services.filter((service) => service.visibility === "public")
     : [];
 
@@ -105,12 +105,12 @@ function ServicesCatalog({
                 className="w-10 h-10 rounded-sm mx-auto"
               />
             )}
-            <p className=" text-sm text-gray-600 text-center">
+            {/* <p className=" text-sm text-gray-600 text-center">
               <Trans
                 i18nKey="services:catalog.description"
                 defaults="Choose from our professional services to grow your business"
               />
-            </p>
+            </p> */}
           </div>
           <div className="flex h-full w-full flex-wrap gap-8 mx-auto">
             {filteredServices.map((service) => (
