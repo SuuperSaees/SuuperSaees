@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useState } from "react";
-import { SquarePen, MoreVertical, Link2, Check, Trash2 } from "lucide-react";
+import { SquarePen, MoreVertical, Link2, Check } from "lucide-react";
 import { Button } from "@kit/ui/button";
 // import { Switch } from "@kit/ui/switch";
 import {
@@ -13,7 +13,6 @@ import { Trans } from "@kit/ui/trans";
 import { ServiceCardActionsProps } from "../../types";
 // import { useServiceApiActions } from "../../hooks/use-service-api-actions";
 import { canUserEditService, ANIMATION_CLASSES } from "../../lib/utils";
-import DeleteServiceDialog from "~/(main)/services/delete/delete-component";
 
 export function ServiceCardActions({
   service,
@@ -36,7 +35,7 @@ export function ServiceCardActions({
 
   const handleCopyCheckoutUrl = () => {
     if (!service.checkout_url) return;
-    
+
     void navigator.clipboard.writeText(service.checkout_url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -60,10 +59,14 @@ export function ServiceCardActions({
                 <span className="sr-only">Open menu</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="flex flex-col gap-1 p-2">
-              
-
-              <DropdownMenuItem asChild className="text-gray-600 cursor-pointer">
+            <DropdownMenuContent
+              align="start"
+              className="flex flex-col gap-1 p-2"
+            >
+              <DropdownMenuItem
+                asChild
+                className="text-gray-600 cursor-pointer"
+              >
                 <Link href={`/services/update?id=${service.id}`}>
                   <SquarePen className="mr-2 h-4 w-4" />
                   <Trans i18nKey="services:catalog.card.edit" defaults="Edit" />
@@ -71,7 +74,7 @@ export function ServiceCardActions({
               </DropdownMenuItem>
 
               {service.checkout_url && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={handleCopyCheckoutUrl}
                   className="text-gray-600 cursor-pointer"
                 >
@@ -80,7 +83,10 @@ export function ServiceCardActions({
                   ) : (
                     <Link2 className="mr-2 h-4 w-4" />
                   )}
-                  <Trans i18nKey="services:catalog.card.checkout" defaults="Copy" />
+                  <Trans
+                    i18nKey="services:catalog.card.checkout"
+                    defaults="Copy"
+                  />
                 </DropdownMenuItem>
               )}
 
@@ -101,19 +107,6 @@ export function ServiceCardActions({
                   />
                 </span>
               </DropdownMenuItem> */}
-
-              <DeleteServiceDialog 
-                serviceId={service.id}
-                triggerComponent={
-                  <DropdownMenuItem 
-                    className="text-gray-600 cursor-pointer"
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    <Trans i18nKey="services:delete" defaults="Delete" />
-                  </DropdownMenuItem>
-                }
-              />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
