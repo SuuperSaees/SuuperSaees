@@ -145,24 +145,24 @@ DECLARE
     membership_type text;
     org_owner_id uuid;
 BEGIN
-    -- Obtener el owner_id de la organización cliente
+    -- Get the owner_id of the client organization
     SELECT owner_id INTO org_owner_id
     FROM public.organizations
     WHERE id = NEW.organization_client_id
     LIMIT 1;
-    
-    -- Obtener el rol del owner de la organización cliente
+
+    -- Get the role of the owner of the client organization
     SELECT am.account_role INTO owner_role
     FROM public.accounts_memberships am
     WHERE am.user_id = org_owner_id 
     AND am.organization_id = NEW.organization_client_id
     LIMIT 1;
-    
-    -- Si no encontramos rol en accounts_memberships, asumir que es cliente
+
+    -- If we didn't find a role in accounts_memberships, assume it's client
     IF owner_role IS NULL THEN
         SELECT 'client' INTO membership_type;
     ELSE
-        -- Determinar si es client o agency basado en el rol
+        -- Determine if it's client or agency based on the role
         IF owner_role IN ('client_owner', 'client_member') THEN
             membership_type := 'client';
         ELSIF owner_role IN ('agency_owner', 'agency_member', 'agency_project_manager') THEN
@@ -171,8 +171,8 @@ BEGIN
             membership_type := 'unknown';
         END IF;
     END IF;
-    
-    -- Solo crear créditos para organizaciones cliente
+
+    -- Only create credits for client organizations
     IF membership_type = 'client' THEN
         INSERT INTO public.credits (
             agency_id,
@@ -198,18 +198,18 @@ CREATE OR REPLACE FUNCTION public.update_credits_balance()
  SECURITY DEFINER
 AS $function$
 BEGIN
-    -- Solo procesar si la quantity es diferente de 0
+    -- Only process if the quantity is different from 0
     IF NEW.quantity != 0 THEN
-        -- Actualizar el balance según el status de operación
+        -- Update the balance according to the operation status
         IF NEW.status = 'consumed' THEN
-            -- Restar créditos
+            -- Subtract credits
             UPDATE public.credits 
             SET 
                 balance = balance - NEW.quantity,
                 updated_at = now()
             WHERE id = NEW.credit_id;
         ELSIF NEW.status IN ('purchased', 'refunded') THEN
-            -- Sumar créditos
+            -- Add credits
             UPDATE public.credits 
             SET 
                 balance = balance + NEW.quantity,
