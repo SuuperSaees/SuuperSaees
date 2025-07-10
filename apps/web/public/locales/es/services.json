@@ -1,8 +1,89 @@
 {
+  "catalog": {
+    "title": "Catálogo de servicios",
+    "description": "Elige entre nuestros servicios profesionales para crecer tu negocio",
+    "card": {
+      "hide": "Ocultar del catálogo",
+      "show": "Mostrar en el catálogo",
+      "edit": "Editar servicio",
+      "checkout": "Copiar enlace",
+      "purchase": "Comenzar",
+      "unavailable": "No disponible",
+      "features": {
+        "professional": "Servicio profesional",
+        "support": "Soporte incluido",
+        "fast": "Entrega rápida",
+        "guaranteed": "Garantizado",
+        "trialAvailable": "Prueba disponible",
+        "trialIncluded": "Prueba disponible",
+        "freeTrial": "Prueba gratuita",
+        "subscription": "Recurrente",
+        "oneTime": "Una vez",
+        "timeBased": "Basado en tiempo",
+        "creditBased": "Basado en créditos",
+        "hoursIncluded": "horas incluidas",
+        "creditsIncluded": "créditos"
+      },
+      "clients": {
+        "singular": "Cliente",
+        "plural": "Clientes"
+      },
+      "status": {
+        "active": "Activo",
+        "inactive": "Inactivo"
+      },
+      "available": "Disponible ahora",
+      "type": {
+        "oneTime": "Una vez",
+        "subscription": "Suscripción",
+        "service": "Servicio"
+      },
+      "pricing": {
+        "oneTime": "Pago único",
+        "subscription": "Suscripción mensual",
+        "contact": "Contactar para precio",
+        "daily": "por día",
+        "weekly": "por semana",
+        "monthly": "por mes",
+        "yearly": "por año",
+        "free": {
+          "singular": {
+            "day": "{{times}} Día de Prueba para {{currency}} luego",
+            "week": "{{times}} Semana de Prueba para {{currency}} luego",
+            "month": "{{times}} Mes de Prueba para {{currency}} luego",
+            "year": "{{times}} Año de Prueba para {{currency}} luego"
+          },
+          "plural": {
+            "day": "{{times}} Días de Prueba para {{currency}} luego",
+            "week": "{{times}} Semanas de Prueba para {{currency}} luego",
+            "month": "{{times}} Meses de Prueba para {{currency}} luego",
+            "year": "{{times}} Años de Prueba para {{currency}} luego"
+          }
+        },
+        "thenRegularPrice": "Luego precio regular"
+      }
+    },
+    "share": {
+      "title": "Compartir",
+      "copyLink": "Copiar enlace",
+      "linkCopied": "¡Enlace copiado!",
+      "pageTitle": "Catálogo de servicios",
+      "description": "Descubre nuestro catálogo de servicios profesionales"
+    },
+    "empty": {
+      "title": "No se encontraron servicios",
+      "description": "No hay servicios disponibles en este momento. Por favor, revisa más tarde."
+    }
+  },
   "serviceTitle": "Servicios",
   "serviceCheckout": "Checkout",
+  "purchase": {
+    "default": "Comprar",
+    "startTrial": "Iniciar Prueba Gratuita"
+  },
   "name": "Nombre",
   "price": "Precio",
+  "visibility": "Mostrar en el catálogo",
   "clients": "Clientes",
   "status": "Estado",
   "createdAt": "Creado en",
@@ -16,14 +97,14 @@
   "deleteService": "Eliminar servicio",
   "deleteServiceDescription": "¿Está seguro de que desea eliminar este servicio?",
   "delete": "Eliminar",
-  "cancel": "Cancelar",
+  "cancel": "Cancelar",     
   "updateService": "Actualizar servicio",
   "statusSelection": "Selecciona el estado",
   "active": "Activo",
   "draft": "En borrador",
   "title": "Servicios",
-  "checkoutURL": "Checkout URL",
-  "checkoutURLCopied": "Checkout URL copiado al portapapeles",
+  "checkoutURL": "Copiar enlace",
+  "checkoutURLCopied": "Enlace copiado al portapapeles",
   "edit": "Editar servicio",
   "eliminate": "Eliminar servicio",
   "step_type_of_service": "Tipo de servicio",

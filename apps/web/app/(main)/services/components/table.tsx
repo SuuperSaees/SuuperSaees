@@ -67,6 +67,8 @@ const ServicesTable = ({
 
   const hasPermissionToActionServices = (type?: string) => {
     switch (type) {
+      case 'visibility':
+        return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'edit':
         return ['agency_owner', 'agency_project_manager'].includes(accountRole);
       case 'delete':

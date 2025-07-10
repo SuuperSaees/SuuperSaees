@@ -14,6 +14,7 @@ import {
   GraduationCap,
   Handshake,
   Calendar,
+  LayoutGrid,
   // Wallet,
 } from 'lucide-react';
 
@@ -147,10 +148,25 @@ const routes = [
   //   ],
   // },
   {
-    type: 'route',
+    type: 'group',
     label: 'common:servicesName',
-    path: pathsConfig.app.services,
     Icon: <Wallet className={iconClasses} />,
+    children: [
+      {
+        type: 'route',
+        label: 'common:servicesListName',
+        path: pathsConfig.app.services,
+        end: true,
+        Icon: <LayoutGrid className={iconClasses} />,
+      },
+      {
+        type: 'route',
+        label: 'common:servicesCatalogName',
+        path: pathsConfig.app.servicesCatalog,
+        end: true,
+        Icon: <Layers className={iconClasses} />,
+      },
+    ],    
   },
   {
     type: 'route',

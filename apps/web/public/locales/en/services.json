@@ -1,8 +1,89 @@
 {
+  "catalog": {
+    "title": "Services catalog",
+    "description": "Choose from our professional services to grow your business",
+    "card": {
+      "hide": "Hide from catalog",
+      "show": "Show in catalog",
+      "edit": "Edit service",
+      "checkout": "Copy link",
+      "purchase": "Get Started",
+      "unavailable": "Unavailable",
+      "features": {
+        "professional": "Professional service",
+        "support": "Support included",
+        "fast": "Fast delivery",
+        "guaranteed": "Guaranteed",
+        "trialAvailable": "Trial available",
+        "trialIncluded": "Trial available",
+        "freeTrial": "Free trial",
+        "subscription": "Recurring",
+        "oneTime": "One-time",
+        "timeBased": "Time-based",
+        "creditBased": "Credit-based",
+        "hoursIncluded": "hours included",
+        "creditsIncluded": "credits"
+      },
+      "clients": {
+        "singular": "Client",
+        "plural": "Clients"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "available": "Available now",
+      "type": {
+        "oneTime": "One-time",
+        "subscription": "Subscription",
+        "service": "Service"
+      },
+      "pricing": {
+        "oneTime": "",
+        "subscription": "Monthly subscription",
+        "contact": "Contact for pricing",
+        "daily": "per day",
+        "weekly": "per week",
+        "monthly": "per month",
+        "yearly": "per year",
+        "free": {
+          "singular": {
+            "day": "{{times}} Day Trial for {{currency}} then",
+            "week": "{{times}} Week Trial for {{currency}} then",
+            "month": "{{times}} Month Trial for {{currency}} then",
+            "year": "{{times}} Year Trial for {{currency}} then"
+          },
+          "plural": {
+            "day": "{{times}} Days Trial for {{currency}} then",
+            "week": "{{times}} Weeks Trial for {{currency}} then",
+            "month": "{{times}} Months Trial for {{currency}} then",
+            "year": "{{times}} Years Trial for {{currency}} then"
+          }
+        },
+        "thenRegularPrice": "Then regular price"
+      }
+    },
+    "share": {
+      "title": "Share",
+      "copyLink": "Copy link",
+      "linkCopied": "Copied!",
+      "pageTitle": "Services catalog",
+      "description": "Check out our professional services catalog"
+    },
+    "empty": {
+      "title": "No services found",
+      "description": "There are no services available at the moment. Please check back later."
+    }
+  },
   "serviceTitle": "Services",
   "serviceCheckout": "Checkout",
+  "purchase": {
+    "default": "Purchase", 
+    "startTrial": "Start Free Trial"
+  },
   "name": "Name",
   "price": "Price",
+  "visibility": "Show in catalog",
   "clients": "Clients",
   "status": "Status",
   "createdAt": "Created At",
@@ -22,8 +103,8 @@
   "active": "Active",
   "draft": "Draft",
   "title": "Services",
-  "checkoutURL": "Checkout URL",
-  "checkoutURLCopied": "Checkout URL copied to clipboard",
+  "checkoutURL": "Copy link",
+  "checkoutURLCopied": "Link copied to clipboard",
   "edit": "Edit service",
   "eliminate": "Eliminate service",
   "searchServices": "Search service...",

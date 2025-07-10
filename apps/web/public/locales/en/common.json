@@ -55,6 +55,8 @@
   "nameInput": "Name",
   "namePortalInput": "Portal Name",
   "servicesName": "Services",
+  "servicesListName": "All services",
+  "servicesCatalogName": "Services catalog",
   "settingsName": "Settings",
   "usersName": "Users",
   "ordersName": "Projects",

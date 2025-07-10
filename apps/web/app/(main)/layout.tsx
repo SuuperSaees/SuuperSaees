@@ -36,9 +36,9 @@ export default async function RootLayout({
 
   
   const pathname = headers().get('x-current-path') ?? '/';
-  const exlusionPaths = ['/set-password', '/checkout'];
+  const exlusionPaths = ['/set-password', '/checkout', '/services/catalog/public'];
   const style = getLayoutStyle();
-  const workspace = exlusionPaths.includes(pathname) ? null : await loadUserWorkspace();
+  const workspace = exlusionPaths.includes(pathname) ? null : await loadUserWorkspace().catch(() => null);
   const theme = getTheme();
   const { language } = await createI18nServerInstance();
   const organizationSettings = await loadOrganizationSettings();

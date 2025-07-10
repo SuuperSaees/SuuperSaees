@@ -28,25 +28,41 @@ export default function Pagination({
 }: PaginationProps) {
   const renderPageNumbers = () => {
     const pages = [];
-    const showPages = 3; // Número de páginas a mostrar antes de la elipsis
+    const showPages = 4; // Number of pages to show around current page
 
-    // Siempre mostrar primera página
+    // Always show page 1
     pages.push(1);
 
+    // Add ellipsis if there's a gap
     if (currentPage > showPages) {
       pages.push('ellipsis');
     }
 
-    // Páginas alrededor de la página actual
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(currentPage + 1, totalPages - 1); i++) {
+    // Calculate range around current page
+    let rangeStart = Math.max(2, currentPage - 2);
+    let rangeEnd = Math.min(totalPages - 1, currentPage + 2);
+
+    // Adjust range if we're near the beginning
+    if (currentPage <= showPages) {
+      rangeEnd = Math.min(totalPages - 1, showPages + 2);
+    }
+
+    // Adjust range if we're near the end
+    if (currentPage > totalPages - showPages) {
+      rangeStart = Math.max(2, totalPages - showPages - 1);
+    }
+
+    // Add pages in range
+    for (let i = rangeStart; i <= rangeEnd; i++) {
       pages.push(i);
     }
 
+    // Add ellipsis if there's a gap before last page
     if (currentPage < totalPages - showPages) {
       pages.push('ellipsis');
     }
 
-    // Siempre mostrar última página
+    // Always show last page if there's more than 1 page
     if (totalPages > 1) {
       pages.push(totalPages);
     }

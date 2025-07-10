@@ -5,6 +5,18 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 
 export default {
   content: [...baseConfig.content],
+  safelist: [
+    // Service tag colors
+    'bg-emerald-50', 'text-emerald-700', // Trial tags
+    'bg-blue-50', 'text-blue-700',       // Hours tags
+    'bg-purple-50', 'text-purple-700',   // Credits tags
+    'bg-indigo-50', 'text-indigo-700',   // Subscription tags
+    'bg-green-50', 'text-green-700',     // One-time tags
+    // Animation classes
+    'transition-transform', 'duration-300', 'group-hover:scale-110',
+    'opacity-0', 'transition-opacity', 'group-hover:opacity-100',
+    'transition-all', 'hover:shadow-lg', 'hover:-translate-y-1'
+  ],
   theme: {
     extend: {
       keyframes: {
