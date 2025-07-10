@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useState } from "react";
-import { SquarePen, MoreVertical, Link2, Check } from "lucide-react";
+import { Pen, MoreVertical, Link2, Check } from "lucide-react";
 import { Button } from "@kit/ui/button";
 // import { Switch } from "@kit/ui/switch";
 import {
@@ -68,7 +68,7 @@ export function ServiceCardActions({
                 className="text-gray-600 cursor-pointer"
               >
                 <Link href={`/services/update?id=${service.id}`}>
-                  <SquarePen className="mr-2 h-4 w-4" />
+                  <Pen className="mr-2 h-4 w-4" />
                   <Trans i18nKey="services:catalog.card.edit" defaults="Edit" />
                 </Link>
               </DropdownMenuItem>

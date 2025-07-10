@@ -1,11 +1,14 @@
 'use client';
 
-import { ComponentPropsWithRef } from 'react';
+import { ComponentPropsWithRef, forwardRef } from 'react';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-const PrefetcherLink = (props: ComponentPropsWithRef<typeof Link>) => {
+const PrefetcherLink = forwardRef<
+  HTMLAnchorElement,
+  ComponentPropsWithRef<typeof Link>
+>((props, ref) => {
   const router = useRouter();
   const strHref = typeof props.href === 'string' ? props.href : props.href.href;
 
@@ -18,6 +21,7 @@ const PrefetcherLink = (props: ComponentPropsWithRef<typeof Link>) => {
   return (
     <Link
       {...props}
+      ref={ref}
       prefetch={true}
       onMouseEnter={(e) => {
         conditionalPrefetch();
@@ -37,6 +41,8 @@ const PrefetcherLink = (props: ComponentPropsWithRef<typeof Link>) => {
       }}
     />
   );
-};
+});
+
+PrefetcherLink.displayName = 'PrefetcherLink';
 
 export default PrefetcherLink;
