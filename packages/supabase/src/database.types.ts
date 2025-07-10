@@ -37,6 +37,7 @@ export type Database = {
       account_plugins: {
         Row: {
           account_id: string
+          config: Json | null
           created_at: string | null
           credentials: Json | null
           deleted_on: string | null
@@ -48,6 +49,7 @@ export type Database = {
         }
         Insert: {
           account_id: string
+          config?: Json | null
           created_at?: string | null
           credentials?: Json | null
           deleted_on?: string | null
@@ -59,6 +61,7 @@ export type Database = {
         }
         Update: {
           account_id?: string
+          config?: Json | null
           created_at?: string | null
           credentials?: Json | null
           deleted_on?: string | null
@@ -4116,8 +4119,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: number; brief_id: string }
           | { service_id: string; brief_id: string }
+          | { service_id: number; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
