@@ -52,7 +52,8 @@ add table public.activities,
     public.tasks,
     public.chats,
     public.chat_members,
-    public.message_reads;
+    public.message_reads,
+    public.credits;
 
 -- INSERT INTO "auth"."users" ("instance_id", "id", "aud", "role", "email", "encrypted_password", "email_confirmed_at", "invited_at", "confirmation_token", "confirmation_sent_at", "recovery_token", "recovery_sent_at", "email_change_token_new", "email_change", "email_change_sent_at", "last_sign_in_at", "raw_app_meta_data", "raw_user_meta_data", "is_super_admin", "created_at", "updated_at", "phone", "phone_confirmed_at", "phone_change", "phone_change_token", "phone_change_sent_at", "email_change_token_current", "email_change_confirm_status", "banned_until", "reauthentication_token", "reauthentication_sent_at", "is_sso_user", "deleted_at", "is_anonymous") VALUES
 --         ('00000000-0000-0000-0000-000000000000', 'b73eb03e-fb7a-424d-84ff-18e2791ce0b4', 'authenticated', 'authenticated', 'custom@makerkit.dev', '$2a$10$b3ZPpU6TU3or30QzrXnZDuATPAx2pPq3JW.sNaneVY3aafMSuR4yi', '2024-04-20 08:38:00.860548+00', NULL, '', '2024-04-20 08:37:43.343769+00', '', NULL, '', '', NULL, '2024-04-20 08:38:00.93864+00', '{"provider": "email", "providers": ["email"]}', '{"sub": "b73eb03e-fb7a-424d-84ff-18e2791ce0b4", "email": "custom@makerkit.dev", "email_verified": false, "phone_verified": false}', NULL, '2024-04-20 08:37:43.3385+00', '2024-04-20 08:38:00.942809+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false),
@@ -99,6 +100,28 @@ INSERT INTO "public"."plugins" ("id", "deleted_on", "created_at", "updated_at", 
 -- ("id", "deleted_on", "created_at", "updated_at", "type", "description", "metadata", "name", "icon_url") 
 -- VALUES 
 -- ('e8f72b59-3a41-4c8d-9e67-d5b8f1d2c0a3', null, '2025-01-10 22:28:38.765124+00', '2025-01-10 22:28:38.765124+00', 'internal', 'Integrate any custom iframe as an application within the platform.', '{"version": "1.0.0", "documentation_url": "https://suuper.co/docs"}', 'embeds', 'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//embeds.jpg');
+
+INSERT INTO "public"."plugins" (
+    "id",
+    "deleted_on",
+    "created_at", 
+    "updated_at",
+    "type",
+    "description",
+    "metadata",
+    "name",
+    "icon_url"
+) VALUES (
+    'ad7c2062-bcc0-4cf1-805f-83472d8fa94f',
+    null,
+    now(),
+    now(),
+    'internal',
+    'Advanced credit management system that allows organizations to track, consume, and purchase credits for various operations and services within the platform.',
+    '{"version": "1.0.0", "documentation_url": "https://suuper.co/docs", "users": []}',
+    'credits',
+    'https://pvszgaeqdyypnqftshey.supabase.co/storage/v1/object/public/plugins//suuper.jpeg'
+);
 
 INSERT INTO "public"."plugins" 
 ("id", "deleted_on", "created_at", "updated_at", "type", "description", "metadata", "name", "icon_url") 
