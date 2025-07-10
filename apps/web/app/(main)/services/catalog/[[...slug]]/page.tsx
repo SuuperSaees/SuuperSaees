@@ -2,16 +2,19 @@ import { PageBody } from "@kit/ui/page";
 import { PageHeader } from "~/(main)/../components/page-header";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
-import ServicesCatalog from "../catalog";
+import ServicesCatalog from "../components/catalog";
 import { getFullDomainBySubdomain } from "~/multitenancy/utils/get/get-domain";
 import { headers } from "next/headers";
-import ShareCatalogButton from "../share-catalog-button";
+import ShareCatalogButton from "../components/share-catalog-button";
 import { Trans } from "@kit/ui/trans";
+import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
+import { Pagination } from "~/lib/pagination";
+import { Service } from "~/lib/services.types";
 
 interface ServicesCatalogPageProps {
   params: {
     slug?: string[];
-  };
+  };  
 }
 
 export const generateMetadata = async () => {
@@ -27,7 +30,7 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   const host = headersList.get("host") ?? "";
 
   // Get organization data from the subdomain
-  const domainData = await getFullDomainBySubdomain(host, true);
+  const domainData = await getFullDomainBySubdomain(host, true, ['logo_url', 'theme_color']);
 
   // Get current user and role
 
@@ -52,6 +55,20 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   // Get the base URL for sharing
   const baseUrl = `${protocol}://${host}`;
 
+  // Get organization settings (logo_url, theme_color)
+  const organizationSettings = domainData.settings;
+
+  const logoUrl = organizationSettings.find((setting) => setting.key === "logo_url")?.value ?? "";
+  const themeColor = organizationSettings.find((setting) => setting.key === "theme_color")?.value ?? "";
+
+  // When pagination config is provided, the function returns Pagination.Response<T>
+  const initialServices = await getServicesByOrganizationId({
+    pagination: {
+      page: 1,
+      limit: 100,
+    },
+  }, organizationId, true) as Pagination.Response<Service.Relationships.Billing.BillingService>;
+  
   return (
     <PageBody className="w-full h-full">
       <PageHeader title="services:catalog.title" className="w-full flex">
@@ -64,9 +81,11 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
       </PageHeader>
 
       <ServicesCatalog
+        initialServices={initialServices}
         organizationId={organizationId}
-        hostname={host}
         isPublicView={isPublicView}
+        logoUrl={logoUrl}
+        themeColor={themeColor}
       />
     </PageBody>
   );

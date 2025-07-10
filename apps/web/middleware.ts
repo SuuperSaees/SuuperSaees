@@ -43,7 +43,7 @@ const PATH_ROLE_RESTRICTIONS = [
   },
   {
     path: '/services',
-    pattern: '^/services(?!/catalog)',
+    pattern: '^/services(?!/catalog/public)',
     allowedRoles: ['agency_owner', 'agency_project_manager'],
     redirectTo: '/orders',
   },

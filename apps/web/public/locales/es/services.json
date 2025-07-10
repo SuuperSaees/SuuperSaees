@@ -12,7 +12,16 @@
         "professional": "Servicio profesional",
         "support": "Soporte incluido",
         "fast": "Entrega rápida",
-        "guaranteed": "Garantizado"
+        "guaranteed": "Garantizado",
+        "trialAvailable": "Prueba disponible",
+        "trialIncluded": "Prueba disponible",
+        "freeTrial": "Prueba gratuita",
+        "subscription": "Recurrente",
+        "oneTime": "Una vez",
+        "timeBased": "Basado en tiempo",
+        "creditBased": "Basado en créditos",
+        "hoursIncluded": "horas incluidas",
+        "creditsIncluded": "créditos"
       },
       "clients": {
         "singular": "Cliente",
@@ -31,7 +40,13 @@
       "pricing": {
         "oneTime": "Pago único",
         "subscription": "Suscripción mensual",
-        "contact": "Contactar para precio"
+        "contact": "Contactar para precio",
+        "daily": "Facturación diaria",
+        "weekly": "Facturación semanal",
+        "monthly": "Facturación mensual",
+        "yearly": "Facturación anual",
+        "free": "GRATIS",
+        "thenRegularPrice": "Luego precio regular"
       }
     },
     "share": {
@@ -48,7 +63,10 @@
   },
   "serviceTitle": "Servicios",
   "serviceCheckout": "Checkout",
-  "purchase": "Comprar",
+  "purchase": {
+    "default": "Comprar",
+    "startTrial": "Iniciar Prueba Gratuita"
+  },
   "name": "Nombre",
   "price": "Precio",
   "clients": "Clientes",
