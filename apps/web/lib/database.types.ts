@@ -1183,6 +1183,160 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_operations: {
+        Row: {
+          actor_id: string
+          created_at: string
+          credit_id: string
+          deleted_on: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          quantity: number
+          status: Database["public"]["Enums"]["credit_operation_status"]
+          type: Database["public"]["Enums"]["credit_operation_type"]
+          updated_at: string
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          credit_id: string
+          deleted_on?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          quantity: number
+          status?: Database["public"]["Enums"]["credit_operation_status"]
+          type?: Database["public"]["Enums"]["credit_operation_type"]
+          updated_at?: string
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          credit_id?: string
+          deleted_on?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          quantity?: number
+          status?: Database["public"]["Enums"]["credit_operation_status"]
+          type?: Database["public"]["Enums"]["credit_operation_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_operations_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_operations_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_operations_credit_id_fkey"
+            columns: ["credit_id"]
+            isOneToOne: false
+            referencedRelation: "credits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credits: {
+        Row: {
+          agency_id: string
+          balance: number
+          client_organization_id: string
+          created_at: string
+          deleted_on: string | null
+          id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          agency_id: string
+          balance?: number
+          client_organization_id: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          agency_id?: string
+          balance?: number
+          client_organization_id?: string
+          created_at?: string
+          deleted_on?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credits_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "credits_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: true
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "credits_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: true
+            referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_account_workspace"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credits_usage: {
         Row: {
           id: number
@@ -2436,6 +2590,7 @@ export type Database = {
           brief_ids: string[] | null
           client_organization_id: string
           created_at: string
+          credit_operation_id: string | null
           customer_id: string
           deleted_on: string | null
           description: string
@@ -2458,6 +2613,7 @@ export type Database = {
           brief_ids?: string[] | null
           client_organization_id: string
           created_at?: string
+          credit_operation_id?: string | null
           customer_id: string
           deleted_on?: string | null
           description: string
@@ -2480,6 +2636,7 @@ export type Database = {
           brief_ids?: string[] | null
           client_organization_id?: string
           created_at?: string
+          credit_operation_id?: string | null
           customer_id?: string
           deleted_on?: string | null
           description?: string
@@ -2544,6 +2701,13 @@ export type Database = {
             columns: ["client_organization_id"]
             isOneToOne: false
             referencedRelation: "user_organization"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_v2_credit_operation_id_fkey"
+            columns: ["credit_operation_id"]
+            isOneToOne: false
+            referencedRelation: "credit_operations"
             referencedColumns: ["id"]
           },
           {
@@ -3706,6 +3870,7 @@ export type Database = {
       }
       user_organization: {
         Row: {
+          config: Json | null
           id: string | null
           name: string | null
           owner_id: string | null
@@ -3761,6 +3926,7 @@ export type Database = {
           brief_ids: string[] | null
           client_organization_id: string
           created_at: string
+          credit_operation_id: string | null
           customer_id: string
           deleted_on: string | null
           description: string
@@ -4030,6 +4196,7 @@ export type Database = {
           brief_ids: string[] | null
           client_organization_id: string
           created_at: string
+          credit_operation_id: string | null
           customer_id: string
           deleted_on: string | null
           description: string
@@ -4149,6 +4316,14 @@ export type Database = {
         | "invoices.read"
         | "invoices.manage"
         | "invoices.delete"
+        | "briefs.read"
+        | "briefs.write"
+        | "briefs.delete"
+        | "briefs.manage"
+        | "credits.write"
+        | "credits.read"
+        | "credits.manage"
+        | "credits.delete"
       billing_provider:
         | "stripe"
         | "lemon-squeezy"
@@ -4157,6 +4332,13 @@ export type Database = {
         | "suuper"
       chat_role: "user" | "assistant"
       chat_role_type: "project_manager" | "assistant" | "owner" | "guest"
+      credit_operation_status:
+        | "consumed"
+        | "purchased"
+        | "refunded"
+        | "locked"
+        | "expired"
+      credit_operation_type: "user" | "system"
       embed_location: "tab" | "sidebar"
       embed_types: "url" | "iframe"
       field_types:
@@ -4859,6 +5041,14 @@ export const Constants = {
         "invoices.read",
         "invoices.manage",
         "invoices.delete",
+        "briefs.read",
+        "briefs.write",
+        "briefs.delete",
+        "briefs.manage",
+        "credits.write",
+        "credits.read",
+        "credits.manage",
+        "credits.delete",
       ],
       billing_provider: [
         "stripe",
@@ -4869,6 +5059,14 @@ export const Constants = {
       ],
       chat_role: ["user", "assistant"],
       chat_role_type: ["project_manager", "assistant", "owner", "guest"],
+      credit_operation_status: [
+        "consumed",
+        "purchased",
+        "refunded",
+        "locked",
+        "expired",
+      ],
+      credit_operation_type: ["user", "system"],
       embed_location: ["tab", "sidebar"],
       embed_types: ["url", "iframe"],
       field_types: [
