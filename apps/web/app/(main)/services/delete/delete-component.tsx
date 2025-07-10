@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import { ThemedButton } from 'node_modules/@kit/accounts/src/components/ui/button-themed-with-settings';
 import { useTranslation } from 'react-i18next';
+import React from 'react';
 
 import {
   AlertDialog,
@@ -21,7 +22,12 @@ import { handleResponse } from '~/lib/response/handle-response';
 import Tooltip from '~/components/ui/tooltip';
 import { deleteService } from '~/team-accounts/src/server/actions/services/delete/delete-service-server';
 
-const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
+interface DeleteServiceDialogProps {
+  serviceId: number;
+  triggerComponent?: React.ReactNode;
+}
+
+const DeleteServiceDialog = ({ serviceId, triggerComponent }: DeleteServiceDialogProps) => {
   const { t } = useTranslation(['services', 'responses']);
 
   const queryClient = useQueryClient();
@@ -43,13 +49,33 @@ const DeleteServiceDialog = ({ serviceId }: { serviceId: number }) => {
     },
   });
 
+  // Custom trigger component wrapped with proper event handling
+  const CustomTrigger = React.forwardRef<
+    HTMLDivElement,
+    React.HTMLAttributes<HTMLDivElement>
+  >((props, ref) => {
+    if (!triggerComponent) return null;
+    
+    return (
+      <div ref={ref} {...props}>
+        {triggerComponent}
+      </div>
+    );
+  });
+
+  CustomTrigger.displayName = 'CustomTrigger';
+
   return (
     <>
       <AlertDialog>
-        <AlertDialogTrigger >
-          <Tooltip content={t('services:eliminate')}>
-            <Trash2 className="h-8 w-8 cursor-pointer text-gray-600 rounded-md p-2 hover:bg-accent" />
-          </Tooltip>
+        <AlertDialogTrigger asChild={!!triggerComponent}>
+          {triggerComponent ? (
+            <CustomTrigger />
+          ) : (
+            <Tooltip content={t('services:eliminate')}>
+              <Trash2 className="h-8 w-8 cursor-pointer text-gray-600 rounded-md p-2 hover:bg-accent" />
+            </Tooltip>
+          )}
         </AlertDialogTrigger>
         <AlertDialogContent>
           <div className="flex">

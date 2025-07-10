@@ -1,15 +1,15 @@
 import { Trans } from "@kit/ui/trans";
 import { formatCurrency } from "@kit/shared/utils";
 import { ServicePricingProps } from "../../types";
-import { hasFreeTrial } from "../../lib/utils";
+// import { hasFreeTrial } from "../../lib/utils";
 
 export function ServicePricing({ service, recurrenceText }: ServicePricingProps) {
-  const isFreeTrial = hasFreeTrial(service);
+  // const isFreeTrial = hasFreeTrial(service);
 
   return (
-    <div className="mb-6">
+    <div className="flex flex-col gap-2">
       <div className="flex items-baseline gap-2">
-        {isFreeTrial ? (
+        {/* {isFreeTrial ? (
           <>
             <span className="text-3xl font-bold text-green-600">
               <Trans
@@ -24,14 +24,14 @@ export function ServicePricing({ service, recurrenceText }: ServicePricingProps)
               )}
             </span>
           </>
-        ) : (
+        ) : ( */}
           <span className="text-3xl font-bold text-gray-900">
             {formatCurrency(
               service?.currency?.toUpperCase() ?? "USD",
               service?.price ?? 0,
             )}
           </span>
-        )}
+        {/* )} */}
       </div>
       
       <p className="text-sm font-medium text-gray-600">
@@ -53,7 +53,7 @@ export function ServicePricing({ service, recurrenceText }: ServicePricingProps)
         )}
       </p>
       
-      {isFreeTrial && (
+      {/* {isFreeTrial && (
         <p className="text-xs text-emerald-600 font-bold mt-1">
           <Trans
             i18nKey="services:catalog.card.pricing.thenRegularPrice"
@@ -63,7 +63,7 @@ export function ServicePricing({ service, recurrenceText }: ServicePricingProps)
             )} ${recurrenceText?.defaults.toLowerCase() ?? "per billing cycle"}`}
           />
         </p>
-      )}
+      )} */}
     </div>
   );
 } 

@@ -30,7 +30,7 @@ export {
   FALLBACK_SERVICE_IMAGE,
   CARD_DIMENSIONS,
   ANIMATION_CLASSES
-} from '../lib/service-card';
+} from '../lib/utils';
 
 // Types
 export type {
@@ -43,4 +43,4 @@ export type {
   ServiceTagsProps,
   ServicePricingProps,
   ServiceTrialBannerProps
-} from '../types/service-card'; 
+} from '../types/index'; 

@@ -30,28 +30,7 @@ export const SERVICE_TAG_PRIORITIES = {
   SERVICE_TYPE: 3,
 } as const;
 
-export const TAG_STYLES = {
-  TRIAL: {
-    bgColor: "bg-emerald-50",
-    textColor: "text-emerald-700",
-  },
-  HOURS: {
-    bgColor: "bg-blue-50",
-    textColor: "text-blue-700",
-  },
-  CREDITS: {
-    bgColor: "bg-purple-50",
-    textColor: "text-purple-700",
-  },
-  SUBSCRIPTION: {
-    bgColor: "bg-indigo-50",
-    textColor: "text-indigo-700",
-  },
-  ONE_TIME: {
-    bgColor: "bg-green-50",
-    textColor: "text-green-700",
-  },
-} as const;
+
 
 export const FALLBACK_SERVICE_IMAGE = "/images/fallbacks/service-1.png";
 
@@ -124,8 +103,8 @@ export function getServiceTags(service: Service.Type): ServiceTag[] {
 
     tags.push({
       icon: Gift,
-      bgColor: TAG_STYLES.TRIAL.bgColor,
-      textColor: TAG_STYLES.TRIAL.textColor,
+      bgColor: "bg-purple-50",
+      textColor: "text-purple-700",
       key: "services:catalog.card.features.freeTrial",
       defaults: `Free ${trialText}`,
       priority: SERVICE_TAG_PRIORITIES.TRIAL,
@@ -136,8 +115,8 @@ export function getServiceTags(service: Service.Type): ServiceTag[] {
   if (service.time_based && service.hours) {
     tags.push({
       icon: Clock,
-      bgColor: TAG_STYLES.HOURS.bgColor,
-      textColor: TAG_STYLES.HOURS.textColor,
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-700",
       key: "services:catalog.card.features.hoursIncluded",
       defaults: `${service.hours}h included`,
       priority: SERVICE_TAG_PRIORITIES.BILLING_MODEL,
@@ -145,8 +124,8 @@ export function getServiceTags(service: Service.Type): ServiceTag[] {
   } else if (service.credit_based && service.credits) {
     tags.push({
       icon: Award,
-      bgColor: TAG_STYLES.CREDITS.bgColor,
-      textColor: TAG_STYLES.CREDITS.textColor,
+      bgColor: "bg-purple-50",
+      textColor: "text-purple-700",
       key: "services:catalog.card.features.creditsIncluded",
       defaults: `${service.credits} credits`,
       priority: SERVICE_TAG_PRIORITIES.BILLING_MODEL,
@@ -158,8 +137,8 @@ export function getServiceTags(service: Service.Type): ServiceTag[] {
     if (service.recurring_subscription) {
       tags.push({
         icon: Repeat,
-        bgColor: TAG_STYLES.SUBSCRIPTION.bgColor,
-        textColor: TAG_STYLES.SUBSCRIPTION.textColor,
+        bgColor: "bg-indigo-50",
+        textColor: "text-indigo-700",
         key: "services:catalog.card.features.subscription",
         defaults: "Recurring",
         priority: SERVICE_TAG_PRIORITIES.SERVICE_TYPE,
@@ -167,8 +146,8 @@ export function getServiceTags(service: Service.Type): ServiceTag[] {
     } else if (service.single_sale) {
       tags.push({
         icon: Calendar,
-        bgColor: TAG_STYLES.ONE_TIME.bgColor,
-        textColor: TAG_STYLES.ONE_TIME.textColor,
+        bgColor: "bg-green-50",
+        textColor: "text-green-700",
         key: "services:catalog.card.features.oneTime",
         defaults: "One-time",
         priority: SERVICE_TAG_PRIORITIES.SERVICE_TYPE,

@@ -3,9 +3,7 @@ import { ServiceCardImageProps } from "../../types";
 import { ServiceCardActions } from "./actions";
 import { 
   getServiceImageUrl, 
-  shouldShowServiceTypeBadge,
-  CARD_DIMENSIONS,
-  ANIMATION_CLASSES
+  shouldShowServiceTypeBadge
 } from "../../lib/utils";
 
 export function ServiceCardImage({ service, serviceTags, userRole }: ServiceCardImageProps) {
@@ -13,16 +11,16 @@ export function ServiceCardImage({ service, serviceTags, userRole }: ServiceCard
   const showTypeBadge = shouldShowServiceTypeBadge(serviceTags);
 
   return (
-    <div className={`relative ${CARD_DIMENSIONS.IMAGE_HEIGHT} w-full overflow-hidden rounded-t-xl`}>
+    <div className={`relative h-48 w-full overflow-hidden rounded-t-xl`}>
       {/* Status Badge */}
-      {service.status === "active" && (
+      {/* {service.status === "active" && (
         <div className="absolute left-3 top-3 z-10 rounded-lg bg-green-100 px-3 py-1 text-xs font-medium text-green-800 shadow-sm">
           <Trans
             i18nKey="services:catalog.card.status.active"
             defaults="Active"
           />
         </div>
-      )}
+      )} */}
 
       {/* Service Type Badge - Only show if not redundant with tags */}
       {showTypeBadge && (
@@ -48,14 +46,15 @@ export function ServiceCardImage({ service, serviceTags, userRole }: ServiceCard
 
       {/* Service Image */}
       {/* eslint-disable @next/next/no-img-element */}
-      <img
-        src={imageUrl}
-        alt={service.name ?? "service"}
-        className={`h-full w-full object-cover ${ANIMATION_CLASSES.IMAGE_HOVER}`}
-      />
+      {/* Image container */}
+        <img
+          src={imageUrl}
+          alt={service.name ?? "service"}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+        />
 
       {/* Gradient Overlay */}
-      <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent ${ANIMATION_CLASSES.OVERLAY_FADE}`} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
       {/* Action Buttons */}
       <ServiceCardActions service={service} userRole={userRole} />

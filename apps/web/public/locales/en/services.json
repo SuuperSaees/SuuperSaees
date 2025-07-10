@@ -1,11 +1,12 @@
 {
   "catalog": {
-    "title": "Services Catalog",
+    "title": "Services catalog",
     "description": "Choose from our professional services to grow your business",
     "card": {
       "hide": "Hide from catalog",
       "show": "Show in catalog",
       "edit": "Edit",
+      "checkout": "Copy link",
       "purchase": "Get Started",
       "unavailable": "Unavailable",
       "features": {
@@ -53,7 +54,7 @@
       "title": "Share",
       "copyLink": "Copy link",
       "linkCopied": "Copied!",
-      "pageTitle": "Services Catalog",
+      "pageTitle": "Services catalog",
       "description": "Check out our professional services catalog"
     },
     "empty": {
@@ -69,6 +70,7 @@
   },
   "name": "Name",
   "price": "Price",
+  "visibility": "Show in catalog?",
   "clients": "Clients",
   "status": "Status",
   "createdAt": "Created At",
