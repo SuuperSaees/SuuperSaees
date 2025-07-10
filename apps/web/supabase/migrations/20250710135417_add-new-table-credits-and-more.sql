@@ -176,17 +176,25 @@ BEGIN
 
     -- Only create credits for client organizations
     IF membership_type = 'client' THEN
-        INSERT INTO public.credits (
-            agency_id,
-            client_organization_id,
-            balance,
-            user_id
-        ) VALUES (
-            NEW.agency_id,
-            NEW.organization_client_id,
-            0,
-            org_owner_id
-        );
+        -- Check if credits record already exists for this agency_id and client_organization_id
+        IF NOT EXISTS (
+            SELECT 1 FROM public.credits 
+            WHERE agency_id = NEW.agency_id 
+            AND client_organization_id = NEW.organization_client_id
+            AND deleted_on IS NULL
+        ) THEN
+            INSERT INTO public.credits (
+                agency_id,
+                client_organization_id,
+                balance,
+                user_id
+            ) VALUES (
+                NEW.agency_id,
+                NEW.organization_client_id,
+                0,
+                org_owner_id
+            );
+        END IF;
     END IF;
     
     RETURN NEW;
