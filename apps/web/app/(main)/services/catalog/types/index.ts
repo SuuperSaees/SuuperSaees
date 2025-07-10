@@ -1,5 +1,5 @@
 import { Service } from "~/lib/services.types";
-import { ServiceTag, RecurrenceText } from "../lib/service-card";
+import { ServiceTag, RecurrenceText } from "../lib/utils";
 
 export interface CatalogServiceCardProps {
   userRole?: string | null;
@@ -41,4 +41,4 @@ export interface ServiceTrialBannerProps {
 }
 
 // Re-export from lib for convenience
-export type { ServiceTag, RecurrenceText } from "../lib/service-card"; 
+export type { ServiceTag, RecurrenceText } from "../lib/utils"; 

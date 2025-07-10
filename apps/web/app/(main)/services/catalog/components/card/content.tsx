@@ -3,7 +3,7 @@ import { Users, Clock, ArrowRight } from "lucide-react";
 import { Button } from "@kit/ui/button";
 import { Trans } from "@kit/ui/trans";
 import { ThemedButton } from "node_modules/@kit/accounts/src/components/ui/button-themed-with-settings";
-import { ServiceCardContentProps } from "../../types/service-card";
+import { ServiceCardContentProps } from "../../types";
 import { ServiceTags } from "./tags";
 import { ServicePricing } from "./pricing";
 import { 
@@ -11,7 +11,7 @@ import {
   hasFreeTrial, 
   isServiceAvailable,
   ANIMATION_CLASSES
-} from "../../lib/service-card";
+} from "../../lib/utils";
 
 export function ServiceCardContent({
   service,

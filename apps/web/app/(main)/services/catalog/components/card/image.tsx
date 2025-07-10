@@ -1,12 +1,12 @@
 import { Trans } from "@kit/ui/trans";
-import { ServiceCardImageProps } from "../../types/service-card";
+import { ServiceCardImageProps } from "../../types";
 import { ServiceCardActions } from "./actions";
 import { 
   getServiceImageUrl, 
   shouldShowServiceTypeBadge,
   CARD_DIMENSIONS,
   ANIMATION_CLASSES
-} from "../../lib/service-card";
+} from "../../lib/utils";
 
 export function ServiceCardImage({ service, serviceTags, userRole }: ServiceCardImageProps) {
   const imageUrl = getServiceImageUrl(service);

@@ -1,10 +1,10 @@
 "use client";
 
-import { CatalogServiceCardProps } from "../../types/service-card";
+import { CatalogServiceCardProps } from "../../types";
 import { ServiceTrialBanner } from "./trial-banner";
 import { ServiceCardImage } from "./image";
 import { ServiceCardContent } from "./content";
-import { getServiceTags, getServiceRecurrenceText, ANIMATION_CLASSES } from "../../lib/service-card";
+import { getServiceTags, getServiceRecurrenceText, ANIMATION_CLASSES } from "../../lib/utils";
 
 /**
  * A modern, responsive service card component for the catalog.

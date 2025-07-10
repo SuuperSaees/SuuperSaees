@@ -1,5 +1,5 @@
 import { Trans } from "@kit/ui/trans";
-import { ServiceTagsProps } from "../../types/service-card";
+import { ServiceTagsProps } from "../../types";
 
 export function ServiceTags({ tags }: ServiceTagsProps) {
   if (tags.length === 0) return null;

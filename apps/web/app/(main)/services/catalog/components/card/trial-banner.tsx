@@ -1,6 +1,6 @@
 import { Trans } from "@kit/ui/trans";
-import { ServiceTrialBannerProps } from "../../types/service-card";
-import { hasFreeTrial } from "../../lib/service-card";
+import { ServiceTrialBannerProps } from "../../types";
+import { hasFreeTrial } from "../../lib/utils";
 
 export function ServiceTrialBanner({ service }: ServiceTrialBannerProps) {
   if (!hasFreeTrial(service)) return null;

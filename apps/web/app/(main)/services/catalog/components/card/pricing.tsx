@@ -1,7 +1,7 @@
 import { Trans } from "@kit/ui/trans";
 import { formatCurrency } from "@kit/shared/utils";
-import { ServicePricingProps } from "../../types/service-card";
-import { hasFreeTrial } from "../../lib/service-card";
+import { ServicePricingProps } from "../../types";
+import { hasFreeTrial } from "../../lib/utils";
 
 export function ServicePricing({ service, recurrenceText }: ServicePricingProps) {
   const isFreeTrial = hasFreeTrial(service);

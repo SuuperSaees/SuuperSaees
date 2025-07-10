@@ -3,9 +3,9 @@ import { Eye, EyeOff, SquarePen, ShoppingCart } from "lucide-react";
 import { Button } from "@kit/ui/button";
 import { Trans } from "@kit/ui/trans";
 import Tooltip from "~/components/ui/tooltip";
-import { ServiceCardActionsProps } from "../../types/service-card";
+import { ServiceCardActionsProps } from "../../types";
 import { useServiceApiActions } from "../../hooks/use-service-api-actions";
-import { canUserEditService, ANIMATION_CLASSES } from "../../lib/service-card";
+import { canUserEditService, ANIMATION_CLASSES } from "../../lib/utils";
 
 export function ServiceCardActions({ service, userRole }: ServiceCardActionsProps) {
   const { updateService, isLoading } = useServiceApiActions();
