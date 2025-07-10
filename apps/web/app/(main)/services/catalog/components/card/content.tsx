@@ -84,7 +84,7 @@ export function ServiceCardContent({
       {service.checkout_url ? (
         <Link href={service.checkout_url} className="w-full">
           <ThemedButton
-            className="w-full font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 group/btn"
+            className="w-full font-semibold py-3 px-6 rounded-lg transition-all duration-300 group/btn"
             size="lg"
             themeColor={themeColor}
           >
