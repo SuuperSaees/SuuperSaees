@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Link2, Pen, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@kit/ui/button";
 import { Switch } from "@kit/ui/switch";
@@ -110,7 +110,14 @@ const VisibilityToggle = ({
   service: Service.Relationships.Billing.BillingService;
 }) => {
   const { t } = useTranslation("services");
-  const queryClient = useQueryClient();
+  
+  // Local state for optimistic updates
+  const [optimisticVisibility, setOptimisticVisibility] = useState(service.visibility);
+
+  // Sync local state when service prop changes
+  useEffect(() => {
+    setOptimisticVisibility(service.visibility);
+  }, [service.visibility]);
 
   const updateServiceMutation = useMutation({
     mutationFn: async ({
@@ -120,20 +127,24 @@ const VisibilityToggle = ({
       id: Service.Type["id"];
       data: Service.Update;
     }) => await updateService(id, data),
+    onMutate: (variables) => {
+      // Optimistically update the local state immediately
+      setOptimisticVisibility(variables.data.visibility as "public" | "private");
+    },
     onSuccess: () => {
       // No toast notification to match the card actions pattern
+      // No invalidateQueries needed - optimistic updates handle the state
     },
     onError: () => {
+      // Revert optimistic update on error
+      setOptimisticVisibility(service.visibility);
       console.error("Error updating service");
-    },
-    onSettled: () => {
-      void queryClient.invalidateQueries({ queryKey: ["services"] });
     },
   });
 
   const handleVisibilityToggle = () => {
     const newVisibility =
-      service.visibility === "public" ? "private" : "public";
+      optimisticVisibility === "public" ? "private" : "public";
     updateServiceMutation.mutate({
       id: service.id,
       data: { visibility: newVisibility },
@@ -143,14 +154,14 @@ const VisibilityToggle = ({
   return (
     <Tooltip
       content={
-        service.visibility === "public"
+        optimisticVisibility === "public"
           ? t("catalog.card.hide")
           : t("catalog.card.show")
       }
     >
       <div className="flex items-center">
         <Switch
-          checked={service.visibility === "public"}
+          checked={optimisticVisibility === "public"}
           onCheckedChange={handleVisibilityToggle}
           disabled={updateServiceMutation.isPending}
         />
