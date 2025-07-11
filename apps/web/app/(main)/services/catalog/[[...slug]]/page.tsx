@@ -65,8 +65,15 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   const initialServices = await getServicesByOrganizationId({
     pagination: {
       page: 1,
-      limit: 100,
+      limit: 120, // Multiple of 6, so we can show 6 cards per page and not show the last page with less than 6 cards
     },
+    filters: [
+      {
+        field: 'visibility',
+        operator: 'eq',
+        value: 'public',
+      },
+    ],
   }, organizationId, true) as Pagination.Response<Service.Relationships.Billing.BillingService>;
   
   return (
