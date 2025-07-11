@@ -15,8 +15,8 @@ export async function getChats(userId: string) {
   return await getChatAction().list(userId);
 }
 
-export async function getChat(chatId: string) {
-  return await getChatAction().get(chatId);
+export async function getChat(chatId: string, fetchLatest?: Chats.FetchLatest) {
+  return await getChatAction().get(chatId, fetchLatest);
 }
 
 export async function deleteChat(chatId: string) {
