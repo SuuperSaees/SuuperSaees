@@ -23,8 +23,8 @@ export class ChatAction extends BaseAction implements IChatAction {
     return await this.controller.list(userId);
   }
 
-  async get(chatId: string): Promise<Chats.TypeWithRelations> {
-    return await this.controller.get(chatId);
+  async get(chatId: string, fetchLatest?: Chats.FetchLatest): Promise<Chats.TypeWithRelations> {
+    return await this.controller.get(chatId, fetchLatest);
   }
 
   async delete(chatId: string): Promise<void> {

@@ -89,8 +89,8 @@ export class ChatService {
   }
 
 
-  async get(chatId: string): Promise<Chats.TypeWithRelations> {
-    return await this.chatRepository.get(chatId);
+  async get(chatId: string, fetchLatest?: Chats.FetchLatest): Promise<Chats.TypeWithRelations> {
+    return await this.chatRepository.get(chatId, fetchLatest);
   }
 
 

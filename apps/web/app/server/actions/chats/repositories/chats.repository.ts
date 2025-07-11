@@ -112,7 +112,7 @@ export class ChatRepository {
   }
  
 
-  async get(chatId: string, fields?: string[]): Promise<Chats.TypeWithRelations> {
+  async get(chatId: string, fetchLatest?: Chats.FetchLatest, fields?: string[] ): Promise<Chats.TypeWithRelations> {
     const client = this.client;
     
     if (fields){
@@ -129,65 +129,106 @@ export class ChatRepository {
       return chat as unknown as Chats.TypeWithRelations;
     }
 
-    const { data: chat, error } = await client
-
-      .from('chats')
-      .select(
-        `
-        id,
-        name,
+    let baseQuery = client
+    .from('chats')
+    .select(
+      `
+      id,
+      name,
+      user_id,
+      settings,
+      visibility,
+      image,
+      created_at,
+      updated_at,
+      deleted_on,
+      agency_id,
+      client_organization_id,
+      chat_members (
         user_id,
-        settings,
+        type,
         visibility,
-        image,
-        created_at,
-        updated_at,
-        deleted_on,
-        agency_id,
-        client_organization_id,
-        chat_members (
+        account:accounts(
+          email,
+          name,
+          picture_url,
+          user_settings (
+            name,
+            picture_url
+          )
+        )
+
+      ),
+      messages!chat_id (
+          id,
           user_id,
+          content,
+          created_at,
+          updated_at,
+          deleted_on,
           type,
           visibility,
-          account:accounts(
-            email,
-            name,
-            picture_url,
-            user_settings (
-              name,
-              picture_url
-            )
-          )
-
-        ),
-        messages!chat_id (
+          temp_id,
+          order_id,
+          parent_id,
+          user:accounts(email, name, picture_url, user_settings(name, picture_url)),
+          files (
             id,
-            user_id,
-            content,
-            created_at,
-            updated_at,
-            deleted_on,
+            name,
+            size,
             type,
-            visibility,
-            temp_id,
-            order_id,
-            parent_id,
-            user:accounts(email, name, picture_url, user_settings(name, picture_url)),
-            files (
-              id,
-              name,
-              size,
-              type,
-              url,
-              temp_id
-            )
-        )
-      `,
+            url,
+            temp_id
+          )
       )
-      .eq('id', chatId)
-      // is deleted_on null but for messages
-      .is('messages.deleted_on', null)
-      .single();
+    `,
+    ).is('deleted_on', null)
+    .is('messages.deleted_on', null)
+
+    if (fetchLatest) {
+      // Find the chat with the most recent message using the specific relationship
+      let messagesQuery = client
+        .from('messages')
+        .select('chat_id, created_at, chats!messages_chat_id_fkey(agency_id, client_organization_id)')
+        .is('deleted_on', null)
+        .is('chats.deleted_on', null);
+
+      if (fetchLatest.scope === 'client') {
+        messagesQuery = messagesQuery
+          .eq('chats.client_organization_id', fetchLatest.clientOrganizationId ?? '')
+          .eq('chats.agency_id', fetchLatest.agencyId ?? '');
+      } else {
+        messagesQuery = messagesQuery.eq('chats.agency_id', fetchLatest.agencyId ?? '');
+      }
+
+      const { data: messages, error: messagesError } = await messagesQuery
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (messagesError) {
+        throw new Error(`Error finding latest message: ${messagesError.message}`);
+      }
+
+      if (messages && messages.length > 0 && messages[0]?.chat_id) {
+        // Get the chat with the latest message
+        baseQuery = baseQuery.eq('id', messages[0].chat_id);
+      } else {
+        // No messages found, fall back to latest chat by creation date
+        baseQuery = baseQuery.order('created_at', { ascending: false });
+        if (fetchLatest.scope === 'client') {
+          baseQuery = baseQuery
+            .eq('client_organization_id', fetchLatest.clientOrganizationId ?? '')
+            .eq('agency_id', fetchLatest.agencyId ?? '');
+        } else {
+          baseQuery = baseQuery.eq('agency_id', fetchLatest.agencyId ?? '');
+        }
+        baseQuery = baseQuery.limit(1);
+      }
+    } else {
+      baseQuery = baseQuery.eq('id', chatId);
+    }
+
+    const { data: chat, error } = await baseQuery.single();
 
     if (error) {
       throw new Error(`Error fetching chat ${chatId}: ${error.message}`);

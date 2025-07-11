@@ -37,6 +37,7 @@ interface ChatManagementActionsProps {
   userId: string;
   queryKey?: string[];
   initialChat?: Chats.TypeWithRelations;
+  initialChats?: Chats.TypeWithRelations[];
   activeChat?: Chats.Type;
   setActiveChat?: (chat: Chats.Type | null) => void;
 }
@@ -51,6 +52,7 @@ export const useChatManagement = ({
   userId,
   queryKey = ['chats'],
   initialChat,
+  initialChats,
   setMessages,
   activeChat,
   setActiveChat,
@@ -328,6 +330,7 @@ export const useChatManagement = ({
       const response = await getChats(userId);
       return response;
     },
+    initialData: initialChats,
   });
 
   /**
@@ -337,11 +340,13 @@ export const useChatManagement = ({
   const chatByIdQuery = useQuery({
     queryKey: queryKey,
     queryFn: async () => {
-      const chat = await getChat(chatId ?? '');
+      if(!chatId) return null;
+      const chat = await getChat(chatId);
       setMessages(chat?.messages ?? []);
       return chat;
     },
-    initialData: initialChat,
+    // Only use initialData if the chatId matches the initial chat's ID
+    initialData: initialChat?.id === chatId ? initialChat : undefined,
     enabled: !!chatId,
   });
 

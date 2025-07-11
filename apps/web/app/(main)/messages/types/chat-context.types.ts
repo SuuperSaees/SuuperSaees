@@ -150,5 +150,6 @@ export interface ChatProviderProps {
   children: ReactNode;
   // chatId: string
   initialChat?: Chats.TypeWithRelations;
+  initialChats?: Chats.TypeWithRelations[];
   initialMembers?: User.Response[];
 }

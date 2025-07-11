@@ -51,13 +51,13 @@ export class ChatController {
     }
   }
 
-  async get(chatId: string): Promise<Chats.TypeWithRelations> {
+  async get(chatId: string, fetchLatest?: Chats.FetchLatest): Promise<Chats.TypeWithRelations> {
     try {
       const chatRepository = new ChatRepository(this.client, this.adminClient);
       const membersRepository = new ChatMembersRepository(this.client, this.adminClient);
       const chatMessagesRepository = new ChatMessagesRepository(this.client, this.adminClient);
       const chatService = new ChatService(chatRepository, membersRepository, chatMessagesRepository);
-      return await chatService.get(chatId);
+      return await chatService.get(chatId, fetchLatest);
 
     } catch (error) {
 
