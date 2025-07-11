@@ -29,11 +29,11 @@ export namespace Credit {
   export type Update = Database['public']['Tables']['credits']['Update'];
 
   export namespace Request {
-    export type Create = Omit<Credit.Insert, 'number'> & {
+    export type Create = Omit<Credit.Insert, 'id' | 'created_at' | 'updated_at' | 'deleted_on'> & {
       credit_operations?: CreditOperations.Insert[] | null;
     };
     export type Update = Credit.Update & {
-      credit_operations?: CreditOperations.Update[] | null;
+      credit_operations?: (CreditOperations.Update | CreditOperations.Insert)[] | null;
     };
   }
 
