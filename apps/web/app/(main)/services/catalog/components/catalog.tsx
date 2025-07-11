@@ -14,7 +14,7 @@ import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
 import { Pagination as PaginationType } from "~/lib/pagination";
 import { Service } from "~/lib/services.types";
 import { useDataPagination } from "~/hooks/use-data-pagination";
-import { useTableConfigs } from "~/(views)/hooks/use-table-configs";
+// import { useTableConfigs } from "~/(views)/hooks/use-table-configs";
 import Pagination from "~/(main)/../components/ui/pagination";
 
 interface ServiceSectionProps {
@@ -32,7 +32,7 @@ function ServicesCatalog({
   initialServices,
   isPublicView,
 }: ServiceSectionProps) {
-  const { config } = useTableConfigs('table-config');
+  // const { config } = useTableConfigs('table-config');
 
   const {
     data: services,
@@ -40,22 +40,20 @@ function ServicesCatalog({
     pagination,
   } = useDataPagination<Service.Relationships.Billing.BillingService>({
     queryKey: ['services'],
-    queryFn: ({ page, limit, filters }) =>
+    queryFn: ({ page, limit }) =>
       getServicesByOrganizationId({
         pagination: { page, limit },
-        filters: filters?.searchTerm
-          ? [
-              {
-                field: 'name',
-                operator: 'ilike',
-                value: filters.searchTerm,
-              },
-            ]
-          : undefined,
+        filters:  [
+            {
+              field: 'visibility',
+              operator: 'eq',
+              value: 'public',
+            },
+          ],
       }, organizationId, true) as Promise<PaginationType.Response<Service.Relationships.Billing.BillingService>>,
     initialData: initialServices,
     config: {
-      limit: config.rowsPerPage.value,
+      limit: 6,
     },
   });
 
@@ -87,7 +85,7 @@ function ServicesCatalog({
   return (
     <div className="flex h-full w-full flex-col gap-8">
       {isLoading ? (
-        <SkeletonCards count={9} className="flex h-full w-full flex-wrap gap-8 max-w-7xl mx-auto">
+        <SkeletonCards count={6} className="flex h-full w-full flex-wrap gap-8 max-w-7xl mx-auto">
           <SkeletonCardService className="max-w-sm w-full"/>
         </SkeletonCards>
       ) : filteredServices.length === 0 ? (

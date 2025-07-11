@@ -11,6 +11,7 @@ import { // Briefcase,
   GraduationCap,
   Calendar,
   Wallet,
+  LayoutGrid,
 } from 'lucide-react';
 
 
@@ -140,6 +141,14 @@ const routes = [
   //     },
   //   ],
   // },
+  {
+    type: 'route',
+    label: 'common:servicesName',
+    path: pathsConfig.app.servicesCatalog,
+    end: true,
+    Icon: <LayoutGrid className={iconClasses} />,
+  },
+  
 
   {
     type: 'route',
