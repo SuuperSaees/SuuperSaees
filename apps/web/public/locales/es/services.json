@@ -48,16 +48,16 @@
         "yearly": "por año",
         "free": {
           "singular": {
-            "day": "{{times}} Día de Prueba para {{currency}} luego",
-            "week": "{{times}} Semana de Prueba para {{currency}} luego",
-            "month": "{{times}} Mes de Prueba para {{currency}} luego",
-            "year": "{{times}} Año de Prueba para {{currency}} luego"
+            "day": "{{times}} Día de Prueba por {{currency}} luego",
+            "week": "{{times}} Semana de Prueba por {{currency}} luego",
+            "month": "{{times}} Mes de Prueba por {{currency}} luego",
+            "year": "{{times}} Año de Prueba por {{currency}} luego"
           },
           "plural": {
-            "day": "{{times}} Días de Prueba para {{currency}} luego",
-            "week": "{{times}} Semanas de Prueba para {{currency}} luego",
-            "month": "{{times}} Meses de Prueba para {{currency}} luego",
-            "year": "{{times}} Años de Prueba para {{currency}} luego"
+            "day": "{{times}} Días de Prueba por {{currency}} luego",
+            "week": "{{times}} Semanas de Prueba por {{currency}} luego",
+            "month": "{{times}} Meses de Prueba por {{currency}} luego",
+            "year": "{{times}} Años de Prueba por {{currency}} luego"
           }
         },
         "thenRegularPrice": "Luego precio regular"
