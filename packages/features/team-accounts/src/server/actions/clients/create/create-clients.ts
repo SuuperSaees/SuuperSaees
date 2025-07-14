@@ -265,6 +265,7 @@ export const addClientMember = async ({
           supabase: undefined,
           adminActivated: true,
           clientOrganizationId,
+          agencyId: agencyOrganization.id,
         });
 
         return CustomResponse.success(existingClient, 'clientCreated').toJSON();
