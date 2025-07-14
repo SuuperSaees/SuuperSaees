@@ -55,6 +55,7 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export function ChatProvider({
   children,
   initialChat,
+  initialChats,
   initialMembers = [],
 }: ChatProviderProps) {
   // User state
@@ -97,6 +98,7 @@ export function ChatProvider({
     setMessages: setMessages,
     userId: user.id,
     initialChat,
+    initialChats,
     activeChat: activeChat ?? undefined,
     setActiveChat: setActiveChat ?? undefined,
   });
@@ -272,6 +274,16 @@ export function ChatProvider({
   );
 
   const { markChatAsRead } = useUnreadMessageCounts({userId: user.id, userRole: currentUser?.role ?? '', userOrganizationId: organization?.id ?? ''});
+  
+  // Create a proper setChatId function that matches the expected type
+  const setChatId = (value: string | ((prevState: string) => string)) => {
+    const newChatId = typeof value === 'function' ? value(chatId) : value;
+    const chat = chats.find(c => c.id === newChatId);
+    if (chat && setActiveChat) {
+      setActiveChat(chat);
+    }
+  };
+  
   const value: ChatContextType = {
     messages: messages.filter((msg) => !('deleted_at' in msg)),
     setMessages: setMessages,
@@ -280,6 +292,7 @@ export function ChatProvider({
     activeChat,
     setActiveChat,
     chatId: chatId ?? '',
+    setChatId,
     isChatCreationDialogOpen,
     setIsChatCreationDialogOpen,
     searchQuery,
