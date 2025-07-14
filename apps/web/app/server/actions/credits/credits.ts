@@ -1,4 +1,4 @@
-import { Credit, CreditOperations } from '~/lib/credit.types';
+import { Credit } from '~/lib/credit.types';
 import { Pagination } from '~/lib/pagination';
 import { BaseAction } from '../base-action';
 import { CreditController } from './controllers/credits.controller';
@@ -29,104 +29,12 @@ export class CreditAction extends BaseAction implements ICreditAction {
     return await this.controller.get(creditId);
   }
 
-  async getByClientOrganization(clientOrganizationId: string): Promise<Credit.Response[]> {
-    return await this.controller.getByClientOrganization(clientOrganizationId);
-  }
-
-  async getByAgency(agencyId: string): Promise<Credit.Response[]> {
-    return await this.controller.getByAgency(agencyId);
-  }
-
   async update(payload: Credit.Request.Update): Promise<Credit.Type> {
     return await this.controller.update(payload);
   }
 
   async delete(creditId: string): Promise<void> {
     return await this.controller.delete(creditId);
-  }
-
-  async addCredits(
-    creditId: string,
-    operationData: {
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type> {
-    return await this.controller.addCredits(creditId, operationData);
-  }
-
-  async consumeCredits(
-    creditId: string,
-    operationData: {
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type> {
-    return await this.controller.consumeCredits(creditId, operationData);
-  }
-
-  async getBalance(creditId: string): Promise<number> {
-    return await this.controller.getBalance(creditId);
-  }
-
-  async transferCredits(transferData: {
-    fromCreditId: string;
-    toCreditId: string;
-    quantity: number;
-    description?: string;
-    actorId: string;
-    metadata?: any;
-  }): Promise<CreditOperations.Type[]> {
-    return await this.controller.transferCredits(transferData);
-  }
-
-  // * ADDITIONAL BUSINESS LOGIC METHODS
-  async refundCredits(
-    creditId: string,
-    operationData: {
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type> {
-    return await this.controller.refundCredits(creditId, operationData);
-  }
-
-  async lockCredits(
-    creditId: string,
-    operationData: {
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type> {
-    return await this.controller.lockCredits(creditId, operationData);
-  }
-
-  // * UTILITY METHODS
-  async getCreditHistory(
-    creditId: string,
-    startDate?: string,
-    endDate?: string
-  ): Promise<CreditOperations.Response[]> {
-    return await this.controller.getCreditHistory(creditId, startDate, endDate);
-  }
-
-  async getCreditSummary(creditId: string): Promise<{
-    currentBalance: number;
-    totalPurchased: number;
-    totalConsumed: number;
-    totalRefunded: number;
-    totalLocked: number;
-    totalExpired: number;
-  }> {
-    return await this.controller.getCreditSummary(creditId);
   }
 }
 

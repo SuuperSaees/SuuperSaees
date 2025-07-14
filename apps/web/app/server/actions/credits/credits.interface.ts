@@ -1,4 +1,4 @@
-import { Credit, CreditOperations } from "~/lib/credit.types";
+import { Credit } from "~/lib/credit.types";
 import { Pagination } from "~/lib/pagination";
 import { PaginationConfig } from "../query.config";
 
@@ -26,20 +26,6 @@ export interface ICreditAction {
    */
   get(creditId: string): Promise<Credit.Response>;
 
-  /**
-   * Retrieves credits by client organization ID
-   * @param {string} clientOrganizationId - The ID of the client organization
-   * @returns {Promise<Credit.Response[]>} - Credits for the organization
-   */
-  getByClientOrganization(clientOrganizationId: string): Promise<Credit.Response[]>;
-
-  /**
-   * Retrieves credits by agency ID
-   * @param {string} agencyId - The ID of the agency
-   * @returns {Promise<Credit.Response[]>} - Credits managed by the agency
-   */
-  getByAgency(agencyId: string): Promise<Credit.Response[]>;
-
   // * UPDATE INTERFACES
   /**
    * Updates a credit record
@@ -55,58 +41,4 @@ export interface ICreditAction {
    * @returns {Promise<void>}
    */
   delete(creditId: string): Promise<void>;
-
-  // * BUSINESS LOGIC INTERFACES
-  /**
-   * Adds credits to an organization's balance
-   * @param {string} creditId - The credit record ID
-   * @param {object} operationData - Operation information
-   * @returns {Promise<CreditOperations.Type>}
-   */
-  addCredits(
-    creditId: string,
-    operationData: {
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type>;
-
-  /**
-   * Consumes credits from an organization's balance
-   * @param {string} creditId - The credit record ID
-   * @param {object} operationData - Operation information
-   * @returns {Promise<CreditOperations.Type>}
-   */
-  consumeCredits(
-    creditId: string,
-    operationData: {
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type>;
-
-  /**
-   * Gets the current balance for a credit record
-   * @param {string} creditId - The credit record ID
-   * @returns {Promise<number>} - Current balance
-   */
-  getBalance(creditId: string): Promise<number>;
-
-  /**
-   * Transfers credits between organizations (for future implementation)
-   * @param {object} transferData - Transfer information
-   * @returns {Promise<CreditOperations.Type[]>}
-   */
-  transferCredits(transferData: {
-    fromCreditId: string;
-    toCreditId: string;
-    quantity: number;
-    description?: string;
-    actorId: string;
-    metadata?: any;
-  }): Promise<CreditOperations.Type[]>;
 }
