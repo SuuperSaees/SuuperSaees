@@ -32,6 +32,8 @@
   "stripeSettingsDescription": "Configura el acceso a tu cuenta de Stripe para que los usuarios puedan pagar en tu proyecto",
   "treliSettingsTitle": "Configura Treli en tu negocio",
   "treliSettingsDescription": "Configura el acceso a tu cuenta de Treli para que los usuarios puedan pagar en tu proyecto",
+  "creditsSettingsTitle": "Configura Créditos en tu negocio",
+  "creditsSettingsDescription": "Gestiona tus créditos y transacciones de manera eficiente con nuestro sistema integral de gestión de créditos.",
   "recommendedAppsForYou": "Aplicaciones recomendadas para ti",
   "getRecommendations": "Obtén más recomendaciones en la Suuper App Store",
   "treliUser": "Usuario Treli",

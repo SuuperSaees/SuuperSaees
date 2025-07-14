@@ -32,6 +32,8 @@
   "suuperapiSettingsDescription": "Configure access to your Suuper API account so users can pay in your project",
   "treliSettingsTitle": "Set up Treli in your business",
   "treliSettingsDescription": "Configure access to your Treli account so users can pay in your project",
+  "creditsSettingsTitle": "Set up Credits in your business",
+  "creditsSettingsDescription": "Manage your credits and transactions efficiently with our comprehensive credit management system.",
   "recommendedAppsForYou": "Recommended apps for you",
   "getRecommendations": "Get more recommendations in the Suuper App Store",
   "treliUser": "Treli User",
