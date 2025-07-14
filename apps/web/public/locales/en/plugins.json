@@ -6,6 +6,8 @@
   "embedsDescription": "Integrate any custom iframe as an application within the platform.",
   "suuperApiTitle": "Suuper API",
   "suuperApiDescription": "Integrate your platform with the powerful Suuuper API to unlock enhanced features and seamless data exchange.",
+  "creditsTitle": "Credits",
+  "creditsDescription": "Manage your credits and transactions efficiently with our comprehensive credit management system.",
   "loomDescription": "Record, insert and share videos from Loom directly in your Suuper projects",
   "stripeTitle": "Stripe",
   "stripeDescription": "Connect to multiple payment gateways around the world and sell your services as a subscription",
