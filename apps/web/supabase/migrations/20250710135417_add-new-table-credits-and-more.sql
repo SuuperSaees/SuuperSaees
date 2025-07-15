@@ -224,26 +224,80 @@ CREATE OR REPLACE FUNCTION public.update_credits_balance()
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $function$
+DECLARE
+    history_array jsonb;
+    latest_history_entry jsonb;
+    old_qty bigint;
+    new_qty bigint;
+    history_status text;
+    operation_type text;
 BEGIN
-    -- Only process if the quantity is different from 0
-    IF NEW.quantity != 0 THEN
-        -- Update the balance according to the operation status
-        IF NEW.status = 'consumed' THEN
-            -- Subtract credits
-            UPDATE public.credits 
-            SET 
-                balance = balance - NEW.quantity,
-                updated_at = now()
-            WHERE id = NEW.credit_id;
-        ELSIF NEW.status IN ('purchased', 'refunded') THEN
-            -- Add credits
-            UPDATE public.credits 
-            SET 
-                balance = balance + NEW.quantity,
-                updated_at = now()
-            WHERE id = NEW.credit_id;
+    -- Only process if quantity changed (ignore status-only changes)
+    IF OLD.quantity IS DISTINCT FROM NEW.quantity THEN
+        -- Check if metadata exists and has history
+        IF NEW.metadata IS NOT NULL AND NEW.metadata ? 'history' THEN
+            history_array := NEW.metadata->'history';
+            
+            -- Check if history is a non-empty array
+            IF jsonb_typeof(history_array) = 'array' AND jsonb_array_length(history_array) > 0 THEN
+                -- Get the latest history entry based on changedAt (most recent timestamp)
+                SELECT entry INTO latest_history_entry
+                FROM (
+                    SELECT entry, (entry->>'changedAt') as changed_at
+                    FROM jsonb_array_elements(history_array) AS entry
+                    ORDER BY (entry->>'changedAt') DESC
+                    LIMIT 1
+                ) sorted_entries;
+                
+                -- Extract values from the latest history entry
+                IF latest_history_entry IS NOT NULL THEN
+                    operation_type := latest_history_entry->>'operationType';
+                    
+                    -- Only process if operationType is 'update' (for after update trigger)
+                    IF operation_type = 'update' THEN
+                        old_qty := (latest_history_entry->>'oldQuantity')::bigint;
+                        new_qty := (latest_history_entry->>'newQuantity')::bigint;
+                        history_status := latest_history_entry->>'status';
+                        
+                        -- Apply logic based on status from history entry
+                        IF history_status = 'consumed' THEN
+                            -- For consumed: add back old, subtract new
+                            UPDATE public.credits 
+                            SET 
+                                balance = balance + old_qty - new_qty,
+                                updated_at = now()
+                            WHERE id = NEW.credit_id;
+                        ELSIF history_status IN ('purchased', 'refunded') THEN
+                            -- For purchased/refunded: subtract old, add new
+                            UPDATE public.credits 
+                            SET 
+                                balance = balance - old_qty + new_qty,
+                                updated_at = now()
+                            WHERE id = NEW.credit_id;
+                        END IF;
+                    END IF;
+                END IF;
+            END IF;
+        ELSE
+            -- Fallback: if no metadata or history, use original logic
+            IF NEW.status = 'consumed' THEN
+                -- Subtract credits
+                UPDATE public.credits 
+                SET 
+                    balance = balance - NEW.quantity,
+                    updated_at = now()
+                WHERE id = NEW.credit_id;
+            ELSIF NEW.status IN ('purchased', 'refunded') THEN
+                -- Add credits
+                UPDATE public.credits 
+                SET 
+                    balance = balance + NEW.quantity,
+                    updated_at = now()
+                WHERE id = NEW.credit_id;
+            END IF;
         END IF;
     END IF;
+    -- Note: If only status changes (without quantity change), do nothing
     
     RETURN NEW;
 END;
