@@ -17,24 +17,24 @@ export class CreditAction extends BaseAction implements ICreditAction {
     );
   }
 
-  async create(payload: Credit.Request.Create): Promise<Credit.Type> {
-    return await this.controller.create(payload);
-  }
-
-  async list(config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {
-    return await this.controller.list(config);
-  }
-
   async get(creditId: string): Promise<Credit.Response> {
     return await this.controller.get(creditId);
   }
 
-  async update(payload: Credit.Request.Update): Promise<Credit.Type> {
-    return await this.controller.update(payload);
+  async listByOrganization(organizationId?: string, config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {
+    return await this.controller.listByOrganization(organizationId, config);
   }
 
-  async delete(creditId: string): Promise<void> {
-    return await this.controller.delete(creditId);
+  async createOperation(payload: Credit.Request.Create): Promise<Credit.Type> {
+    return await this.controller.createOperation(payload);
+  }
+
+  async updateOperation(payload: Credit.Request.Update): Promise<Credit.Type> {
+    return await this.controller.updateOperation(payload);
+  }
+
+  async deleteOperation(creditId: string, actorId: string, creditOperationId?: string): Promise<void> {
+    return await this.controller.deleteOperation(creditId, actorId, creditOperationId);
   }
 }
 

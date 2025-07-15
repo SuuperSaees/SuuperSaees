@@ -1,5 +1,30 @@
 import { Credit, CreditOperations } from "~/lib/credit.types";
 
+// History type for credit operations metadata
+export interface CreditOperationHistory {
+  field: string;
+  oldValue: unknown;
+  newValue: unknown;
+  changedAt: string;
+  changedBy: string;
+}
+
+// Type guards for Credit Operations History
+export function isCreditOperationHistory(value: unknown): value is CreditOperationHistory {
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof obj.field === 'string' &&
+    typeof obj.changedAt === 'string' &&
+    typeof obj.changedBy === 'string'
+  );
+}
+
+export function isCreditOperationHistoryArray(value: unknown): value is CreditOperationHistory[] {
+  return Array.isArray(value) && value.every(item => isCreditOperationHistory(item));
+}
+
 // Type guards for Credit Operations
 export function isCreditOperationStatus(value: unknown): value is CreditOperations.Enums.Status {
   return typeof value === 'string' && 

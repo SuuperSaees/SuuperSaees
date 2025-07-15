@@ -22,47 +22,7 @@ export class CreditController {
     this.adminClient = adminClient;
   }
 
-  // * CREATE CONTROLLERS
-  async create(payload: Credit.Request.Create): Promise<Credit.Type> {
-    try {
-      const creditRepository = new CreditRepository(this.client, this.adminClient);
-      const creditOperationRepository = new CreditOperationRepository(this.client, this.adminClient);
-      const creditService = new CreditService(creditRepository, creditOperationRepository);
-      
-      return await creditService.create(payload);
-    } catch (error) {
-      console.error('Error in CreditController.create:', error);
-      throw error;
-    }
-  }
-
   // * GET CONTROLLERS
-  async list(config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {
-    try {
-      // Create context with config
-      const queryContext = createQueryContext(config);
-      
-      // Inject context into repository
-      const creditRepository = new CreditRepository(this.client, this.adminClient, queryContext);
-      const creditService = new CreditService(creditRepository);
-      
-      const repositoryResponse = await creditService.list();
-      
-      // Transform repository response to match frontend Pagination.Response structure
-      return {
-        data: repositoryResponse.data,
-        total: repositoryResponse.count,
-        limit: repositoryResponse.pagination.limit,
-        page: repositoryResponse.pagination.currentPage,
-        nextCursor: repositoryResponse.nextCursor,
-        prevCursor: null,
-      };
-    } catch (error) {
-      console.error('Error in CreditController.list:', error);
-      throw error;
-    }
-  }
-
   async get(creditId: string): Promise<Credit.Response> {
     try {
       const creditRepository = new CreditRepository(this.client, this.adminClient);
@@ -75,29 +35,64 @@ export class CreditController {
     }
   }
 
-  // * UPDATE CONTROLLERS
-  async update(payload: Credit.Request.Update): Promise<Credit.Type> {
+  async listByOrganization(organizationId?: string, config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {
+    try {
+      const queryContext = createQueryContext(config);
+      const creditRepository = new CreditRepository(this.client, this.adminClient, queryContext);
+      const creditService = new CreditService(creditRepository);
+      
+      const repositoryResponse = await creditService.listByOrganization(organizationId);
+      
+      return {
+        data: repositoryResponse.data,
+        total: repositoryResponse.count,
+        limit: repositoryResponse.pagination.limit,
+        page: repositoryResponse.pagination.currentPage,
+        nextCursor: repositoryResponse.nextCursor,
+        prevCursor: null,
+      };
+    } catch (error) {
+      console.error('Error in CreditController.listByOrganization:', error);
+      throw error;
+    }
+  }
+
+  // * OPERATION CONTROLLERS (Indirect credit modifications)
+  async createOperation(payload: Credit.Request.Create): Promise<Credit.Type> {
     try {
       const creditRepository = new CreditRepository(this.client, this.adminClient);
       const creditOperationRepository = new CreditOperationRepository(this.client, this.adminClient);
       const creditService = new CreditService(creditRepository, creditOperationRepository);
       
-      return await creditService.update(payload);
+      return await creditService.createOperation(payload);
     } catch (error) {
-      console.error('Error in CreditController.update:', error);
+      console.error('Error in CreditController.createOperation:', error);
       throw error;
     }
   }
 
-  // * DELETE CONTROLLERS
-  async delete(creditId: string): Promise<void> {
+  async updateOperation(payload: Credit.Request.Update): Promise<Credit.Type> {
     try {
       const creditRepository = new CreditRepository(this.client, this.adminClient);
-      const creditService = new CreditService(creditRepository);
+      const creditOperationRepository = new CreditOperationRepository(this.client, this.adminClient);
+      const creditService = new CreditService(creditRepository, creditOperationRepository);
       
-      return await creditService.delete(creditId);
+      return await creditService.updateOperation(payload);
     } catch (error) {
-      console.error('Error in CreditController.delete:', error);
+      console.error('Error in CreditController.updateOperation:', error);
+      throw error;
+    }
+  }
+
+  async deleteOperation(creditId: string, actorId: string, creditOperationId?: string): Promise<void> {
+    try {
+      const creditRepository = new CreditRepository(this.client, this.adminClient);
+      const creditOperationRepository = new CreditOperationRepository(this.client, this.adminClient);
+      const creditService = new CreditService(creditRepository, creditOperationRepository);
+      
+      return await creditService.deleteOperation(creditId, actorId, creditOperationId);
+    } catch (error) {
+      console.error('Error in CreditController.deleteOperation:', error);
       throw error;
     }
   }

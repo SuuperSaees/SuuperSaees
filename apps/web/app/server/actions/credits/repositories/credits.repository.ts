@@ -194,11 +194,94 @@ export class CreditRepository {
     return data as Credit.Response;
   }
 
+  async listByOrganization(organizationId?: string): Promise<{
+    data: Credit.Response[];
+    nextCursor: string | null;
+    count: number | null;
+    pagination: {
+      limit: number;
+      hasNextPage: boolean;
+      totalPages: number | null;
+      currentPage: number | null;
+      isOffsetBased: boolean;
+    };
+  }> {
+    const client = this.client;
+    const config = this.queryContext.getConfig();
+    const effectiveLimit = config?.pagination?.limit ?? 50;
+    const currentPage = config?.pagination?.page ?? 1;
+
+    let targetOrganizationId = organizationId;
+
+    // If no organizationId provided, get from session
+    if (!targetOrganizationId) {
+      const session = await getSession();
+      const userRole = session.organization?.role ?? '';
+      targetOrganizationId = session.organization?.id ?? '';
+
+      if (!userRole || !targetOrganizationId) {
+        throw new Error('User session not found or invalid');
+      }
+    }
+
+    // Build base query
+    let query = client
+      .from('credits')
+      .select(`
+        *,
+        credit_operations:credit_operations(
+          id,
+          status,
+          type,
+          quantity,
+          description,
+          created_at,
+          updated_at,
+          actor_id,
+          metadata
+        )
+      `, { count: 'exact' })
+      .is('deleted_on', null);
+
+    // Filter by organization (either as client or agency)
+    query = query.or(`client_organization_id.eq.${targetOrganizationId},agency_id.eq.${targetOrganizationId}`);
+
+    // Apply ordering
+    query = query.order('created_at', { ascending: false });
+
+    // Apply pagination
+    const from = (currentPage - 1) * effectiveLimit;
+    const to = from + effectiveLimit - 1;
+    query = query.range(from, to);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      throw new Error(`Error fetching credits by organization: ${error.message}`);
+    }
+
+    const hasNextPage = count ? (from + effectiveLimit) < count : false;
+    const totalPages = count ? Math.ceil(count / effectiveLimit) : null;
+
+    return {
+      data: (data as Credit.Response[]) || [],
+      nextCursor: hasNextPage ? (currentPage + 1).toString() : null,
+      count,
+      pagination: {
+        limit: effectiveLimit,
+        hasNextPage,
+        totalPages,
+        currentPage,
+        isOffsetBased: true,
+      },
+    };
+  }
+
   // * UPDATE REPOSITORIES
   async update(payload: Credit.Request.Update): Promise<Credit.Type> {
     const client = this.adminClient ?? this.client;
     
-    const { credit_operations, ...creditData } = payload;
+    const { credit_operations: _credit_operations, ...creditData } = payload;
     
     const { data, error } = await client
       .from('credits')
