@@ -1,16 +1,7 @@
 import { Credit, CreditOperations } from "~/lib/credit.types";
 
-// History type for credit operations metadata
-export interface CreditOperationHistory {
-  field: string;
-  oldValue: unknown;
-  newValue: unknown;
-  changedAt: string;
-  changedBy: string;
-}
-
-// History type for remove operations
-export interface CreditRemoveHistory {
+// Unified history type for all credit operation changes
+export interface CreditOperationHistoryEntry {
   oldQuantity: number;
   newQuantity: number;
   changedAt: string;
@@ -18,26 +9,11 @@ export interface CreditRemoveHistory {
   description?: string;
   type: 'user' | 'system';
   status: 'consumed' | 'purchased' | 'refunded' | 'locked' | 'expired';
-  operationType: 'remove';
+  operationType: 'update' | 'remove';
 }
 
-// Type guards for Credit Operations History
-export function isCreditOperationHistory(value: unknown): value is CreditOperationHistory {
-  const obj = value as Record<string, unknown>;
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof obj.field === 'string' &&
-    typeof obj.changedAt === 'string' &&
-    typeof obj.changedBy === 'string'
-  );
-}
-
-export function isCreditOperationHistoryArray(value: unknown): value is CreditOperationHistory[] {
-  return Array.isArray(value) && value.every(item => isCreditOperationHistory(item));
-}
-
-export function isCreditRemoveHistory(value: unknown): value is CreditRemoveHistory {
+// Type guards for Credit Operation History
+export function isCreditOperationHistoryEntry(value: unknown): value is CreditOperationHistoryEntry {
   const obj = value as Record<string, unknown>;
   return (
     typeof value === 'object' &&
@@ -49,7 +25,7 @@ export function isCreditRemoveHistory(value: unknown): value is CreditRemoveHist
     (obj.description === undefined || typeof obj.description === 'string') &&
     (obj.type === 'user' || obj.type === 'system') &&
     isCreditOperationStatus(obj.status) &&
-    obj.operationType === 'remove'
+    (obj.operationType === 'update' || obj.operationType === 'remove')
   );
 }
 
@@ -95,25 +71,6 @@ export function isCreditOperationUpdate(value: unknown): value is CreditOperatio
   );
 }
 
-export function isCreditOperationType_Object(value: unknown): value is CreditOperations.Type {
-  const obj = value as Record<string, unknown>;
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof obj.id === 'string' &&
-    typeof obj.actor_id === 'string' &&
-    isCreditOperationStatus(obj.status) &&
-    isCreditOperationType(obj.type) &&
-    typeof obj.quantity === 'number' &&
-    typeof obj.credit_id === 'string' &&
-    (typeof obj.description === 'string' || obj.description === null) &&
-    (typeof obj.metadata === 'object' || obj.metadata === null) &&
-    typeof obj.created_at === 'string' &&
-    typeof obj.updated_at === 'string' &&
-    (typeof obj.deleted_on === 'string' || obj.deleted_on === null)
-  );
-}
-
 // Type guards for Credits
 export function isCreditInsert(value: unknown): value is Credit.Insert {
   const obj = value as Record<string, unknown>;
@@ -137,22 +94,6 @@ export function isCreditUpdate(value: unknown): value is Credit.Update {
     (obj.client_organization_id === undefined || typeof obj.client_organization_id === 'string') &&
     (obj.balance === undefined || typeof obj.balance === 'number') &&
     (obj.user_id === undefined || typeof obj.user_id === 'string' || obj.user_id === null)
-  );
-}
-
-export function isCreditType(value: unknown): value is Credit.Type {
-  const obj = value as Record<string, unknown>;
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof obj.id === 'string' &&
-    typeof obj.agency_id === 'string' &&
-    typeof obj.client_organization_id === 'string' &&
-    typeof obj.balance === 'number' &&
-    typeof obj.created_at === 'string' &&
-    typeof obj.updated_at === 'string' &&
-    (typeof obj.deleted_on === 'string' || obj.deleted_on === null) &&
-    (typeof obj.user_id === 'string' || obj.user_id === null)
   );
 }
 
@@ -188,17 +129,6 @@ export function isCreditRequestRemove(value: unknown): value is Credit.Request.R
     Array.isArray(obj.credit_operations) &&
     obj.credit_operations.length > 0 &&
     obj.credit_operations.every((op: unknown) => isCreditOperationInsert(op))
-  );
-}
-
-export function isCreditResponse(value: unknown): value is Credit.Response {
-  const obj = value as Record<string, unknown>;
-  return (
-    isCreditType(value) &&
-    (obj.credit_operations === undefined || 
-     obj.credit_operations === null || 
-     (Array.isArray(obj.credit_operations) && 
-      obj.credit_operations.every(op => isCreditOperationType_Object(op))))
   );
 }
 

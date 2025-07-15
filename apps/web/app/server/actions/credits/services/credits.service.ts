@@ -1,7 +1,7 @@
 import { Credit, CreditOperations } from '~/lib/credit.types';
 import { CreditRepository } from '../repositories/credits.repository';
 import { CreditOperationRepository } from '../repositories/credit-operations.repository';
-import { CreditOperationHistory, CreditRemoveHistory, validateCreditOperation, validateCredit, isCreditRequestCreate, isCreditRequestUpdate, isCreditRequestRemove } from '../type-guards';
+import { CreditOperationHistoryEntry, validateCreditOperation, validateCredit, isCreditRequestCreate, isCreditRequestUpdate, isCreditRequestRemove } from '../type-guards';
 
 export class CreditService {
   constructor(
@@ -131,6 +131,60 @@ export class CreditService {
     return await this.creditRepository.getById(creditId);
   }
 
+  // * PRIVATE HELPER METHOD - Advanced quantity tracking with history preservation
+  private async addQuantityHistoryEntry(
+    operationId: string,
+    newQuantity: number,
+    actorId: string,
+    operationType: 'update' | 'remove'
+  ): Promise<void> {
+    if (!this.creditOperationRepository) {
+      throw new Error('Credit operation repository is required');
+    }
+
+    // Get the existing operation
+    const existingOperation = await this.creditOperationRepository.get(operationId);
+    
+    // Advanced heuristic: Calculate difference between current and new quantity
+    const oldQuantity = existingOperation.quantity;
+    const quantityDifference = newQuantity - oldQuantity;
+    
+    // Only add history entry if there's an actual change in quantity
+    if (quantityDifference !== 0) {
+      const timestamp = new Date().toISOString();
+      
+      // Create new history entry for quantity change only
+      const newHistoryEntry: CreditOperationHistoryEntry = {
+        oldQuantity: oldQuantity,
+        newQuantity: newQuantity,
+        changedAt: timestamp,
+        changedBy: actorId,
+        description: operationType === 'remove' 
+          ? `Credit operation removed - quantity changed by ${quantityDifference}`
+          : `Credit operation updated - quantity changed by ${quantityDifference}`,
+        type: existingOperation.type === 'system' ? 'system' as const : 'user' as const,
+        status: existingOperation.status,
+        operationType: operationType,
+      };
+
+      // Preserve existing history and add new entry
+      const existingMetadata = (existingOperation.metadata as Record<string, unknown>) ?? {};
+      const existingHistory = (existingMetadata.history as CreditOperationHistoryEntry[]) ?? [];
+      
+      const updatedMetadata = {
+        ...existingMetadata,
+        history: [...existingHistory, newHistoryEntry],
+      };
+
+      // Update operation with preserved history + new entry
+      await this.creditOperationRepository.update({
+        id: operationId,
+        quantity: newQuantity,
+        metadata: JSON.parse(JSON.stringify(updatedMetadata)),
+      });
+    }
+  }
+
   async updateOperation(payload: Credit.Request.Update): Promise<Credit.Type> {
     if (!this.creditOperationRepository) {
       throw new Error('Credit operation repository is required for operation methods');
@@ -152,58 +206,25 @@ export class CreditService {
     if (payload.credit_operations && payload.credit_operations.length > 0) {
       for (const operation of payload.credit_operations) {
         if (operation.id) {
-          // Get the existing operation for history tracking
-          const existingOperation = await this.creditOperationRepository.get(operation.id);
-          
-          // Create history for changes
-          const history: CreditOperationHistory[] = [];
-          const timestamp = new Date().toISOString();
-          
-          // Track changes
-          if (operation.status && operation.status !== existingOperation.status) {
-            history.push({
-              field: 'status',
-              oldValue: existingOperation.status,
-              newValue: operation.status,
-              changedAt: timestamp,
-              changedBy: operation.actor_id ?? 'system',
-            });
+          // Update existing operation using the general helper method
+          if (operation.quantity !== undefined) {
+            await this.addQuantityHistoryEntry(
+              operation.id,
+              operation.quantity,
+              operation.actor_id ?? 'system',
+              'update'
+            );
           }
           
-          if (operation.quantity && operation.quantity !== existingOperation.quantity) {
-            history.push({
-              field: 'quantity',
-              oldValue: existingOperation.quantity,
-              newValue: operation.quantity,
-              changedAt: timestamp,
-              changedBy: operation.actor_id ?? 'system',
-            });
-          }
-
-          if (operation.description && operation.description !== existingOperation.description) {
-            history.push({
-              field: 'description',
-              oldValue: existingOperation.description,
-              newValue: operation.description,
-              changedAt: timestamp,
-              changedBy: operation.actor_id ?? 'system',
-            });
-          }
-
-          // Add history to existing metadata or create new metadata
-          const existingMetadata = (existingOperation.metadata as Record<string, unknown>) ?? {};
-          const existingHistory = (existingMetadata.history as CreditOperationHistory[]) ?? [];
+          // Update other fields without history (only quantity is tracked)
+          const updateData: Record<string, unknown> = { id: operation.id };
+          if (operation.status) updateData.status = operation.status;
+          if (operation.description !== undefined) updateData.description = operation.description;
+          if (operation.type) updateData.type = operation.type;
           
-          const updatedMetadata = {
-            ...existingMetadata,
-            history: [...existingHistory, ...history],
-          };
-
-          // Update operation with new metadata
-          await this.creditOperationRepository.update({
-            ...operation,
-            metadata: JSON.parse(JSON.stringify(updatedMetadata)),
-          });
+          if (Object.keys(updateData).length > 1) { // More than just ID
+            await this.creditOperationRepository.update(updateData);
+          }
         } else {
           // Create new operation - ensure required fields are provided
           if (!operation.actor_id) {
@@ -289,27 +310,26 @@ export class CreditService {
       }
     }
 
-    // Create remove history for metadata
-    const timestamp = new Date().toISOString();
-    const oldQuantity = currentCredit.balance;
-
-    // Create the operations with default status 'consumed'
+    // Create remove operations (these are operations that consume/subtract credits)
     for (const operation of payload.credit_operations) {
-      const removeHistory: CreditRemoveHistory = {
-        oldQuantity: oldQuantity,
-        newQuantity: oldQuantity - operation.quantity, // Calculate new balance after operation
+      const timestamp = new Date().toISOString();
+      
+      // Create history entry for the new remove operation
+      const removeHistory: CreditOperationHistoryEntry = {
+        oldQuantity: 0, // New operation starts with 0
+        newQuantity: operation.quantity, // Set to the operation quantity 
         changedAt: timestamp,
         changedBy: operation.actor_id,
-        description: operation.description ?? 'Credit operation removed',
+        description: operation.description ?? 'Remove operation created',
         type: operation.type === 'system' ? 'system' : 'user',
-        status: operation.status as 'consumed' | 'purchased' | 'refunded' | 'locked' | 'expired' ?? 'consumed',
+        status: 'consumed', // Remove operations are always consumed
         operationType: 'remove',
       };
 
       await this.creditOperationRepository.create({
         ...operation,
         credit_id: operation.credit_id ?? creditId, // Use provided credit_id or resolved creditId
-        status: operation.status ?? 'consumed', // Default to 'consumed' for remove operations
+        status: 'consumed', // Always consumed for remove operations
         type: operation.type ?? 'user',
         metadata: JSON.parse(JSON.stringify({
           history: [removeHistory],
