@@ -104,49 +104,30 @@ export class CreditRepository {
       throw new Error('User session or organization not found');
     }
 
-    // First, find the credit_id based on role and filters
-    let creditId: string;
-
-    // Check if client_organization_id is provided in filters (for agency)
+    const isClientUser = AccountRoles.clientRoles.has(userRole);
     const clientOrgIdFromFilter = config?.filters?.client_organization_id?.[0];
 
-    if (AccountRoles.agencyRoles.has(userRole)) {
-      // Agency: use client_organization_id from filters or throw error
-      if (!clientOrgIdFromFilter) {
-        throw new Error('Agency users must provide client_organization_id in filters');
-      }
-
-      // Find credit by client_organization_id
-      const { data: credit, error: creditError } = await client
-        .from('credits')
-        .select('id')
-        .eq('client_organization_id', clientOrgIdFromFilter)
-        .eq('agency_id', organizationId)
-        .is('deleted_on', null)
-        .single();
-
-      if (creditError ?? !credit) {
-        throw new Error(`Credit not found for client organization: ${clientOrgIdFromFilter}`);
-      }
-
-      creditId = credit.id;
-    } else if (AccountRoles.clientRoles.has(userRole)) {
-      // Client: use session organization.id
-      const { data: credit, error: creditError } = await client
-        .from('credits')
-        .select('id')
-        .eq('client_organization_id', organizationId)
-        .is('deleted_on', null)
-        .single();
-
-      if (creditError ?? !credit) {
-        throw new Error(`Credit not found for client organization: ${organizationId}`);
-      }
-
-      creditId = credit.id;
-    } else {
-      throw new Error(`Invalid user role: ${userRole}`);
+    if (!isClientUser && !clientOrgIdFromFilter) {
+      throw new Error('Agency users must provide client_organization_id in filters');
     }
+
+    const targetClientOrgId = (isClientUser ? organizationId : clientOrgIdFromFilter) ?? '';
+    const agencyId = (isClientUser ? session.agency?.id : organizationId) ?? '';
+
+    // Find credit by client_organization_id and agency_id
+    const { data: credit, error: creditError } = await client
+      .from('credits')
+      .select('id')
+      .eq('client_organization_id', targetClientOrgId)
+      .eq('agency_id', agencyId)
+      .is('deleted_on', null)
+      .single();
+
+    if (creditError ?? !credit) {
+      throw new Error(`Credit not found for organization: ${targetClientOrgId}`);
+    }
+
+    const creditId = credit.id;
 
     // Build base query for credit_operations
     let query = client
