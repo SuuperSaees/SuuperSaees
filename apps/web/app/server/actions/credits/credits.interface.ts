@@ -1,4 +1,4 @@
-import { Credit } from "~/lib/credit.types";
+import { Credit, CreditOperations } from "~/lib/credit.types";
 import { Pagination } from "~/lib/pagination";
 import { PaginationConfig } from "../query.config";
 
@@ -14,12 +14,11 @@ export interface ICreditAction {
   get(clientOrganizationId?: string): Promise<Credit.Response>;
 
   /**
-   * Retrieves all credits for an organization - Used by both clients and agencies
-   * @param {string} organizationId - Optional organization ID, if not provided uses session
+   * Retrieves all credit operations with pagination - Used by both clients and agencies
    * @param {PaginationConfig} config - Pagination and filter configuration
-   * @returns {Promise<Pagination.Response<Credit.Response>>}
+   * @returns {Promise<Pagination.Response<CreditOperations.Response>>}
    */
-  listByOrganization(organizationId?: string, config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>>;
+  list(config?: PaginationConfig): Promise<Pagination.Response<CreditOperations.Response>>;
 
   // * OPERATION INTERFACES (Indirect credit modifications)
   /**

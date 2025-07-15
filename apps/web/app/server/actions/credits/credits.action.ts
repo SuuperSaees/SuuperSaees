@@ -20,12 +20,11 @@ export async function getCredit(clientOrganizationId?: string) {
 }
 
 /**
- * Get all credits for an organization - Used by both clients and agencies
- * @param organizationId - Optional organization ID, if not provided uses session
- * @param config - Optional pagination configuration
+ * Get all credit operations with pagination - Used by both clients and agencies
+ * @param config - Optional pagination and filter configuration
  */
-export async function getCredits(organizationId?: string, config?: PaginationConfig) {
-  return await getCreditAction().listByOrganization(organizationId, config);
+export async function getCredits(config?: PaginationConfig) {
+  return await getCreditAction().list(config);
 }
 
 // * OPERATION ACTIONS (Indirect credit modifications)

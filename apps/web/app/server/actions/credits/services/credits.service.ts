@@ -21,7 +21,7 @@ export class CreditService {
 
   // * GET SERVICES
   async list(): Promise<{
-    data: Credit.Response[];
+    data: CreditOperations.Response[];
     nextCursor: string | null;
     count: number | null;
     pagination: {
@@ -36,28 +36,7 @@ export class CreditService {
   }
 
   async get(clientOrganizationId?: string): Promise<Credit.Response> {
-    if (clientOrganizationId) {
-      // If clientOrganizationId is provided, use it directly (for agencies)
-      return await this.creditRepository.getByClientOrganization(clientOrganizationId);
-    } else {
-      // Use session-based logic (for clients)
-      return await this.creditRepository.get();
-    }
-  }
-
-  async listByOrganization(organizationId?: string): Promise<{
-    data: Credit.Response[];
-    nextCursor: string | null;
-    count: number | null;
-    pagination: {
-      limit: number;
-      hasNextPage: boolean;
-      totalPages: number | null;
-      currentPage: number | null;
-      isOffsetBased: boolean;
-    };
-  }> {
-    return await this.creditRepository.listByOrganization(organizationId);
+      return await this.creditRepository.get(clientOrganizationId);
   }
 
   // * OPERATION SERVICES (Indirect credit modifications)

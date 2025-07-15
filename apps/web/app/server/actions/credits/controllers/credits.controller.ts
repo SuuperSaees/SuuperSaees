@@ -1,6 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
-import { Credit } from '~/lib/credit.types';
+import { Credit, CreditOperations } from '~/lib/credit.types';
 import { Pagination } from '~/lib/pagination';
 import { PaginationConfig, createQueryContext } from '../../query.config';
 import { CreditRepository } from '../repositories/credits.repository';
@@ -35,13 +35,13 @@ export class CreditController {
     }
   }
 
-  async listByOrganization(organizationId?: string, config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {
+  async list(config?: PaginationConfig): Promise<Pagination.Response<CreditOperations.Response>> {
     try {
       const queryContext = createQueryContext(config);
       const creditRepository = new CreditRepository(this.client, this.adminClient, queryContext);
       const creditService = new CreditService(creditRepository);
       
-      const repositoryResponse = await creditService.listByOrganization(organizationId);
+      const repositoryResponse = await creditService.list();
       
       return {
         data: repositoryResponse.data,
@@ -52,7 +52,7 @@ export class CreditController {
         prevCursor: null,
       };
     } catch (error) {
-      console.error('Error in CreditController.listByOrganization:', error);
+      console.error('Error in CreditController.list:', error);
       throw error;
     }
   }

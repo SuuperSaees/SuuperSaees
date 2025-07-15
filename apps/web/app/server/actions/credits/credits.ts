@@ -1,4 +1,4 @@
-import { Credit } from '~/lib/credit.types';
+import { Credit, CreditOperations } from '~/lib/credit.types';
 import { Pagination } from '~/lib/pagination';
 import { BaseAction } from '../base-action';
 import { CreditController } from './controllers/credits.controller';
@@ -21,8 +21,8 @@ export class CreditAction extends BaseAction implements ICreditAction {
     return await this.controller.get(clientOrganizationId);
   }
 
-  async listByOrganization(organizationId?: string, config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {
-    return await this.controller.listByOrganization(organizationId, config);
+  async list(config?: PaginationConfig): Promise<Pagination.Response<CreditOperations.Response>> {
+    return await this.controller.list(config);
   }
 
   async createOperation(payload: Credit.Request.Create): Promise<Credit.Type> {

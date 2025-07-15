@@ -79,7 +79,7 @@ export class CreditRepository {
 
   // * GET REPOSITORIES
   async list(): Promise<{
-    data: Credit.Response[];
+    data: CreditOperations.Response[];
     nextCursor: string | null;
     count: number | null;
     pagination: {
@@ -101,104 +101,204 @@ export class CreditRepository {
     const organizationId = session.organization?.id ?? '';
 
     if (!userRole || !organizationId) {
-      throw new Error('User session not found or invalid');
+      throw new Error('User session or organization not found');
     }
 
-    // Build base query
-    let query = client
-      .from('credits')
-      .select(`
-        *,
-        credit_operations:credit_operations(
-          id,
-          status,
-          type,
-          quantity,
-          description,
-          created_at,
-          updated_at,
-          actor_id,
-          metadata
-        )
-      `, { count: 'exact' })
-      .is('deleted_on', null);
+    // First, find the credit_id based on role and filters
+    let creditId: string;
 
-    // Apply role-based filtering
-    if (userRole.startsWith('agency_')) {
-      // Agency users see all credits they manage
-      query = query.eq('agency_id', organizationId);
-    } else if (userRole.startsWith('client_')) {
-      // Client users see only their organization's credits
-      query = query.eq('client_organization_id', organizationId);
+    // Check if client_organization_id is provided in filters (for agency)
+    const clientOrgIdFromFilter = config?.filters?.client_organization_id?.[0];
+
+    if (AccountRoles.agencyRoles.has(userRole)) {
+      // Agency: use client_organization_id from filters or throw error
+      if (!clientOrgIdFromFilter) {
+        throw new Error('Agency users must provide client_organization_id in filters');
+      }
+
+      // Find credit by client_organization_id
+      const { data: credit, error: creditError } = await client
+        .from('credits')
+        .select('id')
+        .eq('client_organization_id', clientOrgIdFromFilter)
+        .eq('agency_id', organizationId)
+        .is('deleted_on', null)
+        .single();
+
+      if (creditError ?? !credit) {
+        throw new Error(`Credit not found for client organization: ${clientOrgIdFromFilter}`);
+      }
+
+      creditId = credit.id;
+    } else if (AccountRoles.clientRoles.has(userRole)) {
+      // Client: use session organization.id
+      const { data: credit, error: creditError } = await client
+        .from('credits')
+        .select('id')
+        .eq('client_organization_id', organizationId)
+        .is('deleted_on', null)
+        .single();
+
+      if (creditError ?? !credit) {
+        throw new Error(`Credit not found for client organization: ${organizationId}`);
+      }
+
+      creditId = credit.id;
     } else {
-      throw new Error('Invalid user role for credit access');
+      throw new Error(`Invalid user role: ${userRole}`);
     }
+
+    // Build base query for credit_operations
+    let query = client
+      .from('credit_operations')
+      .select('*')
+      .eq('credit_id', creditId)
+      .is('deleted_on', null);
 
     // Apply ordering
     query = query.order('created_at', { ascending: false });
 
-    // Apply pagination
-    const from = (currentPage - 1) * effectiveLimit;
-    const to = from + effectiveLimit - 1;
-    query = query.range(from, to);
+    // Apply filters using internal config
+    if (config?.filters) {
+      const { status, date_from, date_to } = config.filters;
 
-    const { data, error, count } = await query;
+      if (status && status.length > 0) {
+        query = query.in('status', status);
+      }
 
-    if (error) {
-      throw new Error(`Error fetching credits: ${error.message}`);
+      if (date_from) {
+        query = query.gte('created_at', date_from);
+      }
+
+      if (date_to) {
+        query = query.lte('created_at', date_to);
+      }
     }
 
-    const hasNextPage = count ? (from + effectiveLimit) < count : false;
-    const totalPages = count ? Math.ceil(count / effectiveLimit) : null;
+    // Apply search using internal config
+    if (config?.search?.term) {
+      query = query.or(`description.ilike.%${config.search.term}%`);
+    }
+
+    // Get total count with same filtering
+    let countQuery = client
+      .from('credit_operations')
+      .select('*', { count: 'exact', head: true })
+      .eq('credit_id', creditId)
+      .is('deleted_on', null);
+
+    // Apply same filters to count query
+    if (config?.filters) {
+      const { status, date_from, date_to } = config.filters;
+
+      if (status && status.length > 0) {
+        countQuery = countQuery.in('status', status);
+      }
+
+      if (date_from) {
+        countQuery = countQuery.gte('created_at', date_from);
+      }
+
+      if (date_to) {
+        countQuery = countQuery.lte('created_at', date_to);
+      }
+    }
+
+    // Apply same search to count query
+    if (config?.search?.term) {
+      countQuery = countQuery.or(`description.ilike.%${config.search.term}%`);
+    }
+
+    const { count } = await countQuery;
+
+    // Apply pagination
+    const isOffsetBased = 
+      config?.pagination?.page !== undefined ||
+      config?.pagination?.offset !== undefined;
+
+    if (isOffsetBased) {
+      const offset = 
+        config?.pagination?.offset ??
+        ((config?.pagination?.page ?? 1) - 1) * effectiveLimit;
+      query = query.range(offset, offset + effectiveLimit - 1);
+    } else if (config?.pagination?.cursor ?? config?.pagination?.endCursor) {
+      if (config?.pagination?.cursor) {
+        query = query.lt('created_at', config.pagination.cursor);
+      }
+      if (config?.pagination?.endCursor) {
+        query = query.gte('created_at', config.pagination.endCursor);
+      }
+      query = query.limit(effectiveLimit + 1);
+    } else {
+      query = query.limit(effectiveLimit + 1);
+    }
+
+    const { data: creditOperations, error } = await query;
+
+    if (error) {
+      throw new Error(`Error fetching credit operations: ${error.message}`);
+    }
+
+    // Process pagination
+    let paginatedOperations: CreditOperations.Response[];
+    let hasNextPage: boolean;
+    let nextCursor: string | null = null;
+
+    if (isOffsetBased) {
+      paginatedOperations = creditOperations as unknown as CreditOperations.Response[];
+      hasNextPage = (creditOperations?.length ?? 0) === effectiveLimit && 
+                   ((config?.pagination?.offset ?? ((currentPage - 1) * effectiveLimit)) + effectiveLimit) < (count ?? 0);
+    } else {
+      hasNextPage = (creditOperations?.length ?? 0) > effectiveLimit;
+      paginatedOperations = hasNextPage ? 
+        (creditOperations?.slice(0, effectiveLimit) as unknown as CreditOperations.Response[]) : 
+        (creditOperations as unknown as CreditOperations.Response[]);
+      
+      if (hasNextPage && paginatedOperations.length > 0) {
+        nextCursor = paginatedOperations[paginatedOperations.length - 1]?.created_at ?? null;
+      }
+    }
 
     return {
-      data: (data as Credit.Response[]) || [],
-      nextCursor: hasNextPage ? (currentPage + 1).toString() : null,
-      count,
+      data: paginatedOperations ?? [],
+      nextCursor,
+      count: count ?? 0,
       pagination: {
         limit: effectiveLimit,
         hasNextPage,
-        totalPages,
-        currentPage,
-        isOffsetBased: true,
+        totalPages: count ? Math.ceil(count / effectiveLimit) : 0,
+        currentPage: isOffsetBased ? currentPage : null,
+        isOffsetBased,
       },
     };
   }
 
-  async get(): Promise<Credit.Response> {
+  async get(clientOrganizationId?: string): Promise<Credit.Response> {
     const client = this.client;
     
     // Get session to determine user role and organization
     const session = await getSession();
     const userRole = session.organization?.role ?? '';
-    const organizationId = session.organization?.id ?? '';
-
-    if (!userRole || !organizationId) {
+    
+    
+    if (!userRole) {
       throw new Error('User session not found or invalid');
     }
-
-    // Check if user is client (client roles can access their organization's credit)
     const isClientUser = AccountRoles.clientRoles.has(userRole);
+
+    if (!isClientUser && !clientOrganizationId) {
+      throw new Error('Agency users must provide clientOrganizationId parameter.');
+    }
+
+    const organizationId = (isClientUser ? session.organization?.id ?? clientOrganizationId : clientOrganizationId) ?? '';
+    const agencyId = (isClientUser ? session.agency?.id : session.organization?.id) ?? '';
     
-    if (isClientUser) {
       // Client users: find credit where client_organization_id = their organization id
       const { data, error } = await client
         .from('credits')
-        .select(`
-          *,
-          credit_operations:credit_operations(
-            id,
-            status,
-            type,
-            quantity,
-            description,
-            created_at,
-            updated_at,
-            actor_id,
-            metadata
-          )
-        `)
+        .select(`*`)
         .eq('client_organization_id', organizationId)
+        .eq('agency_id', agencyId)
         .is('deleted_on', null)
         .single();
 
@@ -207,40 +307,6 @@ export class CreditRepository {
       }
 
       return data as Credit.Response;
-    } else {
-      // Agency users: require clientOrganizationId parameter via the service layer
-      throw new Error('Agency users must provide clientOrganizationId parameter.');
-    }
-  }
-
-  async getByClientOrganization(clientOrganizationId: string): Promise<Credit.Response> {
-    const client = this.client;
-    
-    const { data, error } = await client
-      .from('credits')
-      .select(`
-        *,
-        credit_operations:credit_operations(
-          id,
-          status,
-          type,
-          quantity,
-          description,
-          created_at,
-          updated_at,
-          actor_id,
-          metadata
-        )
-      `)
-      .eq('client_organization_id', clientOrganizationId)
-      .is('deleted_on', null)
-      .single();
-
-    if (error) {
-      throw new Error(`Error fetching credit by client organization: ${error.message}`);
-    }
-
-    return data as Credit.Response;
   }
 
   async getById(creditId: string): Promise<Credit.Response> {
@@ -248,20 +314,7 @@ export class CreditRepository {
     
     const { data, error } = await client
       .from('credits')
-      .select(`
-        *,
-        credit_operations:credit_operations(
-          id,
-          status,
-          type,
-          quantity,
-          description,
-          created_at,
-          updated_at,
-          actor_id,
-          metadata
-        )
-      `)
+      .select(`*`)
       .eq('id', creditId)
       .is('deleted_on', null)
       .single();
@@ -271,89 +324,6 @@ export class CreditRepository {
     }
 
     return data as Credit.Response;
-  }
-
-  async listByOrganization(organizationId?: string): Promise<{
-    data: Credit.Response[];
-    nextCursor: string | null;
-    count: number | null;
-    pagination: {
-      limit: number;
-      hasNextPage: boolean;
-      totalPages: number | null;
-      currentPage: number | null;
-      isOffsetBased: boolean;
-    };
-  }> {
-    const client = this.client;
-    const config = this.queryContext.getConfig();
-    const effectiveLimit = config?.pagination?.limit ?? 50;
-    const currentPage = config?.pagination?.page ?? 1;
-
-    let targetOrganizationId = organizationId;
-
-    // If no organizationId provided, get from session
-    if (!targetOrganizationId) {
-      const session = await getSession();
-      const userRole = session.organization?.role ?? '';
-      targetOrganizationId = session.organization?.id ?? '';
-
-      if (!userRole || !targetOrganizationId) {
-        throw new Error('User session not found or invalid');
-      }
-    }
-
-    // Build base query
-    let query = client
-      .from('credits')
-      .select(`
-        *,
-        credit_operations:credit_operations(
-          id,
-          status,
-          type,
-          quantity,
-          description,
-          created_at,
-          updated_at,
-          actor_id,
-          metadata
-        )
-      `, { count: 'exact' })
-      .is('deleted_on', null);
-
-    // Filter by organization (either as client or agency)
-    query = query.or(`client_organization_id.eq.${targetOrganizationId},agency_id.eq.${targetOrganizationId}`);
-
-    // Apply ordering
-    query = query.order('created_at', { ascending: false });
-
-    // Apply pagination
-    const from = (currentPage - 1) * effectiveLimit;
-    const to = from + effectiveLimit - 1;
-    query = query.range(from, to);
-
-    const { data, error, count } = await query;
-
-    if (error) {
-      throw new Error(`Error fetching credits by organization: ${error.message}`);
-    }
-
-    const hasNextPage = count ? (from + effectiveLimit) < count : false;
-    const totalPages = count ? Math.ceil(count / effectiveLimit) : null;
-
-    return {
-      data: (data as Credit.Response[]) || [],
-      nextCursor: hasNextPage ? (currentPage + 1).toString() : null,
-      count,
-      pagination: {
-        limit: effectiveLimit,
-        hasNextPage,
-        totalPages,
-        currentPage,
-        isOffsetBased: true,
-      },
-    };
   }
 
   // * UPDATE REPOSITORIES
