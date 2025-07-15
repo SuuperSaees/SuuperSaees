@@ -52,6 +52,7 @@ create table "public"."credit_operations" (
     "quantity" bigint not null,
     "description" text,
     "credit_id" uuid not null,
+    "invoice_id" uuid,
     "metadata" jsonb,
     "created_at" timestamp with time zone not null default now(),
     "updated_at" timestamp with time zone not null default now(),
@@ -84,6 +85,18 @@ CREATE UNIQUE INDEX credit_operations_pkey ON public.credit_operations USING btr
 CREATE UNIQUE INDEX credits_client_organization_id_unique ON public.credits USING btree (client_organization_id);
 
 CREATE UNIQUE INDEX credits_pkey ON public.credits USING btree (id);
+
+CREATE INDEX idx_credit_operations_invoice_id ON public.credit_operations USING btree (invoice_id);
+
+CREATE INDEX idx_credit_operations_invoice_id_status ON public.credit_operations USING btree (invoice_id, status);
+
+CREATE INDEX idx_credit_operations_invoice_id_created_at ON public.credit_operations USING btree (invoice_id, created_at DESC);
+
+-- Índice compuesto para búsquedas complejas invoice + credit
+CREATE INDEX idx_credit_operations_invoice_status_type ON public.credit_operations USING btree (invoice_id, status, type);
+
+-- Índice para filtros por invoice_id y fecha (para reportes)
+CREATE INDEX idx_credit_operations_invoice_date_range ON public.credit_operations USING btree (invoice_id, created_at, status) WHERE deleted_on IS NULL;
 
 CREATE INDEX idx_credit_operations_actor_id ON public.credit_operations USING btree (actor_id);
 
@@ -134,6 +147,10 @@ alter table "public"."credits" validate constraint "credits_user_id_fkey";
 alter table "public"."orders_v2" add constraint "orders_v2_credit_operation_id_fkey" FOREIGN KEY (credit_operation_id) REFERENCES credit_operations(id) ON UPDATE CASCADE ON DELETE SET NULL not valid;
 
 alter table "public"."orders_v2" validate constraint "orders_v2_credit_operation_id_fkey";
+
+alter table "public"."credit_operations" add constraint "credit_operations_invoice_id_fkey" FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON UPDATE CASCADE ON DELETE SET NULL not valid;
+
+alter table "public"."credit_operations" validate constraint "credit_operations_invoice_id_fkey";
 
 set check_function_bodies = off;
 
