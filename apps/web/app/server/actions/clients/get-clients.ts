@@ -21,13 +21,15 @@ export const getClients = async (
     admin: true,
   });
 
-  const query = client
+  const baseQuery = client
     .from("clients")
     .select(
       `id, organization_client_id, user_client_id, agency_id, deleted_on,
-       user:accounts!inner(id, name, email, picture_url, created_at, settings:user_settings(name, picture_url)), 
-      organization:organizations!organization_client_id(id, name, slug, owner_id, picture_url, settings:organization_settings(key, value))`,
-      config
+       user:accounts!user_client_id(id, name, email, picture_url, created_at, settings:user_settings(name, picture_url)), 
+       organization:organizations!organization_client_id(id, name, slug, owner_id, picture_url, settings:organization_settings(key, value)),
+       user_filter:accounts!user_client_id(),
+       org_filter:organizations!organization_client_id()`,
+      config?.pagination
         ? {
             count: "exact",
           }
@@ -35,12 +37,38 @@ export const getClients = async (
     )
     .eq("agency_id", agencyId)
     .is("deleted_on", null)
-    .not("user.email", "like", "guest%@suuper.co")
+    .not("user.email", "like", "guest%@suuper.co");
 
-  const paginatedClients = QueryBuilder.getInstance().enhance(query, config);
-  const response = await paginatedClients;
+  // Define embed filter mappings for this entity
+  const embedFilters = [
+    {
+      table: "accounts",
+      alias: "user_filter", 
+      foreignKey: "user_client_id",
+    },
+    {
+      table: "organizations",
+      alias: "org_filter",
+      foreignKey: "organization_client_id", 
+    },
+  ];
 
-  // Get roles for each client
+  // Map referencedTable to embedConfig if orFilters exist
+  const enhancedConfig = config?.orFilters ? {
+    ...config,
+    orFilters: config.orFilters.map(filter => ({
+      ...filter,
+      embedConfig: getEmbedConfigForTable(filter.referencedTable)
+    }))
+  } : config;
+
+  const enhancedQuery = QueryBuilder.getInstance().enhance(baseQuery, enhancedConfig, {
+    embedFilters,
+  });
+
+  const response = await enhancedQuery;
+
+  // Get roles for each client - using type assertion for now
   const userIds = response.data?.map((client) => client.user_client_id) ?? [];
 
   const roles = await adminClient
@@ -66,6 +94,20 @@ export const getClients = async (
   }
 };
 
+// Helper function to map referencedTable to embedConfig
+const getEmbedConfigForTable = (
+  referencedTable: string | undefined
+) => {
+  if (!referencedTable) return undefined;
+  
+  const mapping: Record<string, { table: string; alias: string; foreignKey: string }> = {
+    'accounts': { table: 'accounts', alias: 'user_filter', foreignKey: 'user_client_id' },
+    'organizations': { table: 'organizations', alias: 'org_filter', foreignKey: 'organization_client_id' },
+  };
+  
+  return mapping[referencedTable];
+};
+
 type ClientUnparsed = Pick<
   Client.Type,
   | "id"
@@ -76,15 +118,18 @@ type ClientUnparsed = Pick<
 > & {
   user?: User.Response | null;
   organization?:
-    | Pick<
+    | (Pick<
         Organization.Type,
         "id" | "name" | "slug" | "owner_id" | "picture_url"
-      > & {
-        settings: {
-          key: string;
-          value: string;
-        }[] | null;
-      }[]
+      > &
+        {
+          settings:
+            | {
+                key: string;
+                value: string;
+              }[]
+            | null;
+        }[])
     | null;
 };
 
@@ -100,9 +145,16 @@ const transformClients = (
 ): Client.Response[] => {
   if (!clients) return [];
   return clients.map((client) => {
-    const organization = Array.isArray(client.organization) ? client.organization?.[0] : client.organization;
-    const billingSettings = organization?.settings?.find((setting) => setting.key === "billing_details")?.value ?? null;
-    const billingSettingsParsed: InvoiceSettings | null = billingSettings ? parseInvoiceSettings(billingSettings) : null;
+    const organization = Array.isArray(client.organization)
+      ? client.organization?.[0]
+      : client.organization;
+    const billingSettings =
+      organization?.settings?.find(
+        (setting) => setting.key === "billing_details",
+      )?.value ?? null;
+    const billingSettingsParsed: InvoiceSettings | null = billingSettings
+      ? parseInvoiceSettings(billingSettings)
+      : null;
     return {
       ...client,
       user: client.user
@@ -118,7 +170,7 @@ const transformClients = (
             ...organization,
             settings: {
               billing: billingSettingsParsed,
-            }
+            },
           }
         : null,
     };

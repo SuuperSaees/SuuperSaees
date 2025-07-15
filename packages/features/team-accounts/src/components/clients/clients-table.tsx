@@ -76,12 +76,19 @@ export function ClientsTable({
     queryFn: ({ page, limit, filters }) =>
       getClients(agencyId, {
         pagination: { page, limit },
-        filters: filters?.searchTerm
+        orFilters: filters?.searchTerm
           ? [
               {
-                field: "user.name",
+                field: "name",
                 operator: "ilike",
                 value: filters.searchTerm,
+                referencedTable: "accounts",
+              },
+              {
+                field: "name",
+                operator: "ilike", 
+                value: filters.searchTerm,
+                referencedTable: "organizations",
               },
             ]
           : undefined,
@@ -102,7 +109,7 @@ export function ClientsTable({
     queryFn: ({ page, limit, filters }) =>
       getOrganizations(agencyId, {
         pagination: { page, limit },
-        filters: filters?.searchTerm
+        orFilters: filters?.searchTerm
           ? [{ field: "name", operator: "ilike", value: filters.searchTerm }]
           : undefined,
       }),
