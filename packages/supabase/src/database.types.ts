@@ -1194,6 +1194,7 @@ export type Database = {
           deleted_on: string | null
           description: string | null
           id: string
+          invoice_id: string | null
           metadata: Json | null
           quantity: number
           status: Database["public"]["Enums"]["credit_operation_status"]
@@ -1207,6 +1208,7 @@ export type Database = {
           deleted_on?: string | null
           description?: string | null
           id?: string
+          invoice_id?: string | null
           metadata?: Json | null
           quantity: number
           status?: Database["public"]["Enums"]["credit_operation_status"]
@@ -1220,6 +1222,7 @@ export type Database = {
           deleted_on?: string | null
           description?: string | null
           id?: string
+          invoice_id?: string | null
           metadata?: Json | null
           quantity?: number
           status?: Database["public"]["Enums"]["credit_operation_status"]
@@ -1246,6 +1249,13 @@ export type Database = {
             columns: ["credit_id"]
             isOneToOne: false
             referencedRelation: "credits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_operations_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
         ]
