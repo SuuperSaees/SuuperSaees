@@ -27,7 +27,7 @@ export class CreditOperationRepository {
       .insert({
         credit_id: payload.credit_id,
         actor_id: payload.actor_id,
-        status: payload.status ?? 'consumed',
+        status: payload.status ?? 'purchased',
         type: payload.type ?? 'user',
         quantity: payload.quantity,
         description: payload.description,

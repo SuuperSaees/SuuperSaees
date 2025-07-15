@@ -1,7 +1,7 @@
 import { Credit, CreditOperations } from '~/lib/credit.types';
 import { CreditRepository } from '../repositories/credits.repository';
 import { CreditOperationRepository } from '../repositories/credit-operations.repository';
-import { CreditOperationHistory } from '../type-guards';
+import { CreditOperationHistory, validateCreditOperation, validateCredit, isCreditRequestCreate, isCreditRequestUpdate } from '../type-guards';
 
 export class CreditService {
   constructor(
@@ -45,28 +45,100 @@ export class CreditService {
       throw new Error('Credit operation repository is required for operation methods');
     }
 
-    // Extract credit operations and create them
-    if (payload.credit_operations && payload.credit_operations.length > 0) {
-      // Create the credit first
-      const credit = await this.creditRepository.create(payload);
-      
-      // Then create the operations
-      for (const operation of payload.credit_operations) {
-        await this.creditOperationRepository.create({
-          ...operation,
-          credit_id: credit.id,
-        });
-      }
-      
-      return credit;
+    // Validate the payload structure
+    if (!isCreditRequestCreate(payload)) {
+      throw new Error('Invalid payload structure for credit operation creation');
     }
 
-    throw new Error('No credit operations provided for createOperation');
+    // Validate credit operations are provided
+    if (!payload.credit_operations || payload.credit_operations.length === 0) {
+      throw new Error('No credit operations provided for createOperation');
+    }
+
+    // Validate each credit operation
+    for (const operation of payload.credit_operations) {
+      const validation = validateCreditOperation(operation);
+      if (!validation.isValid) {
+        throw new Error(`Invalid credit operation: ${validation.errors.join(', ')}`);
+      }
+    }
+
+    let creditId: string;
+
+    // Priority order: payload.id > credit_id in operations > client_organization_id lookup
+    if (payload.id) {
+      // Credit ID provided in payload - verify it exists and use it
+      try {
+        await this.creditRepository.getById(payload.id);
+        creditId = payload.id;
+      } catch (error) {
+        throw new Error(`Provided credit ID ${payload.id} does not exist`);
+      }
+    } else {
+      // Check if credit_id is provided in any of the operations
+      const providedCreditId = payload.credit_operations.find(op => op.credit_id)?.credit_id;
+      
+      if (providedCreditId) {
+        // Credit ID provided in operations - verify it exists and use it
+        try {
+          await this.creditRepository.getById(providedCreditId);
+          creditId = providedCreditId;
+        } catch (error) {
+          throw new Error(`Provided credit ID ${providedCreditId} does not exist`);
+        }
+      } else if (payload.client_organization_id) {
+        // No credit ID provided - try to find existing credit by client organization
+        try {
+          const existingCredit = await this.creditRepository.get(payload.client_organization_id);
+          creditId = existingCredit.id;
+        } catch (error) {
+          // Credit not found - create as strict fallback only if all required data is present
+          if (!payload.agency_id) {
+            throw new Error('Agency ID is required to create new credit as fallback');
+          }
+          
+          // Validate credit data before creating fallback
+          const creditValidation = validateCredit(payload);
+          if (!creditValidation.isValid) {
+            throw new Error(`Cannot create fallback credit: ${creditValidation.errors.join(', ')}`);
+          }
+          
+          // Create credit as strict fallback
+          const newCredit = await this.creditRepository.create({
+            agency_id: payload.agency_id,
+            client_organization_id: payload.client_organization_id,
+            balance: payload.balance ?? 0,
+            user_id: payload.user_id ?? null,
+          });
+          creditId = newCredit.id;
+        }
+      } else {
+        throw new Error('Either credit_id (payload.id or operation.credit_id) or client_organization_id is required for credit operations');
+      }
+    }
+
+    // Create the operations with default status 'purchased'
+    for (const operation of payload.credit_operations) {
+      await this.creditOperationRepository.create({
+        ...operation,
+        credit_id: operation.credit_id ?? creditId, // Use provided credit_id or resolved creditId
+        status: operation.status ?? 'purchased', // Default to 'purchased' for new operations
+        type: operation.type ?? 'user',
+      });
+    }
+
+    // Return the credit (existing or newly created)
+    return await this.creditRepository.getById(creditId);
   }
 
   async updateOperation(payload: Credit.Request.Update): Promise<Credit.Type> {
     if (!this.creditOperationRepository) {
       throw new Error('Credit operation repository is required for operation methods');
+    }
+
+    // Validate the payload structure
+    if (!isCreditRequestUpdate(payload)) {
+      throw new Error('Invalid payload structure for credit operation update');
     }
 
     // First, get the current credit to return it at the end
@@ -145,7 +217,7 @@ export class CreditService {
             actor_id: operation.actor_id,
             credit_id: payload.id,
             quantity: operation.quantity,
-            status: operation.status ?? 'consumed',
+            status: operation.status ?? 'purchased',
             type: operation.type ?? 'user',
             description: operation.description ?? null,
             metadata: operation.metadata ?? null,
@@ -200,7 +272,7 @@ export class CreditService {
             actor_id: operation.actor_id!,
             credit_id: payload.id!,
             quantity: operation.quantity!,
-            status: operation.status ?? 'consumed',
+            status: operation.status ?? 'purchased',
             type: operation.type ?? 'user',
             description: operation.description ?? null,
             metadata: operation.metadata ?? null,
