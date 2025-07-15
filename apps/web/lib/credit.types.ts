@@ -30,6 +30,7 @@ export namespace Credit {
 
   export namespace Request {
     export type Create = Omit<Credit.Insert, 'id' | 'created_at' | 'updated_at' | 'deleted_on'> & {
+      credit_operation_ids?: string[] | null;
       credit_operations?: CreditOperations.Insert[] | null;
     };
     export type Update = Credit.Update & {
