@@ -136,7 +136,8 @@ export class CreditService {
     operationId: string,
     newQuantity: number,
     actorId: string,
-    operationType: 'update' | 'remove'
+    operationType: 'update' | 'remove',
+    additionalUpdates?: Record<string, unknown>
   ): Promise<void> {
     if (!this.creditOperationRepository) {
       throw new Error('Credit operation repository is required');
@@ -148,6 +149,13 @@ export class CreditService {
     // Advanced heuristic: Calculate difference between current and new quantity
     const oldQuantity = existingOperation.quantity;
     const quantityDifference = newQuantity - oldQuantity;
+    
+    // Prepare update data with additional fields
+    const updateData: Record<string, unknown> = {
+      id: operationId,
+      quantity: newQuantity,
+      ...additionalUpdates
+    };
     
     // Only add history entry if there's an actual change in quantity
     if (quantityDifference !== 0) {
@@ -176,13 +184,12 @@ export class CreditService {
         history: [...existingHistory, newHistoryEntry],
       };
 
-      // Update operation with preserved history + new entry
-      await this.creditOperationRepository.update({
-        id: operationId,
-        quantity: newQuantity,
-        metadata: JSON.parse(JSON.stringify(updatedMetadata)),
-      });
+      // Add metadata to update data
+      updateData.metadata = JSON.parse(JSON.stringify(updatedMetadata));
     }
+
+    // Single update operation with all changes
+    await this.creditOperationRepository.update(updateData);
   }
 
   async updateOperation(payload: Credit.Request.Update): Promise<Credit.Type> {
@@ -200,30 +207,31 @@ export class CreditService {
       throw new Error('Credit ID is required for update operations');
     }
     
-    const currentCredit = await this.creditRepository.getById(payload.id);
-
     // Handle credit operations if provided
     if (payload.credit_operations && payload.credit_operations.length > 0) {
       for (const operation of payload.credit_operations) {
         if (operation.id) {
-          // Update existing operation using the general helper method
+          // Prepare additional updates (only fields that changed)
+          const additionalUpdates: Record<string, unknown> = {};
+          if (operation.status) additionalUpdates.status = operation.status;
+          if (operation.description !== undefined) additionalUpdates.description = operation.description;
+          if (operation.type) additionalUpdates.type = operation.type;
+          
+          // Update existing operation using the optimized helper method (single request)
           if (operation.quantity !== undefined) {
             await this.addQuantityHistoryEntry(
               operation.id,
               operation.quantity,
               operation.actor_id ?? 'system',
-              'update'
+              'update',
+              additionalUpdates
             );
-          }
-          
-          // Update other fields without history (only quantity is tracked)
-          const updateData: Record<string, unknown> = { id: operation.id };
-          if (operation.status) updateData.status = operation.status;
-          if (operation.description !== undefined) updateData.description = operation.description;
-          if (operation.type) updateData.type = operation.type;
-          
-          if (Object.keys(updateData).length > 1) { // More than just ID
-            await this.creditOperationRepository.update(updateData);
+          } else if (Object.keys(additionalUpdates).length > 0) {
+            // Update only other fields if no quantity change
+            await this.creditOperationRepository.update({
+              id: operation.id,
+              ...additionalUpdates,
+            });
           }
         } else {
           // Create new operation - ensure required fields are provided
@@ -246,6 +254,8 @@ export class CreditService {
         }
       }
     }
+
+    const currentCredit = await this.creditRepository.getById(payload.id);
 
     return currentCredit;
   }
