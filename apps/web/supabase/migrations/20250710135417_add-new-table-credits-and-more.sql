@@ -192,7 +192,7 @@ BEGIN
                 NEW.agency_id,
                 NEW.organization_client_id,
                 0,
-                org_owner_id
+                NULL
             );
         END IF;
     END IF;
