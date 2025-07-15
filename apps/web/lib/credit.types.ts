@@ -37,6 +37,11 @@ export namespace Credit {
     export type Update = Credit.Update & {
       credit_operations?: (CreditOperations.Update | CreditOperations.Insert)[] | null;
     };
+    export type Remove = {
+      id?: string; // Optional credit ID that can be provided by frontend
+      client_organization_id?: string; // Optional client organization ID for lookup
+      credit_operations: CreditOperations.Insert[]; // Required credit operations for removal
+    };
   }
 
   export type Response = Credit.Type & {

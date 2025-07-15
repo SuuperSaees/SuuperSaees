@@ -45,9 +45,10 @@ export async function updateCredit(payload: Credit.Request.Update) {
 }
 
 /**
- * Delete credit operation - Does NOT directly affect credits table
- * Creates deletion record in credit_operations with status 'consumed'
+ * Remove credit operations - Does NOT directly affect credits table
+ * Creates removal record in credit_operations with status 'consumed' by default
+ * Generates history tracking with oldQuantity and newQuantity
  */
-export async function deleteCredit(creditId: string, actorId: string, creditOperationId?: string) {
-  return await getCreditAction().deleteOperation(creditId, actorId, creditOperationId);
+export async function removeCredit(payload: Credit.Request.Remove) {
+  return await getCreditAction().removeOperation(payload);
 }

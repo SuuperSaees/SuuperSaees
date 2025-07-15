@@ -9,6 +9,18 @@ export interface CreditOperationHistory {
   changedBy: string;
 }
 
+// History type for remove operations
+export interface CreditRemoveHistory {
+  oldQuantity: number;
+  newQuantity: number;
+  changedAt: string;
+  changedBy: string;
+  description?: string;
+  type: 'user' | 'system';
+  status: 'consumed' | 'purchased' | 'refunded' | 'locked' | 'expired';
+  operationType: 'remove';
+}
+
 // Type guards for Credit Operations History
 export function isCreditOperationHistory(value: unknown): value is CreditOperationHistory {
   const obj = value as Record<string, unknown>;
@@ -23,6 +35,22 @@ export function isCreditOperationHistory(value: unknown): value is CreditOperati
 
 export function isCreditOperationHistoryArray(value: unknown): value is CreditOperationHistory[] {
   return Array.isArray(value) && value.every(item => isCreditOperationHistory(item));
+}
+
+export function isCreditRemoveHistory(value: unknown): value is CreditRemoveHistory {
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof obj.oldQuantity === 'number' &&
+    typeof obj.newQuantity === 'number' &&
+    typeof obj.changedAt === 'string' &&
+    typeof obj.changedBy === 'string' &&
+    (obj.description === undefined || typeof obj.description === 'string') &&
+    (obj.type === 'user' || obj.type === 'system') &&
+    isCreditOperationStatus(obj.status) &&
+    obj.operationType === 'remove'
+  );
 }
 
 // Type guards for Credit Operations
@@ -147,6 +175,19 @@ export function isCreditRequestUpdate(value: unknown): value is Credit.Request.U
      obj.credit_operations === null || 
      (Array.isArray(obj.credit_operations) && 
       obj.credit_operations.every(op => isCreditOperationUpdate(op))))
+  );
+}
+
+export function isCreditRequestRemove(value: unknown): value is Credit.Request.Remove {
+  const obj = value as Record<string, unknown>;
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    (obj.id === undefined || typeof obj.id === 'string') &&
+    (obj.client_organization_id === undefined || typeof obj.client_organization_id === 'string') &&
+    Array.isArray(obj.credit_operations) &&
+    obj.credit_operations.length > 0 &&
+    obj.credit_operations.every((op: unknown) => isCreditOperationInsert(op))
   );
 }
 

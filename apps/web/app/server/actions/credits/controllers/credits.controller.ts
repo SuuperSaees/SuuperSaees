@@ -84,15 +84,15 @@ export class CreditController {
     }
   }
 
-  async deleteOperation(creditId: string, actorId: string, creditOperationId?: string): Promise<void> {
+  async removeOperation(payload: Credit.Request.Remove): Promise<Credit.Type> {
     try {
       const creditRepository = new CreditRepository(this.client, this.adminClient);
       const creditOperationRepository = new CreditOperationRepository(this.client, this.adminClient);
       const creditService = new CreditService(creditRepository, creditOperationRepository);
       
-      return await creditService.deleteOperation(creditId, actorId, creditOperationId);
+      return await creditService.removeOperation(payload);
     } catch (error) {
-      console.error('Error in CreditController.deleteOperation:', error);
+      console.error('Error in CreditController.removeOperation:', error);
       throw error;
     }
   }

@@ -1,7 +1,7 @@
 import { Credit, CreditOperations } from '~/lib/credit.types';
 import { CreditRepository } from '../repositories/credits.repository';
 import { CreditOperationRepository } from '../repositories/credit-operations.repository';
-import { CreditOperationHistory, validateCreditOperation, validateCredit, isCreditRequestCreate, isCreditRequestUpdate } from '../type-guards';
+import { CreditOperationHistory, CreditRemoveHistory, validateCreditOperation, validateCredit, isCreditRequestCreate, isCreditRequestUpdate, isCreditRequestRemove } from '../type-guards';
 
 export class CreditService {
   constructor(
@@ -229,34 +229,6 @@ export class CreditService {
     return currentCredit;
   }
 
-  async deleteOperation(creditId: string, actorId: string, creditOperationId?: string): Promise<void> {
-    if (!this.creditOperationRepository) {
-      throw new Error('Credit operation repository is required for operation methods');
-    }
-
-    // Create a 'consumed' operation to represent the deletion
-    const deleteOperation: CreditOperations.Insert = {
-      credit_id: creditId,
-      actor_id: actorId,
-      status: 'consumed',
-      type: 'system',
-      quantity: 0, // No quantity change, just marking as consumed
-      description: 'Credit operation deleted',
-      metadata: creditOperationId ? {
-        history: [{
-          field: 'deleted',
-          oldValue: 'active',
-          newValue: 'deleted',
-          changedAt: new Date().toISOString(),
-          changedBy: actorId,
-        }],
-        originalOperationId: creditOperationId,
-      } : null,
-    };
-
-    await this.creditOperationRepository.create(deleteOperation);
-  }
-
   // * UPDATE SERVICES
   async update(payload: Credit.Request.Update): Promise<Credit.Type> {
     // Handle credit operations if provided
@@ -287,9 +259,95 @@ export class CreditService {
     return await this.creditRepository.update(creditPayload);
   }
 
-  // * DELETE SERVICES
-  async delete(creditId: string): Promise<void> {
-    // Soft delete the credit
-    return await this.creditRepository.delete(creditId);
+  async removeOperation(payload: Credit.Request.Remove): Promise<Credit.Type> {
+    if (!this.creditOperationRepository) {
+      throw new Error('Credit operation repository is required for operation methods');
+    }
+
+    // Validate the payload structure
+    if (!isCreditRequestRemove(payload)) {
+      throw new Error('Invalid payload structure for credit operation removal');
+    }
+
+    // Validate credit operations are provided
+    if (!payload.credit_operations || payload.credit_operations.length === 0) {
+      throw new Error('No credit operations provided for removeOperation');
+    }
+
+    // Validate each credit operation
+    for (const operation of payload.credit_operations) {
+      const validation = validateCreditOperation(operation);
+      if (!validation.isValid) {
+        throw new Error(`Invalid credit operation: ${validation.errors.join(', ')}`);
+      }
+    }
+
+    let creditId: string;
+    let currentCredit: Credit.Type;
+
+    // Priority order: payload.id > credit_id in operations > client_organization_id lookup
+    if (payload.id) {
+      // Credit ID provided in payload - verify it exists and use it
+      try {
+        currentCredit = await this.creditRepository.getById(payload.id);
+        creditId = payload.id;
+      } catch (error) {
+        throw new Error(`Provided credit ID ${payload.id} does not exist`);
+      }
+    } else {
+      // Check if credit_id is provided in any of the operations
+      const providedCreditId = payload.credit_operations.find(op => op.credit_id)?.credit_id;
+      
+      if (providedCreditId) {
+        // Credit ID provided in operations - verify it exists and use it
+        try {
+          currentCredit = await this.creditRepository.getById(providedCreditId);
+          creditId = providedCreditId;
+        } catch (error) {
+          throw new Error(`Provided credit ID ${providedCreditId} does not exist`);
+        }
+      } else if (payload.client_organization_id) {
+        // No credit ID provided - try to find existing credit by client organization
+        try {
+          currentCredit = await this.creditRepository.get(payload.client_organization_id);
+          creditId = currentCredit.id;
+        } catch (error) {
+          throw new Error(`Credit not found for client organization ${payload.client_organization_id}. Cannot remove operations from non-existent credit.`);
+        }
+      } else {
+        throw new Error('Either credit_id (payload.id or operation.credit_id) or client_organization_id is required for credit operations removal');
+      }
+    }
+
+    // Create remove history for metadata
+    const timestamp = new Date().toISOString();
+    const oldQuantity = currentCredit.balance;
+
+    // Create the operations with default status 'consumed'
+    for (const operation of payload.credit_operations) {
+      const removeHistory: CreditRemoveHistory = {
+        oldQuantity: oldQuantity,
+        newQuantity: oldQuantity - operation.quantity, // Calculate new balance after operation
+        changedAt: timestamp,
+        changedBy: operation.actor_id,
+        description: operation.description ?? 'Credit operation removed',
+        type: operation.type === 'system' ? 'system' : 'user',
+        status: operation.status as 'consumed' | 'purchased' | 'refunded' | 'locked' | 'expired' ?? 'consumed',
+        operationType: 'remove',
+      };
+
+      await this.creditOperationRepository.create({
+        ...operation,
+        credit_id: operation.credit_id ?? creditId, // Use provided credit_id or resolved creditId
+        status: operation.status ?? 'consumed', // Default to 'consumed' for remove operations
+        type: operation.type ?? 'user',
+        metadata: JSON.parse(JSON.stringify({
+          history: [removeHistory],
+        })),
+      });
+    }
+
+    // Return the updated credit
+    return await this.creditRepository.getById(creditId);
   }
 }

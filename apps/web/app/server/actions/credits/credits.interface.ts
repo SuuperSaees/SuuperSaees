@@ -38,12 +38,11 @@ export interface ICreditAction {
   updateOperation(payload: Credit.Request.Update): Promise<Credit.Type>;
 
   /**
-   * Deletes a credit operation (not direct credit deletion)
-   * Creates deletion record in credit_operations with status 'consumed'
-   * @param {string} creditId - ID of the credit affected
-   * @param {string} actorId - ID of the user performing the deletion
-   * @param {string} creditOperationId - Optional ID of existing operation to create history
-   * @returns {Promise<void>}
+   * Removes credit operations (not direct credit deletion)
+   * Creates removal record in credit_operations with status 'consumed' by default
+   * Generates history tracking with oldQuantity and newQuantity
+   * @param {Credit.Request.Remove} payload - Data for removing the operations
+   * @returns {Promise<Credit.Type>} - The affected credit object
    */
-  deleteOperation(creditId: string, actorId: string, creditOperationId?: string): Promise<void>;
+  removeOperation(payload: Credit.Request.Remove): Promise<Credit.Type>;
 }

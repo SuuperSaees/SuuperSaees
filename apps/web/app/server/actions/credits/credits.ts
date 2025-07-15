@@ -33,8 +33,8 @@ export class CreditAction extends BaseAction implements ICreditAction {
     return await this.controller.updateOperation(payload);
   }
 
-  async deleteOperation(creditId: string, actorId: string, creditOperationId?: string): Promise<void> {
-    return await this.controller.deleteOperation(creditId, actorId, creditOperationId);
+  async removeOperation(payload: Credit.Request.Remove): Promise<Credit.Type> {
+    return await this.controller.removeOperation(payload);
   }
 }
 
