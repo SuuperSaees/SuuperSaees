@@ -62,8 +62,6 @@ class AccountsApi {
         tags:tags(*)`
       );
 
-      console.log('Loaded user accounts:', accounts, error);
-
     if (error) {
       throw error;
     }

@@ -1,8 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Database } from '~/lib/database.types';
 import { Credit, CreditOperations } from '~/lib/credit.types';
-import { QueryContext } from '../query.config';
-import { getSession } from '@kit/supabase/get-session';
+import { QueryContext } from '../../query.config';
+import { getSession } from '../../accounts/accounts.action';
 
 export class CreditRepository {
   private client: SupabaseClient<Database>;
@@ -194,83 +194,6 @@ export class CreditRepository {
     return data as Credit.Response;
   }
 
-  async getByClientOrganization(clientOrganizationId: string): Promise<Credit.Response[]> {
-    const client = this.client;
-    
-    const { data, error } = await client
-      .from('credits')
-      .select(`
-        *,
-        credit_operations:credit_operations(
-          id,
-          status,
-          type,
-          quantity,
-          description,
-          created_at,
-          updated_at,
-          actor_id,
-          metadata
-        )
-      `)
-      .eq('client_organization_id', clientOrganizationId)
-      .is('deleted_on', null)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      throw new Error(`Error fetching credits by client organization: ${error.message}`);
-    }
-
-    return (data as Credit.Response[]) || [];
-  }
-
-  async getByAgency(agencyId: string): Promise<Credit.Response[]> {
-    const client = this.client;
-    
-    const { data, error } = await client
-      .from('credits')
-      .select(`
-        *,
-        credit_operations:credit_operations(
-          id,
-          status,
-          type,
-          quantity,
-          description,
-          created_at,
-          updated_at,
-          actor_id,
-          metadata
-        )
-      `)
-      .eq('agency_id', agencyId)
-      .is('deleted_on', null)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      throw new Error(`Error fetching credits by agency: ${error.message}`);
-    }
-
-    return (data as Credit.Response[]) || [];
-  }
-
-  async getBalance(creditId: string): Promise<number> {
-    const client = this.client;
-    
-    const { data, error } = await client
-      .from('credits')
-      .select('balance')
-      .eq('id', creditId)
-      .is('deleted_on', null)
-      .single();
-
-    if (error) {
-      throw new Error(`Error fetching credit balance: ${error.message}`);
-    }
-
-    return data.balance || 0;
-  }
-
   // * UPDATE REPOSITORIES
   async update(payload: Credit.Request.Update): Promise<Credit.Type> {
     const client = this.adminClient ?? this.client;
@@ -306,40 +229,5 @@ export class CreditRepository {
     if (error) {
       throw new Error(`Error deleting credit: ${error.message}`);
     }
-  }
-
-  // * BUSINESS LOGIC REPOSITORIES
-  async createCreditOperation(
-    creditId: string,
-    operationData: {
-      status: CreditOperations.Enums.Status;
-      type: CreditOperations.Enums.Type;
-      quantity: number;
-      description?: string;
-      actorId: string;
-      metadata?: any;
-    }
-  ): Promise<CreditOperations.Type> {
-    const client = this.adminClient ?? this.client;
-    
-    const { data, error } = await client
-      .from('credit_operations')
-      .insert({
-        credit_id: creditId,
-        status: operationData.status,
-        type: operationData.type,
-        quantity: operationData.quantity,
-        description: operationData.description,
-        actor_id: operationData.actorId,
-        metadata: operationData.metadata,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Error creating credit operation: ${error.message}`);
-    }
-
-    return data as CreditOperations.Type;
   }
 }
