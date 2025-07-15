@@ -85,6 +85,18 @@ export type QueryConfigurations<T> = {
     operator: 'eq' | 'like' | 'ilike' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'is';
     value: unknown;
   }>;
+  orFilters?: Array<{
+    field: keyof T | string;
+    operator: 'eq' | 'like' | 'ilike' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'is';
+    value: unknown;
+    referencedTable?: string;
+    embedConfig?: {
+      table: string;
+      alias: string;
+      foreignKey: string;
+      selectFields?: string;
+    };
+  }>;
   sorts?: Array<{
     field: keyof T | string;
     direction: 'asc' | 'desc';
@@ -107,6 +119,7 @@ type SupabaseQueryBuilder = {
   order: (column: string, options?: { ascending?: boolean }) => unknown;
   limit: (count: number) => unknown;
   range: (from: number, to: number) => unknown;
+  or: (filters: string) => unknown;
 };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type QueryBuilderType = any; // Necessary for Supabase query builder type transformations
@@ -128,14 +141,28 @@ export class QueryBuilder {
   public enhance<T extends Record<string, unknown>, TQuery extends SupabaseQueryBuilder>(
     query: TQuery,
     config?: QueryConfigurations<T>,
+    options?: {
+      baseSelect?: string;
+      embedFilters?: Array<{
+        table: string;
+        alias: string;
+        foreignKey: string;
+        selectFields?: string;
+      }>;
+    },
   ): TQuery {
     if (!config) return query;
 
     let enhancedQuery: QueryBuilderType = query;
 
-    // if (config.includes) {
-    //   enhancedQuery = this.applyIncludes(enhancedQuery, config);
-    // }
+    // Handle OR filters with embedded resources
+    if (config.orFilters?.length && options?.embedFilters?.length) {
+      enhancedQuery = this.applyEmbeddedOrFilters(enhancedQuery, config, {
+        ...options,
+        embedFilters: options.embedFilters,
+      });
+    }
+
     if (config.filters) {
       enhancedQuery = this.applyFilters(enhancedQuery, config);
     }
@@ -147,6 +174,75 @@ export class QueryBuilder {
     }
 
     return enhancedQuery as TQuery;
+  }
+
+  private applyEmbeddedOrFilters<T>(
+    query: QueryBuilderType,
+    config: QueryConfigurations<T>,
+    options: {
+      baseSelect?: string;
+      embedFilters: Array<{
+        table: string;
+        alias: string;
+        foreignKey: string;
+        selectFields?: string;
+      }>;
+    },
+  ): QueryBuilderType {
+    if (!config.orFilters?.length) return query;
+
+    let enhancedQuery = query;
+    const orConditions: string[] = [];
+
+    // Apply each OR filter and collect conditions
+    config.orFilters.forEach(({ field, operator, value, referencedTable, embedConfig }) => {
+      // Use embedConfig if provided, otherwise fall back to referencedTable lookup
+      const actualEmbedConfig = embedConfig ?? (referencedTable ? 
+        options.embedFilters.find(embed => embed.table === referencedTable) : undefined);
+      
+      if (!actualEmbedConfig) return;
+
+      const embedInfo = options.embedFilters.find(
+        (embed) => embed.table === actualEmbedConfig.table
+      );
+      
+      if (!embedInfo) return;
+
+      // Apply the filter to the filter alias
+      const fieldName = field.toString().split('.').pop();
+      if (!fieldName) return;
+      
+      const filterField = `${embedInfo.alias}.${fieldName}`;
+      
+      switch (operator) {
+        case 'ilike':
+          enhancedQuery = enhancedQuery.ilike(filterField, `%${String(value)}%`);
+          break;
+        case 'like':
+          enhancedQuery = enhancedQuery.ilike(filterField, `%${String(value)}%`);
+          break;
+        case 'eq':
+          enhancedQuery = enhancedQuery.eq(filterField, value);
+          break;
+        // Add other operators as needed
+      }
+
+      // Add to OR conditions
+      orConditions.push(`${embedInfo.alias}.not.is.null`);
+    });
+
+    // Apply the OR condition if we have multiple conditions
+    if (orConditions.length > 1) {
+      enhancedQuery = enhancedQuery.or(orConditions.join(','));
+    } else if (orConditions.length === 1) {
+      // Single condition, just use the filter directly  
+      const condition = orConditions[0]?.replace('.not.is.null', '');
+      if (condition) {
+        enhancedQuery = enhancedQuery.not(condition, 'is', null);
+      }
+    }
+
+    return enhancedQuery;
   }
 
   private applyIncludes<T>(
