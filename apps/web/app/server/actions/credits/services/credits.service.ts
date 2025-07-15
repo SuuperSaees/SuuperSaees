@@ -229,36 +229,6 @@ export class CreditService {
     return currentCredit;
   }
 
-  // * UPDATE SERVICES
-  async update(payload: Credit.Request.Update): Promise<Credit.Type> {
-    // Handle credit operations if provided
-    if (payload.credit_operations && this.creditOperationRepository) {
-      // Process credit operations through the repository
-      for (const operation of payload.credit_operations) {
-        if (operation.id) {
-          // Update existing operation
-          await this.creditOperationRepository.update(operation);
-        } else {
-          // Create new operation
-          await this.creditOperationRepository.create({
-            actor_id: operation.actor_id!,
-            credit_id: payload.id!,
-            quantity: operation.quantity!,
-            status: operation.status ?? 'purchased',
-            type: operation.type ?? 'user',
-            description: operation.description ?? null,
-            metadata: operation.metadata ?? null,
-          });
-        }
-      }
-    }
-
-    // Remove credit_operations from payload before updating credit
-    const { credit_operations: _credit_operations, ...creditPayload } = payload;
-    
-    return await this.creditRepository.update(creditPayload);
-  }
-
   async removeOperation(payload: Credit.Request.Remove): Promise<Credit.Type> {
     if (!this.creditOperationRepository) {
       throw new Error('Credit operation repository is required for operation methods');
