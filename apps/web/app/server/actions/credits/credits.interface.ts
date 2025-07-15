@@ -5,11 +5,13 @@ import { PaginationConfig } from "../query.config";
 export interface ICreditAction {
   // * GET INTERFACES
   /**
-   * Retrieves a specific credit by its ID - Used by clients only
-   * @param {string} creditId - The ID of the credit to fetch
+   * Retrieves a specific credit based on user session - Used by clients only
+   * For client roles: uses organization.id to find their credit
+   * For agency roles: requires clientOrganizationId parameter
+   * @param {string} clientOrganizationId - Optional client organization ID (required for agencies)
    * @returns {Promise<Credit.Response>} - The credit with all relations
    */
-  get(creditId: string): Promise<Credit.Response>;
+  get(clientOrganizationId?: string): Promise<Credit.Response>;
 
   /**
    * Retrieves all credits for an organization - Used by both clients and agencies

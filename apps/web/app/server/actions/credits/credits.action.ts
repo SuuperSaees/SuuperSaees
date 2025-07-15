@@ -10,11 +10,13 @@ function getCreditAction() {
 
 // * GET ACTIONS
 /**
- * Get specific credit by ID - Used by clients only
- * @param creditId - ID of the credit to fetch
+ * Get specific credit - Used by clients only
+ * For client roles: uses organization.id to find their credit
+ * For agency roles: requires clientOrganizationId parameter
+ * @param clientOrganizationId - Optional client organization ID (required for agencies)
  */
-export async function getCredit(creditId: string) {
-  return await getCreditAction().get(creditId);
+export async function getCredit(clientOrganizationId?: string) {
+  return await getCreditAction().get(clientOrganizationId);
 }
 
 /**

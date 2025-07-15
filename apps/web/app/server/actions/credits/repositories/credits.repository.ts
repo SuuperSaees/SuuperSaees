@@ -3,6 +3,7 @@ import { Database } from '~/lib/database.types';
 import { Credit, CreditOperations } from '~/lib/credit.types';
 import { QueryContext } from '../../query.config';
 import { getSession } from '../../accounts/accounts.action';
+import { AccountRoles } from '~/lib/account.types';
 
 export class CreditRepository {
   private client: SupabaseClient<Database>;
@@ -164,7 +165,85 @@ export class CreditRepository {
     };
   }
 
-  async get(creditId: string): Promise<Credit.Response> {
+  async get(): Promise<Credit.Response> {
+    const client = this.client;
+    
+    // Get session to determine user role and organization
+    const session = await getSession();
+    const userRole = session.organization?.role ?? '';
+    const organizationId = session.organization?.id ?? '';
+
+    if (!userRole || !organizationId) {
+      throw new Error('User session not found or invalid');
+    }
+
+    // Check if user is client (client roles can access their organization's credit)
+    const isClientUser = AccountRoles.clientRoles.has(userRole);
+    
+    if (isClientUser) {
+      // Client users: find credit where client_organization_id = their organization id
+      const { data, error } = await client
+        .from('credits')
+        .select(`
+          *,
+          credit_operations:credit_operations(
+            id,
+            status,
+            type,
+            quantity,
+            description,
+            created_at,
+            updated_at,
+            actor_id,
+            metadata
+          )
+        `)
+        .eq('client_organization_id', organizationId)
+        .is('deleted_on', null)
+        .single();
+
+      if (error) {
+        throw new Error(`Error fetching credit for client: ${error.message}`);
+      }
+
+      return data as Credit.Response;
+    } else {
+      // Agency users: require clientOrganizationId parameter via the service layer
+      throw new Error('Agency users must provide clientOrganizationId parameter.');
+    }
+  }
+
+  async getByClientOrganization(clientOrganizationId: string): Promise<Credit.Response> {
+    const client = this.client;
+    
+    const { data, error } = await client
+      .from('credits')
+      .select(`
+        *,
+        credit_operations:credit_operations(
+          id,
+          status,
+          type,
+          quantity,
+          description,
+          created_at,
+          updated_at,
+          actor_id,
+          metadata
+        )
+      `)
+      .eq('client_organization_id', clientOrganizationId)
+      .is('deleted_on', null)
+      .single();
+
+    if (error) {
+      throw new Error(`Error fetching credit by client organization: ${error.message}`);
+    }
+
+    return data as Credit.Response;
+  }
+
+  async getById(creditId: string): Promise<Credit.Response> {
     const client = this.client;
     
     const { data, error } = await client
@@ -188,7 +267,7 @@ export class CreditRepository {
       .single();
 
     if (error) {
-      throw new Error(`Error fetching credit: ${error.message}`);
+      throw new Error(`Error fetching credit by ID: ${error.message}`);
     }
 
     return data as Credit.Response;

@@ -23,12 +23,12 @@ export class CreditController {
   }
 
   // * GET CONTROLLERS
-  async get(creditId: string): Promise<Credit.Response> {
+  async get(clientOrganizationId?: string): Promise<Credit.Response> {
     try {
       const creditRepository = new CreditRepository(this.client, this.adminClient);
       const creditService = new CreditService(creditRepository);
       
-      return await creditService.get(creditId);
+      return await creditService.get(clientOrganizationId);
     } catch (error) {
       console.error('Error in CreditController.get:', error);
       throw error;

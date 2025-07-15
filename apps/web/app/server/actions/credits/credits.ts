@@ -17,8 +17,8 @@ export class CreditAction extends BaseAction implements ICreditAction {
     );
   }
 
-  async get(creditId: string): Promise<Credit.Response> {
-    return await this.controller.get(creditId);
+  async get(clientOrganizationId?: string): Promise<Credit.Response> {
+    return await this.controller.get(clientOrganizationId);
   }
 
   async listByOrganization(organizationId?: string, config?: PaginationConfig): Promise<Pagination.Response<Credit.Response>> {

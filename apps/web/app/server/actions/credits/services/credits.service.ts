@@ -35,8 +35,14 @@ export class CreditService {
     return await this.creditRepository.list();
   }
 
-  async get(creditId: string): Promise<Credit.Response> {
-    return await this.creditRepository.get(creditId);
+  async get(clientOrganizationId?: string): Promise<Credit.Response> {
+    if (clientOrganizationId) {
+      // If clientOrganizationId is provided, use it directly (for agencies)
+      return await this.creditRepository.getByClientOrganization(clientOrganizationId);
+    } else {
+      // Use session-based logic (for clients)
+      return await this.creditRepository.get();
+    }
   }
 
   async listByOrganization(organizationId?: string): Promise<{
@@ -85,7 +91,11 @@ export class CreditService {
     }
 
     // First, get the current credit to return it at the end
-    const currentCredit = await this.creditRepository.get(payload.id!);
+    if (!payload.id) {
+      throw new Error('Credit ID is required for update operations');
+    }
+    
+    const currentCredit = await this.creditRepository.getById(payload.id);
 
     // Handle credit operations if provided
     if (payload.credit_operations && payload.credit_operations.length > 0) {
@@ -154,7 +164,7 @@ export class CreditService {
           
           await this.creditOperationRepository.create({
             actor_id: operation.actor_id,
-            credit_id: payload.id!,
+            credit_id: payload.id,
             quantity: operation.quantity,
             status: operation.status ?? 'consumed',
             type: operation.type ?? 'user',
