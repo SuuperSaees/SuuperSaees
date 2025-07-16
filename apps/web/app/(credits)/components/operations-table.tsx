@@ -16,6 +16,7 @@ import AddButton from './add-button';
 import { getCredits } from '~/server/actions/credits/credits.action';
 import Table from '~/(main)/../components/table/table';
 import { CreditOperations } from '~/lib/credit.types';
+import CreditEditionSheet from './edition-sheet';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -90,7 +91,7 @@ const CreditOperationsTable = ({
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap w-fit justify-end gap-4 sm:flex-nowrap ml-auto">
         {hasPermissionToActionCredits('create') && (
-          <AddButton />
+          <CreditEditionSheet mode="create" buttonTrigger={<AddButton />} />
         )}
       </div>
       {creditsOperationsAreLoading ? (

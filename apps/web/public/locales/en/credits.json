@@ -44,5 +44,41 @@
   "empty": {
     "title": "No credits operations found",
     "description": "No credits operations found"
+  },
+  "form": {
+    "create": {
+      "title": "Add credits",
+      "description": "Add credits to this organization. The amount entered will increase the organization's available balance and can be used for future services or purchases.",
+      "inputs": {
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "Enter quantity"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Enter description"
+        }
+      },
+      "actions": {
+        "submit": "Add credits"
+      }
+    },
+    "edit": {
+      "title": "Edit credits",
+      "description": "Modify the credits for this organization. Any changes will immediately update the organization's available balance.",
+      "inputs": {
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "Enter quantity"
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Enter description"
+        }
+      },
+      "actions": {
+        "submit": "Edit credits"
+      }
+    }
   }
 }

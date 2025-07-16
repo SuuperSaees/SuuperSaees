@@ -44,5 +44,41 @@
   "empty": {
     "title": "No se encontraron operaciones de créditos",
     "description": "No se encontraron operaciones de créditos"
+  },
+  "form": {
+    "create": {
+      "title": "Agregar créditos",
+      "description": "Agregar créditos a esta organización. La cantidad ingresada aumentará el saldo disponible de la organización y puede ser utilizada para futuros servicios o compras.",
+      "inputs": {
+        "quantity": {
+          "label": "Cantidad",
+          "placeholder": "Ingrese cantidad"
+        },
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Ingrese descripción"
+        }
+      },
+      "actions": {
+        "submit": "Agregar créditos"
+        }
+    },
+    "edit": {
+      "title": "Editar créditos",
+      "description": "Modificar los créditos de esta organización. Cualquier cambio se reflejará inmediatamente en el saldo disponible de la organización.",
+      "inputs": {
+        "quantity": {
+          "label": "Cantidad",
+          "placeholder": "Ingrese cantidad"
+        },
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Ingrese descripción"
+        }
+      },
+      "actions": {
+        "submit": "Editar créditos"
+      }
+    }
   }
 }
