@@ -7,7 +7,7 @@ import {
   SheetTrigger,
 } from "@kit/ui/sheet";
 import { CreditOperations } from "~/lib/credit.types";
-import EditCreditsForm from "./form/edit-credits";
+import EditCreditOperationsForm from "./form/edit-credit-operations";
 import { Trans } from "@kit/ui/trans";
 import { PencilIcon } from "lucide-react";
 import { ThemedButton } from "node_modules/@kit/accounts/src/components/ui/button-themed-with-settings";
@@ -15,6 +15,10 @@ import { Separator } from "@kit/ui/separator";
 
 interface CreditEditionSheetProps {
   mode: "edit" | "create";
+  creditId: string;
+  clientOrganizationId: string;
+  agencyId: string;
+  userId: string;
   initialData?: CreditOperations.Response;
   buttonTrigger?: React.ReactNode;
 }
@@ -22,6 +26,10 @@ interface CreditEditionSheetProps {
 const CreditEditionSheet = ({
   mode,
   initialData,
+  creditId,
+  clientOrganizationId,
+  agencyId,
+  userId,
   buttonTrigger,
 }: CreditEditionSheetProps) => {
   return (
@@ -47,7 +55,14 @@ const CreditEditionSheet = ({
           </SheetDescription>
         </SheetHeader>
         <Separator />
-        <EditCreditsForm mode={mode} initialData={initialData} />
+        <EditCreditOperationsForm
+          mode={mode}
+          initialData={initialData}
+          creditId={creditId}
+          clientOrganizationId={clientOrganizationId}
+          agencyId={agencyId}
+          userId={userId}
+        />
       </SheetContent>
     </Sheet>
   );

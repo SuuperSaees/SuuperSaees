@@ -223,6 +223,7 @@ function SectionView({
       <CreditsSection
         key={'credits'}
         clientOrganizationId={clientOrganizationId}
+        agencyId={agencyId}
       />,
     ]
   ]);

@@ -15,7 +15,10 @@ import {
 import { Input } from "@kit/ui/input";
 import { Trans, useTranslation } from "react-i18next";
 import { ThemedButton } from "node_modules/@kit/accounts/src/components/ui/button-themed-with-settings";
-// import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createCredit } from "~/server/actions/credits/credits.action";
+import { Spinner } from "@kit/ui/spinner";
+import { toast } from "sonner";
 
 export const editCreditsSchema = z.object({
   quantity: z.number().min(1),
@@ -23,15 +26,24 @@ export const editCreditsSchema = z.object({
 });
 
 interface EditCreditsFormProps {
-  initialData?: CreditOperations.Response;
   mode: "edit" | "create";
+  creditId: string;
+  clientOrganizationId: string;
+  agencyId: string;
+  userId: string;
+  initialData?: CreditOperations.Response;
 }
 
-const EditCreditsForm = ({
+const EditCreditOperationsForm = ({
   initialData,
   mode = "create",
+  creditId,
+  clientOrganizationId,
+  agencyId,
+  userId,
 }: EditCreditsFormProps) => {
-  const { t } = useTranslation(["credits"]);
+  const { t } = useTranslation(["credits", "responses", "common"]);
+  const queryClient = useQueryClient();
 
   const defaultValues =
     mode === "create"
@@ -44,18 +56,55 @@ const EditCreditsForm = ({
           description: initialData?.description ?? "",
         };
 
-  // const { mutate: creditsMutation, isPending: isCreatingCredits } = useMutation({
-  //   mutationFn: (data: z.infer<typeof editCreditsSchema>) => {
-  //     return createCred
-  //   },
-  // });
+  const { mutate: creditsMutation, isPending: isCreatingCredits } = useMutation(
+    {
+      mutationFn: (data: z.infer<typeof editCreditsSchema>) => {
+        return createCredit({
+          client_organization_id: clientOrganizationId,
+          agency_id: agencyId,
+          user_id: userId,
+          balance: undefined,
+          credit_operations: [
+            {
+              quantity: data.quantity,
+              description: data.description,
+              actor_id: userId,
+              credit_id: creditId,
+              type: CreditOperations.Enums.Type.USER,
+              status: CreditOperations.Enums.Status.PURCHASED,
+            },
+          ],
+        });
+      },
+      onError: () => {
+        toast.error(t("common:error"), {
+          description: t("responses:error.credits.failedToCreateCreditOperation"),
+        });
+      },
+      onSuccess: () => {
+        toast.success(t("common:success"), {
+          description: t("responses:success.credits.creditOperationCreated"),
+        });
+      },
+      onSettled: () => {
+        void queryClient.invalidateQueries({
+          queryKey: ["organization-credits", clientOrganizationId],
+        });
+        void queryClient.invalidateQueries({
+          queryKey: ["organization-credit", clientOrganizationId],
+        });
+        form.reset();
+      },
+    },
+  );
+
   const form = useForm<z.infer<typeof editCreditsSchema>>({
     resolver: zodResolver(editCreditsSchema),
     defaultValues,
   });
 
   const onSubmit = (data: z.infer<typeof editCreditsSchema>) => {
-    console.log(data);
+    creditsMutation(data);
   };
 
   return (
@@ -74,7 +123,10 @@ const EditCreditsForm = ({
               </FormLabel>
               <FormControl>
                 <Input
+                  type="number"
                   {...field}
+                  value={field.value}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                   placeholder={t(
                     `credits:form.${mode}.inputs.quantity.placeholder`,
                   )}
@@ -107,7 +159,12 @@ const EditCreditsForm = ({
           )}
         />
 
-        <ThemedButton type="submit" className="w-full mt-auto">
+        <ThemedButton
+          type="submit"
+          className="flex items-center gap-2 w-full mt-auto"
+          disabled={isCreatingCredits}
+        >
+          {isCreatingCredits && <Spinner className="w-4 h-4" />}
           <Trans i18nKey={`credits:form.${mode}.actions.submit`} />
         </ThemedButton>
       </form>
@@ -115,4 +172,4 @@ const EditCreditsForm = ({
   );
 };
 
-export default EditCreditsForm;
+export default EditCreditOperationsForm;
