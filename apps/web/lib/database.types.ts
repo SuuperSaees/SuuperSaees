@@ -1265,9 +1265,14 @@ export type Database = {
           agency_id: string
           balance: number
           client_organization_id: string
+          consumed: number
           created_at: string
           deleted_on: string | null
+          expired: number
           id: string
+          locked: number
+          purchased: number
+          refunded: number
           updated_at: string
           user_id: string | null
         }
@@ -1275,9 +1280,14 @@ export type Database = {
           agency_id: string
           balance?: number
           client_organization_id: string
+          consumed?: number
           created_at?: string
           deleted_on?: string | null
+          expired?: number
           id?: string
+          locked?: number
+          purchased?: number
+          refunded?: number
           updated_at?: string
           user_id?: string | null
         }
@@ -1285,9 +1295,14 @@ export type Database = {
           agency_id?: string
           balance?: number
           client_organization_id?: string
+          consumed?: number
           created_at?: string
           deleted_on?: string | null
+          expired?: number
           id?: string
+          locked?: number
+          purchased?: number
+          refunded?: number
           updated_at?: string
           user_id?: string | null
         }
@@ -4129,8 +4144,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: string; brief_id: string }
           | { service_id: number; brief_id: string }
+          | { service_id: string; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
