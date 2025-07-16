@@ -54,6 +54,7 @@ create table "public"."credit_operations" (
     "credit_id" uuid not null,
     "invoice_id" uuid,
     "metadata" jsonb,
+    "remaining" bigint not null default 0,
     "created_at" timestamp with time zone not null default now(),
     "updated_at" timestamp with time zone not null default now(),
     "deleted_on" timestamp with time zone
@@ -246,6 +247,9 @@ DECLARE
     new_qty bigint;
     history_status text;
     operation_type text;
+    current_balance bigint;
+    updated_metadata jsonb;
+    history_index int;
 BEGIN
     -- Only process if quantity changed (ignore status-only changes)
     IF OLD.quantity IS DISTINCT FROM NEW.quantity THEN
@@ -256,10 +260,10 @@ BEGIN
             -- Check if history is a non-empty array
             IF jsonb_typeof(history_array) = 'array' AND jsonb_array_length(history_array) > 0 THEN
                 -- Get the latest history entry based on changedAt (most recent timestamp)
-                SELECT entry INTO latest_history_entry
+                SELECT entry, idx INTO latest_history_entry, history_index
                 FROM (
-                    SELECT entry, (entry->>'changedAt') as changed_at
-                    FROM jsonb_array_elements(history_array) AS entry
+                    SELECT entry, (entry->>'changedAt') as changed_at, idx
+                    FROM jsonb_array_elements(history_array) WITH ORDINALITY AS t(entry, idx)
                     ORDER BY (entry->>'changedAt') DESC
                     LIMIT 1
                 ) sorted_entries;
@@ -282,15 +286,17 @@ BEGIN
                                 balance = balance + old_qty - new_qty,
                                 consumed = consumed + old_qty - new_qty,
                                 updated_at = now()
-                            WHERE id = NEW.credit_id;
+                            WHERE id = NEW.credit_id
+                            RETURNING balance INTO current_balance;
                         ELSIF history_status IN ('purchased') THEN
-                            -- For purchased/refunded: subtract old, add new
+                            -- For purchased: subtract old, add new
                             UPDATE public.credits 
                             SET 
                                 balance = balance - old_qty + new_qty,
                                 purchased = purchased - old_qty + new_qty,
                                 updated_at = now()
-                            WHERE id = NEW.credit_id;
+                            WHERE id = NEW.credit_id
+                            RETURNING balance INTO current_balance;
 
                         ELSIF history_status IN ('refunded') THEN
                             -- For refunded: add back old, subtract new
@@ -299,7 +305,8 @@ BEGIN
                                 balance = balance + old_qty - new_qty,
                                 refunded = refunded + old_qty - new_qty,
                                 updated_at = now()
-                            WHERE id = NEW.credit_id;
+                            WHERE id = NEW.credit_id
+                            RETURNING balance INTO current_balance;
                         ELSIF history_status IN ('locked') THEN
                             -- For locked: add back old, subtract new
                             UPDATE public.credits 
@@ -307,7 +314,8 @@ BEGIN
                                 balance = balance + old_qty - new_qty,
                                 locked = locked + old_qty - new_qty,
                                 updated_at = now()
-                            WHERE id = NEW.credit_id;
+                            WHERE id = NEW.credit_id
+                            RETURNING balance INTO current_balance;
                         ELSIF history_status IN ('expired') THEN
                             -- For expired: add back old, subtract new
                             UPDATE public.credits
@@ -315,8 +323,30 @@ BEGIN
                                 balance = balance + old_qty - new_qty,
                                 expired = expired + old_qty - new_qty,
                                 updated_at = now()
-                            WHERE id = NEW.credit_id;
+                            WHERE id = NEW.credit_id
+                            RETURNING balance INTO current_balance;
                         END IF;
+                        
+                        -- Update the remaining field in credit_operations
+                        UPDATE public.credit_operations 
+                        SET remaining = current_balance,
+                            updated_at = now()
+                        WHERE id = NEW.id;
+                        
+                        -- Update the remaining field in the latest history entry metadata
+                        updated_metadata := NEW.metadata;
+                        updated_metadata := jsonb_set(
+                            updated_metadata,
+                            array['history', (history_index - 1)::text, 'remaining'],
+                            to_jsonb(current_balance)
+                        );
+                        
+                        -- Update the metadata with the updated remaining value
+                        UPDATE public.credit_operations 
+                        SET metadata = updated_metadata,
+                            updated_at = now()
+                        WHERE id = NEW.id;
+                        
                     END IF;
                 END IF;
             END IF;
@@ -328,7 +358,8 @@ BEGIN
                 SET 
                     balance = balance - NEW.quantity,
                     updated_at = now()
-                WHERE id = NEW.credit_id;
+                WHERE id = NEW.credit_id
+                RETURNING balance INTO current_balance;
             ELSIF NEW.status IN ('purchased') THEN
                 -- Add credits
                 UPDATE public.credits 
@@ -336,7 +367,8 @@ BEGIN
                     balance = balance + NEW.quantity,
                     purchased = purchased + NEW.quantity,
                     updated_at = now()
-                WHERE id = NEW.credit_id;
+                WHERE id = NEW.credit_id
+                RETURNING balance INTO current_balance;
             ELSIF NEW.status IN ('refunded') THEN
                 -- Add back credits 
                 UPDATE public.credits 
@@ -344,7 +376,8 @@ BEGIN
                     balance = balance + NEW.quantity,
                     refunded = refunded + NEW.quantity,
                     updated_at = now()
-                WHERE id = NEW.credit_id;
+                WHERE id = NEW.credit_id
+                RETURNING balance INTO current_balance;
             ELSIF NEW.status IN ('locked') THEN
                 -- Add back credits
                 UPDATE public.credits 
@@ -352,7 +385,8 @@ BEGIN
                     balance = balance + NEW.quantity,
                     locked = locked + NEW.quantity,
                     updated_at = now()
-                WHERE id = NEW.credit_id;
+                WHERE id = NEW.credit_id
+                RETURNING balance INTO current_balance;
             ELSIF NEW.status IN ('expired') THEN
                 -- Add back credits
                 UPDATE public.credits
@@ -360,8 +394,15 @@ BEGIN
                     balance = balance + NEW.quantity,
                     expired = expired + NEW.quantity,
                     updated_at = now()
-                WHERE id = NEW.credit_id;
+                WHERE id = NEW.credit_id
+                RETURNING balance INTO current_balance;
             END IF;
+            
+            -- Update the remaining field in credit_operations for fallback cases
+            UPDATE public.credit_operations 
+            SET remaining = current_balance,
+                updated_at = now()
+            WHERE id = NEW.id;
         END IF;
     END IF;
     -- Note: If only status changes (without quantity change), do nothing

@@ -4,6 +4,7 @@ import { Credit, CreditOperations } from "~/lib/credit.types";
 export interface CreditOperationHistoryEntry {
   oldQuantity: number;
   newQuantity: number;
+  remaining: number;
   changedAt: string;
   changedBy: string;
   description?: string;

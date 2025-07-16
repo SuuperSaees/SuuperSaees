@@ -1197,6 +1197,7 @@ export type Database = {
           invoice_id: string | null
           metadata: Json | null
           quantity: number
+          remaining: number
           status: Database["public"]["Enums"]["credit_operation_status"]
           type: Database["public"]["Enums"]["credit_operation_type"]
           updated_at: string
@@ -1211,6 +1212,7 @@ export type Database = {
           invoice_id?: string | null
           metadata?: Json | null
           quantity: number
+          remaining?: number
           status?: Database["public"]["Enums"]["credit_operation_status"]
           type?: Database["public"]["Enums"]["credit_operation_type"]
           updated_at?: string
@@ -1225,6 +1227,7 @@ export type Database = {
           invoice_id?: string | null
           metadata?: Json | null
           quantity?: number
+          remaining?: number
           status?: Database["public"]["Enums"]["credit_operation_status"]
           type?: Database["public"]["Enums"]["credit_operation_type"]
           updated_at?: string
@@ -4144,8 +4147,8 @@ export type Database = {
       }
       insert_service_brief_relation: {
         Args:
-          | { service_id: number; brief_id: string }
           | { service_id: string; brief_id: string }
+          | { service_id: number; brief_id: string }
         Returns: undefined
       }
       is_account_owner: {
