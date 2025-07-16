@@ -1,0 +1,48 @@
+{
+  "statuses": {
+    "consumed": "Consumido",
+    "expired": "Expirado",
+    "purchased": "Comprado",
+    "refunded": "Reembolsado",
+    "locked": "Bloqueado"
+  },
+  "status": {
+    "singular": {
+      "available": "Disponible",
+      "used": "Usado",
+      "purchased": "Comprado",
+      "expired": "Expirado"
+    },
+    "plural": {
+      "available": "Disponibles",
+      "used": "Usados",
+      "purchased": "Comprados",
+      "expired": "Expirados"
+    }
+  },
+  "sections": {
+    "stats": {
+      "title": "Estadísticas de Créditos"
+    },
+    "purchases": {
+      "title": "Créditos Comprados"
+    },
+    "used": {
+      "title": "Créditos Usados"
+    }
+  },
+  "table": {
+    "columns": {
+      "service": "Servicio",
+      "credits": "Créditos",
+      "remaining": "Restantes",
+      "details": "Detalles",
+      "date": "Fecha"
+    },
+    "addButton": "Agregar créditos"
+  },
+  "empty": {
+    "title": "No se encontraron operaciones de créditos",
+    "description": "No se encontraron operaciones de créditos"
+  }
+}

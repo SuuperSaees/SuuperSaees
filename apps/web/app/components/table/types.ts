@@ -4,12 +4,14 @@ import { Order } from '~/lib/order.types';
 import { Service } from '~/lib/services.types';
 import { User } from '~/lib/user.types';
 import { Invoice } from '~/lib/invoice.types';
+import { CreditOperations } from '~/lib/credit.types';
 
 export type EntityData = {
   orders: Order.Response[];
   briefs: Brief.Relationships.Services.Response[];
   services: Service.Relationships.Billing.BillingService[];
   invoices: Invoice.Response[];
+  creditsOperations: CreditOperations.Response[];
 };
 
 // Define configuration types for each entity
@@ -29,6 +31,13 @@ type InvoicePermissions = {
   delete: boolean;
   edit: boolean;
   create: boolean;
+};
+
+type CreditOperationsPermissions = {
+  create: boolean;
+  delete: boolean;
+  edit: boolean;
+  view: boolean;
 };
 
 export type ColumnConfigs = {
@@ -53,6 +62,11 @@ export type ColumnConfigs = {
   invoices: {
     hasPermission: (
       row?: keyof (EntityData['invoices'][0] & InvoicePermissions),
+    ) => boolean;
+  };
+  creditsOperations: {
+    hasPermission: (
+      row?: keyof (EntityData['creditsOperations'][0] & CreditOperationsPermissions),
     ) => boolean;
   };
 };

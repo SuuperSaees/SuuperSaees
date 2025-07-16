@@ -1,0 +1,48 @@
+{
+  "statuses": {
+    "consumed": "Consumed",
+    "expired": "Expired",
+    "purchased": "Purchased",
+    "refunded": "Refunded",
+    "locked": "Locked"
+  },
+  "status": {
+    "singular": {
+      "available": "Available",
+      "used": "Used",
+      "purchased": "Purchased",
+      "expired": "Expired"
+    },
+    "plural": {
+      "available": "Available",
+      "used": "Used",
+      "purchased": "Purchased",
+      "expired": "Expired"
+    }
+  },
+  "sections": {
+    "stats": {
+      "title": "Credits Stats"
+    },
+    "purchases": {
+      "title": "Purchased Credits"
+    },
+    "used": {
+      "title": "Used Credits"
+    }
+  },
+  "table": {
+    "columns": {
+      "service": "Service",
+      "credits": "Credits",
+      "remaining": "Remaining",
+      "details": "Details",
+      "date": "Date"
+    },
+    "addButton": "Add credits"
+  },
+  "empty": {
+    "title": "No credits operations found",
+    "description": "No credits operations found"
+  }
+}

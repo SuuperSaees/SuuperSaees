@@ -21,6 +21,7 @@ import ServiceSection from './services';
 import { Spinner } from '@kit/ui/spinner';
 import MemberSection from './members';
 import InvoicesSection from './invoices';
+import CreditsSection from './credits';
 
 // Dynamically import button components
 const MemberButtonTriggers = dynamic(() => import('./member-button-triggers'), {
@@ -116,6 +117,7 @@ function SectionView({
     ['files', null],
     ['reviews', null],
     ['invoices', null],
+    ['credits', null],
     ['new', null], // Add controller for the "new embed" tab
   ]);
 
@@ -126,8 +128,8 @@ function SectionView({
 
   // Define base tabs that are always available
   const baseTabs = availableTabsBasedOnRole.has(currentUserRole)
-    ? ['orders', 'members', 'services', 'files', 'invoices']
-    : ['members', 'services', 'orders', 'invoices'];
+    ? ['orders', 'members', 'services', 'files', 'invoices', 'credits']
+    : ['members', 'services', 'orders', 'invoices', 'credits'];
 
   // Use our new EmbedTabsContainer to manage embed tabs
   const {
@@ -150,7 +152,7 @@ function SectionView({
     },
     getTabLabel: (option) => {
       // For standard tabs, use translation
-      if (['orders', 'members', 'services', 'files', 'invoices'].includes(option)) {
+      if (['orders', 'members', 'services', 'files', 'invoices', 'credits'].includes(option)) {
         return t(`organizations.${option}.title`)
           .split('')
           .map((char, index) => (index === 0 ? char.toUpperCase() : char))
@@ -216,6 +218,13 @@ function SectionView({
         clientOrganizationId={clientOrganizationId}
       />,
     ],
+    [
+      'credits',
+      <CreditsSection
+        key={'credits'}
+        clientOrganizationId={clientOrganizationId}
+      />,
+    ]
   ]);
 
   // Add embed tab contents with loading state
