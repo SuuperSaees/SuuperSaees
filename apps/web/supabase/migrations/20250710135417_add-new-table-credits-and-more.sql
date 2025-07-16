@@ -67,6 +67,11 @@ create table "public"."credits" (
     "agency_id" uuid not null,
     "client_organization_id" uuid not null,
     "balance" bigint not null default 0,
+    "expired" bigint not null default 0,
+    "purchased" bigint not null default 0,
+    "refunded" bigint not null default 0,
+    "consumed" bigint not null default 0,
+    "locked" bigint not null default 0,
     "created_at" timestamp with time zone not null default now(),
     "updated_at" timestamp with time zone not null default now(),
     "deleted_on" timestamp with time zone,
@@ -204,10 +209,20 @@ BEGIN
                 agency_id,
                 client_organization_id,
                 balance,
+                expired,
+                purchased,
+                refunded,
+                consumed,
+                locked,
                 user_id
             ) VALUES (
                 NEW.agency_id,
                 NEW.organization_client_id,
+                0,
+                0,
+                0,
+                0,
+                0,
                 0,
                 NULL
             );
@@ -265,13 +280,40 @@ BEGIN
                             UPDATE public.credits 
                             SET 
                                 balance = balance + old_qty - new_qty,
+                                consumed = consumed + old_qty - new_qty,
                                 updated_at = now()
                             WHERE id = NEW.credit_id;
-                        ELSIF history_status IN ('purchased', 'refunded') THEN
+                        ELSIF history_status IN ('purchased') THEN
                             -- For purchased/refunded: subtract old, add new
                             UPDATE public.credits 
                             SET 
                                 balance = balance - old_qty + new_qty,
+                                purchased = purchased - old_qty + new_qty,
+                                updated_at = now()
+                            WHERE id = NEW.credit_id;
+
+                        ELSIF history_status IN ('refunded') THEN
+                            -- For refunded: add back old, subtract new
+                            UPDATE public.credits 
+                            SET 
+                                balance = balance + old_qty - new_qty,
+                                refunded = refunded + old_qty - new_qty,
+                                updated_at = now()
+                            WHERE id = NEW.credit_id;
+                        ELSIF history_status IN ('locked') THEN
+                            -- For locked: add back old, subtract new
+                            UPDATE public.credits 
+                            SET
+                                balance = balance + old_qty - new_qty,
+                                locked = locked + old_qty - new_qty,
+                                updated_at = now()
+                            WHERE id = NEW.credit_id;
+                        ELSIF history_status IN ('expired') THEN
+                            -- For expired: add back old, subtract new
+                            UPDATE public.credits
+                            SET 
+                                balance = balance + old_qty - new_qty,
+                                expired = expired + old_qty - new_qty,
                                 updated_at = now()
                             WHERE id = NEW.credit_id;
                         END IF;
@@ -287,11 +329,36 @@ BEGIN
                     balance = balance - NEW.quantity,
                     updated_at = now()
                 WHERE id = NEW.credit_id;
-            ELSIF NEW.status IN ('purchased', 'refunded') THEN
+            ELSIF NEW.status IN ('purchased') THEN
                 -- Add credits
                 UPDATE public.credits 
                 SET 
                     balance = balance + NEW.quantity,
+                    purchased = purchased + NEW.quantity,
+                    updated_at = now()
+                WHERE id = NEW.credit_id;
+            ELSIF NEW.status IN ('refunded') THEN
+                -- Add back credits 
+                UPDATE public.credits 
+                SET
+                    balance = balance + NEW.quantity,
+                    refunded = refunded + NEW.quantity,
+                    updated_at = now()
+                WHERE id = NEW.credit_id;
+            ELSIF NEW.status IN ('locked') THEN
+                -- Add back credits
+                UPDATE public.credits 
+                SET
+                    balance = balance + NEW.quantity,
+                    locked = locked + NEW.quantity,
+                    updated_at = now()
+                WHERE id = NEW.credit_id;
+            ELSIF NEW.status IN ('expired') THEN
+                -- Add back credits
+                UPDATE public.credits
+                SET
+                    balance = balance + NEW.quantity,
+                    expired = expired + NEW.quantity,
                     updated_at = now()
                 WHERE id = NEW.credit_id;
             END IF;
