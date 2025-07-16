@@ -8,17 +8,6 @@ export class CreditService {
     private readonly creditRepository: CreditRepository,
     private readonly creditOperationRepository?: CreditOperationRepository,
   ) {}
-
-  // * CREATE SERVICES
-  async create(payload: Credit.Request.Create): Promise<Credit.Type> {
-    // Validate balance is non-negative for new credits
-    if (payload.balance && payload.balance < 0) {
-      throw new Error('Initial balance cannot be negative');
-    }
-
-    return await this.creditRepository.create(payload);
-  }
-
   // * GET SERVICES
   async list(): Promise<{
     data: CreditOperations.Response[];
