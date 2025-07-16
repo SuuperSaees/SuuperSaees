@@ -12,6 +12,7 @@ import StripeContent from './stripe-content';
 import TreliContent from './treli-content';
 import EmbedsContent from './embed-content';
 import SuuperApiContent from './suuper-content';
+import CreditsContent from './credits-content';
 
 function SettingsContent({ userId }: { userId: string }) {
   const searchParams = useSearchParams();
@@ -28,6 +29,7 @@ function SettingsContent({ userId }: { userId: string }) {
     stripe: StripeContent,
     embeds: EmbedsContent,
     suuperapi: SuuperApiContent,
+    credits: CreditsContent,
   };
 
   const PluginComponent =

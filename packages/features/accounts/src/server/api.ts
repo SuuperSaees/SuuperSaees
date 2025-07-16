@@ -56,7 +56,7 @@ class AccountsApi {
     const { data: accounts, error } = await this.client
       .from('user_organization')
       .select(
-        `id, name, slug, picture_url, 
+        `id, name, slug, picture_url, config, 
         settings:organization_settings!left(*), 
         statuses:agency_statuses(*),
         tags:tags(*)`
