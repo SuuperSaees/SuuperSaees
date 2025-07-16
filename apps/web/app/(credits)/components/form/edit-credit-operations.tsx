@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,7 +22,9 @@ import { Spinner } from "@kit/ui/spinner";
 import { toast } from "sonner";
 
 export const editCreditsSchema = z.object({
-  quantity: z.number().min(1),
+  quantity: z.number().refine((val) => val !== 0, {
+    message: "Quantity cannot be zero.",
+  }),
   description: z.string().optional(),
 });
 
@@ -59,6 +62,7 @@ const EditCreditOperationsForm = ({
   const { mutate: creditsMutation, isPending: isCreatingCredits } = useMutation(
     {
       mutationFn: (data: z.infer<typeof editCreditsSchema>) => {
+        const isNegative = data.quantity < 0;
         return createCredit({
           client_organization_id: clientOrganizationId,
           agency_id: agencyId,
@@ -66,19 +70,23 @@ const EditCreditOperationsForm = ({
           balance: undefined,
           credit_operations: [
             {
-              quantity: data.quantity,
+              quantity: Math.abs(data.quantity),
               description: data.description,
               actor_id: userId,
               credit_id: creditId,
               type: CreditOperations.Enums.Type.USER,
-              status: CreditOperations.Enums.Status.PURCHASED,
+              status: isNegative
+                ? CreditOperations.Enums.Status.CONSUMED
+                : CreditOperations.Enums.Status.PURCHASED,
             },
           ],
         });
       },
       onError: () => {
         toast.error(t("common:error"), {
-          description: t("responses:error.credits.failedToCreateCreditOperation"),
+          description: t(
+            "responses:error.credits.failedToCreateCreditOperation",
+          ),
         });
       },
       onSuccess: () => {
@@ -116,25 +124,59 @@ const EditCreditOperationsForm = ({
         <FormField
           control={form.control}
           name="quantity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                <Trans i18nKey={`credits:form.${mode}.inputs.quantity.label`} />
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  value={field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                  placeholder={t(
-                    `credits:form.${mode}.inputs.quantity.placeholder`,
-                  )}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            // Allow string input for better UX with negative numbers
+            return (
+              <FormItem>
+                <FormLabel>
+                  <Trans
+                    i18nKey={`credits:form.${mode}.inputs.quantity.label`}
+                  />
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    value={field.value === 0 ? "" : field.value}
+                    onChange={(e) => {
+                      // Allow empty, '-', or valid integer
+                      const val = e.target.value;
+                      if (
+                        val === "" ||
+                        val === "-" ||
+                        /^-?\d*$/.test(val)
+                      ) {
+                        field.onChange(val);
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Convert to integer on blur
+                      const val = e.target.value;
+                      if (val === "" || val === "-") {
+                        field.onChange(0);
+                      } else {
+                        field.onChange(parseInt(val, 10));
+                      }
+                    }}
+                    placeholder={t(
+                      `credits:form.${mode}.inputs.quantity.placeholder`,
+                    )}
+                  />
+                </FormControl>
+                <FormDescription className="text-gray-500 text-xs rounded px-2 py-1 mt-1">
+                  <Trans
+                    i18nKey={`credits:form.${mode}.inputs.quantity.description`}
+                    components={{
+                      span: (
+                        <span className="border-gray-500 px-1 rounded-sm bg-muted" />
+                      ),
+                    }}
+                  />
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
         <FormField
           control={form.control}

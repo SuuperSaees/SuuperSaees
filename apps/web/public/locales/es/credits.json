@@ -15,7 +15,7 @@
     },
     "plural": {
       "available": "Disponibles",
-      "used": "Usados",
+      "used": "Usados", 
       "purchased": "Comprados",
       "expired": "Expirados"
     }
@@ -39,7 +39,8 @@
       "details": "Detalles",
       "date": "Fecha"
     },
-    "addButton": "Agregar créditos"
+    "addButton": "Agregar créditos",
+    "manageButton": "Gestionar créditos"
   },
   "empty": {
     "title": "No se encontraron operaciones de créditos",
@@ -47,12 +48,13 @@
   },
   "form": {
     "create": {
-      "title": "Agregar créditos",
-      "description": "Agregar créditos a esta organización. La cantidad ingresada aumentará el saldo disponible de la organización y puede ser utilizada para futuros servicios o compras.",
+      "title": "Gestionar créditos",
+      "description": "La cantidad ingresada afectará el saldo disponible de la organización y puede ser utilizada para futuros servicios o compras.",
       "inputs": {
         "quantity": {
           "label": "Cantidad",
-          "placeholder": "Ingrese cantidad"
+            "placeholder": "e.g. 10 or -10",
+            "description": "Números positivos <span class='border-gray-500 px-1 rounded-sm'>agregan créditos</span>, negativos <span class='border-gray-500 px-1 rounded-sm'>descuentan créditos</span>."
         },
         "description": {
           "label": "Descripción",
@@ -60,16 +62,17 @@
         }
       },
       "actions": {
-        "submit": "Agregar créditos"
+        "submit": "Agregar nueva entrada"
         }
     },
     "edit": {
-      "title": "Editar créditos",
-      "description": "Modificar los créditos de esta organización. Cualquier cambio se reflejará inmediatamente en el saldo disponible de la organización.",
+      "title": "Gestionar créditos",
+      "description": "Cualquier cambio se reflejará inmediatamente en el saldo disponible de la organización.",
       "inputs": {
         "quantity": {
           "label": "Cantidad",
-          "placeholder": "Ingrese cantidad"
+          "placeholder": "Ingrese cantidad",
+          "description": "Números positivos <span class='border-gray-500 px-1 rounded-sm'>agregan créditos</span>, negativos <span class='border-gray-500 px-1 rounded-sm'>descuentan créditos</span>."
         },
         "description": {
           "label": "Descripción",

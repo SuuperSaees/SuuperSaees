@@ -39,7 +39,7 @@ export const creditOperationsColumns = (
     header: t("credits:table.columns.remaining"),
     cell: ({ row }) => (
       <span className="text-sm font-normal text-gray-600">
-        {row.original.status === CreditOperations.Enums.Status.PURCHASED? row.original.quantity : "-"}
+        {row.original.remaining}
       </span>
     ),
   },

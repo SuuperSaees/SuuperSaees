@@ -39,7 +39,8 @@
       "details": "Details",
       "date": "Date"
     },
-    "addButton": "Add credits"
+    "addButton": "Add credits",
+    "manageButton": "Manage credits"
   },
   "empty": {
     "title": "No credits operations found",
@@ -47,12 +48,13 @@
   },
   "form": {
     "create": {
-      "title": "Add credits",
-      "description": "Add credits to this organization. The amount entered will increase the organization's available balance and can be used for future services or purchases.",
+      "title": "Manage credits",
+      "description": "The amount entered will affect the organization's available balance and can be used for future services or purchases.",
       "inputs": {
         "quantity": {
           "label": "Quantity",
-          "placeholder": "Enter quantity"
+          "placeholder": "e.g. 10 or -10",
+          "description": "Positive numbers <span class='border-gray-500 px-1 rounded-sm'>add credits</span>, negative numbers <span class='border-gray-500 px-1 rounded-sm'>deduct credits</span>."
         },
         "description": {
           "label": "Description",
@@ -60,16 +62,17 @@
         }
       },
       "actions": {
-        "submit": "Add credits"
+        "submit": "Add new entry"
       }
     },
     "edit": {
-      "title": "Edit credits",
-      "description": "Modify the credits for this organization. Any changes will immediately update the organization's available balance.",
+      "title": "Manage credits",
+      "description": "Any changes will immediately update the organization's available balance.",
       "inputs": {
         "quantity": {
           "label": "Quantity",
-          "placeholder": "Enter quantity"
+          "placeholder": "Enter quantity",
+          "description": "Positive numbers <span class='border-gray-500 px-1 rounded-sm'>add credits</span>, negative numbers <span class='border-gray-500 px-1 rounded-sm'>deduct credits</span>."
         },
         "description": {
           "label": "Description",
