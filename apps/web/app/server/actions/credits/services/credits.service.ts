@@ -154,6 +154,7 @@ export class CreditService {
       const newHistoryEntry: CreditOperationHistoryEntry = {
         oldQuantity: oldQuantity,
         newQuantity: newQuantity,
+        remaining: 0, // Remaining quantity can be calculated later if needed on triggers
         changedAt: timestamp,
         changedBy: actorId,
         description: operationType === 'remove' 
@@ -322,6 +323,7 @@ export class CreditService {
         description: operation.description ?? 'Remove operation created',
         type: operation.type === 'system' ? 'system' : 'user',
         status: 'consumed', // Remove operations are always consumed
+        remaining: 0, // Remaining quantity can be calculated later if needed on triggers
         operationType: 'remove',
       };
 
