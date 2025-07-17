@@ -424,14 +424,14 @@ AS $function$DECLARE
   client_data record;  -- To hold client data
   agency_organization_data record;  -- To hold agency organization data
   agency_client_id uuid;  -- To hold the agency client ID
-  client_organization_id uuid;  -- To hold the client organization ID
+  _client_organization_id uuid;  -- To hold the client organization ID
   brief_ids uuid[];  -- Array to hold brief IDs
   agencyRoles text[] := ARRAY['agency_owner', 'agency_member', 'agency_project_manager'];  -- List of agency roles
   clientRoles text[] := ARRAY['client_owner', 'client_member'];  -- List of client roles
   all_followers text[];  -- Array to hold all followers
   default_status_id integer;  -- To hold the default status ID
   new_position integer;  -- To hold the new position
-  credit_operation_id uuid;  -- To hold credit operation ID for client orders
+  target_credit_operation_id uuid;  -- To hold credit operation ID for client orders
 BEGIN
   -- Step 0: Verify the user is authenticated
   IF current_user_id IS NULL THEN
@@ -471,10 +471,10 @@ BEGIN
   IF user_role = ANY(agencyRoles) THEN
     -- User is from agency
     agency_client_id := org_id;
-    client_organization_id := COALESCE(client_data.organization_client_id, org_id);
+    _client_organization_id := COALESCE(client_data.organization_client_id, org_id);
   ELSE
     -- User is from client
-    client_organization_id := org_id;
+    _client_organization_id := org_id;
     
     -- Find the agency that this client belongs to
     SELECT agency_id INTO agency_client_id
@@ -520,14 +520,14 @@ BEGIN
   
   -- Construct the orderToInsert object
   _order := jsonb_set(_order, '{customer_id}', to_jsonb(COALESCE(_order_followers[1]::uuid, current_user_id::uuid)));
-  _order := jsonb_set(_order, '{client_organization_id}', to_jsonb(client_organization_id::text));
+  _order := jsonb_set(_order, '{client_organization_id}', to_jsonb(_client_organization_id::text));
   _order := jsonb_set(_order, '{propietary_organization_id}', to_jsonb(agency_organization_data.owner_id::text));
   _order := jsonb_set(_order, '{agency_id}', to_jsonb(agency_organization_data.id::text));
   _order := jsonb_set(_order, '{brief_ids}', to_jsonb(brief_ids));
   _order := jsonb_set(_order, '{position}', to_jsonb(new_position::int));
 
   -- Step 0.13: Create credit operation for client orders
-  IF user_role = ANY(clientRoles) THEN
+  IF _client_organization_id IS NOT NULL AND _client_organization_id != agency_client_id THEN
     -- First, find or create the credits record for this client organization
     DECLARE 
       target_credit_id uuid;
@@ -535,7 +535,7 @@ BEGIN
       -- Get the credit_id for this client organization
       SELECT id INTO target_credit_id
       FROM public.credits 
-      WHERE client_organization_id = client_organization_id AND agency_id = agency_client_id
+      WHERE client_organization_id = _client_organization_id AND agency_id = agency_client_id
       AND deleted_on IS NULL
       LIMIT 1;
       
@@ -548,7 +548,7 @@ BEGIN
           user_id
         ) VALUES (
           agency_client_id,
-          client_organization_id,
+          _client_organization_id,
           0,
           current_user_id
         ) RETURNING id INTO target_credit_id;
@@ -574,7 +574,7 @@ BEGIN
           'order_title', _order->>'title',
           'created_by', current_user_id
         )
-      ) RETURNING id INTO credit_operation_id;
+      ) RETURNING id INTO target_credit_operation_id;
     END;
   END IF;
 
@@ -622,7 +622,7 @@ BEGIN
       WHEN array_length(brief_ids, 1) > 0 THEN brief_ids[1]
       ELSE NULL
     END,
-    credit_operation_id
+    target_credit_operation_id
   )
   RETURNING * INTO new_order;
 
