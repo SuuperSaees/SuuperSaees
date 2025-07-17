@@ -65,7 +65,8 @@ export const getOrderById = async (orderId: Order.Type['id']) => {
          assigned_to:order_assignations(agency_member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
          followers:order_followers(client_follower:accounts(id, name, email, picture_url, settings:user_settings(name, picture_url))),
          order_tags(tag:tags(id, name, color, organization_id)),
-         reviews(order_id)
+         reviews(order_id),
+         credit:credit_operations(quantity, status)
         `,
       )
       .eq('id', orderId)
@@ -348,7 +349,8 @@ export const getOrders = async (
         status:agency_statuses!status_id(*), 
         assignations:order_assignations(member:accounts(id, name, email, deleted_on, picture_url, settings:user_settings(name, picture_url))),
         client_organization:organizations!client_organization_id(id, name, settings:organization_settings!organization_id(key, value)),
-        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url))
+        customer:accounts!customer_id(id, name, email, picture_url, settings:user_settings(name, picture_url)),
+        credit:credit_operations(quantity, status)
         ${includeBrief ? ', brief:briefs(name)' : ''}
         `,
         { count: 'exact' },
