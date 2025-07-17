@@ -48,8 +48,9 @@ export type ColumnConfigs = {
     actions: {
       updateOrderDate: UseMutationResult<{ order: Order.Type; user: User.Type | undefined }, Error, { due_date: string; orderId: number }, unknown>;
       updateOrderAssigns: UseMutationResult<void, Error, { agencyMemberIds: string[]; orderId: number }, unknown>;
+      canShowCreditColumn: () => boolean;
     };
-    hasPermission: () => boolean;
+    hasPermission: (row?: string) => boolean;
   };
   briefs: {
     hasPermission?: (row?: string) => boolean;

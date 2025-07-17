@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { formatDate } from "date-fns";
 import { z } from "zod";
 
@@ -128,17 +128,21 @@ export const ordersColumns = (
         );
       },
     },
-    {
-      accessorKey: "credits",
-      header: t("orders.credits"),
-      cell: ({ row }) => {
-        return (
-          <div className="flex gap-1 items-center text-gray-600">
-            {row.original.credit?.quantity ?? 0} <CreditIcon className="w-4 h-4" />
-          </div>
-        );
-      },
-    },
+    // Only include the credits column if actions.canShowCreditColumn() returns true
+    ...(actions.canShowCreditColumn()
+      ? [
+          {
+            accessorKey: "credits",
+            header: t("orders.credits"),
+            cell: ({ row }: { row: Row<EntityData["orders"][number]> }) => (
+              <div className="flex gap-1 items-center text-gray-600">
+                {row.original.credit?.quantity ?? 0}{" "}
+                <CreditIcon className="w-4 h-4" />
+              </div>
+            ),
+          },
+        ]
+      : []),
     {
       accessorKey: "assigned_to",
       header: t("orders.assignedTo"),
