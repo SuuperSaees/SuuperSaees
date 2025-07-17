@@ -415,6 +415,7 @@ const AsideOrderInformation = ({
                   orderId={order.id}
                   creditOperationValue={order.credit?.quantity}
                   canAddCredits={true}
+                  orderTitle={order.title}
                 />
               )}
             </div>
@@ -502,6 +503,7 @@ const AsideOrderInformation = ({
                 orderId={order.id}
                 creditOperationValue={order.credit?.quantity}
                 canAddCredits={false}
+                orderTitle={order.title}
               />
             )}
             <div className="mb-4 flex items-center">

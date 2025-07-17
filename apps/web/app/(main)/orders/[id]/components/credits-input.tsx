@@ -29,6 +29,7 @@ interface CreditsInputProps {
   orderId: Order.Type["id"];
   creditOperationValue?: number;
   canAddCredits: boolean;
+  orderTitle?: string;
 }
 
 const CreditsInput = ({
@@ -38,6 +39,7 @@ const CreditsInput = ({
   orderId,
   creditOperationValue,
   canAddCredits,
+  orderTitle,
 }: CreditsInputProps) => {
   const { t } = useTranslation("orders");
   const queryClient = useQueryClient();
@@ -79,7 +81,7 @@ const CreditsInput = ({
         balance: undefined,
         credit_operations: [
           {
-            description: `Order # ${orderId}`,
+            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}">Order # ${orderId} - ${orderTitle ?? ''}</a>`,
             id: creditOperationId,
             quantity: Math.abs(data.credits),
             actor_id: userId,

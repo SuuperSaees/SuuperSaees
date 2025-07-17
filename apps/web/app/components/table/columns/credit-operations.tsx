@@ -44,6 +44,16 @@ export const creditOperationsColumns = (
     ),
   },
   {
+    accessorKey: "description",
+    header: t("credits:table.columns.description"),
+    cell: ({ row }) => (
+      <span 
+        className="text-sm font-normal text-gray-600"
+        dangerouslySetInnerHTML={{ __html: row.original.description ?? "" }}
+      />
+    ),
+  },
+  {
     accessorKey: "details",
     header: t("credits:table.columns.details"),
     cell: ({ row }) => (

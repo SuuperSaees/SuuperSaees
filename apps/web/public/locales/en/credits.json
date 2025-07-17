@@ -48,7 +48,8 @@
       "credits": "Credits",
       "remaining": "Remaining",
       "details": "Details",
-      "date": "Date"
+      "date": "Date",
+      "description": "Description"
     },
     "addButton": "Add credits",
     "manageButton": "Manage credits"
