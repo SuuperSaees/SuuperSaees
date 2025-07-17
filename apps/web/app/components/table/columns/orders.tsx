@@ -1,42 +1,43 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
-import { ColumnDef } from '@tanstack/react-table';
-import { formatDate } from 'date-fns';
-import { z } from 'zod';
+import { ColumnDef } from "@tanstack/react-table";
+import { formatDate } from "date-fns";
+import { z } from "zod";
 
-import { Option } from '~/components/ui/checkbox-combobox';
-import { PriorityCombobox } from '~/(main)/orders/[id]/components/priority-combobox';
-import StatusCombobox from '~/(main)/orders/[id]/components/status-combobox';
-import DatePicker from '~/team-accounts/src/server/actions/orders/pick-date/pick-date';
+import { Option } from "~/components/ui/checkbox-combobox";
+import { PriorityCombobox } from "~/(main)/orders/[id]/components/priority-combobox";
+import StatusCombobox from "~/(main)/orders/[id]/components/status-combobox";
+import DatePicker from "~/team-accounts/src/server/actions/orders/pick-date/pick-date";
 
-import { TFunction } from '../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index';
-import Avatar from '../../../components/ui/avatar';
-import { UnreadMessageIndicator } from '../../../components/ui/unread-message-indicator';
-import { MultiAvatarDropdownDisplayer } from '../../../components/ui/multiavatar-displayer';
-import { OverdueIndicator } from '../../../components/ui/overdue-indicator';
-import { ColumnConfigs, EntityData } from '../types';
-import PrefetcherLink from '../../../components/shared/prefetcher-link';
+import { TFunction } from "../../../../../../node_modules/.pnpm/i18next@23.12.2/node_modules/i18next/index";
+import Avatar from "../../../components/ui/avatar";
+import { UnreadMessageIndicator } from "../../../components/ui/unread-message-indicator";
+import { MultiAvatarDropdownDisplayer } from "../../../components/ui/multiavatar-displayer";
+import { OverdueIndicator } from "../../../components/ui/overdue-indicator";
+import { ColumnConfigs, EntityData } from "../types";
+import PrefetcherLink from "../../../components/shared/prefetcher-link";
+import { CreditIcon } from "~/components/icons/icons";
 
 const truncateText = (text: string | undefined, maxLength = 50) => {
-  if (!text) return '';
+  if (!text) return "";
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength) + '...';
+  return text.slice(0, maxLength) + "...";
 };
 
 export const ordersColumns = (
   t: TFunction,
-  data: ColumnConfigs['orders']['data'],
-  actions: ColumnConfigs['orders']['actions'],
-  hasPermission?: ColumnConfigs['orders']['hasPermission'],
-): ColumnDef<EntityData['orders'][number]>[] => {
+  data: ColumnConfigs["orders"]["data"],
+  actions: ColumnConfigs["orders"]["actions"],
+  hasPermission?: ColumnConfigs["orders"]["hasPermission"],
+): ColumnDef<EntityData["orders"][number]>[] => {
   const withPermissionsActive = hasPermission && hasPermission;
 
   return [
     {
-      accessorKey: 'title',
-      header: t('orders.title'),
+      accessorKey: "title",
+      header: t("orders.title"),
       cell: ({ row }) => {
         return (
           <PrefetcherLink
@@ -49,19 +50,19 @@ export const ordersColumns = (
                   {truncateText(row.original.title)}
                 </span>
                 <div className="flex items-start flex-shrink-0">
-                  {
-                    withPermissionsActive && hasPermission() && (
-                      <OverdueIndicator 
-                        dueDate={row.original.due_date} 
-                        isCompleted={row.original.status?.status_name === 'completed'} 
-                      />
-                    )
-                  }
+                  {withPermissionsActive && hasPermission() && (
+                    <OverdueIndicator
+                      dueDate={row.original.due_date}
+                      isCompleted={
+                        row.original.status?.status_name === "completed"
+                      }
+                    />
+                  )}
                   <UnreadMessageIndicator orderId={row.original.id} />
                 </div>
               </div>
               <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
-                {truncateText(row.original?.brief?.name ?? '')}
+                {truncateText(row.original?.brief?.name ?? "")}
               </span>
             </div>
           </PrefetcherLink>
@@ -69,15 +70,15 @@ export const ordersColumns = (
       },
     },
     {
-      accessorKey: 'id',
-      header: t('orders.id'),
+      accessorKey: "id",
+      header: t("orders.id"),
       cell: ({ row }) => (
         <span className="text-gray-600">#{row.original.id}</span>
       ),
     },
     {
-      accessorKey: 'client',
-      header: t('orders.client'),
+      accessorKey: "client",
+      header: t("orders.client"),
       cell: ({ row }) => {
         // const agencyLink = `/clients/organizations/${row.original.client_organization?.id}`
         // const clientLink = '/organization'
@@ -94,15 +95,15 @@ export const ordersColumns = (
               {truncateText(row.original.customer?.name)}
             </span>
             <span className="line-clamp-1 overflow-hidden truncate text-ellipsis whitespace-normal break-words text-sm text-gray-600">
-              {truncateText(row.original.client_organization?.name ?? '')}
+              {truncateText(row.original.client_organization?.name ?? "")}
             </span>
           </span>
         );
       },
     },
     {
-      accessorKey: 'status',
-      header: t('orders.status'),
+      accessorKey: "status",
+      header: t("orders.status"),
       cell: ({ row }) => {
         return (
           <StatusCombobox
@@ -115,8 +116,8 @@ export const ordersColumns = (
       },
     },
     {
-      accessorKey: 'priority',
-      header: t('orders.priority'),
+      accessorKey: "priority",
+      header: t("orders.priority"),
       cell: ({ row }) => {
         return (
           <PriorityCombobox
@@ -128,8 +129,19 @@ export const ordersColumns = (
       },
     },
     {
-      accessorKey: 'assigned_to',
-      header: t('orders.assignedTo'),
+      accessorKey: "credits",
+      header: t("orders.credits"),
+      cell: ({ row }) => {
+        return (
+          <div className="flex gap-1 items-center text-gray-600">
+            {row.original.credit?.quantity ?? 0} <CreditIcon className="w-4 h-4" />
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "assigned_to",
+      header: t("orders.assignedTo"),
       cell: ({ row }) => (
         <RowAssignedTo
           row={row.original}
@@ -140,32 +152,32 @@ export const ordersColumns = (
       ),
     },
     {
-      accessorKey: 'created_at',
-      header: t('orders.createdAt'),
+      accessorKey: "created_at",
+      header: t("orders.createdAt"),
       cell: ({ row }) => {
         return (
           <span className="line-clamp-1 text-nowrap text-sm text-gray-500">
-            {formatDate(row.original?.created_at, 'PP')}
+            {formatDate(row.original?.created_at, "PP")}
           </span>
         );
       },
     },
     {
-      accessorKey: 'updated_at',
-      header: t('orders.updatedAt'),
+      accessorKey: "updated_at",
+      header: t("orders.updatedAt"),
       cell: ({ row }) => {
         return (
           <span className="line-clamp-1 text-nowrap text-sm text-gray-500">
             {row.original?.updated_at &&
-              formatDate(row.original?.updated_at, 'PP')}
+              formatDate(row.original?.updated_at, "PP")}
           </span>
         );
       },
     },
 
     {
-      accessorKey: 'due_date',
-      header: t('orders.dueDate'),
+      accessorKey: "due_date",
+      header: t("orders.dueDate"),
       cell: ({ row }) => {
         return (
           <DatePicker
@@ -191,15 +203,14 @@ const RowAssignedTo = ({
   orderAgencyMembers,
   updateOrderAssigns,
 }: {
-  row: EntityData['orders'][number];
+  row: EntityData["orders"][number];
   blocked: boolean;
-  orderAgencyMembers: ColumnConfigs['orders']['data']['orderAgencyMembers'];
-  updateOrderAssigns: ColumnConfigs['orders']['actions']['updateOrderAssigns'];
+  orderAgencyMembers: ColumnConfigs["orders"]["data"]["orderAgencyMembers"];
+  updateOrderAssigns: ColumnConfigs["orders"]["actions"]["updateOrderAssigns"];
 }) => {
   const membersAssignedSchema = z.object({
     members: z.array(z.string()),
   });
-  
 
   const defaultValues = {
     members: row?.assignations
@@ -224,14 +235,16 @@ const RowAssignedTo = ({
     [orderAgencyMembers],
   );
 
-  const avatars = useMemo(
-    () => row?.assignations?.map((assignee) => ({
-      name: assignee?.name ?? '',
-      email: assignee?.email ?? '',
-      picture_url: assignee?.picture_url ?? '',
-    })) ?? [],
-    [row?.assignations],
-  ) ?? [];
+  const avatars =
+    useMemo(
+      () =>
+        row?.assignations?.map((assignee) => ({
+          name: assignee?.name ?? "",
+          email: assignee?.email ?? "",
+          picture_url: assignee?.picture_url ?? "",
+        })) ?? [],
+      [row?.assignations],
+    ) ?? [];
 
   const CustomUserItem = ({
     option,
@@ -241,9 +254,9 @@ const RowAssignedTo = ({
     <div className="flex items-center space-x-1">
       <Avatar
         className="font-normal"
-        src={option?.picture_url ?? ''}
-        username={option?.label ?? ''}
-        alt={option?.label ?? ''}
+        src={option?.picture_url ?? ""}
+        username={option?.label ?? ""}
+        alt={option?.label ?? ""}
       />
       <span>{option?.label}</span>
     </div>
@@ -252,7 +265,7 @@ const RowAssignedTo = ({
 
   const CustomItemTrigger = (
     <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-sm font-bold text-gray-600">
-      +{maxAvatars >= avatars.length ? '' : avatars.length - maxAvatars}
+      +{maxAvatars >= avatars.length ? "" : avatars.length - maxAvatars}
     </div>
   );
 
@@ -275,4 +288,4 @@ const RowAssignedTo = ({
   );
 };
 
-RowAssignedTo.displayName = 'RowAssignedTo';
+RowAssignedTo.displayName = "RowAssignedTo";
