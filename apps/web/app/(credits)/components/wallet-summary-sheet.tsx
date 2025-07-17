@@ -13,7 +13,7 @@ import { SheetTitle } from "@kit/ui/sheet";
 import WalletButton from "./wallet-button";
 import { useTranslation } from "react-i18next";
 import { Separator } from "@kit/ui/separator";
-import { X } from "lucide-react";
+import { ArrowRight, Info, X } from "lucide-react";
 import { formatDate } from "date-fns";
 import { Button } from "@kit/ui/button";
 import { getCredit } from "~/server/actions/credits/credits.action";
@@ -25,13 +25,19 @@ import { statusConfig } from "../lib/style-configs";
 import { isValid, parseISO } from "date-fns";
 import { CreditIcon } from "~/components/icons/icons";
 import { cn } from "@kit/ui/utils";
+import { ThemedButton } from "node_modules/@kit/accounts/src/components/ui/button-themed-with-settings";
+import PrefetcherLink from "~/(main)/../components/shared/prefetcher-link";
+import Tooltip from "~/components/ui/tooltip";
 
 interface WalletSummarySheetProps {
   className?: string;
   triggerClassName?: string;
 }
 
-const WalletSummarySheet = ({ className, triggerClassName }: WalletSummarySheetProps) => {
+const WalletSummarySheet = ({
+  className,
+  triggerClassName,
+}: WalletSummarySheetProps) => {
   const { t } = useTranslation("credits");
 
   const { workspace: userWorkspace, organization } = useUserWorkspace();
@@ -51,7 +57,9 @@ const WalletSummarySheet = ({ className, triggerClassName }: WalletSummarySheetP
   });
 
   const lastMovementDateRaw = credit?.updated_at ?? credit?.created_at ?? "";
-  const lastMovementDate = lastMovementDateRaw ? parseISO(lastMovementDateRaw) : null;
+  const lastMovementDate = lastMovementDateRaw
+    ? parseISO(lastMovementDateRaw)
+    : null;
   const isValidDate = lastMovementDate && isValid(lastMovementDate);
 
   if (!isEnable) return null;
@@ -63,7 +71,12 @@ const WalletSummarySheet = ({ className, triggerClassName }: WalletSummarySheetP
         <WalletButton value={credit?.balance ?? 0} />
       </SheetTrigger>
 
-      <SheetContent className={cn("flex flex-col gap-2", className)}>
+      <SheetContent
+        className={cn(
+          "flex flex-col gap-2 overflow-y-auto no-scrollbar",
+          className,
+        )}
+      >
         <SheetClose asChild className="absolute top-2 right-2">
           <Button variant="outline" size="icon">
             <X className="w-4 h-4" />
@@ -85,7 +98,9 @@ const WalletSummarySheet = ({ className, triggerClassName }: WalletSummarySheetP
 
         <WalletStatusSection t={t} credit={credit ?? null} />
 
-        <SheetFooter className="mt-auto border-t py-4">
+        <SheetFooter className="mt-auto border-t py-4 flex flex-col gap-4 sm:flex-col">
+          <WalletHelp />
+          <WalletCTA />
           <span className="text-gray-500 text-sm">
             {t("wallet.lastMovement", {
               date: isValidDate ? formatDate(lastMovementDate, "PP") : "-",
@@ -152,6 +167,32 @@ const WalletStatusItem = ({
         <p className="text-xs text-gray-600 mr-3">{description}</p>
       </div>
     </div>
+  );
+};
+
+const WalletCTA = ({
+  url = `${process.env.NEXT_PUBLIC_SITE_URL}/services/catalog`,
+}: {
+  url?: string;
+}) => {
+  const { t } = useTranslation("credits");
+
+  return (
+    <ThemedButton className="mt-auto group">
+      <PrefetcherLink href={url} className="flex items-center gap-2">
+        <span className="text-sm font-medium">{t("wallet.cta.title")}</span>
+        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+      </PrefetcherLink>
+    </ThemedButton>
+  );
+};
+
+const WalletHelp = () => {
+  const { t } = useTranslation("credits");
+  return (
+    <Tooltip content={t("wallet.help.description")} className="max-w-xs bg-white text-gray-500">
+      <Info className="w-4 h-4 text-gray-500 cursor-pointer ml-auto" />
+    </Tooltip>
   );
 };
 

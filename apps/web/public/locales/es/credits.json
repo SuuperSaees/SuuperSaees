@@ -103,6 +103,14 @@
       "singular": "{{value}} Crédito",
       "plural": "{{value}} Créditos"
     },
-    "lastMovement": "Última operación registrada: {{date}}"
+    "lastMovement": "Última operación registrada: {{date}}",
+    "cta": {
+      "title": "Obtener más créditos",
+      "description": "¿Te quedaste sin créditos? ¡Recarga tu monedero para continuar!"
+    },
+    "help": {
+      "title": "¿Necesitas ayuda?",
+      "description": "Si tus créditos no se reflejan correctamente, contáctanos directamente y te ayudaremos."
+    }
   }
 }

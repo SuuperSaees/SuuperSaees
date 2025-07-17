@@ -103,6 +103,14 @@
       "plural": "{{value}} Credits"
     },
     "description": "Here you can see the values and states of your credits.",
-    "lastMovement": "Last movement registered: {{date}}"
+    "lastMovement": "Last movement registered: {{date}}",
+    "cta": {
+      "title": "Get more credits",
+      "description": "Running low on credits? Top up your wallet to keep going!"
+    },
+    "help": {
+      "title": "Need help?",
+      "description": "If your credits aren't showing up correctly, contact us directly and we'll help you out!"
+    }
   }
 }
