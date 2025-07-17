@@ -11,13 +11,24 @@
       "available": "Disponible",
       "used": "Usado",
       "purchased": "Comprado",
-      "expired": "Expirado"
+      "expired": "Expirado",
+      "locked": "Bloqueado",
+      "refunded": "Reembolsado"
     },
     "plural": {
       "available": "Disponibles",
       "used": "Usados", 
       "purchased": "Comprados",
-      "expired": "Expirados"
+      "expired": "Expirados",
+      "locked": "Bloqueados",
+      "refunded": "Reembolsados"
+    },
+    "description": {
+      "available": "Créditos que puedes usar para servicios o proyectos.",
+      "used": "Créditos que ya han sido gastados.",
+      "purchased": "Créditos que has comprado.",
+      "expired": "Créditos que ya no son válidos.",
+      "locked": "Créditos reservados o no disponibles actualmente."
     }
   },
   "sections": {
@@ -83,5 +94,14 @@
         "submit": "Editar créditos"
       }
     }
+  },
+  "wallet": {
+    "title": "Resumen de tu monedero",
+    "description": "Aquí puedes ver los valores y estados de tus créditos.",
+    "value": {
+      "singular": "{{value}} Crédito",
+      "plural": "{{value}} Créditos"
+    },
+    "lastMovement": "Última operación registrada: {{date}}"
   }
 }

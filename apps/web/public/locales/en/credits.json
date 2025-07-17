@@ -11,13 +11,24 @@
       "available": "Available",
       "used": "Used",
       "purchased": "Purchased",
-      "expired": "Expired"
+      "expired": "Expired",
+      "locked": "Locked",
+      "refunded": "Refunded"
     },
     "plural": {
       "available": "Available",
       "used": "Used",
       "purchased": "Purchased",
-      "expired": "Expired"
+      "expired": "Expired",
+      "locked": "Locked",
+      "refunded": "Refunded"
+    },
+    "description": {
+      "available": "Credits you can use for services or projects.",
+      "used": "Credits that have already been spent.",
+      "purchased": "Credits you have bought.",
+      "expired": "Credits that are no longer valid.",
+      "locked": "Credits reserved or not currently available."
     }
   },
   "sections": {
@@ -83,5 +94,14 @@
         "submit": "Edit credits"
       }
     }
+  },
+  "wallet": {
+    "title": "Wallet summary",
+    "value": {
+      "singular": "{{value}} Credit",
+      "plural": "{{value}} Credits"
+    },
+    "description": "Here you can see the values and states of your credits.",
+    "lastMovement": "Last movement registered: {{date}}"
   }
 }

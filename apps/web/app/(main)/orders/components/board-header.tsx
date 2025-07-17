@@ -15,6 +15,7 @@ import Search from './search';
 import SettingsDropdown from './settings-dropdown';
 import StatusFilters, { TabConfig } from './status-filters';
 import ViewSelect from './view-select';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 interface BoardHeaderProps {
   t: (key: string) => string;
@@ -59,12 +60,18 @@ export function BoardHeader({
   // ];
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title="orders:title" rightContent={<TimerContainer />} className="w-full flex">
-        <h2 className='text-xl font-medium leading-4'>{t('title')}</h2>
-        <CreateOrderButton
+      <PageHeader title="orders:title" rightContent={
+        <div className="flex items-center gap-4">
+          <TimerContainer />
+          <WalletSummarySheet />
+          <CreateOrderButton
           t={t}
           hasOrders={orders.length > 0 || ordersAreLoading}
         />
+        </div>
+      } className="w-full flex">
+        <h2 className='text-xl font-medium leading-4'>{t('title')}</h2>
+    
       </PageHeader>
       <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="mr-auto flex items-center gap-4">
