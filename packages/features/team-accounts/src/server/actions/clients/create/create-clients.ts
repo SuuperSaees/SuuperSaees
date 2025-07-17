@@ -133,6 +133,8 @@ export const createClient = async (clientData: CreateClient) => {
       clientData.adminActivated,
       clientData.agencyId,
       clientData.sendEmail,
+      clientData.isSignUp,
+      clientData.customPassword,
     );
 
     const userId = clientOrganizationUser.user?.id;
@@ -277,6 +279,11 @@ export const addClientMember = async ({
       email,
       '',
       clientOrganization.name ?? '',
+      false,
+      undefined,
+      true,
+      false,
+      undefined,
     );
     const clientUserId = clientOrganizationUser.user?.id;
     if (!clientUserId) {
