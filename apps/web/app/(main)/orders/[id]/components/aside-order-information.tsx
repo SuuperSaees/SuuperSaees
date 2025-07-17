@@ -49,6 +49,7 @@ import ActivityTags from "./activity-tags";
 import { Tags } from "~/lib/tags.types";
 import { updateOrderTags } from "~/server/actions/orders/orders.action";
 import CreditsInput from "./credits-input";
+import { useUserWorkspace } from "@kit/accounts/hooks/use-user-workspace";
 interface AsideOrderInformationProps {
   className?: string;
   orderAgencyTags: Tags.Type[];
@@ -75,6 +76,7 @@ const AsideOrderInformation = ({
   const [copied, setCopied] = useState(false);
   const baseUrl = window.location.origin;
 
+  const { organization } = useUserWorkspace();
   const userId = userWorkspace?.id ?? "";
 
   const handleGenerateTokenId = async () => {
@@ -278,6 +280,8 @@ const AsideOrderInformation = ({
   const canAddFollowers =
     userRolesFollowers.has(userRole) || userRoles.has(userRole);
 
+  const creditsEnabled = organization?.settings?.credits?.enable_credits;
+
   return (
     <AgencyStatusesProvider
       initialStatuses={agencyStatuses}
@@ -403,14 +407,16 @@ const AsideOrderInformation = ({
                 </div>
                 <PriorityCombobox order={order} mode={"order"} />
               </div>
-              <CreditsInput
-                agencyId={order.agency_id}
-                clientOrganizationId={order.client_organization_id}
-                userId={userId}
-                orderId={order.id}
-                creditOperationValue={order.credit?.quantity}
-                canAddCredits={true}
-              />
+              {creditsEnabled && (
+                <CreditsInput
+                  agencyId={order.agency_id}
+                  clientOrganizationId={order.client_organization_id}
+                  userId={userId}
+                  orderId={order.id}
+                  creditOperationValue={order.credit?.quantity}
+                  canAddCredits={true}
+                />
+              )}
             </div>
             <div>
               <ActivityAssignations
@@ -488,14 +494,16 @@ const AsideOrderInformation = ({
               </div>
               <PriorityCombobox mode={"order"} order={order} blocked={true} />
             </div>
-            <CreditsInput
-              agencyId={order.agency_id}
-              clientOrganizationId={order.client_organization_id}
-              userId={userId}
-              orderId={order.id}
-              creditOperationValue={order.credit?.quantity}
-              canAddCredits={false}
-            />
+            {creditsEnabled && (
+              <CreditsInput
+                agencyId={order.agency_id}
+                clientOrganizationId={order.client_organization_id}
+                userId={userId}
+                orderId={order.id}
+                creditOperationValue={order.credit?.quantity}
+                canAddCredits={false}
+              />
+            )}
             <div className="mb-4 flex items-center">
               <ActivityAssignations
                 searchUserOptions={searchUserOptions}
