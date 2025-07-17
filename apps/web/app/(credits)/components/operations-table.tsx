@@ -55,10 +55,13 @@ const CreditOperationsTable = ({
       (({ page, limit }) =>
         getCredits({
           pagination: { page, limit },
+          filters: {
+            client_organization_id: [clientOrganizationId],
+          },
         })),
     initialData,
     config: {
-      limit: config.rowsPerPage.value,
+      limit: 10,
     },
   });
 
@@ -94,6 +97,10 @@ const CreditOperationsTable = ({
     },
   };
 
+  if(creditsOperationsAreLoading) {
+    return<TableSkeleton columns={6} rows={7} />
+  }
+  
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap w-fit justify-end gap-4 sm:flex-nowrap ml-auto">

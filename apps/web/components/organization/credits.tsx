@@ -3,9 +3,8 @@
 import { useQuery } from "@tanstack/react-query";
 import CreditOperationsTable from "~/(credits)/components/operations-table";
 import CreditStats from "~/(credits)/components/stats";
-import TableSkeleton from "~/(views)/components/table/table-skeleton";
 import { Credit } from "~/lib/credit.types";
-import { getCredit, getCredits } from "~/server/actions/credits/credits.action";
+import { getCredit } from "~/server/actions/credits/credits.action";
 import { SkeletonBox, SkeletonCards } from "../ui/skeleton";
 
 function CreditsSection({
@@ -20,24 +19,6 @@ function CreditsSection({
   const creditQuery = useQuery({
     queryKey: ["organization-credit", clientOrganizationId],
     queryFn: async () => await getCredit(clientOrganizationId),
-    enabled: !!clientOrganizationId,
-    retry: 1,
-  });
-
-  const queryFn = async () =>
-    await getCredits({
-      pagination: {
-        limit: 100,
-        page: 1,
-      },
-      filters: {
-        client_organization_id: [clientOrganizationId],
-      },
-    });
-
-  const creditsQuery = useQuery({
-    queryKey,
-    queryFn,
     enabled: !!clientOrganizationId,
     retry: 1,
   });
@@ -70,18 +51,13 @@ function CreditsSection({
           expiredCredits={expiredCredits}
         />
       )}
-      {creditQuery.isLoading ? (
-        <TableSkeleton columns={6} rows={7} />
-      ) : (
-        <CreditOperationsTable
-          initialData={creditsQuery.data}
-          queryKey={queryKey}
-          queryFn={queryFn}
-          creditId={creditId}
-          clientOrganizationId={clientOrganizationId}
-          agencyId={agencyId}
-        />
-      )}
+
+      <CreditOperationsTable
+        queryKey={queryKey}
+        creditId={creditId}
+        clientOrganizationId={clientOrganizationId}
+        agencyId={agencyId}
+      />
     </div>
   );
 }
