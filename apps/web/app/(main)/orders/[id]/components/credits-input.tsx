@@ -17,7 +17,7 @@ import { useRef } from "react";
 import { cn } from "@kit/ui/utils";
 
 const creditsSchema = z.object({
-  credits: z.number(),
+  credits: z.number().min(0),
 });
 
 type CreditsFormValues = z.infer<typeof creditsSchema>;
@@ -45,7 +45,6 @@ const CreditsInput = ({
   const {
     register,
     handleSubmit,
-    formState: { errors },
     reset,
   } = useForm<CreditsFormValues>({
     resolver: zodResolver(creditsSchema),
@@ -70,6 +69,9 @@ const CreditsInput = ({
     mutationFn: async (data: CreditsFormValues) => {
       const creditOperationId = crypto.randomUUID();
 
+      if (data.credits < 0) {
+        throw new Error("Credits cannot be negative");
+      }
       const creditOperation = await createCredit({
         client_organization_id: clientOrganizationId,
         agency_id: agencyId,
@@ -140,13 +142,14 @@ const CreditsInput = ({
         onBlur={handleBlur}
         className={cn(
           "w-fit border-none text-right px-0 text-gray-700 placeholder:text-gray-700",
-          "disabled:opacity-100 disabled:cursor-auto",
+          "disabled:cursor-auto focus:outline-none focus:ring-0",
+          `${isLoading ? "disabled:opacity-50" : "disabled:opacity-100"}`
         )}
       />
 
-      {errors.credits && (
+      {/* {errors.credits && (
         <span className="text-red-500 text-xs">{errors.credits.message}</span>
-      )}
+      )} */}
     </div>
   );
 };
