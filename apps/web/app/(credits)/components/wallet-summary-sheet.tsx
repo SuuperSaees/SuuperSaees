@@ -24,8 +24,14 @@ import { Credit } from "~/lib/credit.types";
 import { statusConfig } from "../lib/style-configs";
 import { isValid, parseISO } from "date-fns";
 import { CreditIcon } from "~/components/icons/icons";
+import { cn } from "@kit/ui/utils";
 
-const WalletSummarySheet = () => {
+interface WalletSummarySheetProps {
+  className?: string;
+  triggerClassName?: string;
+}
+
+const WalletSummarySheet = ({ className, triggerClassName }: WalletSummarySheetProps) => {
   const { t } = useTranslation("credits");
 
   const { workspace: userWorkspace, organization } = useUserWorkspace();
@@ -53,11 +59,11 @@ const WalletSummarySheet = () => {
 
   return (
     <Sheet>
-      <SheetTrigger asChild>
+      <SheetTrigger asChild className={triggerClassName}>
         <WalletButton value={credit?.balance ?? 0} />
       </SheetTrigger>
 
-      <SheetContent className="flex flex-col gap-2">
+      <SheetContent className={cn("flex flex-col gap-2", className)}>
         <SheetClose asChild className="absolute top-2 right-2">
           <Button variant="outline" size="icon">
             <X className="w-4 h-4" />

@@ -14,6 +14,7 @@ import { PageHeader } from '../../components/page-header';
 import PluginCard from './components/plugin-card';
 import PluginsHeaderCard from './components/plugins-header-card';
 import { TimerContainer } from '../../components/timer-container';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -94,7 +95,7 @@ async function PluginsPage() {
 
   return (
     <PageBody>
-      <PageHeader title="plugins:title" rightContent={<TimerContainer />} />
+      <PageHeader title="plugins:title" rightContent={<><TimerContainer /><WalletSummarySheet /></>} />
       <PluginsHeaderCard plugins={enrichedPlugins} />
       {installedPlugins.length > 0 && <Separator className="my-4" />}
       <div className="flex flex-col gap-3">
