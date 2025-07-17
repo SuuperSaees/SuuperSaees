@@ -13,7 +13,7 @@ import { SheetTitle } from "@kit/ui/sheet";
 import WalletButton from "./wallet-button";
 import { useTranslation } from "react-i18next";
 import { Separator } from "@kit/ui/separator";
-import { X, Bitcoin } from "lucide-react";
+import { X } from "lucide-react";
 import { formatDate } from "date-fns";
 import { Button } from "@kit/ui/button";
 import { getCredit } from "~/server/actions/credits/credits.action";
@@ -23,6 +23,7 @@ import { Spinner } from "@kit/ui/spinner";
 import { Credit } from "~/lib/credit.types";
 import { statusConfig } from "../lib/style-configs";
 import { isValid, parseISO } from "date-fns";
+import { CreditIcon } from "~/components/icons/icons";
 
 const WalletSummarySheet = () => {
   const { t } = useTranslation("credits");
@@ -65,7 +66,7 @@ const WalletSummarySheet = () => {
 
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <Bitcoin className="w-6 h-6" />
+            <CreditIcon className="w-6 h-6" />
             {t("wallet.title")}
           </SheetTitle>
         </SheetHeader>

@@ -1,8 +1,8 @@
 import { forwardRef } from "react";
 import { Button, ButtonProps } from "@kit/ui/button";
-import { Bitcoin } from "lucide-react";
 import { cn } from "@kit/ui/utils";
 import { Trans } from "@kit/ui/trans";
+import { CreditIcon } from "~/components/icons/icons";
 
 const WalletButton = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, value, ...props }, ref) => {
@@ -16,7 +16,7 @@ const WalletButton = forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {...props}
       >
-        <Bitcoin className="w-4 h-4" />
+        <CreditIcon className="w-4 h-4" />
         <Trans
           i18nKey={
             value === 1
