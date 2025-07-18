@@ -569,7 +569,7 @@ BEGIN
         'consumed',
         'user',
         0,
-        'Order setup - no credits charged',
+        'Order setup · No credit charge',
         target_credit_id,
         jsonb_build_object(
           'order_title', _order->>'title',
