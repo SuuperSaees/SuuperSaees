@@ -16,6 +16,7 @@ import SettingsDropdown from './settings-dropdown';
 import StatusFilters, { TabConfig } from './status-filters';
 import ViewSelect from './view-select';
 import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
+import { usePathname } from 'next/navigation';
 
 interface BoardHeaderProps {
   t: (key: string) => string;
@@ -52,18 +53,24 @@ export function BoardHeader({
   orders,
   getValueFormatters,
 }: BoardHeaderProps) {
+  const pathname = usePathname();
   // const { workspace: userWorkspace } = useUserWorkspace();
   // const agencyRoles = [
   //   'agency_owner',
   //   'agency_project_manager',
   //   'agency_member',
   // ];
+  const showTimerAndWallet = pathname !== '/organization'
   return (
     <div className="flex flex-col gap-5">
       <PageHeader title="orders:title" rightContent={
         <div className="flex items-center gap-4">
-          <TimerContainer />
-          <WalletSummarySheet />
+          {showTimerAndWallet && (
+            <>
+              <TimerContainer />
+              <WalletSummarySheet />
+            </>
+          )}
           <CreateOrderButton
           t={t}
           hasOrders={orders.length > 0 || ordersAreLoading}

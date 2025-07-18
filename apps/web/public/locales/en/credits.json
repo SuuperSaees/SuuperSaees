@@ -47,7 +47,7 @@
       "service": "Service",
       "credits": "Credits",
       "remaining": "Remaining",
-      "details": "Details",
+      "status": "Status",
       "date": "Date",
       "description": "Description"
     },
@@ -114,3 +114,4 @@
     }
   }
 }
+

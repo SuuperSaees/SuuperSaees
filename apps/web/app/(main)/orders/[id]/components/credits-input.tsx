@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createCredit,
   getCredit,
+  updateCredit,
 } from "~/server/actions/credits/credits.action";
 import { CreditOperations } from "~/lib/credit.types";
 import { toast } from "sonner";
@@ -74,14 +74,15 @@ const CreditsInput = ({
       if (data.credits < 0) {
         throw new Error("Credits cannot be negative");
       }
-      const creditOperation = await createCredit({
+      const creditOperation = await updateCredit({
         client_organization_id: clientOrganizationId,
         agency_id: agencyId,
         user_id: userId,
         balance: undefined,
+        id: creditId,
         credit_operations: [
           {
-            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}">Order # ${orderId} - ${orderTitle ?? ''}</a>`,
+            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}"><strong>Order #${orderId}</strong> · ${orderTitle ?? ''}</a>`,
             id: creditOperationId,
             quantity: Math.abs(data.credits),
             actor_id: userId,
@@ -136,18 +137,20 @@ const CreditsInput = ({
         <CreditIcon className="w-4 h-4" />
         <span className="text-sm font-medium">{t("credits.input.label")}</span>
       </div>
-      <Input
-        disabled={!canAddCredits || isLoading}
-        type="number"
-        placeholder={t("credits.input.placeholder")}
-        {...register("credits", { valueAsNumber: true })}
-        onBlur={handleBlur}
-        className={cn(
-          "w-fit border-none text-right px-0 text-gray-700 placeholder:text-gray-700",
-          "disabled:cursor-auto focus:outline-none focus:ring-0",
-          `${isLoading ? "disabled:opacity-50" : "disabled:opacity-100"}`
-        )}
-      />
+      <div className="w-fit min-w-[60px] max-w-[120px]">
+        <Input
+          disabled={!canAddCredits || isLoading}
+          type="number"
+          placeholder={t("credits.input.placeholder")}
+          {...register("credits", { valueAsNumber: true })}
+          onBlur={handleBlur}
+          className={cn(
+            "w-full border-none text-end px-0 text-gray-700 placeholder:text-gray-700",
+            "disabled:cursor-auto focus:outline-none focus:ring-0",
+            `${isLoading ? "disabled:opacity-50" : "disabled:opacity-100"}`
+          )}
+        />
+      </div>
 
       {/* {errors.credits && (
         <span className="text-red-500 text-xs">{errors.credits.message}</span>

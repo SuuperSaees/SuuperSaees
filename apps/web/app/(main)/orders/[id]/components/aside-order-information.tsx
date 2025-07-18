@@ -280,7 +280,7 @@ const AsideOrderInformation = ({
   const canAddFollowers =
     userRolesFollowers.has(userRole) || userRoles.has(userRole);
 
-  const creditsEnabled = organization?.settings?.credits?.enable_credits;
+  const creditsEnabled = order.agency_id !== order.client_organization_id && organization?.settings?.credits?.enable_credits;
 
   return (
     <AgencyStatusesProvider

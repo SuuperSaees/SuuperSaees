@@ -615,18 +615,18 @@ export function PayzenIcon({ className }: IconProps) {
 export function CreditIcon({ className }: IconProps) {
   return (
     <svg
-      viewBox="0 0 16 17"
-      fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
       className={className}
     >
-      <path
-        d="M6.33331 5.52153H9.16665C9.99507 5.52153 10.6666 6.1931 10.6666 7.02153C10.6666 7.84995 9.99507 8.52153 9.16665 8.52153H6.33331H9.49998C10.3284 8.52153 11 9.1931 11 10.0215C11 10.85 10.3284 11.5215 9.49998 11.5215H6.33331M6.33331 5.52153H5.33331M6.33331 5.52153V11.5215M6.33331 11.5215H5.33331M6.66665 4.52153V5.52153M6.66665 11.5215V12.5215M8.66665 4.52153V5.52153M8.66665 11.5215V12.5215M14.6666 8.52153C14.6666 12.2034 11.6819 15.1882 7.99998 15.1882C4.31808 15.1882 1.33331 12.2034 1.33331 8.52153C1.33331 4.83963 4.31808 1.85486 7.99998 1.85486C11.6819 1.85486 14.6666 4.83963 14.6666 8.52153Z"
-        stroke="#646464"
-        strokeWidth="1.33333"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="12" cy="12" r="10" />
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+      <path d="M12 18V6" />
     </svg>
   );
 }

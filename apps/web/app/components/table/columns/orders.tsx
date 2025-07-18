@@ -135,7 +135,7 @@ export const ordersColumns = (
             accessorKey: "credits",
             header: t("orders.credits"),
             cell: ({ row }: { row: Row<EntityData["orders"][number]> }) => (
-              <div className="flex gap-1 items-center text-gray-600">
+              <div className="flex gap-1 items-center text-gray-500">
                 {row.original.credit?.quantity ?? 0}{" "}
                 <CreditIcon className="w-4 h-4" />
               </div>
