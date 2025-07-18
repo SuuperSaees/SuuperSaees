@@ -130,7 +130,7 @@ export default function PluginCard({
     <Card className="p-4">
       <div className="flex gap-4">
         <div className="shrink-0">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md overflow-hidden">
             {icon_url ? (
               <img
                 src={icon_url}

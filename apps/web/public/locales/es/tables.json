@@ -8,6 +8,7 @@
     "dueDate": "Fecha de vencimiento",
     "createdAt": "Creado en",
     "updatedAt": "Última actualización",
-    "priority": "Prioridad"
+    "priority": "Prioridad",
+    "credits": "Créditos"
   }
 }

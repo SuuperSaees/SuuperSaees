@@ -151,8 +151,8 @@ export class PluginsRepository {
         if (pluginError) throw pluginError;
 
         return pluginData.filter((plugin) => {
-            if (userId && plugin.type === 'internal') {
-                return (plugin.metadata as { users: string[] }).users.includes(userId);
+            if (userId && plugin.type === 'internal' && (plugin?.metadata as { users: string[] })?.users) {
+                return (plugin.metadata as { users: string[] }).users?.includes(userId);
             }
             return true;
         }) as Plugin[];

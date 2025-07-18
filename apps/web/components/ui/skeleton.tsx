@@ -65,7 +65,7 @@ export const SkeletonCards = ({
   return (
     <div className={` ${className}`}>
       {Array.from({ length: count }).map((_, index) => (
-        <div key={index}>{children}</div>
+        <React.Fragment key={index}>{children}</React.Fragment>
       ))}
     </div>
   );

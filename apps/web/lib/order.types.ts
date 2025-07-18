@@ -9,6 +9,7 @@ import { Task } from './tasks.types';
 import { User } from './user.types';
 import { Tags } from './tags.types';
 import { Organization } from './organization.types';
+import { CreditOperations } from './credit.types';
 
 
 export namespace Order {
@@ -23,6 +24,7 @@ export namespace Order {
     statusData?: AgencyStatus.Type | null;
     reviews?: Review.Response[] | null;
     status?: AgencyStatus.Insert | null;
+    credit?: CreditOperations.Response | null;
   };
   export type Relational = Order.Relationships.All & {
     brief_responses: BriefResponse.Response[]
@@ -45,6 +47,7 @@ export namespace Order {
       slug: string;
     };
     tags: Tags.Type[] | null;
+    credit?: CreditOperations.Response | null;
   };
   export type Insert = Database['public']['Tables']['orders_v2']['Insert'];
   export type Update = Database['public']['Tables']['orders_v2']['Update'];

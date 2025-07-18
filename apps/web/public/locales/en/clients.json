@@ -72,6 +72,9 @@
   "embeds": {
     "title": "Embeds"
   },
+  "credits": {
+    "title": "Credits"
+  },
   "pinOrganization": "Add to favorites",
   "unpinOrganization": "Remove from favorites",
   "deleteOrganization": "Delete organization"

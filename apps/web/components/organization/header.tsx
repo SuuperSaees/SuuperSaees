@@ -8,6 +8,7 @@ import { handleResponse } from '~/lib/response/handle-response';
 import { useTranslation } from 'react-i18next';
 import UpdateImage from '../../app/components/ui/update-image';
 import { cn } from '@kit/ui/utils';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 interface OrganizationHeaderProps {
   id: string;
@@ -77,6 +78,7 @@ function Header({
           {owner?.email}
         </p> : null}
       </div>
+      <WalletSummarySheet triggerClassName="ml-auto" />
     </div>
   );
 }

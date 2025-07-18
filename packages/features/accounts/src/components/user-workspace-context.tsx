@@ -6,6 +6,7 @@ import { User } from '@supabase/supabase-js';
 
 import { Tables } from '@kit/supabase/database';
 import { InvoiceSettings } from '../../../../../apps/web/app/server/actions/invoices/type-guards';
+import { CreditsConfig } from '../server/type-guard';
 
 export interface UserWorkspace {
   accounts: Array<{
@@ -41,7 +42,8 @@ export interface UserWorkspace {
       name: string | null;
     }[]
     settings: {
-      billing: InvoiceSettings
+      billing: InvoiceSettings;
+      credits: CreditsConfig;
     }
   };
 

@@ -35,6 +35,7 @@ import CalendarCardMonth from '../components/calendar-card-month';
 import KanbanCard from '../components/kanban-card';
 import { useUserOrderActions } from './user-order-actions';
 import { useOrdersContext } from '../components/context/orders-context';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 // Enhanced Types
 export interface ViewOption extends Option {
@@ -164,6 +165,10 @@ const useOrdersViewConfigs = ({
     action: updateCurrentView,
   })), [viewOptions, updateCurrentView]);
 
+  const { organization } = useUserWorkspace();
+  const isCreditsEnabled = organization?.settings?.credits?.enable_credits;
+
+  const canShowCreditColumn = () => isCreditsEnabled;
   // Permission check helper
   const hasPermission = () => agencyRoles.has(currentUserRole);
 
@@ -202,6 +207,7 @@ const useOrdersViewConfigs = ({
     actions: {
       updateOrderDate: orderDateMutation,
       updateOrderAssigns: orderAssignsMutation,
+      canShowCreditColumn,
     },
     hasPermission,
   });
@@ -224,11 +230,8 @@ const useOrdersViewConfigs = ({
         configs: {
           rowsPerPage: {
             onUpdate: (value: string) => {
-              console.log('🔍 rowsPerPage.onUpdate called with:', value);
               const newLimit = Number(value);
-              console.log('🔍 Updating limit from', limit, 'to', newLimit);
               updateLimit(newLimit); // Update the query limit via context
-              console.log('🔍 Updated limit to:', newLimit);
             },
             value: limit, // Use limit from context instead of configs.table?.rowsPerPage
           },
