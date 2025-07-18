@@ -38,7 +38,7 @@ const CreditsInput = ({
   canAddCredits,
   orderTitle,
 }: CreditsInputProps) => {
-  const { t } = useTranslation("orders");
+  const { t } = useTranslation(["orders", "credits"]);
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, reset } = useForm<CreditsFormValues>({
@@ -63,7 +63,11 @@ const CreditsInput = ({
         user_id: userId,
         credit_operations: [
           {
-            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}"><strong>Order #${orderId}</strong> · ${orderTitle ?? ""}</a>`,
+            description: t("message.consumed.automatic", {
+              orderUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}`,
+              orderId,
+              orderTitle: orderTitle ?? "",
+            }),
             id: creditOperationId,
             quantity: Math.abs(data.credits),
             actor_id: userId,
