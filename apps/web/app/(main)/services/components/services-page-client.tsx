@@ -23,6 +23,7 @@ import { useStripeActions } from '../hooks/use-stripe-actions';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { PlusIcon } from 'lucide-react';
 import PrefetcherLink from '../../../components/shared/prefetcher-link';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -101,7 +102,7 @@ export function ServicesPageClient() {
       <div className="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
         <PageHeader
           title="services:title"
-          rightContent={<TimerContainer />}
+          rightContent={<><TimerContainer /><WalletSummarySheet /></>}
           className="w-full"
         />
 

@@ -25,6 +25,7 @@ import ChatEmptyState from "./chat-empty-state";
 import ChatMembersSelector from "./chat-members-selector";
 import { useChat } from "./context/chat-context";
 import MessageList from "./message-list";
+import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 export default function ChatThread({
   agencyTeam,
@@ -208,7 +209,7 @@ export default function ChatThread({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <TimerContainer />
+        <><TimerContainer /><WalletSummarySheet /></>
           <ChatMembersSelector
             agencyTeam={agencyTeam}
             selectedMembers={

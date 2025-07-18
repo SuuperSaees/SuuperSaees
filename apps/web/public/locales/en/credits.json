@@ -1,0 +1,117 @@
+{
+  "statuses": {
+    "consumed": "Consumed",
+    "expired": "Expired",
+    "purchased": "Purchased",
+    "refunded": "Refunded",
+    "locked": "Locked"
+  },
+  "status": {
+    "singular": {
+      "available": "Available",
+      "used": "Used",
+      "purchased": "Purchased",
+      "expired": "Expired",
+      "locked": "Locked",
+      "refunded": "Refunded"
+    },
+    "plural": {
+      "available": "Available",
+      "used": "Used",
+      "purchased": "Purchased",
+      "expired": "Expired",
+      "locked": "Locked",
+      "refunded": "Refunded"
+    },
+    "description": {
+      "available": "Credits you can use for services or projects.",
+      "used": "Credits that have already been spent.",
+      "purchased": "Credits you have bought.",
+      "expired": "Credits that are no longer valid.",
+      "locked": "Credits reserved or not currently available."
+    }
+  },
+  "sections": {
+    "stats": {
+      "title": "Credits Stats"
+    },
+    "purchases": {
+      "title": "Purchased Credits"
+    },
+    "used": {
+      "title": "Used Credits"
+    }
+  },
+  "table": {
+    "columns": {
+      "service": "Service",
+      "credits": "Credits",
+      "remaining": "Remaining",
+      "status": "Status",
+      "date": "Date",
+      "description": "Description"
+    },
+    "addButton": "Add credits",
+    "manageButton": "Manage credits"
+  },
+  "empty": {
+    "title": "No credits operations found",
+    "description": "No credits operations found"
+  },
+  "form": {
+    "create": {
+      "title": "Manage credits",
+      "description": "The amount entered will affect the organization's available balance and can be used for future services or purchases.",
+      "inputs": {
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "e.g. 10 or -10",
+          "description": "Positive numbers <span class='border-gray-500 px-1 rounded-sm'>add credits</span>, negative numbers <span class='border-gray-500 px-1 rounded-sm'>deduct credits</span>."
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Enter description"
+        }
+      },
+      "actions": {
+        "submit": "Add new entry"
+      }
+    },
+    "edit": {
+      "title": "Manage credits",
+      "description": "Any changes will immediately update the organization's available balance.",
+      "inputs": {
+        "quantity": {
+          "label": "Quantity",
+          "placeholder": "Enter quantity",
+          "description": "Positive numbers <span class='border-gray-500 px-1 rounded-sm'>add credits</span>, negative numbers <span class='border-gray-500 px-1 rounded-sm'>deduct credits</span>."
+        },
+        "description": {
+          "label": "Description",
+          "placeholder": "Enter description"
+        }
+      },
+      "actions": {
+        "submit": "Edit credits"
+      }
+    }
+  },
+  "wallet": {
+    "title": "Wallet summary",
+    "value": {
+      "singular": "{{value}} Credit",
+      "plural": "{{value}} Credits"
+    },
+    "description": "Here you can see the values and states of your credits.",
+    "lastMovement": "Last movement registered: {{date}}",
+    "cta": {
+      "title": "Get more credits",
+      "description": "Running low on credits? Top up your wallet to keep going!"
+    },
+    "help": {
+      "title": "Need help?",
+      "description": "If your credits aren't showing up correctly, contact us directly and we'll help you out!"
+    }
+  }
+}
+

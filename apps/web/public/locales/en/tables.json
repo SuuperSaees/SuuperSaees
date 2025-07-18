@@ -8,6 +8,7 @@
     "dueDate": "Due date",
     "createdAt": "Created at",
     "updatedAt": "Last update",
-    "priority": "Priority"
+    "priority": "Priority",
+    "credits": "Credits"
   }
 }

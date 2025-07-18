@@ -45,6 +45,7 @@ export const defaultI18nNamespaces = [
   'plugins',
   'invoices',
   'embeds',
+  'credits',
 ];
 
 /**

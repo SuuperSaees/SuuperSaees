@@ -25,6 +25,7 @@ export class CreditOperationRepository {
     const { data, error } = await client
       .from('credit_operations')
       .insert({
+        id: payload.id ?? undefined,
         credit_id: payload.credit_id,
         actor_id: payload.actor_id,
         status: payload.status ?? 'purchased',

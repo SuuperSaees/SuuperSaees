@@ -8,6 +8,7 @@ import { PageHeader } from '../../components/page-header';
 import { TimerContainer } from '../../components/timer-container';
 // import AddServiceButton from './components/add-button';
 import ServicesTable from './components/table';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 
 export const generateMetadata = async () => {
@@ -32,7 +33,7 @@ async function ServicesPage() {
     <PageBody>
       <PageHeader
         title="services:title"
-        rightContent={<TimerContainer />}
+        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full"
       >
         <h2 className="text-xl font-medium">Services</h2>

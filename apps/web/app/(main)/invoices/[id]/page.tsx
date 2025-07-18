@@ -12,6 +12,7 @@ import { Service } from "~/lib/services.types";
 // Invoice type is used in the component
 import { InvoiceForm } from "../components/form/form";
 import { Trans } from "@kit/ui/trans";
+import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 interface UpdateInvoicePageProps {
   params: {
@@ -61,7 +62,7 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
     <PageBody>
       <PageHeader
         title="invoices:update.title"
-        rightContent={<TimerContainer />}
+        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full flex"
       >
         <h2 className="text-xl font-medium">

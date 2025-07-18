@@ -1,4 +1,4 @@
-{
+  {
   "error": {
     "title": "¡Algo salió mal!",
     "toastError": "Error",
@@ -77,6 +77,10 @@
       "failedToUpdateEmbed": "No se pudo actualizar el enlace. Inténtalo más tarde.",
       "failedToDeleteEmbed": "No se pudo eliminar el enlace. Inténtalo más tarde.",
       "failedToRemoveAccount": "No se pudo eliminar la cuenta del enlace. Inténtalo más tarde."
+    },
+    "credits": {
+      "failedToCreateCreditOperation": "No se pudo crear la operación de crédito. Inténtalo de nuevo más tarde.",
+      "failedToUpdateCreditOperation": "No se pudo actualizar la operación de crédito. Inténtalo de nuevo más tarde."
     }
   },
   "success": {
@@ -98,7 +102,7 @@
       "serviceCancelled": "El servicio fue cancelado con éxito.",
       "serviceAdded": "El servicio se agregó correctamente.",
       "serviceCreated": "El servicio fue creado con éxito.",
-      "serviceDeleted": "El servicio se eliminó correctamente.",
+      "serviceDeleted": "El servicio se eliminó correctamente.",  
       "serviceUpdated": "El servicio se actualizó correctamente."
     },
     "briefs": {
@@ -135,6 +139,10 @@
       "embedUpdated": "El enlace se actualizó correctamente.",
       "embedDeleted": "El enlace se eliminó correctamente.",
       "accountRemovedFromEmbed": "La cuenta se eliminó del enlace correctamente."
+    },
+    "credits": {
+      "creditOperationCreated": "La operación de crédito se creó correctamente.",
+      "creditOperationUpdated": "La operación de crédito se actualizó correctamente."
     }
   },
   "loading": {

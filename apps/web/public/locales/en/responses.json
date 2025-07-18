@@ -78,6 +78,10 @@
       "failedToUpdateEmbed": "Couldn't update the embed. Please try again later.",
       "failedToDeleteEmbed": "Couldn't delete the embed. Please try again later.",
       "failedToRemoveAccount": "Couldn't remove the account from the embed. Please try again later."
+    },
+    "credits": {
+      "failedToCreateCreditOperation": "Couldn't create the credit operation. Please try again later.",
+      "failedToUpdateCreditOperation": "Couldn't update the credit operation. Please try again later."
     }
   },
   "success": {
@@ -137,6 +141,10 @@
       "embedUpdated": "Embed updated successfully.",
       "embedDeleted": "Embed deleted successfully.",
       "accountRemovedFromEmbed": "Account removed from embed successfully."
+    },
+    "credits": {
+      "creditOperationCreated": "Credit operation created successfully.",
+      "creditOperationUpdated": "Credit operation updated successfully."
     }
   },
   "loading": {

@@ -7,6 +7,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import BriefsTable from './components/table';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -26,7 +27,7 @@ async function BriefsPage() {
     <PageBody className="overflow-y-auto">
       <PageHeader
         title="briefs:briefs"
-        rightContent={<TimerContainer />}
+        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full"
       />
       <BriefsTable initialData={initialData} />
