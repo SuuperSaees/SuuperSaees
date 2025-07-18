@@ -96,6 +96,15 @@
       }
     }
   },
+  "message": {
+    "purchased": {
+      "manual": "Recarga manual · Aumento de créditos"
+    },
+    "consumed": {
+      "automatic": "<a href=\"{{orderUrl}}\"><strong>Orden #{{orderId}}</strong> · {{orderTitle}} · Deducción de créditos</a>",
+      "manual": "Ajuste manual · Deducción de créditos"
+    }
+  },
   "wallet": {
     "title": "Resumen de tu monedero",
     "description": "Aquí puedes ver los valores y estados de tus créditos.",

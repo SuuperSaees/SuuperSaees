@@ -96,6 +96,15 @@
       }
     }
   },
+  "message": {
+    "purchased": {
+      "manual": "Manual top-up · Credit addition"
+    },
+    "consumed": {
+      "automatic": "<a href=\"{{orderUrl}}\"><strong>Order #{{orderId}}</strong> · {{orderTitle}} · Credit deduction</a>",
+      "manual": "Manual adjustment · Credit deduction"
+    }
+  },
   "wallet": {
     "title": "Wallet summary",
     "value": {
