@@ -3,11 +3,8 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  getCredit,
-  updateCredit,
-} from "~/server/actions/credits/credits.action";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { updateCredit } from "~/server/actions/credits/credits.action";
 import { CreditOperations } from "~/lib/credit.types";
 import { toast } from "sonner";
 import { updateOrder } from "~/team-accounts/src/server/actions/orders/update/update-order";
@@ -44,11 +41,7 @@ const CreditsInput = ({
   const { t } = useTranslation("orders");
   const queryClient = useQueryClient();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-  } = useForm<CreditsFormValues>({
+  const { register, handleSubmit, reset } = useForm<CreditsFormValues>({
     resolver: zodResolver(creditsSchema),
     defaultValues: {
       credits: creditOperationValue ?? 0,
@@ -56,16 +49,6 @@ const CreditsInput = ({
   });
 
   const initialValueRef = useRef(creditOperationValue ?? 0);
-
-  // Get the credit id
-  const { data: credit, isLoading: isLoadingCredit } = useQuery({
-    queryKey: ["credit", clientOrganizationId],
-    queryFn: () => getCredit(clientOrganizationId),
-    enabled: !!clientOrganizationId && !!canAddCredits,
-    retry: 1,
-  });
-
-  const creditId = credit?.id ?? "";
 
   const { mutate: createCreditMutation, isPending } = useMutation({
     mutationFn: async (data: CreditsFormValues) => {
@@ -78,15 +61,12 @@ const CreditsInput = ({
         client_organization_id: clientOrganizationId,
         agency_id: agencyId,
         user_id: userId,
-        balance: undefined,
-        id: creditId,
         credit_operations: [
           {
-            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}"><strong>Order #${orderId}</strong> · ${orderTitle ?? ''}</a>`,
+            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}"><strong>Order #${orderId}</strong> · ${orderTitle ?? ""}</a>`,
             id: creditOperationId,
             quantity: Math.abs(data.credits),
             actor_id: userId,
-            credit_id: creditId,
             type: CreditOperations.Enums.Type.USER,
             status: CreditOperations.Enums.Status.CONSUMED,
           },
@@ -130,7 +110,7 @@ const CreditsInput = ({
     createCreditMutation(data);
   });
 
-  const isLoading = isLoadingCredit || isPending;
+  const isLoading = isPending;
   return (
     <div className="flex justify-between items-center text-gray-700 py-2">
       <div className="flex items-center gap-2">
@@ -147,7 +127,7 @@ const CreditsInput = ({
           className={cn(
             "w-full border-none text-end px-0 text-gray-700 placeholder:text-gray-700",
             "disabled:cursor-auto focus:outline-none focus:ring-0",
-            `${isLoading ? "disabled:opacity-50" : "disabled:opacity-100"}`
+            `${isLoading ? "disabled:opacity-50" : "disabled:opacity-100"}`,
           )}
         />
       </div>
