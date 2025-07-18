@@ -357,6 +357,7 @@ BEGIN
                 UPDATE public.credits 
                 SET 
                     balance = balance - NEW.quantity,
+                    consumed = consumed + NEW.quantity,
                     updated_at = now()
                 WHERE id = NEW.credit_id
                 RETURNING balance INTO current_balance;
