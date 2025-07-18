@@ -161,7 +161,7 @@ const useCSVExportFormatters = (
       
       // Format status to show the status name instead of ID
       status: (value) => {
-        const statusObj = statuses.find(s => s.id === value);
+        const statusObj = statuses.find(s => s.id === (value as Status).id);
         return statusObj ? statusObj.status_name ?? String(value) : String(value ?? '');
       },
       

@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { Download, SlidersVertical } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 
 import { CustomDropdownMenu } from '../../../components/ui/dropdown-menu';
-import ExportCSVButton from '../../../components/shared/export-csv-button/index';
-import { ExportableData } from '../../../components/shared/export-csv-button/types';
+import ExportCSVButton, { ExportCSVButtonRef } from '../../../components/shared/export-csv-button/index';
+import { ExportableData, PaginationConfig } from '../../../components/shared/export-csv-button/types';
 
 interface SettingsDropdownProps<T extends ExportableData> {
   data: T[];
@@ -18,6 +18,7 @@ interface SettingsDropdownProps<T extends ExportableData> {
   valueFormatters: Record<string, (value: unknown) => string>;
   disabled?: boolean;
   defaultFilename?: string;
+  pagination?: PaginationConfig;
 }
 
 function SettingsDropdown<T extends ExportableData>({
@@ -29,22 +30,9 @@ function SettingsDropdown<T extends ExportableData>({
   valueFormatters,
   disabled = false,
   defaultFilename = 'export.csv',
+  pagination,
 }: SettingsDropdownProps<T>) {
-  // Create a hidden ExportCSVButton that will be triggered by the dropdown
-  const hiddenExportButton = (
-    <div className="hidden">
-      <ExportCSVButton
-        disabled={disabled}
-        data={data}
-        t={t}
-        allowedColumns={allowedColumns}
-        defaultFilename={defaultFilename}
-        defaultSelectedColumns={defaultSelectedColumns}
-        columnHeaders={columnHeaders}
-        valueFormatters={valueFormatters}
-      />
-    </div>
-  );
+  const exportButtonRef = useRef<ExportCSVButtonRef>(null);
 
   // Settings dropdown menu items
   const settingsDropdownItems = useMemo(() => [
@@ -54,10 +42,9 @@ function SettingsDropdown<T extends ExportableData>({
       label: t('export.exportCSV'),
       icon: Download,
       onClick: () => {
-        // Find the button inside the hidden ExportCSVButton and click it
-        const button = document.querySelector('.hidden .flex.items-center.gap-2') as HTMLButtonElement;
-        if (button) {
-          button.click();
+        // Directly call the openDialog method on the ExportCSVButton
+        if (exportButtonRef.current) {
+          exportButtonRef.current.openDialog();
         }
       }
     }
@@ -66,9 +53,22 @@ function SettingsDropdown<T extends ExportableData>({
 
   return (
     <>
-      {hiddenExportButton}
+      <div className="hidden">
+        <ExportCSVButton
+          ref={exportButtonRef}
+          disabled={disabled}
+          data={data}
+          t={t}
+          allowedColumns={allowedColumns}
+          defaultFilename={defaultFilename}
+          defaultSelectedColumns={defaultSelectedColumns}
+          columnHeaders={columnHeaders}
+          valueFormatters={valueFormatters}
+          pagination={pagination}
+        />
+      </div>
       <CustomDropdownMenu
-      className='text-gray-600'
+        className='text-gray-600'
         trigger={
           <Button variant="outline" className="flex items-center justify-center w-10 h-10 p-0">
             <SlidersVertical className="h-4 w-4" />

@@ -15,6 +15,7 @@ import Search from './search';
 import SettingsDropdown from './settings-dropdown';
 import StatusFilters, { TabConfig } from './status-filters';
 import ViewSelect from './view-select';
+import { PaginationConfig } from '../../../components/shared/export-csv-button/types';
 
 interface BoardHeaderProps {
   t: (key: string) => string;
@@ -33,6 +34,7 @@ interface BoardHeaderProps {
   ordersAreLoading: boolean;
   orders: Order.Response[];
   getValueFormatters: () => ValueFormatters;
+  pagination?: PaginationConfig;
 }
 
 export function BoardHeader({
@@ -50,6 +52,7 @@ export function BoardHeader({
   ordersAreLoading,
   orders,
   getValueFormatters,
+  pagination,
 }: BoardHeaderProps) {
   // const { workspace: userWorkspace } = useUserWorkspace();
   // const agencyRoles = [
@@ -108,7 +111,7 @@ export function BoardHeader({
             'updated_at',
             'due_date',
             'customer',
-            'assigned_to',
+            'assignations',
             'agency',
             'client_organization',
           ]}
@@ -133,7 +136,7 @@ export function BoardHeader({
             updated_at: t('columns.updatedAt'),
             due_date: t('columns.dueDate'),
             customer: t('columns.customer'),
-            assigned_to: t('columns.assignedTo'),
+            assignations: t('columns.assignedTo'),
             agency: t('columns.agency'),
             client_organization: t('columns.clientOrganization'),
           }}
@@ -143,6 +146,7 @@ export function BoardHeader({
               (value: unknown) => string
             >
           }
+          pagination={pagination}
         />
 
 
