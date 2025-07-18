@@ -127,7 +127,7 @@ export class CreditService {
     actorId: string,
     operationType: 'update' | 'remove',
     additionalUpdates?: Record<string, unknown>
-  ): Promise<void> {
+  ): Promise<CreditOperations.Type> {
     if (!this.creditOperationRepository) {
       throw new Error('Credit operation repository is required');
     }
@@ -179,7 +179,8 @@ export class CreditService {
     }
 
     // Single update operation with all changes
-    await this.creditOperationRepository.update(updateData);
+    const updatedOperation = await this.creditOperationRepository.update(updateData);
+    return updatedOperation;
   }
 
   async updateOperation(payload: Credit.Request.Update): Promise<Credit.Type> {
@@ -192,10 +193,8 @@ export class CreditService {
       throw new Error('Invalid payload structure for credit operation update');
     }
 
-    // First, get the current credit to return it at the end
-    if (!payload.id) {
-      throw new Error('Credit ID is required for update operations');
-    }
+
+    let creditId = '';
     
     // Handle credit operations if provided
     if (payload.credit_operations && payload.credit_operations.length > 0) {
@@ -209,21 +208,27 @@ export class CreditService {
           
           // Update existing operation using the optimized helper method (single request)
           if (operation.quantity !== undefined) {
-            await this.addQuantityHistoryEntry(
+            const updatedOperation = await this.addQuantityHistoryEntry(
               operation.id,
               operation.quantity,
               operation.actor_id ?? 'system',
               'update',
               additionalUpdates
             );
+            creditId = updatedOperation.credit_id;
           } else if (Object.keys(additionalUpdates).length > 0) {
             // Update only other fields if no quantity change
-            await this.creditOperationRepository.update({
+            const updatedOperation = await this.creditOperationRepository.update({
               id: operation.id,
               ...additionalUpdates,
             });
+            creditId = updatedOperation.credit_id;
           }
         } else {
+              // First, get the current credit to return it at the end
+          if (!payload.id) {
+            throw new Error('Credit ID is required for update operations');
+          }
           // Create new operation - ensure required fields are provided
           if (!operation.actor_id) {
             throw new Error('Actor ID is required for new credit operations');
@@ -232,7 +237,7 @@ export class CreditService {
             throw new Error('Quantity is required for new credit operations');
           }
           
-          await this.creditOperationRepository.create({
+          const newOperation = await this.creditOperationRepository.create({
             actor_id: operation.actor_id,
             credit_id: payload.id,
             quantity: operation.quantity,
@@ -241,11 +246,12 @@ export class CreditService {
             description: operation.description ?? null,
             metadata: operation.metadata ?? null,
           });
+          creditId = newOperation.credit_id;
         }
       }
     }
 
-    const currentCredit = await this.creditRepository.getById(payload.id);
+    const currentCredit = await this.creditRepository.getById(creditId);
 
     return currentCredit;
   }
