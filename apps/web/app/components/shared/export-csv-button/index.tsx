@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, forwardRef, useImperativeHandle, useCallback } from 'react';
 
 import { DownloadIcon } from '@radix-ui/react-icons';
 
@@ -12,10 +12,17 @@ import ExportDialog from './export-dialog';
 import { ExportableData, ExportCSVButtonProps } from './types';
 import { formatValue, getDefaultDelimiter } from './utils';
 
+export interface ExportCSVButtonRef {
+  openDialog: () => void;
+}
+
 /**
  * A reusable button component for exporting data to CSV format
  */
-function ExportCSVButton<T extends ExportableData>({
+const ExportCSVButton = forwardRef<ExportCSVButtonRef, ExportCSVButtonProps<ExportableData>>(({
+  ...props
+}, ref) => {
+  const {
   data,
   t,
   allowedColumns,
@@ -27,15 +34,16 @@ function ExportCSVButton<T extends ExportableData>({
   className,
   valueFormatters,
   disabled = false,
-}: ExportCSVButtonProps<T>) {
+  pagination,
+} = props;
   // State for the export dialog
   const [isOpen, setIsOpen] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [filename, setFilename] = useState(defaultFilename);
   const [delimiter, setDelimiter] = useState(getDefaultDelimiter());
   const [usePagination, setUsePagination] = useState(false);
-  const [pageSize, setPageSize] = useState(100);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(pagination?.pageSize ?? 100);
+  const [currentPage, setCurrentPage] = useState(pagination?.currentPage ?? 1);
 
   // Get available columns from data, filtered by allowedColumns if provided
   const availableColumns = useMemo(() => {
@@ -72,7 +80,7 @@ function ExportCSVButton<T extends ExportableData>({
   }, [availableColumns, propColumnHeaders]);
 
   // Initialize selected columns when dialog opens
-  const handleOpenDialog = () => {
+  const handleOpenDialog = useCallback(() => {
     // Default to provided default columns, or some common ones if none selected yet
     if (selectedColumns.length === 0) {
       if (defaultSelectedColumns && defaultSelectedColumns.length > 0) {
@@ -97,7 +105,12 @@ function ExportCSVButton<T extends ExportableData>({
       }
     }
     setIsOpen(true);
-  };
+  }, [selectedColumns, defaultSelectedColumns, availableColumns]);
+
+  // Expose the openDialog method to parent components
+  useImperativeHandle(ref, () => ({
+    openDialog: handleOpenDialog
+  }), [handleOpenDialog]);
 
   // Format value for display in preview and export
   const formatPreviewValue = (value: unknown, column?: string): string => {
@@ -180,6 +193,8 @@ function ExportCSVButton<T extends ExportableData>({
       />
     </>
   );
-}
+});
+
+ExportCSVButton.displayName = 'ExportCSVButton';
 
 export default ExportCSVButton; 

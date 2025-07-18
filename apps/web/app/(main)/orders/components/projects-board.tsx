@@ -34,6 +34,7 @@ import { BoardContent } from './board-content';
 import { BoardHeader } from './board-header';
 import { useAgencyStatuses } from './context/agency-statuses-context';
 import { useOrdersContext } from './context/orders-context';
+import { useTableConfigs } from '~/(views)/hooks/use-table-configs';
 
 // Types
 interface ProjectsBoardProps {
@@ -82,6 +83,7 @@ const ProjectsBoard = ({
     preferences,
     currentView,
     viewOptions,
+    configs,
   } = useOrdersViewConfigs({
     agencyRoles: AGENCY_ROLES,
     statuses,
@@ -130,6 +132,10 @@ const ProjectsBoard = ({
   }, [orders, currentView, statuses]);
 
 
+  const pagination = {
+    pageSize: configs.table?.rowsPerPage ?? 10,
+    currentPage: 1,
+  }
   return (
     <ViewProvider
       initialData={mutedOrders as ViewItem[]}
@@ -164,6 +170,7 @@ const ProjectsBoard = ({
           ordersAreLoading={ordersAreLoading}
           orders={orders}
           getValueFormatters={getValueFormatters}
+          pagination={pagination}
         />
 
         <BoardContent
