@@ -568,7 +568,7 @@ BEGIN
         'consumed',
         'user',
         0,
-        'Order creation credit consumption',
+        'Order setup · No credit charge',
         target_credit_id,
         jsonb_build_object(
           'order_title', _order->>'title',
@@ -714,12 +714,12 @@ create or replace view "public"."user_organization" as  WITH session_data AS (
     (oi.owner_id)::uuid AS owner_id,
     jsonb_build_object('enable_credits',
         CASE
-            WHEN ((ap.deleted_on IS NULL) AND (p.name = 'credits'::text)) THEN true
+            WHEN ((ap.deleted_on IS NULL) AND (ap.status = 'installed') AND (p.name = 'credits'::text)) THEN true
             ELSE false
         END) AS config
    FROM (((org_info oi
      JOIN organizations o ON ((o.id = (oi.id)::uuid)))
-     LEFT JOIN account_plugins ap ON (((ap.account_id = oi.plugin_owner_id) AND (ap.deleted_on IS NULL))))
+     LEFT JOIN account_plugins ap ON (((ap.account_id = oi.plugin_owner_id) AND (ap.deleted_on IS NULL) AND (ap.status = 'installed'))))
      LEFT JOIN plugins p ON (((p.id = ap.plugin_id) AND (p.name = 'credits'::text) AND (p.deleted_on IS NULL))))
   WHERE (oi.id IS NOT NULL);
 
