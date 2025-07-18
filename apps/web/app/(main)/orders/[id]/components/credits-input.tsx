@@ -24,6 +24,7 @@ interface CreditsInputProps {
   clientOrganizationId: string;
   userId: string;
   orderId: Order.Type["id"];
+  creditOperationId: string;
   creditOperationValue?: number;
   canAddCredits: boolean;
   orderTitle?: string;
@@ -34,6 +35,7 @@ const CreditsInput = ({
   clientOrganizationId,
   userId,
   orderId,
+  creditOperationId,
   creditOperationValue,
   canAddCredits,
   orderTitle,
@@ -52,11 +54,15 @@ const CreditsInput = ({
 
   const { mutate: createCreditMutation, isPending } = useMutation({
     mutationFn: async (data: CreditsFormValues) => {
-      const creditOperationId = crypto.randomUUID();
 
       if (data.credits < 0) {
         throw new Error("Credits cannot be negative");
       }
+
+      if(!creditOperationId) {
+        throw new Error("Credit operation ID is required");
+      }
+
       const creditOperation = await updateCredit({
         client_organization_id: clientOrganizationId,
         agency_id: agencyId,
