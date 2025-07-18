@@ -211,22 +211,5 @@ BEGIN
     RAISE NOTICE 'Eligible orders (client_org != agency): %', eligible_orders;
     RAISE NOTICE 'Orders with credit operations: %', orders_with_credits;
     RAISE NOTICE 'Eligible orders without credit operations: %', orders_without_credits;
-    
-    IF orders_without_credits > 0 THEN
-        RAISE WARNING 'Some eligible orders still do not have credit operations. Manual review may be needed.';
-        
-        -- Show details of orders without credit operations
-        RAISE NOTICE 'Orders without credit operations:';
-        PERFORM RAISE NOTICE 'Order UUID: %, Title: %, Agency: %, Client: %', 
-            o.uuid, o.title, o.agency_id, o.client_organization_id
-        FROM public.orders_v2 o
-        WHERE o.deleted_on IS NULL
-        AND o.client_organization_id IS NOT NULL 
-        AND o.client_organization_id != o.agency_id
-        AND o.credit_operation_id IS NULL
-        LIMIT 10;  -- Show first 10 for debugging
-    ELSE
-        RAISE NOTICE 'All eligible orders now have credit operations. Migration successful!';
-    END IF;
 END;
 $$;
