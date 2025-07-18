@@ -26,13 +26,13 @@ BEGIN
             c.agency_id,
             c.organization_client_id,
             c.user_client_id,
-            c.created_at,
+            o.created_at,
             o.name as organization_name,
             o.owner_id as org_owner_id
         FROM public.clients c
         LEFT JOIN public.organizations o ON o.id = c.organization_client_id
         WHERE c.deleted_on IS NULL
-        ORDER BY c.created_at ASC
+        ORDER BY o.created_at ASC
     LOOP
         BEGIN
             RAISE NOTICE 'Processing client ID: %, Organization: %, Agency: %', 
