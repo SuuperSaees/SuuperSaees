@@ -24,6 +24,7 @@ interface CreditsInputProps {
   clientOrganizationId: string;
   userId: string;
   orderId: Order.Type["id"];
+  creditOperationId: string;
   creditOperationValue?: number;
   canAddCredits: boolean;
   orderTitle?: string;
@@ -34,11 +35,12 @@ const CreditsInput = ({
   clientOrganizationId,
   userId,
   orderId,
+  creditOperationId,
   creditOperationValue,
   canAddCredits,
   orderTitle,
 }: CreditsInputProps) => {
-  const { t } = useTranslation("orders");
+  const { t } = useTranslation(["orders", "credits"]);
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, reset } = useForm<CreditsFormValues>({
@@ -52,18 +54,26 @@ const CreditsInput = ({
 
   const { mutate: createCreditMutation, isPending } = useMutation({
     mutationFn: async (data: CreditsFormValues) => {
-      const creditOperationId = crypto.randomUUID();
 
       if (data.credits < 0) {
         throw new Error("Credits cannot be negative");
       }
+
+      if(!creditOperationId) {
+        throw new Error("Credit operation ID is required");
+      }
+
       const creditOperation = await updateCredit({
         client_organization_id: clientOrganizationId,
         agency_id: agencyId,
         user_id: userId,
         credit_operations: [
           {
-            description: `<a href="${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}"><strong>Order #${orderId}</strong> · ${orderTitle ?? ""}</a>`,
+            description: t("message.consumed.automatic", {
+              orderUrl: `${process.env.NEXT_PUBLIC_SITE_URL}/orders/${orderId}`,
+              orderId,
+              orderTitle: orderTitle ?? "",
+            }),
             id: creditOperationId,
             quantity: Math.abs(data.credits),
             actor_id: userId,

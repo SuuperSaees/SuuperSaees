@@ -63,6 +63,9 @@ const EditCreditOperationsForm = ({
     {
       mutationFn: (data: z.infer<typeof editCreditsSchema>) => {
         const isNegative = data.quantity < 0;
+        const description = isNegative
+          ? t("message.consumed.manual")
+          : t("message.purchased.manual");
         return createCredit({
           client_organization_id: clientOrganizationId,
           agency_id: agencyId,
@@ -71,7 +74,7 @@ const EditCreditOperationsForm = ({
           credit_operations: [
             {
               quantity: Math.abs(data.quantity),
-              description: data.description,
+              description: !data.description ? description : data.description,
               actor_id: userId,
               credit_id: creditId,
               type: CreditOperations.Enums.Type.USER,
@@ -141,11 +144,7 @@ const EditCreditOperationsForm = ({
                     onChange={(e) => {
                       // Allow empty, '-', or valid integer
                       const val = e.target.value;
-                      if (
-                        val === "" ||
-                        val === "-" ||
-                        /^-?\d*$/.test(val)
-                      ) {
+                      if (val === "" || val === "-" || /^-?\d*$/.test(val)) {
                         field.onChange(val);
                       }
                     }}
