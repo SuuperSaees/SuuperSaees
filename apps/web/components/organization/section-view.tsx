@@ -63,7 +63,6 @@ function SectionView({
 
   const { organization } = useUserWorkspace();
   // Define availableTabsBasedOnRole before it's used
-  console.log("organization", JSON.stringify(organization, null, 2));
   const availableTabsBasedOnRole = new Set([
     "agency_owner",
     "agency_member",
