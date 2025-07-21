@@ -171,7 +171,7 @@ const WalletStatusItem = ({
 };
 
 const WalletCTA = ({
-  url = `${process.env.NEXT_PUBLIC_SITE_URL}/services/catalog`,
+  url = `/services/catalog`,
 }: {
   url?: string;
 }) => {
