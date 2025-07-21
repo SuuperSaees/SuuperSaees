@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useState } from 'react';
 import { useOrganizationSettings } from 'node_modules/@kit/accounts/src/context/organization-settings-context';
 import { Button } from '@kit/ui/button';
 import { hexToRgba } from '~/utils/generate-colors';
+import { cn } from '@kit/ui/utils';
 
 export type TabConfig = {
   key: string;
@@ -16,6 +17,7 @@ interface StatusFiltersProps {
   setActiveTab: Dispatch<SetStateAction<string>>;
   t: (key: string) => string;
   tabsConfig: TabConfig[];
+  className?: string;
 }
 
 const StatusFilters = ({
@@ -23,6 +25,7 @@ const StatusFilters = ({
   setActiveTab,
   t,
   tabsConfig,
+  className,
 }: StatusFiltersProps) => {
   const { theme_color } = useOrganizationSettings();
   const [hoveredTab, setHoveredTab] = useState<string | null>(null); // Track the hovered tab's key
@@ -42,16 +45,19 @@ const StatusFilters = ({
   };
 
   return (
-    <div className="flex mr-auto gap-2 bg-transparent gap-2">
+    <div className={cn("flex mr-auto gap-2 bg-transparent sm:gap-2 gap-0 w-full sm:w-fit", 
+    "overflow-x-auto", className)}>
       {tabsConfig.map((tab) => (
         <Button
           onClick={() => {
             setActiveTab(tab.key);
             tab.filter();
           }}
-          className={`font-semibold hover:bg-gray-200/30 hover:text-brand ${
-            tab.key === activeTab ? 'bg-brand-50/60 text-brand-900' : 'bg-transparent text-gray-600'
-          }`}
+          className={cn(
+            "font-semibold hover:bg-gray-200/30 hover:text-brand",
+            tab.key === activeTab ? 'bg-brand-50/60 text-brand-900' : 'bg-transparent text-gray-600',
+            "sm:flex-none flex-1 sm:w-fit w-full"
+          )}
           key={tab.key}
           style={createStyles(tab)}
           onMouseEnter={() => setHoveredTab(tab.key)} // Set hover state for the specific tab
