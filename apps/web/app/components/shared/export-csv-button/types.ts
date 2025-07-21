@@ -5,6 +5,13 @@
 export type ValueFormatter = (value: unknown) => string;
 
 /**
+ * Type for pagination configuration
+ */
+export type PaginationConfig = {
+  pageSize: number;
+  currentPage: number;
+}
+/**
  * Generic type for data objects that can be exported to CSV
  */
 export type ExportableData = Record<string, unknown>;
@@ -68,6 +75,11 @@ export interface ExportCSVButtonProps<T extends ExportableData> {
    * Optional disabled state for the button
    */
   disabled?: boolean;
+
+  /**
+   * Optional pagination configuration
+   */
+  pagination?: PaginationConfig;
 }
 
 /**
@@ -263,6 +275,11 @@ export interface SettingsTabProps {
    * Function to handle clear all columns
    */
   handleClearAllColumns: () => void;
+
+  /**
+   * Total number of rows in the data
+   */
+  dataLength: number;
 }
 
 /**

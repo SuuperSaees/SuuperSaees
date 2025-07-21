@@ -168,6 +168,7 @@
     "tab": "Tab",
     "delimiterHelp": "Choose the delimiter that works best with your spreadsheet application. Semicolon is recommended for European locales.",
     "usePagination": "Use pagination",
+    "usePaginationNotAvailable": "You will export {{pageSize}} rows from your current data view. Adjust the number of rows displayed in your table to control the export size.",
     "pageSize": "Page size",
     "currentPage": "Current page",
     "selectColumns": "Select columns to export",
