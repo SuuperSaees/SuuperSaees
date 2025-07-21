@@ -12,6 +12,7 @@ import { loadUserWorkspace } from "~/(main)/home/(user)/_lib/server/load-user-wo
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
 import { Client } from "~/lib/client.types";
 import { Service } from "~/lib/services.types";
+import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -38,7 +39,7 @@ async function CreateInvoicesPage() {
     <PageBody className="h-full">
       <PageHeader
         title="invoices:creation.title"
-        rightContent={<TimerContainer />}
+        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full"
       />
       {/* <Alert

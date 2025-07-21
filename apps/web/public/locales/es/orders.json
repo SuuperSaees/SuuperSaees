@@ -1,4 +1,14 @@
 {
+  "credits": {
+    "input": {
+      "label": "Créditos",
+      "placeholder": "Ingresa la cantidad de créditos (ej. 10 o -10)"
+    },
+    "value": {
+      "singular": "Crédito",
+      "plural": "Créditos"
+    }
+  },
   "title": "Proyectos",
   "selectDateLabel": "Selecciona una fecha",
   "confirmDateTitle": "Confirmar fecha",

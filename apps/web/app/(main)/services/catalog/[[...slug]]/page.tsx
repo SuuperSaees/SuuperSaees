@@ -10,6 +10,8 @@ import { Trans } from "@kit/ui/trans";
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
 import { Pagination } from "~/lib/pagination";
 import { Service } from "~/lib/services.types";
+import { TimerContainer } from "~/(main)/../components/timer-container";
+import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 interface ServicesCatalogPageProps {
   params: {
@@ -78,7 +80,7 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   
   return (
     <PageBody className="w-full h-full">
-      <PageHeader title="services:catalog.title" className="w-full flex">
+      <PageHeader title="services:catalog.title" className="w-full flex" rightContent={<><TimerContainer /><WalletSummarySheet /></>}>
         <h2 className="font-inter text-xl font-medium leading-4">
           <Trans i18nKey="services:catalog.title" />
         </h2>

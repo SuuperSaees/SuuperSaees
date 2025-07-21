@@ -4,6 +4,7 @@ import { Database } from '@kit/supabase/database';
 import { getEmbeds } from '../../../../../apps/web/app/server/actions/embeds/embeds.action'
 import { fetchClientOrganizations } from '../../../team-accounts/src/server/actions/clients/get/get-clients'
 import { parseInvoiceSettings } from '../../../../../apps/web/app/server/actions/invoices/type-guards';
+import { parseCreditsConfig } from './type-guard';
 /**
  * Class representing an API for interacting with user accounts.
  * @constructor
@@ -56,7 +57,7 @@ class AccountsApi {
     const { data: accounts, error } = await this.client
       .from('user_organization')
       .select(
-        `id, name, slug, picture_url, 
+        `id, name, slug, picture_url, config, 
         settings:organization_settings!left(*), 
         statuses:agency_statuses(*),
         tags:tags(*)`
@@ -83,6 +84,7 @@ class AccountsApi {
 
     const billingDetails = accounts[0]?.settings?.find((setting) => setting.key === 'billing_details')?.value;
 
+    const credits = accounts[0]?.config
 
     // Get pinned organizations from settings
     const pinnedOrganizationsString = accounts[0]?.settings?.find(
@@ -113,6 +115,9 @@ class AccountsApi {
       statuses: accounts[0]?.statuses,
       tags: accounts[0]?.tags,
       settings: {
+        credits: {
+          ...parseCreditsConfig(credits)
+        },
         billing: {
           ...parseInvoiceSettings(billingDetails)
         }

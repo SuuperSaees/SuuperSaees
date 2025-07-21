@@ -1,4 +1,14 @@
 {
+  "credits": {
+    "input": {
+      "label": "Credits",
+      "placeholder": "Enter the number of credits (e.g. 10 or -10)"
+    },
+    "value": {
+      "singular": "Credit",
+      "plural": "Credits" 
+    }
+  },
   "title": "Projects",
   "selectDateLabel": "Select a date",
   "confirmDateTitle": "Confirm date",
