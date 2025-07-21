@@ -29,10 +29,17 @@ const ViewSelect = ({
       defaultValue={defaultValue}
       containerClassname="block"
       className={
-        'w-fit border border-gray-200 bg-white text-gray-600 ' +
+        'w-fit border border-gray-200 bg-white text-gray-600 group ' +
         className
       }
+      aria-label="View options" // Or use a translation if available
       {...rest}
+      customTrigger={(option: string) => (
+        <CustomTrigger
+          label={option}
+          icon={options.find((opt) => opt.label === option)?.icon}
+        />
+      )}
       customItem={(option: string) => (
         <CustomItem
           label={option}
@@ -45,11 +52,36 @@ const ViewSelect = ({
 
 const CustomItem = ({ label, icon: Icon }: CustomItemProps) => {
   return (
-    <div className="flex w-full items-center gap-2 rounded-full bg-white/70 px-2 py-1 font-semibold capitalize text-gray-600">
+    <div
+      className="flex w-full items-center gap-2 rounded-full bg-white/70 px-2 py-1 font-semibold capitalize text-gray-600"
+      // Add group if needed for group selectors
+    >
       {Icon && <Icon className="h-4 w-4" />}
-      <span>{label}</span>
+      <span
+        className="
+
+          group-data-[state=open]:inline
+          group-data-[state=closed]:hidden
+
+        "
+      >
+        {label}
+      </span>
     </div>
   );
 };
 
+const CustomTrigger = ({ label, icon: Icon }: CustomItemProps) => {
+  return (
+    <div className="flex w-full items-center gap-2 rounded-full bg-white/70 px-2 py-1 font-semibold capitalize text-gray-600">
+      {Icon && <Icon className="h-4 w-4" />}
+      <span
+        className="
+          hidden
+          sm:inline
+        "
+      >{label}</span>
+    </div>
+  );
+};
 export default ViewSelect;

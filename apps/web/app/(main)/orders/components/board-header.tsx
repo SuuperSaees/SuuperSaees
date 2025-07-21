@@ -65,7 +65,7 @@ export function BoardHeader({
   // ];
   const showTimerAndWallet = pathname !== '/organization'
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 w-full">
       <PageHeader title="orders:title" rightContent={
         <div className="flex items-center gap-4">
           {showTimerAndWallet && (
@@ -77,13 +77,14 @@ export function BoardHeader({
           <CreateOrderButton
           t={t}
           hasOrders={orders.length > 0 || ordersAreLoading}
+          className="sm:block hidden ml-auto"
         />
         </div>
       } className="w-full flex">
         <h2 className='text-xl font-medium leading-4'>{t('title')}</h2>
     
       </PageHeader>
-      <div className="flex flex-wrap items-center justify-end gap-4">
+      <div className="flex sm:flex-wrap flex-wrap-reverse items-center justify-end gap-2 sm:gap-4 relative w-full">
 
           <StatusFilters
             activeTab={activeTab}
@@ -159,7 +160,11 @@ export function BoardHeader({
           pagination={pagination}
         />
 
-
+        <CreateOrderButton
+          t={t}
+          hasOrders={orders.length > 0 || ordersAreLoading}
+          className="sm:hidden block"
+        />
       </div>
     </div>
   );

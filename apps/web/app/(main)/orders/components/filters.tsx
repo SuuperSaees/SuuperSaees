@@ -134,19 +134,20 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
     <CustomDropdownMenu
       trigger={
         <Button
-          className="flex w-fit items-center gap-2 px-4 py-1 text-sm font-semibold text-gray-600"
+          className="flex w-fit items-center sm:gap-2 gap-0 px-4 py-1 text-sm font-semibold text-gray-600"
           variant="outline"
           size="icon"
+          aria-label={t('common:filters.title')}
         >
           <ListFilter className="h-4 w-4" />
-          <span>{t('common:filters.title')}</span>
+          <span className="hidden sm:inline">{t('common:filters.title')}</span>
           <FilterLabel
             appliedFilters={appliedFiltersCount}
           />
         </Button>
       }
       items={filtersConfig}
-      className="w-[300px]"
+      className="sm:w-[300px] w-full"
     />
   );
 };
