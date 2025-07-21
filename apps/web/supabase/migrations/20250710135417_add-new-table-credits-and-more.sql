@@ -720,8 +720,8 @@ create or replace view "public"."user_organization" as  WITH session_data AS (
         END) AS config
    FROM (((org_info oi
      JOIN organizations o ON ((o.id = (oi.id)::uuid)))
-     LEFT JOIN account_plugins ap ON (((ap.account_id = oi.plugin_owner_id) AND (ap.deleted_on IS NULL) AND (ap.status = 'installed'))))
-     LEFT JOIN plugins p ON (((p.id = ap.plugin_id) AND (p.name = 'credits'::text) AND (p.deleted_on IS NULL))))
+     LEFT JOIN plugins p ON (p.name = 'credits'::text))
+     LEFT JOIN account_plugins ap ON (((ap.plugin_id = p.id) AND (ap.account_id = oi.plugin_owner_id) AND (ap.deleted_on IS NULL) AND (ap.status = 'installed'))))
   WHERE (oi.id IS NOT NULL);
 
 
