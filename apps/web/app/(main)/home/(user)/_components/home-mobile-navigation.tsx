@@ -22,7 +22,6 @@ import { shouldShowDashboardUrl } from '~/config/navigation-utils';
 
 // home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
   const { workspace } = props;
@@ -112,7 +111,6 @@ export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
 
   return (
     <>
-      <WalletSummarySheet />
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Menu className={'h-9'} />

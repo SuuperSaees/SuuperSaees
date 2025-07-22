@@ -14,9 +14,7 @@ import {
 } from '~/server/actions/clients/get-clients';
 
 import { PageHeader } from '../../components/page-header';
-import { TimerContainer } from '../../components/timer-container';
 import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -53,7 +51,7 @@ async function ClientsMembersPage() {
 
   return (
     <PageBody>
-      <PageHeader title="clients:client" rightContent={<><TimerContainer /><WalletSummarySheet /></>} />
+      <PageHeader title="clients:client" />
       <ClientsTable
         initialClients={clients ?? []}
         initialOrganizations={organizations ?? []}

@@ -11,14 +11,12 @@ import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
 import { PageHeader } from '~/(main)/../components/page-header';
-import { TimerContainer } from '~/(main)/../components/timer-container';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getSession } from '~/server/actions/accounts/accounts.action';
 
 import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
 import { loadMembersPageData } from './_lib/server/members-page.loader';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -118,7 +116,6 @@ async function ClientsMembersPage() {
       <div className="flex items-center gap-2">
         <PageHeader
           title="team:team"
-          rightContent={<><TimerContainer /><WalletSummarySheet /></>}
           className="w-full"
         >
           <div className="flex items-center gap-2">

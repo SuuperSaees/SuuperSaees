@@ -4,9 +4,7 @@ import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
 import  InvoicesTable  from "./components/table";
 import { PageHeader } from "~/(main)/../components/page-header";
-import { TimerContainer } from "~/(main)/../components/timer-container";
 import { getInvoices } from "~/server/actions/invoices/invoices.action";
-import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -29,7 +27,6 @@ async function InvoicesPage() {
     <PageBody >
       <PageHeader
         title="invoices:title"
-        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full"
       />
       <InvoicesTable initialData={invoices}/>

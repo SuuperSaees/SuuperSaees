@@ -1,6 +1,5 @@
 import { PageBody } from "@kit/ui/page";
 import { PageHeader } from "~/(main)/../components/page-header";
-import { TimerContainer } from "~/(main)/../components/timer-container";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
 import { getClients } from "~/server/actions/clients/get-clients";
@@ -12,7 +11,6 @@ import { Service } from "~/lib/services.types";
 // Invoice type is used in the component
 import { InvoiceForm } from "../components/form/form";
 import { Trans } from "@kit/ui/trans";
-import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 interface UpdateInvoicePageProps {
   params: {
@@ -62,7 +60,6 @@ async function UpdateInvoicePage({ params }: UpdateInvoicePageProps) {
     <PageBody>
       <PageHeader
         title="invoices:update.title"
-        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full flex"
       >
         <h2 className="text-xl font-medium">
