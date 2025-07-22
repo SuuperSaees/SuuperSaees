@@ -24,7 +24,7 @@ export function WhiteLabelSignUpTabs({
     const { t } = useTranslation('auth');
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full h-full max-w-md mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
         <h2 className="text-xl font-semibold mb-2">
@@ -50,8 +50,8 @@ export function WhiteLabelSignUpTabs({
         </TabsList>
 
         {/* Agency Member Tab */}
-        <TabsContent value="agency-member" className="space-y-4">
-          <Alert>
+        <TabsContent value="agency-member" className="space-y-4 w-96">
+          <Alert className='w-full'>
             <Info className="h-4 w-4" />
             <AlertDescription className="text-center">
               <div className="font-medium mb-1">
@@ -65,7 +65,7 @@ export function WhiteLabelSignUpTabs({
         </TabsContent>
 
         {/* Client Tab */}
-        <TabsContent value="client" className="space-y-4">
+        <TabsContent value="client" className="space-y-4 w-96">
           <WhiteLabelClientSignUpForm 
             agencyId={organizationId}
             themeColor={authDetails?.theme_color}
