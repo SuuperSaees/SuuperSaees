@@ -4,6 +4,7 @@ import { useState, useTransition, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
@@ -39,6 +40,7 @@ export function WhiteLabelClientSignUpForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const host = window.location.host; // Get the current host
+  const router = useRouter();
   
   // Add sign in hooks
   const { captchaToken, resetCaptchaToken } = useCaptchaToken();
@@ -71,6 +73,9 @@ export function WhiteLabelClientSignUpForm({
         });
 
         form.reset();
+
+        // Redirect to home page after successful sign up and sign in
+        router.push('/orders');
         
         // The redirect should happen automatically from the sign in process
       } catch (error) {
@@ -80,7 +85,7 @@ export function WhiteLabelClientSignUpForm({
         resetCaptchaToken();
       }
     });
-  }, [host, agencyId, signInMutation, captchaToken, resetCaptchaToken, form, t]);
+  }, [host, agencyId, signInMutation, captchaToken, resetCaptchaToken, form, t, router]);
 
   return (
     <div className="space-y-6 w-full">

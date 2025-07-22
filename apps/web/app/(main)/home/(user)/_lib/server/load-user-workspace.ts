@@ -10,8 +10,6 @@ import { getTeams } from '~/server/actions/team/team.action';
 import featureFlagsConfig from '~/config/feature-flags.config';
 import { requireUserInServerComponent } from '~/lib/server/require-user-in-server-component';
 
-
-
 const shouldLoadAccounts = featureFlagsConfig.enableTeamAccounts;
 
 export type UserWorkspace = Awaited<ReturnType<typeof loadUserWorkspace>>;
@@ -25,7 +23,8 @@ export type UserWorkspace = Awaited<ReturnType<typeof loadUserWorkspace>>;
 export const loadUserWorkspace = cache(workspaceLoader);
 
 async function workspaceLoader() {
-  const client = getSupabaseServerComponentClient();
+  try {
+    const client = getSupabaseServerComponentClient();
   const api = createAccountsApi(client);
 
   const accountsPromise = shouldLoadAccounts
@@ -61,7 +60,7 @@ async function workspaceLoader() {
         picture_url: org.picture_url ?? undefined
       }))
     : [];
-
+    
   return {
     accounts,
     organization,
@@ -70,4 +69,15 @@ async function workspaceLoader() {
     user,
     agency,
   };
+  } catch (error) {
+    console.log('Error loading user workspace on first render:', error);
+    return {
+      accounts: [],
+      organization: null,
+      pinnedOrganizations: [],
+      workspace: null,
+      user: null,
+      agency: null,
+    };
+  }
 }
