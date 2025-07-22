@@ -155,7 +155,7 @@ const Interactions = ({
 
   return (
     <div
-      className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8"
+      className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto md:px-8 px-0"
       ref={interactionsContainerRef}
       onScroll={handleContainerScroll}
     >
