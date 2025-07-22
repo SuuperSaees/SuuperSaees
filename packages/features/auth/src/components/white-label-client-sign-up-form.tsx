@@ -24,17 +24,18 @@ import {
 import { whiteLabelClientSignUp } from '../../.../../../team-accounts/src/server/actions/clients/white-label-signup/white-label-client-signup';
 
 interface WhiteLabelClientSignUpFormProps {
-  _currentAppOrigin: string;
+  agencyId: string;
   themeColor?: string;
 }
 
 export function WhiteLabelClientSignUpForm({ 
-  _currentAppOrigin, 
+  agencyId,
   themeColor 
 }: WhiteLabelClientSignUpFormProps) {
   const { t } = useTranslation('auth');
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const host = window.location.host; // Get the current host
 
   const form = useForm<WhiteLabelClientSignUpData>({
     resolver: zodResolver(WhiteLabelClientSignUpSchema),
@@ -51,7 +52,7 @@ export function WhiteLabelClientSignUpForm({
     startTransition(() => {
       setError(null);
 
-      whiteLabelClientSignUp(data)
+      whiteLabelClientSignUp(data, host, agencyId)
         .then(() => {
           // The server action will handle the redirect
           form.reset();

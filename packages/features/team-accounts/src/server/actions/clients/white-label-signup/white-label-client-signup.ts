@@ -7,14 +7,11 @@ import { createClient } from '../create/create-clients';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { WhiteLabelClientSignUpSchema, type WhiteLabelClientSignUpData } from '../../../../../../auth/src/schemas/white-label-client-sign-up.schema';
 
-export async function whiteLabelClientSignUp(data: WhiteLabelClientSignUpData) {
+export async function whiteLabelClientSignUp(data: WhiteLabelClientSignUpData, host: string, agencyId: string) {
   try {
     // Validate the input data
     const validatedData = WhiteLabelClientSignUpSchema.parse(data);
 
-    // Get host for the baseUrl - for server actions we need to get it differently
-    const headers = new Headers();
-    const host = headers.get('host') ?? process.env.VERCEL_URL ?? 'localhost:3000';
     const baseUrl = `${host === 'localhost:3000' ? 'http://' : 'https://'}${host}`;
 
     // Create the client using the existing createClient function
@@ -25,6 +22,7 @@ export async function whiteLabelClientSignUp(data: WhiteLabelClientSignUpData) {
         slug: validatedData.organizationName.toLowerCase().replace(/\s+/g, '-'),
       },
       role: 'client_owner',
+      agencyId: agencyId,
       adminActivated: true,
       baseUrl,
       sendEmail: true,

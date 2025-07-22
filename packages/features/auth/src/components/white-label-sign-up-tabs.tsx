@@ -9,16 +9,16 @@ import { Info } from 'lucide-react';
 import { WhiteLabelClientSignUpForm } from './white-label-client-sign-up-form';
 
 interface WhiteLabelSignUpTabsProps {
-  currentAppOrigin: string;
   authDetails?: {
     theme_color?: string;
     background_color?: string;
-  };
+  } | null;
+  organizationId: string;
 }
 
 export function WhiteLabelSignUpTabs({ 
-  currentAppOrigin, 
-  authDetails 
+  authDetails,
+  organizationId
 }: WhiteLabelSignUpTabsProps) {
   const [activeTab, setActiveTab] = useState('client');
     const { t } = useTranslation('auth');
@@ -67,7 +67,7 @@ export function WhiteLabelSignUpTabs({
         {/* Client Tab */}
         <TabsContent value="client" className="space-y-4">
           <WhiteLabelClientSignUpForm 
-            currentAppOrigin={currentAppOrigin}
+            agencyId={organizationId}
             themeColor={authDetails?.theme_color}
           />
         </TabsContent>

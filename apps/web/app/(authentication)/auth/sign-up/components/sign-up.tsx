@@ -27,7 +27,7 @@ export default function SignUp({ searchParams }: Props) {
   const [currentAppOrigin, setCurrentAppOrigin] = useState('http://localhost:3000/');
   const [isCustomDomain, setIsCustomDomain] = useState(false);
   
-  const { authDetails, isLoading } = useAuthDetails(host);
+  const { authDetails, isLoading, organizationId } = useAuthDetails(host);
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
   
   useEffect(() => {
@@ -91,8 +91,8 @@ export default function SignUp({ searchParams }: Props) {
                 {/* Show white label tabs if it's custom domain and no invite token */}
                 {isCustomDomain && !inviteToken ? (
                   <WhiteLabelSignUpTabs 
-                    currentAppOrigin={currentAppOrigin}
                     authDetails={authDetails}
+                    organizationId={organizationId}
                   />
                 ) : (
                   <SignUpMethodsContainer
