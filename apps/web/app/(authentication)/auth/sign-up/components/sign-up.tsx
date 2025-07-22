@@ -5,6 +5,7 @@ import { useAuthDetails } from '@kit/auth/sign-in';
 import { SignUpMethodsContainer } from '@kit/auth/sign-up';
 import { Trans } from '@kit/ui/trans';
 import { SkeletonPasswordSignInForm } from 'node_modules/@kit/auth/src/components/skeleton-password-sign-in-form';
+import { WhiteLabelSignUpTabs } from 'node_modules/@kit/auth/src/components/white-label-sign-up-tabs';
 
 import { AppLogo } from '~/components/app-logo';
 import authConfig from '~/config/auth.config';
@@ -26,7 +27,7 @@ export default function SignUp({ searchParams }: Props) {
   const [currentAppOrigin, setCurrentAppOrigin] = useState('http://localhost:3000/');
   const [isCustomDomain, setIsCustomDomain] = useState(false);
   
-  const { authDetails, isLoading } = useAuthDetails(host);
+  const { authDetails, isLoading, organizationId } = useAuthDetails(host);
   const originalAppOrigin = process.env.NEXT_PUBLIC_SITE_URL;
   
   useEffect(() => {
@@ -86,13 +87,22 @@ export default function SignUp({ searchParams }: Props) {
                     <AppLogo logoUrl={authDetails?.logo_url} />
                   </div>
                 )}
-                <SignUpMethodsContainer
-                  providers={authConfig.providers}
-                  displayTermsCheckbox={authConfig.displayTermsCheckbox}
-                  inviteToken={inviteToken}
-                  paths={paths}
-                  currentAppOrigin={currentAppOrigin}
-                />
+                
+                {/* Show white label tabs if it's custom domain and no invite token */}
+                {isCustomDomain && !inviteToken ? (
+                  <WhiteLabelSignUpTabs 
+                    authDetails={authDetails}
+                    organizationId={organizationId ?? ''}
+                  />
+                ) : (
+                  <SignUpMethodsContainer
+                    providers={authConfig.providers}
+                    displayTermsCheckbox={authConfig.displayTermsCheckbox}
+                    inviteToken={inviteToken}
+                    paths={paths}
+                    currentAppOrigin={currentAppOrigin}
+                  />
+                )}
               </div>
             </div>
 

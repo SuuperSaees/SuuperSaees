@@ -14,10 +14,12 @@ export interface AuthDetails {
   logo_dark_url: string;
   sidebar_background_color: string;
   auth_background_url?: string;
+  organization_id?: string;
 }
 
 export const useAuthDetails = (hostname: string) => {
   const [authDetails, setAuthDetails] = useState<AuthDetails | null>(null);
+  const [organizationId, setOrganizationId] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -122,11 +124,15 @@ export const useAuthDetails = (hostname: string) => {
             fetchedAuthDetails,
           )}; path=/;`;
         }
+
+        setOrganizationId(domainFullData?.organizationId);
+
       }
     };
 
     void fetchAuthDetails();
   }, [hostname]);
 
-  return { authDetails, isLoading };
+
+  return { authDetails, organizationId, isLoading };
 };

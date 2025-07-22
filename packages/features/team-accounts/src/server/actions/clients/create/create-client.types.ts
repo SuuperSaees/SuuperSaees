@@ -11,6 +11,8 @@ export type CreateClient = {
     adminActivated?: boolean;
     sendEmail?: boolean;
     baseUrl?: string;
+    isSignUp?: boolean;
+    customPassword?: string;
   };
   
   export const senderNameKey = OrganizationSettings.KEYS.sender_name;

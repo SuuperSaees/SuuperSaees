@@ -18,6 +18,8 @@ export const createClientUserAccount = async (
     adminActivated = false,
     agencyId?: string,
     sendEmail = true,
+    isSignUp = false,
+    customPassword?: string,
   ) => {
     try {
       const client = getSupabaseServerComponentClient({
@@ -38,7 +40,7 @@ export const createClientUserAccount = async (
       }
   
       // Step 1: Pre-authentication of the user
-      const password = generateRandomPassword(12);
+      const password = customPassword ?? generateRandomPassword(12);
 
       const { logo_url, theme_color } = OrganizationSettingsType.KEYS;
   
@@ -115,7 +117,7 @@ export const createClientUserAccount = async (
       ).toISOString();
       const providerToken = 'supabase';
       const sessionId = decodeToken(accessToken, 'base64')?.session_id as string;
-      const callbackUrl = `${baseUrl}set-password`;
+      const callbackUrl = isSignUp ? `${baseUrl}orders` : `${baseUrl}set-password`;
       // Step 4: Save the token in the database
       const token: Tokens.Insert = {
         id: sessionId,
