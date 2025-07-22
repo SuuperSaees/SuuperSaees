@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
 import { Alert, AlertDescription } from '@kit/ui/alert';
+import { useSignInWithEmailPassword } from '@kit/supabase/hooks/use-sign-in-with-email-password';
 import { 
   Form, 
   FormControl, 
@@ -16,6 +17,8 @@ import {
   FormLabel, 
   FormMessage 
 } from '@kit/ui/form';
+
+import { useCaptchaToken } from '../captcha/client';
 
 import { 
   WhiteLabelClientSignUpSchema, 
@@ -36,6 +39,10 @@ export function WhiteLabelClientSignUpForm({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const host = window.location.host; // Get the current host
+  
+  // Add sign in hooks
+  const { captchaToken, resetCaptchaToken } = useCaptchaToken();
+  const signInMutation = useSignInWithEmailPassword();
 
   const form = useForm<WhiteLabelClientSignUpData>({
     resolver: zodResolver(WhiteLabelClientSignUpSchema),
@@ -48,21 +55,32 @@ export function WhiteLabelClientSignUpForm({
     },
   });
 
-  const onSubmit = (data: WhiteLabelClientSignUpData) => {
-    startTransition(() => {
+  const onSubmit = useCallback((data: WhiteLabelClientSignUpData) => {
+    startTransition(async () => {
       setError(null);
 
-      whiteLabelClientSignUp(data, host, agencyId)
-        .then(() => {
-          // The server action will handle the redirect
-          form.reset();
-        })
-        .catch((error) => {
-          console.error('Registration error:', error);
-          setError(error instanceof Error ? error.message : t('whiteLabel.clientRegistration.errors.registrationFailed'));
+      try {
+        // Step 1: Register the client
+        await whiteLabelClientSignUp(data, host, agencyId);
+        
+        // Step 2: Automatically sign in the user
+        await signInMutation.mutateAsync({
+          email: data.email,
+          password: data.password,
+          options: { captchaToken },
         });
+
+        form.reset();
+        
+        // The redirect should happen automatically from the sign in process
+      } catch (error) {
+        console.error('Registration or sign in error:', error);
+        setError(error instanceof Error ? error.message : t('whiteLabel.clientRegistration.errors.registrationFailed'));
+      } finally {
+        resetCaptchaToken();
+      }
     });
-  };
+  }, [host, agencyId, signInMutation, captchaToken, resetCaptchaToken, form, t]);
 
   return (
     <div className="space-y-6 w-full">
@@ -93,7 +111,7 @@ export function WhiteLabelClientSignUpForm({
                     {...field}
                     type="text"
                     placeholder={t('whiteLabel.clientRegistration.namePlaceholder')}
-                    disabled={isPending}
+                    disabled={isPending || signInMutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -114,7 +132,7 @@ export function WhiteLabelClientSignUpForm({
                     {...field}
                     type="email"
                     placeholder={t('whiteLabel.clientRegistration.emailPlaceholder')}
-                    disabled={isPending}
+                    disabled={isPending || signInMutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -135,7 +153,7 @@ export function WhiteLabelClientSignUpForm({
                     {...field}
                     type="text"
                     placeholder={t('whiteLabel.clientRegistration.organizationNamePlaceholder')}
-                    disabled={isPending}
+                    disabled={isPending || signInMutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -156,7 +174,7 @@ export function WhiteLabelClientSignUpForm({
                     {...field}
                     type="password"
                     placeholder={t('whiteLabel.clientRegistration.passwordPlaceholder')}
-                    disabled={isPending}
+                    disabled={isPending || signInMutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -177,7 +195,7 @@ export function WhiteLabelClientSignUpForm({
                     {...field}
                     type="password"
                     placeholder={t('whiteLabel.clientRegistration.confirmPasswordPlaceholder')}
-                    disabled={isPending}
+                    disabled={isPending || signInMutation.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -188,13 +206,13 @@ export function WhiteLabelClientSignUpForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={isPending}
+            disabled={isPending || signInMutation.isPending}
             style={{
               backgroundColor: themeColor ?? undefined,
               borderColor: themeColor ?? undefined,
             }}
           >
-            {isPending
+            {(isPending || signInMutation.isPending)
               ? t("whiteLabel.clientRegistration.submitting")
               : t("whiteLabel.clientRegistration.submitButton")}
           </Button>
