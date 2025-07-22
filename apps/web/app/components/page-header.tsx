@@ -1,30 +1,18 @@
-import { Trans } from '@kit/ui/trans';
-import { cn } from '@kit/ui/utils';
+import { Header } from "./header";
 
 interface PageHeaderProps {
   title: string;
-  rightContent?: React.ReactNode;
-  className?: string;
   children?: React.ReactNode;
+  className?: string;
 }
 
-export function PageHeader({
-  title,
-  rightContent,
-  className,
-  children,
-}: PageHeaderProps) {
+const PageHeader = ({ title, children, className }: PageHeaderProps) => {
   return (
-    <div className={cn('flex h-9 items-center justify-between', className)}>
-      {!children && (
-        <h2 className="font-inter text-xl font-medium leading-4">
-          <Trans i18nKey={title} />
-        </h2>
-      )}
+    <Header.Root title={title} className={className}>
       {children}
-      <div className="flex items-center gap-2 ml-2">
-        {rightContent}
-      </div>
-    </div>
+      <Header.Right />
+    </Header.Root>
   );
-}
+};
+
+export { PageHeader };
