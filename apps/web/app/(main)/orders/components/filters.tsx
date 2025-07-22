@@ -134,19 +134,20 @@ const Filters = ({ filters, defaultFilters, onReset }: FiltersProps) => {
     <CustomDropdownMenu
       trigger={
         <Button
-          className="flex w-fit items-center gap-2 px-4 py-1 text-sm font-semibold text-gray-600"
+          className="flex w-fit items-center md:gap-2 gap-0 md:px-4 px-0 py-1 text-sm font-semibold text-gray-600 md:border-solid border-none"
           variant="outline"
           size="icon"
+          aria-label={t('common:filters.title')}
         >
           <ListFilter className="h-4 w-4" />
-          <span>{t('common:filters.title')}</span>
+          <span className="hidden md:inline">{t('common:filters.title')}</span>
           <FilterLabel
             appliedFilters={appliedFiltersCount}
           />
         </Button>
       }
       items={filtersConfig}
-      className="w-[300px]"
+      className="md:w-[300px] w-full"
     />
   );
 };
@@ -164,7 +165,7 @@ const FiltersHeaderMenu = ({
 
       <Button
         variant={'ghost'}
-        className="ml-auto h-fit w-fit rounded-lg bg-gray-100 px-2 py-1 text-gray-600"
+        className="ml-auto h-fit w-fit rounded-lg bg-gray-100 px-2 py-1 text-gray-600 md:border-solid border-none"
         onClick={onReset}
       >
         <span>{t('common:filters.resetFilters')}</span>

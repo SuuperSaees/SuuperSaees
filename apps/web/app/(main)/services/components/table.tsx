@@ -118,7 +118,7 @@ const ServicesTable = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-4 justify-end">
+      <div className="flex flex-wrap gap-4 justify-end relative w-full">
         <SearchInput
           value={searchTerm}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

@@ -7,10 +7,12 @@ const AddButton = () => {
   return (
     // TODO: Use only link, the use of themed button is not needed
     // Right now is only being used for the theme color
-    <PrefetcherLink href="/invoices/create" className="ml-auto">
-      <ThemedButton className="h-fit">
+    <PrefetcherLink href="/invoices/create">
+      <ThemedButton className="h-fit" aria-label={'Create invoice'}>
         <PlusIcon className="h-4 w-4" />
-        <Trans i18nKey="invoices:creation.form.actions.createInvoice" />
+        <span className="hidden md:inline">
+          <Trans i18nKey="invoices:creation.form.actions.createInvoice" />
+        </span>
       </ThemedButton>
     </PrefetcherLink>
   );
