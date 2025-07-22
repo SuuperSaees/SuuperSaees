@@ -153,7 +153,7 @@ export const StatusActivity = ({
     return (
       <div className="flex h-fit w-full justify-between gap-4">
         <div className="flex gap-2 align-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 shrink-0">
             {activity.type === ActivityType.PRIORITY ? (
               <BarChart className="h-4 w-4" />
             ) : activity.type === ActivityType.DUE_DATE ? (
