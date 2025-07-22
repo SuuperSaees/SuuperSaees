@@ -20,9 +20,11 @@ const AddServiceButton = ({ show = true }: { show?: boolean }) => {
 
   return (
     <PrefetcherLink href="/services/create">
-      <ThemedButton>
+      <ThemedButton aria-label={'Create service'}>
         <PlusIcon className="h-4 w-4" />
-        {t('createService')}
+        <span className="hidden md:inline">
+          {t('createService')}
+        </span>
       </ThemedButton>
     </PrefetcherLink>
   );
