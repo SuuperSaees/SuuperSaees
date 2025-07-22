@@ -7,6 +7,7 @@ import { getServicesByOrganizationId } from '~/server/actions/services/get-servi
 import { PageHeader } from '../../components/page-header';
 // import AddServiceButton from './components/add-button';
 import ServicesTable from './components/table';
+import AddServiceButton from './components/add-button';
 
 
 export const generateMetadata = async () => {
@@ -32,11 +33,8 @@ async function ServicesPage() {
       <PageHeader
         title="services:title"
         className="w-full"
-      >
-        <h2 className="text-xl font-medium">Services</h2>
-        {/* <AddServiceButton /> */}
-      </PageHeader>
-
+        rightContent={<AddServiceButton />}
+      />
       <ServicesTable initialData={initialServices} />
     </PageBody>
   );
