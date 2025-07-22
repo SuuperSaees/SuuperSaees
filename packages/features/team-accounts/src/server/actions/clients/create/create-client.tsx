@@ -78,9 +78,11 @@ const CreateClientDialog = ({
       <Dialog open={open} onOpenChange={(newOpen) => onOpenChange?.(newOpen)}>
         <DialogTrigger asChild>
           {customTrigger ?? (
-            <ThemedButton>
+            <ThemedButton aria-label={t('createClient')}>
               <PlusIcon className="h-4 w-4" />
-              {t('createClient')}
+              <span className="hidden md:inline">
+                {t('createClient')}
+              </span>
             </ThemedButton>
           )}
         </DialogTrigger>

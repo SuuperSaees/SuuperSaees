@@ -227,14 +227,14 @@ export function ClientsTable({
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col">
-        <div className="flex justify-between">
-          <div className="min-h-[40px] gap-2">
+
+        <div className="flex md:flex-wrap flex-wrap-reverse gap-4 justify-between">
+          <div className="flex gap-2 overflow-x-auto md:w-fit w-full">
             {!view && (
               <>
                 <Button
                   variant="ghost"
-                  className={`inline-flex max-h-[32px] items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold text-[#667085] transition-all hover:text-[#667085] active:bg-[#EBECEF] ${
+                  className={`md:flex-none flex-1 w-full md:w-fit inline-flex max-h-[32px] items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold text-[#667085] transition-all hover:text-[#667085] active:bg-[#EBECEF] ${
                     activeButton === "clients"
                       ? "bg-[#EBECEF] text-[#667085] shadow-sm data-[state=active]:bg-[#d0d6f799] data-[state=active]:text-[#667085] data-[state=active]:shadow-sm"
                       : "bg-transparent text-[#667085]"
@@ -246,7 +246,7 @@ export function ClientsTable({
 
                 <Button
                   variant="ghost"
-                  className={`ml-[.5rem] inline-flex max-h-[32px] items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold text-[#667085] transition-all hover:text-[#667085] active:bg-[#EBECEF] ${
+                  className={`md:flex-none flex-1 w-full md:w-fit inline-flex items-center gap-2 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-semibold text-[#667085] transition-all hover:text-[#667085] active:bg-[#EBECEF] ${
                     activeButton === "organizations"
                       ? "bg-[#EBECEF] text-[#667085] shadow-sm data-[state=active]:bg-[#d0d6f799] data-[state=active]:text-[#667085] data-[state=active]:shadow-sm"
                       : "bg-transparent text-[#667085]"
@@ -260,7 +260,7 @@ export function ClientsTable({
               </>
             )}
           </div>
-          <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center justify-end gap-4 relative md:w-fit w-full">
             <SearchInput
               value={
                 activeButton === "clients"
@@ -286,7 +286,7 @@ export function ClientsTable({
             )}
           </div>
         </div>
-      </div>
+
       <div className="rounded-xl bg-white">
         {shouldShowEmptyState ? (
           <EmptyState

@@ -14,9 +14,12 @@ const AddButton = ({ briefMutation }: AddButtonProps) => {
       onClick={() => briefMutation.mutate()}
       disabled={briefMutation.isPending}
       className='w-fit'
+      aria-label={t('briefs:createBrief')}
     >
       <PlusIcon className="h-4 w-4" />
-      {t('briefs:createBrief')}
+      <span className="hidden md:inline">
+        {t('briefs:createBrief')}
+      </span>
     </ThemedButton>
   );
 };

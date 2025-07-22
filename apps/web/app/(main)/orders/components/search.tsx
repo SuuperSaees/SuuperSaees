@@ -40,14 +40,14 @@ const Search = ({
   );
 
   return (
-    <div className="relative flex flex-1 md:grow-0">
+   
       <SearchInput
         placeholder={t('search')}
         value={searchTerm}
         onChange={handleInputChange}
         className="w-[200px] lg:w-[320px]"
       />
-    </div>
+  
   );
 };
 

@@ -32,6 +32,7 @@ interface SelectActionProps {
   showLabel?: boolean;
   [key: string]: unknown;
   containerClassname?: string;
+  customTrigger?: (option: string) => React.ReactNode;
 }
 
 const SelectAction = ({
@@ -45,6 +46,7 @@ const SelectAction = ({
   isLoading,
   showLabel,
   containerClassname,
+  customTrigger,
   ...rest
 }: SelectActionProps) => {
   const [selectedValue, setSelectedValue] = useState(defaultValue);
@@ -86,13 +88,15 @@ const SelectAction = ({
       >
         <SelectTrigger className={'w-full ' + className}>
           <SelectValue placeholder={t('common:selectOption')}>
-            {/* Use customItem for the selected value if provided, otherwise show the label */}
-            {customItem && selectedValue
+            {/* Use customTrigger for the selected value if provided, else use customItem, otherwise show the label */}
+            {customTrigger && selectedValue
+              ? customTrigger(options.find((opt) => opt.value === selectedValue)?.label ?? '')
+              : customItem && selectedValue
               ? customItem(options.find((opt) => opt.value === selectedValue)?.label ?? '')
               : selectedLabel ?? t('common:selectOption')}
           </SelectValue>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className='ml-0'>
           {
             isLoading ? <Spinner className='w-5 h-5 mx-auto' /> :
           <SelectGroup>

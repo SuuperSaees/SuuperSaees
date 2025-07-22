@@ -102,7 +102,7 @@ const BriefsTable = ({
 
   return (
     <>
-      <div className="flex flex-wrap justify-end gap-4 sm:flex-nowrap">
+      <div className="flex flex-wrap justify-end gap-4 md:flex-nowrap relative w-full">
         <SearchInput
           placeholder={t('briefs:search')}
           value={searchTerm}

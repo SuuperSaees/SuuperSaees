@@ -148,10 +148,12 @@ async function ClientsMembersPage() {
           <ThemedButton
             data-test={'invite-members-form-trigger'}
             className="ml-auto"
+            aria-label={'Invite members'}
           >
             <PlusIcon className="h-4 w-4" />
-
-            <Trans i18nKey={'team:inviteMembersButton'} />
+            <span className="hidden md:inline">
+              <Trans i18nKey={'team:inviteMembersButton'} />
+            </span>
           </ThemedButton>
         </InviteMembersDialogContainer>
       </div>

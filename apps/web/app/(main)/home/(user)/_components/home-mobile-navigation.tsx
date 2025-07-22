@@ -22,6 +22,7 @@ import { shouldShowDashboardUrl } from '~/config/navigation-utils';
 
 // home imports
 import type { UserWorkspace } from '../_lib/server/load-user-workspace';
+import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
   const { workspace } = props;
@@ -110,21 +111,25 @@ export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
   });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Menu className={'h-9'} />
-      </DropdownMenuTrigger>
+    <>
+      <WalletSummarySheet />
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Menu className={'h-9'} />
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent sideOffset={10} className={'w-screen rounded-none'}>
-  
+        <DropdownMenuContent sideOffset={10} className={'w-screen rounded-none'}>
+    
 
-        <DropdownMenuGroup>{Links}</DropdownMenuGroup>
+          <DropdownMenuGroup>{Links}</DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <SignOutDropdownItem onSignOut={() => signOut.mutateAsync()} />
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <SignOutDropdownItem onSignOut={() => signOut.mutateAsync()} />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+ 
   );
 }
 
