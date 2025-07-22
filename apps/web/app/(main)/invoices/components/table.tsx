@@ -102,7 +102,7 @@ const InvoicesTable = ({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap w-fit justify-end gap-4 sm:flex-nowrap ml-auto">
+      <div className="flex flex-wrap w-full justify-end gap-4 md:flex-nowrap ml-auto md:w-fit relative">
         <SearchInput
           placeholder={t('invoices:search')}
           value={searchTerm}

@@ -66,7 +66,7 @@ const SearchInput = ({
   const MobileOverlay = () => (
     <div
       ref={overlayRef}
-      className="absolute top-0 left-0 right-0 z-50 bg-white shadow-md flex items-center px-4 py-2 transition-transform duration-300 sm:hidden animate-in fade-in slide-in-from-top-4"
+      className="absolute top-0 left-0 right-0 z-50 bg-white shadow-md flex items-center px-4 py-2 transition-transform duration-300 md:hidden animate-in fade-in slide-in-from-top-4"
       style={{ top: overlayTop }}
     >
       <Search className="h-5 w-5 text-gray-500 mr-2" />
@@ -94,7 +94,7 @@ const SearchInput = ({
   return (
     <>
       {/* Desktop: always show input inline */}
-      <div className={cn('relative hidden sm:flex items-center w-[280px]', className)}>
+      <div className={cn('relative hidden md:flex items-center w-[280px]', className)}>
         <ThemedInput
           type="text"
           placeholder={placeholder}
@@ -111,7 +111,7 @@ const SearchInput = ({
         type="button"
         aria-label="Open search"
         onClick={handleExpand}
-        className="sm:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
+        className="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <Search className="h-5 w-5 text-gray-500" />
       </button>
