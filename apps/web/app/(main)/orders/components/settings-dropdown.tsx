@@ -70,7 +70,7 @@ function SettingsDropdown<T extends ExportableData>({
       <CustomDropdownMenu
         className='text-gray-600'
         trigger={
-          <Button variant="outline" className="flex items-center justify-center w-10 h-10 p-0">
+          <Button variant="outline" className="flex items-center justify-center px-4 py-1 text-gray-600">
             <SlidersVertical className="h-4 w-4" />
           </Button>
         }
