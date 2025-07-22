@@ -6,6 +6,7 @@ import { briefsColumns } from './briefs';
 import { ordersColumns } from './orders';
 import { servicesColumns } from './services';
 import { invoicesColumns } from './invoices';
+import { creditOperationsColumns } from './credit-operations';
 
 export const columnFactory = <K extends keyof EntityData>(
   type: K,
@@ -16,6 +17,7 @@ export const columnFactory = <K extends keyof EntityData>(
   const ordersConfig = config as ColumnConfigs['orders'];
   const briefsConfig = config as ColumnConfigs['briefs'];
   const invoicesConfig = config as ColumnConfigs['invoices'];
+  const creditsOperationsConfig = config as ColumnConfigs['creditsOperations'];
 
   switch (type) {
     case 'orders':
@@ -38,6 +40,11 @@ export const columnFactory = <K extends keyof EntityData>(
       return invoicesColumns(
         t,
         invoicesConfig.hasPermission,
+      ) as ColumnDef<EntityData[K][number]>[];
+    case 'creditsOperations':
+      return creditOperationsColumns(
+        t,
+        creditsOperationsConfig.hasPermission,
       ) as ColumnDef<EntityData[K][number]>[];
     default:
       return [];

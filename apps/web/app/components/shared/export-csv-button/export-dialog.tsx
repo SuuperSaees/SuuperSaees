@@ -130,6 +130,7 @@ const ExportDialog = <T extends ExportableData>({
                 handleColumnToggle={handleColumnToggle}
                 handleSelectAllColumns={handleSelectAllColumns}
                 handleClearAllColumns={handleClearAllColumns}
+                dataLength={data.length}
               />
             </TabsContent>
 

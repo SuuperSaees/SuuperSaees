@@ -165,6 +165,7 @@
     "tab": "Tabulador",
     "delimiterHelp": "Elige el delimitador que mejor funcione con tu aplicación de hojas de cálculo. La coma es estándar para CSV, pero el punto y coma puede funcionar mejor en algunas regiones.",
     "usePagination": "Usar paginación",
+    "usePaginationNotAvailable": "Se exportarán {{pageSize}} filas de tu vista actual de datos. Puedes cambiar el número de filas en tu vista de tabla",
     "pageSize": "Tamaño de la página",
     "currentPage": "Página actual",
     "selectColumns": "Seleccionar columnas para exportar",
