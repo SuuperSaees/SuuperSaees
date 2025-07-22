@@ -92,7 +92,7 @@ export default function SignUp({ searchParams }: Props) {
                 {isCustomDomain && !inviteToken ? (
                   <WhiteLabelSignUpTabs 
                     authDetails={authDetails}
-                    organizationId={organizationId}
+                    organizationId={organizationId ?? ''}
                   />
                 ) : (
                   <SignUpMethodsContainer
