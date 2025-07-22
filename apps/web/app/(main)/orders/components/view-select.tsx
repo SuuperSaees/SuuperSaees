@@ -29,7 +29,7 @@ const ViewSelect = ({
       defaultValue={defaultValue}
       containerClassname="block"
       className={
-        'w-fit border border-gray-200 bg-white text-gray-600 group ' +
+        'w-fit border border-gray-200 bg-white text-gray-600 group md:border-solid border-none md:px-4 px-0 ' +
         className
       }
       aria-label="View options" // Or use a translation if available
@@ -73,12 +73,12 @@ const CustomItem = ({ label, icon: Icon }: CustomItemProps) => {
 
 const CustomTrigger = ({ label, icon: Icon }: CustomItemProps) => {
   return (
-    <div className="flex w-full items-center gap-2 rounded-full bg-white/70 px-2 py-1 font-semibold capitalize text-gray-600">
-      {Icon && <Icon className="h-4 w-4" />}
+    <div className="flex w-full items-center gap-2 rounded-full bg-white/70 md:px-2 px-0 py-1 font-semibold capitalize text-gray-600">
+      {Icon && <Icon className="h-4 w-4 ml-0" />}
       <span
         className="
           hidden
-          sm:inline
+          md:inline
         "
       >{label}</span>
     </div>

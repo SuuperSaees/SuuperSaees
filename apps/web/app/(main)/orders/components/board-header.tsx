@@ -77,14 +77,14 @@ export function BoardHeader({
           <CreateOrderButton
           t={t}
           hasOrders={orders.length > 0 || ordersAreLoading}
-          className="sm:block hidden ml-auto"
+          className="md:block hidden ml-auto"
         />
         </div>
       } className="w-full flex">
         <h2 className='text-xl font-medium leading-4'>{t('title')}</h2>
     
       </PageHeader>
-      <div className="flex sm:flex-wrap flex-wrap-reverse items-center justify-end gap-2 sm:gap-4 relative w-full">
+      <div className="flex md:flex-wrap flex-wrap-reverse items-center justify-end gap-3 md:gap-4 relative w-full">
 
           <StatusFilters
             activeTab={activeTab}
@@ -163,7 +163,7 @@ export function BoardHeader({
         <CreateOrderButton
           t={t}
           hasOrders={orders.length > 0 || ordersAreLoading}
-          className="sm:hidden block"
+          className="md:hidden block"
         />
       </div>
     </div>

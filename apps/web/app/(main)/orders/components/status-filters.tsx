@@ -45,7 +45,7 @@ const StatusFilters = ({
   };
 
   return (
-    <div className={cn("flex mr-auto gap-2 bg-transparent sm:gap-2 gap-0 w-full sm:w-fit", 
+    <div className={cn("flex mr-auto gap-2 bg-transparent sm:gap-2 gap-0 w-full md:w-fit", 
     "overflow-x-auto", className)}>
       {tabsConfig.map((tab) => (
         <Button
@@ -56,7 +56,7 @@ const StatusFilters = ({
           className={cn(
             "font-semibold hover:bg-gray-200/30 hover:text-brand",
             tab.key === activeTab ? 'bg-brand-50/60 text-brand-900' : 'bg-transparent text-gray-600',
-            "sm:flex-none flex-1 sm:w-fit w-full"
+            "md:flex-none flex-1 md:w-fit w-full"
           )}
           key={tab.key}
           style={createStyles(tab)}
