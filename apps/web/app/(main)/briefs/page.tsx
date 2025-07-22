@@ -6,6 +6,7 @@ import { withI18n } from '~/lib/i18n/with-i18n';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import BriefsTable from './components/table';
+import AddButton from './components/add-button';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -26,6 +27,7 @@ async function BriefsPage() {
       <PageHeader
         title="briefs:briefs"
         className="w-full"
+        rightContent={<AddButton />}
       />
       <BriefsTable initialData={initialData} />
     </PageBody>
