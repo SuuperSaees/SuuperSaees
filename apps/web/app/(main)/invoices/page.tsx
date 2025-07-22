@@ -5,6 +5,7 @@ import { withI18n } from "~/lib/i18n/with-i18n";
 import  InvoicesTable  from "./components/table";
 import { PageHeader } from "~/(main)/../components/page-header";
 import { getInvoices } from "~/server/actions/invoices/invoices.action";
+import AddButton from "./components/add-button";
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -28,7 +29,9 @@ async function InvoicesPage() {
       <PageHeader
         title="invoices:title"
         className="w-full"
+        rightContent={<AddButton />}
       />
+    
       <InvoicesTable initialData={invoices}/>
     </PageBody>
   );
