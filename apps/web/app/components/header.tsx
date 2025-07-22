@@ -17,7 +17,7 @@ interface HeaderRootProps {
  */
 export const HeaderRoot = ({ title, className, children }: HeaderRootProps) => {
   return (
-    <header className={cn("flex h-9 items-center justify-between", className)}>
+    <header className={cn("flex h-9 items-center justify-between gap-2", className)}>
       <h2 className="font-inter text-xl font-medium leading-4">
         <Trans i18nKey={title} />
       </h2>
@@ -38,7 +38,7 @@ export const HeaderRight = ({
   enableDefaults?: boolean;
 }) => {
   return (
-    <div className="flex items-center gap-2 ml-2">
+    <div className="flex items-center gap-2">
       {enableDefaults && (
         <>
           <TimerContainer />
