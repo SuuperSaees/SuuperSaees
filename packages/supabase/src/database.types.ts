@@ -3923,6 +3923,10 @@ export type Database = {
         }
         Returns: Database["public"]["Tables"]["invitations"]["Row"][]
       }
+      approve_agency_member: {
+        Args: { p_user_id: string; p_domain: string }
+        Returns: boolean
+      }
       can_action_account_member: {
         Args: { target_organization_id: string; target_user_id: string }
         Returns: boolean

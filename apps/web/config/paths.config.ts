@@ -5,6 +5,8 @@ const PathsSchema = z.object({
   auth: z.object({
     signIn: z.string().min(1),
     signUp: z.string().min(1),
+    signUpAgencyMember: z.string().min(1),
+    pendingApproval: z.string().min(1),
     verifyMfa: z.string().min(1),
     callback: z.string().min(1),
     passwordReset: z.string().min(1),
@@ -53,6 +55,8 @@ const pathsConfig = PathsSchema.parse({
   auth: {
     signIn: '/auth/sign-in',
     signUp: '/auth/sign-up',
+    signUpAgencyMember: '/auth/sign-up/member',
+    pendingApproval: '/auth/pending-approval',
     verifyMfa: '/auth/verify',
     callback: '/auth/callback',
     passwordReset: '/auth/password-reset',
