@@ -327,7 +327,8 @@ function SectionView({
       className={`h-full min-h-0 ${["new", ...embeds.map((e) => e.id)].includes(activeTab) ? "flex flex-col" : ""}`}
     >
       <div className="flex justify-between flex-wrap shrink gap-4">
-        <TabsList className="gap-2 bg-transparent max-w-full">
+        <div className="w-full overflow-x-auto no-scrollbar">
+          <TabsList className="gap-2 bg-transparent flex-nowrap min-w-max">
           {/* Standard tabs */}
           {renderStandardTabs(baseTabs)}
 
@@ -338,7 +339,8 @@ function SectionView({
             renderEmbedTabs()
           )}
         </TabsList>
-        <div className="flex gap-4 items-center">
+        </div>
+        <div className="flex gap-4 items-center ml-auto">
           {availableTabsBasedOnRole.has(currentUserRole) && (
             <ButtonPinOrganization organizationId={clientOrganizationId} />
           )}
