@@ -74,8 +74,7 @@ export default async function RootLayout({
           </PageNavigation>
 
           <PageMobileNavigation className={'flex items-center justify-between'}>
-            <AppLogo />
-            <HomeMobileNavigation workspace={workspace} />
+            {/* <HomeMobileNavigation /> */}
           </PageMobileNavigation>
 
           <UserWorkspaceContextProvider value={workspace}>
