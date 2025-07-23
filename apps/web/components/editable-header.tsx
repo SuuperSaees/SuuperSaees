@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { TimerContainer } from '../app/components/timer-container';
-import { PageMobileNavigation } from '@kit/ui/page';
-import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { TimerContainer } from "../app/components/timer-container";
+import { PageMobileNavigation } from "@kit/ui/page";
+import { HomeMobileNavigation } from "~/(main)/home/(user)/_components/home-mobile-navigation";
 
 interface EditableHeaderProps {
   initialName: string;
   userRole: string;
   updateFunction: (value: string) => Promise<void>;
   rolesThatCanEdit: Set<string>;
-  variant?: 'chat' | 'default';
+  variant?: "chat" | "default";
   maxWidth?: number;
   maxWindowWidthRatio?: number;
   layoutClassName?: string;
@@ -24,7 +24,7 @@ const EditableHeader = ({
   userRole,
   updateFunction,
   rolesThatCanEdit,
-  variant = 'default',
+  variant = "default",
   maxWidth = 600,
   maxWindowWidthRatio = 0.6,
   layoutClassName = "flex gap-2 inline-flex max-h-[60px] w-full items-center justify-between relative w-full",
@@ -40,7 +40,7 @@ const EditableHeader = ({
   }, [initialName]);
 
   const handleSave = async () => {
-    if (name.trim() === '') {
+    if (name.trim() === "") {
       toast.error(`The given name cannot be empty`);
       setName(initialName);
       return;
@@ -58,9 +58,10 @@ const EditableHeader = ({
   const updateInputWidth = () => {
     if (spanRef.current && inputRef.current) {
       const spanWidth = spanRef.current.offsetWidth;
-      const maxCalculatedWidth = variant === 'chat'
-        ? Math.min(spanWidth, window.innerWidth * 0.5, maxWidth)
-        : Math.min(spanWidth, window.innerWidth * maxWindowWidthRatio);
+      const maxCalculatedWidth =
+        variant === "chat"
+          ? Math.min(spanWidth, window.innerWidth * 0.5, maxWidth)
+          : Math.min(spanWidth, window.innerWidth * maxWindowWidthRatio);
       inputRef.current.style.width = `${maxCalculatedWidth}px`;
     }
   };
@@ -72,38 +73,39 @@ const EditableHeader = ({
   const canEdit = rolesThatCanEdit.has(userRole);
 
   const getContainerClassName = () => {
-    return variant === 'chat'
-      ? 'flex-1 flex items-center gap-2 overflow-hidden'
-      : 'w-full relative justify-between flex';
+    return variant === "chat"
+      ? "flex-1 flex items-center gap-2 overflow-hidden"
+      : "w-full relative justify-between flex";
   };
 
   const getInputClassName = () => {
-    const baseClass = "items-center overflow-hidden rounded-md border-none bg-slate-50 pr-1 text-xl font-medium font-inter leading-4 text-primary-900 outline-none bg-transparent";
-    return variant === 'chat'
-      ? `w-full h-15 ${baseClass} ${inputClassName ?? ''}`
-      : `h-15 flex min-w-[80%] max-w-[80%] ${baseClass} ${inputClassName ?? ''}`;
+    const baseClass =
+      "items-center overflow-hidden rounded-md border-none bg-slate-50 pr-1 text-xl font-medium font-inter leading-4 text-primary-900 outline-none bg-transparent";
+    return variant === "chat"
+      ? `w-full h-15 ${baseClass} ${inputClassName ?? ""}`
+      : `h-15 flex min-w-[80%] max-w-[80%] ${baseClass} ${inputClassName ?? ""}`;
   };
 
   const getTextClassName = () => {
     const baseClass = "text-xl font-medium font-inter leading-4";
-    return variant === 'chat'
-      ? `block overflow-hidden text-ellipsis whitespace-nowrap ${baseClass} ${textClassName ?? ''}`
-      : `max-w-[100%] overflow-hidden whitespace-nowrap pr-1 w-full ${baseClass} ${textClassName ?? ''}`;
+    return variant === "chat"
+      ? `block overflow-hidden text-ellipsis whitespace-nowrap ${baseClass} ${textClassName ?? ""}`
+      : `max-w-[100%] overflow-hidden whitespace-nowrap pr-1 w-full ${baseClass} ${textClassName ?? ""}`;
   };
 
   if (!canEdit) {
     return (
       <div className={layoutClassName}>
-        <PageMobileNavigation className={"flex items-center justify-between w-fit" }>
+        <PageMobileNavigation
+          className={"flex items-center justify-between w-fit"}
+        >
           <HomeMobileNavigation />
         </PageMobileNavigation>
         <div className={getContainerClassName()}>
-          {variant === 'chat' ? (
+          {variant === "chat" ? (
             <>
               <div className="flex-1 min-w-0 max-w-[600px] overflow-hidden">
-                <span className={getTextClassName()}>
-                  {name}
-                </span>
+                <span className={getTextClassName()}>{name}</span>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <TimerContainer />
@@ -113,7 +115,7 @@ const EditableHeader = ({
             <>
               <span className={getTextClassName()}>
                 {name.slice(0, 70).trim()}
-                {name.length > 70 && '...'}
+                {name.length > 70 && "..."}
               </span>
               <TimerContainer />
             </>
@@ -125,9 +127,13 @@ const EditableHeader = ({
 
   return (
     <div className={layoutClassName}>
-
+      <PageMobileNavigation
+        className={"flex items-center justify-between w-fit"}
+      >
+        <HomeMobileNavigation />
+      </PageMobileNavigation>
       <div className={getContainerClassName()}>
-        {variant === 'chat' ? (
+        {variant === "chat" ? (
           <>
             <div className="relative flex-1 min-w-0 max-w-[600px] overflow-hidden">
               <input
