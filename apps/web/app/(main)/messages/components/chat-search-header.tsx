@@ -10,13 +10,15 @@ import { Members } from '~/lib/members.types';
 // import { useRouter } from 'next/navigation';
 import { useChat } from './context/chat-context';
 import CreateOrganizationsChatDialog from './create-chat-dialog';
+import { PageMobileNavigation } from '@kit/ui/page';
+import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
 
 export default function ChatSearchHeader({
   agencyTeam,
   clientOrganization,
 }: {
   agencyTeam: Members.Organization;
-  clientOrganization?: Account.Type;
+  clientOrganization?: Account.Type;  
 }) {
   const { t } = useTranslation('chats');
 
@@ -47,6 +49,9 @@ export default function ChatSearchHeader({
   return (
     <div className="relative flex flex-col border-b">
       <div className="flex min-h-9 items-center justify-between gap-2 border-b border-gray-200 px-6.5 py-3">
+        <PageMobileNavigation className={"flex items-center justify-between w-fit" }>
+          <HomeMobileNavigation />
+        </PageMobileNavigation>
         <h2 className="font-inter text-xl font-medium text-primary-900">
           {t('chats')}
         </h2>

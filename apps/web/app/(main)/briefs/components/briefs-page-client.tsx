@@ -22,10 +22,8 @@ import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-bri
 
 import { PageHeader } from '../../../components/page-header';
 import Table from '../../../components/table/table';
-import { TimerContainer } from '../../../components/timer-container';
 import TableSkeleton from '~/(views)/components/table/table-skeleton';
 import { PlusIcon } from 'lucide-react';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -93,7 +91,6 @@ export function BriefsPageClient() {
       <div className="flex flex-wrap justify-between gap-4 sm:flex-nowrap">
         <PageHeader
           title="briefs:briefs"
-          rightContent={<><TimerContainer /><WalletSummarySheet /></>}
           className="w-full"
         />
 

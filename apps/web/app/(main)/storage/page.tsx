@@ -13,6 +13,7 @@ import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 
 import FilesView from './components/file-view';
+import { PageBody } from '@kit/ui/page';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -40,7 +41,8 @@ async function StoragePage() {
 
 
   return (
-    <div className="space-y-10 p-8">
+    <PageBody>
+
       <Header
         id={newOrganization.id ?? ''}
         name={newOrganization.name ?? ''}
@@ -53,7 +55,7 @@ async function StoragePage() {
         agencyId={agency?.id ?? ''}
         organizationName={organization.name ?? agency?.name ?? ''}
       />
-    </div>
+    </PageBody>
   );
 }
 export default withI18n(StoragePage);

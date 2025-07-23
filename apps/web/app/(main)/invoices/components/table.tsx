@@ -17,7 +17,6 @@ import { Pagination } from '~/lib/pagination';
 
 import Table from '../../../components/table/table';
 import { getInvoices } from '~/server/actions/invoices/invoices.action';
-import AddButton from './add-button';
 
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
@@ -110,9 +109,6 @@ const InvoicesTable = ({
             setSearchTerm(e.target.value)
           }
         />
-        {hasPermissionToActionInvoices('create') && (
-          <AddButton />
-        )}
       </div>
       {invoicesAreLoading ? (
         <TableSkeleton columns={6} rows={4} />

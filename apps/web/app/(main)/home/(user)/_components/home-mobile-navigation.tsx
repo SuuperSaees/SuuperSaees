@@ -19,16 +19,15 @@ import { personalAccountNavigationConfig } from '~/config/personal-account-navig
 import { useOrganizationSettings } from '../../../../../../../packages/features/accounts/src/context/organization-settings-context';
 import pathsConfig from '~/config/paths.config';
 import { shouldShowDashboardUrl } from '~/config/navigation-utils';
+import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
 
 // home imports
-import type { UserWorkspace } from '../_lib/server/load-user-workspace';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
-export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
-  const { workspace } = props;
+export function HomeMobileNavigation() {
+  const { workspace } = useUserWorkspace();
   const signOut = useSignOut();
-  const userId = workspace.id;
-  const userRole = workspace.role;
+  const userId = workspace?.id;
+  const userRole = workspace?.role;
   const organizationSettings = useOrganizationSettings();
 
   const catalogProductUrl = Boolean(organizationSettings.catalog_product_url);
@@ -112,13 +111,12 @@ export function HomeMobileNavigation(props: { workspace: UserWorkspace }) {
 
   return (
     <>
-      <WalletSummarySheet />
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Menu className={'h-9'} />
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent sideOffset={10} className={'w-screen rounded-none'}>
+        <DropdownMenuContent sideOffset={10} className={'w-screen rounded-none h-full'}>
     
 
           <DropdownMenuGroup>{Links}</DropdownMenuGroup>

@@ -11,8 +11,6 @@ import { loadUserWorkspace } from '../_lib/server/load-user-workspace';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { PageHeader } from '../../../../components/page-header';
-import { TimerContainer } from '../../../../components/timer-container';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 const features = {
   enableAccountDeletion: featureFlagsConfig.enableAccountDeletion,
@@ -38,9 +36,6 @@ function PersonalAccountSettingsPage() {
     <PageBody>
         <PageHeader
           title='account:settingsTab'
-          rightContent={
-           <><TimerContainer /><WalletSummarySheet /></>
-          }
         />
 
         <PersonalAccountSettingsContainer

@@ -80,7 +80,7 @@ const CreateClientDialog = ({
           {customTrigger ?? (
             <ThemedButton aria-label={t('createClient')}>
               <PlusIcon className="h-4 w-4" />
-              <span className="hidden md:inline">
+              <span>
                 {t('createClient')}
               </span>
             </ThemedButton>

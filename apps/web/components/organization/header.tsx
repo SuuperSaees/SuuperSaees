@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import UpdateImage from '../../app/components/ui/update-image';
 import { cn } from '@kit/ui/utils';
 import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
+import { PageMobileNavigation } from '@kit/ui/page';
+import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
 
 interface OrganizationHeaderProps {
   id: string;
@@ -32,7 +34,7 @@ function Header({
   id, 
   currentUserRole, 
   className, 
-  imageClassName = "aspect-square h-12 w-12 flex-shrink-0", 
+  imageClassName = "aspect-square h-12 w-12 flex-shrink-0 md:block hidden", 
   contentClassName = "flex flex-col justify-center" 
 }: OrganizationHeaderProps) {
   const rolesThatCanEdit = new Set(['agency_member', 'agency_project_manager', 'agency_owner']);
@@ -51,7 +53,10 @@ function Header({
     identifier: '',
   };
   return (
-    <div className={cn('flex w-full gap-4', className)}>
+    <div className={cn('flex w-full md:gap-4 gap-1 ', className)}>
+       <PageMobileNavigation className={"flex items-center justify-between w-fit" }>
+          <HomeMobileNavigation />
+        </PageMobileNavigation>
        <UpdateImage
         bucketStorage={bucketStorage}
         floatingButtons={{ update: true, delete: true }}

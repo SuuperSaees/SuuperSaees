@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { TimerContainer } from '../app/components/timer-container';
+import { PageMobileNavigation } from '@kit/ui/page';
+import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
 
 interface EditableHeaderProps {
   initialName: string;
@@ -25,7 +27,7 @@ const EditableHeader = ({
   variant = 'default',
   maxWidth = 600,
   maxWindowWidthRatio = 0.6,
-  layoutClassName = "flex inline-flex max-h-[60px] w-full items-center justify-between relative w-full",
+  layoutClassName = "flex gap-2 inline-flex max-h-[60px] w-full items-center justify-between relative w-full",
   inputClassName,
   textClassName,
 }: EditableHeaderProps) => {
@@ -92,6 +94,9 @@ const EditableHeader = ({
   if (!canEdit) {
     return (
       <div className={layoutClassName}>
+        <PageMobileNavigation className={"flex items-center justify-between w-fit" }>
+          <HomeMobileNavigation />
+        </PageMobileNavigation>
         <div className={getContainerClassName()}>
           {variant === 'chat' ? (
             <>
@@ -120,6 +125,7 @@ const EditableHeader = ({
 
   return (
     <div className={layoutClassName}>
+
       <div className={getContainerClassName()}>
         {variant === 'chat' ? (
           <>
