@@ -35,7 +35,7 @@ const AddButton = () => {
       aria-label={t('briefs:createBrief')}
     >
       <PlusIcon className="h-4 w-4" />
-      <span className="hidden md:inline">
+      <span>
         {t('briefs:createBrief')}
       </span>
     </ThemedButton>

@@ -127,7 +127,7 @@ async function ClientsMembersPage() {
                 aria-label={"Invite members"}
               >
                 <PlusIcon className="h-4 w-4" />
-                <span className="hidden md:inline">
+                <span>
                   <Trans i18nKey={"team:inviteMembersButton"} />
                 </span>
               </ThemedButton>
