@@ -41,11 +41,11 @@ function SiteSettings({
   };
 
   return (
-    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 pr-48 text-sm lg:flex-nowrap'>
+    <div className='"flex mt-4 w-full flex-wrap gap-6 pb-32 md:pr-48 pr-0 text-sm lg:flex-nowrap'>
       {role === 'agency_owner' && (
         <div className="flex w-full flex-col space-y-6">
-          <div className="flex justify-between">
-            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandName')}
               </p>
@@ -54,15 +54,15 @@ function SiteSettings({
             <UpdateAccountOrganizationName />
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <p className="mr-7 w-[45%] whitespace-nowrap font-bold text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <p className="md:mr-7 mr-0 w-[45%] whitespace-nowrap font-bold text-gray-700">
               {t('language')}
             </p>
             <LanguageSelector onChange={handleChangeLanguage} defaultLanguage={language}/>
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 md:w-[45%] w-2/3 flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandColor')}
               </p>
@@ -71,8 +71,8 @@ function SiteSettings({
               <UpdateAccountColorBrand />
             </div>
           </div>
-          <div className="flex justify-between">
-            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 md:w-[45%] w-2/3 flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandSidebar')}
               </p>
@@ -82,12 +82,12 @@ function SiteSettings({
             </div>
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 md:w-[45%] w-full flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandLogo')}
               </p>
-              <p className="text-wrap max-w-[300px]">
+              <p className="text-wrap md:max-w-[300px] max-w-full">
                 {t('brandLogoDescription')}
               </p>
             </div>
@@ -113,8 +113,8 @@ function SiteSettings({
             </div>
           </div>
 
-          <div className="flex justify-between">
-            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700"></div>
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 md:w-[45%] w-2/3 flex flex-col whitespace-nowrap text-gray-700"></div>
             <div className="w-[100%] flex flex-col gap-2">
               <p className="font-bold text-gray-700">
                 {t('darkVersion')}
@@ -137,8 +137,8 @@ function SiteSettings({
             </div>
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 w-[45%] flex flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 md:w-[45%] w-full flex flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandFavicon')}
               </p>
@@ -164,8 +164,8 @@ function SiteSettings({
             </div>
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandDomain')}
               </p>
@@ -173,8 +173,8 @@ function SiteSettings({
             <UpdateAccountOrganizationDomain organizationId={organization?.id ?? ''} />
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
               <p className="font-bold">
                 {t('brandSenderName')}
               </p>
@@ -182,8 +182,8 @@ function SiteSettings({
             <UpdateAccountOrganizationSenderName />
           </div>
           <Separator />
-          <div className="flex justify-between">
-            <div className="mr-7 flex w-[45%] flex-col whitespace-nowrap text-gray-700">
+          <div className="flex flex-wrap md:flex-nowrap gap-4 justify-between md:p-0 p-4">
+            <div className="md:mr-7 mr-0 flex md:w-[45%] w-full flex-col whitespace-nowrap text-gray-700">
               <p className="text-wrap font-bold">
                 {t('brandSenderEmailAndDomain')}
               </p>
