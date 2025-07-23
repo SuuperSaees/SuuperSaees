@@ -12,7 +12,7 @@ const TasksSection = ({
   agencyStatuses: AgencyStatus.Type[];
 }) => {
   return (
-    <div className="h-screen max-h-screen overflow-y-auto">
+    <div className="max-h-screen h-full overflow-y-auto">
       <TaskDropdown userRole={userRole} orderId={orderId} orderAgencyId={orderAgencyId} agencyStatuses={agencyStatuses} />
     </div>
   );
