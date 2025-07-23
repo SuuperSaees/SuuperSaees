@@ -15,6 +15,7 @@ import {
 
 import { PageHeader } from '../../components/page-header';
 import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspace';
+import CreateClientDialog from '~/team-accounts/src/server/actions/clients/create/create-client';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -51,7 +52,7 @@ async function ClientsMembersPage() {
 
   return (
     <PageBody>
-      <PageHeader title="clients:client" />
+      <PageHeader title="clients:client" rightContent={<CreateClientDialog />} />
       <ClientsTable
         initialClients={clients ?? []}
         initialOrganizations={organizations ?? []}
