@@ -11,6 +11,8 @@ import { loadUserWorkspace } from '../home/(user)/_lib/server/load-user-workspac
 import { AgencyStatusesProvider } from './components/context/agency-statuses-context';
 import { OrdersProvider } from './components/context/orders-context';
 import ProjectsBoard from './components/projects-board';
+import CreateOrderButton from './components/create-order-button';
+import { PageHeader } from '~/(main)/../components/page-header';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -84,27 +86,11 @@ async function OrdersPage() {
         agencyMembers={agencyMembers ?? []}
       >
         <PageBody className="flex h-screen max-h-full min-h-0 flex-1 flex-col">
-          {/*  
             <PageHeader
               title="orders:title"
-              rightContent={<TimerContainer />}
-            /> */}
-          {/* {agencyRoles.includes(userWorkspace.role ?? '') ? (
-              <PageHeader
-                title="orders:title"
-                rightContent={<TimerContainer />}
-              />
-            ) : (
-              <Header
-                name={userOrganization.name ?? ''}
-                logo={userOrganization.picture_url ?? ''}
-                id={userOrganization.id ?? ''}
-                currentUserRole={userWorkspace.role ?? ''}
-                className="mb-6 flex items-center gap-2"
-                imageClassName="aspect-square h-8 w-8 flex-shrink-0"
-                contentClassName="flex flex-col justify-center"
-              />
-            )} */}
+              rightContent={<CreateOrderButton />}
+            />
+
           <ProjectsBoard
             agencyMembers={agencyMembers.map((member) => ({
               id: member.id,

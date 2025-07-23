@@ -7,15 +7,12 @@ import { Order } from '~/lib/order.types';
 
 import { ValueFormatters } from '../hooks/use-csv-export-formatters';
 import { ViewOption } from '../hooks/use-orders-view-configs';
-import CreateOrderButton from './create-order-button';
 import Filters, { FilterGroup } from './filters';
 import Search from './search';
 import SettingsDropdown from './settings-dropdown';
 import StatusFilters, { TabConfig } from './status-filters';
 import ViewSelect from './view-select';
-import { usePathname } from 'next/navigation';
 import { PaginationConfig } from '../../../components/shared/export-csv-button/types';
-import { Header } from '~/(main)/../components/header';
 
 interface BoardHeaderProps {
   t: (key: string) => string;
@@ -54,27 +51,14 @@ export function BoardHeader({
   getValueFormatters,
   pagination,
 }: BoardHeaderProps) {
-  const pathname = usePathname();
   // const { workspace: userWorkspace } = useUserWorkspace();
   // const agencyRoles = [
   //   'agency_owner',
   //   'agency_project_manager',
   //   'agency_member',
   // ];
-  const showTimerAndWallet = pathname !== '/organization'
   return (
     <div className="flex flex-col gap-5 w-full">
-
-      <Header.Root title="orders:title" className="w-full flex">
-        <Header.Right enableDefaults={showTimerAndWallet}>
-          <CreateOrderButton
-            t={t}
-            hasOrders={orders.length > 0 || ordersAreLoading}
-            className="md:block hidden ml-auto"
-          />
-        </Header.Right>
-      </Header.Root>
-
       <div className="flex md:flex-wrap flex-wrap-reverse items-center justify-end gap-3 md:gap-4 relative w-full">
 
           <StatusFilters
@@ -84,7 +68,6 @@ export function BoardHeader({
             tabsConfig={tabsConfig}
             className="mr-auto"
           />
-
 
         <Search
           defaultSearch={searchTerm}
@@ -149,12 +132,6 @@ export function BoardHeader({
             >
           }
           pagination={pagination}
-        />
-
-        <CreateOrderButton
-          t={t}
-          hasOrders={orders.length > 0 || ordersAreLoading}
-          className="md:hidden block"
         />
       </div>
     </div>
