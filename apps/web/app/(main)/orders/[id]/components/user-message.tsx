@@ -16,7 +16,7 @@ const UserMessage = forwardRef(({ message, ...props }: UserMessageProps, ref: Re
 
   return (
     <div
-      className="flex w-full items-start gap-4 rounded-lg p-2 transition duration-300 hover:bg-grayTrue-100"
+      className="flex w-full items-start gap-2 rounded-lg p-2 transition duration-300 hover:bg-gray-100"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       ref={ref}

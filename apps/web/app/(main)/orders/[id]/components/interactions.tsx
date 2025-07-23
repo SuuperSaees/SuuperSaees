@@ -190,12 +190,12 @@ const Interactions = ({
                 return interaction.class ===
                   ChatInteractionType.BRIEF_RESPONSE ? (
                   <div
-                    className="flex w-full"
+                    className="flex w-full p-2"
                     key={interaction.id}
                     {...dataProps}
                   >
-                    <div className="mr-2 flex h-7 w-7 items-center justify-center rounded-full bg-green-200 p-1">
-                      <Check className="text-green-700" />
+                    <div className="mr-2 flex h-10 w-10 items-center justify-center rounded-full bg-green-200 p-1">
+                      <Check className="text-green-700 w-4 h-4" />
                     </div>
                     <UserFirstMessage interaction={interaction} user={{
                       ...orderOwner,
