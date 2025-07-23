@@ -107,158 +107,6 @@ interface SectionHeaderProps {
   title: string;
   subtitle: string;
 }
-
-// Reusable Setting Row Component
-function SettingRow({
-  title,
-  description,
-  children,
-  showSeparator = true,
-}: SettingRowProps) {
-  return (
-    <>
-      <div className="flex flex-wrap md:flex-nowrap gap-6 justify-between md:p-0 p-4">
-        <div className="md:w-[45%] w-full flex flex-col gap-2 text-gray-700">
-          <label className="text-sm font-medium text-gray-900 break-words">
-            {title}
-          </label>
-          <p className="text-sm text-gray-600 break-words">{description}</p>
-        </div>
-        <div className="flex-1 w-full min-w-0">{children}</div>
-      </div>
-      {showSeparator && <Separator />}
-    </>
-  );
-}
-
-// Reusable Form Field Component
-function FormFieldComponent({
-  name,
-  label,
-  description,
-  placeholder,
-  onFieldChange,
-  type = "input",
-  options = [],
-  comboboxProps,
-}: FormFieldProps) {
-  const renderField = () => {
-    switch (type) {
-      case "select":
-        return (
-          <Select
-            onValueChange={(value) => onFieldChange(name as FormPath, value)}
-          >
-            <SelectTrigger className="text-gray-700">
-              <SelectValue
-                className="text-gray-700"
-                placeholder={placeholder}
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-
-      case "textarea":
-        return (
-          <Textarea
-            placeholder={placeholder}
-            className="min-h-[100px] resize-none text-gray-700"
-            onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) =>
-              onFieldChange(name as FormPath, e.target.value)
-            }
-          />
-        );
-
-      case "combobox":
-        return (
-          <Combobox
-            options={options}
-            onValueChange={(value) => onFieldChange(name as FormPath, value)}
-            placeholder={placeholder}
-            searchPlaceholder={comboboxProps?.searchPlaceholder ?? ""}
-            emptyMessage={comboboxProps?.emptyMessage ?? ""}
-            contentClassName="text-gray-700"
-            triggerClassName="text-gray-700"
-            className="w-full text-gray-700 bg-transparent font-normal"
-          />
-        );
-
-      default:
-        return (
-          <ThemedInput
-            placeholder={placeholder}
-            onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
-              onFieldChange(name as FormPath, e.target.value)
-            }
-            className="text-gray-700"
-          />
-        );
-    }
-  };
-
-  return (
-    <SettingRow title={label} description={description}>
-      <FormField
-        name={name}
-        render={({ field: _field }) => (
-          <FormItem>
-            <FormControl>{renderField()}</FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-    </SettingRow>
-  );
-}
-
-// Reusable Section Header Component
-function SectionHeader({ title, subtitle }: SectionHeaderProps) {
-  return (
-    <div className="border-b border-gray-200 pb-3">
-      <h4 className="text-sm font-semibold text-gray-900 break-words">
-        {title}
-      </h4>
-      <p className="text-xs text-gray-500 break-words">{subtitle}</p>
-    </div>
-  );
-}
-
-// Reusable Switch Setting Component
-function SwitchSetting({
-  title,
-  description,
-  checked,
-  onCheckedChange,
-}: {
-  title: string;
-  description: string;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex md:flex-nowrap gap-6 justify-between md:p-0 p-4">
-        <div className="md:w-[45%] w-full flex flex-col gap-2 text-gray-700">
-          <label className="text-sm font-bold text-gray-900 break-words">
-            {title}
-          </label>
-          <p className="text-sm text-gray-600 break-words">{description}</p>
-        </div>
-        <div className="flex-1 flex justify-end">
-          <Switch checked={checked} onCheckedChange={onCheckedChange} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function InvoiceSettings({ role }: InvoiceSettingsProps) {
   const { t } = useTranslation("invoices");
 
@@ -554,6 +402,156 @@ function InvoiceSettings({ role }: InvoiceSettingsProps) {
           className="bg-blue-50 border-none"
         />
       </Form>
+    </div>
+  );
+}
+// Reusable Setting Row Component
+function SettingRow({
+  title,
+  description,
+  children,
+  showSeparator = true,
+}: SettingRowProps) {
+  return (
+    <>
+      <div className="flex flex-wrap md:flex-nowrap gap-6 justify-between md:p-0 p-4">
+        <div className="md:w-[45%] w-full flex flex-col gap-2 text-gray-700">
+          <label className="text-sm font-medium text-gray-900 break-words">
+            {title}
+          </label>
+          <p className="text-sm text-gray-600 break-words">{description}</p>
+        </div>
+        <div className="flex-1 w-full min-w-0">{children}</div>
+      </div>
+      {showSeparator && <Separator />}
+    </>
+  );
+}
+
+// Reusable Form Field Component
+function FormFieldComponent({
+  name,
+  label,
+  description,
+  placeholder,
+  onFieldChange,
+  type = "input",
+  options = [],
+  comboboxProps,
+}: FormFieldProps) {
+  const renderField = () => {
+    switch (type) {
+      case "select":
+        return (
+          <Select
+            onValueChange={(value) => onFieldChange(name as FormPath, value)}
+          >
+            <SelectTrigger className="text-gray-700">
+              <SelectValue
+                className="text-gray-700"
+                placeholder={placeholder}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case "textarea":
+        return (
+          <Textarea
+            placeholder={placeholder}
+            className="min-h-[100px] resize-none text-gray-700"
+            onBlur={(e: React.FocusEvent<HTMLTextAreaElement>) =>
+              onFieldChange(name as FormPath, e.target.value)
+            }
+          />
+        );
+
+      case "combobox":
+        return (
+          <Combobox
+            options={options}
+            onValueChange={(value) => onFieldChange(name as FormPath, value)}
+            placeholder={placeholder}
+            searchPlaceholder={comboboxProps?.searchPlaceholder ?? ""}
+            emptyMessage={comboboxProps?.emptyMessage ?? ""}
+            contentClassName="text-gray-700"
+            triggerClassName="text-gray-700"
+            className="w-full text-gray-700 bg-transparent font-normal"
+          />
+        );
+
+      default:
+        return (
+          <ThemedInput
+            placeholder={placeholder}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+              onFieldChange(name as FormPath, e.target.value)
+            }
+            className="text-gray-700"
+          />
+        );
+    }
+  };
+
+  return (
+    <SettingRow title={label} description={description}>
+      <FormField
+        name={name}
+        render={({ field: _field }) => (
+          <FormItem>
+            <FormControl>{renderField()}</FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </SettingRow>
+  );
+}
+
+// Reusable Section Header Component
+function SectionHeader({ title, subtitle }: SectionHeaderProps) {
+  return (
+    <div className="border-b border-gray-200 pb-3">
+      <h4 className="text-sm font-semibold text-gray-900 break-words">
+        {title}
+      </h4>
+      <p className="text-xs text-gray-500 break-words">{subtitle}</p>
+    </div>
+  );
+}
+
+// Reusable Switch Setting Component
+function SwitchSetting({
+  title,
+  description,
+  checked,
+  onCheckedChange,
+}: {
+  title: string;
+  description: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex md:flex-nowrap gap-6 justify-between md:p-0 p-4">
+        <div className="md:w-[45%] w-full flex flex-col gap-2 text-gray-700">
+          <label className="text-sm font-bold text-gray-900 break-words">
+            {title}
+          </label>
+          <p className="text-sm text-gray-600 break-words">{description}</p>
+        </div>
+        <div className="flex-1 flex justify-end">
+          <Switch checked={checked} onCheckedChange={onCheckedChange} />
+        </div>
+      </div>
     </div>
   );
 }
