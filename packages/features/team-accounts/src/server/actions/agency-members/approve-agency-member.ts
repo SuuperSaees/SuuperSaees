@@ -28,13 +28,13 @@ export async function approveAgencyMember(
       throw new Error('Failed to approve member: RPC returned false');
     }
 
-    console.log(`Successfully approved agency member ${userId} for domain ${domain}`);
 
-    // Revalidate the current path to refresh the data
-    if (currentPath) {
+    // Revalidate multiple paths to ensure data refresh
+    revalidatePath('/team');
+    revalidatePath('/');
+    
+    if (currentPath && currentPath !== '/team') {
       revalidatePath(currentPath);
-    } else {
-      revalidatePath('/team');
     }
 
     return { success: true };
