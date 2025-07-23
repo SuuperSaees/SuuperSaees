@@ -9,9 +9,6 @@ import { useTranslation } from 'react-i18next';
 import UpdateImage from '../../app/components/ui/update-image';
 import { cn } from '@kit/ui/utils';
 import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
-import { PageMobileNavigation } from '@kit/ui/page';
-import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
-
 interface OrganizationHeaderProps {
   id: string;
   name: string;
@@ -54,9 +51,7 @@ function Header({
   };
   return (
     <div className={cn('flex w-full md:gap-4 gap-1 ', className)}>
-       <PageMobileNavigation className={"flex items-center justify-between w-fit" }>
-          <HomeMobileNavigation />
-        </PageMobileNavigation>
+
        <UpdateImage
         bucketStorage={bucketStorage}
         floatingButtons={{ update: true, delete: true }}
