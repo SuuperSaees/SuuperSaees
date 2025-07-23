@@ -72,9 +72,6 @@ export default function PendingApprovalContainer() {
               {t('pendingApproval.signOut')}
             </Button>
             
-            <p className="text-xs text-center text-muted-foreground">
-              {t('pendingApproval.refreshNote')}
-            </p>
           </div>
         </CardContent>
       </Card>
