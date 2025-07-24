@@ -3,12 +3,16 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@kit/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@kit/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@kit/ui/alert';
 import { Clock, Mail, Users, ArrowLeft } from 'lucide-react';
 import { useSignOut } from '@kit/supabase/hooks/use-sign-out';
+import { useAuthDetails } from '@kit/auth/sign-in';
 
-export default function PendingApprovalContainer() {
+export default function PendingApprovalContainer({ host }: { host: string }) {
   const { t } = useTranslation('auth');
   const signOut = useSignOut();
+  const { authDetails } = useAuthDetails(host)
+  const themeColor = authDetails?.theme_color;
 
   const handleSignOut = async () => {
     await signOut.mutateAsync();
@@ -31,35 +35,25 @@ export default function PendingApprovalContainer() {
 
         <CardContent className="space-y-6">
           <div className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-blue-600 mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm text-blue-900">
-                    {t('pendingApproval.emailSent')}
-                  </p>
-                  <p className="text-sm text-blue-700">
-                    {t('pendingApproval.emailSentDescription')}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <Alert variant="info">
+              <Mail className="h-4 w-4" />
+              <AlertTitle>{t('pendingApproval.emailSent')}</AlertTitle>
+              <AlertDescription>
+                {t('pendingApproval.emailSentDescription')}
+              </AlertDescription>
+            </Alert>
 
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <Users className="h-5 w-5 text-gray-600 mt-0.5" />
-                <div>
-                  <p className="font-medium text-sm text-gray-900">
-                    {t('pendingApproval.whatHappensNext')}
-                  </p>
-                  <ul className="text-sm text-gray-700 mt-2 space-y-1">
-                    <li>• {t('pendingApproval.step1')}</li>
-                    <li>• {t('pendingApproval.step2')}</li>
-                    <li>• {t('pendingApproval.step3')}</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
+            <Alert variant="default">
+              <Users className="h-4 w-4" />
+              <AlertTitle>{t('pendingApproval.whatHappensNext')}</AlertTitle>
+              <AlertDescription>
+                <ul className="mt-2 space-y-1 text-sm">
+                  <li>• {t('pendingApproval.step1')}</li>
+                  <li>• {t('pendingApproval.step2')}</li>
+                  <li>• {t('pendingApproval.step3')}</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -67,6 +61,10 @@ export default function PendingApprovalContainer() {
               variant="outline"
               onClick={handleSignOut}
               className="w-full"
+              style={{
+              backgroundColor: themeColor ?? undefined,
+              borderColor: themeColor ?? undefined,
+            }}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t('pendingApproval.signOut')}
