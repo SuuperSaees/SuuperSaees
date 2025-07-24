@@ -12,6 +12,7 @@ import { useOrderApiActions } from '../hooks/use-order-api-actions';
 import { useOrderState } from '../hooks/use-order-state';
 import { useOrderSubscriptions } from '../hooks/use-order-subscriptions';
 import { ActivityContextType, DataResult } from './activity.types';
+import { useIsMobile } from '~/hooks/useIsMobile';
 
 /**
  * Activity Context Provider
@@ -55,6 +56,7 @@ export const ActivityProvider = ({
   clientOrganizationId,
   agencyId,
 }: ActivityProviderProps) => {
+  const isMobile = useIsMobile();
   // Manage order state and related interactions
   const {
     order,
@@ -142,6 +144,7 @@ export const ActivityProvider = ({
         fileUploads,
         handleFileUpload,
         handleRemoveFile,
+        isMobile,
       }}
     >
       {children}
