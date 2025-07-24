@@ -14,6 +14,9 @@ export const EMAIL = {
   CLIENTS: {
     NEW_REGISTRATION: 'clients.newRegistration',
   },
+  AGENCY_MEMBERS: {
+    NEW_REGISTRATION: 'agencyMembers.newRegistration',
+  },
   NOTIFICATIONS: {
     GENERAL: 'notifications.general',
   },
@@ -26,6 +29,7 @@ export type EmailType =
   | typeof EMAIL.ORDERS.NEW_MESSAGE
   | typeof EMAIL.CHAT.NEW_MESSAGE
   | typeof EMAIL.CLIENTS.NEW_REGISTRATION
+  | typeof EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION
   | typeof EMAIL.NOTIFICATIONS.GENERAL;
 
 // Email Parameters based on type
@@ -80,6 +84,16 @@ export interface EmailParams {
     agencyId: string;
     domain: string;
     buttonUrl: string
+  };
+  [EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION]: {
+    to: string;
+    userId: string;
+    memberEmail: string;
+    agencyName: string;
+    registrationDate: string;
+    agencyId: string;
+    domain: string;
+    buttonUrl: string;
   };
   [EMAIL.NOTIFICATIONS.GENERAL]: {
     to: string;

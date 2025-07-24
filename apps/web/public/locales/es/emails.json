@@ -146,5 +146,20 @@
     "buttonText": "Ver Clientes",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "at": "de"
+  },
+  "newAgencyMemberRegistration": {
+    "subject": "Solicitud de registro de nuevo miembro para ${agencyName}",
+    "body": "Un nuevo miembro ha solicitado unirse a tu agencia y está pendiente de aprobación.",
+    "greeting": "¡Hola!",
+    "memberDetails": "Detalles del Miembro:",
+    "memberEmail": "Email: ${memberEmail}",
+    "agencyName": "Agencia: ${agencyName}",
+    "registrationDate": "Fecha de Registro: ${registrationDate}",
+    "status": "Estado: Pendiente de aprobación",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Gestionar Equipo",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "instructions": "Haz clic en 'Gestionar Equipo' para acceder a tu panel de administración donde podrás revisar y aprobar esta solicitud de membresía.",
+    "at": "de"
   }
 }

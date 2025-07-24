@@ -146,6 +146,21 @@
     "buttonText": "View Clients",
     "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
     "at": "at"
+  },
+  "newAgencyMemberRegistration": {
+    "subject": "New member registration request for ${agencyName}",
+    "body": "A new member has requested to join your agency and is pending approval.",
+    "greeting": "Hi there!",
+    "memberDetails": "Member Details:",
+    "memberEmail": "Email: ${memberEmail}",
+    "agencyName": "Agency: ${agencyName}",
+    "registrationDate": "Registration Date: ${registrationDate}",
+    "status": "Status: Pending approval",
+    "farewell": "Best regards,",
+    "buttonText": "Manage Team",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "instructions": "Click 'Manage Team' to access your admin panel where you can review and approve this membership request.",
+    "at": "at"
   }
 }
 

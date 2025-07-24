@@ -180,6 +180,27 @@ function createEmailConfig<T extends EmailType>(
       };
     }
 
+    case EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION: {
+      const p = params as EmailParams[typeof EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION];
+      const { t } = getEmailTranslations("newAgencyMemberRegistration", lang);
+
+      return {
+        to: p.to,
+        userId: p.userId,
+        subject: t("subject", { agencyName: p.agencyName }),
+        body: t("body"),
+        greeting: t("greeting"),
+        farewell: t("farewell"),
+        buttonText: t("buttonText"),
+        buttonUrl: p.buttonUrl,
+        footer: t("footer", { toEmail: p.to }),
+        additionalMessage: `${t("memberDetails")}\n${t("memberEmail", { memberEmail: p.memberEmail })}\n${t("registrationDate", { registrationDate: p.registrationDate })}\n${t("status")}\n\n${t("instructions")}`,
+        emailType: "notification",
+        agencyId: p.agencyId,
+        domain: p.domain,
+      };
+    }
+
     case EMAIL.NOTIFICATIONS.GENERAL: {
       const p = params as EmailParams[typeof EMAIL.NOTIFICATIONS.GENERAL];
       // For general notifications, use direct content since it's custom
