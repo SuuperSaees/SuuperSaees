@@ -190,4 +190,5 @@ export interface ActivityContextType {
   fileUploads: FileUploadState[];
   handleFileUpload: (file: File, onComplete?: (upload: FileUploadState) => void | undefined) => Promise<void>;
   handleRemoveFile: (id: string) => void;
+  isMobile: boolean;
 }

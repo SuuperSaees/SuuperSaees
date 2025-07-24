@@ -12,10 +12,10 @@ import { getInteractions } from '~/server/actions/interactions/get-interactions'
 import { getFolderFiles } from '~/team-accounts/src/server/actions/files/get/get-files';
 
 import { getOrderById } from '~/team-accounts/src/server/actions/orders/get/get-order';
-import AsideOrderInformation from './components/aside-order-information';
 import { OrderHeader } from './components/order-header';
 import { OrderTabs } from './components/order-tabs';
 import { ActivityProvider } from './context/activity-context';
+import OrderInformationRenderer from './components/order-information-renderer';
 
 const getOrderByIdCached = cache(
   async (id: string): Promise<Order.Relational> => {
@@ -139,12 +139,11 @@ async function OrderDetailsPage({
               agencyName={agencyName}
             />
           </div>
-          <AsideOrderInformation
-            className="hidden lg:flex"
+          <OrderInformationRenderer
             agencyStatuses={agencyStatuses ?? []}
             orderAgencyTags={orderAgencyTags ?? []}
-            agencyTags={agencyTags ?? []}
-          />
+            agencyTags={agencyTags ?? []}/>
+          
         </div>
       </div>
     </ActivityProvider>
