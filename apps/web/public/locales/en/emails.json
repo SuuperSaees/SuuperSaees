@@ -132,6 +132,20 @@
     "farewell": "Regards,",
     "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
     "at": "at"
+  },
+  "newClientRegistration": {
+    "subject": "New client registered: ${clientName}",
+    "body": "A new client has registered on your agency platform.",
+    "greeting": "Hi there!",
+    "clientDetails": "Client Details:",
+    "clientName": "Name: ${clientName}",
+    "clientEmail": "Email: ${clientEmail}",
+    "organizationName": "Organization: ${organizationName}",
+    "registrationDate": "Registration Date: ${registrationDate}",
+    "farewell": "Best regards,",
+    "buttonText": "View Clients",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
   }
 }
 

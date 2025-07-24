@@ -132,5 +132,19 @@
     "thanks": "Gracias,",
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "at": "de"
+  },
+  "newClientRegistration": {
+    "subject": "Nuevo cliente registrado: ${clientName}",
+    "body": "Un nuevo cliente se ha registrado en tu plataforma de agencia.",
+    "greeting": "¡Hola!",
+    "clientDetails": "Detalles del Cliente:",
+    "clientName": "Nombre: ${clientName}",
+    "clientEmail": "Email: ${clientEmail}",
+    "organizationName": "Organización: ${organizationName}",
+    "registrationDate": "Fecha de Registro: ${registrationDate}",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Ver Clientes",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
   }
 }

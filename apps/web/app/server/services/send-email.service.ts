@@ -23,6 +23,8 @@ interface EmailConfig {
   additionalMessage?: string;
   emailType?: "default" | "message" | "notification" | "invoice";
   agencyName?: string;
+  agencyId?: string;
+  domain?: string;
 }
 
 // Factory function to create email configs (internal use only)
@@ -157,6 +159,27 @@ function createEmailConfig<T extends EmailType>(
       };
     }
 
+    case EMAIL.CLIENTS.NEW_REGISTRATION: {
+      const p = params as EmailParams[typeof EMAIL.CLIENTS.NEW_REGISTRATION];
+      const { t } = getEmailTranslations("newClientRegistration", lang);
+
+      return {
+        to: p.to,
+        userId: p.userId,
+        subject: t("subject", { clientName: p.clientName }),
+        body: t("body"),
+        greeting: t("greeting"),
+        farewell: t("farewell"),
+        buttonText: t("buttonText"),
+        buttonUrl: p.buttonUrl,
+        footer: t("footer", { toEmail: p.to }),
+        additionalMessage: `${t("clientDetails")}\n${t("clientName", { clientName: p.clientName })}\n${t("clientEmail", { clientEmail: p.clientEmail })}\n${t("organizationName", { organizationName: p.organizationName })}\n${t("registrationDate", { registrationDate: p.registrationDate })}`,
+        emailType: "notification",
+        agencyId: p.agencyId,
+        domain: p.domain
+      };
+    }
+
     case EMAIL.NOTIFICATIONS.GENERAL: {
       const p = params as EmailParams[typeof EMAIL.NOTIFICATIONS.GENERAL];
       // For general notifications, use direct content since it's custom
@@ -198,15 +221,19 @@ export async function sendEmail<T extends EmailType>(
       subject: config.subject,
     });
 
-    const { domain: siteURL, organizationId } = await getDomainByUserId(
-      config.userId,
-      true,
-    );
-
+    const { domain: siteURL, organizationId } = !config.agencyId
+      ? await getDomainByUserId(config.userId, true)
+      : { domain: config.domain ?? '', organizationId: config.agencyId };
 
     // Get sender identity and branding
     const { fromSenderIdentity, logoUrl, themeColor, buttonTextColor } =
       await getFormSendIdentity(organizationId ?? "", "at");
+
+      console.log("DEBUG - Sender identity:", {
+      fromSenderIdentity,
+      logoUrl, 
+      themeColor
+      })
 
     // Generate HTML content
     const htmlContent = generateHtmlTemplate({
@@ -224,6 +251,11 @@ export async function sendEmail<T extends EmailType>(
       siteURL,
       lang,
       agencyName: config.agencyName ?? "",
+    });
+
+    console.log("DEBUG - HTML content generated:", {
+      subject: config.subject,
+      to: config.to,
     });
 
     // Send email
@@ -248,10 +280,9 @@ export async function sendCustomEmail(config: EmailConfig): Promise<void> {
   const mailer = await getMailer();
 
   try {
-    const { domain: siteURL, organizationId } = await getDomainByUserId(
-      config.userId,
-      true,
-    );
+    const { domain: siteURL, organizationId } = !config.agencyId
+      ? await getDomainByUserId(config.userId, true)
+      : { domain: config.domain ?? '', organizationId: config.agencyId };
 
     const lang = getLanguageFromCookie() as "en" | "es";
 

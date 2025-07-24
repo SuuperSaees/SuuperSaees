@@ -340,3 +340,38 @@ export const getUserAccountByEmail = async (
     throw error;
   }
 };
+
+
+/**
+ * Gets the agency owner's email by agency ID
+ * @param agencyId - The ID of the agency organization
+ * @returns Promise<string | null> - The email of the agency owner or null if not found
+ */
+export async function getAgencyOwner(agencyId: string): Promise<{
+  owner_id: string;
+  email: string | null;
+} | null> {
+  try {
+    const client = getSupabaseServerComponentClient({ admin: true });
+
+    // Get the agency organization to find the owner_id
+    const { data: organization, error: orgError } = await client
+      .from('organizations')
+      .select('owner_id, accounts(email)')
+      .eq('id', agencyId)
+      .single();
+
+    if (orgError ?? !organization?.owner_id) {
+      console.error('Error fetching agency organization:', orgError);
+      return null;
+    }
+
+    return {
+      owner_id: organization.owner_id,
+      email: organization.accounts?.email ?? null,
+    };
+  } catch (error) {
+    console.error('Error in getAgencyOwnerEmail:', error);
+    return null;
+  }
+}

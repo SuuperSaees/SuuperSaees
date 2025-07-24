@@ -11,6 +11,9 @@ export const EMAIL = {
   CHAT: {
     NEW_MESSAGE: 'chat.newMessage',
   },
+  CLIENTS: {
+    NEW_REGISTRATION: 'clients.newRegistration',
+  },
   NOTIFICATIONS: {
     GENERAL: 'notifications.general',
   },
@@ -22,6 +25,7 @@ export type EmailType =
   | typeof EMAIL.ORDERS.STATUS_UPDATE
   | typeof EMAIL.ORDERS.NEW_MESSAGE
   | typeof EMAIL.CHAT.NEW_MESSAGE
+  | typeof EMAIL.CLIENTS.NEW_REGISTRATION
   | typeof EMAIL.NOTIFICATIONS.GENERAL;
 
 // Email Parameters based on type
@@ -65,6 +69,17 @@ export interface EmailParams {
     senderName: string;
     chatTitle: string;
     message: string;
+  };
+  [EMAIL.CLIENTS.NEW_REGISTRATION]: {
+    to: string;
+    userId: string;
+    clientName: string;
+    clientEmail: string;
+    organizationName: string;
+    registrationDate: string;
+    agencyId: string;
+    domain: string;
+    buttonUrl: string
   };
   [EMAIL.NOTIFICATIONS.GENERAL]: {
     to: string;
