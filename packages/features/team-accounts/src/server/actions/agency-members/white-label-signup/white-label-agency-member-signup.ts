@@ -6,7 +6,11 @@ import {
   WhiteLabelAgencyMemberSignUpSchema, 
   type WhiteLabelAgencyMemberSignUpData 
 } from '../../../../../../auth/src/schemas/white-label-agency-member-sign-up.schema';
-import { sendAgencyMemberApprovalEmail } from './send-agency-member-approval-email';
+import { sendEmail } from '../../../../../../../../apps/web/app/server/services/send-email.service';
+import { EMAIL } from '../../../../../../../../apps/web/app/server/services/email.types';
+import { getAgencyOwner } from '../../members/get/get-member-account';
+import { decodeToken } from '../../../../../../../tokens/src/decode-token';
+import { Tokens } from '../../../../../../../../apps/web/lib/tokens.types';
 
 export async function whiteLabelAgencyMemberSignUp(
   data: WhiteLabelAgencyMemberSignUpData, 
@@ -56,9 +60,69 @@ export async function whiteLabelAgencyMemberSignUp(
         },
       });
 
+
       if (signUpError) {
         throw new Error(`Error creating user: ${signUpError.message}`);
       }
+
+
+      // Generate token and send confirmation email to the new agency member
+    try {
+      
+      if (signUpError) {
+        console.error('Error occurred while creating the agency member user session:', signUpError);
+      } else if (signUpData.session) {
+        // Extract session data
+        const sessionUserAgencyMember = signUpData.session;
+        const createdAtAndUpdatedAt = new Date().toISOString();
+        const accessToken = sessionUserAgencyMember?.access_token ?? '';
+        const refreshToken = sessionUserAgencyMember?.refresh_token ?? '';
+        const expiresAt = new Date(new Date().getTime() + 3600 * 1000).toISOString();
+        const providerToken = 'supabase';
+        const sessionId = (decodeToken(accessToken, 'base64') as { session_id: string })?.session_id;
+        const callbackUrl = `${baseUrl}/orders`; // Agency members go to orders page after confirmation
+
+        // Save the token in the database
+        const token: Tokens.Insert = {
+          id: sessionId,
+          id_token_provider: sessionId,
+          created_at: createdAtAndUpdatedAt,
+          updated_at: createdAtAndUpdatedAt,
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          expires_at: expiresAt,
+          provider: providerToken,
+        };
+
+        const { error: tokenError } = await supabase.from('tokens').insert(token);
+
+        if (tokenError) {
+          console.error('Error occurred while saving the token', tokenError);
+        } else {
+          // Get agency name for the confirmation email
+          const { data: organization } = await supabase
+            .from('organizations')
+            .select('name')
+            .eq('id', agencyId)
+            .single();
+
+          // Send confirmation email to the agency member
+          await sendEmail(EMAIL.AGENCY_MEMBERS.ACCOUNT_CONFIRMATION, {
+            to: validatedData.email,
+            userId: signUpData?.user?.id ?? '', // Use agency member user ID as context
+            agencyName: organization?.name ?? '',
+            sessionId: sessionId,
+            callbackUrl: `${baseUrl}/auth/confirm?token_hash_session=${sessionId}&type=invite&callback=${callbackUrl}`,
+            domain: baseUrl,
+            agencyId: agencyId,
+          });
+
+        }
+      }
+    } catch (confirmationEmailError) {
+      // Log error but don't fail the registration
+      console.error('Failed to send confirmation email to agency member:', confirmationEmailError);
+    }
 
       const newUserId = signUpData.user?.id;
       if (!newUserId) {
@@ -147,17 +211,40 @@ export async function whiteLabelAgencyMemberSignUp(
       p_password: '',
     });
 
-    // Send notification email to agency owner
+    
+    // Send notification email to agency owner using the standard email system
     try {
-      await sendAgencyMemberApprovalEmail(
-        validatedData.email,
-        agencyId,
-        baseUrl
-      );
-      console.log(`Notification email sent for new member registration: ${validatedData.email}`);
+      // Get agency owner information
+      const agencyOwnerData = await getAgencyOwner(agencyId);
+      
+      // Get agency name for the email
+      const { data: organization } = await supabase
+        .from('organizations')
+        .select('name')
+        .eq('id', agencyId)
+        .single();
+      
+      if (agencyOwnerData?.email && organization) {
+        const registrationDate = new Date().toLocaleDateString();
+        
+        await sendEmail(EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION, {
+          to: agencyOwnerData.email,
+          userId: agencyOwnerData.owner_id, // Use agency ID as context
+          memberEmail: validatedData.email,
+          agencyName: organization.name ?? '',
+          registrationDate: registrationDate,
+          agencyId,
+          domain: baseUrl,
+          buttonUrl: `${baseUrl}/team`
+        });
+        
+        console.log(`Notification email sent to agency owner: ${agencyOwnerData.email} for new member: ${validatedData.email}`);
+      } else {
+        console.warn('Could not find agency owner email or organization data for notification');
+      }
     } catch (emailError) {
       // Log email error but don't fail the registration
-      console.error('Failed to send notification email:', emailError);
+      console.error('Failed to send notification email to agency owner:', emailError);
     }
 
     console.log(`Agency member ${validatedData.email} registered successfully`);

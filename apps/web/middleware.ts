@@ -471,7 +471,8 @@ function getPatterns() {
             '/auth/sign-out',
             '/auth/confirm',
             '/join',
-            '/auth/pending-approval'
+            '/auth/pending-approval',
+            '/services/catalog/public',
           ];
           
           const isAllowedPath = allowedPathsForUnapproved.some(path => 

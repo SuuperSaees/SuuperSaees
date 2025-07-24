@@ -1,9 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { AppLogo } from '~/components/app-logo';
 import { useAuthDetails } from '@kit/auth/sign-in';
-import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
 import { WhiteLabelAgencyMemberSignUpForm } from 'node_modules/@kit/auth/src/components/white-label-agency-member-sign-up-form';
 import { SkeletonPasswordSignInForm } from 'node_modules/@kit/auth/src/components/skeleton-password-sign-in-form';
 
@@ -13,10 +11,6 @@ const domain = host.includes('localhost') ?  `http://${host}`: `https://${host}`
   const router = useRouter();
   
   const { authDetails, isLoading, organizationId } = useAuthDetails(host);
-  
-  const textcolor = getTextColorBasedOnBackground(
-    authDetails?.background_color ?? '#ffffff',
-  );
 
   if(!isCustomDomain) {
     router.push('/auth/sign-up');
@@ -31,6 +25,7 @@ const domain = host.includes('localhost') ?  `http://${host}`: `https://${host}`
         <>
         <WhiteLabelAgencyMemberSignUpForm 
             agencyId={organizationId ?? ''}
+            agencyName={authDetails?.portal_name ?? ''}
             themeColor={authDetails?.theme_color}
           />
         </>

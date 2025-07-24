@@ -6,6 +6,7 @@ import { WhiteLabelClientSignUpForm } from './white-label-client-sign-up-form';
 interface WhiteLabelSignUpTabsProps {
   authDetails?: {
     theme_color?: string;
+    portal_name?: string;
     background_color?: string;
   } | null;
   organizationId: string;
@@ -28,6 +29,7 @@ export function WhiteLabelSignUpTabs({
 
           <WhiteLabelClientSignUpForm 
             agencyId={organizationId}
+            agencyName={authDetails?.portal_name ?? ''}
             themeColor={authDetails?.theme_color}
           />
     </div>
