@@ -1,32 +1,41 @@
-import React, { ComponentType, useRef } from 'react';
+"use client";
 
-import dynamic from 'next/dynamic';
+import React, { ComponentType, useRef } from "react";
 
-import { Check, Copy, Download, Eye, MoreVertical } from 'lucide-react';
+import dynamic from "next/dynamic";
 
-import Tooltip from '~/components/ui/tooltip';
-import { File } from '~/lib/file.types';
-import { FileUploadState } from '~/hooks/use-file-upload';
+import { Check, Copy, Download, Eye, MoreVertical } from "lucide-react";
 
-import { useFileActions } from '../../hooks/use-file-actions';
+import Tooltip from "~/components/ui/tooltip";
+import { File } from "~/lib/file.types";
+import { FileUploadState } from "~/hooks/use-file-upload";
+
+import { useFileActions } from "../../hooks/use-file-actions";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../../../../packages/ui/src/shadcn/dropdown-menu";
+import { useTranslation } from "react-i18next";
 
 const AnnotationsDialog = dynamic(
-  () => import('~/(annotations)/components/dialog'),
+  () => import("~/(annotations)/components/dialog"),
   {
     ssr: false,
   },
 );
 
 const FileDialogView = dynamic(
-  () => import('../../components/file-preview/file-dialog-view'),
+  () => import("../../components/file-preview/file-dialog-view"),
   {
     ssr: false,
   },
 );
 
 export enum FileViewerMode {
-  DEFAULT = 'default',
-  ANNOTATIONS = 'annotations',
+  DEFAULT = "default",
+  ANNOTATIONS = "annotations",
 }
 interface FileProps {
   file: File.Type;
@@ -42,30 +51,37 @@ interface FileProps {
 }
 
 export const withFileOptions = <P extends FileProps>(
-  WrappedComponent: ComponentType<Omit<P, 'viewerMode' | 'isLoading' | 'upload'> & {
-    fileName: string;
-    fileType: string;
-    isLoading?: boolean;
-    upload?: FileUploadState;
-  }>,
+  WrappedComponent: ComponentType<
+    Omit<P, "viewerMode" | "isLoading" | "upload"> & {
+      fileName: string;
+      fileType: string;
+      isLoading?: boolean;
+      upload?: FileUploadState;
+    }
+  >,
 ) => {
   const WithFileOptions: React.FC<P> = (props) => {
-    const { viewerMode = FileViewerMode.DEFAULT, isLoading, upload, ...rest } = props;
+    const {
+      viewerMode = FileViewerMode.DEFAULT,
+      isLoading,
+      upload,
+      ...rest
+    } = props;
     const previewTriggerRef = useRef<HTMLButtonElement>(null);
-    
+
     // Don't show file options when loading or uploading
-    const shouldShowOptions = !isLoading && upload?.status !== 'uploading';
-    
+    const shouldShowOptions = !isLoading && upload?.status !== "uploading";
+
     const handleCardClick = (event: React.MouseEvent) => {
       // Don't trigger if clicking on action buttons or if loading/uploading
       if (!shouldShowOptions) return;
-      
+
       // Check if the click target is an action button or its children
       const target = event.target as HTMLElement;
-      if (target.closest('.file-action-button')) {
+      if (target.closest(".file-action-button")) {
         return;
       }
-      
+
       // Programmatically trigger the preview dialog
       previewTriggerRef.current?.click();
     };
@@ -76,16 +92,16 @@ export const withFileOptions = <P extends FileProps>(
       fileType: props.file.type,
       bucketName: props.bucketName,
     });
-    
+
     return (
       <>
-        <div 
-          className="group/file-options relative inline-block flex h-full max-h-[2000px] min-w-[150px] items-center justify-center cursor-pointer hover:bg-gray-50 hover:shadow-sm transition-all duration-200 rounded-lg"
+        <div
+          className="group/file-options relative inline-block flex h-fit min-w-[150px] items-center justify-center cursor-pointer hover:bg-gray-50 hover:shadow-sm transition-all duration-200 rounded-lg"
           onClick={handleCardClick}
         >
-          <WrappedComponent 
-            {...rest} 
-            fileName={props.file.name} 
+          <WrappedComponent
+            {...rest}
+            fileName={props.file.name}
             fileType={props.file.type}
             isLoading={isLoading}
             upload={upload}
@@ -103,15 +119,15 @@ export const withFileOptions = <P extends FileProps>(
             />
           )}
         </div>
-        
+
         {/* Hidden Preview Dialogs - Triggered programmatically */}
         {viewerMode === FileViewerMode.ANNOTATIONS ? (
           <AnnotationsDialog
             file={props.file}
             triggerComponent={
-              <button 
+              <button
                 ref={previewTriggerRef}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 aria-hidden="true"
               />
             }
@@ -121,9 +137,9 @@ export const withFileOptions = <P extends FileProps>(
         ) : (
           <FileDialogView
             triggerComponent={
-              <button 
+              <button
                 ref={previewTriggerRef}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 aria-hidden="true"
               />
             }
@@ -140,7 +156,7 @@ export const withFileOptions = <P extends FileProps>(
   return WithFileOptions;
 };
 
-type FileOptionsProps = Omit<FileProps, 'dialogClassName' | 'className'> & {
+type FileOptionsProps = Omit<FileProps, "dialogClassName" | "className"> & {
   previewTriggerRef: React.RefObject<HTMLButtonElement>;
 };
 
@@ -150,84 +166,92 @@ const FileOptions = ({
   bucketName,
   previewTriggerRef,
 }: FileOptionsProps) => {
-  const {
-    isLinkCopied,
-    isMenuOpen,
-    // canPreview,
-    handleCopyLink,
-    handleDownload,
-    handleToggleMenu,
-  } = useFileActions({
+  const { isLinkCopied, handleCopyLink, handleDownload } = useFileActions({
     src,
     fileName: file.name,
     fileType: file.type,
     bucketName,
   });
-  
-  return (
-    <div className="absolute right-0 top-0 flex items-center">
-      {/* Responsive button */}
-      <button
-        onClick={(event) => {
-          event.stopPropagation();
-          handleToggleMenu();
-        }}
-        className="file-action-button p-2 text-black sm:hidden"
-      >
-        <MoreVertical className="h-6 w-6" />
-      </button>
 
-      {/* Desktop menu */}
-      <div
-        className={`${
-          isMenuOpen ? 'flex' : 'hidden'
-        } absolute right-0 top-8 z-10 flex-col items-start gap-2 rounded-md bg-transparent p-2 text-gray-700 sm:right-0 sm:top-0 sm:flex-row sm:items-center sm:group-hover/file-options:flex`}
-      >
-        {/* Copy link */}
-        <Tooltip content="Copy link">
-          <button
-            className="file-action-button flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleCopyLink().catch(console.error);
-            }}
+  const { t } = useTranslation("files");
+  return (
+    <>
+      {/* Mobile: Dropdown menu */}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="md:hidden file-action-button p-2 text-black absolute right-1 top-1 rounded-full bg-white/70">
+          <MoreVertical className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() => handleCopyLink().catch(console.error)}
           >
             {isLinkCopied ? (
+              <Check className="h-[15px] w-[15px] text-green-500 mr-2" />
+            ) : (
+              <Copy className="h-[15px] w-[15px] mr-2" />
+            )}
+            {t("fileOptions.copyLink")}
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => previewTriggerRef.current?.click()}>
+            <Eye className="h-[15px] w-[15px] mr-2" />
+            {t("fileOptions.view")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => handleDownload().catch(console.error)}
+          >
+            <Download className="h-[15px] w-[15px] mr-2" />
+            {t("fileOptions.download")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Desktop: Horizontal menu */}
+      <div
+        className={
+          "hidden absolute right-0 top-8 z-10 flex-col items-start gap-2 rounded-md bg-transparent p-2 text-gray-700 md:right-0 md:top-0 md:flex-row md:items-center md:group-hover/file-options:flex"
+        }
+      >
+        <FileOption
+          icon={
+            isLinkCopied ? (
               <Check className="h-[15px] w-[15px] text-green-500" />
             ) : (
               <Copy className="h-[15px] w-[15px]" />
-            )}
-          </button>
-        </Tooltip>
-
-        {/* View button - triggers the same preview as card click */}
-        <Tooltip content="View">
-          <button
-            className="file-action-button flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              previewTriggerRef.current?.click();
-            }}
-          >
-            <Eye className="h-[15px] w-[15px]" />
-          </button>
-        </Tooltip>
-
-        {/* Download */}
-        <Tooltip content="Download">
-          <button
-            className="file-action-button flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleDownload().catch(console.error);
-            }}
-          >
-            <Download className="h-[15px] w-[15px]" />
-          </button>
-        </Tooltip>
+            )
+          }
+          label={t("fileOptions.copyLink")}
+          onClick={() => handleCopyLink().catch(console.error)}
+        />
+        <FileOption
+          icon={<Eye className="h-[15px] w-[15px]" />}
+          label={t("fileOptions.view")}
+          onClick={() => previewTriggerRef.current?.click()}
+        />
+        <FileOption
+          icon={<Download className="h-[15px] w-[15px]" />}
+          label={t("fileOptions.download")}
+          onClick={() => handleDownload().catch(console.error)}
+        />
       </div>
-    </div>
+    </>
   );
 };
 
+interface FileOptionProps {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+}
+const FileOption = ({ icon, label, onClick }: FileOptionProps) => {
+  return (
+    <Tooltip content={label}>
+      <button
+        className="file-action-button flex h-[30px] w-[30px] items-center justify-center gap-2 rounded-full bg-white/70 text-sm"
+        onClick={onClick}
+      >
+        {icon}
+      </button>
+    </Tooltip>
+  );
+};
 export default withFileOptions;

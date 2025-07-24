@@ -13,5 +13,11 @@
       "title": "We couldn't preview this file",
       "description": "It might be incomplete or corrupted. Please try uploading it again."
     }
+  },
+  "fileOptions": {
+    "copyLink": "Copy link",
+    "copyLinkSuccess": "Link copied to clipboard",
+    "view": "View",
+    "download": "Download"
   }
 }

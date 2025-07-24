@@ -13,5 +13,11 @@
       "title": "No se pudo mostrar este archivo",
       "description": "Puede que esté incompleto o dañado. Por favor, inténtalo de nuevo."
     }
+  },
+  "fileOptions": {
+    "copyLink": "Copiar enlace",
+    "copyLinkSuccess": "Enlace copiado al portapapeles",
+    "view": "Ver",
+    "download": "Descargar"
   }
 }
