@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/navigation';
+import { Eye, EyeOff } from 'lucide-react';
 
 import { Button } from '@kit/ui/button';
 import { Input } from '@kit/ui/input';
@@ -39,6 +40,8 @@ export function WhiteLabelClientSignUpForm({
   const { t } = useTranslation('auth');
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const host = window.location.host; // Get the current host
   const router = useRouter();
   
@@ -88,13 +91,7 @@ export function WhiteLabelClientSignUpForm({
   }, [host, agencyId, signInMutation, captchaToken, resetCaptchaToken, form, t, router]);
 
   return (
-    <div className="space-y-6 w-full">
-      <div className="text-center">
-        <h3 className="text-lg font-medium">
-          {t("whiteLabel.clientRegistration.title")}
-        </h3>
-      </div>
-
+    <div className="space-y-6 w-full text-start">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -117,6 +114,7 @@ export function WhiteLabelClientSignUpForm({
                     type="text"
                     placeholder={t('whiteLabel.clientRegistration.namePlaceholder')}
                     disabled={isPending || signInMutation.isPending}
+                    className="h-fit py-3 placeholder:text-inherit"
                   />
                 </FormControl>
                 <FormMessage />
@@ -138,6 +136,7 @@ export function WhiteLabelClientSignUpForm({
                     type="email"
                     placeholder={t('whiteLabel.clientRegistration.emailPlaceholder')}
                     disabled={isPending || signInMutation.isPending}
+                    className="h-fit py-3 placeholder:text-inherit"
                   />
                 </FormControl>
                 <FormMessage />
@@ -159,6 +158,7 @@ export function WhiteLabelClientSignUpForm({
                     type="text"
                     placeholder={t('whiteLabel.clientRegistration.organizationNamePlaceholder')}
                     disabled={isPending || signInMutation.isPending}
+                    className="h-fit py-3 placeholder:text-inherit"
                   />
                 </FormControl>
                 <FormMessage />
@@ -175,12 +175,27 @@ export function WhiteLabelClientSignUpForm({
                   {t("whiteLabel.clientRegistration.password")}
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="password"
-                    placeholder={t('whiteLabel.clientRegistration.passwordPlaceholder')}
-                    disabled={isPending || signInMutation.isPending}
-                  />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder={t('whiteLabel.clientRegistration.passwordPlaceholder')}
+                      disabled={isPending || signInMutation.isPending}
+                      className="h-fit py-3 pr-10 placeholder:text-inherit"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -196,12 +211,27 @@ export function WhiteLabelClientSignUpForm({
                   {t("whiteLabel.clientRegistration.confirmPassword")}
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    type="password"
-                    placeholder={t('whiteLabel.clientRegistration.confirmPasswordPlaceholder')}
-                    disabled={isPending || signInMutation.isPending}
-                  />
+                  <div className="relative">
+                    <Input
+                      {...field}
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder={t('whiteLabel.clientRegistration.confirmPasswordPlaceholder')}
+                      disabled={isPending || signInMutation.isPending}
+                      className="h-fit py-3 pr-10 placeholder:text-inherit"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -210,7 +240,7 @@ export function WhiteLabelClientSignUpForm({
 
           <Button
             type="submit"
-            className="w-full"
+            className="w-full h-fit py-3"
             disabled={isPending || signInMutation.isPending}
             style={{
               backgroundColor: themeColor ?? undefined,

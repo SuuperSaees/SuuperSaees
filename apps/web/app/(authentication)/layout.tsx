@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   }
 
   const { authDetails, isLoading } = useAuthDetails(host);
-  const exlusionPaths = ['/auth/sign-up', '/auth/onboarding'];
+  const exlusionPaths = ['/auth/sign-up', '/auth/onboarding', '/auth/pending-approval'];
   
   if (exlusionPaths.includes(pathname)) {
     return <>{children}</>;
