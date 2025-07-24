@@ -8,7 +8,6 @@ import { useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import type { z } from 'zod';
 
-import { Button } from '@kit/ui/button';
 import {
   Form,
   FormControl,
@@ -146,20 +145,21 @@ export function PasswordSignInForm({
             {t('signIn.label')}
           </If>
         </ThemedButton>
-        {/* Or sign-up */}
-        {/* <div className="flex flex-col items-center gap-3 text-sm">
+        
+        {/* Or sign-up section */}
+        <div className="flex flex-col items-center gap-3 text-sm">
           <div className="flex w-full items-center justify-center gap-8">
             <div className="h-[1px] w-full bg-gray-200"></div>
-            <span className="text-gray-500">{t('signIn.or.title')}</span>
+            <span className="text-gray-500">{t('signIn.or.title') || 'or'}</span>
             <div className="h-[1px] w-full bg-gray-200"></div>
           </div>
           <div className="flex items-center gap-2">
-            <span>{t('signIn.or.question')}</span>
+            <span>{t('signIn.or.question') || "Don't have an account?"}</span>
             <a href={'/auth/sign-up'} className="underline">
-              {t('signIn.or.link')}
+              {t('signIn.or.link') || 'Sign up'}
             </a>
           </div>
-        </div> */}
+        </div>
       </form>
     </Form>
   );

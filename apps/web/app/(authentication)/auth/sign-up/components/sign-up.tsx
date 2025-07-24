@@ -11,6 +11,7 @@ import { AppLogo } from '~/components/app-logo';
 import authConfig from '~/config/auth.config';
 import pathsConfig from '~/config/paths.config';
 import { getTextColorBasedOnBackground } from '~/utils/generate-colors';
+import { AuthLayout as AuthLayoutWrapper} from '../../components/auth-layout';
 
 interface Props {
   searchParams: {
@@ -40,6 +41,21 @@ export default function SignUp({ searchParams }: Props) {
   const textcolor = getTextColorBasedOnBackground(
     authDetails?.background_color ?? '#ffffff',
   );
+
+  if (isCustomDomain && !inviteToken) {
+    return (
+      <AuthLayoutWrapper
+        authDetails={authDetails}
+        isLoading={isLoading}
+        className='w-screen h-screen'
+      >
+        <WhiteLabelSignUpTabs
+          authDetails={authDetails}
+          organizationId={organizationId ?? ''}
+        />
+      </AuthLayoutWrapper>
+    );
+  }
 
   return (
     <div 
@@ -82,19 +98,14 @@ export default function SignUp({ searchParams }: Props) {
                     <Trans i18nKey={'auth:signUpHeading2'} />
                   </h2>
                 ) : null}
-                {isCustomDomain && (
+                {isCustomDomain && inviteToken && (
                   <div className="flex justify-center mb-8">
                     <AppLogo logoUrl={authDetails?.logo_url} />
                   </div>
                 )}
                 
                 {/* Show white label tabs if it's custom domain and no invite token */}
-                {isCustomDomain && !inviteToken ? (
-                  <WhiteLabelSignUpTabs 
-                    authDetails={authDetails}
-                    organizationId={organizationId ?? ''}
-                  />
-                ) : (
+                {(!isCustomDomain || inviteToken) && (
                   <SignUpMethodsContainer
                     providers={authConfig.providers}
                     displayTermsCheckbox={authConfig.displayTermsCheckbox}
