@@ -132,6 +132,48 @@
     "farewell": "Regards,",
     "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
     "at": "at"
+  },
+  "newClientRegistration": {
+    "subject": "New client registered: ${clientName}",
+    "body": "A new client has registered on ${agencyName}.",
+    "greeting": "Hi there!",
+    "clientDetails": "Client Details:",
+    "clientName": "Name: ${clientName}",
+    "clientEmail": "Email: ${clientEmail}",
+    "organizationName": "Organization: ${organizationName}",
+    "registrationDate": "Registration Date: ${registrationDate}",
+    "farewell": "Best regards,",
+    "buttonText": "View Clients",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "newAgencyMemberRegistration": {
+    "subject": "New member registration request for ${agencyName}",
+    "body": "A new member has requested to join ${agencyName} and is pending approval.",
+    "greeting": "Hi there!",
+    "memberDetails": "Member Details:",
+    "memberEmail": "Email: ${memberEmail}",
+    "agencyName": "Agency: ${agencyName}",
+    "registrationDate": "Registration Date: ${registrationDate}",
+    "status": "Status: Pending approval",
+    "farewell": "Best regards,",
+    "buttonText": "Manage Team",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "instructions": "Click 'Manage Team' to access your admin panel where you can review and approve this membership request.",
+    "at": "at"
+  },
+  "agencyMemberAccountConfirmation": {
+    "subject": "Welcome to ${agencyName} - Confirm your account",
+    "body": "You have registered with ${agencyName}. Please confirm your account.",
+    "greeting": "Hello!",
+    "welcomeMessage": "Welcome to the team! Please click the button below to confirm your account",
+    "yourUsername": "Your username:",
+    "farewell": "Best regards,",
+    "buttonText": "Activate Account",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "instructions": "If you cannot click the button, copy and paste the following link into your browser:",
+    "team": "The Team",
+    "at": "at"
   }
 }
 

@@ -27,11 +27,13 @@ import { whiteLabelAgencyMemberSignUp } from '../../../../features/team-accounts
 
 interface WhiteLabelAgencyMemberSignUpFormProps {
   agencyId: string;
+  agencyName: string;
   themeColor?: string;
 }
 
 export function WhiteLabelAgencyMemberSignUpForm({ 
   agencyId,
+  agencyName,
   themeColor 
 }: WhiteLabelAgencyMemberSignUpFormProps) {
   const { t } = useTranslation('auth');
@@ -102,7 +104,7 @@ export function WhiteLabelAgencyMemberSignUpForm({
     <div className="space-y-6 w-full text-start">
       <div className="text-center">
         <h3 className="text-5xl font-medium">
-          {t("whiteLabel.agencyMemberRegistration.title")}
+          {`${t("whiteLabel.agencyMemberRegistration.title")} ${agencyName}`}
         </h3>
         <p className="text-sm text-muted-foreground mt-2">
           {t("whiteLabel.agencyMemberRegistration.description")}

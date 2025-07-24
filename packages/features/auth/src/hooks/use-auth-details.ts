@@ -14,6 +14,7 @@ export interface AuthDetails {
   logo_dark_url: string;
   sidebar_background_color: string;
   auth_background_url?: string;
+  portal_name: string;
   organization_id?: string;
 }
 
@@ -61,6 +62,7 @@ export const useAuthDetails = (hostname: string) => {
             'auth_section_background_color',
             'logo_dark_url',
             'auth_background_url',
+            'portal_name',
           ]));
       } catch (error) {
         console.error('Error fetching auth details', error);
@@ -107,6 +109,10 @@ export const useAuthDetails = (hostname: string) => {
             domainFullData.settings.find(
               (setting) => setting.key === 'auth_background_url',
             )?.value ?? '',
+          portal_name:
+            domainFullData.settings.find(
+              (setting) => setting.key === 'portal_name',
+            )?.value ?? domainFullData.organizationName ?? '',
         };
 
         // Compare the fetched data with the cached data

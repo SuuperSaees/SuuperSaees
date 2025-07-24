@@ -30,11 +30,13 @@ import { whiteLabelClientSignUp } from '../../.../../../team-accounts/src/server
 
 interface WhiteLabelClientSignUpFormProps {
   agencyId: string;
+  agencyName: string;
   themeColor?: string;
 }
 
 export function WhiteLabelClientSignUpForm({ 
   agencyId,
+  agencyName,
   themeColor 
 }: WhiteLabelClientSignUpFormProps) {
   const { t } = useTranslation('auth');
@@ -66,7 +68,7 @@ export function WhiteLabelClientSignUpForm({
 
       try {
         // Step 1: Register the client
-        await whiteLabelClientSignUp(data, host, agencyId);
+        await whiteLabelClientSignUp(data, host, agencyId, agencyName);
         
         // Step 2: Automatically sign in the user
         await signInMutation.mutateAsync({

@@ -159,7 +159,7 @@ export async function getFullDomainBySubdomain(
       error: organizationSubdomainError,
     } = await supabase
       .from('organization_subdomains')
-      .select('organization_id')
+      .select('organization_id, organizations(name)')
       .eq('subdomain_id', domainData.id)
       .single();
 
@@ -187,6 +187,7 @@ export async function getFullDomainBySubdomain(
       domainData,
       settings: organizationSettings,
       organizationId: organizationSubdomainData.organization_id,
+      organizationName: organizationSubdomainData.organizations?.name ?? '',
     };
   } catch (error) {
     console.error(`Error in getFullDomainBySubdomain: ${error}`);
