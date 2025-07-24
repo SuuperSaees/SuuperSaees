@@ -1241,7 +1241,7 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.get_session() TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.get_session() TO authenticated, service_role, anon;
 
 CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _org_id uuid, _role_name text)
  RETURNS boolean

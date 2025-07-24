@@ -2,6 +2,8 @@
 
 import {
   useMemo,
+  useState,
+  useEffect,
 } from 'react';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -16,12 +18,12 @@ import { Spinner } from '@kit/ui/spinner';
 
 import { loadPaginatedAccountMembers, Member } from '../../../../../../apps/web/app/(main)/team/_lib/server/members-page.loader';
 import { useTableConfigs } from '../../../../../../apps/web/app/(views)/hooks/use-table-configs';
-import PrefetcherLink from '../../../../../../apps/web/app/components/shared/prefetcher-link';
 import { useDataPagination } from '../../../../../../apps/web/app/hooks/use-data-pagination';
 import { Pagination } from '../../../../../../apps/web/lib/pagination';
 import AgencyClientCrudMenu from '../clients/agency-client-crud-menu';
 import { RoleBadge } from './role-badge';
 import { useUserWorkspace } from '@kit/accounts/hooks/use-user-workspace';
+import { ApproveAgencyMemberButton } from './approve-agency-member-button';
 
 type Members =
   Database['public']['Functions']['get_account_members']['Returns'];
@@ -133,8 +135,15 @@ function useGetColumns(
   },
   isLoading: boolean,
   userRole: string,
-): ColumnDef<Members[0]>[] {
+): ColumnDef<Member>[] {
   const { t } = useTranslation('team');
+  const [currentDomain, setCurrentDomain] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCurrentDomain(window.location.host);
+    }
+  }, []);
 
   return useMemo(
     () => [
@@ -147,12 +156,20 @@ function useGetColumns(
           const displayName =
             memberSettings?.name ?? member.name ?? member.email?.split('@')[0] ?? '';
           const isSelf = member.user_id === params.currentUserId;
+          
+          // Check if member is not approved - check all domains in public_data
+          const publicData = member.public_data || {};
+          const isNotApproved = Object.values(publicData).some(
+            (domainData: unknown) => {
+              const data = domainData as Record<string, unknown>;
+              return data?.approved === false;
+            }
+          );
 
           return (
-            <PrefetcherLink
-              className={'flex items-center space-x-4 text-left font-semibold'}
-              href={`/team/${member.id}`}
-            >
+            <div className={`flex items-center space-x-4 text-left font-semibold ${
+              isNotApproved ? 'opacity-50' : ''
+            }`}>
               <span>
                 <ProfileAvatar
                   displayName={displayName}
@@ -167,7 +184,13 @@ function useGetColumns(
               <If condition={isSelf}>
                 <Badge variant={'outline'}>{t('youLabel')}</Badge>
               </If>
-            </PrefetcherLink>
+              
+              <If condition={isNotApproved}>
+                <Badge variant={'secondary'} className="text-xs">
+                  {t('pendingApproval')}
+                </Badge>
+              </If>
+            </div>
           );
         },
       },
@@ -217,22 +240,39 @@ function useGetColumns(
         header: '',
         id: 'actions',
         cell: ({ row }) => {
+          const member = row.original;
+          const publicData = member.public_data || {};
+          const currentDomainData = publicData[currentDomain] as Record<string, unknown> | undefined;
+          const needsApprovalForCurrentDomain = currentDomainData?.approved === false;
+          
           return isLoading ? (
             <Spinner className="h-4" />
           ) : (
-            <ActionsDropdown
-              permissions={permissions}
-              member={row.original}
-              currentUserId={params.currentUserId}
-              currentTeamAccountId={params.currentAccountId}
-              currentRoleHierarchy={params.currentRoleHierarchy}
-              currentUserRole={userRole}
-            />
+            <div className="flex items-center justify-end space-x-2">
+              {needsApprovalForCurrentDomain && 
+               currentDomain && // Only show if domain is available (after hydration)
+               (userRole === 'agency_owner' || userRole === 'agency_project_manager') && (
+                <ApproveAgencyMemberButton
+                  userId={member.user_id}
+                  memberName={member.name}
+                  memberEmail={member.email}
+                  domain={currentDomain}
+                />
+              )}
+              <ActionsDropdown
+                permissions={permissions}
+                member={member}
+                currentUserId={params.currentUserId}
+                currentTeamAccountId={params.currentAccountId}
+                currentRoleHierarchy={params.currentRoleHierarchy}
+                currentUserRole={userRole}
+              />
+            </div>
           );
         },
       },
     ],
-    [t, params, permissions, isLoading, userRole],
+    [t, params, permissions, isLoading, userRole, currentDomain],
   );
 }
 
@@ -243,7 +283,7 @@ function ActionsDropdown({
   currentUserRole,
 }: {
   permissions: Permissions;
-  member: Members[0];
+  member: Member;
   currentUserId: string;
   currentTeamAccountId: string;
   currentRoleHierarchy: number;

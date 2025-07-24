@@ -65,7 +65,7 @@ export default async function MemberPage(props: {
       },
     })) ?? [];
   return (
-    <PageBody className="flex h-full flex-col gap-8 p-8 py-8 lg:px-8">
+    <PageBody className="flex h-full flex-col gap-8 ">
       <Member
         id={id}
         userRole={userRole ?? ''}

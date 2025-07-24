@@ -23,6 +23,7 @@ export type Member = {
   owner_user_id: string;
   name: string;
   email: string;
+  public_data: Record<string, unknown>;
   picture_url: string;
   created_at: string;
   updated_at: string;
@@ -206,6 +207,7 @@ export async function loadPaginatedAccountMembers(
         owner_user_id: organizationData.data?.owner_id ?? '',
         name: account.settings[0]?.name ?? account.name ?? '',
         email: account.email ?? '',
+        public_data: account.public_data ?? {},
         picture_url: account.settings[0]?.picture_url ?? account.picture_url ?? '',
         created_at: membership?.created_at ?? account.created_at ?? '',
         updated_at: membership?.updated_at ?? account.updated_at ?? '',

@@ -10,14 +10,14 @@ interface UserReviewMessageProps {
 }
 const UserReviewMessage = ({ review }: UserReviewMessageProps) => {
   return (
-    <div className="flex gap-2 w-full">
+    <div className="flex gap-2 w-full p-2">
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100 shrink-0">
         <Star className="h-5 w-5 text-yellow-400" />
       </div>
       <div className="flex flex-col w-full">
         <div className="flex justify-between gap-4">
           <p className="font-semibold text-gray-600 text-sm">{`Left a ${review?.rating} star review:`}</p>
-          <small className="">
+          <small className="shrink-0">
             {format(new Date(review?.created_at), 'MMM dd, p')}
           </small>
         </div>

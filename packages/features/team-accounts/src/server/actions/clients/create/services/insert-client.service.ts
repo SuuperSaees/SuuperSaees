@@ -30,7 +30,8 @@ export const insertClient = async (
       const {error: clientSettingsError} = await supabaseClient
         .from('user_settings')
         .insert({
-          user_id: userId
+          user_id: userId,
+          organization_id: organizationId,
         })
   
       if (clientError) {

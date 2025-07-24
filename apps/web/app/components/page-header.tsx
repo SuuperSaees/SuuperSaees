@@ -1,30 +1,33 @@
-import { Trans } from '@kit/ui/trans';
-import { cn } from '@kit/ui/utils';
+import { HomeMobileNavigation } from "~/(main)/home/(user)/_components/home-mobile-navigation";
+import { Header } from "./header";
+import { PageMobileNavigation } from "@kit/ui/page";
 
 interface PageHeaderProps {
   title: string;
-  rightContent?: React.ReactNode;
-  className?: string;
   children?: React.ReactNode;
+  className?: string;
+  rightContent?: React.ReactNode;
 }
 
-export function PageHeader({
+const PageHeader = ({
   title,
-  rightContent,
-  className,
   children,
-}: PageHeaderProps) {
+  className,
+  rightContent,
+}: PageHeaderProps) => {
   return (
-    <div className={cn('flex h-9 items-center justify-between', className)}>
-      {!children && (
-        <h2 className="font-inter text-xl font-medium leading-4">
-          <Trans i18nKey={title} />
-        </h2>
-      )}
+    <Header.Root className={className}>
+      <Header.Left>
+        <PageMobileNavigation className={"flex items-center justify-between"}>
+          <HomeMobileNavigation />
+        </PageMobileNavigation>
+      </Header.Left>
+      <Header.Title title={title} />
       {children}
-      <div className="flex items-center gap-2 ml-2">
-        {rightContent}
-      </div>
-    </div>
+
+      <Header.Right>{rightContent}</Header.Right>
+    </Header.Root>
   );
-}
+};
+
+export { PageHeader };

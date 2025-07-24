@@ -14,8 +14,6 @@ import { PageBody } from '@kit/ui/page';
 import { Trans } from '@kit/ui/trans';
 
 import { PageHeader } from '../../../components/page-header';
-import { TimerContainer } from '../../../components/timer-container';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
 
 const ClientsMembersPagePresentation = ({
   account,
@@ -76,7 +74,6 @@ const ClientsMembersPagePresentation = ({
       <div className="flex items-center gap-2">
         <PageHeader
           title="team:team"
-          rightContent={<><TimerContainer /><WalletSummarySheet /></>}
           className="w-full"
         >
           <div className="flex items-center gap-2">

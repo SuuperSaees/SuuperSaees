@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 
-import { useRouter } from 'next/navigation';
-
-import { useMutation } from '@tanstack/react-query';
 import type { ColumnDefBase } from '@tanstack/react-table';
 import { useTranslation } from 'react-i18next';
 
@@ -18,8 +15,6 @@ import { useColumns } from '~/hooks/use-columns';
 import { useDataPagination } from '~/hooks/use-data-pagination';
 import type { Brief } from '~/lib/brief.types';
 import { Pagination } from '~/lib/pagination';
-import { handleResponse } from '~/lib/response/handle-response';
-import { createBrief } from '~/team-accounts/src/server/actions/briefs/create/create-briefs';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import Table from '../../../components/table/table';
@@ -35,7 +30,6 @@ const BriefsTable = ({
 }: {
   initialData: Pagination.Response<Brief.Relationships.Services.Response>;
 }) => {
-  const router = useRouter();
   const { workspace } = useUserWorkspace();
   const accountRole = workspace?.role ?? '';
   const { t } = useTranslation(['briefs', 'services']);
@@ -77,15 +71,7 @@ const BriefsTable = ({
     hasPermission: hasPermissionToActionBriefs,
   }) as ColumnDef<Brief.Relationships.Services.Response>[];
 
-  const briefMutation = useMutation({
-    mutationFn: async () => {
-      const res = await createBrief({});
-      await handleResponse(res, 'briefs', t);
-      if (res.ok && res?.success?.data) {
-        router.push(`briefs/${res.success.data.id}`);
-      }
-    },
-  });
+
 
   const extendedConfig = {
     ...config,
@@ -110,10 +96,6 @@ const BriefsTable = ({
             setSearchTerm(e.target.value)
           }
         />
-
-        {hasPermissionToActionBriefs() && (
-          <AddButton briefMutation={briefMutation} />
-        )}
       </div>
       {briefsAreLoading ? (
         <TableSkeleton columns={4} rows={4} />
@@ -124,7 +106,7 @@ const BriefsTable = ({
           description={t('briefs:empty.description')}
           button={
             hasPermissionToActionBriefs() ? (
-              <AddButton briefMutation={briefMutation} />
+              <AddButton />
             ) : undefined
           }
         />

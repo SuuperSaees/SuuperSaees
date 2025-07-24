@@ -8,7 +8,7 @@ export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
 
   return {
-    title: i18n.t('auth:signUp'),
+    title: i18n.t('auth:signUp.label'),
   };
 };
 

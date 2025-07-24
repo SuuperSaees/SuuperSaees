@@ -1,4 +1,11 @@
 {
+  "pendingApproval": "Aprobación Pendiente",
+  "approve": "Aprobar",
+  "approving": "Aprobando...",
+  "memberApproved": "Miembro Aprobado",
+  "memberApprovedDescription": "{{name}} ha sido aprobado exitosamente",
+  "approvalFailed": "Fallo en la Aprobación",
+  "approvalFailedDescription": "Falló al aprobar el miembro. Por favor intenta de nuevo.",
   "home": {
     "pageTitle": "Inicio"
   },

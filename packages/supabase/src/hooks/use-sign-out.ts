@@ -1,8 +1,9 @@
+'use client';
+
 import { useRouter } from 'next/navigation';
 
 import { useMutation } from '@tanstack/react-query';
 
-import { getDomainByUserId } from '../../../multitenancy/utils/get/get-domain';
 import { useSupabase } from './use-supabase';
 
 // Check if the site URL is defined in environment variables
@@ -11,31 +12,21 @@ if (!process.env.NEXT_PUBLIC_SITE_URL) {
 }
 
 // Define the default landing page URL
-const landingPage = `${process.env.NEXT_PUBLIC_SITE_URL}auth/sign-in`;
 
 export function useSignOut() {
   const client = useSupabase();
   const router = useRouter();
-  const IS_PROD = process.env.NEXT_PUBLIC_IS_PROD === 'true';
 
   return useMutation({
     mutationFn: async () => {
       try {
-        // Fetch the current user data
-        const { data: userData, error: userError } =
-          await client.auth.getUser();
-        if (userError)
-          throw new Error(`Error fetching user: ${userError.message}`);
-
-        const userId = userData?.user?.id;
-
-        // Get the domain for the user (for multi-tenancy support)
-        const {domain} = await getDomainByUserId(userId, false);
 
         // Determine the appropriate landing page URL
-        const landingPageParsed = IS_PROD
-          ? domain.startsWith('http') ? `${domain}/auth/sign-in` : `https://${domain}/auth/sign-in`
-          : landingPage
+        const domain = typeof window !== 'undefined' ? window.location.host : '';
+
+        const landingPageParsed = domain.includes('localhost')
+          ? `http://${domain}/auth/sign-in`
+          : `https://${domain}/auth/sign-in`;
 
         // Sign out the user
         await client.auth.signOut();

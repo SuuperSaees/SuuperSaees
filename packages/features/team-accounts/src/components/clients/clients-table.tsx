@@ -279,11 +279,11 @@ export function ClientsTable({
               }
             />
 
-            {((activeButton === "organizations" &&
+            {/* {((activeButton === "organizations" &&
               filteredOrganizations.length > 0) ||
               (activeButton === "clients" && filteredClients.length > 0)) && (
               <CreateClientDialog />
-            )}
+            )} */}
           </div>
         </div>
 

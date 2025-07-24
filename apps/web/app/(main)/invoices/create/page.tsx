@@ -1,6 +1,5 @@
 import { PageBody } from "@kit/ui/page";
 import { PageHeader } from "~/(main)/../components/page-header";
-import { TimerContainer } from "~/(main)/../components/timer-container";
 // import { Alert } from "~/(main)/../components/shared/export-csv-button/alert";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
@@ -12,7 +11,6 @@ import { loadUserWorkspace } from "~/(main)/home/(user)/_lib/server/load-user-wo
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
 import { Client } from "~/lib/client.types";
 import { Service } from "~/lib/services.types";
-import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -39,7 +37,6 @@ async function CreateInvoicesPage() {
     <PageBody className="h-full">
       <PageHeader
         title="invoices:creation.title"
-        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full"
       />
       {/* <Alert

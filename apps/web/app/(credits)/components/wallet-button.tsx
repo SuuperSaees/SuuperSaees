@@ -10,6 +10,7 @@ const WalletButton = forwardRef<HTMLButtonElement, ButtonProps>(
       <Button
         ref={ref}
         variant="outline"
+        aria-label="Wallet"
         className={cn(
           "flex items-center gap-2 text-gray-600 font-medium",
           className,
@@ -17,14 +18,18 @@ const WalletButton = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         <CreditIcon className="w-4 h-4" />
-        <Trans
-          i18nKey={
-            value === 1
-              ? "credits:wallet.value.singular"
-              : "credits:wallet.value.plural"
-          }
-          values={{ value }}
-        />
+        <span className="inline-flex gap-1 items-center">
+          <span>{value}</span>
+          <span className="hidden md:inline">
+            <Trans
+              i18nKey={
+                value === 1
+                  ? "credits:wallet.value.singular"
+                  : "credits:wallet.value.plural"
+              }
+            />
+          </span>
+        </span>
       </Button>
     );
   },

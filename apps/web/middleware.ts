@@ -295,6 +295,42 @@ function getPatterns() {
       handler: adminMiddleware,
     },
     {
+      pattern: new URLPattern({ pathname: '/auth/pending-approval' }),
+      handler: async (req: NextRequest, res: NextResponse) => {
+        const {
+          data: { user },
+        } = await getUser(req, res);
+
+        // If user is not logged in, redirect to sign in
+        if (!user) {
+          return NextResponse.redirect(
+            new URL(pathsConfig.auth.signIn, req.nextUrl.origin).href,
+          );
+        }
+
+        // Get domain from cookies
+        let domain = '';
+        for (const [key, cookie] of req.cookies) {
+          if (key.startsWith('authDetails')) {
+            domain = cookie.name.split('_')[1] ?? '';
+          }
+        }
+
+        const userMetadata = user.app_metadata;
+        const isApproved = userMetadata?.[domain]?.approved;
+
+        // If user is approved, redirect to home
+        if (isApproved === true) {
+          return NextResponse.redirect(
+            new URL(pathsConfig.app.home, req.nextUrl.origin).href,
+          );
+        }
+
+        // If user is not approved or approval status is undefined, allow access to pending approval page
+        return;
+      },
+    },
+    {
       pattern: new URLPattern({ pathname: '/auth/*?' }),
       handler: async (req: NextRequest, res: NextResponse) => {
         const {
@@ -418,10 +454,35 @@ function getPatterns() {
 
         const userMetadata = user.app_metadata;
         const hasDeletedOn = userMetadata?.[domain]?.deleted_on;
+        const isApproved = userMetadata?.[domain]?.approved;
+        
         const supabase = createMiddlewareClient(req, res);
         if (hasDeletedOn) {
           await supabase.auth.signOut();
           return NextResponse.redirect(new URL(pathsConfig.auth.signIn, origin).href);
+        }
+
+        // Check if user is not approved (only for agency members)
+        if (isApproved === false) {
+          // Allow access only to specific routes for unapproved users
+          const allowedPathsForUnapproved = [
+            '/auth/sign-in',
+            '/auth/sign-up',
+            '/auth/sign-out',
+            '/auth/confirm',
+            '/join',
+            '/auth/pending-approval'
+          ];
+          
+          const isAllowedPath = allowedPathsForUnapproved.some(path => 
+            req.nextUrl.pathname.startsWith(path)
+          );
+          
+          if (!isAllowedPath) {
+            return NextResponse.redirect(
+              new URL('/auth/pending-approval', origin).href
+            );
+          }
         }
 
         let userRoleWithId = req.cookies.get('user_role')?.value;
