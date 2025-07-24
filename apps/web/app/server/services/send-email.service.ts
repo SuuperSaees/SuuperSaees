@@ -167,7 +167,7 @@ function createEmailConfig<T extends EmailType>(
         to: p.to,
         userId: p.userId,
         subject: t("subject", { clientName: p.clientName }),
-        body: t("body"),
+        body: t("body", { agencyName: p.agencyName }),
         greeting: t("greeting"),
         farewell: t("farewell"),
         buttonText: t("buttonText"),
@@ -188,7 +188,9 @@ function createEmailConfig<T extends EmailType>(
         to: p.to,
         userId: p.userId,
         subject: t("subject", { agencyName: p.agencyName }),
-        body: t("body"),
+        body: t("body", {
+          agencyName: p.agencyName,
+        }),
         greeting: t("greeting"),
         farewell: t("farewell"),
         buttonText: t("buttonText"),
@@ -198,6 +200,26 @@ function createEmailConfig<T extends EmailType>(
         emailType: "notification",
         agencyId: p.agencyId,
         domain: p.domain,
+      };
+    }
+
+    case EMAIL.AGENCY_MEMBERS.ACCOUNT_CONFIRMATION: {
+      const p = params as EmailParams[typeof EMAIL.AGENCY_MEMBERS.ACCOUNT_CONFIRMATION];
+      const { t } = getEmailTranslations("agencyMemberAccountConfirmation", lang);
+
+      return {
+        to: p.to,
+        userId: p.userId,
+        subject: t("subject", { agencyName: p.agencyName }),
+        body: t("body", { agencyName: p.agencyName }),
+        greeting: t("greeting"),
+        farewell: t("farewell"),
+        buttonText: t("buttonText"),
+        buttonUrl: p.callbackUrl,
+        footer: t("footer", { toEmail: p.to }),
+        emailType: "notification",
+        domain: p.domain,
+        agencyId: p.agencyId
       };
     }
 

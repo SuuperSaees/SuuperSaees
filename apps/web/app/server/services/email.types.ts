@@ -16,6 +16,7 @@ export const EMAIL = {
   },
   AGENCY_MEMBERS: {
     NEW_REGISTRATION: 'agencyMembers.newRegistration',
+    ACCOUNT_CONFIRMATION: 'agencyMembers.accountConfirmation',
   },
   NOTIFICATIONS: {
     GENERAL: 'notifications.general',
@@ -30,6 +31,7 @@ export type EmailType =
   | typeof EMAIL.CHAT.NEW_MESSAGE
   | typeof EMAIL.CLIENTS.NEW_REGISTRATION
   | typeof EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION
+  | typeof EMAIL.AGENCY_MEMBERS.ACCOUNT_CONFIRMATION
   | typeof EMAIL.NOTIFICATIONS.GENERAL;
 
 // Email Parameters based on type
@@ -83,7 +85,8 @@ export interface EmailParams {
     registrationDate: string;
     agencyId: string;
     domain: string;
-    buttonUrl: string
+    buttonUrl: string;
+    agencyName: string;
   };
   [EMAIL.AGENCY_MEMBERS.NEW_REGISTRATION]: {
     to: string;
@@ -94,6 +97,15 @@ export interface EmailParams {
     agencyId: string;
     domain: string;
     buttonUrl: string;
+  };
+  [EMAIL.AGENCY_MEMBERS.ACCOUNT_CONFIRMATION]: {
+    to: string;
+    userId: string;
+    agencyName: string;
+    sessionId: string;
+    callbackUrl: string;
+    domain: string;
+    agencyId: string;
   };
   [EMAIL.NOTIFICATIONS.GENERAL]: {
     to: string;

@@ -161,5 +161,18 @@
     "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
     "instructions": "Haz clic en 'Gestionar Equipo' para acceder a tu panel de administración donde podrás revisar y aprobar esta solicitud de membresía.",
     "at": "de"
+  },
+  "agencyMemberAccountConfirmation": {
+    "subject": "Bienvenido a ${agencyName} - Confirma tu cuenta",
+    "body": "Te has registrado en ${agencyName}. Por favor confirma tu cuenta.",
+    "greeting": "¡Hola!",
+    "welcomeMessage": "¡Bienvenido al equipo! Por favor haz clic en el botón de abajo para confirmar tu cuenta.",
+    "yourUsername": "Tu nombre de usuario:",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Activar Cuenta",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "instructions": "Si no puedes hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:",
+    "team": "El Equipo",
+    "at": "de"
   }
 }

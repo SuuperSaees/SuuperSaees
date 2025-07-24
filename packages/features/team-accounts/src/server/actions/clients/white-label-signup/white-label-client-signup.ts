@@ -9,7 +9,7 @@ import { sendEmail } from '../../../../../../../../apps/web/app/server/services/
 import { EMAIL } from '../../../../../../../../apps/web/app/server/services/email.types';
 import { getAgencyOwner } from '../../members/get/get-member-account';
 
-export async function whiteLabelClientSignUp(data: WhiteLabelClientSignUpData, host: string, agencyId: string) {
+export async function whiteLabelClientSignUp(data: WhiteLabelClientSignUpData, host: string, agencyId: string, agencyName: string) {
   try {
     // Validate the input data
     const validatedData = WhiteLabelClientSignUpSchema.parse(data);
@@ -54,7 +54,8 @@ export async function whiteLabelClientSignUp(data: WhiteLabelClientSignUpData, h
           registrationDate: registrationDate,
           agencyId,
           domain: baseUrl,
-          buttonUrl: `${baseUrl}/clients`
+          buttonUrl: `${baseUrl}/clients`,
+          agencyName,
         });
         
       } else {
