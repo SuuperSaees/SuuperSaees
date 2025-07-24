@@ -24,43 +24,15 @@ const domain = host.includes('localhost') ?  `http://${host}`: `https://${host}`
   }
 
   return (
-    <div 
-      className={`flex bg-white ${
-        isLoading && !authDetails && isCustomDomain ? 'items-center justify-center' : ''
-      }`}
-      style={{
-        color: textcolor,
-      }}
-    >
+    <div>
       {isLoading && !authDetails && isCustomDomain ? (
         <SkeletonPasswordSignInForm/>
       ) : (
         <>
-          {!isCustomDomain && (
-            <div className="hidden lg:block lg:w-1/2 relative">
-              <img
-                src="/images/oauth/signUpBackground.avif"
-                alt="Background"
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          <div className={`w-full flex flex-col ${isCustomDomain ? 'items-center' : 'lg:w-1/2'}`}>
-            <div className="flex-1 px-4 py-6 sm:px-6 md:px-8 flex flex-col">
-              <div className="flex-1 w-full max-w-md mx-auto flex flex-col justify-center">
-                {!isCustomDomain && (
-                  <div className="hidden md:flex w-full justify-center lg:justify-start mb-12">
-                    <AppLogo/>
-                  </div>
-                )}
-                <WhiteLabelAgencyMemberSignUpForm 
-                  agencyId={organizationId ?? ''}
-                  themeColor={authDetails?.theme_color}
-                />
-              </div>
-            </div>
-          </div>
+        <WhiteLabelAgencyMemberSignUpForm 
+            agencyId={organizationId ?? ''}
+            themeColor={authDetails?.theme_color}
+          />
         </>
       )}
     </div>
