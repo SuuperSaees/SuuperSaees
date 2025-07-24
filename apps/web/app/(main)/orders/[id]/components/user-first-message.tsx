@@ -77,14 +77,20 @@ const UserFirstMessage = ({
   };
 
   return (
-    <div className={`flex flex-col gap-2 w-full p-0 max-w-full min-w-0`}>
+    <div className={`flex flex-col gap-2 w-full max-w-full min-w-0`}>
       <div className="flex justify-between w-full">
         <div className="flex gap-2">
           <span className="font-semibold text-sm">
             {user.name} {t("createdNewProject")}
           </span>
         </div>
-        <small className="">{`${date}`}</small>
+        <div className="flex gap-2 shrink-0">
+          <small className="shrink-0">{`${date}`}</small>
+          {/* This is a fallback where will be placed a delete button in the future */}
+          {/* Is used right now to make the activities align with the design of messages */}
+          <div className='w-4 h-4'></div>
+        </div>
+
       </div>
       {interaction?.briefResponses.length > 0 && (
         <div className="flex w-full p-2.5 flex-col items-start gap-2.5 rounded-tr-lg rounded-br-lg rounded-bl-lg bg-gray-100">

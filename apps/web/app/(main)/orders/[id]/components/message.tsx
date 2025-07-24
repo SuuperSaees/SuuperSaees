@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 // import { Message } from "~/lib/message.types";
 import { useActivityContext } from "../context/activity-context";
-import { ClockIcon, KeyIcon, Trash2, X } from "lucide-react";
+import { ClockIcon, KeyIcon, Trash, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -88,7 +88,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
     <div ref={elementRef} className="flex flex-col gap-2 w-full p-0 max-w-full min-w-0">
       <div className="flex justify-between w-full">
         <div className="flex gap-2">
-          <span className="font-semibold">{displayName}</span>
+          <span className="font-semibold text-sm">{displayName}</span>
           {message?.pending && (
             <ClockIcon className="h-3 w-3 text-muted-foreground self-center" />
           )}
@@ -98,13 +98,13 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
             </span>
           )}
         </div>
-        <div className="flex gap-2">
-          <small>{date}</small>
+        <div className="flex gap-2 shrink-0">
+          <small className="shrink-0">{date}</small>
           <div className="w-4 h-4">
             {isHovered &&
               (currentUser?.id === message.user_id ||
                 userRole === "agency_owner") && (
-                <Trash2
+                <Trash
                   className="w-4 h-4 hover:text-red-500 transition duration-300 cursor-pointer text-gray-600"
                   onClick={() => setIsOpen(true)}
                 />
@@ -145,7 +145,7 @@ const ChatMessage = ({ message, isHovered }: ChatMessageProps) => {
             <AlertDialogHeader>
               <div className="flex justify-between">
                 <div className="flex items-center justify-center w-12 h-12 rounded-full bg-error-100">
-                  <Trash2 className="w-6 h-6 text-error-600" />
+                  <Trash className="w-6 h-6 text-error-600" />
                 </div>
                 <X
                   className="w-6 h-6 cursor-pointer text-gray-400"

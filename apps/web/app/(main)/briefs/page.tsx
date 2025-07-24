@@ -1,13 +1,12 @@
 import { PageBody } from '@kit/ui/page';
 
 import { PageHeader } from '~/(main)/../components/page-header';
-import { TimerContainer } from '~/(main)/../components/timer-container';
 import { createI18nServerInstance } from '~/lib/i18n/i18n.server';
 import { withI18n } from '~/lib/i18n/with-i18n';
 import { getBriefs } from '~/team-accounts/src/server/actions/briefs/get/get-brief';
 
 import BriefsTable from './components/table';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
+import AddButton from './components/add-button';
 
 export const generateMetadata = async () => {
   const i18n = await createI18nServerInstance();
@@ -27,8 +26,8 @@ async function BriefsPage() {
     <PageBody className="overflow-y-auto">
       <PageHeader
         title="briefs:briefs"
-        rightContent={<><TimerContainer /><WalletSummarySheet /></>}
         className="w-full"
+        rightContent={<AddButton />}
       />
       <BriefsTable initialData={initialData} />
     </PageBody>

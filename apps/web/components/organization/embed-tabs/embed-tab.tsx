@@ -70,7 +70,7 @@ export function EmbedTab({
       activeTab={activeTab}
       option={id}
       value={id}
-      className="group flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+      className="group flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 flex-shrink-0"
     >
       <DynamicEmoji emoji={icon ?? ''} fallback={"🔗"} className="h-4 w-4" />
       <span>{title}</span>
@@ -94,7 +94,7 @@ export function AddIntegrationTab({ activeTab }: { activeTab: string }) {
       activeTab={activeTab}
       option="new"
       value="new"
-      className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+      className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 flex-shrink-0"
     >
       <Plus className="h-4 w-4" />
       <span>{t('form.addButton')}</span>
@@ -116,7 +116,7 @@ export function StandardTab({
       activeTab={activeTab}
       option={option}
       value={option}
-      className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900"
+      className="flex items-center gap-2 font-semibold hover:bg-gray-200/30 hover:text-brand data-[state=active]:bg-brand-50/60 data-[state=active]:text-brand-900 flex-shrink-0"
     >
       {label}
     </ThemedTabTrigger>

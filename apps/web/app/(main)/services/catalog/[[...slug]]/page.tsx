@@ -6,12 +6,9 @@ import ServicesCatalog from "../components/catalog";
 import { getFullDomainBySubdomain } from "~/multitenancy/utils/get/get-domain";
 import { headers } from "next/headers";
 import ShareCatalogButton from "../components/share-catalog-button";
-import { Trans } from "@kit/ui/trans";
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
 import { Pagination } from "~/lib/pagination";
 import { Service } from "~/lib/services.types";
-import { TimerContainer } from "~/(main)/../components/timer-container";
-import WalletSummarySheet from "~/(credits)/components/wallet-summary-sheet";
 
 interface ServicesCatalogPageProps {
   params: {
@@ -80,10 +77,7 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   
   return (
     <PageBody className="w-full h-full">
-      <PageHeader title="services:catalog.title" className="w-full flex" rightContent={<><TimerContainer /><WalletSummarySheet /></>}>
-        <h2 className="font-inter text-xl font-medium leading-4">
-          <Trans i18nKey="services:catalog.title" />
-        </h2>
+      <PageHeader title="services:catalog.title" className="w-full flex">
         <div className="flex items-center justify-end flex-1">
           <ShareCatalogButton baseUrl={baseUrl} />
         </div>

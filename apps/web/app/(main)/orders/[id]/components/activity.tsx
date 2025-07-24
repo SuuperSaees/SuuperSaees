@@ -171,7 +171,7 @@ const ActivityPage = ({
       <Interactions agencyStatuses={agencyStatuses} />
       <Separator className="w-full" />
       <div
-        className={`flex flex-col justify-end pt-3 px-8 mb-4`}
+        className={`flex flex-col justify-end pt-3 md:px-8 px-0 mb-4`}
         onDragOver={(e) => {
           e.preventDefault();
           e.stopPropagation();

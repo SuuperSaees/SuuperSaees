@@ -13,7 +13,6 @@ import { convertToTitleCase } from '../utils/format-agency-names';
 import { formatDisplayDate } from '@kit/shared/utils';
 import { ActivityType, DataResult } from '../context/activity.types';
 import { AgencyStatus } from '~/lib/agency-statuses.types';
-import FileWithOptions from '../hoc/with-file-options';
 import { useActivityContext } from '../context/activity-context';
 import AnnotationsDialog from '~/(annotations)/components/dialog';
 4
@@ -151,9 +150,9 @@ export const StatusActivity = ({
     activity.type === ActivityType.TASK
   ) {
     return (
-      <div className="flex h-fit w-full justify-between gap-4">
+      <div className="flex h-fit w-full justify-between gap-4 p-2">
         <div className="flex gap-2 align-center">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 shrink-0">
             {activity.type === ActivityType.PRIORITY ? (
               <BarChart className="h-4 w-4" />
             ) : activity.type === ActivityType.DUE_DATE ? (
@@ -180,9 +179,14 @@ export const StatusActivity = ({
             )}
           </span>
         </div>
-        <small className="">
-          {format(new Date(formattedActivity.created_at), 'MMM dd, p')}
-        </small>
+        <div className="flex gap-2 shrink-0">
+          <small className="shrink-0">
+            {format(new Date(formattedActivity.created_at), 'MMM dd, p')}
+          </small>
+          {/* This is a fallback where will be placed a delete button in the future*/}
+          {/* Is used right now to make the activities align with the design of messages */}
+          <div className='w-4 h-4'></div>
+        </div>
       </div>
     );
   }
@@ -212,41 +216,41 @@ export const DefaultAction = ({
     isFileValue = true; 
   }
 
-  const [fileName, fileId] = isFileValue ? parsedValue : [];
+  const [_, fileId] = isFileValue ? parsedValue : [];
 
   const { allFiles } = useActivityContext();
 
   const file = allFiles?.find((file) => file.id === fileId);
 
   return (
-    <div className="flex h-fit w-full justify-between gap-2">
+    <div className="flex h-fit w-full justify-between gap-2 p-2">
       <div className="flex gap-2 text-sm">
         <AvatarDisplayer
           displayName={
-            formattedActivity.user.settings?.picture_url ?? formattedActivity.user.picture_url
+            formattedActivity.user?.settings?.[0]?.picture_url ?? formattedActivity.user?.picture_url
               ? null
-              : formattedActivity.user?.settings?.name ?? formattedActivity.user.name
+              : formattedActivity.user?.settings?.[0]?.name ?? formattedActivity.user?.name
           }
           pictureUrl={
-            formattedActivity.user.settings?.picture_url ?? formattedActivity.user.picture_url
+            formattedActivity.user?.settings?.[0]?.picture_url ?? formattedActivity.user?.picture_url
           }
         />
-        <span className="flex flex-wrap items-center gap-1">
+        <span className="flex flex-wrap items-start gap-1">
           <span className='font-semibold'>{formattedActivity.actor}</span>
           <span>{formattedActivity.message}</span>
           <span>{formatTarget(formattedActivity.type)}</span>
           <span>{formattedActivity.preposition}</span>
           {isFileValue ? (
-            <span className="flex items-center">
+            
               <AnnotationsDialog
                 file={file}
-                triggerComponent={<button className="text-blue-500 hover:underline">
+                triggerComponent={<button className="text-blue-500 hover:underline text-start">
                   {file?.name}
                 </button>}
                 fileName={file?.name ?? ''}
                 files={allFiles ?? []}
               />
-            </span>
+           
           ) : (
             <span>
               {activity.type === 'due_date'
@@ -256,7 +260,12 @@ export const DefaultAction = ({
           )}
         </span>
       </div>
-      <small>{format(new Date(activity.created_at), 'MMM dd, p')}</small>
+      <div className="flex gap-2 shrink-0">
+        <small className="shrink-0">{format(new Date(activity.created_at), 'MMM dd, p')}</small>
+        {/* This is a fallback where will be placed a delete button in the future*/}
+        {/* Is used right now to make the activities align with the design of messages */}
+        <div className='w-4 h-4'></div>
+      </div>
     </div>
   );
 };

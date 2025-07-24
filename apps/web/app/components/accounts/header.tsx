@@ -4,6 +4,8 @@ import EditableHeader from '~/components/editable-header';
 
 import UpdateImage from '../ui/update-image';
 import { Account } from '~/lib/account.types';
+import { PageMobileNavigation } from '@kit/ui/page';
+import { HomeMobileNavigation } from '~/(main)/home/(user)/_components/home-mobile-navigation';
 
 type AccountType = Pick<Account.Type, 'id' | 'name' | 'email' | 'picture_url'>;
 
@@ -38,12 +40,15 @@ function Header({
 }: AccountHeaderProps) {
 
   return (
-    <div className="flex w-full gap-4">
+    <div className="flex w-full lg:gap-4 gap-1">
+      <PageMobileNavigation className={"flex items-center justify-between w-fit" }>
+        <HomeMobileNavigation />
+      </PageMobileNavigation>
       <UpdateImage
         bucketStorage={bucketStorage}
         floatingButtons={{ update: true, delete: true }}
         defaultImageURL={account.picture_url ?? ''}
-        className="aspect-square h-16 w-16"
+        className="aspect-square h-12 w-12 md:block hidden"
         onUpdate={controllers.onUpdateAccountImage}
       />
 

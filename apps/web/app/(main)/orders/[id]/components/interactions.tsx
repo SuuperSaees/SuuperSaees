@@ -155,7 +155,7 @@ const Interactions = ({
 
   return (
     <div
-      className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto px-8"
+      className="relative box-border flex h-full max-h-full min-h-0 w-full min-w-0 shrink flex-grow flex-col gap-4 overflow-y-auto md:px-8 px-0"
       ref={interactionsContainerRef}
       onScroll={handleContainerScroll}
     >
@@ -190,12 +190,12 @@ const Interactions = ({
                 return interaction.class ===
                   ChatInteractionType.BRIEF_RESPONSE ? (
                   <div
-                    className="flex w-full"
+                    className="flex w-full p-2"
                     key={interaction.id}
                     {...dataProps}
                   >
-                    <div className="mr-2 flex h-7 w-7 items-center justify-center rounded-full bg-green-200 p-1">
-                      <Check className="text-green-700" />
+                    <div className="mr-2 flex h-10 w-10 items-center justify-center rounded-full bg-green-200 p-1">
+                      <Check className="text-green-700 w-4 h-4" />
                     </div>
                     <UserFirstMessage interaction={interaction} user={{
                       ...orderOwner,

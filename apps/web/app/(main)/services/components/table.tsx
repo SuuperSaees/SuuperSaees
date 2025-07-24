@@ -20,9 +20,6 @@ import { useDataPagination } from '~/hooks/use-data-pagination';
 import { Pagination } from '~/lib/pagination';
 import { Service } from '~/lib/services.types';
 import { getServicesByOrganizationId } from '~/server/actions/services/get-services';
-
-import AddServiceButton from './add-button';
-
 interface ColumnDef<T> extends ColumnDefBase<T, unknown> {
   accessorKey: keyof T;
   header: string;
@@ -118,7 +115,7 @@ const ServicesTable = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap gap-4 justify-end">
+      <div className="flex flex-wrap gap-4 justify-end relative w-full">
         <SearchInput
           value={searchTerm}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -127,7 +124,7 @@ const ServicesTable = ({
           placeholder={t('searchServices')}
           className="ml-auto"
         />
-        <AddServiceButton />
+
       </div>
 
       {servicesAreLoading ? (

@@ -90,11 +90,12 @@ export const OrderTabs = ({
       value={activeTab}
       onValueChange={handleTabChange}
     >
-      <TabsList className="flex w-fit gap-2 bg-transparent px-6.5">
+      <TabsList className="flex md:w-fit gap-2 bg-transparent md:px-6.5 px-0 overflow-x-auto w-full">
         <ThemedTabTrigger
           value="activity"
           activeTab={activeTab}
           option={'activity'}
+          className='md:flex-none flex-1'
         >
           <Trans i18nKey={'orders:details.navigation.activity'} />
         </ThemedTabTrigger>
@@ -102,6 +103,7 @@ export const OrderTabs = ({
           value="details"
           activeTab={activeTab}
           option={'details'}
+          className='md:flex-none flex-1'
         >
           <Trans i18nKey={'orders:details.navigation.details'} />
         </ThemedTabTrigger>
@@ -109,7 +111,7 @@ export const OrderTabs = ({
           value="tasks"
           activeTab={activeTab}
           option={'tasks'}
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 md:flex-none flex-1"
         >
           <Trans i18nKey={'orders:details.navigation.tasks'} />
         </ThemedTabTrigger>
@@ -121,6 +123,7 @@ export const OrderTabs = ({
             value="calendar"
             activeTab={activeTab}
             option={'calendar'}
+            className='md:flex-none flex-1'
           >
             <Trans i18nKey={'account:calendar'} />
           </ThemedTabTrigger>

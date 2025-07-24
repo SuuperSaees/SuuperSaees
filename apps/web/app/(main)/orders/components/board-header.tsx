@@ -5,18 +5,13 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Embeds } from '~/lib/embeds.types';
 import { Order } from '~/lib/order.types';
 
-import { PageHeader } from '../../../components/page-header';
-import { TimerContainer } from '../../../components/timer-container';
 import { ValueFormatters } from '../hooks/use-csv-export-formatters';
 import { ViewOption } from '../hooks/use-orders-view-configs';
-import CreateOrderButton from './create-order-button';
 import Filters, { FilterGroup } from './filters';
 import Search from './search';
 import SettingsDropdown from './settings-dropdown';
 import StatusFilters, { TabConfig } from './status-filters';
 import ViewSelect from './view-select';
-import WalletSummarySheet from '~/(credits)/components/wallet-summary-sheet';
-import { usePathname } from 'next/navigation';
 import { PaginationConfig } from '../../../components/shared/export-csv-button/types';
 
 interface BoardHeaderProps {
@@ -56,47 +51,23 @@ export function BoardHeader({
   getValueFormatters,
   pagination,
 }: BoardHeaderProps) {
-  const pathname = usePathname();
   // const { workspace: userWorkspace } = useUserWorkspace();
   // const agencyRoles = [
   //   'agency_owner',
   //   'agency_project_manager',
   //   'agency_member',
   // ];
-  const showTimerAndWallet = pathname !== '/organization'
   return (
-    <div className="flex flex-col gap-5">
-      <PageHeader title="orders:title" rightContent={
-        <div className="flex items-center gap-4">
-          {showTimerAndWallet && (
-            <>
-              <TimerContainer />
-              <WalletSummarySheet />
-            </>
-          )}
-          <CreateOrderButton
-          t={t}
-          hasOrders={orders.length > 0 || ordersAreLoading}
-        />
-        </div>
-      } className="w-full flex">
-        <h2 className='text-xl font-medium leading-4'>{t('title')}</h2>
-    
-      </PageHeader>
-      <div className="flex flex-wrap items-center justify-end gap-4">
-        <div className="mr-auto flex items-center gap-4">
-          {/* Status filters */}
-          {/* {agencyRoles.includes(userWorkspace.role ?? '') && (
-            <> */}
+    <div className="flex flex-col gap-5 w-full">
+      <div className="flex md:flex-wrap flex-wrap-reverse items-center justify-end gap-3 md:gap-4 relative w-full">
+
           <StatusFilters
             activeTab={activeTab}
             setActiveTab={handleTabChange}
             t={t}
             tabsConfig={tabsConfig}
+            className="mr-auto"
           />
-          {/* </>
-          )} */}
-        </div>
 
         <Search
           defaultSearch={searchTerm}
@@ -162,8 +133,6 @@ export function BoardHeader({
           }
           pagination={pagination}
         />
-
-
       </div>
     </div>
   );
