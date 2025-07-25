@@ -32,7 +32,7 @@ const FileDialogView: React.FC<FileDialogViewProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>{triggerComponent}</DialogTrigger>
-      <DialogContent className="h-[90vh] w-[90vw] p-8">
+      <DialogContent className="h-[90vh] w-[90vw] p-8 rounded-lg">
         <div className="flex h-[calc(90vh-10rem)] w-full items-center justify-center overflow-auto">
           <FilePreview
             {...props}

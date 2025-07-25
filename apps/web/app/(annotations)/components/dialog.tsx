@@ -22,14 +22,12 @@ import { Separator } from '@kit/ui/separator';
 import Tooltip from '~/components/ui/tooltip';
 import { Annotation } from '~/lib/annotations.types';
 import { File } from '~/lib/file.types';
-import FileViewer from '~/(main)/orders/[id]/components/files/file-viewer';
 import { useFileHandlers } from '~/(main)/orders/[id]/hooks/files/use-file-handlres';
 import { useAnnotations } from '~/(main)/orders/[id]/hooks/use-annotations';
 import { handleFileDownload } from '~/(main)/orders/[id]/utils/file-utils';
 
 import AnnotationsHelpTooltip from './help-tooltip';
-import AnnotationsThumbnailsSidebar from './thumbnails-sidebar';
-import AnnotationsCommentsPanel from './comments-panel';
+import AnnotationsContentRenderer from './content-renderer';
 
 export interface AnnotationsProps {
   triggerComponent: React.ReactNode;
@@ -224,22 +222,22 @@ const AnnotationsDialog = ({
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>{triggerComponent}</DialogTrigger>
       <DialogContent
-        className="flex h-[90vh] w-[90vw] max-w-[90vw] flex-col gap-0 p-0"
+        className="flex h-[90vh] w-[90vw] max-w-[90vw] flex-col gap-0 p-0 rounded-lg"
         showCloseIcon={false}
 
       >
-        <DialogHeader className="flex flex-row justify-between p-4">
-          <DialogTitle>{selectedFile?.name ?? fileName}</DialogTitle>
-          <div className="flex">
+        <DialogHeader className="flex flex-row gap-4 text-left justify-between p-4">
+          <DialogTitle className='line-clamp-1 leading-normal'>{selectedFile?.name ?? fileName}</DialogTitle>
+          <div className="flex gap-4 shrink-0 items-center">
             <Tooltip
               className="w-80 rounded-md bg-white p-2 text-gray-700 shadow-lg"
               content={<AnnotationsHelpTooltip />}
             >
-              <QuestionMarkCircledIcon className="mr-[34px] h-6 w-6 text-[#A4A7AE]" />
+              <QuestionMarkCircledIcon className="h-4 w-4 text-gray-700" />
             </Tooltip>
 
             <ArrowDownToLine
-              className="mr-[34px] h-6 w-6 cursor-pointer text-[#A4A7AE]"
+              className="h-4 w-4 cursor-pointer text-gray-700"
               onClick={() =>
                 handleFileDownload(
                   selectedFile?.url ?? '',
@@ -248,70 +246,54 @@ const AnnotationsDialog = ({
               }
             />
             <DialogClose className="rounded-sm opacity-70 hover:opacity-100 focus:outline-none">
-              <X className="h-6 w-6 text-[#A4A7AE]" />
+              <X className="h-4 w-4 text-gray-700" />
               <span className="sr-only">Close</span>
             </DialogClose>
           </div>
         </DialogHeader>
 
         <Separator />
-        <div className="flex min-h-0 flex-1">
-          <AnnotationsThumbnailsSidebar
-            files={files}
-            selectedFile={selectedFile}
-            setSelectedFile={setSelectedFile}
-            setCurrentFileType={setCurrentFileType}
-            resetZoom={resetZoom}
-            setCurrentPage={setCurrentPage}
-          />
-
-          <FileViewer
-            currentFileType={currentFileType}
-            containerRef={containerRef}
-            handleMouseUp={handleMouseUp}
-            handleMouseMove={handleMouseMove}
-            handleWheel={handleWheel}
-            imageRef={imageRef}
-            handleImageClick={handleImageClick}
-            handleMouseDown={handleMouseDown}
-            zoomLevel={zoomLevel}
-            position={position}
-            isDragging={isDragging}
-            selectedFile={selectedFile}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            setTotalPages={setTotalPages}
-            isLoadingAnnotations={isLoadingAnnotations}
-            annotations={annotations}
-            selectedAnnotation={selectedAnnotation}
-            isChatOpen={isChatOpen}
-            setIsChatOpen={setIsChatOpen}
-            setSelectedAnnotation={setSelectedAnnotation}
-            handleAnnotationClick={handleAnnotationClick}
-            handleChatClose={handleChatClose}
-            handleMessageSubmit={handleSendMessage}
-            isLoadingMessages={isLoadingMessages}
-            messages={messages}
-            isSpacePressed={isSpacePressed}
-            isInitialMessageOpen={isInitialMessageOpen}
-            setIsInitialMessageOpen={setIsInitialMessageOpen}
-            setCurrentPage={setCurrentPage}
-          />
-          {
-            !currentFileType.startsWith('video/') && (
-              <AnnotationsCommentsPanel
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                annotations={annotations}
-                isLoadingAnnotations={isLoadingAnnotations}
-                handleUpdateAnnotation={handleUpdateAnnotation}
-                handleDeleteAnnotation={handleDeleteAnnotation}
-                handleChatClick={handleChatClick}
-              />
-            )
-          }
-          
-        </div>
+        <AnnotationsContentRenderer
+          files={files}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+          setCurrentFileType={setCurrentFileType}
+          resetZoom={resetZoom}
+          setCurrentPage={setCurrentPage}
+          currentFileType={currentFileType}
+          containerRef={containerRef}
+          handleMouseUp={handleMouseUp}
+          handleMouseMove={handleMouseMove}
+          imageRef={imageRef}
+          handleImageClick={handleImageClick}
+          handleMouseDown={handleMouseDown}
+          zoomLevel={zoomLevel}
+          position={position}
+          isDragging={isDragging}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setTotalPages={setTotalPages}
+          isLoadingAnnotations={isLoadingAnnotations}
+          annotations={annotations}
+          selectedAnnotation={selectedAnnotation}
+          isChatOpen={isChatOpen}
+          setIsChatOpen={setIsChatOpen}
+          setSelectedAnnotation={setSelectedAnnotation}
+          handleAnnotationClick={handleAnnotationClick}
+          handleChatClose={handleChatClose}
+          handleMessageSubmit={handleSendMessage}
+          isLoadingMessages={isLoadingMessages}
+          messages={messages}
+          handleWheel={handleWheel}
+          isSpacePressed={isSpacePressed}
+          isInitialMessageOpen={isInitialMessageOpen}
+          setIsInitialMessageOpen={setIsInitialMessageOpen}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          handleUpdateAnnotation={handleUpdateAnnotation}
+          handleDeleteAnnotation={handleDeleteAnnotation}
+          handleChatClick={handleChatClick}
+        />
       </DialogContent>
     </Dialog>
   );
