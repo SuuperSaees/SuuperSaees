@@ -1,16 +1,8 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from "react";
 
-import { File } from '~/lib/file.types';
-import { FilePreview } from '~/(main)/orders/[id]/components/files/file-preview';
-
-interface AnnotationsThumbnailsSidebarProps {
-  files: File.Type[];
-  selectedFile: File.Type | null;
-  setSelectedFile: (file: File.Type) => void;
-  setCurrentFileType: (fileType: string) => void;
-  resetZoom: () => void;
-  setCurrentPage: (page: number) => void;
-}
+import { FilePreview } from "~/(main)/orders/[id]/components/files/file-preview";
+import { AnnotationsThumbnailsSidebarProps } from "../types/types";
+import { cn } from "@kit/ui/utils";
 
 const AnnotationsThumbnailsSidebar = ({
   files,
@@ -19,11 +11,12 @@ const AnnotationsThumbnailsSidebar = ({
   setCurrentFileType,
   resetZoom,
   setCurrentPage,
+  className,
 }: AnnotationsThumbnailsSidebarProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
-    if (selectedFile && ref && 'current' in ref && ref.current) {
+    if (selectedFile && ref && "current" in ref && ref.current) {
       const container = ref.current;
       const selectedElement = container.querySelector(
         `[data-file-id="${selectedFile.id}"]`,
@@ -31,8 +24,8 @@ const AnnotationsThumbnailsSidebar = ({
 
       if (selectedElement) {
         selectedElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
+          behavior: "smooth",
+          block: "center",
         });
       }
     }
@@ -41,7 +34,12 @@ const AnnotationsThumbnailsSidebar = ({
   return (
     <div
       ref={ref}
-      className="flex px-6 w-fit shrink-0 h-full flex-col items-center gap-4 overflow-y-auto py-4 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2"
+      className={cn(
+        "flex px-6 w-fit shrink-0 h-full flex-col items-center gap-4 overflow-y-auto py-4 min-h-0",
+        "[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 ",
+        "[&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2",
+        className,
+      )}
     >
       {files
         ?.filter(
@@ -63,8 +61,8 @@ const AnnotationsThumbnailsSidebar = ({
             <div
               className={`item-center flex h-[150px] w-[150px] justify-center rounded-lg border ${
                 selectedFile?.id === file.id
-                  ? 'border-2 border-blue-500'
-                  : 'bg-gray-100 border-transparent'
+                  ? "border-2 border-blue-500"
+                  : "bg-gray-100 border-transparent"
               }`}
             >
               <FilePreview
@@ -75,13 +73,12 @@ const AnnotationsThumbnailsSidebar = ({
               />
             </div>
             <p className="w-[150px] truncate text-sm font-medium text-gray-400">
-              {file.name ?? 'fileName'}
+              {file.name ?? "fileName"}
             </p>
           </div>
         ))}
     </div>
   );
-}
-
+};
 
 export default AnnotationsThumbnailsSidebar;

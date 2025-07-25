@@ -1,24 +1,14 @@
-import { MessageCircle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { MessageCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-import { Spinner } from '@kit/ui/spinner';
+import { Spinner } from "@kit/ui/spinner";
 
-import ActiveChats from '~/(main)/orders/[id]/components/files/active-chats';
-import ResolvedChat from '~/(main)/orders/[id]/components/files/resolved-chat';
-import { Annotation } from '~/lib/annotations.types';
+import ActiveChats from "~/(main)/orders/[id]/components/files/active-chats";
+import ResolvedChat from "~/(main)/orders/[id]/components/files/resolved-chat";
+import { Annotation } from "~/lib/annotations.types";
+import { AnnotationsCommentsPanelProps } from "../types/types";
+import { cn } from "@kit/ui/utils";
 
-interface AnnotationsCommentsPanelProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  annotations: Annotation.Type[];
-  isLoadingAnnotations: boolean;
-  handleUpdateAnnotation: (
-    annotationId: string,
-    status: 'completed' | 'draft' | 'active',
-  ) => Promise<void>;
-  handleDeleteAnnotation: (annotationId: string) => Promise<void>;
-  handleChatClick: (fileId: string, pageNumber: number) => void;
-}
 const AnnotationsCommentsPanel = ({
   activeTab,
   setActiveTab,
@@ -27,6 +17,7 @@ const AnnotationsCommentsPanel = ({
   handleUpdateAnnotation,
   handleDeleteAnnotation,
   handleChatClick,
+  className,
 }: AnnotationsCommentsPanelProps) => {
   const renderAnnotationsList = (filteredAnnotations: Annotation.Type[]) => {
     if (filteredAnnotations.length === 0) {
@@ -36,17 +27,17 @@ const AnnotationsCommentsPanel = ({
             <MessageCircle className="h-4 w-4 text-gray-900" />
           </div>
           <p className="font-inter text-xs font-normal leading-none text-gray-900">
-            {t('annotations.chat.noChats')}
+            {t("annotations.chat.noChats")}
           </p>
         </div>
       );
     }
 
     return filteredAnnotations
-      .sort((a, b) => a.created_at?.localeCompare(b.created_at ?? '') ?? 0)
+      .sort((a, b) => a.created_at?.localeCompare(b.created_at ?? "") ?? 0)
       .map((annotation) => (
         <div key={annotation.id} className="">
-          {activeTab === 'active' ? (
+          {activeTab === "active" ? (
             <>
               <ActiveChats
                 chat={annotation}
@@ -79,7 +70,7 @@ const AnnotationsCommentsPanel = ({
 
     const filteredAnnotations = annotations.filter(
       (annotation) =>
-        annotation.status === (activeTab === 'active' ? 'active' : 'completed'),
+        annotation.status === (activeTab === "active" ? "active" : "completed"),
     );
 
     return (
@@ -88,34 +79,34 @@ const AnnotationsCommentsPanel = ({
       </div>
     );
   };
-  const { t } = useTranslation('orders');
+  const { t } = useTranslation("orders");
   return (
-    <div className="flex min-h-0 w-80 flex-col px-6 shrink-0">
+    <div className={cn("flex min-h-0 w-80 flex-col px-6 shrink-0 h-full", className)}>
       <div className="flex h-10 shrink-0 border-b">
         <button
           className={`flex-1 py-2 text-sm font-medium ${
-            activeTab === 'active'
-              ? 'border-b-2 border-brand text-brand'
-              : 'text-gray-500'
+            activeTab === "active"
+              ? "border-b-2 border-brand text-brand"
+              : "text-gray-500"
           }`}
-          onClick={() => setActiveTab('active')}
+          onClick={() => setActiveTab("active")}
         >
-          {t('annotations.chat.active')} (
-          {annotations.filter((a) => a.status === 'active').length})
+          {t("annotations.chat.active")} (
+          {annotations.filter((a) => a.status === "active").length})
         </button>
         <button
           className={`flex-1 py-2 text-sm font-medium ${
-            activeTab === 'resolved'
-              ? 'border-b-2 border-brand text-brand'
-              : 'text-gray-500'
+            activeTab === "resolved"
+              ? "border-b-2 border-brand text-brand"
+              : "text-gray-500"
           }`}
-          onClick={() => setActiveTab('resolved')}
+          onClick={() => setActiveTab("resolved")}
         >
-          {t('annotations.chat.resolved')} (
-          {annotations.filter((a) => a.status === 'completed').length})
+          {t("annotations.chat.resolved")} (
+          {annotations.filter((a) => a.status === "completed").length})
         </button>
       </div>
-      <div className="flex flex-col overflow-y-auto [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2">
+      <div className="flex flex-col overflow-y-auto flex-1 min-h-0 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-400 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-200 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 [&::-webkit-scrollbar]:h-1 [&::-webkit-scrollbar]:w-2">
         {renderAnnotationsContent()}
       </div>
     </div>
