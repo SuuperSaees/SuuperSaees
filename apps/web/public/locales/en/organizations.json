@@ -1,0 +1,58 @@
+{
+  "organizationTitle": "Organizations",
+  "organizationName": "Your agency name",
+  "organizationLabel": "Enter your agency name",
+  "continue": "Continue",
+  "title": "Create organizations",
+  "successAgency": "Agency created successfully",
+  "successAgencyDescription": "Your new agency has been created successfully.",
+  "files": {
+    "all": "All",
+    "team_uploaded": "Uploaded by the team",
+    "client_uploaded": "Uploaded by the client",
+    "download_files": "Download all files",
+    "download_error": "Error downloading files or the folder is empty",
+    "new": {
+      "title": "New",
+      "file": "Upload file",
+      "folder": "Create folder",
+      "uploadSuccess": "File uploaded",
+      "error": "Error uploading file"
+    },
+    "orders": "Projects",
+    "delete": "Delete file",
+    "deleteSuccess": "File deleted",
+    "noFiles": "No files in this folder",
+    "emptyFolder": "The folder is empty",
+    "emptyFolderDescription": "Add files or folders to get started.",
+    "emptyFolderDescriptionInTeam": "Add files to get started."
+  },
+  "folders": {
+    "title": "Folders",
+    "new": {
+      "title": "New folder",
+      "folder": "Folder name",
+      "name": "Enter the name of the folder",
+      "create": "Create",
+      "accept": "Accept",
+      "cancel": "Cancel",
+      "emptyName": "The folder name cannot be empty",
+      "error": "Error creating folder",
+      "successSubfolder": "Folder \"{{folderName}}\" successfully created in \"{{lastPath}}\"",
+      "success": "Folder \"{{folderName}}\" successfully created.",
+      "cannotCreateInOrderFolder": "You cannot create folders in the projects folder"
+    },
+    "delete": "Delete folder",
+    "deleteSuccess": "Folder deleted",
+    "deleteError": "This folder could not be deleted"
+  },
+  "loading": "Loading...",
+  "members": {
+    "search": "Search members...",
+    "addButton": "Add member"
+  },
+  "embeds": {
+    "title": "Embeds",
+    "addButton": "Add embed"
+  }
+}

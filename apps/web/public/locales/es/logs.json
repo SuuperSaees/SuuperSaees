@@ -1,0 +1,90 @@
+{
+  "messages": {
+    "create": "ha añadido",
+    "update": "ha cambiado",
+    "delete": "ha eliminado",
+    "complete": "ha completado la"
+  },
+  "articles": {
+    "due_date": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    },
+    "priority": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    },
+    "status": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    },
+    "title": {
+      "singular": {
+        "masculine": "el",
+        "feminine": "la"
+      },
+      "plural": {
+        "masculine": "los",
+        "feminine": "las"
+      }
+    }
+  },
+    "types": {
+      "due_date": "Fecha de vencimiento",
+      "priority": "Prioridad",
+      "status": "Estado",
+      "review": "Reseña",
+      "assigned_to": "Asignado a",
+      "message": "Comentario",
+      "description": "Descripción",
+      "title": "Título",
+      "assign": "Asignar",
+      "task": "Tarea",
+      "annotation": "Anotación"
+    },
+    "prepositions": {
+      "in": "en",
+      "to": "a",
+      "of": "de",
+      "by": "por",
+      "for": "para",
+      "on": "en",
+      "at": "en",
+      "with": "con",
+      "from": "de",
+      "into": "en",
+      "during": "durante",
+      "until": "hasta",
+      "named": "llamada",
+      "in_file": "en el archivo"
+    },
+    "values": {
+      "low": "Bajo",
+      "medium": "Medio",
+      "high": "Alto",
+      "in_progress": "En progreso",
+      "completed": "Completado",
+      "pending": "Esperando respuesta",
+      "annulled": "Anulado",
+      "anulled": "Anulado",
+      "in_review": "En revisión"
+    }
+}

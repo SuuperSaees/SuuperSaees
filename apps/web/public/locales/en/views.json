@@ -1,0 +1,83 @@
+{
+  "kanban": {
+    "title": "Board",
+    "columns": {
+      "negations": {
+        "noProperty": "No {{property}}",
+        "no": "No",
+        "assignees": "Assignees",
+        "status": "Status",
+        "priority": "Priority",
+        "assigned_to": "Assignees",
+        "title": "Title",
+        "date": "Date"
+      },
+      "color": "Columns with color"
+    },
+    "group": {
+      "title": "Group",
+      "groupBy": "Group by",
+      "visible": "Visible groups",
+      "hidden": "Hidden groups"
+    },
+    "properties": {
+      "title": "Properties",
+      "visibility": {
+        "visible": "Visible properties",
+        "hidden": "Hidden properties"
+      },
+      "visible": "Visible: {{visibles}}"
+    },
+    "filters": {
+      "title": "Filters",
+      "none": "None"
+    },
+    "sort": {
+      "title": "Sort",
+      "none": "No sorting"
+    },
+    "common": {
+      "showAll": "Show all",
+      "hideAll": "Hide all"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "view": {
+      "month": "Month view",
+      "week": "Week view"
+    },
+    "date": {
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month",
+      "week": "Week",
+      "months": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    }
+  },
+  "table": {
+    "title": "Table"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "createdBy": "Por",
+  "date": "en {{date}}",
+  "empty": {
+    "title": "No hay reseñas todavía",
+    "description": "No hay reseñas disponibles todavía. Una vez que un cliente deje sus comentarios, podrán ver sus pensamientos aquí."
+  },
+  "rating": {
+    "title": "Calificación promedio",
+    "total": {
+      "plural": "Basado en {{total}} reseñas",
+      "singular": "Basado en {{total}} reseña"
+    },
+    "empty": "N/A",
+    "noRated": "Sin calificar"
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "error": {
+    "title": "Something went wrong!",
+    "toastError": "Error",
+    "default": "Something went wrong while processing your request. Please try again.",
+    "copyToClipboard": "Failed to copy link to clipboard.",
+    "clients": {
+      "userAlreadyExists": "A member with that email already exists.",
+      "failedToCreateUser": "Couldn't create the client's user. Please try again.",
+      "insufficientPermissions": "You don’t have permission to perform this action.",
+      "organizationNotFound": "The client's organization could not be found.",
+      "agencyNotFound": "The client's agency could not be found."
+    },
+    "organizations": {
+      "failedToUpdateOrganization": "Couldn't update the organization. Please try again later.",
+      "failedToGetOrganizationSettings": "Couldn't load organization settings. Please try again later.",
+      "failedToUpdateOrganizationSettingsColor": "Couldn't update the organization's color. A valid hexadecimal code is needed.",
+      "failedToUpdateOrganizationSetting": "Couldn't update the organization's preference. Please try again later.",
+      "failedToCreateOrganizationSetting": "Couldn't create the organization's preference. Please try again later.",
+      "organizationNotFoundOrNotAccessible": "The organization wasn't found or is not accessible."
+    },
+    "services": {
+      "failedToCancelService": "Couldn't cancel the service. Please try again.",
+      "insufficientPermissions": "You don’t have the necessary permissions for this action.",
+      "failedToAddService": "Couldn't add the service to the client. Please try again.",
+      "failedToCreateService": "Couldn't create the service. Please try again.",
+      "failedToDeleteService": "Couldn't delete the service. Please try again.",
+      "failedToDeleteServiceFromStripe": "Couldn't delete the service from Stripe. Please try again.",
+      "failedToFindStripeAccount": "Stripe account couldn't be found. Please try again later.",
+      "failedToUpdateService": "Couldn't update the service. Please try again."
+    },
+    "briefs": {
+      "failedToCreateBrief": "Couldn't create the brief. Please try again.",
+      "failedToUpdateBrief": "Couldn't update the brief. Check that the fields are correct.",
+      "failedToDeleteBrief": "Couldn't delete the brief. Please try again.",
+      "failedToConnectService": "Couldn't connect the service to the brief. Please try again later.",
+      "failedToUpdateFields": "Couldn't update the fields. Please try again later.",
+      "failedToDeleteFormFields": "Couldn't delete the form fields. Please try again later.",
+      "failedToGetFormFields": "Couldn't retrieve the form fields. Please try again later.",
+      "failedToCreateFormFields": "Couldn't create the form fields. Please try again later.",
+      "failedToDuplicateBrief": "Couldn't duplicate the brief. Please try again later."
+    },
+    "orders": {
+      "failedToCreateOrder": "Couldn't create the order. Please try again.",
+      "failedToAssociateRole": "Unexpected error while associating the role. Please try again later.",
+      "insufficientPermissions": "You don’t have permission to perform this action.",
+      "failedToCreateBriefResponses": "Couldn't create brief responses. Please try again later.",
+      "failedToGetFormFields": "Couldn't retrieve the form fields. Please try again later.",
+      "failedToInsertFiles": "Couldn't insert the files. Check your files or try again later.",
+      "failedToAddAssignees": "Couldn't add assignees to the order. Please try again later.",
+      "failedToAddFollowers": "Couldn't add followers to the order. Please try again later.",
+      "failedToUpdateOrderDate": "Couldn't update the order date. Please try again later.",
+      "failedToUpdateOrderAssignees": "Agency members couldn't be updated. Please try again later.",
+      "failedToUpdateOrderFollowers": "Client followers couldn't be updated. Please try again later.",
+      "failedToUpdateOrderStatus": "Couldn't update the order status. Please try again later.",
+      "failedToUpdateOrderPriority": "Couldn't update the order priority. Please try again later.",
+      "failedToUpdateOrderName": "Couldn't update the order name. Please try again later.",
+      "failedToDeleteOrder": "Couldn't delete the order. Please try again later.",
+      "failedToUpdateOrderVisibility": "Couldn't update the order visibility. Please try again later.",
+      "failedToUpdateOrderTags": "Couldn't update the order tags. Please try again later.",
+      "failedToCreateOrderTag": "Couldn't create the order tag. Please try again later.",
+      "failedToUpdateOrderTag": "Couldn't update the order tag. Please try again later.",
+      "failedToDeleteOrderTag": "Couldn't delete the order tag. Please try again later.",
+      "failedToUpdatedOrder": "Couldn't update the order. Please try again later."
+    },
+    "reviews": {
+      "reviewNotFound": "Review not found.",
+      "reviewAlreadyExists": "A review already exists for this project.",
+      "failedToCreateReview": "Couldn't create the review. Please try again later.",
+      "failedToUpdateReview": "Couldn't update the review. Please try again later.",
+      "failedToDeleteReview": "Couldn't delete the review. Please try again later.",
+      "failedToGetReviews": "Couldn't get the reviews. Please try again later.",
+      "failedToGetReview": "Couldn't get the review. Please try again later."
+    },
+    "embeds": {
+      "invalidEmbed": "Embedding this URL isn’t allowed. Please try a different one.",
+      "failedToCreateEmbed": "Couldn't create the embed. Please try again later.",
+      "failedToUpdateEmbed": "Couldn't update the embed. Please try again later.",
+      "failedToDeleteEmbed": "Couldn't delete the embed. Please try again later.",
+      "failedToRemoveAccount": "Couldn't remove the account from the embed. Please try again later."
+    },
+    "credits": {
+      "failedToCreateCreditOperation": "Couldn't create the credit operation. Please try again later.",
+      "failedToUpdateCreditOperation": "Couldn't update the credit operation. Please try again later."
+    }
+  },
+  "success": {
+    "title": "All set!",
+    "toastSuccess": "Success",
+    "default": "Operation completed successfully.",
+    "copyToClipboard": "Link copied to clipboard.",
+    "clients": {
+      "clientCreated": "Client created successfully.",
+      "memberAdded": "Member added successfully.",
+      "clientDeleted": "Client deleted successfully."
+    },
+    "organizations": {
+      "organizationUpdated": "Organization updated successfully.",
+      "organizationNameUpdated": "Organization name updated successfully.",
+      "organizationSettingUpdated": "Organization preference updated successfully.",
+      "organizationSettingCreated": "Organization preference created successfully."
+    },
+    "services": {
+      "serviceCancelled": "Service cancelled successfully.",
+      "serviceAdded": "Service added successfully.",
+      "serviceCreated": "Service created successfully.",
+      "serviceDeleted": "Service deleted successfully.",
+      "serviceUpdated": "Service updated successfully."
+    },
+    "briefs": {
+      "briefCreated": "Brief created successfully.",
+      "briefDeleted": "Brief deleted successfully.",
+      "briefUpdated": "Brief updated successfully.",
+      "serviceConnected": "Service connected to the brief successfully.",
+      "fieldsUpdated": "Fields updated successfully.",
+      "formFieldsDeleted": "Form fields deleted successfully.",
+      "briefDuplicated": "Brief duplicated successfully."
+    },
+    "orders": {
+      "orderCreated": "Order created successfully.",
+      "orderDateUpdated": "Order date updated successfully.",
+      "orderStatusUpdated": "Order status updated successfully.",
+      "orderPriorityUpdated": "Order priority updated successfully.",
+      "orderDescriptionUpdated": "Order description updated successfully.",
+      "orderAssigneesUpdated": "Order assignees updated successfully.",
+      "orderFollowersUpdated": "Order followers updated successfully.",
+      "orderNameUpdated": "Order name updated successfully.",
+      "orderDeleted": "Order deleted successfully.",
+      "orderVisibilityUpdated": "Order visibility updated successfully.",
+      "orderTagsUpdated": "Order tags updated successfully.",
+      "orderTagCreated": "Order tag created successfully.",
+      "orderTagUpdated": "Order tag updated successfully.",
+      "orderTagDeleted": "Order tag deleted successfully.",
+      "orderUpdated": "Order updated successfully."
+    },
+    "reviews": {
+      "reviewCreated": "Review added successfully."
+    },
+    "embeds": {
+      "embedCreated": "Embed created successfully.",
+      "embedUpdated": "Embed updated successfully.",
+      "embedDeleted": "Embed deleted successfully.",
+      "accountRemovedFromEmbed": "Account removed from embed successfully."
+    },
+    "credits": {
+      "creditOperationCreated": "Credit operation created successfully.",
+      "creditOperationUpdated": "Credit operation updated successfully."
+    }
+  },
+  "loading": {
+    "title": "Just a moment...",
+    "embeds": {
+      "removingAccountFromEmbed": "Removing account from embed...",
+      "updatingEmbed": "Updating embed...",
+      "deletingEmbed": "Deleting embed..."
+    }
+  }
+}

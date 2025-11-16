@@ -1,0 +1,23 @@
+{
+  "upload": {
+    "placeholder": "Drag and drop files here or click to upload",
+    "dropHere": "Drop files here",
+    "uploading": "Uploading...",
+    "error": "Upload failed",
+    "success": "Upload completed"
+  },
+  "corrupted": "Incomplete or damaged file",
+  "validating": "Validating file...",
+  "preview": {
+    "error": {
+      "title": "We couldn't preview this file",
+      "description": "It might be incomplete or corrupted. Please try uploading it again."
+    }
+  },
+  "fileOptions": {
+    "copyLink": "Copy link",
+    "copyLinkSuccess": "Link copied to clipboard",
+    "view": "View",
+    "download": "Download"
+  }
+}

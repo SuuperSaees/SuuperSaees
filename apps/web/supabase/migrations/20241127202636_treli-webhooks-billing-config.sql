@@ -1,0 +1,3 @@
+CREATE TRIGGER billing_accounts_upsert AFTER INSERT OR UPDATE ON public.billing_accounts FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('http://host.docker.internal:3000/api/db/webhook', 'POST', '{"Content-type":"application/json","X-Supabase-Event-Signature":"WEBHOOKSECRET"}', '{}', '5000');
+
+CREATE TRIGGER services_upsert AFTER INSERT OR UPDATE ON public.services FOR EACH ROW EXECUTE FUNCTION supabase_functions.http_request('http://host.docker.internal:3000/api/db/webhook', 'POST', '{"Content-type":"application/json","X-Supabase-Event-Signature":"WEBHOOKSECRET"}', '{}', '5000');

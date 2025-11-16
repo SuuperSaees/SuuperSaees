@@ -1,0 +1,8 @@
+{
+  "extends": "@kit/tsconfig/base.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+  },
+  "include": ["*.ts", "*.tsx", "src", "../../../apps/web/app/clients/_lib/server/delete-client.tsx"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,38 @@
+{
+  "extends": "@kit/tsconfig/base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./app/*"],
+      "~/config/*": ["./config/*"],
+      "~/components/*": ["./components/*"],
+      "~/lib/*": ["./lib/*"],
+      "~/multitenancy/*": ["../../packages/multitenancy/*"],
+      "~/team-accounts/*": ["../../packages/features/team-accounts/*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "*.ts",
+    "*.tsx",
+    "*.mjs",
+    "./config/**/*.ts",
+    "components/**/*",
+    "lib/**/*.ts",
+    "app",
+    "handlers/**/*",
+    "../../packages/**/*",
+    "../../packages/features/auth/src/hooks",
+    "../../packages/features/accounts/src/components/personal-account-settings",
+    "../../packages/tokens/src/decode-token.ts",
+    "../../packages/tokens/src/save-token.ts"
+  ],
+  "exclude": ["node_modules", ".next"]
+}

@@ -1,0 +1,63 @@
+{
+  "name": "next-supabase-saas-kit-turbo-demo-vercel",
+  "private": true,
+  "sideEffects": false,
+  "engines": {
+    "node": "20.9.0"
+  },
+  "author": {
+    "url": "https://makerkit.dev",
+    "name": "MakerKit"
+  },
+  "scripts": {
+    "postinstall": "manypkg fix",
+    "build": "turbo build --cache-dir=.turbo",
+    "clean": "git clean -xdf node_modules dist .next",
+    "clean:workspaces": "turbo clean",
+    "set-credentials": "if exist set-credentials.ps1 (powershell -File set-credentials.ps1) else (echo File set-credentials.ps1 not found - continuing...)",
+    "dev": "pnpm run set-credentials && cross-env FORCE_COLOR=1 turbo dev --parallel",
+    "dev:web": "turbo dev --parallel",
+    "format": "turbo format --cache-dir=.turbo --continue -- --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
+    "format:fix": "turbo format --cache-dir=.turbo --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-path='../../.gitignore'",
+    "lint": "turbo lint --cache-dir=.turbo --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
+    "lint:fix": "turbo lint --cache-dir=.turbo --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
+    "typecheck": "turbo typecheck --cache-dir=.turbo",
+    "test": "turbo test --cache-dir=.turbo",
+    "update": "pnpm update -r",
+    "supabase:web:start": "pnpm --filter web supabase:start",
+    "supabase:web:stop": "pnpm --filter web supabase:stop",
+    "supabase:web:typegen": "pnpm --filter web supabase:typegen",
+    "supabase:web:reset": "pnpm --filter web supabase:reset",
+    "stripe:listen": "pnpm --filter '@kit/stripe' start",
+    "env:generate": "turbo gen env",
+    "env:validate": "turbo gen validate-env"
+  },
+  "prettier": "@kit/prettier-config",
+  "dependencies": {
+    "@ai-sdk/openai": "^0.0.37",
+    "@manypkg/cli": "^0.21.4",
+    "@radix-ui/react-progress": "^1.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@turbo/gen": "^2.1.0",
+    "@types/uuid": "^10.0.0",
+    "airtable": "^0.12.2",
+    "cross-env": "^7.0.3",
+    "dompurify": "^3.2.4",
+    "dotenv": "^16.4.5",
+    "gpt-tokenizer": "^2.2.1",
+    "happy-dom": "^17.2.2",
+    "pnpm": "^9.9.0",
+    "prettier": "^3.3.3",
+    "turbo": "2.0.9",
+    "typescript": "^5.5.3",
+    "untitled-ui-icons-pack": "^0.0.3",
+    "uuid": "^10.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    }
+  },
+  "packageManager": "pnpm@9.1.4"
+}

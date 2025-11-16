@@ -1,0 +1,211 @@
+{
+    "briefs":"Briefs",
+    "briefTitle": "Brief",
+    "name": "Nombre",
+    "services": "Servicios conectados",
+    "createdAt": "Creado en",
+    "actions": "Acciones",
+    "createBrief": "Nuevo brief",
+    "briefNameLabel": "Ingrese el nombre del brief",
+    "briefName": "Nombre",
+    "deleteBrief": "Eliminar brief",
+    "deleteDescription": "¿Estás seguro de que deseas eliminar este brief?",
+    "duplicateBrief": "Duplicar brief",
+    "editBrief": "Editar brief",
+    "eliminateBrief": "Eliminar brief",
+    "delete": "Eliminar",
+    "cancel": "Cancelar",
+    "updateBrief": "Actualizar brief",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "validation": {
+       "required": "Requerido",
+       "minCharacters": "Se requieren al menos 2 caracteres",
+       "maxCharacters": "Se permiten un máximo de 3000 caracteres",
+       "labelRequired": "El título del campo no puede quedar vacio"
+    },
+    "search": "Buscar brief...",
+    "creation": {
+    "title": "Crear brief",
+    "form": {
+        "addQuestion": "Añade o arrastra un nuevo elemento",
+        "submit": "Crear brief",
+        "titleLabel": "Nombre del brief",
+        "titlePlaceholder": "Ingrese el nombre de su brief",
+        "questionLabel": "Pregunta",
+        "labelPlaceholder": "Escribe tu pregunta aquí *",
+        "descriptionPlaceholder": "Agregar una descripción",
+        "placeholderPlaceholder": "Agregar un marcador de posición",
+        "descriptionLabel": "Descripción del brief",
+        "imageLabel": "Imagen del brief",
+        "defaultPlaceholder": "Añade una descripción...",
+        "update": "Actualizar brief",
+        "createSuccess": "Brief creado con éxito",
+        "updateSuccess": "Brief actualizado con éxito",
+        "errorCreating": "Error creando brief",
+        "errorUpdating": "Error actualizando brief",
+        "defaultField": {
+          "label": "Título del proyecto",
+          "placeholder": "Añade una descripción..."
+        },
+        "marks": {
+          "label": "Titulo",
+          "description": "Descripción",
+          "alert_message": "Mensaje informativo",
+          "placeholder": "Placeholder",
+          "options": {
+            "label": "Opción {{number}}",
+            "value": "Valor {{number}}"
+          },
+          "allow_other": "Agregar \"otra\" opción",
+          "other_option_label": "Otro",
+          "other_option_placeholder": "El usuario ingresará texto personalizado aquí"
+        }
+    },
+    "widgets": {
+      "edit": {
+        "title": "Editar widget"
+      }
+    }, 
+    "panel": {
+      "wigets": {
+        "title": "Widgets"
+      }, 
+      "settings": {
+        "title": "Ajustes",
+        "services": {
+          "title": "Servicios conectados"
+        }
+      }
+    }
+  },
+  "update": {
+    "title": "Editar brief"
+  },
+  "singleChoice": {
+    "value": "Seleccionar",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Agregar nueva opción",
+    "options": {
+      "option1": {
+        "label": "Opción 1"
+      },
+      "option2": {
+        "label": "Opción 2"
+      },
+      "option3": {
+        "label": "Opción 3"
+      }
+    }
+  },
+  "multipleChoice": {
+    "value": "Selección múltiple",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Agregar nueva opción",
+    "options": {
+      "option1": {
+        "label": "Opción 1"
+      },
+      "option2": {
+        "label": "Opción 2"
+      },
+      "option3": {
+        "label": "Opción 3"
+      }
+    }
+  },
+  "textLarge" : {
+    "value": "Párrafo",
+    "title":"Título *",
+    "description":"Este es un texto de sugerencia para ayudar al usuario.",
+    "descriptionHint":"Escribe una descripción..."
+  },
+  "textShort": {
+    "value": "Texto corto",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Escribe una descripción..."
+  },
+  "datePicker": {
+    "value": "Fecha",
+    "title": "Título *",
+    "selectTitle": "Seleccionar fecha",
+    "description": "Este es un texto de sugerencia para ayudar al usuario."
+  },
+  "dropdown": {
+    "value": "Desplegable",
+    "title": "Título *",
+    "description": "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Agregar nueva opción",
+    "selectAnOption": "Seleccione una opción"
+  },
+  "title": {
+    "value": "Título",
+    "title": "Título",
+    "placeholder": "Introduzca el título"
+  },
+  "richText": {
+    "value": "Texto enriquecido",
+    "title": "Texto enriquecido",
+    "placeholder": "Introduzca el texto enriquecido"
+  },
+  "uploadFiles" : {
+    "value": "Subir archivos",
+    "title" : "Título *",
+    "description" : "Este es un texto de sugerencia para ayudar al usuario.",
+    "placeholder": "Haz clic o arrastra para subir un archivo",
+    "fileTypes": "SVG, PNG, JPG o GIF (max. 800x400px)"
+  },
+  "video": {
+    "value": "Video",
+    "title": "Video",
+    "uploadSuccess": "Vídeo subido con éxito",
+    "uploadError": "Error al cargar el video",
+    "uploadUrlError": "No se pudo generar la URL de carga",
+    "databaseEntryError": "No se pudo crear la entrada de la base de datos",
+    "description": "Descripción",
+    "placeholder": "Subir un video",
+    "remove": "Eliminar video",
+    "dragOrClick": "Arrastre un video aquí o haga clic para seleccionarlo",
+    "dropHere": "Deja el video aquí",
+    "invalidFileType": "Por favor seleccione un archivo de vídeo válido",
+    "youtubePlaceholder": "O ingresa una URL de video de YouTube",
+    "urlAddedSuccess": "URL del video agregada con éxito",
+    "invalidUrl": "Por favor, introduzca una URL de video de YouTube válida"
+  },
+  "uploadImage":{
+    "value": "Imagen",
+    "placeholder": "Haz clic o arrastra para subir una imagen",
+    "fileTypes": "PNG, JPG(max. 800x400px)",
+    "uploadSuccess": "Imagen subido con éxito",
+    "uploadError": "Error al cargar la imagen",
+    "uploadUrlError": "No se pudo generar la URL de carga",
+    "databaseEntryError": "No se pudo crear la entrada de la base de datos",
+    "description": "Descripción",
+    "remove": "Eliminar imagen",
+    "dragOrClick": "Arrastre una imagen aquí o haga clic para seleccionarlo",
+    "dropHere": "Deja la imagen aquí",
+    "invalidFileType": "Por favor seleccione un archivo de imagen válido"
+  }, 
+  "empty": {
+    "title": "¡Aún no tienes ningún brief!",
+    "description": "Comienza creando un brief haciendo clic en el botón de abajo.",
+    "orderCreation": {
+      "agency": {
+        "title": "¡Aún no tienes ningún servicio!",
+        "description": "Comienza comprando un servicio para crear tu primer proyecto."
+      },
+      "client": {
+        "title": "!Aún no te han asignado ningún servicio!",
+        "description": "Contacta a tu agencia para asignar un servicio y comenzar a crear un proyecto."
+      }
+    }, 
+      "agency": {
+        "title": "¡Aún no tienes ningún brief creado!",
+        "description": "Comienza creando un brief haciendo clic en el botón de abajo."
+      }
+  }
+}
+

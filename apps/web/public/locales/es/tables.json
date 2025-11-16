@@ -1,0 +1,14 @@
+{
+  "orders": {
+    "title": "Título",
+    "id": "ID",
+    "client": "Cliente",
+    "status": "Estado",
+    "assignedTo": "Asignado a",
+    "dueDate": "Fecha de vencimiento",
+    "createdAt": "Creado en",
+    "updatedAt": "Última actualización",
+    "priority": "Prioridad",
+    "credits": "Créditos"
+  }
+}

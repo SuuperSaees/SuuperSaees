@@ -1,0 +1,91 @@
+{
+    "messages": {
+      "create": "has added",
+      "update": "has changed",
+      "delete": "has deleted",
+      "complete": "has completed the"
+    },
+    "articles": {
+      "due_date": {
+        "singular": {
+          "masculine": "the",
+          "feminine": "the"
+        },
+        "plural": {
+          "masculine": "the",
+          "feminine": "the"
+        }
+      },
+      "priority": {
+        "singular": {
+          "masculine": "the",
+          "feminine": "the"
+        },
+        "plural": {
+          "masculine": "the",
+          "feminine": "the"
+        }
+      },
+      "status": {
+        "singular": {
+          "masculine": "the",
+          "feminine": "the"
+        },
+        "plural": {
+          "masculine": "the",
+          "feminine": "the"
+        }
+      },
+      "title": {
+        "singular": {
+          "masculine": "the",
+          "feminine": "the"
+        },
+        "plural": {
+          "masculine": "the",
+          "feminine": "the"
+        }
+      }
+    },
+    "types": {
+      "due_date": "Due Date",
+      "priority": "Priority",
+      "status": "Status",
+      "review": "Review",
+      "assigned_to": "Assigned To",
+      "message": "Comment",
+      "description": "Description",
+      "title": "Title",
+      "assign": "Assign",
+      "task": "Task",
+      "annotation": "Annotation"
+    },
+    "prepositions": {
+      "in": "in",
+      "to": "to",
+      "of": "of",
+      "by": "by",
+      "for": "for",
+      "on": "on",
+      "at": "at",
+      "with": "with",
+      "from": "from",
+      "into": "into",
+      "during": "during",
+      "until": "until",
+      "named": "named",
+      "in_file": "in file"
+    },
+    "values": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "pending": "Pending Response",
+      "annulled": "Annulled",
+      "anulled": "Annulled",
+      "in_review": "In Review"
+    }
+  }
+  

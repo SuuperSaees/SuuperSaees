@@ -1,0 +1,210 @@
+{
+    "briefs":"Briefs",
+    "briefTitle": "Brief",
+    "name": "Name",
+    "services": "Connected services",
+    "createdAt": "Created at",
+    "actions": "Actions",
+    "createBrief": "New brief",
+    "briefNameLabel": "Enter the brief name",
+    "briefName": "Name",
+    "deleteBrief": "Delete brief",
+    "duplicateBrief": "Duplicate brief",
+    "editBrief": "Edit brief",
+    "eliminateBrief": "Eliminate brief",
+    "deleteDescription": "Are you sure you want to delete this brief?",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "updateBrief": "Update brief",
+    "previous": "Previous",
+    "next": "Next",
+    "validation": {
+      "required": "Required",
+       "minCharacters" : "Minimum 2 characters required",
+       "maxCharacters" : "Maximum 3000 characters allowed",
+       "labelRequired": "Title cannot be empty"
+    },
+    "search": "Search brief...",
+    "creation": {
+    "title": "Create brief",
+    "form": {
+        "addQuestion": "Add or drag a new element",
+        "submit": "Create brief",
+        "titleLabel": "Brief name",
+        "titlePlaceholder": "Enter the name of your brief",
+        "questionLabel": "Question",
+        "labelPlaceholder": "Title *",
+        "descriptionPlaceholder": "This is a hint text to help user",
+        "placeholderPlaceholder": "Add a placeholder",
+        "descriptionLabel": "Brief description",
+        "imageLabel": "Brief image",
+        "defaultPlaceholder": "Add a description...",
+        "update": "Update brief",
+        "createSuccess": "Brief created successfully",
+        "updateSuccess": "Brief updated successfully",
+        "errorCreating": "Error creating brief",
+        "errorUpdating": "Error updating brief",
+        "defaultField": {
+          "label": "Project title",
+          "placeholder": "Add a description..."
+        },
+        "marks": {
+          "label": "Title",
+          "description": "Description",
+          "alert_message": "Alert message",
+          "placeholder": "Placeholder",
+          "options": {
+            "label": "Option {{number}}",
+            "value": "Value {{number}}"
+          },
+          "allow_other": "Add \"other\" option",
+          "other_option_label": "Other",
+          "other_option_placeholder": "User will enter custom text here"
+        }
+    },
+    "widgets": {
+      "edit": {
+        "title": "Edit widget"
+      }
+    }, 
+    "panel": {
+      "widgets": {
+        "title": "Widgets"
+      }, 
+      "settings": {
+        "title": "Settings",
+        "services": {
+          "title": "Connected services"
+        }
+      }
+    }
+  },
+  "update": {
+    "title": "Edit brief"
+  },
+  "singleChoice": {
+    "value": "Select",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
+  },
+  "multipleChoice": {
+    "value": "Multiple choice",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Add new option",
+    "options": {
+      "option1": {
+        "label": "Option 1"
+      },
+      "option2": {
+        "label": "Option 2"
+      },
+      "option3": {
+        "label": "Option 3"
+      }
+    }
+  },
+  "textLarge" : {
+    "value": "Paragraph",
+    "title":"Title *",
+    "description":"This is a hint text to help user",
+    "placeholder":"Enter a description..."
+  },
+  "textShort": {
+    "value": "Short text",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Enter a description..."
+  },
+  "datePicker": {
+    "value": "Date",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "selectTitle": "Select date"
+  },
+  "dropdown": {
+    "value": "Dropdown",
+    "title": "Title *",
+    "description": "This is a hint text to help user",
+    "placeholder": "Add new option",
+    "selectAnOption": "Select an option"
+  },
+  "title": {
+    "value": "Title",
+    "title": "Title",
+    "placeholder": "Enter the title"
+  },
+  "richText": {
+    "value": "Rich text",
+    "title": "Rich text",
+    "placeholder": "Enter the rich text"
+  },
+  "uploadFiles" : {
+    "value": "Upload files",
+    "title" : "Title *",
+    "description" : "This is a hint text to help user",
+    "placeholder": "Click here or drag a file to upload",
+    "fileTypes": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "video": {
+    "value": "Video",
+    "title": "Video",
+    "uploadSuccess": "Video uploaded successfully",
+    "uploadError": "Error uploading video",
+    "uploadUrlError": "Failed to generate upload URL",
+    "databaseEntryError": "Failed to create database entry",
+    "description": "Description",
+    "placeholder": "Upload a video",
+    "remove": "Delete video",
+    "dragOrClick": "Drag a video here or click to select",
+    "dropHere": "Drop the video here",
+    "invalidFileType": "Please select a valid video file",
+    "youtubePlaceholder": "Or enter a YouTube video URL",
+    "urlAddedSuccess": "Video URL added successfully",
+    "invalidUrl": "Please enter a valid YouTube video URL"
+  },
+  "uploadImage":{
+    "value": "Image",
+    "placeholder": "Click here or drag an image to upload",
+    "fileTypes": "PNG, JPG(max. 800x400px)",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Error uploading image",
+    "uploadUrlError": "Failed to generate upload URL",
+    "databaseEntryError": "Failed to create database entry",
+    "description": "Description",
+    "remove": "Delete image",
+    "dragOrClick": "Drag an image here or click to select",
+    "dropHere": "Drop the image here",
+    "invalidFileType": "Please select a valid image file"
+  },
+  "empty": {
+    "title": "You don't have any brief yet!",
+    "description": "Start by creating a brief clicking on the button below.",
+    "orderCreation": {
+      "agency": {
+        "title": "You don't have any service yet!",
+        "description": "Start by buying a service to create your first project."
+      },
+      "client": {
+        "title": "You haven't assigned any services yet!",
+        "description": "Contact your agency to assign a service and start creating projects."
+      }
+    },
+    "agency": {
+      "title": "You don't have any brief yet!",
+      "description": "Start by creating a brief clicking on the button below."
+    }
+  }
+}

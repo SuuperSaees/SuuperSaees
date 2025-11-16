@@ -1,0 +1,241 @@
+{
+  "credits": {
+    "input": {
+      "label": "Créditos",
+      "placeholder": "Ingresa la cantidad de créditos (ej. 10 o -10)"
+    },
+    "value": {
+      "singular": "Crédito",
+      "plural": "Créditos"
+    }
+  },
+  "title": "Proyectos",
+  "selectDateLabel": "Selecciona una fecha",
+  "confirmDateTitle": "Confirmar fecha",
+  "confirmDateMessage": "¿Estás seguro de que deseas actualizar la fecha de vencimiento?",
+  "accept": "Aceptar",
+  "save": "Guardar",
+  "search": "Buscar proyectos...",
+  "cancel": "Cancelar",
+  "saveChanges": "Guardar cambios",
+  "summary": "Resumen",
+  "openOrders": "Abiertos",
+  "completedOrders": "Completados",
+  "allOrders": "Todos",
+  "titleLabel": "Título",
+  "idLabel": "ID",
+  "clientLabel": "Cliente",
+  "statusLabel": "Estado",
+  "assignedToLabel": "Asignado a",
+  "dueDateLabel": "Fecha de vencimiento",
+  "select_date_range": "Seleccionar rango de fechas",
+  "empty_date_range": "Sin fecha seleccionada",
+  "delete": "Eliminar proyecto",
+  "deleteConfirmation": "¿Estás seguro de que deseas eliminar este proyecto?",
+  "deleteSuccess": "Proyecto eliminado con éxito",
+  "deleteError": "Error al eliminar el proyecto",
+  "create": "Nuevo proyecto",
+  "calendarTitle": "Agendas disponibles",
+  "calendarEmpty": "No hay calendarios disponibles",
+  "creation": {
+    "title": "Crear proyecto",
+    "form": {
+      "titleLabel": "Nombre del proyecto",
+      "titlePlaceholder": "Escribe el nombre de tu proyecto",
+      "descriptionLabel": "Descripción del proyecto",
+      "descriptionPlaceholder": "Añade una descripción sobre este proyecto",
+      "filesLabel": "Archivos",
+      "filesPlaceholder": "Haz click o arrastra para subir un archivo SVG, PNG, JPG or GIF (max. 800x400px)",
+      "submitMessage": "Crear proyecto"
+    },
+    "validation": {
+      "minTitleCharacters": "El título debe tener al menos 2 caracteres.",
+      "minDescriptionCharacters": "La descripción debe tener al menos 2 caracteres.",
+      "files": "Por favor, sube al menos un archivo"
+    }
+  },
+  "tasks": {
+    "emptyTasks": "No se encontraron tareas",
+    "emptySubtasks": "No se encontraron subtareas",
+    "emptyTasksDescription": "Agrega una tarea para comenzar.",
+    "emptyTasksDescriptionToClient": "",
+    "addTask": "Agregar tarea",
+    "addSubtask": "Agregar subtarea",
+    "newTask": "Nueva tarea",
+    "newSubtask": "Nueva subtarea",
+    "openSubtask": "Abrir"
+  },
+  "details": {
+    "title": "Detalles del proyecto",
+    "summary": "Resumen",
+    "deadlineNotSet": "Sin asignar",
+    "createdBy": "Creado por",
+    "orderId": "#",
+    "createdAt": "Creado",
+    "assignedTo": "Asignado a",
+    "followedBy": "Seguido por",
+    "tags": "Etiquetas",
+    "status": "Estado",
+    "priority": "Prioridad",
+    "dueDate": "Fecha de vencimiento",
+    "deadline": "Fecha límite",
+    "visibility": "Activa o desactiva para hacer este proyecto público o privado",
+    "statuses": {
+      "pending": "Esperando respuesta",
+      "inProgress": "En Progreso",
+      "completed": "Completado",
+      "inReview": "En Revisión",
+      "annulled": "Anulado"
+    },
+    "priorities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "navigation": {
+      "details": "Detalles",
+      "activity": "Actividad",
+      "tasks": "Tareas",
+      "files": "Archivos"
+    },
+    "dialog": {
+      "titleCompleteOrder": "Completar orden",
+      "descriptionCompleteOrder": "Esta orden ya tiene una reseña. ¿Deseas marcarla como completada?",
+      "button": "Marcar como completado",
+      "title": "Deja una reseña",
+      "description": "¡Cuentanos sobre tu experiencia con este proyecto!",
+      "label": "Escribe una reseña",
+      "placeholder": "¿Qué te pareció este proyecto?"
+    }
+  },
+  "createdNewProject": "ha creado un nuevo proyecto",
+  "selectFile": "Debes seleccionar al menos un archivo",
+  "uploadError": "Error al subir el archivo {{fileName}}",
+  "uploadURLError": "Error al obtener la URL de carga: {{error}}",
+  "dragMessage": "Arrastra los archivos aquí o haz clic para subir archivos",
+  "dropMessage": "Suelta aquí para subir los archivos",
+  "dragAndDrop": "Arrastra los archivos aquí o haz clic para subir",
+  "dropHere": "Suelta aquí para subir archivos",
+  "tryAgain": "Inténtalo de nuevo",
+  "OrderDescriptionTitle": "Detalles del proyecto",
+  "internalMessagingEnabled": "Habilitado el envío de mensajes internos",
+  "internalMessagingDisabled": "Deshabilitado el envío de mensajes internos",
+  "internalMessage": "Mensaje interno",
+  "placeholder": "Escribe un mensaje...",
+  "dropdown": "Selecciona una opción",
+  "deletedFile": "Archivo eliminado",
+  "deletedFileDescription": "El archivo ha sido eliminado",
+  "form": {
+    "completion": {
+      "client": {
+        "title": "Asignar un cliente",
+        "label": "Nombre de la organización",
+        "select": {
+          "placeholder": "Selecciona una organización"
+        },
+        "members": {
+          "label": "Miembros",
+          "placeholder": "Busca y selecciona un miembro",
+          "notFound": "No se encontraron miembros"
+        }
+      }
+    }
+  },
+  "notesTitle": "Notas",
+  "detailsTitle": "Detalles",
+  "timeTitle": "Tiempo",
+  "timers": {
+    "timeTracking": "Tiempo total contabilizado:",
+    "sunday": "Domingo",
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miércoles",
+    "thursday": "Jueves",
+    "friday": "Viernes",
+    "saturday": "Sábado",
+    "noTimeEntries": "Aún no hay entradas de tiempo",
+    "startAdding": "Comience agregando una nueva entrada de tiempo",
+    "addManualTime": "Agregar tiempo manual",
+    "deleteTimer": "Eliminar temporizador",
+    "editTimer": "Editar temporizador"
+  },
+  "empty": {
+    "member": {
+      "title": "Aún no has asignado ningún proyecto a ti.",
+      "description": "¡Espera! Tus proyectos asignados aparecerán aquí pronto."
+    },
+    "organization": {
+      "title": "Aún no se han asignado proyectos a tu organización.",
+      "description": "¡Espera! Los proyectos asignados aparecerán aquí pronto."
+    }
+  },
+  "message": {
+    "deleteMessage": "Eliminar mensaje",
+    "deleteMessageDescription": "¿Estás seguro de que deseas eliminar este mensaje? Esta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "success": "Mensaje enviado",
+    "error": "Error",
+    "messageSent": "El mensaje ha sido enviado.",
+    "messageSentError": "El mensaje no se pudo enviar.",
+    "messageDeleted": "Mensaje eliminado",
+    "messageDeletedSuccess": "El mensaje ha sido eliminado.",
+    "messageDeletedError": "El mensaje no se pudo eliminar.",
+    "newMessages": {
+      "singular": "nuevo mensaje",
+      "plural": "nuevos mensajes"
+    },
+    "scrollToBottom": "Desplazarse al inicio"
+  },
+  "dragAndDropDictionary": {
+    "dropHere": "Suelta aquí para subir archivos",
+    "dropHereDescription": "SVG, PNG, JPG o GIF (max. 800x400px)"
+  },
+  "annotations": {
+    "help": {
+      "title": "¿Necesitas ayuda?",
+      "move": "Moverte sobre la imagen:",
+      "zoom": "Hacer zoom:",
+      "spacebar": "Mantén presionada la tecla Espacio y haz clic mientras arrastras.",
+      "mouseWheel": "Usa la rueda del ratón para acercar o alejar.",
+      "open": "Abrir búsqueda:"
+    },
+    "page": "Página",
+    "chat": {
+      "title": "Comentarios",
+      "placeholder": "Escribe un mensaje...",
+      "send": "Enviar",
+      "noChats": "Deja tu opinión, haz una pregunta o simplemente deja una nota de agradecimiento. Haz click en cualquier parte del archivo para dejar un comentario.",
+      "active": "Activos",
+      "resolved": "Resueltos"
+    },
+    "add": "Añadir anotación",
+    "addSuccess": "Anotación añadida con éxito",
+    "addError": "Error al añadir anotación"
+  },
+  "guest": "Invitado",
+  "files": {
+    "noPreview": "No hay vista previa disponible",
+    "download": "Por favor, descarga el archivo para verlo"
+  },
+  "shareProject": "Compartir proyecto",
+  "publishProject": "Copiar enlace",
+  "shareProjectDescription": "Al compartir este proyecto públicamente, cualquier persona con el enlace podrá acceder a toda la información de este proyecto, incluyendo la interacción a través del chat y la visualización de archivos, detalles y tareas.",
+  "link": "Enlace",
+  "columns": {
+    "id": "ID",
+    "title": "Título",
+    "description": "Descripción",
+    "status": "Estado",
+    "statusId": "Estado ID",
+    "dueDate": "Fecha de vencimiento",
+    "priority": "Prioridad",
+    "createdAt": "Creado el",
+    "updatedAt": "Actualizado el",
+    "clientOrganization": "Organización del cliente",
+    "agency": "Agencia",
+    "assignedTo": "Asignado a",
+    "customer": "Cliente"
+  }
+}
+

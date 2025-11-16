@@ -1,0 +1,222 @@
+{
+  "pleaseSpecify": "Por favor, especifica...",
+  "homeTabLabel": "Inicio",
+  "homeTabDescription": "Bienvenido a tu página de inicio",
+  "accountMembers": "Miembros",
+  "membersTabDescription": "Administra los miembros de tu organización",
+  "billingTabLabel": "Facturación",
+  "billingTabDescription": "Administra tu facturación y suscripción",
+  "yourAccountTabLabel": "Configuración de la Cuenta",
+  "dashboardTabLabel": "Tablero",
+  "organizationSettingsTabLabel": "Organización",
+  "settingsTabLabel": "Configuraciones",
+  "profileSettingsTabLabel": "Perfil",
+  "organizationNamelabel": "Nombre de tu marca",
+  "subscriptionSettingsTabLabel": "Suscripción",
+  "dashboardTabDescription": "Un resumen de la actividad y rendimiento de tu organización en todos tus proyectos.",
+  "settingsTabDescription": "Administra tus configuraciones y preferencias.",
+  "emailAddress": "Correo electrónico",
+  "messagesName": "Mensajes",
+  "password": "Contraseña",
+  "confirmClose": "¿Estás seguro de que quieres continuar?",
+  "modalConfirmationQuestion": "¿Estás seguro de que quieres continuar?",
+  "loading": "Estamos cargando la pagina...",
+  "genericServerErrorHeading": "Lo siento, algo salió mal al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
+  "pageNotFound": "Lo siento, esta página no existe.",
+  "pageNotFoundSubHeading": "Lo sentimos, la página que buscabas no fue encontrada",
+  "genericError": "Lo siento, algo salió mal.",
+  "genericErrorSubHeading": "Lo sentimos, ocurrió un error al procesar tu solicitud. Por favor, contáctanos si el problema persiste.",
+  "goBack": "Volver",
+  "backToHomePage": "Regresar a la página principal",
+  "anonymousUser": "Anónimo",
+  "profile": "Mi perfil",
+  "billing": "Facturación",
+  "subscription": "Suscripción",
+  "orders": "Proyectos",
+  "tryAgain": "Intentar de Nuevo",
+  "theme": "Tema",
+  "contactUs": "Contactanos",
+  "lightTheme": "Claro",
+  "darkTheme": "Oscuro",
+  "systemTheme": "Sistema",
+  "expandSidebar": "Expandir Barra Lateral",
+  "collapseSidebar": "Colapsar Barra Lateral",
+  "documentation": "Documentación",
+  "getStarted": "Comenzar",
+  "getStartedWithPlan": "Comienza con {{plan}}",
+  "retry": "Reintentar",
+  "yourOrganizations": "Tus Organizaciones",
+  "continue": "Continuar",
+  "skip": "Omitir",
+  "signedInAs": "Conectado como",
+  "pageOfPages": "Página {{page}} de {{total}}",
+  "noData": "No hay datos disponibles",
+  "pageNotFoundHeading": "¡Ay! :|",
+  "errorPageHeading": "¡Ay! :|",
+  "servicesName": "Servicios",
+  "servicesListName": "Todos los servicios",
+  "servicesCatalogName": "Catálogo de servicios",
+  "settingsName": "Configuraciones",
+  "usersName": "Usuarios",
+  "ordersName": "Proyectos",
+  "dashboardName": "Tablero",
+  "clientsName": "Clientes",
+  "teamName": "Equipo",
+  "aiToolsName": "Herramientas AI",
+  "catalogProviderName": "Proveedores",
+  "calendarName": "Calendario",
+  "catalogProductName": "Productos",
+  "toolCopyListName": "Copiar listado",
+  "catalogName": "Catálogo",
+  "partnersName": "Socios",
+  "catalogWholesaleName": "Wholesale",
+  "catalogPrivateLabelName": "Marca privada",
+  "trainingName": "Training",
+  "catalogSourcingChinaName": "Sourcing China",
+  "nameInput": "Nombre",
+  "storage": "Almacenamiento",
+  "namePortalInput": "Nombre del portal",
+  "roles": {
+    "agency_owner": {
+      "label": "Propietario"
+    },
+    "agency_member": {
+      "label": "Miembro"
+    },
+    "agency_project_manager": {
+      "label": "Gestor de proyectos"
+    },
+    "client_owner": {
+      "label": "Lider"
+    },
+    "client_member": {
+      "label": "Miembro"
+    }
+  },
+  "clear": "Eliminar",
+  "pagination": {
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "search": "Buscar..."
+  },
+  "timer": {
+    "pauseTimer": "Pausar temporizador",
+    "enterTimerName": "Ingrese el nombre del temporizador",
+    "timerName": "Nombre del Temporizador",
+    "cancel": "Cancelar",
+    "confirm": "Guardar",
+    "errorCreating": "Error al crear el temporizador",
+    "addTime": "Añadir tiempo",
+    "whatDidYouSpendTimeOn": "¿Cómo invertiste este tiempo?*",
+    "writeHere": "Escribe aquí..."
+  },
+  "organizationName": "Organización",
+  "selectOption": "Seleccionar una opción",
+  "success": "¡Todo Listo!",
+  "error": "¡Algo salió mal!",
+  "stopImpersonating": "Dejar de suplantar",
+  "stopImpersonatingDescription": "Regresarás a tu sesión en unos segundos",
+  "rowsPerPage": "Mostrar",
+  "rowNumber": "{{number}} filas",
+  "filters": {
+    "title": "Filtros",
+    "appliedFilters": {
+      "singular": "({{number}})",
+      "plural": "({{number}})"
+    },
+    "resetFilters": "Limpiar filtros",
+    "groups": {
+      "status": {
+        "title": "Estado"
+      },
+      "client_organization": {
+        "title": "Organización del cliente"
+      },
+      "assigned_to": {
+        "title": "Asignado a"
+      },
+      "tags": {
+        "title": "Etiquetas"
+      },
+      "customer": {
+        "title": "Cliente"
+      },
+      "priority": {
+        "title": "Prioridad"
+      }
+    }
+  },
+  "pluginsName": "Aplicaciones",
+  "goToPage": "Ir a la página",
+  "of": "de",
+  "showing": "Mostrando",
+  "go": "Ir",
+  "export": {
+    "exportCSV": "Exportar CSV",
+    "exportOptions": "Opciones de exportación",
+    "configureAndPreview": "Configura tus opciones de exportación y ve la vista previa de los resultados",
+    "settings": "Configuraciones",
+    "preview": "Vista previa",
+    "filename": "Nombre del archivo",
+    "delimiter": "Delimitador",
+    "selectDelimiter": "Seleccionar delimitador",
+    "comma": "Coma",
+    "semicolon": "Punto y coma",
+    "tab": "Tabulador",
+    "delimiterHelp": "Elige el delimitador que mejor funcione con tu aplicación de hojas de cálculo. La coma es estándar para CSV, pero el punto y coma puede funcionar mejor en algunas regiones.",
+    "usePagination": "Usar paginación",
+    "usePaginationNotAvailable": "Se exportarán {{pageSize}} filas de tu vista actual de datos. Puedes cambiar el número de filas en tu vista de tabla",
+    "pageSize": "Tamaño de la página",
+    "currentPage": "Página actual",
+    "selectColumns": "Seleccionar columnas para exportar",
+    "selectAll": "Seleccionar todas",
+    "clearAll": "Limpiar todas",
+    "previewTitle": "Vista previa de datos",
+    "previewDescription": "Vista previa de las primeras 5 filas de datos con las columnas seleccionadas",
+    "noColumnsSelected": "No hay columnas seleccionadas para exportar",
+    "export": "Exportar",
+    "selectAtLeastOneColumn": "Por favor, selecciona al menos una columna para exportar"
+  },
+  "embedsName": "Embeds",
+  "overdue": {
+    "title": "Retrasado",
+    "singular": {
+      "description": "Retrasado por {{days}} día"
+    },
+    "plural": {
+      "description": "Retrasado por {{days}} días"
+    }
+  },
+  "workspaceName": "Espacio de trabajo",
+  "sidebar": {
+    "addSpace": "Agregar embed",
+    "projects": "Proyectos",
+    "services": "Servicios",
+    "members": "Miembros",
+    "files": "Archivos",
+    "inviteMembers": "Invitar miembros",
+    "clients": "Clientes",
+    "pinClient": "Nuevo cliente favorito",
+    "unpinClient": "Remover de favoritos",
+    "edit": "Editar embed",
+    "delete": "Eliminar embed",
+    "addClient": "Agregar cliente",
+    "favoriteClients": "Clientes favoritos",
+    "pinClients": "Marcar clientes como favoritos",
+    "pinClientsDescription": "Selecciona clientes para marcar como favoritos y acceder a ellos rápidamente desde el sidebar ",
+    "searchClients": "Buscar clientes",
+    "loadingClients": "Cargando clientes...",
+    "failedToLoadClients": "Error al cargar clientes",
+    "errorLoadingClients": "Ocurrió un error al cargar la lista de clientes",
+    "differentSearchTerm": "Intenta con un término de búsqueda diferente",
+    "noClientsFound": "No se encontraron clientes",
+    "tryAgain": "Intentar de Nuevo",
+    "noClientsSelected": "No se seleccionaron clientes",
+    "pinnedClients": "Clientes favoritos",
+    "pinnedClientsDescription": "Clientes que has marcado como favoritos para acceder rápidamente desde el sidebar",
+    "saving": "Guardando",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "invoicesName": "Facturas"
+}

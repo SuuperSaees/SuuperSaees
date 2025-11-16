@@ -1,0 +1,87 @@
+{
+  "title": "Embeds",
+  "form": {
+    "updateButton": "Update embed",
+    "createButton": "Create embed",
+    "addButton": "Add embed",  
+    "title": "Embed other apps",
+    "description": "Add your favorite apps to your portal.",
+    "delete": "Delete embed",
+    "edit": "Edit embed",
+    "inputs": {
+      "title": {
+        "type": "text",
+        "label": "Title",
+        "placeholder": "Short title"
+      },
+      "icon": {
+        "type": "text",
+        "label": "Icon",
+        "placeholder": "Icon URL"
+      },
+      "location": {
+        "type": "select",
+        "label": "Location",
+        "options": [
+          {
+            "label": "Tab",
+            "value": "tab"
+          },
+          {
+            "label": "Sidebar",
+            "value": "sidebar"
+          }
+        ]
+      },
+      "type": {
+        "type": "select",
+        "label": "Type",
+        "options": [
+          {
+            "label": "URL",
+            "value": "url"
+          },
+          {
+            "label": "Iframe",
+            "value": "iframe"
+          }
+        ]
+      },
+      "url": {
+        "type": "text",
+        "label": "Embed source",
+        "placeholder": "Enter the URL or the Iframe code"
+      },
+      "visibility": {
+        "type": "select",
+        "label": "Visibility",
+        "options": [
+          {
+            "label": "For everyone",
+            "value": "public",
+            "icon": "Globe"
+          },
+          {
+            "label": "Private",
+            "value": "private",
+            "icon": "Lock"
+          }
+        ]
+      },
+      "organizations": {
+        "type": "select",
+        "label": "Organizations",
+        "placeholder": "Select organizations"
+      },
+      "template": {
+        "type": "select",
+        "label": "Template",
+        "placeholder": "Select a template"
+      }
+    }
+  },
+  "empty": {
+    "title": "No embed source provided",
+    "description": "Please provide a valid embed source"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "organizationTitle": "Organizaciones",
+  "organizationName": "Nombre de tu agencia",
+  "organizationLabel": "Ingresa el nombre de tu agencia",
+  "continue": "Continuar",
+  "title": "Crear organizaciones",
+  "successAgency": "Agencia creada con éxito",
+  "successAgencyDescription": "Tu nueva agencia ha sido creada exitosamente.",
+  "files": {
+    "all": "Todos",
+    "team_uploaded": "Subidos por el equipo",
+    "client_uploaded": "Subidos por el cliente",
+    "download_files": "Descargar todos los archivos",
+    "download_error": "Error al descargar archivos o la carpeta está vacía",
+    "new": {
+      "title": "Nuevo",
+      "file": "Subir archivo",
+      "folder": "Crear carpeta",
+      "uploadSuccess": "Archivo subido",
+      "error": "Error al subir archivo"
+    },
+    "orders": "Proyectos",
+    "delete": "Eliminar archivo",
+    "deleteSuccess": "Archivo eliminado",
+    "noFiles": "No hay archivos en esta carpeta",
+    "emptyFolder": "La carpeta está vacía",
+    "emptyFolderDescription": "Agrega archivos o carpetas para comenzar.",
+    "emptyFolderDescriptionInTeam": "Agrega archivos para comenzar."
+  },
+  "folders": {
+    "title": "Carpetas",
+    "new": {
+      "title": "Nueva carpeta",
+      "folder": "Nombre de la carpeta",
+      "name": "Ingresa el nombre de la carpeta",
+      "create": "Crear",
+      "accept": "Aceptar",
+      "cancel": "Cancelar",
+      "emptyName": "El nombre de la carpeta no puede estar vacío",
+      "error": "Error al crear carpeta",
+      "successSubfolder": "Carpeta \"{{folderName}}\" creada exitosamente en \"{{lastPath}}\"",
+      "success": "Carpeta \"{{folderName}}\" creada exitosamente.",
+      "cannotCreateInOrderFolder": "No puedes crear carpetas en la carpeta de proyectos"
+    },
+    "delete": "Eliminar carpeta",
+    "deleteSuccess": "Carpeta eliminada",
+    "deleteError": "No se pudo eliminar la carpeta"
+  },
+  "loading": "Cargando...",
+  "members": {
+    "search": "Buscar miembros...",
+    "addButton": "Añadir miembro"
+  },
+  "embeds": {
+    "title": "Embeds",
+    "addButton": "Añadir embed"
+  }
+}

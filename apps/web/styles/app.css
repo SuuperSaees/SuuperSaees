@@ -1,0 +1,5 @@
+@tailwind base;
+@import "./font.css"
+@import "./globals.css"
+@tailwind components;
+@tailwind utilities;

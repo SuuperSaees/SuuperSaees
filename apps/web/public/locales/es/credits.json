@@ -1,0 +1,125 @@
+{
+  "statuses": {
+    "consumed": "Consumido",
+    "expired": "Expirado",
+    "purchased": "Comprado",
+    "refunded": "Reembolsado",
+    "locked": "Bloqueado"
+  },
+  "status": {
+    "singular": {
+      "available": "Disponible",
+      "used": "Usado",
+      "purchased": "Comprado",
+      "expired": "Expirado",
+      "locked": "Bloqueado",
+      "refunded": "Reembolsado"
+    },
+    "plural": {
+      "available": "Disponibles",
+      "used": "Usados", 
+      "purchased": "Comprados",
+      "expired": "Expirados",
+      "locked": "Bloqueados",
+      "refunded": "Reembolsados"
+    },
+    "description": {
+      "available": "Créditos que puedes usar para servicios o proyectos.",
+      "used": "Créditos que ya han sido gastados.",
+      "purchased": "Créditos que has comprado.",
+      "expired": "Créditos que ya no son válidos.",
+      "locked": "Créditos reservados o no disponibles actualmente."
+    }
+  },
+  "sections": {
+    "stats": {
+      "title": "Estadísticas de Créditos"
+    },
+    "purchases": {
+      "title": "Créditos Comprados"
+    },
+    "used": {
+      "title": "Créditos Usados"
+    }
+  },
+  "table": {
+    "columns": {
+      "service": "Servicio",
+      "credits": "Créditos",
+      "remaining": "Restantes",
+      "status": "Estado",
+      "date": "Fecha",
+      "description": "Descripción"
+    },
+    "addButton": "Agregar créditos",
+    "manageButton": "Gestionar créditos"
+  },
+  "empty": {
+    "title": "No se encontraron operaciones de créditos",
+    "description": "No se encontraron operaciones de créditos"
+  },
+  "form": {
+    "create": {
+      "title": "Gestionar créditos",
+      "description": "La cantidad ingresada afectará el saldo disponible de la organización y puede ser utilizada para futuros servicios o compras.",
+      "inputs": {
+        "quantity": {
+          "label": "Cantidad",
+            "placeholder": "e.g. 10 or -10",
+            "description": "Números positivos <span class='border-gray-500 px-1 rounded-sm'>agregan créditos</span>, negativos <span class='border-gray-500 px-1 rounded-sm'>descuentan créditos</span>."
+        },
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Ingrese descripción"
+        }
+      },
+      "actions": {
+        "submit": "Agregar nueva entrada"
+        }
+    },
+    "edit": {
+      "title": "Gestionar créditos",
+      "description": "Cualquier cambio se reflejará inmediatamente en el saldo disponible de la organización.",
+      "inputs": {
+        "quantity": {
+          "label": "Cantidad",
+          "placeholder": "Ingrese cantidad",
+          "description": "Números positivos <span class='border-gray-500 px-1 rounded-sm'>agregan créditos</span>, negativos <span class='border-gray-500 px-1 rounded-sm'>descuentan créditos</span>."
+        },
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Ingrese descripción"
+        }
+      },
+      "actions": {
+        "submit": "Editar créditos"
+      }
+    }
+  },
+  "message": {
+    "purchased": {
+      "manual": "Recarga manual · Aumento de créditos"
+    },
+    "consumed": {
+      "automatic": "<a href=\"{{orderUrl}}\"><strong>Orden #{{orderId}}</strong> · {{orderTitle}} · Deducción de créditos</a>",
+      "manual": "Ajuste manual · Deducción de créditos"
+    }
+  },
+  "wallet": {
+    "title": "Resumen de tu monedero",
+    "description": "Aquí puedes ver los valores y estados de tus créditos.",
+    "value": {
+      "singular": "{{value}} Crédito",
+      "plural": "{{value}} Créditos"
+    },
+    "lastMovement": "Última operación registrada: {{date}}",
+    "cta": {
+      "title": "Obtener más créditos",
+      "description": "¿Te quedaste sin créditos? ¡Recarga tu monedero para continuar!"
+    },
+    "help": {
+      "title": "¿Necesitas ayuda?",
+      "description": "Si tus créditos no se reflejan correctamente, contáctanos directamente y te ayudaremos."
+    }
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "title": "Facturas",
+  "number": "Número",
+  "organization": "Organización",
+  "paymentMethod": "Método de pago",
+  "status": "Estado",
+  "createdAt": "Creado el",
+  "actions": "Acciones",
+  "search": "Buscar facturas...",
+  "empty": {
+    "title": "No se encontraron facturas",
+    "description": "Comienza creando tu primera factura."
+  },
+  "paid": "Pagado",
+  "issued": "Emitido",
+  "partiallyPaid": "Parcialmente pagado",
+  "draft": "Borrador",
+  "overdue": "Vencido",
+  "cancelled": "Cancelado",
+  "voided": "Anulado",
+  "openMenu": "Abrir menú",
+  "download": "Descargar",
+  "markAsPaid": "Marcar como pagado",
+  "requestPaymentByEmail": "Solicitar pago por email",
+  "getPaymentLink": "Obtener enlace de pago",
+  "paymentLinkCopied": "¡Enlace de pago copiado!",  
+  "view": "Ver",
+  "delete": "Eliminar",
+  "creation": {
+    "title": "Nueva factura",
+    "warning": {
+      "description": "Por favor, configure su información de facturación antes de crear facturas.",
+      "link": "Ir a configuraciones"
+    },
+    "form": {
+      "information": {
+        "title": "Información",
+        "client": {
+          "label": "Cliente",
+          "placeholder": "Seleccionar un cliente"
+        },
+        "dateOfIssue": {
+          "label": "Fecha de emisión",
+          "placeholder": "Seleccionar una fecha"
+        },
+        "paymentMethod": {
+          "label": "Método de pago",
+          "placeholder": "Seleccionar un método de pago"
+        },
+        "paymentReference": {
+          "label": "Referencia de pago",
+          "placeholder": "Ingresar una referencia de pago"
+        }
+      },
+      "items": {
+        "title": "Items",
+        "description": {
+          "label": "Descripción",
+          "placeholder": "Seleccionar un servicio"
+        },
+        "rate": {
+          "label": "Tasa",
+          "placeholder": "Ingresar una tasa"
+        },
+        "quantity": {
+          "label": "Cantidad",
+          "placeholder": "Ingresar una cantidad"
+        },
+        "lineTotal": {
+          "title": "Total de la línea"
+        },
+        "total": {
+          "title": "Total"
+        },
+        "subtotal": {
+          "title": "Subtotal"
+        },
+        "add": "Agregar nueva línea"
+      },
+      "notes": {
+        "title": "Notas",
+        "placeholder": "Escribir una nota..."
+      },
+      "actions": {
+        "saveAsDraft": "Guardar como borrador",
+        "createInvoice": "Crear factura"
+      }
+    },
+    "plan": {
+      "title": "Plan",
+      "nextInvoice": "Fecha de la próxima factura"
+    },
+    "update": {
+      "title": "Editar factura - {{number}}",
+      "form": {
+        "actions": {
+          "updateInvoice": "Guardar"
+        }
+      }
+    },
+    "total": {
+      "title": "Total de la factura",
+      "usersEquivalent": "equivalente a {{currentUsers}}",
+      "users": "usuarios",
+      "user": "usuario",
+      "upgrade": "Mejorar su plan"
+    },
+    "history": {
+      "title": "Historial de facturación",
+      "invoice": "Factura",
+      "amount": "Cantidad",
+      "date": "Fecha",
+      "status": "Estado"
+    },
+    "manage": {
+      "title": "Gestionar suscripción",
+      "description": "Actulizar estado de suscripción",
+      "cancel": "Cancelar suscripción",
+      "modal": {
+        "cancel": {
+          "title": "Cancelar suscripción",
+          "description": {
+            "paragraph1": "¿Estás seguro de que quieres cancelar tu suscripción?",
+            "paragraph2": {
+              "text1": "Escribe",
+              "text2": "para confirmar."
+            }
+          },
+          "submit": "Cancelar suscripción",
+          "placeholder": "Escribe 'cancel_subscription'",
+          "cancelButton": "Cancelar",
+          "backButton": "Volver"
+        }
+      }
+    }
+  },
+  "errors": {
+    "failedToCreateInvoice": "Error al crear la factura",
+    "failedToCreateInvoiceDraft": "Error al guardar la factura como borrador",
+    "failedToUpdateInvoice": "Error al actualizar la factura",
+    "failedToDeleteInvoice": "La factura no pudo ser eliminada",
+    "failedToSendEmail": "Error al enviar el email"
+  },
+  "success": {
+    "invoiceCreated": "Factura creada correctamente",
+    "invoiceDraftCreated": "Factura guardada como borrador",
+    "invoiceUpdated": "Factura actualizada correctamente!",
+    "invoiceDeleted": "Factura eliminada correctamente!",
+    "emailSent": "Email enviado correctamente!",
+    "pdfDownloaded": "PDF descargado correctamente!"
+  },
+  "loading": {
+    "updating": "Actualizando...",
+    "updatingInvoice": "Actualizando factura...",
+    "updatingInvoiceStatus": "Actualizando estado de la factura...",
+    "deletingInvoice": "Eliminando factura...",
+    "sendingEmail": "Enviando email..."
+  },
+  "settings": {
+    "invoiceManagement": {
+      "title": "Habilitar Generación de Facturas",
+      "description": "Genera facturas profesionales para transacciones de clientes y accede a herramientas de gestión."
+    },
+    "requireCompleteAddress": {
+      "title": "Recopilar Dirección Completa en Checkout",
+      "description": "Requiere dirección de facturación completa de clientes. Desactiva para checkout rápido solo con país."
+    },
+    "automaticInvoiceNote": {
+      "title": "Auto-agregar Notas de Factura",
+      "description": "Incluye automáticamente una nota estándar en todas las nuevas facturas."
+    },
+    "noteContent": {
+      "title": "Contenido de la Nota",
+      "description": "Contenido predeterminado de la nota para facturas automáticas",
+      "placeholder": "Ingresa el contenido predeterminado de la nota..."
+    },
+    "billingInformation": {
+      "title": "Información de Facturación",
+      "description": "Esta información se utilizará para generar facturas para tus clientes.",
+      "companyInformation": {
+        "title": "Información de la Empresa",
+        "subtitle": "Detalles básicos para tus facturas",
+        "companyName": {
+          "label": "Nombre de la Empresa",
+          "placeholder": "Ingresa el nombre de tu empresa",
+          "description": "Esto se mostrará en tus facturas"
+        },
+        "taxId": {
+          "label": "ID Fiscal / Número IVA",
+          "placeholder": "Ingresa la identificación fiscal",
+          "description": "Tu número de identificación fiscal empresarial"
+        },
+        "taxType": {
+          "label": "Tipo de identificación fiscal",
+          "placeholder": "Seleccionar el tipo de identificación fiscal",
+          "description": "Seleccionar el tipo de identificación fiscal"
+        },
+        "country": {
+          "label": "País",
+          "placeholder": "Selecciona tu país",
+          "description": "Elige la ubicación de tu negocio",
+          "searchPlaceholder": "Buscar países...",
+          "emptyMessage": "No se encontró el país."
+        }
+      },
+      "businessAddress": {
+        "title": "Dirección del Negocio",
+        "subtitle": "Detalles de ubicación para facturación",
+        "streetAddress": {
+          "label": "Dirección",
+          "placeholder": "Ingresa la dirección de tu negocio",
+          "description": "La dirección de tu negocio"
+        },
+        "addressLine2": {
+          "label": "Línea de Dirección 2",
+          "placeholder": "Suite, apt, piso (opcional)",
+          "description": "Apartamento, suite, unidad, edificio, piso, etc. (opcional)"
+        },
+        "city": {
+          "label": "Ciudad",
+          "placeholder": "Ciudad",
+          "description": "Ciudad donde se encuentra tu negocio"
+        },
+        "stateProvince": {
+          "label": "Estado / Provincia",
+          "placeholder": "Estado o Provincia",
+          "description": "Estado o provincia (si aplica)"
+        },
+        "zipCode": {
+          "label": "Código Postal",
+          "placeholder": "Código Postal",
+          "description": "Tu código postal o ZIP"
+        }
+      },
+      "infoNote": {
+        "title": "Información de Facturas",
+        "description": "Esta información aparecerá en todas las facturas generadas para tus clientes. Asegúrate de que todos los detalles sean precisos y estén actualizados para una facturación profesional."
+      }
+    }
+  }
+}

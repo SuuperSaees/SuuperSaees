@@ -1,0 +1,23 @@
+{
+  "upload": {
+    "placeholder": "Arrastra los archivos aquí o haz click para subir",
+    "dropHere": "Suelta los archivos aquí",
+    "uploading": "Subiendo...",
+    "error": "Carga fallida",
+    "success": "Carga completada"
+  },
+  "corrupted": "Archivo incompleto o dañado",
+  "validating": "Validando archivo...",
+  "preview": {
+    "error": {
+      "title": "No se pudo mostrar este archivo",
+      "description": "Puede que esté incompleto o dañado. Por favor, inténtalo de nuevo."
+    }
+  },
+  "fileOptions": {
+    "copyLink": "Copiar enlace",
+    "copyLinkSuccess": "Enlace copiado al portapapeles",
+    "view": "Ver",
+    "download": "Descargar"
+  }
+}

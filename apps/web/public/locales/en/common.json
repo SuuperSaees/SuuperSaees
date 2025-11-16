@@ -1,0 +1,225 @@
+{
+  "pleaseSpecify": "Please specify...",
+  "homeTabLabel": "Home",
+  "homeTabDescription": "Welcome to your home page",
+  "accountMembers": "Members",
+  "membersTabDescription": "Manage the members of your organization",
+  "billingTabLabel": "Billing",
+  "billingTabDescription": "Manage your billing and subscription",
+  "briefsName": "Briefs",
+  "yourAccountTabLabel": "Account Settings",
+  "dashboardTabLabel": "Dashboard",
+  "organizationSettingsTabLabel": "Organization",
+  "settingsTabLabel": "Settings",
+  "profileSettingsTabLabel": "Profile",
+  "subscriptionSettingsTabLabel": "Subscription",
+  "messagesName": "Messages",
+  "dashboardTabDescription": "An overview of your organization's activity and performance across all your projects.",
+  "settingsTabDescription": "Manage your settings and preferences.",
+  "emailAddress": "Email",
+  "organizationNamelabel": "Name of your brand",
+  "organizationNamePlaceholder": "Suuper Agency",
+  "emailLabel": "Email",
+  "confirmClose": "Are you sure you want to continue?",
+  "password": "Password",
+  "modalConfirmationQuestion": "Are you sure you want to continue?",
+  "loading": "Loading the page...",
+  "genericServerErrorHeading": "Sorry, something went wrong while processing your request. Please contact us if the issue persists.",
+  "pageNotFound": "Sorry, this page does not exist.",
+  "pageNotFoundSubHeading": "Sorry, the page you were looking for was not found",
+  "genericError": "Sorry, something went wrong.",
+  "genericErrorSubHeading": "Sorry, an error occurred while processing your request. Please contact us if the issue persists.",
+  "goBack": "Go Back",
+  "backToHomePage": "Return to the home page",
+  "anonymousUser": "Anonymous",
+  "tryAgain": "Try Again",
+  "theme": "Theme",
+  "contactUs": "Contact Us",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "systemTheme": "System",
+  "expandSidebar": "Expand Sidebar",
+  "collapseSidebar": "Collapse Sidebar",
+  "documentation": "Documentation",
+  "getStarted": "Get Started",
+  "getStartedWithPlan": "Start with {{plan}}",
+  "retry": "Retry",
+  "yourOrganizations": "Your Organizations",
+  "continue": "Continue",
+  "skip": "Skip",
+  "signedInAs": "Signed in as",
+  "pageOfPages": "Page {{page}} of {{total}}",
+  "noData": "No data available",
+  "pageNotFoundHeading": "Oh no! :|",
+  "errorPageHeading": "Oh no! :|",
+  "nameInput": "Name",
+  "namePortalInput": "Portal Name",
+  "servicesName": "Services",
+  "servicesListName": "All services",
+  "servicesCatalogName": "Services catalog",
+  "settingsName": "Settings",
+  "usersName": "Users",
+  "ordersName": "Projects",
+  "dashboardName": "Dashboard",
+  "clientsName": "Clients",
+  "teamName": "Team",
+  "aiToolsName": "AI Tools",
+  "catalogProviderName": "Providers",
+  "catalogProductName": "Products",
+  "toolCopyListName": "Copy Listing",
+  "catalogName": "Catalog",
+  "partnersName": "Partners",
+  "catalogWholesaleName": "Wholesale",
+  "catalogPrivateLabelName": "Private Label",
+  "trainingName": "Training",
+  "calendarName": "Calendar",
+  "catalogSourcingChinaName": "Sourcing China",
+  "orders": "Projects",
+  "profile": "My profile",
+  "billing": "Billing",
+  "subscription": "Subscription",
+  "storage": "Storage",
+  "roles": {
+    "agency_owner": {
+      "label": "Owner"
+    },
+    "agency_member": {
+      "label": "Member"
+    },
+    "agency_project_manager": {
+      "label": "Project Manager"
+    },
+    "client_owner": {
+      "label": "Leader"
+    },
+    "client_member": {
+      "label": "Member"
+    }
+  },
+  "clear": "Clear",
+  "pagination": {
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search..."
+  },
+  "timer": {
+    "pauseTimer": "Pause timer",
+    "enterTimerName": "Enter the name of the timer",
+    "timerName": "Timer Name",
+    "cancel": "Cancel",
+    "confirm": "Save",
+    "errorCreating": "Failed to create timer",
+    "addTime": "Add time",
+    "whatDidYouSpendTimeOn": "What did you spend time on?*",
+    "writeHere": "Write here..."
+  },
+  "organizationName": "Organization",
+  "selectOption": "Select an option",
+  "success": "All set!",
+  "error": "Something went wrong!",
+  "stopImpersonating": "Stop impersonating",
+  "stopImpersonatingDescription": "You will go back to your session shortly",
+  "rowsPerPage": "Show",
+  "rowNumber": "{{number}} rows",
+  "filters": {
+    "title": "Filters",
+    "appliedFilters": {
+      "singular": "({{number}})",
+      "plural": "({{number}})"
+    },
+    "resetFilters": "Clear filters",
+    "groups": {
+      "status": {
+        "title": "Status"
+      },
+      "client_organization": {
+        "title": "Client Organization"
+      },
+      "assigned_to": {
+        "title": "Assigned to"
+      },
+      "tags": {
+        "title": "Tags"
+      },
+      "customer": {
+        "title": "Customer"
+      },
+      "priority": {
+        "title": "Priority"
+      }
+    }
+  },
+  "pluginsName": "Apps",
+  "goToPage": "Go to page",
+  "of": "of",
+  "showing": "Showing",
+  "go": "Go",
+  "export": {
+    "exportCSV": "Export CSV",
+    "exportOptions": "Export Options",
+    "configureAndPreview": "Configure your export options and preview the data",
+    "settings": "Settings",
+    "preview": "Preview",
+    "filename": "Filename",
+    "delimiter": "Delimiter",
+    "selectDelimiter": "Select delimiter",
+    "comma": "Comma",
+    "semicolon": "Semicolon",
+    "tab": "Tab",
+    "delimiterHelp": "Choose the delimiter that works best with your spreadsheet application. Semicolon is recommended for European locales.",
+    "usePagination": "Use pagination",
+    "usePaginationNotAvailable": "You will export {{pageSize}} rows from your current data view. Adjust the number of rows displayed in your table to control the export size.",
+    "pageSize": "Page size",
+    "currentPage": "Current page",
+    "selectColumns": "Select columns to export",
+    "selectAll": "Select all",
+    "clearAll": "Clear all",
+    "previewTitle": "Data Preview",
+    "previewDescription": "Preview of the first 5 rows of data with selected columns",
+    "noColumnsSelected": "No columns selected for export",
+    "export": "Export",
+    "selectAtLeastOneColumn": "Please select at least one column to export"
+  },
+  "embedsName": "Embeds",
+  "overdue": {
+    "title": "Overdue",
+    "singular": {
+      "description": "Overdue by {{days}} day"
+    },
+    "plural": {
+      "description": "Overdue by {{days}} days"
+    }
+  },
+  "workspaceName": "Workspace",
+  "sidebar": {
+    "addSpace": "Add embed",
+    "projects": "Projects",
+    "services": "Services",
+    "members": "Members",
+    "files": "Files",
+    "inviteMembers": "Invite members",
+    "clients": "Clients",
+    "pinClient": "New favorite client",
+    "unpinClient": "Remove from favorites",
+    "favoriteClients": "Favorite clients",
+    "edit": "Edit embed",
+    "delete": "Delete embed",
+    "addClient": "Add client",
+    "pinClients": "Mark clients as favorites",
+    "pinClientsDescription": "Select clients to mark as favorites and access them quickly from the sidebar",
+    "searchClients": "Search clients",
+    "loadingClients": "Loading clients...",
+    "failedToLoadClients": "Failed to load clients",
+    "errorLoadingClients": "There was an error loading the client list",
+    "differentSearchTerm": "Try a different search term",
+    "noClientsFound": "No clients found",
+    "tryAgain": "Try again",
+    "noClientsSelected": "No clients selected",
+    "pinnedClients": "Pinned clients",
+    "pinnedClientsDescription": "Clients you have pinned to your sidebar for quick access",
+    "saving": "Saving",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "invoicesName": "Invoices"
+}

@@ -1,0 +1,179 @@
+{
+  "contactFormSubmission": {
+    "subject": "Contact Form Submission",
+    "body": "You have received a new contact form submission.",
+    "name": "Name: ${name}",
+    "email": "Email: ${email}",
+    "message": "Message: ${message}"
+  },
+  "orderCompleted": {
+    "subject": "${actualName} has marked '${orderTitle}' request as completed.",
+    "body": "${actualName} has marked '${orderTitle}' request as completed.",
+    "greeting": "Hi ${actualName}",
+    "viewOrder": "View project",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "orderCreation": {
+    "subject": "New project created",
+    "body": "You have a new project",
+    "greeting": "Hi ${toEmail}",
+    "newOrderMessage": "You have a new project from ${emailSender}",
+    "viewOrder": "View project",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "orderMessage": {
+    "subject": "${userName} commented in ${orderTitle} on ${date}.",
+    "greeting": "Hi ${toEmail}",
+    "reply": "Reply",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "orderStatusPriority": {
+    "status": {
+      "subject": "${actualName} has changed '${orderTitle}' request status to ${message}.",
+      "body": "${actualName} has changed '${orderTitle}' request status to ${message}."
+    },
+    "priority": {
+      "subject": "${actualName} has changed '${orderTitle}' request priority to ${message}.",
+      "body": "${actualName} has changed '${orderTitle}' request priority to ${message}."
+    },
+    "due_date": {
+      "subject": "${actualName} has changed '${orderTitle}' due date to ${message}.",
+      "body": "${actualName} has changed '${orderTitle}' due date to ${message}."
+    },
+    "default": {
+      "subject": "New message added to project ${orderId}.",
+      "body": "You have a message in project ${orderId}."
+    },
+    "greeting": "Hi ${actualName}",
+    "viewOrder": "View project",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "inviteEmail": {
+    "acceptInvitation": "Accept invitation",
+    "confirmEmail": "Confirm email",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "clientConfirmEmail": {
+    "subject": "Confirm your email",
+    "body": "Welcome to <strong>${agencyName}</strong>, please activate your account to get started.",
+    "greeting": "Hi ${toEmail}",
+    "yourUsername": "Your username:",
+    "thanks": "Thanks,",
+    "team": "The Team",
+    "activateAccount": "Activate account",
+    "at": "at",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "clientRecoveryEmail": {
+    "subject": "Recover your password",
+    "body": "Recover your password",
+    "yourUsername": "Your username:",
+    "at": "at",
+    "team": "The team",
+    "thanks": "Thanks,",
+    "activateAccount": "Recover password",
+    "greeting": "Hi ${toEmail}",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+  "clientInvitationEmail": {
+    "subject": "Invitation to join ${agencyName}",
+    "body": "You have been invited to join ${agencyName}",
+    "yourUsername": "Your username:",
+    "thanks": "Thanks,",
+    "team": "The team",
+    "activateAccount": "Accept invitation",
+    "at": "at",
+    "greeting": "Hi ${toEmail}",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences."
+  },
+    "chatMessage": {
+      "subject": "New message from ${senderName} in ${chatTitle}",
+      "body": "${senderName} has sent you a new message in the chat ${chatTitle}",
+      "greeting": "Hi ${toName},",
+      "viewMessage": "View Message",
+      "farewell": "Best regards,",
+      "footer": "You are receiving this email because you are a participant in this chat. If you don't want to receive these notifications, you can adjust your notification settings.",
+      "at": "at"
+  },
+  "requestPayment": {
+    "subject": "Payment requested for invoice ${invoiceNumber}",
+    "body": "You have a new pending invoice for ${amount}.",
+    "greeting": "Hi ${clientName},",
+    "farewell": "Best regards,",
+    "buttonText": "Pay Now",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "paymentReceived": {
+    "subject": "Payment received for invoice ${invoiceNumber}",
+    "body": "We are pleased to confirm that we have received your payment of ${amount} for invoice ${invoiceNumber}. Thank you for your prompt payment.",
+    "greeting": "Hello ${clientName}!",
+    "farewell": "Thank you for your business.",
+    "footer": "This email was sent to ${toEmail}. If you have any questions, please contact us.",
+    "at": "at"
+  },
+  "clientUpdateEmail": {
+    "subject": "Update your email",
+    "body": "Update your email",
+    "yourUsername": "Your username:",
+    "team": "The team",
+    "greeting": "Hi ${toEmail}",
+    "activateAccount": "Update email",
+    "thanks": "Thanks,",
+    "farewell": "Regards,",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "newClientRegistration": {
+    "subject": "New client registered: ${clientName}",
+    "body": "A new client has registered on ${agencyName}.",
+    "greeting": "Hi there!",
+    "clientDetails": "Client Details:",
+    "clientName": "Name: ${clientName}",
+    "clientEmail": "Email: ${clientEmail}",
+    "organizationName": "Organization: ${organizationName}",
+    "registrationDate": "Registration Date: ${registrationDate}",
+    "farewell": "Best regards,",
+    "buttonText": "View Clients",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "at": "at"
+  },
+  "newAgencyMemberRegistration": {
+    "subject": "New member registration request for ${agencyName}",
+    "body": "A new member has requested to join ${agencyName} and is pending approval.",
+    "greeting": "Hi there!",
+    "memberDetails": "Member Details:",
+    "memberEmail": "Email: ${memberEmail}",
+    "agencyName": "Agency: ${agencyName}",
+    "registrationDate": "Registration Date: ${registrationDate}",
+    "status": "Status: Pending approval",
+    "farewell": "Best regards,",
+    "buttonText": "Manage Team",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "instructions": "Click 'Manage Team' to access your admin panel where you can review and approve this membership request.",
+    "at": "at"
+  },
+  "agencyMemberAccountConfirmation": {
+    "subject": "Welcome to ${agencyName} - Confirm your account",
+    "body": "You have registered with ${agencyName}. Please confirm your account.",
+    "greeting": "Hello!",
+    "welcomeMessage": "Welcome to the team! Please click the button below to confirm your account",
+    "yourUsername": "Your username:",
+    "farewell": "Best regards,",
+    "buttonText": "Activate Account",
+    "footer": "This email was sent to ${toEmail}. If you prefer not to receive this type of emails, you can unsubscribe or manage your email preferences.",
+    "instructions": "If you cannot click the button, copy and paste the following link into your browser:",
+    "team": "The Team",
+    "at": "at"
+  }
+}
+

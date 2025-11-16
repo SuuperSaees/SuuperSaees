@@ -1,0 +1,79 @@
+{
+  "title": "Embeds",
+  "form": {
+    "updateButton": "Actualizar embed",
+    "createButton": "Crear embed",
+    "addButton": "Agregar embed",
+    "title": "Nuevo embed",
+    "description": "Añade un nuevo embed de tu aplicación favorita a tu portal.",
+    "delete": "Eliminar embed",
+    "edit": "Editar embed",
+    "inputs": {
+      "title": {
+        "type": "text",
+        "label": "Título",
+        "placeholder": "Título corto"
+      },
+      "icon": {
+        "type": "text",
+        "label": "Icono",
+        "placeholder": "URL del icono"
+      },
+      "location": {
+        "type": "select",
+        "label": "Ubicación",
+        "options": [
+          {
+            "label": "Tab",
+            "value": "tab"
+          },
+          {
+            "label": "Sidebar",
+            "value": "sidebar"
+          }
+        ]
+      },
+      "type": {
+        "type": "select",
+        "label": "Tipo",
+        "options": [
+          {
+            "label": "Enlace",
+            "value": "url"
+          },
+          {
+            "label": "Iframe",
+            "value": "iframe"
+          }
+        ]
+      },
+      "url": {
+        "type": "text",
+        "label": "Embed",
+        "placeholder": "Ingresa el URL o el código del Iframe"
+      },
+      "visibility": {
+        "type": "select",
+        "label": "Visibilidad",
+        "options": [
+          { "label": "Para todos", "value": "public", "icon": "Globe" },
+          { "label": "Privado", "value": "private", "icon": "Lock" }
+        ]
+      },
+      "organizations": {
+        "type": "select",
+        "label": "Organizaciones",
+        "placeholder": "Selecciona organizaciones"
+      },
+      "template": {
+        "type": "select",
+        "label": "Plantilla",
+        "placeholder": "Selecciona una plantilla"
+      }
+    }
+  },
+  "empty": {
+    "title": "No hay embed",
+    "description": "Por favor, proporciona un embed válido"
+  }
+}

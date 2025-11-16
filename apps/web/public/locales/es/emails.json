@@ -1,0 +1,178 @@
+{
+  "contactFormSubmission": {
+    "subject": "Solicitud de contacto",
+    "body": "Has recibido una nueva solicitud de contacto.",
+    "name": "Nombre: ${name}",
+    "email": "Email: ${email}",
+    "message": "Mensaje: ${message}",
+    "at": "de"
+  },
+  "orderCompleted": {
+    "subject": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
+    "body": "${actualName} ha marcado '${orderTitle}' solicitud como completada.",
+    "greeting": "Hola ${actualName}",
+    "viewOrder": "Ver proyecto",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "orderCreation": {
+    "subject": "Nuevo proyecto creado",
+    "body": "Tienes un nuevo proyecto",
+    "greeting": "Hola ${toEmail}",  
+    "newOrderMessage": "Tienes un nuevo proyecto de ${emailSender}",
+    "viewOrder": "Ver proyecto",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "orderMessage": {
+    "subject": "${userName} ha comentado en ${orderTitle} el ${date}.",
+    "greeting": "Hola ${toEmail}",
+    "reply": "Responder",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "orderStatusPriority": {
+    "status": {
+      "subject": "${actualName} ha cambiado el estado de la solicitud '${orderTitle}' a ${message}.",
+      "body": "${actualName} ha cambiado el estado de la solicitud '${orderTitle}' a ${message}."
+    },
+    "priority": {
+      "subject": "${actualName} ha cambiado la prioridad de la solicitud '${orderTitle}' a ${message}.",
+      "body": "${actualName} ha cambiado la prioridad de la solicitud '${orderTitle}' a ${message}."
+    },
+    "due_date": {
+      "subject": "${actualName} ha cambiado la fecha de vencimiento de '${orderTitle}' a ${message}.",
+      "body": "${actualName} ha cambiado la fecha de vencimiento de '${orderTitle}' a ${message}."
+    },
+    "default": {
+      "subject": "Nuevo mensaje en el proyecto ${orderId} añadido.",
+      "body": "Tienes un mensaje en el proyecto ${orderId}."
+    },
+    "greeting": "Hola ${actualName}",
+    "viewOrder": "Ver proyecto",
+    "farewell": "Saludos,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "inviteEmail": {
+    "confirmEmail": "Confirma tu correo",
+    "acceptInvitation": "Aceptar invitación",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "clientConfirmEmail": {
+    "subject": "Confirma tu correo",
+    "body": "Bienvenido a ${agencyName}, por favor activa tu cuenta para empezar.",
+    "greeting": "Hola ${toEmail}",
+    "yourUsername": "Tu nombre de usuario:",
+    "thanks": "Gracias,",
+    "team": "El equipo",
+    "activateAccount": "Activar cuenta",
+    "at": "de",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+  },
+  "clientRecoveryEmail": {
+    "subject": "Recupera tu contraseña",
+    "body": "Recupera tu contraseña",
+    "yourUsername": "Tu nombre de usuario:",
+    "at": "de",
+    "team": "El equipo",
+    "thanks": "Gracias,",
+    "activateAccount": "Recuperar contraseña",
+    "greeting": "Hola ${toEmail}",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+  },
+  "clientInvitationEmail": {
+    "subject": "Invitación a unirse a ${agencyName}",
+    "body": "Has sido invitado a unirte a ${agencyName}",
+    "yourUsername": "Tu nombre de usuario:",
+    "thanks": "Gracias,",
+    "team": "El equipo",
+    "activateAccount": "Aceptar invitación",
+    "at": "de",
+    "greeting": "Hola ${toEmail}",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo."
+  },
+    "chatMessage": {
+      "subject": "Nuevo mensaje de ${senderName} en ${chatTitle}",
+      "body": "${senderName} te ha enviado un nuevo mensaje en el chat ${chatTitle}",
+      "greeting": "Hola ${toName},",
+      "viewMessage": "Ver Mensaje",
+      "farewell": "Saludos cordiales,",
+      "footer": "Estás recibiendo este correo porque eres participante de este chat. Si no deseas recibir estas notificaciones, puedes ajustar tu configuración de notificaciones.",
+      "at": "en"
+  },
+  "requestPayment": {
+    "subject": "Solicitud de pago para la factura ${invoiceNumber}",
+    "body": "Tienes una nueva factura pendiente de pago por ${amount}.",
+    "greeting": "Hola ${clientName},",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Pagar Ahora",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "paymentReceived": {
+    "subject": "Pago recibido para la factura ${invoiceNumber}",
+    "body": "Nos complace confirmar que hemos recibido tu pago de ${amount} para la factura ${invoiceNumber}. Gracias por tu pronto pago.",
+    "greeting": "¡Hola ${clientName}!",
+    "farewell": "Saludos cordiales,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si tienes alguna pregunta, por favor contáctanos.",
+    "at": "de"
+  },
+  "clientUpdateEmail": {
+    "subject": "Actualiza tu correo",
+    "body": "Actualiza tu correo",
+    "yourUsername": "Tu nombre de usuario:",
+    "team": "El equipo",
+    "greeting": "Hola ${toEmail}",
+    "activateAccount": "Actualizar correo",
+    "thanks": "Gracias,",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "newClientRegistration": {
+    "subject": "Nuevo cliente registrado: ${clientName}",
+    "body": "Un nuevo cliente se ha registrado en tu plataforma de agencia.",
+    "greeting": "¡Hola!",
+    "clientDetails": "Detalles del Cliente:",
+    "clientName": "Nombre: ${clientName}",
+    "clientEmail": "Email: ${clientEmail}",
+    "organizationName": "Organización: ${organizationName}",
+    "registrationDate": "Fecha de Registro: ${registrationDate}",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Ver Clientes",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "at": "de"
+  },
+  "newAgencyMemberRegistration": {
+    "subject": "Solicitud de registro de nuevo miembro para ${agencyName}",
+    "body": "Un nuevo miembro ha solicitado unirse a tu agencia y está pendiente de aprobación.",
+    "greeting": "¡Hola!",
+    "memberDetails": "Detalles del Miembro:",
+    "memberEmail": "Email: ${memberEmail}",
+    "agencyName": "Agencia: ${agencyName}",
+    "registrationDate": "Fecha de Registro: ${registrationDate}",
+    "status": "Estado: Pendiente de aprobación",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Gestionar Equipo",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "instructions": "Haz clic en 'Gestionar Equipo' para acceder a tu panel de administración donde podrás revisar y aprobar esta solicitud de membresía.",
+    "at": "de"
+  },
+  "agencyMemberAccountConfirmation": {
+    "subject": "Bienvenido a ${agencyName} - Confirma tu cuenta",
+    "body": "Te has registrado en ${agencyName}. Por favor confirma tu cuenta.",
+    "greeting": "¡Hola!",
+    "welcomeMessage": "¡Bienvenido al equipo! Por favor haz clic en el botón de abajo para confirmar tu cuenta.",
+    "yourUsername": "Tu nombre de usuario:",
+    "farewell": "Saludos cordiales,",
+    "buttonText": "Activar Cuenta",
+    "footer": "Este correo fue enviado a ${toEmail}. Si prefieres no recibir este tipo de correos, puedes darte de baja o gestionar tus preferencias de correo.",
+    "instructions": "Si no puedes hacer clic en el botón, copia y pega el siguiente enlace en tu navegador:",
+    "team": "El Equipo",
+    "at": "de"
+  }
+}

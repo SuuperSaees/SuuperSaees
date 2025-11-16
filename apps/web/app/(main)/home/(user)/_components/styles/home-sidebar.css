@@ -1,0 +1,14 @@
+.padding-24 {
+  padding: 32px 24px 0px 24px; /* 32px arriba/abajo, 24px izquierda/derecha */
+}
+
+.logo-home-sidebar {
+  max-width: 197px;
+  max-height: 48px;
+}
+
+/* Add styles for muted text */
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.8;
+} 

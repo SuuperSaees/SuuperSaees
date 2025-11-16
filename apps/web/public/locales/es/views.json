@@ -1,0 +1,84 @@
+{
+  "kanban": {
+    "title": "Tablero",
+    "columns": {
+      "negations": {
+        "noProperty": "Sin {{property}}",
+        "no": "Sin",
+        "assignees": "Asignados",
+        "status": "Estado",
+        "priority": "Prioridad",
+        "assigned_to": "Asignados",
+        "title": "Título",
+        "date": "Fecha"
+      },
+      "color": "Columnas de color"
+    },
+    "group": {
+      "title": "Agrupar",
+      "groupBy": "Agrupar por",
+      "visible": "Grupos visibles",
+      "hidden": "Grupos ocultos"
+    },
+    "properties": {
+      "title": "Propiedades",
+      "visibility": {
+        "visible": "Propiedades visibles",
+        "hidden": "Propiedades ocultas"
+      },
+      "visible": "Visible: {{visibles}}"
+    },
+    "filters": {
+      "title": "Filtros",
+      "none": "Ninguno"
+    },
+    "sort": {
+      "title": "Ordenar",
+      "none": "Sin ordenar"
+    },
+    "common": {
+      "showAll": "Mostrar todo",
+      "hideAll": "Ocultar todo"
+    }
+  },
+  "calendar": {
+    "title": "Calendario",
+    "view": {
+      "month": "Vista mensual",
+      "week": "Vista semanal"
+    },
+    "date": {
+      "today": "Hoy",
+      "thisWeek": "Esta semana",
+      "thisMonth": "Este mes",
+      "week": "Semana",
+      "months": {
+        "january": "Enero",
+
+        "february": "Febrero",
+        "march": "Marzo",
+        "april": "Abril",
+        "may": "Mayo",
+        "june": "Junio",
+        "july": "Julio",
+        "august": "Agosto",
+        "september": "Septiembre",
+        "october": "Octubre",
+        "november": "Noviembre",
+        "december": "Diciembre"
+      },
+      "days": {
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miércoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo"
+      }
+    }
+  },
+  "table": {
+    "title": "Tabla"
+  }
+}

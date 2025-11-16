@@ -1,0 +1,156 @@
+  {
+  "error": {
+    "title": "¡Algo salió mal!",
+    "toastError": "Error",
+    "default": "Ocurrió un error inesperado al procesar tu solicitud. Inténtalo de nuevo más tarde.",
+    "clients": {
+      "userAlreadyExists": "Ya hay un miembro con ese correo electrónico. Usa un correo diferente.",
+      "faildedToCreateUser": "No se pudo crear el usuario del cliente. Verifica la información e inténtalo de nuevo.",
+      "insufficientPermissions": "No tienes permisos para realizar esta acción. Contacta al administrador si necesitas acceso.",
+      "organizationNotFound": "No encontramos la organización del cliente. Asegúrate de que la información sea correcta.",
+      "agencyNotFound": "No encontramos la agencia del cliente. Verifica los datos ingresados."
+    },
+    "organizations": {
+      "failedToUpdateOrganization": "No se pudo actualizar la organización. Inténtalo de nuevo.",
+      "failedToGetOrganizationSettings": "No se pudieron obtener las configuraciones de la organización. Inténtalo más tarde.",
+      "failedToUpdateOrganizationSettingsColor": "No se pudo actualizar el color. Asegúrate de usar un código hexadecimal válido.",
+      "failedToUpdateOrganizationSetting": "No se pudo actualizar la preferencia de la organización. Inténtalo de nuevo más tarde.",
+      "failedToCreateOrganizationSetting": "No se pudo crear la preferencia de la organización. Inténtalo nuevamente más tarde.",
+      "organizationNotFoundOrNotAccessible": "No encontramos la organización o no tienes acceso a ella. Verifica tu permiso o la información proporcionada."
+    },
+    "services": {
+      "failedToCancelService": "No se pudo cancelar el servicio. Inténtalo de nuevo más tarde.",
+      "insufficientPermissions": "No tienes los permisos necesarios para esta acción. Contacta a un administrador.",
+      "faildedToAddService": "No se pudo agregar el servicio al cliente. Revisa la información e inténtalo de nuevo.",
+      "faildedToCreateService": "No se pudo crear el servicio. Inténtalo más tarde.",
+      "failedToDeleteService": "No se pudo eliminar el servicio. Reinténtalo más tarde.",
+      "failedToDeleteServiceFromStripe": "No se pudo eliminar el servicio de Stripe. Inténtalo más tarde.",
+      "failedToFindStripeAccount": "No encontramos la cuenta de Stripe. Por favor, intenta de nuevo más tarde.",
+      "failedToUpdateService": "No se pudo actualizar el servicio. Inténtalo de nuevo."
+    },
+    "briefs": {
+      "failedToCreateBrief": "No se pudo crear el brief. Intenta nuevamente.",
+      "failedToUpdateBrief": "No se pudo actualizar el brief. Verifica que todos los campos sean correctos.",
+      "failedToDeleteBrief": "No se pudo eliminar el brief. Inténtalo otra vez.",
+      "failedToConnectService": "No se pudo conectar el servicio al brief. Intenta más tarde.",
+      "failedToUpdateFields": "No se pudieron actualizar los campos. Reinténtalo más tarde.",
+      "failedToDeleteFormFields": "No se pudieron eliminar los campos del formulario. Inténtalo de nuevo.",
+      "failedToGetFormFields": "No se pudieron recuperar los campos del formulario. Inténtalo de nuevo.",
+      "failedToCreateFormFields": "No se pudieron crear los campos del formulario. Inténtalo de nuevo.",
+      "failedToDuplicateBrief": "No se pudo duplicar el brief. Inténtalo de nuevo."
+    },
+    "orders": {
+      "faildeToCreateOrder": "No se pudo crear el pedido. Verifica la información e inténtalo nuevamente.",
+      "failedToAssociateRole": "Ocurrió un error inesperado al asociar el rol. Inténtalo más tarde.",
+      "insufficientPermissions": "No tienes permiso para realizar esta acción. Contacta al administrador si es necesario.",
+      "failedToCreateBriefResponses": "No se pudieron crear las respuestas del brief. Inténtalo nuevamente.",
+      "failedToGetFormFields": "No se pudieron obtener los campos del formulario. Inténtalo más tarde.",
+      "failedToInsertFiles": "No se pudieron insertar los archivos. Verifica los archivos e inténtalo de nuevo.",
+      "failedToAddAssignees": "No se pudieron agregar asignados a la orden. Inténtalo más tarde.",
+      "failedToAddFollowers": "No se pudieron agregar seguidores a la orden. Inténtalo más tarde.",
+      "failedToUpdateOrderDate": "No se pudo actualizar la fecha de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderAssigneees": "No se pudieron actualizar los asignados de la orden. Inténtalo más tarde.",
+      "failedToUpdateOrderFollowers": "No se pudieron actualizar los seguidores de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderStatus": "No se pudo actualizar el estado de la orden. Inténtalo más tarde.",
+      "failedToUpdateOrderPriority": "No se pudo actualizar la prioridad de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderName": "No se pudo actualizar el nombre de la orden. Inténtalo más tarde.",
+      "failedToDeleteOrder": "No se pudo eliminar la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderVisibility": "No se pudo actualizar la visibilidad de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderTags": "No se pudo actualizar las etiquetas de la orden. Inténtalo nuevamente.",
+      "failedToCreateOrderTag": "No se pudo crear la etiqueta de la orden. Inténtalo nuevamente.",
+      "failedToUpdateOrderTag": "No se pudo actualizar la etiqueta de la orden. Inténtalo nuevamente.",
+      "failedToDeleteOrderTag": "No se pudo eliminar la etiqueta de la orden. Inténtalo nuevamente.",
+      "failedToUpdatedOrder": "No se pudo actualizar la orden. Inténtalo nuevamente."
+    },
+    "reviews": {
+      "reviewNotFound": "La reseña no se encontró.",
+      "reviewAlreadyExists": "Una reseña ya existe para este proyecto.",
+      "failedToCreateReview": "No se pudo crear la reseña. Inténtalo más tarde.", 
+      "failedToUpdateReview": "No se pudo actualizar la reseña. Inténtalo más tarde.",
+      "failedToDeleteReview": "No se pudo eliminar la reseña. Inténtalo más tarde.",
+      "failedToGetReviews": "No se pudieron obtener las reseñas. Inténtalo más tarde.",
+      "failedToGetReview": "No se pudo obtener la reseña. Inténtalo más tarde."
+    },
+    "embeds": {
+      "invalidEmbed": "No esta permitido insertar este enlace. Por favor, inténtalo con otro.",
+      "failedToCreateEmbed": "No se pudo crear el enlace. Inténtalo más tarde.",
+      "failedToUpdateEmbed": "No se pudo actualizar el enlace. Inténtalo más tarde.",
+      "failedToDeleteEmbed": "No se pudo eliminar el enlace. Inténtalo más tarde.",
+      "failedToRemoveAccount": "No se pudo eliminar la cuenta del enlace. Inténtalo más tarde."
+    },
+    "credits": {
+      "failedToCreateCreditOperation": "No se pudo crear la operación de crédito. Inténtalo de nuevo más tarde.",
+      "failedToUpdateCreditOperation": "No se pudo actualizar la operación de crédito. Inténtalo de nuevo más tarde."
+    }
+  },
+  "success": {
+    "title": "¡Todo Listo!",
+    "toastSuccess": "Éxito",
+    "default": "Operación completada exitosamente.",
+    "clients": {
+      "clientCreated": "El cliente fue creado con éxito.",
+      "memberAdded": "El miembro se agregó correctamente.",
+      "clientDeleted": "El cliente se eliminó correctamente."
+    },
+    "organizations": {
+      "organizationUpdated": "La organización se actualizó correctamente.",
+      "organizationNameUpdated": "El nombre de la organización se actualizó con éxito.",
+      "organizationSettingUpdated": "La preferencia de la organización se actualizó correctamente.",
+      "organizationSettingCreated": "La preferencia de la organización se creó con éxito."
+    },
+    "services": {
+      "serviceCancelled": "El servicio fue cancelado con éxito.",
+      "serviceAdded": "El servicio se agregó correctamente.",
+      "serviceCreated": "El servicio fue creado con éxito.",
+      "serviceDeleted": "El servicio se eliminó correctamente.",  
+      "serviceUpdated": "El servicio se actualizó correctamente."
+    },
+    "briefs": {
+      "briefCreated": "El brief se creó correctamente.",
+      "briefDeleted": "El brief se eliminó correctamente.",
+      "briefUpdated": "El brief se actualizó correctamente.",
+      "serviceConnected": "El servicio se conectó al brief con éxito.",
+      "fieldsUpdated": "Los campos se actualizaron correctamente.",
+      "formFieldsDeleted": "Los campos del formulario se eliminaron correctamente.",
+      "briefDuplicated": "El brief se duplicó correctamente."
+    },
+    "orders": {
+      "orderCreated": "El proyecto fue creado con éxito.",
+      "orderDateUpdated": "La fecha de la orden se actualizó correctamente.",
+      "orderStatusUpdated": "El estado de la orden se actualizó correctamente.",
+      "orderPriorityUpdated": "La prioridad de la orden se actualizó con éxito.",
+      "orderDescriptionUpdated": "La descripción de la orden se actualizó correctamente.",
+      "orderAssigneesUpdated": "Los asignados de la orden se actualizaron correctamente.",
+      "orderFollowersUpdated": "Los seguidores de la orden se actualizaron correctamente.",
+      "orderNameUpdated": "El nombre de la orden se actualizó con éxito.",
+      "orderDeleted": "El pedido se eliminó correctamente.",
+      "orderVisibilityUpdated": "La visibilidad de la orden se actualizó correctamente.",
+      "orderTagsUpdated": "Las etiquetas de la orden se actualizaron correctamente.",
+      "orderTagCreated": "La etiqueta de la orden se creó correctamente.",
+      "orderTagUpdated": "La etiqueta de la orden se actualizó correctamente.",
+      "orderTagDeleted": "La etiqueta de la orden se eliminó correctamente.",
+      "orderUpdated": "La orden se actualizó correctamente."
+    },
+    "reviews": {
+      "reviewCreated": "La reseña se añadió correctamente."
+    },
+    "embeds": {
+      "embedCreated": "El enlace se añadió correctamente.",
+      "embedUpdated": "El enlace se actualizó correctamente.",
+      "embedDeleted": "El enlace se eliminó correctamente.",
+      "accountRemovedFromEmbed": "La cuenta se eliminó del enlace correctamente."
+    },
+    "credits": {
+      "creditOperationCreated": "La operación de crédito se creó correctamente.",
+      "creditOperationUpdated": "La operación de crédito se actualizó correctamente."
+    }
+  },
+  "loading": {
+    "title": "Espera un momento...",
+    "embeds": {
+      "removingAccountFromEmbed": "Eliminando cuenta del enlace...",
+      "updatingEmbed": "Actualizando enlace...",
+      "deletingEmbed": "Eliminando enlace..."
+    }
+  }
+}

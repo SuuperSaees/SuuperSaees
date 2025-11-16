@@ -1,0 +1,1 @@
+alter table "public"."messages" add column "deleted_on" timestamp with time zone;

@@ -1,0 +1,134 @@
+{
+  "title": "Clientes",
+  "client": "Clientes",
+  "yourTeams": "Tus equipos ({{teamsCount}})",
+  "createClient": "Nuevo cliente",
+  "personalAccount": "Cuenta personal",
+  "searchAccount": "Buscar cuenta...",
+  "teamsTabLabel": "Equipo",
+  "membersTabLabel": "Miembros del equipo",
+  "clientName": "Nombre",
+  "clientEmail": "Correo electrónico",
+  "youLabel": "Tú",
+  "nameLabel": "Ingresa su nombre",
+  "emailLabel": "Ingresa su correo electrónico",
+  "organizationLabelInput": "Ingresa el nombre de su organización",
+  "searchClientsPlaceholder": "Buscar",
+  "organizationLabel": "Organización",
+  "ActionsLabel": "Acciones",
+  "lastSignInLabel": "Último inicio de sesión",
+  "role": "Rol",
+  "organization": "Organización",
+  "lastLogin": "Último Inicio de Sesión",
+  "createdAt": "Creado el",
+  "actions": "Acciones",
+  "organizationName": "Nombre de la organización",
+  "organizationMembers": "Miembros",
+  "searchPlaceholder": "Buscar",
+  "noResults": "No hay resultados.",
+  "roleSelection": "Selecciona su rol",
+  "page": "Página",
+  "of": "de",
+  "pages": "páginas",
+  "previous": "Anterior",
+  "next": "Siguiente",
+  "leader": "Líder",
+  "member": "Miembro",
+  "updateClient": "Actualizar cliente",
+  "organizations": {
+    "title": "Organizaciones",
+    "members": {
+      "title": "Miembros",
+      "owner": "Lider",
+      "invite": {
+        "title": "Invita miembros",
+        "description": "Invita miembros a formar parte de la organización.",
+        "email": "Correo electrónico",  
+        "sendInvite": "Enviar invitaciones",
+        "cancel": "Cancelar",
+        "success": "Invitación enviada correctamente.",
+        "error": "Error al enviar la invitación.",
+        "inviting": "Invitando miembros...",
+        "addAnother": "Agregar otro",
+        "add": "Añadir miembro",
+        "search": "Buscar"
+      }
+    },
+    "services": {
+      "title": "Servicios"
+    },
+    "reviews": {
+      "title": "Reseñas"
+    },
+    "files": {
+      "title": "Almacenamiento"
+    },
+    "invoices": {
+      "title": "Facturas"
+    },
+    "orders": {
+      "title": "Proyectos"
+    },
+    "embeds": {
+      "title": "Embeds"
+    },
+    "credits": {
+      "title": "Créditos"
+    },
+    "pinOrganization": "Añadir a favoritos",
+    "unpinOrganization": "Quitar de favoritos",
+    "deleteOrganization": "Eliminar organización"
+  },
+  "startWithFirstClientTitle": "Comencemos con tu primer cliente",
+  "noClientsDescription": "Aún no has creado ningún cliente, agrega uno haciendo clic a continuación.",
+  "clients": "Clientes",
+  "searchClients": "Buscar clientes...",
+  "searchOrganizations": "Buscar organizaciones...",
+  "deletion": {
+    "title": "Eliminar cliente",
+    "titleInTeamMembers": "Eliminar miembro del equipo",
+    "description": "¿Estás seguro de que deseas eliminar este cliente?",
+    "descriptionInTeamMembers": "¿Estás seguro de que deseas eliminar este miembro del equipo?",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "editUser": {
+    "editUserInfo": "Editar usuario",
+    "supplant": "Suplantar",
+    "supplantDescription": "¿Estás seguro de que deseas suplantar a este usuario? Iniciarás sesión como este usuario.",
+    "cancelSupplant": "Cancelar",
+    "confirmSupplant": "Suplantar usuario",
+    "resetPassword": "Reestablecer contraseña",
+    "edit" : "Editar",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "saveChanges": "Guardar cambios",
+    "switchOrganization": "Cambiar organización",
+    "selectOrganization": "Selecciona una organización...",
+    "searchOrganization": "Buscar organización...",
+    "noOrganizations": "No se encontraron organizaciones",
+    "enterNewPassword": "Ingresa la nueva contraseña para el usuario",
+    "confirmNewPassword": "Confirma la nueva contraseña",
+    "passwordsNotEqual": "Las contraseñas no coinciden",
+    "passwordMinimalLength": "La contraseña debe tener al menos 8 caracteres",
+    "successEdit": "Usuario actualizado correctamente",
+    "failureEdit": "Error al actualizar el usuario",
+    "badInputFullName": "El nombre completo debe tener al menos 3 caracteres",
+    "badInputEmail": "Por favor, introduce una dirección de correo electrónico válida",
+    "badInputRole": "Por favor, selecciona un rol"
+  },
+  "creation": {
+    "title": "Crear cliente",
+    "form": {
+      "submitMessage": "Crear cliente"
+    }
+  },
+  "success": "¡Todo listo!",
+  "clientOwner": "Líder",
+  "clientMember": "Miembro",
+  "agencyMember": "Miembro",
+  "agencyOwner": "Propietario",
+  "agencyProjectManager": "Gestor de proyecto"
+}
+

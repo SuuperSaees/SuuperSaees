@@ -1,0 +1,33 @@
+/* YourComponent.module.css */
+.image-input-text-editor img,
+.image-group img {
+  width: 80 !important;
+  height: 80 !important;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.image-input-text-editor iframe[height] {
+    height: 200px !important;
+  }
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px; /* width of the entire scrollbar */
+  height: 8px;            
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);        /* color of the tracking area */
+  border-radius: 20px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+  border: none;  /* creates padding around scroll thumb */
+}
+
+.image-group {
+  display: flex;
+  flex-wrap: wrap;
+}

@@ -1,0 +1,134 @@
+{
+  "title": "Clients",
+  "client": "Clients",
+  "yourTeams": "Your teams ({{teamsCount}})",
+  "createClient": "New client",
+  "personalAccount": "Personal account",
+  "searchAccount": "Search account...",
+  "teamsTabLabel": "Team",
+  "membersTabLabel": "Team Members",
+  "clientName": "Name",
+  "clientEmail": "Email",
+  "youLabel": "You",
+  "nameLabel": "Enter their name",
+  "emailLabel": "Enter their email",
+  "organizationLabelInput": "Enter the name of their organization",
+  "searchClientsPlaceholder": "Search",
+  "organizationLabel": "Organization",
+  "ActionsLabel": "Actions",
+  "lastSignInLabel": "Last sign in",
+  "role": "Role",
+  "organization": "Organization",
+  "lastLogin": "Last Sign In",
+  "createdAt": "Created on",
+  "actions": "Actions",
+  "organizationName": "Organization Name",
+  "organizationMembers": "Members",
+  "searchPlaceholder": "Search",
+  "noResults": "No results.",
+  "roleSelection": "Select their role",
+  "page": "Page",
+  "of": "of",
+  "pages": "pages",
+  "previous": "Previous",
+  "next": "Next",
+  "leader": "Leader",
+  "member": "Member",
+  "updateClient": "Update Client",
+"organizations": {
+  "title": "Organizations",
+  "members": {
+    "title": "Members",
+    "owner": "Leader",
+    "invite": {
+      "title": "Invite members",
+      "description": "Invite members to join the organization.",
+      "email": "Email",  
+      "sendInvite": "Send invitations",
+      "cancel": "Cancel",
+      "success": "Invitation sent successfully.",
+      "error": "Error sending the invitation.",
+      "inviting": "Inviting members...",
+      "addAnother": "Add another",
+      "add": "Add member",
+      "search": "Search"
+    }
+  },
+  "services": {
+    "title": "Services"
+  },
+  "reviews": {
+    "title": "Reviews"
+  },
+  "files": {
+    "title": "Files"
+  },
+  "invoices": {
+    "title": "Invoices"
+  },
+  "orders": {
+    "title": "Projects"
+  },
+  "embeds": {
+    "title": "Embeds"
+  },
+  "credits": {
+    "title": "Credits"
+  },
+  "pinOrganization": "Add to favorites",
+  "unpinOrganization": "Remove from favorites",
+  "deleteOrganization": "Delete organization"
+},
+  "startWithFirstClientTitle": "Let's start with your first client",
+  "noClientsDescription": "You haven't created any clients yet, add one by clicking below.",
+  "clients": "Clients",
+  "searchClients": "Search clients...",
+  "searchOrganizations": "Search organizations...",
+  "deletion": {
+    "title": "Delete client",
+    "titleInTeamMembers": "Delete team member",
+    "description": "Are you sure you want to delete this client?",
+    "descriptionInTeamMembers": "Are you sure you want to delete this team member?",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "editUser": {
+    "editUserInfo": "Edit user",
+    "supplant": "Impersonate",
+    "supplantDescription": "Are you sure you want to impersonate this user? You will be logged in as this user.",
+    "cancelSupplant": "Cancel",
+    "confirmSupplant": "Impersonate user",
+    "resetPassword": "Reset password",
+    "edit" : "Edit",
+    "fullName": "Full name",
+    "email": "Email",
+    "role": "Role",
+    "saveChanges": "Save changes",
+    "switchOrganization": "Switch organization",
+    "selectOrganization": "Select organization...",
+    "searchOrganization": "Search organization...",
+    "noOrganizations": "No organizations found",
+    "enterNewPassword": "Enter the new password for the user",
+    "confirmNewPassword": "Confirm the new password",
+    "passwordsNotEqual": "Passwords do not match",
+    "passwordMinimalLength": "Password must be at least 8 characters long",
+    "successEdit": "User updated successfully",
+    "failureEdit": "Error updating user",
+    "badInputFullName": "Full name must be at least 3 characters long",
+    "badInputEmail": "Please enter a valid email address",
+    "badInputRole": "Please select a role"
+
+  },
+  "creation": {
+    "title": "Create client",
+    "form": {
+      "submitMessage": "Create client"
+    }
+  },
+  "success": "All set!",
+  "clientOwner": "Owner",
+  "clientMember": "Member",
+  "agencyMember": "Member",
+  "agencyOwner": "Owner",
+  "agencyProjectManager": "Project Manager"
+}

@@ -1,0 +1,1 @@
+alter table "public"."billing_services" add column "provider" billing_provider not null default 'suuper'::billing_provider;

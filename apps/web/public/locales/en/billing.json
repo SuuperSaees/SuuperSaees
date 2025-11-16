@@ -1,0 +1,171 @@
+{
+  "subscriptionTabSubheading": "Manage Your Subscription and Billing",
+  "planCardTitle": "Your Plan",
+  "planCardDescription": "Below are the details of your current plan. You can change your plan or cancel your subscription at any time.",
+  "planRenewal": "Renews every {{interval}} at {{price}}",
+  "planDetails": "Plan Details",
+  "checkout": "Proceed to Payment",
+  "trialEndsOn": "Your trial ends on",
+  "billingPortalCardButton": "Visit Billing Portal",
+  "billingPortalCardTitle": "Manage Your Billing Details",
+  "billingPortalCardDescription": "Visit your Billing Portal to manage your subscription and billing. You can upgrade or cancel your plan, or download your invoices.",
+  "cancelAtPeriodEndDescription": "Your subscription is scheduled to be canceled on {{- endDate }}.",
+  "renewAtPeriodEndDescription": "Your subscription is scheduled to renew on {{- endDate }}",
+  "noPermissionsAlertHeading": "You do not have permission to change billing settings",
+  "noPermissionsAlertBody": "Please contact your organization's owner to change billing settings.",
+  "checkoutSuccessTitle": "All Set! Everything is in order.",
+  "checkoutSuccessDescription": "Thank you for subscribing, we've successfully processed your subscription! A confirmation email will be sent to {{ customerEmail }}.",
+  "checkoutSuccessBackButton": "Proceed to the App",
+  "cannotManageBillingAlertTitle": "You cannot manage billing",
+  "cannotManageBillingAlertDescription": "You do not have permissions to manage billing. Please contact your organization's owner.",
+  "manageTeamPlan": "Manage Your Team Plan",
+  "manageTeamPlanDescription": "Choose a plan that fits your team's needs. You can upgrade or downgrade your plan at any time.",
+  "basePlan": "Base Plan",
+  "noPaymentMethodsTitle": "No payment methods available",
+  "noPaymentMethodsDescription": "Please contact your organization's owner to add a payment method.",
+  "invalidCheckoutUrl": "Invalid Checkout URL",
+  "invalidCheckoutUrlDescription": "There was an error processing your checkout URL. Please try again or contact support if the problem persists.",
+  "contactSupport": "Contact Support",
+  "billingInterval": {
+    "label": "Choose your billing interval",
+    "month": "Billed monthly",
+    "year": "Billed annually"
+  },
+  "billingTitle": "Billing",
+  "custom": "Custom",
+  "lifetime": "Lifetime",
+  "trialPeriod": "{{period}}-day Trial",
+  "perPeriod": "per {{period}}",
+  "processing": "Processing...",
+  "proceedToPayment": "Proceed to Payment",
+  "startTrial": "Start Trial",
+  "perTeamMember": "Per Team Member",
+  "perUnit": "Per usage of {{unit}}",
+  "teamMembers": "Team Members",
+  "includedUpTo": "Up to {{upTo}} {{unit}} included in the plan",
+  "fromPreviousTierUpTo": "for each {{unit}} for the next {{upTo}} {{unit}}",
+  "andAbove": "above {{previousTier}} {{unit}}",
+  "setupFee": "plus a setup fee of {{setupFee}}",
+  "perUnitIncluded": "({{included}} included)",
+  "featuresLabel": "Features",
+  "detailsLabel": "Details",
+  "planPickerLabel": "Choose Your Preferred Plan",
+  "planCardLabel": "Manage Your Plan",
+  "planPickerAlertErrorTitle": "Error Requesting Payment",
+  "planPickerAlertErrorDescription": "There was an error requesting payment. Please try again later.",
+  "subscriptionCancelled": "Subscription Cancelled",
+  "cancelSubscriptionDate": "Your subscription will be canceled at the end of the period",
+  "status": {
+    "free": {
+      "badge": "Free Plan",
+      "heading": "You are currently on the Free Plan",
+      "description": "You are on a free plan. You can upgrade to a paid plan at any time."
+    },
+    "active": {
+      "badge": "Active",
+      "heading": "Your subscription is active",
+      "description": "Your subscription is active. You can manage your subscription and billing in the Customer Portal."
+    },
+    "trialing": {
+      "badge": "Trial",
+      "heading": "You are on a trial",
+      "description": "Your trial will end on {{- trialEndDate }}."
+    },
+    "past_due": {
+      "badge": "Past Due",
+      "heading": "Your payment is past due",
+      "description": "Your payment is past due. Please update your payment method."
+    },
+    "canceled": {
+      "badge": "Cancelled",
+      "heading": "Your subscription has been cancelled",
+      "description": "Your subscription has been cancelled. You can reactivate it at any time."
+    },
+    "unpaid": {
+      "badge": "Unpaid",
+      "heading": "Your subscription has not been paid",
+      "description": "Your subscription has not been paid. Please update your payment method."
+    },
+    "incomplete": {
+      "badge": "Incomplete",
+      "heading": "Your payment is processing",
+      "description": "We are waiting for your payment to be processed. Please be patient."
+    },
+    "incomplete_expired": {
+      "badge": "Expired",
+      "heading": "Your payment has expired",
+      "description": "Your payment has expired. Please update your payment method."
+    },
+    "paused": {
+      "badge": "Paused",
+      "heading": "Your subscription is paused",
+      "description": "Your subscription is paused. You can resume it at any time."
+    },
+    "succeeded": {
+      "badge": "Successful",
+      "heading": "Your payment was successful",
+      "description": "Your payment was successful. Thank you for subscribing!"
+    },
+    "pending": {
+      "badge": "Pending",
+      "heading": "Your payment is pending",
+      "description": "Your payment is pending. Please be patient."
+    },
+    "failed": {
+      "badge": "Failed",
+      "heading": "Your payment has failed",
+      "description": "Your payment has failed. Please update your payment method."
+    }
+  },
+  "plans": {
+    "currentPlan": "Current",
+    "upgrade": "Upgrade plan",
+    "scheduleDemo": "Schedule a Demo",
+    "whatIncludes": "What includes",
+    "features": {
+      "maxTasks": "Up to 10 tasks",
+      "chatSupport": "Chat Support",
+      "perMemberPerMonth": "per team member per month"
+    },
+    "starter": {
+      "name": "Starter Plan",
+      "description": "Ideal for starting your digital services business.",
+      "badge": "Value",
+      "base": "Base",
+      "features": {
+        "maxTokens": "Up to 500k tokens",
+        "base": "Basic features and...",
+        "unlimitedServices": "Unlimited services",
+        "unlimitedClients": "Unlimited clients",
+        "unlimitedProjects": "Unlimited projects"
+      }
+    },
+    "premium": {
+      "name": "Premium Plan",
+      "description": "For agencies and creative studios with great potential.",
+      "badge": "Most Popular",
+      "base": "Base",
+      "features": {
+        "maxTokens": "Up to 3M tokens",
+        "base": "<strong>Premium Plan</strong> features plus...",
+        "calendarView": "Calendar view",
+        "whiteBrandingPortal": "White branding on the portal",
+        "customDomain": "Custom domain"
+      }
+    },
+    "advanced": {
+      "name": "Advanced Plan",
+      "description": "For established teams with advanced needs.",
+      "badge": "Custom",
+      "base": "Base",
+      "features": {
+        "base": "<strong>Premium Plan</strong> features plus...",
+        "maxTokens": "Unlimited tokens",
+        "chatSupport": "Priority Support",
+        "customEmails": "Custom emails",
+        "apiIntegration": "API integration",
+        "zapierAutomation": "Zapier automations"
+      }
+    }
+  }
+}

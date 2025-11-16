@@ -1,0 +1,241 @@
+{
+  "credits": {
+    "input": {
+      "label": "Credits",
+      "placeholder": "Enter the number of credits (e.g. 10 or -10)"
+    },
+    "value": {
+      "singular": "Credit",
+      "plural": "Credits" 
+    }
+  },
+  "title": "Projects",
+  "selectDateLabel": "Select a date",
+  "confirmDateTitle": "Confirm date",
+  "confirmDateMessage": "Are you sure you want to update the due date?",
+  "accept": "Accept",
+  "save": "Save",
+  "search": "Search projects...",
+  "cancel": "Cancel",
+  "saveChanges": "Save changes",
+  "openOrders": "Open",
+  "summary": "Summary",
+  "completedOrders": "Completed",
+  "allOrders": "All",
+  "titleLabel": "Title",
+  "idLabel": "ID",
+  "clientLabel": "Client",
+  "statusLabel": "Status",
+  "assignedToLabel": "Assigned to",
+  "dueDateLabel": "Due date",
+  "select_date_range": "Select date range",
+  "empty_date_range": "No date selected",
+  "delete": "Delete project",
+  "deleteConfirmation": "Do you really want to delete this project?",
+  "deleteSuccess": "Project deleted successfully",
+  "deleteError": "Error deleting project",
+  "create": "New project",
+  "calendarTitle": "Available calendars",
+  "calendarEmpty": "No calendars available",
+  "creation": {
+    "title": "Create project",
+    "form": {
+      "titleLabel": "Project name",
+      "titlePlaceholder": "Enter the name of your project",
+      "descriptionLabel": "Project description",
+      "descriptionPlaceholder": "Add a description for this project",
+      "filesLabel": "Files",
+      "filesPlaceholder": "Click or drag to upload an SVG, PNG, JPG, or GIF file (max. 800x400px)",
+      "submitMessage": "Create project"
+    },
+    "validation": {
+      "minTitleCharacters": "Title must be at least 2 characters.",
+      "minDescriptionCharacters": "Description must be at least 2 characters.",
+      "files": "Please upload at least one file."
+    }
+  },
+  "tasks": {
+    "emptyTasks": "No tasks found",
+    "emptySubtasks": "No subtasks found",
+    "emptyTasksDescription": "Add a task to get started.",
+    "emptyTasksDescriptionToClient": "",
+    "addTask": "Add task",
+    "addSubtask": "Add subtask",
+    "newTask": "New task",
+    "newSubtask": "New subtask",
+    "openSubtask": "Open"
+  },
+  "details": {
+    "title": "Project details",
+    "deadlineNotSet": "Unassigned",
+    "summary": "Summary",
+    "createdBy": "Created by",
+    "visibility": "Toggle to make this project public or private",
+    "orderId": "#",
+    "createdAt": "Created",
+    "assignedTo": "Assigned to",
+    "followedBy": "Followed by",
+    "tags": "Tags",
+    "status": "Status",
+    "priority": "Priority",
+    "dueDate": "Due date",
+    "deadline": "Deadline",
+    "statuses": {
+      "pending": "Pending Response",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "inReview": "In Review",
+      "annulled": "Annulled"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "navigation": {
+      "details": "Details",
+      "activity": "Activity",
+      "tasks": "Tasks",
+      "files": "Files"
+    },
+    "dialog": {
+      "titleCompleteOrder": "Complete order",
+      "descriptionCompleteOrder": "This order already has a review. Do you want to mark it as completed?",
+      "button": "Mark as completed",
+      "title": "Leave a review",
+      "description": "Tell us about your experience with this project!",
+      "label": "Write a review",
+      "placeholder": "What did you think of this project?"
+    }
+  },
+  "createdNewProject": "has created a new project",
+  "selectFile": "Please select at least one file",
+  "uploadError": "Error uploading file {{fileName}}",
+  "uploadURLError": "Error getting upload URL: {{error}}",
+  "dragMessage": "Drag files here or click to upload files",
+  "dropMessage": "Release here to upload files",
+  "dragAndDrop": "Drag files here or click to upload",
+  "dropHere": "Drop here to upload files",
+  "tryAgain": "Try again",
+  "OrderDescriptionTitle": "Project description",
+  "internalMessagingEnabled": "Internal messaging enabled",
+  "internalMessagingDisabled": "Internal messaging disabled",
+  "internalMessage": "Internal message",
+  "placeholder": "Write a message...",
+  "dropdown": "Select an option",
+  "deletedFile": "File deleted",
+  "deletedFileDescription": "The file was deleted successfully",
+  "form": {
+    "completion": {
+      "client": {
+        "title": "Assign a client",
+        "label": "Name of the organization",
+        "select": {
+          "placeholder": "Select an organization"
+        },
+        "members": {
+          "label": "Members",
+          "placeholder": "Search and select a member",
+          "notFound": "No members found"
+        }
+      }
+    }
+  },
+  "notesTitle": "Notes",
+  "detailsTitle": "Details",
+  "timeTitle": "Time",
+  "timers": {
+    "timeTracking": "Total time recorded:",
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "noTimeEntries": "There are no time entries yet",
+    "startAdding": "Start by adding a new time entry",
+    "addManualTime": "Add manual time",
+    "deleteTimer": "Delete timer",
+    "editTimer": "Edit timer"
+  },
+  "empty": {
+    "member": {
+      "title": "No orders assigned to you yet.",
+      "description": "Hang tight! Your assigned orders will appear here soon."
+    },
+    "organization": {
+      "title": "No orders assigned to your organization yet.",
+      "description": "Hang tight! The orders assigned to your organization will appear here soon."
+    }
+  },
+  "message": {
+    "deleteMessage": "Delete message",
+    "deleteMessageDescription": "Are you sure you want to delete this message? This action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "success": "Message sent",
+    "error": "Error",
+    "messageSent": "The message has been sent.",
+    "messageSentError": "The message could not be sent.",
+    "messageDeleted": "Message deleted",
+    "messageDeletedSuccess": "The message has been deleted.",
+    "messageDeletedError": "The message could not be deleted.",
+    "newMessages": {
+      "singular": "new message",
+      "plural": "new messages"
+    },
+    "scrollToBottom": "Scroll to bottom"
+  },
+  "dragAndDropDictionary": {
+    "dropHere": "Drop your files here",
+    "dropHereDescription": "SVG, PNG, JPG or GIF (max. 800x400px)"
+  },
+  "annotations": {
+    "help": {
+      "title": "Need help?",
+      "move": "Move around the image:",
+      "zoom": "Zoom in/out:",
+      "spacebar": "Hold Spacebar and click while dragging.",
+      "mouseWheel": "Use the mouse wheel to zoom.",
+      "open": "Open search:"
+    },
+    "page": "Page",
+    "chat": {
+      "title": "Comments",
+      "placeholder": "Write a message...",
+      "send": "Send",
+      "noChats": "Leave your opinion, ask a question or just leave a thank you note. Click anywhere in the file to leave a comment.",
+      "active": "Active",
+      "resolved": "Resolved"
+    },
+    "add": "Add annotation",
+    "addSuccess": "Annotation added successfully",
+    "addError": "Error adding annotation"
+  },
+  "guest": "Guest",
+  "files": {
+    "noPreview": "No preview available",
+    "download": "Please download the file to view it"
+  },
+  "shareProject": "Share project",
+  "publishProject": "Copy project link",
+  "shareProjectDescription": "When you publish a project publicly, anyone with the link can access all the information of this project, including interaction through the chat and viewing files, details, and tasks.",
+  "link": "Link",
+  "columns": {
+    "id": "ID",
+    "title": "Title",
+    "description": "Description",
+    "status": "Status",
+    "statusId": "Status ID",
+    "dueDate": "Due Date",
+    "priority": "Priority",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At",
+    "clientOrganization": "Client Organization",
+    "agency": "Agency",
+    "assignedTo": "Assigned To",
+    "customer": "Customer"
+  }
+}
+
