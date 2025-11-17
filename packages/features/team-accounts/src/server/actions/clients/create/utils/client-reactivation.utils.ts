@@ -25,7 +25,7 @@ import {
   defaultSenderLogo,
   defaultSenderColor,
 } from '../create-client.types';
-import { SUUPER_CLIENT_ID, SUUPER_CLIENT_SECRET } from './client-account.utils';
+import { getSuuperClientId, getSuuperClientSecret } from './client-account.utils';
 import { getSupabaseServerComponentClient } from '@kit/supabase/server-component-client';
 import { Organization } from '../../../../../../../../../apps/web/lib/organization.types';
 
@@ -206,7 +206,7 @@ async function sendReactivationEmail({ email, baseUrl, supabase, newAgency = fal
   const res = await fetch(`${onlyBaseUrl}/api/v1/mailer`, {
     method: 'POST',
     headers: new Headers({
-      Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+      Authorization: `Basic ${btoa(`${getSuuperClientId()}:${getSuuperClientSecret()}`)}`,
     }),
     body: JSON.stringify({
       from: fromSenderIdentity,

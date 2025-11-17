@@ -35,19 +35,24 @@ const defaultSenderDomain =
 const defaultSenderLogo = OrganizationSettings.EXTRA_KEYS.default_sender_logo;
 const defaultSenderColor = OrganizationSettings.EXTRA_KEYS.default_sender_color;
 
-const SUUPER_CLIENT_ID = z
-  .string({
-    description: 'The Client id for the Suuper API',
-    required_error: 'Please provide the client id for the Suuper API',
-  })
-  .parse(process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID);
+// Lazy validation to avoid errors during build
+const getSuuperClientId = () => {
+  return z
+    .string({
+      description: 'The Client id for the Suuper API',
+      required_error: 'Please provide the client id for the Suuper API',
+    })
+    .parse(process.env.NEXT_PUBLIC_SUUPER_CLIENT_ID);
+};
 
-const SUUPER_CLIENT_SECRET = z
-  .string({
-    description: 'The Client secret for the Suuper API',
-    required_error: 'Please provide the client secret for the Suuper API',
-  })
-  .parse(process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET);
+const getSuuperClientSecret = () => {
+  return z
+    .string({
+      description: 'The Client secret for the Suuper API',
+      required_error: 'Please provide the client secret for the Suuper API',
+    })
+    .parse(process.env.NEXT_PUBLIC_SUUPER_CLIENT_SECRET);
+};
 
 /**
  * @name useRequestResetPassword
@@ -152,7 +157,7 @@ export function useRequestResetPassword() {
     const res = await fetch(`${baseUrl}/api/v1/mailer`, {
       method: 'POST',
       headers: new Headers({
-        Authorization: `Basic ${btoa(`${SUUPER_CLIENT_ID}:${SUUPER_CLIENT_SECRET}`)}`,
+        Authorization: `Basic ${btoa(`${getSuuperClientId()}:${getSuuperClientSecret()}`)}`,
       }),
       body: JSON.stringify({
         from: fromSenderIdentity,
