@@ -26,11 +26,12 @@ export {
   getServiceDescription,
   VALID_EDIT_ROLES,
   SERVICE_TAG_PRIORITIES,
-  TAG_STYLES,
   FALLBACK_SERVICE_IMAGE,
   CARD_DIMENSIONS,
   ANIMATION_CLASSES
 } from '../lib/utils';
+
+// Note: TAG_STYLES was removed - it's no longer exported from utils
 
 // Types
 export type {
