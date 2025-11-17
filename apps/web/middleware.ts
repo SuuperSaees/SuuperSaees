@@ -4,9 +4,7 @@ import { NextResponse, URLPattern } from 'next/server';
 import { createMiddlewareClient } from '@kit/supabase/middleware-client';
 
 import pathsConfig from '~/config/paths.config';
-import {
-  getFullDomainBySubdomain,
-} from '~/multitenancy/utils/get/get-domain';
+// Removed multitenancy - no longer using subdomains
 
 import { handleApiAuth } from './handlers/api-auth-handler';
 // import { handleCors } from './handlers/cors-handler';
@@ -204,15 +202,13 @@ export async function middleware(request: NextRequest) {
         // User has a language preference, use it
         language = String(userSettings.preferences.user.language);
       } else {
-        // If no user preference, fall back to organization setting
+        // If no user preference, fall back to cookie or default
         const currentLanguage = request.cookies.get('lang')?.value;
         if (currentLanguage) {
           language = currentLanguage;
         } else {
-          const domainData = await getFullDomainBySubdomain(domain, true, ['language']);
-          language = domainData?.settings?.find(
-            (setting) => setting.key === 'language'
-          )?.value ?? 'en';
+          // Default to 'en' since we're not using multitenancy
+          language = 'en';
         }
       }
 

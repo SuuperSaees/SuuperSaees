@@ -8,7 +8,8 @@ import { OrganizationSettings } from '../../../../apps/web/lib/organization-sett
 import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/src/server/actions/clients/send-email/utils/client-confirm-email-template';
 import { generateMagicLinkRecoveryPassword } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
-import { getFullDomainBySubdomain } from '../../../multitenancy/utils/get/get-domain';
+import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
+import { fetchCurrentUserAccount } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { createToken } from '../../../tokens/src/create-token';
 import { TokenRecoveryType } from '../../../tokens/src/domain/token-type';
 
@@ -120,14 +121,22 @@ export function useUpdateUser() {
       // step 2: Send an email with the token to the user
       const updateEmailUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${params.email}&type=update_email&next=${baseUrl}/orders`;
       let lang: 'en' | 'es' = 'en';
-      const { settings } = await getFullDomainBySubdomain(url.host, true, [
-        logoUrlKey,
-        themeColorKey,
-        senderNameKey,
-        senderDomainKey,
-        senderEmailKey,
-        langKey,
-      ]);
+      
+      // Get organization settings directly from user's organization (no multitenancy)
+      let settings: { key: string; value: string }[] = [];
+      try {
+        const userAccount = await fetchCurrentUserAccount(client, userData.user?.id);
+        if (userAccount.organization_id) {
+          settings = await getOrganizationSettingsByOrganizationId(
+            userAccount.organization_id,
+            true,
+            [logoUrlKey, themeColorKey, senderNameKey, senderDomainKey, senderEmailKey, langKey],
+          );
+        }
+      } catch (error) {
+        console.error('Error fetching organization settings:', error);
+        // Continue with default values
+      }
 
       let senderName = '',
         logoUrl = '',

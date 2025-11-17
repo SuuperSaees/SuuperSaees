@@ -6,7 +6,7 @@ import { insertOrganization } from '../../../organizations/create/create-organiz
 import { generateMagicLinkRecoveryPassword } from '../../../members/update/update-account';
 import { TokenRecoveryType } from '../../../../../../../../tokens/src/domain/token-type';
 import { createToken } from '../../../../../../../../tokens/src/create-token';
-import { getFullDomainBySubdomain } from '../../../../../../../../multitenancy/utils/get/get-domain';
+import { getOrganizationSettingsByOrganizationId } from '../../../organizations/get/get-organizations';
 import { getClientConfirmEmailTemplate } from '../../send-email/utils/client-confirm-email-template';
 import { HttpStatus } from '../../../../../../../../shared/src/response/http-status';
 import { ErrorUserOperations } from '../../../../../../../../shared/src/response';
@@ -139,7 +139,13 @@ export const reactivateDeletedClient = async ({
     p_password: generateRandomPassword(12),
   });
 
-  await sendReactivationEmail({ email, baseUrl, supabase, newAgency });
+  await sendReactivationEmail({ 
+    email, 
+    baseUrl, 
+    supabase, 
+    newAgency,
+    organizationId: agencyId ?? clientOrganizationAccountId ?? undefined,
+  });
 };
 
 interface SendReactivationEmailParams {
@@ -147,9 +153,10 @@ interface SendReactivationEmailParams {
   baseUrl?: string;
   supabase: SupabaseClient<Database>;
   newAgency?: boolean;
+  organizationId?: string;
 }
 
-async function sendReactivationEmail({ email, baseUrl, supabase, newAgency = false }: SendReactivationEmailParams) {
+async function sendReactivationEmail({ email, baseUrl, supabase, newAgency = false, organizationId }: SendReactivationEmailParams) {
   const generatedMagicLink = await generateMagicLinkRecoveryPassword(email, supabase, true);
   const tokenRecoveryType: TokenRecoveryType = {
     email: email,
@@ -160,11 +167,20 @@ async function sendReactivationEmail({ email, baseUrl, supabase, newAgency = fal
   const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${email}&type=recovery&next=${baseUrl}/set-password`;
   let lang: 'en' | 'es' = 'en';
 
-  const { settings } = await getFullDomainBySubdomain(
-    baseUrl?.replace('http://', '').replace('https://', '') ?? '',
-    true,
-    [logoUrlKey, themeColorKey, senderNameKey, senderDomainKey, senderEmailKey, langKey],
-  );
+  // Get organization settings directly from organization (no multitenancy)
+  let settings: { key: string; value: string }[] = [];
+  if (organizationId) {
+    try {
+      settings = await getOrganizationSettingsByOrganizationId(
+        organizationId,
+        true,
+        [logoUrlKey, themeColorKey, senderNameKey, senderDomainKey, senderEmailKey, langKey],
+      );
+    } catch (error) {
+      console.error('Error fetching organization settings:', error);
+      // Continue with default values
+    }
+  }
 
   let senderName = '',
     logoUrl = '',

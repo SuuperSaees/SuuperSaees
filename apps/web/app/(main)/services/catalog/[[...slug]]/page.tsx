@@ -3,7 +3,8 @@ import { PageHeader } from "~/(main)/../components/page-header";
 import { createI18nServerInstance } from "~/lib/i18n/i18n.server";
 import { withI18n } from "~/lib/i18n/with-i18n";
 import ServicesCatalog from "../components/catalog";
-import { getFullDomainBySubdomain } from "~/multitenancy/utils/get/get-domain";
+import { getSession } from "~/app/server/actions/accounts/accounts.action";
+import { getOrganizationSettingsByOrganizationId } from "@kit/team-accounts/server/actions/organizations/get/get-organizations";
 import { headers } from "next/headers";
 import ShareCatalogButton from "../components/share-catalog-button";
 import { getServicesByOrganizationId } from "~/server/actions/services/get-services";
@@ -28,21 +29,13 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   const headersList = headers();
   const host = headersList.get("host") ?? "";
 
-  // Get organization data from the subdomain
-  const domainData = await getFullDomainBySubdomain(host, true, ['logo_url', 'theme_color']);
-
-  // Get current user and role
-
-  // Extract organization ID from domain data
-  const organizationId = domainData.organizationId ?? "";
-
-  // Load current user workspace to get the user role
-  // Get user role (you might need to adjust this based on your user structure)
+  // Get organization ID from current user session (no multitenancy)
+  const sessionData = await getSession();
+  const organizationId = sessionData?.organization?.id ?? "";
 
   // Access the slug parameter (will be undefined for /services/catalog, ["public"] for /services/catalog/public, etc.)
   const { slug } = params;
   const isPublicView = slug?.includes("public") ?? false;
-
 
   // Get the protocol dynamically
   const protocol =
@@ -54,11 +47,22 @@ async function ServicesCatalogPage({ params }: ServicesCatalogPageProps) {
   // Get the base URL for sharing
   const baseUrl = `${protocol}://${host}`;
 
-  // Get organization settings (logo_url, theme_color)
-  const organizationSettings = domainData.settings;
-
-  const logoUrl = organizationSettings.find((setting) => setting.key === "logo_url")?.value ?? "";
-  const themeColor = organizationSettings.find((setting) => setting.key === "theme_color")?.value ?? "";
+  // Get organization settings (logo_url, theme_color) directly from organization
+  let logoUrl = "";
+  let themeColor = "";
+  if (organizationId) {
+    try {
+      const organizationSettings = await getOrganizationSettingsByOrganizationId(
+        organizationId,
+        true,
+        ['logo_url', 'theme_color'],
+      );
+      logoUrl = organizationSettings.find((setting) => setting.key === "logo_url")?.value ?? "";
+      themeColor = organizationSettings.find((setting) => setting.key === "theme_color")?.value ?? "";
+    } catch (error) {
+      console.error('Error fetching organization settings:', error);
+    }
+  }
 
   // When pagination config is provided, the function returns Pagination.Response<T>
   const initialServices = await getServicesByOrganizationId({

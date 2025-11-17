@@ -123,17 +123,22 @@ export async function getDomainBySubdomain(
 ): Promise<{
   domain: string;
   id: string;
-}> {
+} | null> {
   const supabase = getSupabaseServerComponentClient({ admin: adminActived });
   const { data: domainData, error: domainError } = await supabase
     .from('subdomains')
     .select('domain, id')
     .eq('domain', subdomain)
-    .single();
+    .maybeSingle();
 
-  if (domainError) {
+  // If no rows found or error, return null instead of throwing
+  if (domainError || !domainData) {
+    // Check if it's a "no rows" error (PGRST116) or multiple rows error
+    if (domainError?.code === 'PGRST116' || domainError?.message?.includes('multiple') || domainError?.message?.includes('no rows')) {
+      return null;
+    }
     throw new Error(
-      `Error getting domain by subdomain: ${domainError.message}`,
+      `Error getting domain by subdomain: ${domainError?.message || 'Unknown error'}`,
     );
   }
 
@@ -153,6 +158,11 @@ export async function getFullDomainBySubdomain(
     // Fetch domain data and handle possible errors
     const domainData = await getDomainBySubdomain(subdomain, adminActived);
 
+    // If no domain found, return null instead of throwing
+    if (!domainData) {
+      return null;
+    }
+
     // Fetch organization subdomain data and handle errors
     const {
       data: organizationSubdomainData,
@@ -161,18 +171,21 @@ export async function getFullDomainBySubdomain(
       .from('organization_subdomains')
       .select('organization_id, organizations(name)')
       .eq('subdomain_id', domainData.id)
-      .single();
+      .maybeSingle();
 
+    // If no organization subdomain found or error, return null
     if (organizationSubdomainError) {
+      // Check if it's a "no rows" error
+      if (organizationSubdomainError.code === 'PGRST116' || organizationSubdomainError.message?.includes('multiple') || organizationSubdomainError.message?.includes('no rows')) {
+        return null;
+      }
       throw new Error(
         `Error getting organization subdomain: ${organizationSubdomainError.message}`,
       );
     }
 
     if (!organizationSubdomainData) {
-      throw new Error(
-        `No organization subdomain found for subdomain: ${subdomain}`,
-      );
+      return null;
     }
 
     // Fetch organization settings and handle possible errors
@@ -191,6 +204,7 @@ export async function getFullDomainBySubdomain(
     };
   } catch (error) {
     console.error(`Error in getFullDomainBySubdomain: ${error}`);
-    throw new Error(`Failed to get full domain by subdomain: ${error}`);
+    // Return null instead of throwing to allow graceful fallback
+    return null;
   }
 }

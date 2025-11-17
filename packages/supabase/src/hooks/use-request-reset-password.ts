@@ -8,7 +8,7 @@ import { getClientConfirmEmailTemplate } from '../../../features/team-accounts/s
 import { getUserAccountByEmail } from '../../../features/team-accounts/src/server/actions/members/get/get-member-account';
 import { generateMagicLinkRecoveryPassword } from '../../../features/team-accounts/src/server/actions/members/update/update-account';
 import { getTextColorBasedOnBackground } from '../../../features/team-accounts/src/server/utils/generate-colors';
-import { getFullDomainBySubdomain } from '../../../multitenancy/utils/get/get-domain';
+import { getOrganizationSettingsByOrganizationId } from '../../../features/team-accounts/src/server/actions/organizations/get/get-organizations';
 import { CustomError, CustomSuccess, ErrorUserOperations } from '../../../shared/src/response';
 import { HttpStatus, statusCodeMap } from '../../../shared/src/response/http-status';
 import { createToken } from '../../../tokens/src/create-token';
@@ -98,14 +98,21 @@ export function useRequestResetPassword() {
     // step 3: Send an email with the token to the user
     const resetPasswordUrl = `${baseUrl}/auth/confirm?token_hash_recovery=${tokenId}&email=${params.email}&type=recovery&next=${baseUrl}/set-password`;
     let lang: 'en' | 'es' = 'en';
-    const { settings } = await getFullDomainBySubdomain(url.host, true, [
-      logoUrlKey,
-      themeColorKey,
-      senderNameKey,
-      senderDomainKey,
-      senderEmailKey,
-      langKey,
-    ]);
+    
+    // Get organization settings directly from user's organization (no multitenancy)
+    let settings: { key: string; value: string }[] = [];
+    if (userData.organization_id) {
+      try {
+        settings = await getOrganizationSettingsByOrganizationId(
+          userData.organization_id,
+          true,
+          [logoUrlKey, themeColorKey, senderNameKey, senderDomainKey, senderEmailKey, langKey],
+        );
+      } catch (error) {
+        console.error('Error fetching organization settings:', error);
+        // Continue with default values
+      }
+    }
 
     let senderName = '',
       logoUrl = '',
