@@ -15,7 +15,6 @@ import { getSupabaseServerComponentClient } from '@kit/supabase/server-component
 import { Account } from '../../../../../../../../apps/web/lib/account.types';
 import { Database, Json } from '../../../../../../../../apps/web/lib/database.types';
 import { UserSettings } from '../../../../../../../../apps/web/lib/user-settings.types';
-import { updateClient } from '../../clients/update/update-client';
 import { formatToTimestamptz } from '../../../../../../../../apps/web/app/utils/format-to-timestamptz';
 import { Organization } from '../../../../../../../../apps/web/lib/organization.types';
 
@@ -61,7 +60,16 @@ export const switchUserOrganization = async (
     //   userId,
     // );
 
-    await updateClient({organization_client_id: organizationId ?? ''}, userId,undefined, true);
+    // Update client with organization_client_id
+    const client = getSupabaseServerComponentClient({ admin: true });
+    const { error: errorUpdateClient } = await client
+      .from('clients')
+      .update({ organization_client_id: organizationId ?? '' })
+      .eq('user_client_id', userId);
+    
+    if (errorUpdateClient) {
+      throw new Error(`Error updating the client: ${errorUpdateClient.message}`);
+    }
 
   } catch (error) {
     console.error('Error switching the user organization', error);
