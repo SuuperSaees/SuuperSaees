@@ -9,6 +9,9 @@ import { getSupabaseRouteHandlerClient } from '@kit/supabase/route-handler-clien
 
 import pathsConfig from '~/config/paths.config';
 
+// Force dynamic rendering to prevent static page data collection during build
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const service = createAuthCallbackService(getSupabaseRouteHandlerClient());
