@@ -16,7 +16,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 For the Stripe integration, first we need to start the Stripe CLI:
 
-```
+```s
 pnpm run stripe:listen
 ```
 
